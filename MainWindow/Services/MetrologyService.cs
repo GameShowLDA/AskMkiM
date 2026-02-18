@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Metrology;
 using Ask.Core.Shared.Metadata.Enums.MetrologyEnums;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using NLog.Config;
 using UI.Controls.ExecutorControls.MetrologyControls;
@@ -33,7 +34,7 @@ namespace MainWindowProgram.Services
     public void OpenMetrologyMode(MetrologyType type)
     {
       var (control, title) = _factory.Create(type);
-      _multiWindow.AddControl(title, control, TypeWindow.DeviceControl);
+      _multiWindow.WorkspaceService.AddControl(title, control, TypeWindow.DeviceControl);
     }
   }
 }

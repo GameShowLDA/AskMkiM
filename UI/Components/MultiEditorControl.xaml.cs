@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Windows;
@@ -61,6 +62,9 @@ namespace UI.Components
     public IEditorDocumentService EditorDocumentService => fileManager.EditorDocumentService;
 
     public IProtocolViewerService ProtocolViewerService => fileManager.ProtocolService;
+
+    public IWorkspaceService WorkspaceService => controlManager;
+
 
     /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
@@ -200,7 +204,7 @@ namespace UI.Components
         return true;
       }
 
-      await RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
+      await controlManager.RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
 
       return true;
     }
@@ -301,35 +305,9 @@ namespace UI.Components
 
     #endregion
 
-    /// <summary>
-    /// Удаляет указанный элемент управления и соответствующую вкладку.
-    /// </summary>
-    public void RemoveControl(EditorType editorType)
-    {
-      var control = fileManager.ContainerService.GetEditorContainer(editorType);
-      var page = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
-      if (control != null && page != null)
-      {
-        controlManager.RemoveControl(page, control).ConfigureAwait(true);
-      }
-    }
-
-    /// <summary>
-    /// Добавляет элемент управления и соответствующую вкладку в панель управления.
-    /// </summary>
-    /// <param name="header">Заголовок для кнопки, отображаемой в панели вкладок.</param>
-    /// <param name="control">Элемент управления для отображения в панели управления.</param>
-    /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
-    public void AddControl(string header, UserControl control, TypeWindow tabType, string description = null) => controlManager.AddControl(header, control, tabType, description);
 
     public bool GetEmtyControl() => controlManager.GetEmtyControl();
 
-    /// <summary>
-    /// Удаляет указанный элемент управления и соответствующую вкладку.
-    /// </summary>
-    /// <param name="tabButton">Вкладка для удаления.</param>
-    /// <param name="control">Элемент управления для удаления.</param>
-    private async Task RemoveControl(OpenFileButton tabButton, UserControl control) => await controlManager.RemoveControl(tabButton, control);
 
     /// <summary>
     /// Выполняет поиск по тектсу.

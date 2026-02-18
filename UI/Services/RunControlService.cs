@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Message;
 using System.Windows;
@@ -45,7 +46,7 @@ namespace UI.Services
       try
       {
         TextEditorContainer runContainer = _fileManager.ContainerService.GetEditorContainer(editorType)
-          ?? _fileManager.ContainerService.CreateEditorContainer(editorType, OpenFileButton.TypeWindow.DeviceControl);
+          ?? _fileManager.ContainerService.CreateEditorContainer(editorType, TypeWindow.DeviceControl);
 
         _fileManager.DockItemService.ShowEditorDockItem(runControl.FileName, runContainer, runControl.View, editorType);
         _fileManager.ControlManagerService.ShowEditorContainer(runContainer, EditorType.Translator);

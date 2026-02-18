@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Windows.Controls;
@@ -32,26 +33,20 @@ namespace MainWindowProgram.Services
     /// </summary>
     public readonly IEditorDocumentService EditorDocumentService;
     public readonly IProtocolViewerService ProtocolViewerService;
+    public readonly IWorkspaceService WorkspaceService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowService"/>.
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
-    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService, IEditorDocumentService editorDocumentService, IProtocolViewerService protocolViewerService)
+    public MultiWindowService(MultiWindowControl multiWindowControl, IRunService runService, IEditorDocumentService editorDocumentService, IProtocolViewerService protocolViewerService, IWorkspaceService workspaceService)
     {
       _multiWindowControl = multiWindowControl;
       RunService = runService;
       EditorDocumentService = editorDocumentService;
       ProtocolViewerService = protocolViewerService;
+      WorkspaceService = workspaceService;
     }
-
-    /// <summary>
-    /// Асинхронно добавляет элемент управления в редактор.
-    /// </summary>
-    /// <param name="name">Название вкладки или окна.</param>
-    /// <param name="control">Элемент управления, который необходимо отобразить.</param>
-    /// <param name="type">Тип окна, в котором должен отображаться элемент управления.</param>
-    public void AddControl(string name, UserControl control, TypeWindow type) => _multiWindowControl.AddControl(name, control, type);
 
     /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
@@ -75,15 +70,6 @@ namespace MainWindowProgram.Services
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       return _multiWindowControl.RemoveActiveTextEditor(isTranslation);
-    }
-
-    /// <summary>
-    /// Удаляет контрол.
-    /// </summary>
-    /// <param name="editorType">Тип вкладки.</param>
-    public void RemoveControl(EditorType editorType)
-    {
-      _multiWindowControl.RemoveControl(editorType);
     }
 
     /// <summary>

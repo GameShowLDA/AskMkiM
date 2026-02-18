@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Message;
@@ -40,6 +41,7 @@ namespace UI.Components
     public IEditorDocumentService EditorDocumentService => MultiEditor.EditorDocumentService;
 
     public IProtocolViewerService ProtocolViewerService => MultiEditor.ProtocolViewerService;
+    public IWorkspaceService WorkspaceService => MultiEditor.WorkspaceService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
@@ -191,11 +193,6 @@ namespace UI.Components
       return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
     }
 
-    public void RemoveControl(EditorType editorType)
-    {
-      MultiEditor.RemoveControl(editorType);
-    }
-
     /// <summary>
     /// Получает активный текстовый редактор.
     /// </summary>
@@ -205,20 +202,6 @@ namespace UI.Components
     public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
     {
       return MultiEditor.CreateTranslationFileAsync(parentFilePath);
-    }
-
-    /// <summary>
-    /// Добавляет новый элемент управления в редактор.
-    /// </summary>
-    /// <param name="name">
-    /// Имя для нового элемента управления.
-    /// </param>
-    /// <param name="userControl">
-    /// Элемент управления, который будет добавлен.
-    /// </param>
-    public void AddControl(string name, UserControl userControl, TypeWindow tabType)
-    {
-      MultiEditor.AddControl(name, userControl, tabType);
     }
 
     /// <summary>
