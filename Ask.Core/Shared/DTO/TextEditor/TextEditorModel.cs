@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace UI.Controls.TextEditor
+namespace Ask.Core.Shared.DTO.TextEditor
 {
   public class TextEditorModel
   {
