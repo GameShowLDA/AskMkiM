@@ -3,9 +3,10 @@ using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using static Ask.Core.Services.EventCore.Events.ExecutionEvents;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
@@ -32,17 +33,33 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       await ShowBreakpointCommandHeaderAsync(command, userInteractionService).ConfigureAwait(false);
       StepControlManager.EnableStepModeByBreakpoint(command, true);
-      await WaitForBreakpointF4Async(command, userInteractionService.GetCancellationToken()).ConfigureAwait(false);
-      return await OpenDrawerAndWaitSelectionAsync(command, commands, userInteractionService.GetCancellationToken()).ConfigureAwait(false);
+      var cancellationToken = userInteractionService.GetCancellationToken();
+      var shouldOpenDrawer = await WaitForBreakpointActionAsync(command, cancellationToken).ConfigureAwait(false);
+      if (!shouldOpenDrawer)
+      {
+        return command;
+      }
+
+      var selected = await OpenDrawerAndWaitSelectionAsync(command, commands, cancellationToken).ConfigureAwait(false);
+
+      // Drawer closed via F4 without selection: stay on current command and continue in normal flow.
+      return selected ?? command;
     }
 
     private static Task ShowBreakpointCommandHeaderAsync(BaseCommandModel command, IUserInteractionService userInteractionService)
     {
       var commandName = $"{command.CommandNumber} {command.Mnemonic}".Trim();
-      var message = string.IsNullOrWhiteSpace(command.CommandBody) ? null : command.CommandBody;
-      var header = ExecutorMessageBuilder.BuildCommandExecutionMessage(commandName, message);
+      var commandBody = string.IsNullOrWhiteSpace(command.CommandBody) ? "<пусто>" : command.CommandBody;
 
-      // Header must be visible before we stop on breakpoint waiting for F4.
+      var header = new ShowMessageModel(
+        header: $"\r\nСработала точка останова на команде {commandName}",
+        headerColor: ShowMessageModel.SuccessMessage.TitleColor,
+        message: $"{commandBody}",
+        type: ShowMessageModel.MessageType.Command)
+        {
+          IndentLevel = 1
+        };
+
       return userInteractionService.ShowMessageAsync(
         header,
         IsBlockStart: true,
@@ -50,7 +67,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         skipPause: true);
     }
 
-    private static async Task WaitForBreakpointF4Async(BaseCommandModel command, CancellationToken cancellationToken)
+    private static async Task<bool> WaitForBreakpointActionAsync(BaseCommandModel command, CancellationToken cancellationToken)
     {
       var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -65,18 +82,29 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         tcs.TrySetResult(true);
       };
 
+      Action<ControlButtonPressed>? onControlPressed = null;
+      onControlPressed = e =>
+      {
+        if (e.Button is ExecutionControlButton.Run or ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
+        {
+          tcs.TrySetResult(false);
+        }
+      };
+
       EventAggregator.Subscribe(onF4Pressed);
+      EventAggregator.Subscribe(onControlPressed);
 
       try
       {
         using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
         {
-          await tcs.Task.ConfigureAwait(false);
+          return await tcs.Task.ConfigureAwait(false);
         }
       }
       finally
       {
         EventAggregator.Unsubscribe(onF4Pressed);
+        EventAggregator.Unsubscribe(onControlPressed);
       }
     }
 

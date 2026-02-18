@@ -80,11 +80,18 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Асинхронно запускает перетаскивание окна пользователем.
     /// </summary>
-    public async Task DragMoveAsync()
+    public void DragMoveAsync()
     {
-      await Application.Current.Dispatcher?.InvokeAsync(() =>
+      Application.Current.Dispatcher?.Invoke(() =>
       {
-        _mainWindow.DragMove();
+        try
+        {
+          _mainWindow.DragMove();
+        }
+        catch (Exception)
+        {
+          throw;
+        }
       });
     }
 

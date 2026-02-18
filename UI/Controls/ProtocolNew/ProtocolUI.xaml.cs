@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -183,6 +184,10 @@ namespace UI.Controls.ProtocolNew
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
     {
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
 
       if (Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox)
         return;
@@ -205,6 +210,7 @@ namespace UI.Controls.ProtocolNew
         case Key.F10:
         case Key.F11:
           HandleStepModeStart();
+          e.Handled = true;
           break;
 
         case Key.P:
@@ -220,7 +226,9 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case Key.Escape:
-          if (StopButtonElement.Visibility == Visibility.Visible)
+          if (StopButtonElement.Visibility == Visibility.Visible
+              || ContinueButtonElement.Visibility == Visibility.Visible
+              || PauseButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnExitPressed?.Invoke();
           }

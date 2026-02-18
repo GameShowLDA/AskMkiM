@@ -23,6 +23,12 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
     public static DrawerHostService Instance => _instance.Value;
 
     public DrawerViewModel ViewModel => _viewModel;
+    public bool IsOpen => _viewModel.IsOpen;
+
+    // Runtime toggle: while drawer is open, block global app hotkeys/handlers.
+    public bool BlockGlobalInputWhenOpen { get; set; } = true;
+
+    public bool ShouldBlockGlobalInput => _viewModel.IsOpen && BlockGlobalInputWhenOpen;
 
     public void EnsureInitialized()
     {
@@ -41,6 +47,7 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
 
       BaseCommandModel? selectedCommand = null;
       var tcs = new TaskCompletionSource<BaseCommandModel?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
       try
       {
         await RunOnUiThreadAsync(() =>

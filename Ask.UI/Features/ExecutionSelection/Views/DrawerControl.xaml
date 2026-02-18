@@ -61,7 +61,7 @@
             <TextBlock Foreground="{DynamicResource DrawerSecondaryTextBrush}"
                        FontSize="13"
                        Margin="0,2,0,0"
-                       Text="Enter / DoubleClick — выбрать, Esc — отменить" />
+                       Text="Enter / DoubleClick — выбрать, F4 — закрыть" />
           </StackPanel>
 
           <Border Grid.Row="1"

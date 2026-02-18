@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
@@ -68,6 +69,29 @@ namespace UI.Controls.ProtocolNew
       if (args == null || args.RoutedEvent != Keyboard.KeyDownEvent) return;
 
       var key = args.Key == Key.System ? args.SystemKey : args.Key;
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
+      if (StepControlManager.IsBreakpointStepModeActive && _tcs == null && Keyboard.Modifiers == ModifierKeys.None)
+      {
+        switch (key)
+        {
+          case Key.F5:
+            ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.Run);
+            args.Handled = true;
+            return;
+          case Key.F10:
+            ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.StepOver);
+            args.Handled = true;
+            return;
+          case Key.F11:
+            ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.StepInto);
+            args.Handled = true;
+            return;
+        }
+      }
 
       if (key == Key.F4 && Keyboard.Modifiers == ModifierKeys.None && TryHandleBreakpointF4())
       {
@@ -76,6 +100,7 @@ namespace UI.Controls.ProtocolNew
       }
 
       if (_tcs == null) return;
+      if (!StepControlManager.StepMode) return;
 
       LogInformation($"[KEYBOARD] Detected key: {key}");
 
@@ -176,3 +201,5 @@ namespace UI.Controls.ProtocolNew
   }
 
 }
+
+

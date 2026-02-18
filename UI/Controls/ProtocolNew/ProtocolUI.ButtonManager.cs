@@ -238,7 +238,14 @@ namespace UI.Controls.ProtocolNew
 
       KeyboardManager.OnExitPressed = () =>
         Application.Current.Dispatcher.Invoke(() =>
-          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs()));
+        {
+          if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
+          {
+            return;
+          }
+
+          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
+        });
 
       KeyboardManager.OnPausePressed = () =>
       {

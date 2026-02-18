@@ -1,4 +1,5 @@
 ﻿using DataBaseConfiguration.Context;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -74,6 +75,11 @@ namespace MainWindowProgram.HotkeyBindings
         return;
 
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
       var mods = Keyboard.Modifiers;
       key = UnifyNumpadDigits(key);
 

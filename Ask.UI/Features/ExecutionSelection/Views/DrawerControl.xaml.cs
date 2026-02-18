@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace Ask.UI.Features.ExecutionSelection.Views
@@ -19,6 +20,7 @@ namespace Ask.UI.Features.ExecutionSelection.Views
       DrawerHostService.Instance.EnsureInitialized();
       ViewModel.PropertyChanged += OnViewModelPropertyChanged;
       PreviewKeyDown += OnPreviewKeyDown;
+      PreviewLostKeyboardFocus += OnPreviewLostKeyboardFocus;
       Unloaded += (_, _) => ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 
@@ -34,11 +36,27 @@ namespace Ask.UI.Features.ExecutionSelection.Views
         ViewModel.ConfirmSelection();
         e.Handled = true;
       }
-      else if (e.Key == Key.Escape)
+      else if (e.Key == Key.F4)
       {
         ViewModel.Cancel();
         e.Handled = true;
       }
+    }
+
+    private void OnPreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+      if (!ViewModel.IsOpen)
+      {
+        return;
+      }
+
+      if (e.NewFocus is DependencyObject newFocus && IsFocusInsideDrawer(newFocus))
+      {
+        return;
+      }
+
+      e.Handled = true;
+      Dispatcher.InvokeAsync(() => CommandsList.Focus(), System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -88,6 +106,22 @@ namespace Ask.UI.Features.ExecutionSelection.Views
       Backdrop.BeginAnimation(UIElement.OpacityProperty, null);
       PanelTranslate.X = Panel.Width;
       Backdrop.Opacity = 0;
+    }
+
+    private static bool IsFocusInsideDrawer(DependencyObject target)
+    {
+      DependencyObject? current = target;
+      while (current != null)
+      {
+        if (current is DrawerControl)
+        {
+          return true;
+        }
+
+        current = VisualTreeHelper.GetParent(current);
+      }
+
+      return false;
     }
   }
 }
