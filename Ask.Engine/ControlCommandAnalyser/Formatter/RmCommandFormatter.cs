@@ -1,4 +1,5 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {

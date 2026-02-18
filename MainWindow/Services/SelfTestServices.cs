@@ -1,4 +1,5 @@
-﻿using UI.Controls.ExecutorControls.SelfControl;
+﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using UI.Controls.ExecutorControls.SelfControl;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
@@ -22,12 +23,12 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Добавляет элемент управления для теста методом узла СИ в multiEditors.
     /// </summary>
-    public void AddSelfTestModule() => _multiWindow.AddControl("Самоконтроль модуля", new ModuleSelfControl(), TypeWindow.DeviceControl);
+    public void AddSelfTestModule() => _multiWindow.WorkspaceService.AddControl("Самоконтроль модуля", new ModuleSelfControl(), TypeWindow.DeviceControl);
 
 
     /// <summary>
     /// Добавляет элемент управления для теста методом узла СИ в multiEditors.
     /// </summary>
-    public void AddSelfTestSystem() => _multiWindow.AddControl("Самоконтроль системы", new SystemSelfControl(), TypeWindow.DeviceControl);
+    public void AddSelfTestSystem() => _multiWindow.WorkspaceService.AddControl("Самоконтроль системы", new SystemSelfControl(), TypeWindow.DeviceControl);
   }
 }

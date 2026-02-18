@@ -3,8 +3,10 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Message;
@@ -28,7 +30,7 @@ namespace UI.Controls.Runner
   /// <summary>
   /// Логика взаимодействия для RunControl.xaml
   /// </summary>
-  public partial class RunControl : UserControl
+  public partial class RunControl : UserControl, IRunView
   {
     /// <summary>
     /// Флаг, указывающий, находится ли интерфейс в заблокированном состоянии.
@@ -84,6 +86,8 @@ namespace UI.Controls.Runner
         headerFile.Text = value;
       }
     }
+
+    public UserControl View => this;
 
     private bool task = false;
 

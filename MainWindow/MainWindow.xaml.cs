@@ -1,4 +1,7 @@
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.View;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
@@ -40,7 +43,7 @@ namespace MainWindowProgram
     /// Сервис управления USB-устройствами.
     /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    private readonly UsbServices _usbServices;
+    private readonly IUsbMonitorView _usbServices;
 
     /// <summary>
     /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
@@ -60,6 +63,13 @@ namespace MainWindowProgram
     public SearchWindow SearchWindow;
 
     private readonly TextEditorStatusViewModel _statusBarViewModel = new();
+
+    public IRunService RunService => MultiWindow.RunService;
+    public IEditorDocumentService EditorDocumentService => MultiWindow.EditorDocumentService;
+    public IProtocolViewerService ProtocolViewerService => MultiWindow.ProtocolViewerService;
+    public IWorkspaceService WorkspaceService => MultiWindow.WorkspaceService;
+    public ITranslationService TranslationService => MultiWindow.TranslationService;
+
 
     #endregion
 

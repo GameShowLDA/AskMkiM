@@ -1,6 +1,6 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
-namespace Ask.Engine.ControlCommandAnalyser.Model.Interface
+namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces
 {
   /// <summary>
   /// Определяет функциональность по формированию читаемой информации для отображения данных в интерфейсе.

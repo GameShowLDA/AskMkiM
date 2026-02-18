@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -12,32 +13,6 @@ namespace UI.Components.Invoke
   /// </summary>
   public partial class OpenFileButton : UserControl
   {
-    /// <summary>
-    /// Перечисление типов окон пользовательского интерфейса.
-    /// </summary>
-    public enum TypeWindow
-    {
-      /// <summary>
-      /// Окно настроек.
-      /// </summary>
-      Settings,
-
-      /// <summary>
-      /// Окно управления файлами.
-      /// </summary>
-      Files,
-
-      /// <summary>
-      /// Окно работы с оборудованием.
-      /// </summary>
-      DeviceControl,
-
-      /// <summary>
-      /// Окно трансляции программ.
-      /// </summary>
-      Translation,
-    }
-
     /// <summary>
     /// Тип вкладки.
     /// </summary>

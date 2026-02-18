@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Message;

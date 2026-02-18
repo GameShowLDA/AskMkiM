@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Windows.Controls;
 using UI.Controls.Runner;
 
@@ -42,9 +43,9 @@ namespace MainWindowProgram.Services
 
     public async void CloseRunItem(UserControl userControl)
     {
-      if (userControl != null && userControl is RunControl runControl)
+      if (userControl != null && userControl is IRunView runControl)
       {
-        await _multiWindow.CloseRunItem(runControl, EditorType.Run);
+        await _multiWindow.RunService.CloseRunItem(runControl, EditorType.Run);
       }
     }
   }

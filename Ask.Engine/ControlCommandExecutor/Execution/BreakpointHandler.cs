@@ -1,5 +1,5 @@
 using Ask.Core.Services.App;
-using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using static Ask.Core.Services.EventCore.Events.ExecutionEvents;

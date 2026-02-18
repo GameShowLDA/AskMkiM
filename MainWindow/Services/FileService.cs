@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Microsoft.Win32;
 using System.Windows;
 using UI.Components.FileComparerControls;
@@ -94,7 +95,7 @@ namespace MainWindowProgram.Services
         {
           foreach (string filePath in openFileDialog.FileNames)
           {
-            _multiWindow.OpenFileInEditor(filePath);
+            _multiWindow.EditorDocumentService.OpenFile(filePath);
           }
         }
       }
@@ -108,7 +109,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
+        _multiWindow.ProtocolViewerService.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
       }
     }
 
@@ -123,7 +124,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.OpenFileInEditor(filePath);
+        _multiWindow.EditorDocumentService.OpenFile(filePath);
       }
     }
 
@@ -138,7 +139,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.CreateNewFile();
+        _multiWindow.EditorDocumentService.CreateNewFile();
       }
     }
 
@@ -147,7 +148,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void SaveFileAsync()
     {
-      _multiWindow.SaveFile();
+      _multiWindow.EditorDocumentService.SaveFile();
     }
 
     /// <summary>
@@ -155,7 +156,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void SaveFileAsAsync()
     {
-      _multiWindow.SaveFileAs();
+      _multiWindow.EditorDocumentService.SaveFileAs();
     }
 
     /// <summary>
@@ -163,7 +164,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void PrintFileAsync()
     {
-      _multiWindow.PrintFile();
+      _multiWindow.EditorDocumentService.PrintFile();
     }
 
     /// <summary>
@@ -215,7 +216,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Создает новый файл трансляции (.opkw) в редакторе.
     /// </summary>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
+    public ITextEditorView CreateTranslationFileAsync(string parentFilePath)
     {
       if (_isLockedProvider())
       {
@@ -224,10 +225,10 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        return _multiWindow.CreateTranslationFileAsync(parentFilePath);
+        return _multiWindow.TranslationService.CreateTranslationFile(parentFilePath);
       }
     }
-    internal void OpenFolder() => _multiWindow.OpenFolder();
+    internal void OpenFolder() => _multiWindow.EditorDocumentService.OpenFolder();
 
     /// <summary>
     /// Открывает окно поиска сразу с раскрытой строкой замены.

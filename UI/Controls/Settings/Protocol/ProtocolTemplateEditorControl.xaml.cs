@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Windows.Controls;
@@ -118,29 +119,32 @@ namespace UI.Controls.Settings.Protocol
   /// </summary>
   public sealed class ProtectedReadOnlySectionProvider : IReadOnlySectionProvider
   {
-    private readonly List<AnchorSegment> _protected = new();
-    private TextDocument _document;
+    private readonly List<ITextSegment> _protected = new();
+    private ITextDocumentView _document;
 
     /// <summary>Переиндексация защищённых участков по документу.</summary>
-    public void Rebuild(TextDocument document, IEnumerable<string> readonlyLines)
+    public void Rebuild(ITextDocumentView document, IEnumerable<string> readonlyLines)
     {
       _document = document ?? throw new ArgumentNullException(nameof(document));
       _protected.Clear();
 
-      if (readonlyLines == null) return;
+      if (readonlyLines == null)
+        return;
 
       foreach (var line in readonlyLines.Where(s => !string.IsNullOrEmpty(s)))
       {
         foreach (var docLine in _document.Lines)
         {
           string lineText = _document.GetText(docLine);
+
           if (lineText.Contains(line, StringComparison.Ordinal))
           {
-            _protected.Add(new AnchorSegment(_document, docLine.Offset, docLine.TotalLength));
+            _protected.Add(_document.CreateAnchor(docLine.Offset, docLine.Length));
           }
         }
       }
     }
+
 
     /// <summary>
     /// Возвращает части запрошенного диапазона, которые МОЖНО удалить.

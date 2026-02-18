@@ -1,4 +1,5 @@
-﻿using MainWindowProgram.Test.Protocol;
+﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using MainWindowProgram.Test.Protocol;
 using System.Windows;
 using UI.Controls.AdminPanel;
 using UI.Controls.DeviceHealthView;
@@ -38,7 +39,7 @@ namespace MainWindowProgram.Services
     /// Открывает элемент управления для работы с программируемой пробойной установкой (ППУ).
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
-    public void OpenGptServiceAsync() => _multiWindow.AddControl("GptManagement", new GPTPunchControl(), TypeWindow.DeviceControl);
+    public void OpenGptServiceAsync() => _multiWindow.WorkspaceService.AddControl("GptManagement", new GPTPunchControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Открывает элемент управления для работы с USB-устройствами (например, флешками).
@@ -59,8 +60,8 @@ namespace MainWindowProgram.Services
 
     public async Task StartConsoleTest() => await Test.ConsoleTest.TestData.PrintTestData();
 
-    public void AdminPanel() => _multiWindow.AddControl("Панель администратора", new AdminPanelControl(), TypeWindow.Settings);
-    public void ProtocolTest() => _multiWindow.AddControl("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
-    public void ProtocolBaseTest() => _multiWindow.AddControl("Тест теста протокола", new ProtocolTemplateEditorControl(), TypeWindow.DeviceControl);
+    public void AdminPanel() => _multiWindow.WorkspaceService.AddControl("Панель администратора", new AdminPanelControl(), TypeWindow.Settings);
+    public void ProtocolTest() => _multiWindow.WorkspaceService.AddControl("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
+    public void ProtocolBaseTest() => _multiWindow.WorkspaceService.AddControl("Тест теста протокола", new ProtocolTemplateEditorControl(), TypeWindow.DeviceControl);
   }
 }

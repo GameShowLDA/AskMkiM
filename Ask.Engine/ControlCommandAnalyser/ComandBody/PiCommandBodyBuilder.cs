@@ -1,4 +1,5 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
 using System.Text;
 using System.Text.RegularExpressions;

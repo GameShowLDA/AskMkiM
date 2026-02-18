@@ -1,5 +1,7 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using ICSharpCode.AvalonEdit.Document;
@@ -66,7 +68,7 @@ namespace MainWindowProgram.Services
     /// <returns>
     /// Список номеров строк в документе трансляции, на которые разрешено ставить точку остановки.
     /// </returns>
-    private static List<int> BuildRightBreakpointLinesFromDocument(TextDocument doc, List<BaseCommandModel> models)
+    private static List<int> BuildRightBreakpointLinesFromDocument(ITextDocumentView doc, List<BaseCommandModel> models)
     {
       var allowedCommands = new HashSet<int>(models.Count);
       for (int i = 0; i < models.Count; i++)
@@ -79,7 +81,7 @@ namespace MainWindowProgram.Services
 
       for (int lineNumber = 1; lineNumber <= doc.LineCount; lineNumber++)
       {
-        var line = doc.GetLineByNumber(lineNumber);
+        var line = doc.GetLine(lineNumber);
         var text = doc.GetText(line);
         if (string.IsNullOrWhiteSpace(text))
           continue;
@@ -146,8 +148,8 @@ namespace MainWindowProgram.Services
     /// </summary>
     private static void RestoreBreakpoints(
       List<BaseCommandModel> models,
-      TextEditorUI leftEditor,
-      TextEditorUI rightEditor,
+      ITextEditorView leftEditor,
+      ITextEditorView rightEditor,
       HashSet<int> preservedCommandNumbers)
     {
       var requiredCommands = new HashSet<int>();
@@ -186,7 +188,7 @@ namespace MainWindowProgram.Services
     /// снимает лишние и добавляет отсутствующие.
     /// </summary>
     private static void SyncEditorBreakpoints(
-      TextEditorUI editor,
+      ITextEditorView editor,
       HashSet<int> requiredCommands,
       Dictionary<int, int> lineByCommand)
     {
@@ -355,7 +357,7 @@ namespace MainWindowProgram.Services
 
       if (runContainer == null)
       {
-        await _multiWindow.AddRunItem(runControl, EditorType.Run);
+        await _multiWindow.RunService.AddRunItem(runControl, EditorType.Run);
       }
       else
       {
@@ -365,7 +367,7 @@ namespace MainWindowProgram.Services
           dockItem.PerformClose();
         }
 
-        await _multiWindow.AddRunItem(runControl, EditorType.Run);
+        await _multiWindow.RunService.AddRunItem(runControl, EditorType.Run);
       }
 
       await runControl.Start(runControl.TranslationModels);
@@ -522,7 +524,7 @@ namespace MainWindowProgram.Services
         LogError($"Не удалось запустить трансляцию программы контроля: {ex}.");
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
-        _multiWindow.OpenFileInEditor(editor.TextEditorModel.FilePath);
+        _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
       }
     }
   }
