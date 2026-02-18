@@ -25,6 +25,10 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
 
+  //TODO: Если буду рисовать дырку в точках остановки (когда те выключены) с помощью наложения поверх ещё одного кружка, то цвет HEX #303843.
+  private static readonly Brush BreakpointHoleBrush = (Brush)new BrushConverter().ConvertFromString("#303843");
+
+
   /// <summary>
   /// Определяет, должны ли клики по марджину изменять состояние точек остановки.
   /// </summary>
@@ -167,8 +171,6 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (raiseEvents)
       BreakpointEventAdapter.RaiseBreakpointSet(lineNumber, commandNumber);
   }
-
-  //TODO: сделать метод RemoveBreakpoint с такими же входными данными, как и SetBreakpoint, для унификации.
 
   /// <summary>
   /// Снимает точку остановки для указанной команды, привязанной к указанной строке.
@@ -318,25 +320,32 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// <summary>
   /// Отрисовывает одиночный маркер напротив строки документа.
   /// </summary>
+  /// <remarks>Дополнительно может отрисовать поверх ещё один маркер.</remarks>
   /// <param name="lineNumber">Номер строки.</param>
   /// <param name="textView">Текущее представление AvalonEdit.</param>
   /// <param name="verticalOffset">Текущая координата по вертикали.</param>
   /// <param name="lineHeight">Высота строки.</param>
   /// <param name="drawingContext">Контекст рисования.</param>
   /// <param name="brush">Кисть для отрисовки.</param>
-  private static void RenderMarginSingle(
+  /// <param name="isEnabled">Отрисовка дополнительного маркера.</param>
+  private static void RenderBreakpointMarker(
     int lineNumber,
     TextView textView,
     double verticalOffset,
     double lineHeight,
     DrawingContext drawingContext,
-    Brush brush)
+    Brush brush,
+    bool isEnabled)
   {
     double top = textView.GetVisualTopByDocumentLine(lineNumber);
     if (double.IsNaN(top)) return;
 
     double centerY = top - verticalOffset + lineHeight * 0.5;
+
     drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
+
+    if (!isEnabled)
+      drawingContext.DrawEllipse(BreakpointHoleBrush, null, new Point(10, centerY), 7, 7);
   }
 
   /// <summary>
@@ -398,10 +407,15 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (BreakpointsVisible && BreakpointLines.Count != 0)
     {
       var doc = _textEditor.Document;
+
       for (int i = 0; i < BreakpointLines.Count; i++)
       {
         int lineNumber = doc.GetLineByOffset(BreakpointLines[i].Offset).LineNumber;
-        RenderMarginSingle(lineNumber, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush);
+
+        int cmd = BreakpointCommandsNumbers[i];
+        bool enabled = !_disabledBreakpoints.Contains(cmd);
+
+        RenderBreakpointMarker(lineNumber, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush, enabled);
       }
     }
 

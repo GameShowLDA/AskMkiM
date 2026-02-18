@@ -242,12 +242,6 @@ namespace UI.Controls.Runner
       dockManager.DockItems.Add(dockItemPk);
       dockManager.DockItems.Add(dockItemDeviceState);
 
-      if (dockManager == null)
-      {
-        LogError("ChildTextEditorContainer.DockControl не найден (null). Невозможно отобразить вкладку.");
-        return;
-      }
-
       LogInformation($"Попытка показать ChildTextEditorContainer.DockItem. Title: {dockItemPk.Title}, IsLoaded: {dockManager.IsLoaded}, DockItems.Count: {dockManager.DockItems.Count}");
 
       if (!dockManager.IsLoaded)
@@ -267,9 +261,6 @@ namespace UI.Controls.Runner
             dockItemDeviceState.Show(dockManager, DockPosition.Document);
             capturedDockItem.Show(dockManager, DockPosition.Document);
 
-            dockItemDeviceState.Show(dockManager, DockPosition.Document);
-            capturedDockItem.Show(dockManager, DockPosition.Document);
-
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
               SyncBreakpointsFromEditor(textEditorUI);
@@ -286,14 +277,15 @@ namespace UI.Controls.Runner
         var isControlProgramActive = true;
 
         SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
+
         dockItemDeviceState.Show(dockManager, DockPosition.Document);
-        dockItemPk.Show(dockManager, DockPosition.Document);
         dockItemPk.Show(dockManager, DockPosition.Document);
 
         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
           SyncBreakpointsFromEditor(textEditorUI);
         }), System.Windows.Threading.DispatcherPriority.Loaded);
+
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
       }
     }

@@ -10,25 +10,33 @@
              x:Name="root">
 
     <UserControl.Resources>
-        <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
-        <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
-        <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/TabControl.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <DataTemplate x:Key="ErrorIconTemplate">
-            <Icon:CrossIcon Size="13"/>
-        </DataTemplate>
+            <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
+            <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
+            <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
 
-        <DataTemplate x:Key="WarningIconTemplate">
-            <Icon:TiangleWarningIcon Size="17"/>
-        </DataTemplate>
+            <DataTemplate x:Key="ErrorIconTemplate">
+                <Icon:CrossIcon Size="13"/>
+            </DataTemplate>
 
-        <local:IssueIconSelector x:Key="IssueIconSelector"
-                             ErrorTemplate="{StaticResource ErrorIconTemplate}"
-                             WarningTemplate="{StaticResource WarningIconTemplate}" />
+            <DataTemplate x:Key="WarningIconTemplate">
+                <Icon:TiangleWarningIcon Size="17"/>
+            </DataTemplate>
+
+            <local:IssueIconSelector x:Key="IssueIconSelector"
+                                ErrorTemplate="{StaticResource ErrorIconTemplate}"
+                                WarningTemplate="{StaticResource WarningIconTemplate}" />
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource ErrorListBackground}">
         <TabControl TabStripPlacement="Bottom"
+                Style="{StaticResource BottomTabControlStyle}"
+                ItemContainerStyle="{StaticResource BottomTabItemStyle}"
                 Background="{DynamicResource ErrorListBackground}"
                 BorderThickness="0">
 
@@ -173,7 +181,7 @@
 
             <TabItem Header="Точки остановки">
                 <TabItem.Style>
-                    <Style TargetType="TabItem">
+                    <Style TargetType="TabItem" BasedOn="{StaticResource BottomTabItemStyle}">
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Breakpoints.Count, ElementName=root}" Value="0">
@@ -196,6 +204,7 @@
                   GridLinesVisibility="None"
                   BorderThickness="0"
                   ColumnHeaderHeight="28"
+                  RowHeight="25"
                   MouseDoubleClick="BreakpointsGrid_MouseDoubleClick"
                   ScrollViewer.VerticalScrollBarVisibility="Auto">
 
@@ -229,11 +238,11 @@
                     </DataGrid.Resources>
 
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40" Header="">
+                        <DataGridTemplateColumn Width="80" MinWidth="80" MaxWidth="80" Header="Состояние">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            HorizontalAlignment="Center"
+                            Style="{StaticResource AnimatedSwitch}"
                             VerticalAlignment="Center"
                             Click="BreakpointEnabled_Click"/>
                                 </DataTemplate>
@@ -242,6 +251,7 @@
 
                         <DataGridTextColumn Header="Строка"
                             Width="80"
+                            MinWidth="25"
                             Binding="{Binding RightLine}"
                             FontFamily="{DynamicResource WinstonLight}"
                             FontSize="14"/>
