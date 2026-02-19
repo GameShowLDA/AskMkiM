@@ -16,6 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
   public partial class BreakDownWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
+    private BreakdownTesterEntity? _editingEntity;
     /// <summary>
     /// Событие запроса закрытия окна.
     /// </summary>
@@ -60,11 +61,16 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e)
+    public void SetSettings(object? sender, IHeadUnit e, BreakdownTesterEntity? editingEntity = null)
     {
+      _editingEntity = editingEntity;
       deviceSettingsWindow.NameDevice = "Пробойная установка";
       deviceSettingsWindow.LoadDeviceModels<IBreakdownTester>();
       deviceSettingsWindow.SetHeadUnit(e);
+      if (editingEntity != null)
+      {
+        deviceSettingsWindow.LoadFromDevice(editingEntity);
+      }
 
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
@@ -84,7 +90,16 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
 
           try
           {
-            svc.Create(deviceEntity);
+            if (_editingEntity == null)
+            {
+              svc.Create(deviceEntity);
+            }
+            else
+            {
+              deviceEntity.Id = _editingEntity.Id;
+              svc.Update(deviceEntity);
+            }
+
             RequestSave?.Invoke(s, deviceEntity);
             RequestCloseWindow();
           }

@@ -72,6 +72,27 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="EditButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+            <Setter Property="MinWidth" Value="28"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Background" Value="#2B4F8BFF"/>
+            <Setter Property="BorderBrush" Value="#9C4F8BFF"/>
+            <Setter Property="Foreground" Value="#FFBFD4FF"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3F5F9FFF"/>
+                    <Setter Property="BorderBrush" Value="#CF5F9FFF"/>
+                    <Setter Property="Foreground" Value="#FFE5EEFF"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#6A4F8BFF"/>
+                    <Setter Property="BorderBrush" Value="#FF4F8BFF"/>
+                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="AddButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
             <Setter Property="MinWidth" Value="30"/>
             <Setter Property="MinHeight" Value="30"/>
@@ -136,11 +157,23 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource ForegrounfBrushes}" FontSize="18" VerticalAlignment="Center"/>
 
                                 <Button Grid.Column="1"
+                                        Style="{StaticResource EditButtonStyle}"
+                                        Click="EditDeviceButton_Click"
+                                        CommandParameter="{Binding}"
+                                        ToolTip="Редактировать устройство"
+                                        Margin="0,0,6,0">
+                                    <askUiIcons:EditIcon Size="14"
+                                                         ToolTip="Редактировать устройство"
+                                                         Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
+
+                                <Button Grid.Column="2"
                                         Style="{StaticResource RemoveButtonStyle}"
                                         Click="RemoveDeviceButton_Click"
                                         CommandParameter="{Binding}"

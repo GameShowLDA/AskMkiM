@@ -29,6 +29,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// Событие, вызываемое при удалении устройства.
     /// </summary>
     public event EventHandler<IDevice> DeleteEvent;
+    public event EventHandler<IDevice> EditEvent;
 
     /// <summary>
     /// Свойство зависимости для заголовка списка устройств.
@@ -170,6 +171,14 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
       if (sender is Button button && button.CommandParameter is DeviceWrapper deviceWrapper)
       {
         RemoveDevice(deviceWrapper);
+      }
+    }
+
+    private void EditDeviceButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (sender is Button button && button.CommandParameter is DeviceWrapper deviceWrapper)
+      {
+        EditEvent?.Invoke(this, deviceWrapper.Device);
       }
     }
 

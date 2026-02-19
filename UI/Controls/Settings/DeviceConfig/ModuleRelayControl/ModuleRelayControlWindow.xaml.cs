@@ -16,6 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
+    private RelaySwitchModuleEntity? _editingEntity;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -61,11 +62,16 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e)
+    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleEntity? editingEntity = null)
     {
+      _editingEntity = editingEntity;
       deviceSettingsWindow.NameDevice = "МКР";
       deviceSettingsWindow.LoadDeviceModels<IRelaySwitchModule>();
       deviceSettingsWindow.SetHeadUnit(e);
+      if (editingEntity != null)
+      {
+        deviceSettingsWindow.LoadFromDevice(editingEntity);
+      }
 
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
@@ -84,7 +90,16 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           deviceEntity.SwitchResistance = deviceSettingsWindow.GetResistance();
           try
           {
-            new RelaySwitchModuleServices().Create(deviceEntity);
+            if (_editingEntity == null)
+            {
+              new RelaySwitchModuleServices().Create(deviceEntity);
+            }
+            else
+            {
+              deviceEntity.Id = _editingEntity.Id;
+              new RelaySwitchModuleServices().Update(deviceEntity);
+            }
+
             RequestSave?.Invoke(s, deviceEntity);
             RequestCloseWindow();
           }

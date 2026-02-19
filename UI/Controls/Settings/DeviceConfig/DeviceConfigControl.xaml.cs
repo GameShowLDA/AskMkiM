@@ -80,6 +80,11 @@ namespace UI.Controls.Settings.DeviceConfig
       devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
       devices.ModuleRelayEvent += (s, a) => Devices_ModuleRalayEvent(s, a, system, devices);
       devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
+      devices.EditBreakdownEvent += (s, a) => Devices_EditBreakdownEvent(system, devices, a);
+      devices.EditDeviceBusCommutationEvent += (s, a) => Devices_EditSwitchingEvent(system, devices, a);
+      devices.EditPowerModuleEvent += (s, a) => Devices_EditPowerModuleEvent(system, devices, a);
+      devices.EditModuleRelayEvent += (s, a) => Devices_EditRelayEvent(system, devices, a);
+      devices.EditFastMeterEvent += (s, a) => Devices_EditFastMeterEvent(system, devices, a);
       devices.ExitEvent += Devices_ExitEvent;
     }
 
@@ -146,6 +151,46 @@ namespace UI.Controls.Settings.DeviceConfig
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterEntity entity)
+    {
+      BreakDownWindow window = new BreakDownWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceEntity entity)
+    {
+      DeviceBusCommutationWindow window = new DeviceBusCommutationWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleEntity entity)
+    {
+      ModuleVoltageCurrentSourceWindow window = new ModuleVoltageCurrentSourceWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadPowerSources(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleEntity entity)
+    {
+      ModuleRelayControlWindow window = new ModuleRelayControlWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadRelaySwitchModules(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterEntity entity)
+    {
+      FastMeterWindow window = new FastMeterWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
     /// <summary>

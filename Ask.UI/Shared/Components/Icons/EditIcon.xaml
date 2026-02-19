@@ -1,0 +1,14 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.EditIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24" Height="24">
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="M14.5 4.5l 5 5 2.09-2.09a2 2 0 0 0 0-2.82L19.4 2.4a2 2 0 0 0-2.82 0L14.5 4.5Z M2.25 21.13l 1.68-5.88a1 1 0 0 1 .25-.43L13 6l5 5-8.82 8.82a1 1 0 0 1-.43.25l-5.88 1.68a.5.5 0 0 1-.62-.62Z" />
+    </Grid>
+  </Viewbox>
+</UserControl>
