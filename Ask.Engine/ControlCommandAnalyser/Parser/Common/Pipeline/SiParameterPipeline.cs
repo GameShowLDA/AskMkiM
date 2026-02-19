@@ -7,8 +7,15 @@ using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Processo
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {
+  /// <summary>
+  /// Конвейер обработки параметров для команды СИ.
+  /// Определяет последовательность процессоров параметров и учитывает пробойную установку.
+  /// </summary>
   internal static class SiParameterPipeline
   {
+    /// <summary>
+    /// Внутренний конвейер процессоров параметров.
+    /// </summary>
     private static readonly ParameterPipeline<SiCommandModel> _pipeline =
         new(new IParameterProcessor<SiCommandModel>[]
         {
@@ -18,6 +25,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
             Time<SiCommandModel>(),
         });
 
+    /// <summary>
+    /// Выполняет обработку параметров команды СИ.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <param name="breakdown">Экземпляр пробойной установки.</param>
+    /// <returns>Остаток строки после выполнения конвейера.</returns>
     public static string Execute(
         SiCommandModel model,
         string remainder,

@@ -7,13 +7,46 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
 {
   /// <summary>
-  /// Парсер для команд УП (условный переход).
+  /// Парсер команды УП (условный переход).
+  /// <para>
+  /// Извлекает метку перехода из текста команды,
+  /// формирует модель и выполняет базовую валидацию.
+  /// </para>
   /// </summary>
   public class UpCommandParser : ICommandParser
   {
+    /// <summary>
+    /// Определяет, может ли данный парсер обработать команду
+    /// с указанной мнемоникой.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники команды.</param>
+    /// <returns>
+    /// true — если мнемоника соответствует команде УП;  
+    /// false — если команда должна быть обработана другим парсером.
+    /// </returns>
     public bool CanParse(MnemonicIdentifier mnemonic)
     => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.UP);
 
+    /// <summary>
+    /// Выполняет разбор команды условного перехода.
+    /// <para>
+    /// Алгоритм:
+    /// <list type="number">
+    /// <item><description>Определяет метку перехода из первой или второй строки.</description></item>
+    /// <item><description>Создаёт модель команды.</description></item>
+    /// <item><description>Удаляет комментарии и пустые строки.</description></item>
+    /// <item><description>Проверяет корректность метки перехода.</description></item>
+    /// </list>
+    /// </para>
+    /// </summary>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="mnemonic">Мнемоника команды.</param>
+    /// <param name="numberLine">Номер строки начала команды.</param>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <returns>
+    /// Заполненная модель <see cref="UpCommandModel"/>,
+    /// содержащая метку перехода и возможные ошибки.
+    /// </returns>
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       var firstLine = lines[0].Trim();

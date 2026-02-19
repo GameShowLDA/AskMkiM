@@ -13,11 +13,26 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 {
+  /// <summary>
+  /// Парсер команды ПИ.
+  /// Выполняет разбор параметров ПИ и вложенной команды СИ,
+  /// проверяет наличие пробойной установки и формирует схему.
+  /// </summary>
   internal class PiCommandParser : CommandParserBase<PiCommandModel>
   {
+    /// <summary>
+    /// Определяет, может ли парсер обработать указанную мнемонику.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники.</param>
+    /// <returns>
+    /// <c>true</c>, если мнемоника соответствует команде ПИ; иначе <c>false</c>.
+    /// </returns>
     public override bool CanParse(MnemonicIdentifier mnemonic)
       => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.PI);
 
+    /// <summary>
+    /// Создаёт модель команды ПИ.
+    /// </summary>
     protected override PiCommandModel CreateModel(string commandNumber, int numberLine, List<string> lines) => new()
     {
       CommandNumber = commandNumber,
@@ -25,6 +40,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       StartLineNumber = numberLine,
     };
 
+    /// <summary>
+    /// Проверяет наличие пробойной установки перед разбором команды.
+    /// </summary>
     protected override bool BeforeCheckRm(
       PiCommandModel model,
       string commandNumber,
@@ -41,10 +59,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return true;
     }
 
+    /// <summary>
+    /// Определяет, нужно ли удалять префикс команды.
+    /// </summary>
     protected override bool ShouldRemoveCommandPrefix(PiCommandModel model) => false;
 
+    /// <summary>
+    /// Определяет, требуется ли проверка допустимых ключей.
+    /// </summary>
     protected override bool ShouldValidateAllowedKeys(PiCommandModel model) => false;
 
+    /// <summary>
+    /// Создаёт контекст парсинга с учётом пробойной установки.
+    /// </summary>
     protected override ParameterContext CreateContext(
       string commandNumber,
       string mnemonic,
@@ -52,6 +79,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       PiCommandModel model)
       => new(commandNumber, mnemonic, numberLine, ServiceLocator.GetRequired<IBreakdownTester>());
 
+    /// <summary>
+    /// Выполняет разбор параметров ПИ и вложенной части СИ.
+    /// </summary>
     protected override string ParseParameters(PiCommandModel model, string remainder, ParameterContext ctx, List<string> lines)
     {
       var breakdown = ctx.Breakdown;
@@ -89,6 +119,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return PiParameterPipeline.Execute(model, remainderPi, ctxPi, breakdown);
     }
 
+    /// <summary>
+    /// Выполняет разбор структуры схемы команды.
+    /// </summary>
     protected override void ParseStructure(
       PiCommandModel model,
       RmCommandModel rmCommandModel,
@@ -99,9 +132,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       ref string remainder)
       => model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
 
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды.
+    /// </summary>
     protected override void HandleUnparsed(PiCommandModel model, int numberLine, string remainder)
       => UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
 
+    /// <summary>
+    /// Выполняет финальную синхронизацию данных между ПИ и вложенной СИ.
+    /// </summary>
     protected override void AfterParse(
       PiCommandModel model,
       string commandNumber,

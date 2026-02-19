@@ -8,8 +8,19 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ie
 {
+  /// <summary>
+  /// Процессор параметров электрической ёмкости для команды IE.
+  /// Извлекает диапазон ёмкости из строки и применяет его к модели.
+  /// </summary>
   internal class IeCapacityProcessor : IParameterProcessor<IeCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор параметров ёмкости и обновляет модель команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанных параметров.</returns>
     public string Process(IeCommandModel model, string remainder, ParameterContext ctx)
     {
       string lower, higher, unit;

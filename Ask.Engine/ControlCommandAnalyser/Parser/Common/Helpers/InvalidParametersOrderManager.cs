@@ -1,7 +1,20 @@
 ﻿namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Утилитный класс для проверки корректности порядка параметров в строке команды.
+  /// </summary>
   public static class InvalidParametersOrderManager
   {
+    /// <summary>
+    /// Определяет, нарушен ли порядок параметров (ключ алгоритма, ёмкость, точки).
+    /// </summary>
+    /// <param name="firstLine">Первая строка команды.</param>
+    /// <param name="algorithmKeys">Список ключей алгоритма.</param>
+    /// <param name="capacityStart">Начало параметра ёмкости.</param>
+    /// <param name="errorDescription">Описание ошибки, если порядок нарушен.</param>
+    /// <returns>
+    /// <c>true</c>, если обнаружено нарушение порядка; иначе <c>false</c>.
+    /// </returns>
     public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? capacityStart, out string errorDescription)
     {
       errorDescription = string.Empty;

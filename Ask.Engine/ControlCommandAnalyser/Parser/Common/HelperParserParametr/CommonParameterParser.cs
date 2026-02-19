@@ -44,7 +44,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
       if (string.IsNullOrWhiteSpace(input))
         throw new FormatException("Входная строка пуста.");
 
-      // заменяем запятую на точку для унификации
       string normalized = input.Replace(',', '.');
 
       if (double.TryParse(normalized, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))

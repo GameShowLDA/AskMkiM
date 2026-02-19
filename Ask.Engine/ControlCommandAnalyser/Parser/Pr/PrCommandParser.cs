@@ -11,10 +11,54 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
 {
+  /// <summary>
+  /// Парсер команды ПР (проверка сопротивления).
+  /// <para>
+  /// Отвечает за полный цикл разбора команды:
+  /// <list type="number">
+  /// <item><description>Создание модели команды.</description></item>
+  /// <item><description>Предобработка исходных строк.</description></item>
+  /// <item><description>Парсинг параметров через конвейер.</description></item>
+  /// <item><description>Построение схемы подключения.</description></item>
+  /// <item><description>Обработка нераспознанных параметров и валидация ключей.</description></item>
+  /// </list>
+  /// </para>
+  /// </summary>
   internal class PrCommandParser : ICommandParser
   {
+    /// <summary>
+    /// Проверяет, поддерживает ли данный парсер переданную мнемонику команды.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники команды.</param>
+    /// <returns>
+    /// true — если мнемоника соответствует команде ПР;  
+    /// false — если команда должна обрабатываться другим парсером.
+    /// </returns>
     public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.PR);
 
+    /// <summary>
+    /// Выполняет полный разбор команды ПР.
+    /// <para>
+    /// В процессе:
+    /// <list type="bullet">
+    /// <item><description>Создаётся модель команды.</description></item>
+    /// <item><description>Проверяется корректность исходных строк.</description></item>
+    /// <item><description>Формируется строка параметров (remainder).</description></item>
+    /// <item><description>Запускается конвейер парсинга параметров.</description></item>
+    /// <item><description>Строится схема точек.</description></item>
+    /// <item><description>Обрабатываются нераспознанные параметры.</description></item>
+    /// <item><description>Проверяются допустимые ключи алгоритма.</description></item>
+    /// </list>
+    /// </para>
+    /// </summary>
+    /// <param name="commandNumber">Номер команды в программе.</param>
+    /// <param name="mnemonic">Мнемоника команды (ПР).</param>
+    /// <param name="numberLine">Номер строки, с которой начинается команда.</param>
+    /// <param name="lines">Список строк исходного текста команды.</param>
+    /// <returns>
+    /// Экземпляр <see cref="PrCommandModel"/>  
+    /// с заполненными параметрами, схемой и списком ошибок.
+    /// </returns>
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
 

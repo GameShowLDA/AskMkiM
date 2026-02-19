@@ -4,8 +4,23 @@ using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер обработки параметра времени.
+  /// Выполняет разбор значения времени и при необходимости
+  /// подставляет значение по умолчанию.
+  /// </summary>
   public static class TimeManager
   {
+    /// <summary>
+    /// Возвращает числовое значение времени для команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="time">Строковое значение времени.</param>
+    /// <param name="unitTime">Единица измерения времени.</param>
+    /// <returns>
+    /// Значение времени, либо значение по умолчанию,
+    /// если указана только единица измерения.
+    /// </returns>
     public static double? GetTime(BaseCommandModel model, string time, string unitTime)
     {
       double? timeValue = -1;

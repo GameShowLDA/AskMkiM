@@ -6,8 +6,20 @@ using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht
 {
+  /// <summary>
+  /// Процессор параметров сопротивления для команды ЭХТ.
+  /// Извлекает диапазон сопротивления и сопротивление кабеля,
+  /// затем применяет их к модели.
+  /// </summary>
   public class EhtResistanceProcessor : IParameterProcessor<EhtCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор параметров сопротивления из строки команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанных параметров.</returns>
     public string Process(EhtCommandModel model, string remainder, ParameterContext ctx)
     {
       string lower, higher, unit;

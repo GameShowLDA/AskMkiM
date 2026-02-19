@@ -3,8 +3,21 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер обработки параметров напряжения.
+  /// Выполняет применение диапазона, одиночного и значений по умолчанию к моделям команд.
+  /// </summary>
   public static class VoltageManager
   {
+    /// <summary>
+    /// Применяет диапазон напряжения к модели и выполняет проверки границ.
+    /// </summary>
+    /// <param name="model">Модель команды НЕ.</param>
+    /// <param name="unit">Единица измерения.</param>
+    /// <param name="lower">Нижняя граница.</param>
+    /// <param name="higher">Верхняя граница.</param>
+    /// <param name="defaultLower">Минимально допустимое значение.</param>
+    /// <param name="defaultHigher">Максимально допустимое значение.</param>
     public static void ApplyRange(
         NeCommandModel model,
         string? unit,
@@ -66,6 +79,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       model.HigherLimitVoltageSource = $"{valHigher}{higherUnit}";
     }
 
+    /// <summary>
+    /// Применяет значение напряжения по умолчанию.
+    /// </summary>
+    /// <param name="model">Модель команды НЕ.</param>
+    /// <param name="defaultVoltage">Значение напряжения.</param>
+    /// <param name="unit">Единица измерения.</param>
     public static void ApplyDefaultVoltage(
         NeCommandModel model,
         double defaultVoltage,
@@ -76,6 +95,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       model.VoltageUnit = unit;
     }
 
+    /// <summary>
+    /// Применяет одиночное значение напряжения с проверкой диапазона.
+    /// </summary>
+    /// <param name="model">Модель команды СИ.</param>
+    /// <param name="value">Значение напряжения.</param>
+    /// <param name="unit">Единица измерения.</param>
+    /// <param name="min">Минимально допустимое значение.</param>
+    /// <param name="max">Максимально допустимое значение.</param>
+    /// <param name="line">Номер строки.</param>
+    /// <param name="command">Идентификатор команды.</param>
     public static void ApplySingleVoltage(
         SiCommandModel model,
         double value,
@@ -100,6 +129,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       model.VoltageSource = $"{value}{unit}";
     }
 
+    /// <summary>
+    /// Применяет рабочее напряжение к модели.
+    /// </summary>
+    /// <param name="model">Модель команды НЕ.</param>
+    /// <param name="value">Значение напряжения.</param>
+    /// <param name="unit">Единица измерения.</param>
     public static void ApplyOperatingVoltage(
     NeCommandModel model,
     double value,

@@ -8,8 +8,16 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер обработки нераспознанных параметров команд.
+  /// Записывает остаток строки в модель и выполняет базовую валидацию,
+  /// специфичную для типа команды.
+  /// </summary>
   public static class UnparsedParametersManager
   {
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды ЭТ.
+    /// </summary>
     public static void HandleUnparsedParameters(EhtCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -27,6 +35,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           $"сопротивление было неправильно задано, или неверно указаны границы сопроитвления", numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды ПТ.
+    /// </summary>
     public static void HandleUnparsedParameters(PtCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -42,6 +53,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(PtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды ОТ.
+    /// </summary>
     public static void HandleUnparsedParameters(OtCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -57,6 +72,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(OtErrors.EmptyCommandBody(model.StartLineNumber, $"{model.CommandNumber}   {model.Mnemonic}"));
       }
     }
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды КС.
+    /// </summary>
     public static void HandleUnparsedParameters(KsCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -73,6 +91,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(KsErrors.CannotParseParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды НЭ.
+    /// </summary>
     public static void HandleUnparsedParameters(NeCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -92,6 +114,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды СК.
+    /// </summary>
     public static void HandleUnparsedParameters(CkCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -101,6 +127,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды СИ.
+    /// </summary>
     public static void HandleUnparsedParameters(SiCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -110,6 +140,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды ПИ.
+    /// </summary>
     public static void HandleUnparsedParameters(PiCommandModel model, int numberLine, string? remainder)
     {
       if (!string.IsNullOrEmpty(remainder))
@@ -119,6 +153,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды IE.
+    /// </summary>
     public static void HandleUnparsedParameters(IeCommandModel model, int numberLine, string? remainder)
     {
 
@@ -129,6 +167,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
+
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды ПР.
+    /// </summary>
     public static void HandleUnparsedParameters(PrCommandModel model, int numberLine, string? remainder)
     {
 

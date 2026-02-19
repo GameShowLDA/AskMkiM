@@ -5,8 +5,33 @@ using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
+  /// <summary>
+  /// Утилитарный класс для форматирования строк представления точек цепей
+  /// и вывода сообщений результатов проверки.
+  /// </summary>
+  /// <remarks>
+  /// Используется для формирования текстовых представлений цепей в протоколах
+  /// и интерфейсе пользователя.
+  /// </remarks>
   public static class PointFormater
   {
+    /// <summary>
+    /// Формирует строковое представление точек для режима «разомкнуто».
+    /// </summary>
+    /// <param name="chainModels">Список цепей с точками.</param>
+    /// <returns>
+    /// Асинхронно возвращает строку с форматированным списком точек,
+    /// разделённых специальными маркерами:
+    /// <list type="bullet">
+    /// <item><description><c>*</c> — границы цепи</description></item>
+    /// <item><description><c>#</c> — разделитель точек внутри цепи</description></item>
+    /// <item><description><c>##</c> или <c>,,</c> — разделитель цепей</description></item>
+    /// </list>
+    /// </returns>
+    /// <remarks>
+    /// При включённой настройке отображения машинного адреса
+    /// добавляет адрес точки в квадратных скобках.
+    /// </remarks>
     public static async Task<string> GetFormatDisconnectPoint(List<ChainModel> chainModels)
     {
       var formatPoint = new List<string>();
@@ -72,6 +97,17 @@ namespace Ask.Engine.ControlCommandAnalyser
       return result;
     }
 
+    /// <summary>
+    /// Формирует строковое представление точек для режима «замкнуто».
+    /// </summary>
+    /// <param name="chainModels">Модель цепи с набором точек.</param>
+    /// <returns>
+    /// Строку, где каждая точка обрамлена символами <c>*</c>.
+    /// </returns>
+    /// <remarks>
+    /// Если включено отображение машинного адреса,
+    /// к мнемонике точки добавляется её адрес в квадратных скобках.
+    /// </remarks>
     public static string GetFormatConnectPoint(ChainModel chainModels)
     {
       var result = string.Empty;
@@ -89,6 +125,16 @@ namespace Ask.Engine.ControlCommandAnalyser
       return result;
     }
 
+    /// <summary>
+    /// Выводит список сообщений результатов проверки через сервис сообщений.
+    /// </summary>
+    /// <param name="showMessageModels">Список сообщений для отображения.</param>
+    /// <param name="messageService">Сервис вывода сообщений в интерфейс.</param>
+    /// <returns>Асинхронная задача завершения операции.</returns>
+    /// <remarks>
+    /// Если список сообщений не пустой, сначала выводится заголовок
+    /// «Результаты проверки», затем все сообщения по порядку.
+    /// </remarks>
     public static async Task MessageResult(List<ShowMessageModel> showMessageModels, IMessageOutputService messageService)
     {
       if (showMessageModels.Count > 0)

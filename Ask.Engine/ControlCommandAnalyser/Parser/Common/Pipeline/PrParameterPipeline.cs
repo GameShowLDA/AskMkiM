@@ -7,8 +7,15 @@ using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Processo
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {
+  /// <summary>
+  /// Конвейер обработки параметров для команды ПР.
+  /// Определяет набор процессоров параметров и использует быстрый измеритель.
+  /// </summary>
   internal class PrParameterPipeline
   {
+    /// <summary>
+    /// Внутренний конвейер процессоров параметров.
+    /// </summary>
     private static readonly ParameterPipeline<PrCommandModel> _pipeline =
         new(new IParameterProcessor<PrCommandModel>[]
         {
@@ -17,6 +24,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
             Time<PrCommandModel>(),
         });
 
+    /// <summary>
+    /// Выполняет обработку параметров команды ПР.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <param name="meter">Экземпляр быстрого измерителя.</param>
+    /// <returns>Остаток строки после выполнения конвейера.</returns>
     public static string Execute(
         PrCommandModel model,
         string remainder,

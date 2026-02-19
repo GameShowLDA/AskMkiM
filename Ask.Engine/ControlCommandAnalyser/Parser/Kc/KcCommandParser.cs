@@ -12,13 +12,31 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
 {
   /// <summary>
-  /// Парсер для команд КС (контроль сопротивления).
+  /// Парсер команды КС (контроль сопротивления).
+  /// Выполняет полный цикл разбора: подготовку строк,
+  /// обработку параметров, построение схемы и валидацию ключей.
   /// </summary>
   [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б, Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Д)]
   internal class KcCommandParser : ICommandParser
   {
+    /// <summary>
+    /// Определяет, может ли парсер обработать указанную мнемонику.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники.</param>
+    /// <returns>
+    /// <c>true</c>, если мнемоника соответствует команде КС; иначе <c>false</c>.
+    /// </returns>
     public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.KC);
 
+    /// <summary>
+    /// Выполняет разбор команды КС, включая обработку параметров,
+    /// построение схемы и проверку ошибок.
+    /// </summary>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="mnemonic">Мнемоника команды.</param>
+    /// <param name="numberLine">Номер строки начала команды.</param>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <returns>Заполненная модель команды КС.</returns>
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");

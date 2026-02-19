@@ -10,8 +10,20 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ne
 {
+  /// <summary>
+  /// Процессор параметров напряжения для команды НЕ.
+  /// Обрабатывает диапазон и рабочее напряжение,
+  /// а также применяет значение по умолчанию при необходимости.
+  /// </summary>
   internal class NeVoltageProcessor : IParameterProcessor<NeCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор параметров напряжения и обновляет модель команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанных параметров.</returns>
     public string Process(NeCommandModel model, string remainder, ParameterContext ctx)
     {
       string lowerRaw, higherRaw, unitRange;

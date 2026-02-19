@@ -2,6 +2,9 @@
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
+  /// <summary>
+  /// Класс CapacityParser.
+  /// </summary>
   public class CapacityParser
   {
     /// <summary>

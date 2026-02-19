@@ -8,8 +8,20 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
 {
+  /// <summary>
+  /// Процессор параметров сопротивления для команды ПР.
+  /// Извлекает диапазон сопротивления и распределяет значения
+  /// между состояниями "разомкнуто" и "замкнуто".
+  /// </summary>
   internal class PrResistanceProcessor : IParameterProcessor<PrCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор параметров сопротивления и обновляет модель команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанных параметров.</returns>
     public string Process(PrCommandModel model, string remainder, ParameterContext ctx)
     {
       string lowerRaw, higherRaw, unit;
@@ -32,6 +44,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       return remainder;
     }
 
+    /// <summary>
+    /// Применяет параметры сопротивления к модели ПР
+    /// с учётом допустимого диапазона.
+    /// </summary>
     private static void ApplyPrResistance(
         PrCommandModel model,
         string? unit,
@@ -83,11 +99,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       ApplyDefault(model, PR_MIN, PR_DEFAULT_LOWER, infinity);
     }
 
+    /// <summary>
+    /// Получает атрибут диапазона сопротивления для модели.
+    /// </summary>
     private static ResistanceRangeAttribute? GetResistanceRangeAttr(PrCommandModel model)
         => (ResistanceRangeAttribute?)Attribute.GetCustomAttribute(
             model.GetType(),
             typeof(ResistanceRangeAttribute));
 
+    /// <summary>
+    /// Применяет значения сопротивления по умолчанию.
+    /// </summary>
     private static void ApplyDefault(PrCommandModel model, double min, double defLower, char infinity)
     {
       model.DisconnectedLowerLimitResistance = defLower;
@@ -101,6 +123,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       model.ConnectedHigherLimitResistanceSource = $"{defLower} Ом";
     }
 
+    /// <summary>
+    /// Применяет только нижнюю границу сопротивления.
+    /// </summary>
     private static void ApplyLower(
         PrCommandModel model,
         double? lower,
@@ -130,6 +155,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       model.ConnectedHigherLimitResistanceSource = $"{valLower} {unit}";
     }
 
+    /// <summary>
+    /// Применяет только верхнюю границу сопротивления.
+    /// </summary>
     private static void ApplyUpper(
         PrCommandModel model,
         double? upper,
@@ -159,6 +187,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       model.ConnectedHigherLimitResistanceSource = $"{valUpper} {unit}";
     }
 
+    /// <summary>
+    /// Применяет диапазон сопротивления.
+    /// </summary>
     private static void ApplyRange(
         PrCommandModel model,
         double? lower,

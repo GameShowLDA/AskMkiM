@@ -5,14 +5,25 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
-using DataBaseConfiguration.Migrations;
 using static Ask.LogLib.LoggerUtility;
 
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
 {
+  /// <summary>
+  /// Процессор параметра напряжения для команды ПИ.
+  /// Извлекает значение напряжения, определяет тип (ACW/DCW)
+  /// и выполняет проверку диапазона относительно установки пробоя.
+  /// </summary>
   internal class PiVoltageProcessor : IParameterProcessor<PiCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор напряжения и обновляет модель команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанного параметра напряжения.</returns>
     public string Process(PiCommandModel model, string remainder, ParameterContext ctx)
     {
       var breakdown = ctx.Breakdown!;

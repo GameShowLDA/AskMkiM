@@ -7,8 +7,15 @@ using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Processo
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {
+  /// <summary>
+  /// Конвейер обработки параметров для команды IE.
+  /// Определяет набор процессоров параметров, применяемых к строке команды.
+  /// </summary>
   internal class IeParameterPipeline
   {
+    /// <summary>
+    /// Внутренний конвейер процессоров параметров.
+    /// </summary>
     private static readonly ParameterPipeline<IeCommandModel> _pipeline =
         new(new IParameterProcessor<IeCommandModel>[]
         {
@@ -16,6 +23,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
             new IeCapacityProcessor(),
         });
 
+    /// <summary>
+    /// Выполняет обработку параметров команды IE.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Остаток строки после выполнения конвейера.</returns>
     public static string Execute(
         IeCommandModel model,
         string remainder,

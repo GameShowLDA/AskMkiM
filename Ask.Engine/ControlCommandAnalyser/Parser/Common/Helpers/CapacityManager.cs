@@ -1,19 +1,32 @@
 ﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Engine.ControlCommandAnalyser.Model.Ie;
-using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Core.Shared.Metadata.Atributes;
-using static Ask.LogLib.LoggerUtility;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using System.Windows.Navigation;
+using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер обработки параметров электрической ёмкости для команды IE.
+  /// Выполняет парсинг значений, проверку диапазонов и запись результата в модель.
+  /// </summary>
   public static class CapacityManager
   {
+    /// <summary>
+    /// Обрабатывает пределы ёмкости, валидирует их и применяет к модели команды.
+    /// </summary>
+    /// <param name="model">Модель команды IE.</param>
+    /// <param name="lowerLimitCapacity">Нижняя граница ёмкости.</param>
+    /// <param name="higherLimitCapacity">Верхняя граница ёмкости.</param>
+    /// <param name="unit">Единица измерения.</param>
+    /// <param name="numberLine">Номер строки.</param>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="mnemonic">Мнемоника команды.</param>
+    /// <returns>Обновлённая модель команды.</returns>
     public static IeCommandModel ProcessCapacity(IeCommandModel model, string lowerLimitCapacity,
   string higherLimitCapacity, string unit, int numberLine, string commandNumber, string mnemonic)
     {
@@ -49,6 +62,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return model;
     }
 
+    /// <summary>
+    /// Получает быстрый измеритель из конфигурации устройства.
+    /// </summary>
     private static IFastMeter GetFastMeter(IeCommandModel model, int numberLine, string commandNumber, string mnemonic)
     {
       var meter = new DataBaseConfiguration.Services.Device.FastMeterServices()
@@ -76,6 +92,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return (minCapacity, maxCapacity, lowerLimit.Value, higherLimit.Value, commandInfo.Unit);
     }
 
+    /// <summary>
+    /// Проверяет корректность соотношения нижней и верхней границ.
+    /// </summary>
     private static bool ValidateLowerHigherRelation(double? lower, double? higher, string unit, int numberLine, string commandNumber, string mnemonic, BaseCommandModel model)
     {
       if (lower.HasValue && higher.HasValue && lower.Value >= higher.Value)
@@ -98,6 +117,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       return false;
     }
+    /// <summary>
+    /// Проверяет нижнюю границу ёмкости.
+    /// </summary>
     private static bool ValidateLowerLimit(double? lower, string unit,
     (double MinCapacity, double MaxCapacity, double LowerLimit, double HigherLimit, string DefaultUnit) limits,
     int numberLine, string commandNumber, string mnemonic, IeCommandModel model)
@@ -124,6 +146,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return false;
     }
 
+    /// <summary>
+    /// Проверяет верхнюю границу ёмкости.
+    /// </summary>
     private static bool ValidateHigherLimit(double? higher, string unit,
     (double MinCapacity, double MaxCapacity, double LowerLimit, double HigherLimit, string DefaultUnit) limits,
     int numberLine, string commandNumber, string mnemonic, IeCommandModel model)
@@ -149,6 +174,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       return false;
     }
+    /// <summary>
+    /// Записывает валидированные значения ёмкости в модель.
+    /// </summary>
     private static IeCommandModel ApplyCapacityToModel(IeCommandModel model, double lower, double? higher, string unit, double maxCapacity, int numberLine, string commandNumber, string mnemonic)
     {
       var lowerValue = UnitsConvertor.TryConvertBack(lower, unit);
@@ -180,6 +208,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return model;
     }
 
+    /// <summary>
+    /// Добавляет ошибку, если нижняя граница электрической емкости меньше минимально измеряемой.
+    /// </summary>
     private static void AddLowerTooSmallError(IeCommandModel model, int numberLine, string commandNumber, string mnemonic, double lowerValue, string unit,
     (double MinCapacity, double MaxCapacity, double LowerLimit, double HigherLimit, string DefaultUnit) limits)
     {
@@ -197,6 +228,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
               $"меньше минимально измеряемой ({limitsLowerValue.Item1} {limitsLowerValue.Item2})."));
     }
 
+    /// <summary>
+    /// Добавляет ошибку, если нижняя граница электрической емкости больше максмально возможной.
+    /// </summary>
     private static void AddLowerTooLargeError(IeCommandModel model, int numberLine, string commandNumber, string mnemonic, double lowerValue, string unit,
     (double MinCapacity, double MaxCapacity, double LowerLimit, double HigherLimit, string DefaultUnit) limits)
     {
@@ -214,6 +248,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
               $"больше максимально возможной ({limitsHigherValue.Item1} {limitsHigherValue.Item2})."));
     }
 
+    /// <summary>
+    /// Добавляет ошибку, если верхняя граница электрической емкости больше максимально возможной.
+    /// </summary>
     private static void AddHigherTooLargeError(IeCommandModel model, int numberLine, string commandNumber, string mnemonic, double higherValue, string unit,
     (double MinCapacity, double MaxCapacity, double LowerLimit, double HigherLimit, string DefaultUnit) limits)
     {
@@ -230,6 +267,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
               $"Верхняя граница электрической емкости ({higher.Item1} {higher.Item2}) " +
               $"больше максимально возможной ({limitsHigherValue.Item1} {limitsHigherValue.Item2})."));
     }
+    /// <summary>
+    /// Добавляет ошибку, если верхняя граница электрической емкости меньше минимально измеряемой.
+    /// </summary>
     private static void AddHigherTooSmallError(IeCommandModel model, int numberLine, string commandNumber, string mnemonic, double higherValue, string unit,
     (double MinCapacity, double MaxCapacity, double LowerLimit, double HigherLimit, string DefaultUnit) limits)
     {

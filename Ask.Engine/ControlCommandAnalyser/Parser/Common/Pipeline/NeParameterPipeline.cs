@@ -6,8 +6,15 @@ using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Processo
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {
+  /// <summary>
+  /// Конвейер обработки параметров для команды НЭ.
+  /// Определяет последовательность процессоров параметров команды.
+  /// </summary>
   internal class NeParameterPipeline
   {
+    /// <summary>
+    /// Внутренний конвейер процессоров параметров.
+    /// </summary>
     private static readonly ParameterPipeline<NeCommandModel> _pipeline =
         new(new IParameterProcessor<NeCommandModel>[]
         {
@@ -16,6 +23,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
             new NeAmperageProcessor(),
         });
 
+    /// <summary>
+    /// Выполняет обработку параметров команды НЭ.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Остаток строки после выполнения конвейера.</returns>
     public static string Execute(
         NeCommandModel model,
         string remainder,

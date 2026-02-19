@@ -2,6 +2,9 @@
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
+  /// <summary>
+  /// Класс VoltageParser.
+  /// </summary>
   public class VoltageParser
   {
     /// <summary>

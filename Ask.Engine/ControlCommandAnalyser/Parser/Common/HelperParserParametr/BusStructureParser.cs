@@ -7,8 +7,23 @@ using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
+  /// <summary>
+  /// Вспомогательный парсер структуры шин (Ш) для команды ВШ.
+  /// Извлекает из строки указания шин и формирует структуру
+  /// <see cref="VshCommandModel.BusStructure"/> с учётом конфигурации стойки и шасси.
+  /// </summary>
   internal class BusStructureParser
   {
+    /// <summary>
+    /// Разбирает строку команды ВШ и заполняет структуру шин модели.
+    /// </summary>
+    /// <param name="input">Исходная строка команды.</param>
+    /// <param name="model">Модель команды ВШ.</param>
+    /// <returns>Обновлённая модель с заполненной структурой шин.</returns>
+    /// <remarks>
+    /// Поддерживает указание конкретного номера (например, 4Ш:2)
+    /// или применение ко всем доступным стойкам/шасси.
+    /// </remarks>
     public static VshCommandModel ParseVshCommand(string input, VshCommandModel model)
     {
       var regex = new Regex(
@@ -56,6 +71,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
       return model;
     }
 
+    /// <summary>
+    /// Обрабатывает найденный префикс шины и добавляет номер стойки
+    /// в словарь структуры шин с учётом ограничений конфигурации.
+    /// </summary>
     private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber,
       Dictionary<BusStructureEnum.Type, List<int?>> busDictionary, BusStructureEnum.Type shassiBusType)
     {
@@ -115,6 +134,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
       return busDictionary;
     }
 
+    /// <summary>
+    /// Формирует строковое представление доступных шин шасси
+    /// для использования в сообщениях об ошибках.
+    /// </summary>
     private static string CreateShassiString(int resultShassi)
     {
       var shassiStr = string.Empty;

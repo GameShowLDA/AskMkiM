@@ -4,10 +4,29 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
+  /// <summary>
+  /// Вспомогательный класс для получения допустимых и недопустимых ключей алгоритма
+  /// для моделей команд. Использует кэширование для ускорения повторных вызовов.
+  /// </summary>
+  /// <remarks>
+  /// Допустимые ключи извлекаются из атрибута <see cref="AllowedKeysAttribute"/>,
+  /// объявленного у типа модели команды.
+  /// </remarks>
   public static class KeysHelper
   {
     private static readonly Dictionary<Type, AlgorithmKey[]> Cache = new();
 
+    /// <summary>
+    /// Возвращает список допустимых ключей алгоритма для указанной модели команды.
+    /// </summary>
+    /// <param name="model">Экземпляр модели команды.</param>
+    /// <returns>
+    /// Массив допустимых значений <see cref="AlgorithmKey"/>.
+    /// Если атрибут отсутствует — возвращается пустой массив.
+    /// </returns>
+    /// <remarks>
+    /// Результат кэшируется по типу модели для повышения производительности.
+    /// </remarks>
     public static AlgorithmKey[] GetAllowedKeysForModel(BaseCommandModel model)
     {
       Type type = model.GetType();
@@ -24,6 +43,20 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       return keys;
     }
+
+    /// <summary>
+    /// Возвращает список ключей алгоритма, которые не разрешены
+    /// для указанной модели команды.
+    /// </summary>
+    /// <param name="model">Экземпляр модели команды.</param>
+    /// <returns>
+    /// Массив значений <see cref="AlgorithmKey"/>, отсутствующих
+    /// в списке допустимых ключей.
+    /// </returns>
+    /// <remarks>
+    /// Метод использует кэш допустимых ключей и формирует список
+    /// недопустимых путём исключения их из полного перечисления.
+    /// </remarks>
     public static AlgorithmKey[] GetNotAllowedKeysForModel(BaseCommandModel model)
     {
       Type type = model.GetType();

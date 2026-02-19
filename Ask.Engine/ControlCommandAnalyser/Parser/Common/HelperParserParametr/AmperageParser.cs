@@ -2,6 +2,9 @@
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
+  /// <summary>
+  /// Класс AmperageParser.
+  /// </summary>
   public class AmperageParser
   {
     /// <summary>

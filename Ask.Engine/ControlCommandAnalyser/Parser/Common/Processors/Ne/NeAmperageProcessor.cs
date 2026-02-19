@@ -6,8 +6,19 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ne
 {
+  /// <summary>
+  /// Процессор параметра силы тока для команды НЭ.
+  /// Извлекает значение тока из строки и передаёт остаток дальше по конвейеру.
+  /// </summary>
   internal class NeAmperageProcessor : IParameterProcessor<NeCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор параметра силы тока из строки команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанного параметра.</returns>
     public string Process(NeCommandModel model, string remainder, ParameterContext ctx)
     {
       var (amperageRaw, unitRaw, rest) =

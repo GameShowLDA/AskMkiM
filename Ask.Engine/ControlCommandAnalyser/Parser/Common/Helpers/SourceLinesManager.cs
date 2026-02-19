@@ -5,8 +5,21 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер проверки исходных строк команды.
+  /// Проверяет наличие строк и корректность отступов.
+  /// </summary>
   public class SourceLinesManager
   {
+    /// <summary>
+    /// Выполняет комплексную проверку строк команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="lines">Строки тела команды.</param>
+    /// <param name="numberLine">Номер строки начала команды.</param>
+    /// <returns>
+    /// <c>true</c>, если строки валидны; иначе <c>false</c>.
+    /// </returns>
     public static bool Check(BaseCommandModel model, List<string> lines, int numberLine)
     {
       if (LinesExist(model, lines, numberLine) == true)
@@ -19,6 +32,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
     }
 
+    /// <summary>
+    /// Проверяет наличие строк тела команды.
+    /// </summary>
     private static bool LinesExist(BaseCommandModel model, List<string> lines, int numberLine)
     {
       if (lines == null || lines.Count == 0)
@@ -29,6 +45,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
       return true;
     }
+
+    /// <summary>
+    /// Проверяет корректность отступов в строках.
+    /// </summary>
     private static bool IndentationCheck(BaseCommandModel model, List<string> lines, int numberLine)
     {
       var errors = IndentationCheker.CheckIndentationErrors(lines, model.CommandNumber, model.Mnemonic);

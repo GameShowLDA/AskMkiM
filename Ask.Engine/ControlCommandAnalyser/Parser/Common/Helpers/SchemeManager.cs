@@ -11,8 +11,15 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер разбора схем, шин и точек команд.
+  /// Выполняет извлечение блока точек и формирует соответствующие модели.
+  /// </summary>
   public static class SchemeManager
   {
+    /// <summary>
+    /// Извлекает и парсит схему из строки команды.
+    /// </summary>
     public static SchemeModel GetScheme(BaseCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
@@ -46,6 +53,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return scheme;
     }
 
+    /// <summary>
+    /// Обрабатывает схему для команды PI с учётом ключей алгоритма.
+    /// </summary>
     private static PiCommandModel HandlePiCommandModel(string bodyNoWs, PiCommandModel piCommandModel, int numberLine, ref SchemeModel? scheme, RmCommandModel rmCommandModel)
     {
       if (TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
@@ -71,6 +81,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return piCommandModel;
     }
 
+    /// <summary>
+    /// Обрабатывает схему для команд PR и SI.
+    /// </summary>
     private static SchemeModel HandlePrCommandModel(string bodyNoWs, BaseCommandModel model, SchemeModel modelScheme, int numberLine, ref SchemeModel? scheme, RmCommandModel rmCommandModel)
     {
       if (TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
@@ -95,6 +108,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
 
+    /// <summary>
+    /// Применяет ключи алгоритма П или С для PI.
+    /// </summary>
     private static PiCommandModel HandleKeysSP(int numberLine, PiCommandModel piCommandModel)
     {
       if (piCommandModel.SiCommand.AlgorithmKey.Contains(AlgorithmKey.П.ToString())
@@ -111,6 +127,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return piCommandModel;
     }
 
+    /// <summary>
+    /// Применяет ключи алгоритма П или С для базовой команды.
+    /// </summary>
     private static SchemeModel HandleKeysSP(int numberLine, BaseCommandModel model, SchemeModel scheme)
     {
       if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
@@ -125,6 +144,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return scheme;
     }
 
+    /// <summary>
+    /// Обрабатывает ключ алгоритма С.
+    /// </summary>
     private static SchemeModel HandleKeyS(SchemeModel scheme, SiCommandModel siCommand = null)
     {
       scheme = CommandsModel.CheckKeyS(scheme);
@@ -135,6 +157,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return scheme;
     }
 
+    /// <summary>
+    /// Обрабатывает ключ алгоритма П.
+    /// </summary>
     private static SchemeModel HandleKeyP(BaseCommandModel model, SchemeModel scheme, int numberLine, SiCommandModel siCommand = null)
     {
       var newScheme = new SchemeModel(new List<GroupModel>());
@@ -163,6 +188,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
 
+    /// <summary>
+    /// Возвращает список шин из блока точек.
+    /// </summary>
     public static List<SwitchingBus> GetBusList(CkCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
@@ -178,6 +206,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return model.BusList;
     }
 
+    /// <summary>
+    /// Формирует словарь шин и соответствующих точек.
+    /// </summary>
     public static Dictionary<SwitchingBus, List<PointModel>> GetBusPointsDictionary(BaseCommandModel model, RmCommandModel rmCommandModel, int numberLine,
       string commandNumber, string mnemonic, ref string remainder)
     {
@@ -208,6 +239,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
 
+    /// <summary>
+    /// Пытается найти границы блока точек '*...*'.
+    /// </summary>
     private static bool TryExtractPointsBlock(string body, out int firstStar, out int lastStar)
     {
       firstStar = body.IndexOf('*');
@@ -216,6 +250,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return firstStar >= 0 && lastStar > firstStar;
     }
 
+    /// <summary>
+    /// Обрабатывает ситуацию отсутствия блока точек.
+    /// </summary>
     private static void HandleNoPointsBlock(BaseCommandModel model, int numberLine)
     {
       LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {model.CommandNumber} {model.Mnemonic}");
@@ -223,6 +260,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       model.Errors.Add(EhtErrors.EmptyPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
     }
 
+    /// <summary>
+    /// Возвращает список шин по умолчанию при отсутствии блока.
+    /// </summary>
     private static List<SwitchingBus> HandleNoBusBlock(CkCommandModel model, int numberLine)
     {
       LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {model.CommandNumber} {model.Mnemonic}");
@@ -230,6 +270,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return Enum.GetValues<SwitchingBus>().Where(x => !x.ToString().StartsWith("AB")).ToList();
     }
 
+    /// <summary>
+    /// Парсит схему точек из блока.
+    /// </summary>
     private static SchemeModel? ParseScheme(BaseCommandModel model, string body, RmCommandModel rmCommandModel,
       int firstStar, int lastStar, int numberLine)
     {
@@ -254,6 +297,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return scheme;
     }
 
+    /// <summary>
+    /// Парсит список шин из блока.
+    /// </summary>
     private static List<SwitchingBus> ParseBusList(CkCommandModel model, string body, RmCommandModel rmCommandModel, int firstStar, int lastStar)
     {
       var busBlob = body.Substring(firstStar, lastStar - firstStar + 1);
@@ -273,6 +319,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
     }
 
+    /// <summary>
+    /// Обрабатывает ситуацию пустой схемы.
+    /// </summary>
     private static void HandleEmptyScheme(BaseCommandModel model, int numberLine)
     {
       LogWarning(
@@ -282,6 +331,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           EhtErrors.EmptyPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
     }
 
+    /// <summary>
+    /// Добавляет ошибки, возникшие при разборе точек.
+    /// </summary>
     private static void CheckPointsErrors(BaseCommandModel model, int numberLine, List<ErrorItem> pointErrors)
     {
       if (pointErrors?.Count > 0)
@@ -297,6 +349,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
     }
 
+    /// <summary>
+    /// Удаляет блок точек из строки команды.
+    /// </summary>
     private static string ClearLineFromPoints(string remainder)
     {
       int idxStarInFirstLine = remainder.IndexOf('*');

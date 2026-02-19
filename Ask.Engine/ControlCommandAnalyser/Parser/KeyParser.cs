@@ -6,8 +6,35 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
 {
+  /// <summary>
+  /// Выполняет извлечение и обработку ключей алгоритма из текста команды.
+  /// <para>
+  /// Ключи проверяются на допустимость, дубликаты и корректность записи.
+  /// При необходимости добавляются ошибки и предупрежeдения в модель команды.
+  /// </para>
+  /// </summary>
   public static class KeyParser
   {
+    /// <summary>
+    /// Извлекает ключи алгоритма из строки и обновляет модель команды.
+    /// </summary>
+    /// <param name="numberLine">Номер строки, в которой выполняется парсинг.</param>
+    /// <param name="model">Модель команды, в которую добавляются найденные ключи.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <returns>
+    /// Строка без найденных ключей алгоритма.
+    /// </returns>
+    /// <remarks>
+    /// Выполняет:
+    /// <list type="number">
+    /// <item><description>получение ключей через <see cref="AlgorithmKeyParser"/>;</description></item>
+    /// <item><description>проверку допустимости по атрибуту <see cref="AllowedKeysAttribute"/>;</description></item>
+    /// <item><description>добавление ошибок для недопустимых ключей;</description></item>
+    /// <item><description>добавление предупреждений для дубликатов;</description></item>
+    /// <item><description>перенос ключей из вложенной команды СИ в ПИ (если требуется);</description></item>
+    /// <item><description>удаление ключей из текста команды.</description></item>
+    /// </list>
+    /// </remarks>
     public static string ParseKeys(int numberLine, BaseCommandModel model, string remainder)
     {
       var result = AlgorithmKeyParser.ExtractKeysWithTrailingCommaCheck(remainder, model);

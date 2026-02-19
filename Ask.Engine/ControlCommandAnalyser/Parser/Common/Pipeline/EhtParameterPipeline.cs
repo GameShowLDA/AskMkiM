@@ -7,8 +7,15 @@ using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Processo
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {
+  /// <summary>
+  /// Конвейер обработки параметров для команды ЭТ.
+  /// Определяет последовательность процессоров параметров.
+  /// </summary>
   public static class EhtParameterPipeline
   {
+    /// <summary>
+    /// Внутренний конвейер процессоров параметров.
+    /// </summary>
     private static readonly ParameterPipeline<EhtCommandModel> _pipeline =
         new(new IParameterProcessor<EhtCommandModel>[]
         {
@@ -18,6 +25,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
             Time<EhtCommandModel>(),
         });
 
+    /// <summary>
+    /// Выполняет обработку параметров команды ЭХТ.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Остаток строки после выполнения конвейера.</returns>
     public static string Execute(
         EhtCommandModel model,
         string remainder,

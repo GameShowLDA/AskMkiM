@@ -5,16 +5,23 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
 {
+  /// <summary>
+  /// Процессор параметра сопротивления для команды СИ.
+  /// Извлекает значение сопротивления, выполняет проверку диапазона
+  /// и записывает результат в модель.
+  /// </summary>
   internal class SiResistanceProcessor : IParameterProcessor<SiCommandModel>
   {
+    /// <summary>
+    /// Выполняет разбор сопротивления и обновляет модель команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Строка без обработанного параметра.</returns>
     public string Process(SiCommandModel model, string remainder, ParameterContext ctx)
     {
       var info = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI);

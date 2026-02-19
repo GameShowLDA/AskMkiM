@@ -5,8 +5,15 @@ using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Processo
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {
+  /// <summary>
+  /// Конвейер обработки параметров для команды ОТ.
+  /// Определяет набор процессоров параметров команды.
+  /// </summary>
   internal class OtParameterPipeline
   {
+    /// <summary>
+    /// Внутренний конвейер процессоров параметров.
+    /// </summary>
     private static readonly ParameterPipeline<OtCommandModel> _pipeline =
         new(new IParameterProcessor<OtCommandModel>[]
         {
@@ -14,6 +21,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
             Time<OtCommandModel>(),
         });
 
+    /// <summary>
+    /// Выполняет обработку параметров команды ОТ.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <returns>Остаток строки после выполнения конвейера.</returns>
     public static string Execute(
         OtCommandModel model,
         string remainder,

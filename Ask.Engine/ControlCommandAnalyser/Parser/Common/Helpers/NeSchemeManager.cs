@@ -9,8 +9,25 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер разбора схемы точек для команды НЭ.
+  /// Извлекает блок точек, формирует модель схемы и применяет знаки включения.
+  /// </summary>
   public static class NeSchemeManager
   {
+    /// <summary>
+    /// Парсит схему точек из тела команды и возвращает модель схемы.
+    /// </summary>
+    /// <param name="model">Модель команды НЕ.</param>
+    /// <param name="rmCommandModel">Модель команды РМ с описанием точек.</param>
+    /// <param name="numberLine">Номер строки.</param>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="mnemonic">Мнемоника команды.</param>
+    /// <param name="remainder">Оставшаяся часть команды (очищается от блока точек).</param>
+    /// <param name="processedLines">Строки команды без предварительной обработки.</param>
+    /// <returns>
+    /// Модель схемы, если точки успешно распознаны; иначе <c>null</c>.
+    /// </returns>
     public static SchemeModel? Parse(
         NeCommandModel model,
         RmCommandModel rmCommandModel,
@@ -93,6 +110,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return scheme;
     }
 
+    /// <summary>
+    /// Применяет знак включения к цепи.
+    /// </summary>
     private static void ApplySign(ChainModel chain, char? sign, NeCommandModel model)
     {
       if (sign == '+')
@@ -101,6 +121,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         model.ElementEnablingType.Add((chain, ElementEnabling.Type.Reverse));
     }
 
+    /// <summary>
+    /// Удаляет блок точек из остатка строки команды.
+    /// </summary>
     private static void ClearPointsFromRemainder(ref string remainder)
     {
       int first = remainder.IndexOf('*');

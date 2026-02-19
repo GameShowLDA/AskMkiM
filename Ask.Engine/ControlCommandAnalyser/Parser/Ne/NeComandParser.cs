@@ -9,11 +9,30 @@ using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
 {
+  /// <summary>
+  /// Парсер команды НЭ.
+  /// Выполняет разбор параметров, построение схемы
+  /// и обработку нераспознанных параметров.
+  /// </summary>
   internal class NeComandParser : CommandParserBase<NeCommandModel>
   {
+    /// <summary>
+    /// Определяет, может ли парсер обработать указанную мнемонику.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники.</param>
+    /// <returns>
+    /// <c>true</c>, если мнемоника соответствует команде НЭ; иначе <c>false</c>.
+    /// </returns>
     public override bool CanParse(MnemonicIdentifier mnemonic)
       => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.NE);
 
+    /// <summary>
+    /// Создаёт модель команды НЭ.
+    /// </summary>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="numberLine">Номер строки начала команды.</param>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <returns>Экземпляр модели команды НЭ.</returns>
     protected override NeCommandModel CreateModel(string commandNumber, int numberLine, List<string> lines) => new()
     {
       CommandNumber = commandNumber,
@@ -21,9 +40,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       StartLineNumber = numberLine,
     };
 
+    /// <summary>
+    /// Выполняет разбор параметров через конвейер параметров НЭ.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <param name="remainder">Оставшаяся часть строки команды.</param>
+    /// <param name="ctx">Контекст парсинга параметров.</param>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <returns>Строка без обработанных параметров.</returns>
     protected override string ParseParameters(NeCommandModel model, string remainder, ParameterContext ctx, List<string> lines)
       => NeParameterPipeline.Execute(model, remainder, ctx);
 
+    /// <summary>
+    /// Выполняет разбор структуры схемы команды НЭ.
+    /// </summary>
     protected override void ParseStructure(
       NeCommandModel model,
       RmCommandModel rmCommandModel,
@@ -34,6 +64,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ne
       ref string remainder)
       => model.Scheme = NeSchemeManager.Parse(model, rmCommandModel, numberLine, commandNumber, mnemonic, ref remainder, lines);
 
+    /// <summary>
+    /// Обрабатывает нераспознанные параметры команды.
+    /// </summary>
     protected override void HandleUnparsed(NeCommandModel model, int numberLine, string remainder)
       => UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
   }

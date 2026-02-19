@@ -9,8 +9,15 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
+  /// <summary>
+  /// Менеджер обработки параметров сопротивления.
+  /// Выполняет парсинг, валидацию диапазонов и запись значений в модели команд.
+  /// </summary>
   public static class ResistanceManager
   {
+    /// <summary>
+    /// Обрабатывает параметры сопротивления для команды ЭТ.
+    /// </summary>
     public static void ProcessResistance(
     EhtCommandModel model,
     string lowerLimitResistance,
@@ -32,6 +39,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       ApplyResistanceToModel(model, parsed, defaults, commandNumber, mnemonic);
     }
 
+    /// <summary>
+    /// Обрабатывает параметры сопротивления для команды КС.
+    /// </summary>
     public static void ProcessResistance(
     KsCommandModel model,
     string lower,
@@ -52,6 +62,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
 
+    /// <summary>
+    /// Получает значения сопротивления по умолчанию из метаданных команды.
+    /// </summary>
     private static ResistanceDefaults GetResistanceDefaults(MeasurementTypeCommand typeCommand)
     {
       var commandInfo = EnumExtensions.GetDisplayInfo(typeCommand);
@@ -62,8 +75,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           commandInfo.Unit);
     }
 
+    /// <summary>
+    /// Значения сопротивления по умолчанию.
+    /// </summary>
     private record ResistanceDefaults(double DefaultLower, double DefaultHigher, string DefaultUnit);
 
+    /// <summary>
+    /// Парсит входные параметры сопротивления.
+    /// </summary>
     private static ParsedResistance ParseResistanceInputs(string lowerRaw, string higherRaw, string unit, string defaultUnit, string cabelRaw = null, string cabelUnit = null)
     {
       double? lower = !string.IsNullOrWhiteSpace(lowerRaw)
@@ -83,8 +102,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           string.IsNullOrWhiteSpace(cabelUnit) ? defaultUnit : cabelUnit);
     }
 
+    /// <summary>
+    /// Результат парсинга параметров сопротивления.
+    /// </summary>
     private record ParsedResistance( double? Lower, double? Higher, double? Cabel, string Unit, string CabelUnit);
 
+    /// <summary>
+    /// Проверяет корректность диапазона сопротивления.
+    /// </summary>
     private static bool ValidateResistanceLimits(BaseCommandModel model, ParsedResistance parsed, ResistanceDefaults defaults, 
       string commandNumber, string mnemonic, int numberLine)
     {
@@ -109,6 +134,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return true;
     }
 
+    /// <summary>
+    /// Проверяет корректность диапазона сопротивления для команды КС.
+    /// </summary>
     private static bool ValidateResistanceLimits(
     KsCommandModel model,
     ParsedResistance parsed,
@@ -211,6 +239,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
 
+    /// <summary>
+    /// Добавляет ошибку валидации сопротивления.
+    /// </summary>
     private static bool AddError(BaseCommandModel model, int numberLine, string commandNumber, string mnemonic, string message)
     {
       LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) {message}");
@@ -224,6 +255,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return false;
     }
 
+    /// <summary>
+    /// Записывает значения сопротивления в модель ЭТ.
+    /// </summary>
     private static void ApplyResistanceToModel(EhtCommandModel model, ParsedResistance parsed, ResistanceDefaults defaults, string commandNumber, string mnemonic)
     {
       double lowerFinal = parsed.Lower ?? defaults.DefaultLower;
@@ -243,6 +277,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
     }
 
+    /// <summary>
+    /// Записывает значения сопротивления в модель КС.
+    /// </summary>
     private static void ApplyResistanceToModel(
     KsCommandModel model,
     ParsedResistance parsed,
