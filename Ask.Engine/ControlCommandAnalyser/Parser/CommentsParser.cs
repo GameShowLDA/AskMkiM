@@ -5,8 +5,40 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
 {
+  /// <summary>
+  /// Выполняет извлечение и удаление комментариев из строк команды.
+  /// <para>
+  /// Поддерживаются типы комментариев:
+  /// <list type="bullet">
+  /// <item><description>фигурные: <c>{ ... }</c> (включая двухстрочные);</description></item>
+  /// <item><description>C-style: <c>/* ... */</c> (включая двухстрочные);</description></item>
+  /// <item><description>однострочные: <c>// ...</c>.</description></item>
+  /// </list>
+  /// </para>
+  /// Найденные комментарии добавляются в коллекцию <see cref="BaseCommandModel.Comment"/>.
+  /// </summary>
   public static class CommentsParser
   {
+    /// <summary>
+    /// Удаляет комментарии из набора строк и возвращает очищенные строки.
+    /// </summary>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <param name="model">
+    /// Модель команды, в которую сохраняются найденные комментарии.
+    /// </param>
+    /// <returns>
+    /// Список строк без комментариев и пустых значений.
+    /// </returns>
+    /// <remarks>
+    /// Алгоритм:
+    /// <list type="number">
+    /// <item><description>Ищет фигурные комментарии <c>{…}</c>;</description></item>
+    /// <item><description>затем блоки <c>/*…*/</c>;</description></item>
+    /// <item><description>в конце — однострочные <c>//</c>.</description></item>
+    /// </list>
+    /// При обнаружении многострочных комментариев корректно изменяет
+    /// содержимое следующих строк.
+    /// </remarks>
     public static List<string> ParseComments(List<string> lines, BaseCommandModel model)
     {
       if (lines == null || lines.Count == 0)
@@ -138,6 +170,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return result;
     }
 
+    /// <summary>
+    /// Подготавливает строку комментария для вывода в лог,
+    /// экранируя управляющие символы и ограничивая длину.
+    /// </summary>
+    /// <param name="s">Исходный текст комментария.</param>
+    /// <param name="maxLen">Максимальная длина строки в логе.</param>
+    /// <returns>Строка, пригодная для безопасного логирования.</returns>
     private static string TrimForLog(string s, int maxLen = 160)
     {
       if (string.IsNullOrEmpty(s)) return s;
