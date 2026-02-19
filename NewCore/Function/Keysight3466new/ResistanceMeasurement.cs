@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
+using NewCore.Function.Helpers;
 
 namespace NewCore.Function.Keysight3466new
 {
@@ -55,9 +56,15 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
+      if (rangeTo == -1)
       {
-        return param;
+        rangeTo = double.MaxValue;
+      }
+
+      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo);
+      if (random != -1)
+      {
+        return random;
       }
 
       if (!_device.IsConnected)
