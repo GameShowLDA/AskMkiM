@@ -4,72 +4,70 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.DeviceConfig.Controls"
-             xmlns:CustomControls="clr-namespace:UI.Components"
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
-        <!-- Стиль для прозрачности при наведении -->
-        <Style x:Key="HoverOpacityBorderStyle" TargetType="Border">
-            <Setter Property="Opacity" Value="0.5"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="1"/>
-                    <Setter Property="Cursor" Value="Hand"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Стиль для изменения размера шрифта при наведении -->
-        <Style x:Key="HoverFontSizeStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="18"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Cursor" Value="Hand"/>
-                    <Setter Property="Foreground" Value="{StaticResource ActiveBorderSolidColorBrush}"/>
-                    <Trigger.EnterActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="FontSize"
-                                             To="22" Duration="0:0:0.1" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.EnterActions>
-                    <Trigger.ExitActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="FontSize"
-                                             To="18" Duration="0:0:0.1" />
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.ExitActions>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="RemoveButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#ff4d4d"/>
-            <Setter Property="Width" Value="24"/>
-            <Setter Property="Height" Value="24"/>
+        <Style x:Key="TopMenuLikeIconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Grid>
-                            <!-- Красный круг -->
-                            <Ellipse Fill="{TemplateBinding Background}" Width="24" Height="24"/>
-                            <!-- Крестик -->
-                            <Path Data="M6,6 L18,18 M6,18 L18,6" Stroke="White" StrokeThickness="2"/>
-                        </Grid>
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractivePressedSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="RemoveButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+            <Setter Property="MinWidth" Value="28"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Background" Value="#22E45757"/>
+            <Setter Property="BorderBrush" Value="#66E45757"/>
+            <Setter Property="Foreground" Value="#FFE57A7A"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#ff1a1a"/>
+                    <Setter Property="Background" Value="#33E45757"/>
+                    <Setter Property="BorderBrush" Value="#AAE45757"/>
+                    <Setter Property="Foreground" Value="#FFFFA8A8"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#66E45757"/>
+                    <Setter Property="BorderBrush" Value="#FFE45757"/>
+                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -95,20 +93,20 @@
                                FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center"/>
 
                     <!-- Кнопка добавления нового устройства -->
-                    <Border x:Name="AddButtonContainer"
-                            Grid.Column="1" Background="{DynamicResource SettingsSelectorSelectedSolidColorBrush}" 
-                            CornerRadius="3" Margin="5,0"
-                            Style="{StaticResource HoverOpacityBorderStyle}"
-                            Focusable="False"
+                    <Button x:Name="AddButtonContainer"
+                            Grid.Column="1"
+                            Margin="5,0"
+                            Style="{StaticResource TopMenuLikeIconButtonStyle}"
                             PreviewMouseDown="PlusPreviewMouseDown"
-                            >
-                        <CustomControls:PlusButtonControl 
-                        x:Name="AddDeviceButton" 
-                        Width="30"
-                        Height="30"
-                        FontSize="4"
-                       />
-                    </Border>
+                            ToolTip="Добавить устройство">
+                        <Path Data="M 8,2 L 8,14 M 2,8 L 14,8"
+                              Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                              StrokeThickness="1.8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+                    </Button>
                 </Grid>
             </Border>
 
@@ -125,12 +123,15 @@
 
                                 <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource ForegrounfBrushes}" FontSize="18" VerticalAlignment="Center"/>
 
-                                <!-- Кнопка удаления с крестиком -->
-                                <Border Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource HoverOpacityBorderStyle}">
-                                    <Button Style="{StaticResource RemoveButtonStyle}" Click="RemoveDeviceButton_Click"
-                                            CommandParameter="{Binding}" />
-
-                                </Border>
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource RemoveButtonStyle}"
+                                        Click="RemoveDeviceButton_Click"
+                                        CommandParameter="{Binding}"
+                                        ToolTip="Удалить устройство">
+                                    <askUiIcons:TrashDeleteIcon Size="14"
+                                                                 IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>

@@ -1,0 +1,54 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.TrashDeleteIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <UserControl.Resources>
+    <Storyboard x:Key="LidOpenStoryboard">
+      <DoubleAnimation Storyboard.TargetName="LidRotate"
+                       Storyboard.TargetProperty="Angle"
+                       To="-28"
+                       Duration="0:0:0.14" />
+      <DoubleAnimation Storyboard.TargetName="LidTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="-1.6"
+                       Duration="0:0:0.14" />
+    </Storyboard>
+    <Storyboard x:Key="LidCloseStoryboard">
+      <DoubleAnimation Storyboard.TargetName="LidRotate"
+                       Storyboard.TargetProperty="Angle"
+                       To="0"
+                       Duration="0:0:0.12" />
+      <DoubleAnimation Storyboard.TargetName="LidTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="0"
+                       Duration="0:0:0.12" />
+    </Storyboard>
+  </UserControl.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24" Height="24">
+      <!-- Bin body -->
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="M18.72 10H5.28a1 1 0 0 0-.97 1.24l2.12 8.49A3 3 0 0 0 9.34 22h5.32a3 3 0 0 0 2.9-2.27l2.13-8.49a1 1 0 0 0-.97-1.24Z" />
+
+      <!-- Lid (animated) -->
+      <Grid RenderTransformOrigin="0.35,0.68">
+        <Grid.RenderTransform>
+          <TransformGroup>
+            <RotateTransform x:Name="LidRotate" />
+            <TranslateTransform x:Name="LidTranslate" />
+          </TransformGroup>
+        </Grid.RenderTransform>
+
+        <Path Fill="{Binding Foreground, ElementName=Root}"
+              Data="M9.38 2a1 1 0 0 0-.9.55L7.02 5.5H3a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1h-4L15.5 2.55a1 1 0 0 0-.9-.55H9.39Z" />
+        <Path Fill="{Binding Foreground, ElementName=Root}"
+              Opacity="0.78"
+              Data="M14.86 5.5l-.72-1.25a.5.5 0 0 0-.43-.25h-3.42a.5.5 0 0 0-.43.25L9.14 5.5h5.72Z" />
+      </Grid>
+    </Grid>
+  </Viewbox>
+</UserControl>
