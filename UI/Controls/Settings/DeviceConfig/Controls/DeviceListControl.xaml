@@ -142,6 +142,7 @@
                             PreviewMouseDown="PlusPreviewMouseDown"
                             ToolTip="Добавить устройство">
                         <askUiIcons:PlusCircleIcon Size="16"
+                                                   IsMagnetized="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                    ToolTip="Добавить устройство"
                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
