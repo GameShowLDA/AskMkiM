@@ -36,10 +36,7 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Объект менеджера шасси, реализующий <see cref="IChassisManager"/>.</returns>
     public IChassisManager GetByNumber(int numberChassis)
     {
-      var entity = _context.Set<ChassisManagerEntity>()
-                           .FirstOrDefault(device => device.Number == numberChassis);
-
-      return GetDeviceInstance(entity);
+      return GetAll().FirstOrDefault(device => device.Number == numberChassis);
     }
 
     public List<ChassisManagerEntity> GetAllEntities()

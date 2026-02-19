@@ -35,17 +35,9 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список устройств коммутации шин.</returns>
     public List<ISwitchingDevice> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<SwitchingDeviceEntity>()
-                         .Where(device => device.NumberChassis == numberChassis)
-                         .ToList();
-
-      var result = data
-          .OfType<ISwitchingDevice>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList();
-
-      return result;
+      return GetAll()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     /// <summary>
@@ -55,9 +47,10 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
     public List<SwitchingDeviceEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<SwitchingDeviceEntity>()
-                     .Where(device => device.NumberChassis == numberChassis)
-                     .ToList();
+      return GetAllData()
+        .OfType<SwitchingDeviceEntity>()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     public List<SwitchingDeviceEntity> GetAllEntities()
