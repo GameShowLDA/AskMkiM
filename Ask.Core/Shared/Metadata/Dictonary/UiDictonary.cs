@@ -23,7 +23,7 @@
         { "SearchFile", "Ctrl+F" },
         { "SearchReplace", "Ctrl+H" },
         { "CompareFile", "Ctrl+K" },
-        { "Build", "F9" },
+        { "Build", "Ctrl+B" },
         { "Run", "Ctrl+F5" },
         { "RunStepByStepMode", "Ctrl+F10" },
 
