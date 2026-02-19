@@ -56,6 +56,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       return _commands.IndexOf(command);
     }
 
+    public List<BaseCommandModel> GetAllCommands() => _commands;
+
     /// <summary>
     /// Выполняет поиск команды по её номеру.
     /// </summary>

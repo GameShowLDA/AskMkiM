@@ -95,6 +95,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       _commands = new CommandCollection(controlProgram);
       _executorRegistry = new CommandExecutorRegistry();
       _breakpointManager = new BreakpointManager(_commands);
+      CommandsToExecute = _commands.GetAllCommands();
     }
 
     /// <summary>
