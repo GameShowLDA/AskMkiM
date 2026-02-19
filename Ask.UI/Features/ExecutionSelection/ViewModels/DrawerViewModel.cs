@@ -31,6 +31,7 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     private object? _customContent;
     private string _title = "Выбор команды";
     private string _subtitle = "Enter / DoubleClick — выбрать, F4 — закрыть";
+    private double _panelWidth = 900d;
 
     public ObservableCollection<CommandPreviewViewModel> Commands { get; } = new();
 
@@ -62,6 +63,12 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     {
       get => _subtitle;
       private set => SetProperty(ref _subtitle, value);
+    }
+
+    public double PanelWidth
+    {
+      get => _panelWidth;
+      private set => SetProperty(ref _panelWidth, value);
     }
 
     public CommandPreviewViewModel? SelectedCommand
@@ -104,6 +111,7 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
       CustomContent = null;
       Title = "Выбор команды";
       Subtitle = "Enter / DoubleClick — выбрать, F4 — закрыть";
+      PanelWidth = 900d;
 
       foreach (var command in commands)
       {
@@ -126,7 +134,7 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
       IsOpen = true;
     }
 
-    public void OpenContent(object content, string title, string subtitle, Action? onClose = null)
+    public void OpenContent(object content, string title, string subtitle, Action? onClose = null, double panelWidth = 900d)
     {
       Commands.Clear();
       SelectedCommand = null;
@@ -137,6 +145,7 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
       CustomContent = content;
       Title = title;
       Subtitle = subtitle;
+      PanelWidth = panelWidth;
       IsOpen = true;
     }
 
@@ -164,6 +173,7 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     {
       IsOpen = false;
       CustomContent = null;
+      PanelWidth = 900d;
       var callback = _onComplete;
       var closeCallback = _onClose;
       _onComplete = null;

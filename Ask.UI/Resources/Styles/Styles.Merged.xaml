@@ -6,6 +6,7 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/ButtonStyle.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/BorderStyle.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/ComboBoxStyle.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.File.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Admin.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Execution.xaml"/>

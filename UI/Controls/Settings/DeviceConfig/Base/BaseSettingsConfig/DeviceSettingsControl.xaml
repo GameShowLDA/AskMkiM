@@ -6,9 +6,34 @@
              xmlns:local="clr-namespace:UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig"
              mc:Ignorable="d" 
              d:DesignHeight="600" 
-             d:DesignWidth="800"
+             d:DesignWidth="400"
              >
     <UserControl.Resources>
+        <Style x:Key="DeviceSettingsUnifiedComboBoxStyle"
+               TargetType="ComboBox"
+               BasedOn="{StaticResource CustomComboBoxStyle}">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Margin" Value="14,8,14,8"/>
+            <Setter Property="Height" Value="40"/>
+        </Style>
+
+        <Style x:Key="DeviceSettingsUnifiedInputBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Margin" Value="14,8,14,8"/>
+            <Setter Property="Height" Value="40"/>
+        </Style>
+
+        <Style x:Key="DeviceSettingsUnifiedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+        </Style>
+
         <Style TargetType="ScrollBar">
             <Setter Property="Width" Value="10"/>
             <Setter Property="Template">
@@ -59,20 +84,26 @@
 
     <Border Background="{DynamicResource DeviceInputShellBackgroundBrush}"
             CornerRadius="20"
-            Padding="24,14"
-            Margin="10,10,10,15"
+            Padding="12,12"
+            Margin="8,8,8,12"
+            HorizontalAlignment="Stretch"
             Effect="{DynamicResource ShadowEffect}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Name="Header" Text="Настройка устройства:  Имя устройства" VerticalAlignment="Center" HorizontalAlignment="Center"
-      Foreground="{DynamicResource ForegrounfBrushes}" FontSize="25" FontWeight="Bold"/>
+            <TextBlock Name="Header" Text="Настройка устройства:  Имя устройства"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Stretch"
+                       Margin="6,4,6,10"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource ForegrounfBrushes}" FontSize="25" FontWeight="Bold"/>
 
-            <ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" Padding="10,0">
+            <ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" Padding="2,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -103,10 +134,7 @@
 
                             <ComboBox Grid.Row="1" 
                                   Name="DeviceModelSelectionBox" 
-                                  Style="{StaticResource CustomComboBoxStyle}"
-                                  HorizontalAlignment="Stretch"
-                                  Margin="20,0"
-                                  Height="40"
+                                  Style="{StaticResource DeviceSettingsUnifiedComboBoxStyle}"
                                   SelectionChanged="DeviceModelSelectionBox_SelectionChanged"
                         >
                             </ComboBox>
@@ -131,10 +159,7 @@
 
                             <ComboBox Grid.Row="1" 
                                 Name="BusTypeSelectionBox" 
-                                Style="{StaticResource CustomComboBoxStyle}"
-                                HorizontalAlignment="Stretch"
-                                Margin="20,0"
-                                Height="40"
+                                Style="{StaticResource DeviceSettingsUnifiedComboBoxStyle}"
                                 SelectionChanged="BusTypeSelectionBox_SelectionChanged"
                                 >
                             </ComboBox>
@@ -148,7 +173,7 @@
                         <Grid >
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
-                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <Border Style="{StaticResource DeviceInputSectionTitleBarStyle}">
@@ -157,12 +182,9 @@
                                        />
                             </Border>
 
-                            <Border Grid.Row="1" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5" Margin="5,5">
+                            <Border Grid.Row="1" Style="{StaticResource DeviceSettingsUnifiedInputBorderStyle}">
                                 <TextBox 
-                                    Background="Transparent" 
-                                     BorderThickness="0" 
-                                    VerticalAlignment="Center" 
-                                     FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
+                                     Style="{StaticResource DeviceSettingsUnifiedTextBoxStyle}"
                                      PreviewTextInput="NumberDevice_PreviewTextInput"
                                      TextChanged="NumberDevice_TextChanged"
                                      Name="DeviceNumberTextBox"
@@ -178,7 +200,7 @@
                         <Grid >
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
-                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <Border Style="{StaticResource DeviceInputSectionTitleBarStyle}">
@@ -186,12 +208,9 @@
                                            FontSize="20" FontWeight="Bold" Margin="7,0"/>
                             </Border>
 
-                            <Border Grid.Row="1" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5" Margin="5,5">
+                            <Border Grid.Row="1" Style="{StaticResource DeviceSettingsUnifiedInputBorderStyle}">
                                 <TextBox 
-                                    Background="Transparent" 
-                                    BorderThickness="0" 
-                                    VerticalAlignment="Center" 
-                                    FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
+                                    Style="{StaticResource DeviceSettingsUnifiedTextBoxStyle}"
                                     PreviewTextInput="ResistanceDevice_PreviewTextInput"
                                     TextChanged="ResistanceDevice_TextChanged"
                                     Name="ResistanceTextBox"
@@ -219,10 +238,7 @@
 
                             <ComboBox Grid.Row="1" 
                                 Name="ConnectionTypeSelectionBox" 
-                                Style="{StaticResource CustomComboBoxStyle}"
-                                HorizontalAlignment="Stretch"
-                                Margin="20,0"
-                                Height="40"
+                                Style="{StaticResource DeviceSettingsUnifiedComboBoxStyle}"
                                 SelectionChanged="ConnectionTypeSelectionBox_SelectionChanged"
                                 PreviewMouseWheel="ConnectionTypeSelectionBox_OnPreviewMouseWheel">
 
@@ -561,21 +577,25 @@
 
             <Grid Grid.Row="2" Margin="0,5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <Button Name="CancelButton" Grid.Column="0" Content="Отменить" 
                     Style="{StaticResource DeviceInputSecondaryActionButton}" 
-                    Margin="0,10" Width="250" 
-                    HorizontalAlignment="Left"
+                    Margin="0,10,8,10"
+                    MinWidth="120"
+                    MaxWidth="170"
+                    HorizontalAlignment="Center"
                     PreviewMouseDown="CancelButton_PreviewMouseDown"
                     />
 
                 <Button Name="SaveButton" Grid.Column="1" Content="Сохранить" 
              Style="{StaticResource DeviceInputPrimaryActionButton}" 
-             Width="250" HorizontalAlignment="Left" 
-             Margin="20,0"
+             MinWidth="120"
+             MaxWidth="170"
+             HorizontalAlignment="Center"
+             Margin="8,10,0,10"
              PreviewMouseDown="SaveButton_PreviewMouseDown"       
              />
             </Grid>

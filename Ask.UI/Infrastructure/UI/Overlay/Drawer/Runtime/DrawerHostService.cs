@@ -73,11 +73,11 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
       return selectedCommand;
     }
 
-    public Task OpenContentAsync(object content, string title, string subtitle, Action? onClose = null)
+    public Task OpenContentAsync(object content, string title, string subtitle, Action? onClose = null, double panelWidth = 900d)
     {
       return RunOnUiThreadAsync(() =>
       {
-        _viewModel.OpenContent(content, title, subtitle, onClose);
+        _viewModel.OpenContent(content, title, subtitle, onClose, panelWidth);
       });
     }
 

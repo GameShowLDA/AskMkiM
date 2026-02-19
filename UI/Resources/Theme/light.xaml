@@ -53,6 +53,16 @@
     <SolidColorBrush x:Key="DeviceListDeleteButtonPressedBackgroundBrush" Color="#F8B6B6"/>
     <SolidColorBrush x:Key="DeviceListDeleteButtonPressedBorderBrush" Color="#A93333"/>
     <SolidColorBrush x:Key="DeviceListDeleteButtonPressedForegroundBrush" Color="#822020"/>
+    <SolidColorBrush x:Key="ComboBoxModernBackgroundBrush" Color="#FFFDFD"/>
+    <SolidColorBrush x:Key="ComboBoxModernBorderBrush" Color="#C4CAD3"/>
+    <SolidColorBrush x:Key="ComboBoxModernHoverBorderBrush" Color="#96A8BE"/>
+    <SolidColorBrush x:Key="ComboBoxModernFocusBorderBrush" Color="#5E87C7"/>
+    <SolidColorBrush x:Key="ComboBoxModernGlyphBrush" Color="#4D6078"/>
+    <SolidColorBrush x:Key="ComboBoxModernPopupBackgroundBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ComboBoxModernPopupBorderBrush" Color="#CFD6E0"/>
+    <SolidColorBrush x:Key="ComboBoxModernItemHoverBrush" Color="#EEF3FA"/>
+    <SolidColorBrush x:Key="ComboBoxModernItemSelectedBrush" Color="#DDE8F8"/>
+    <Color x:Key="ComboBoxModernShadowColor">#3A5A7A</Color>
     <!--#endregion-->
 
     <!--#region Главное окно -->

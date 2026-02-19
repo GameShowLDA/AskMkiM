@@ -18,7 +18,7 @@
 
     <Border x:Name="Panel"
             HorizontalAlignment="Right"
-            Width="900"
+            Width="{Binding PanelWidth}"
             Margin="0,14,0,14"
             Background="{DynamicResource DrawerPanelBackgroundBrush}"
             BorderBrush="{DynamicResource DrawerBorderBrush}"

@@ -25,6 +25,8 @@ namespace UI.Controls.Settings.DeviceConfig
   /// </summary>
   public partial class DeviceConfigControl : UserControl
   {
+    private const double DeviceConfigDrawerPanelWidth = 470d;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceConfigControl"/>.
     /// </summary>
@@ -355,42 +357,42 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose);
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
 
     private async Task OpenWindowInDrawerAsync(FastMeterWindow window, string title, string subtitle, Action? onClose = null)
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose);
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
 
     private async Task OpenWindowInDrawerAsync(ModuleVoltageCurrentSourceWindow window, string title, string subtitle, Action? onClose = null)
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose);
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
 
     private async Task OpenWindowInDrawerAsync(ModuleRelayControlWindow window, string title, string subtitle, Action? onClose = null)
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose);
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
 
     private async Task OpenWindowInDrawerAsync(DeviceBusCommutationWindow window, string title, string subtitle, Action? onClose = null)
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose);
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
 
     private async Task OpenWindowInDrawerAsync(ChassisManagerWindow window, string title, string subtitle, Action? onClose = null)
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose);
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
   }
 }
