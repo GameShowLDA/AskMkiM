@@ -57,94 +57,123 @@
             <TextBlock Foreground="{DynamicResource DrawerTextBrush}"
                        FontSize="20"
                        FontWeight="SemiBold"
-                       Text="Выбор команды" />
+                       Text="{Binding Title}" />
             <TextBlock Foreground="{DynamicResource DrawerSecondaryTextBrush}"
                        FontSize="13"
                        Margin="0,2,0,0"
-                       Text="Enter / DoubleClick — выбрать, F4 — закрыть" />
+                       Text="{Binding Subtitle}" />
           </StackPanel>
 
-          <Border Grid.Row="1"
-                  Grid.Column="0"
-                  CornerRadius="14"
-                  Background="{DynamicResource DrawerSurfaceBackgroundBrush}"
-                  BorderBrush="{DynamicResource DrawerBorderBrush}"
-                  BorderThickness="1"
-                  Padding="2"
-                  SnapsToDevicePixels="True">
-            <ListBox x:Name="CommandsList"
-                     ItemsSource="{Binding Commands}"
-                     SelectedItem="{Binding SelectedCommand, Mode=TwoWay}"
-                     Background="Transparent"
-                     Foreground="{DynamicResource DrawerTextBrush}"
-                     BorderThickness="0"
-                     ScrollViewer.CanContentScroll="True"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     VirtualizingStackPanel.IsVirtualizing="True"
-                     VirtualizingStackPanel.VirtualizationMode="Recycling"
-                     VirtualizingPanel.ScrollUnit="Item"
-                     KeyboardNavigation.TabNavigation="None">
-              <ListBox.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
-                  <Setter Property="Padding" Value="10,8" />
-                  <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                  <Setter Property="Margin" Value="5,4" />
-                  <Setter Property="Background" Value="Transparent" />
-                  <Setter Property="BorderBrush" Value="Transparent" />
-                  <Setter Property="BorderThickness" Value="1" />
-                  <Setter Property="Template">
-                    <Setter.Value>
-                      <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="11"
-                                Padding="{TemplateBinding Padding}">
-                          <ContentPresenter />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                          <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource DrawerItemHoverBrush}" />
-                            <Setter Property="BorderBrush" Value="{DynamicResource DrawerBorderBrush}" />
-                          </Trigger>
-                          <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource DrawerItemSelectedBrush}" />
-                            <Setter Property="BorderBrush" Value="{DynamicResource DrawerAccentBrush}" />
-                          </Trigger>
-                        </ControlTemplate.Triggers>
-                      </ControlTemplate>
-                    </Setter.Value>
-                  </Setter>
-                  <EventSetter Event="MouseDoubleClick" Handler="OnItemDoubleClick" />
-                </Style>
-              </ListBox.ItemContainerStyle>
-              <ListBox.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Name}"
-                             FontSize="15"
-                             FontWeight="SemiBold"
-                             TextTrimming="CharacterEllipsis" />
-                </DataTemplate>
-              </ListBox.ItemTemplate>
-            </ListBox>
-          </Border>
+          <Grid Grid.Row="1"
+                Grid.ColumnSpan="3">
+            <Grid.Style>
+              <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsCustomContent}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Grid.Style>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="350" />
+              <ColumnDefinition Width="14" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    CornerRadius="14"
+                    Background="{DynamicResource DrawerSurfaceBackgroundBrush}"
+                    BorderBrush="{DynamicResource DrawerBorderBrush}"
+                    BorderThickness="1"
+                    Padding="2"
+                    SnapsToDevicePixels="True">
+              <ListBox x:Name="CommandsList"
+                       ItemsSource="{Binding Commands}"
+                       SelectedItem="{Binding SelectedCommand, Mode=TwoWay}"
+                       Background="Transparent"
+                       Foreground="{DynamicResource DrawerTextBrush}"
+                       BorderThickness="0"
+                       ScrollViewer.CanContentScroll="True"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto"
+                       VirtualizingStackPanel.IsVirtualizing="True"
+                       VirtualizingStackPanel.VirtualizationMode="Recycling"
+                       VirtualizingPanel.ScrollUnit="Item"
+                       KeyboardNavigation.TabNavigation="None">
+                <ListBox.ItemContainerStyle>
+                  <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="Padding" Value="10,8" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Margin" Value="5,4" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="Template">
+                      <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                          <Border Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  CornerRadius="11"
+                                  Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter Property="Background" Value="{DynamicResource DrawerItemHoverBrush}" />
+                              <Setter Property="BorderBrush" Value="{DynamicResource DrawerBorderBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                              <Setter Property="Background" Value="{DynamicResource DrawerItemSelectedBrush}" />
+                              <Setter Property="BorderBrush" Value="{DynamicResource DrawerAccentBrush}" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Setter.Value>
+                    </Setter>
+                    <EventSetter Event="MouseDoubleClick" Handler="OnItemDoubleClick" />
+                  </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Name}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Background="{DynamicResource DrawerSurfaceBackgroundBrush}"
+                    BorderBrush="{DynamicResource DrawerBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14"
+                    Padding="14"
+                    SnapsToDevicePixels="True">
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="{Binding SelectedCommandText}"
+                           Foreground="{DynamicResource DrawerTextBrush}"
+                           FontFamily="Consolas"
+                           FontSize="15"
+                           LineHeight="22"
+                           TextWrapping="Wrap" />
+              </ScrollViewer>
+            </Border>
+          </Grid>
 
           <Border Grid.Row="1"
-                  Grid.Column="2"
+                  Grid.ColumnSpan="3"
                   Background="{DynamicResource DrawerSurfaceBackgroundBrush}"
                   BorderBrush="{DynamicResource DrawerBorderBrush}"
                   BorderThickness="1"
                   CornerRadius="14"
-                  Padding="14"
-                  SnapsToDevicePixels="True">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <TextBlock Text="{Binding SelectedCommandText}"
-                         Foreground="{DynamicResource DrawerTextBrush}"
-                         FontFamily="Consolas"
-                         FontSize="15"
-                         LineHeight="22"
-                         TextWrapping="Wrap" />
-            </ScrollViewer>
+                  Padding="12"
+                  SnapsToDevicePixels="True"
+                  Visibility="{Binding IsCustomContent, Converter={StaticResource BoolToVisibility}}">
+            <ContentPresenter Content="{Binding CustomContent}" />
           </Border>
         </Grid>
       </Grid>
@@ -152,3 +181,4 @@
 
   </Grid>
 </UserControl>
+

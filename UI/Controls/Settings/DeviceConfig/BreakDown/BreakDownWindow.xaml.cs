@@ -15,6 +15,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
   /// </summary>
   public partial class BreakDownWindow : Window, IDataProcessor
   {
+    public Action? CloseActionOverride { get; set; }
     /// <summary>
     /// Событие запроса закрытия окна.
     /// </summary>
@@ -29,6 +30,12 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     /// Свойство, предоставляющее доступ к параметрам устройства.
     /// </summary>
     public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
+
+    public DeviceSettingsControl DetachSettingsControl()
+    {
+      Content = null;
+      return deviceSettingsWindow;
+    }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BreakDownWindow"/>.
@@ -79,7 +86,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
           {
             svc.Create(deviceEntity);
             RequestSave?.Invoke(s, deviceEntity);
-            Close();
+            RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)
           {
@@ -93,8 +100,20 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
       deviceSettingsWindow.RequestClose += (s, a) =>
       {
         RequestClose?.Invoke(s, a);
-        Close();
+        RequestCloseWindow();
       };
+    }
+
+    private void RequestCloseWindow()
+    {
+      if (CloseActionOverride != null)
+      {
+        CloseActionOverride.Invoke();
+        return;
+      }
+
+      Close();
     }
   }
 }
+

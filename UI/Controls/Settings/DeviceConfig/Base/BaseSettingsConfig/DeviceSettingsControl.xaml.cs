@@ -86,13 +86,13 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// </summary>
     private void VisibilityElements()
     {
-      DeviceNumberContainer.Visibility = Visibility.Collapsed;
+      DeviceNumberContainer.Visibility = Visibility.Visible;
       BusTypeContainer.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
-      ConnectionTypeContainer.Visibility = Visibility.Collapsed;
+      ConnectionTypeContainer.Visibility = Visibility.Visible;
       IPAddressContainer.Visibility = Visibility.Collapsed;
       COMContainer.Visibility = Visibility.Collapsed;
-      AdditionalSettingsContainer.Visibility = Visibility.Collapsed;
+      AdditionalSettingsContainer.Visibility = Visibility.Visible;
     }
 
     /// <summary>

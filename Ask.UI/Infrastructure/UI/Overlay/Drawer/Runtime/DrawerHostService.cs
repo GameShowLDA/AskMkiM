@@ -1,4 +1,4 @@
-using Ask.Core.Contracts.Debugging;
+﻿using Ask.Core.Contracts.Debugging;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
@@ -28,7 +28,7 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
     // Runtime toggle: while drawer is open, block global app hotkeys/handlers.
     public bool BlockGlobalInputWhenOpen { get; set; } = true;
 
-    public bool ShouldBlockGlobalInput => _viewModel.IsOpen && BlockGlobalInputWhenOpen;
+    public bool ShouldBlockGlobalInput => _viewModel.IsOpen && BlockGlobalInputWhenOpen && !_viewModel.IsCustomContent;
 
     public void EnsureInitialized()
     {
@@ -73,6 +73,19 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
       return selectedCommand;
     }
 
+    public Task OpenContentAsync(object content, string title, string subtitle, Action? onClose = null)
+    {
+      return RunOnUiThreadAsync(() =>
+      {
+        _viewModel.OpenContent(content, title, subtitle, onClose);
+      });
+    }
+
+    public void Close()
+    {
+      _viewModel.Cancel();
+    }
+
     private void OnOpenRequest(OpenCommandDrawerRequest request)
     {
       _ = OpenAsync(request);
@@ -91,3 +104,4 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
     }
   }
 }
+
