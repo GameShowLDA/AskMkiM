@@ -78,7 +78,7 @@ namespace NewCore.Function.Keysight3466new
     /// <c>true</c>, если обнаружено соединение (низкое сопротивление), иначе <c>false</c>.
     /// </returns>
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    public async Task<double> CheckContinuityAsync(double expectedOutcome, IUserInteractionService? userMessageService = null)
+    public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       if (!_device.IsConnected)
       {

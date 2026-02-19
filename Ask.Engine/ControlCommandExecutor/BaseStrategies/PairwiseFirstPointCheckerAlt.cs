@@ -55,7 +55,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var _basePoint = chains.PointModels.First();
           await ConnectToBusAAndBAsync(context.MessageService, _basePoint);
 
-          var Rt1 = await GetResistanceAsync(context.MessageService, context.Value);
+          var Rt1 = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
           if (Rt1 > 100)
           {
             var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
@@ -67,9 +67,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             errorsMessgae.Add(errorMessageModels);
             await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
             context.CommandManager.AddErrorMethod(
-              EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
-              $"{_basePoint}{machineAdress}", 
-              context.MessageService.GetLastLineNumber(), 
+              EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
+              $"{_basePoint}{machineAdress}",
+              context.MessageService.GetLastLineNumber(),
               baseCommandModel.FormattedStartLineNumber));
           }
           else
@@ -89,7 +89,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var point = chains.PointModels[i];
             await ConnectToBusAAndBAsync(context.MessageService, point);
 
-            var Rt2 = await GetResistanceAsync(context.MessageService, context.Value);
+            var Rt2 = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
             if (Rt2 > 100)
             {
               var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
@@ -100,9 +100,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               await context.MessageService.ShowMessageAsync(errorMessageModels);
               errorsMessgae.Add(errorMessageModels);
               context.CommandManager.AddErrorMethod(
-                EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
-                $"{point.Mnemonic}{machineAdress}", 
-                context.MessageService.GetLastLineNumber(), 
+                EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
+                $"{point.Mnemonic}{machineAdress}",
+                context.MessageService.GetLastLineNumber(),
                 baseCommandModel.FormattedStartLineNumber));
 
               await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
@@ -127,7 +127,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
             if (!errorPoint)
             {
-              Rt = await GetResistanceAsync(context.MessageService, context.Value);
+              Rt = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
 
               if (Rt > 100)
               {
@@ -138,10 +138,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
                 await context.MessageService.ShowMessageAsync(errorMessageModels);
                 context.CommandManager.AddErrorMethod(
-                  EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
-                  $"{_basePoint.Mnemonic}{machineAdressFirst}", 
-                  $"{point.Mnemonic}{machineAdressSecond}", 
-                  context.MessageService.GetLastLineNumber(), 
+                  EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
+                  $"{_basePoint.Mnemonic}{machineAdressFirst}",
+                  $"{point.Mnemonic}{machineAdressSecond}",
+                  context.MessageService.GetLastLineNumber(),
                   baseCommandModel.FormattedStartLineNumber));
 
                 errorsMessgae.Add(errorMessageModels);
@@ -168,9 +168,28 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 Rx = Rt;
               }
 
-              var result = !ExecutionConfig.GetIsIdleModeEnabled() ? Rx : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? (LowerBound + UpperBound) / 2 : Rx;
+              double result = 0;
 
-              result -= context.CabelResistance;
+              if (ExecutionConfig.GetIsIdleModeEnabled())
+              {
+                if (!await ExecutionConfig.GetIsErrorSimulationEnabled())
+                {
+                  result = (LowerBound + UpperBound) / 2;
+                }
+                else
+                {
+                  result = Rx;
+                }
+              }
+              else
+              {
+                result = Rx;
+              }
+
+              if (!ExecutionConfig.GetIsIdleModeEnabled())
+              {
+                result -= context.CabelResistance;
+              }
 
               if (result < 0)
               {
@@ -191,13 +210,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               {
                 errorsMessgae.Add(error);
                 context.CommandManager.AddErrorMethod(
-                  EhtErrors.ResistanceOutOfRange($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}", 
-                  result, 
-                  _basePoint.ToString(), 
-                  point.ToString(), 
-                  LowerBound, 
-                  UpperBound, 
-                  context.MessageService.GetLastLineNumber(), 
+                  EhtErrors.ResistanceOutOfRange($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
+                  result,
+                  _basePoint.ToString(),
+                  point.ToString(),
+                  LowerBound,
+                  UpperBound,
+                  context.MessageService.GetLastLineNumber(),
                   baseCommandModel.FormattedStartLineNumber));
 
                 await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {error.ToString()}"));
@@ -226,11 +245,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService);
     }
 
-    static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param)
+    static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(userMessageService);
       await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ContinuityManager.CheckContinuityAsync(param) : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
+      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
       return result;
     }
 
