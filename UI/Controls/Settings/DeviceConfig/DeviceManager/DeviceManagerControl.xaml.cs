@@ -49,6 +49,12 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     public DeviceManagerControl()
     {
       InitializeComponent();
+
+      FastMeterControl.IsSingleDeviceOnly = true;
+      PrecisionMeterControl.IsSingleDeviceOnly = true;
+      BreakdownTesterControl.IsSingleDeviceOnly = true;
+      SwitchingDeviceControl.IsSingleDeviceOnly = true;
+
       BreakdownTesterControl.PlusEvent += (s, a) => AddBreakdownEvent?.Invoke(this, _headUnit);
       SwitchingDeviceControl.PlusEvent += (s, a) => DeviceBusCommutationSelected?.Invoke(this, _headUnit);
       FastMeterControl.PlusEvent += (s, a) => FastMeterEvent?.Invoke(this, _headUnit);

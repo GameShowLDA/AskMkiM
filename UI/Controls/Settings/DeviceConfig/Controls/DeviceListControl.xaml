@@ -95,7 +95,8 @@
                                FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center"/>
 
                     <!-- Кнопка добавления нового устройства -->
-                    <Border Grid.Column="1" Background="{DynamicResource SettingsSelectorSelectedSolidColorBrush}" 
+                    <Border x:Name="AddButtonContainer"
+                            Grid.Column="1" Background="{DynamicResource SettingsSelectorSelectedSolidColorBrush}" 
                             CornerRadius="3" Margin="5,0"
                             Style="{StaticResource HoverOpacityBorderStyle}"
                             Focusable="False"

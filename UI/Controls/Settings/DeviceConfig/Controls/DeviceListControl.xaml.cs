@@ -40,6 +40,13 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
             typeof(DeviceListControl),
             new PropertyMetadata("Название устройства"));
 
+    public static readonly DependencyProperty IsSingleDeviceOnlyProperty =
+        DependencyProperty.Register(
+            nameof(IsSingleDeviceOnly),
+            typeof(bool),
+            typeof(DeviceListControl),
+            new PropertyMetadata(false, OnIsSingleDeviceOnlyChanged));
+
     /// <summary>
     /// Получает или задает заголовок списка устройств.
     /// </summary>
@@ -47,6 +54,12 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     {
       get => (string)GetValue(DeviceTitleProperty);
       set => SetValue(DeviceTitleProperty, value);
+    }
+
+    public bool IsSingleDeviceOnly
+    {
+      get => (bool)GetValue(IsSingleDeviceOnlyProperty);
+      set => SetValue(IsSingleDeviceOnlyProperty, value);
     }
 
     /// <summary>
@@ -71,6 +84,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     public void AddDevice(IDevice device)
     {
       Devices.Add(new DeviceWrapper(device));
+      UpdateAddButtonVisibility();
     }
 
     /// <summary>
@@ -79,6 +93,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     public void ClearItems()
     {
       Devices.Clear();
+      UpdateAddButtonVisibility();
     }
 
     /// <summary>
@@ -90,6 +105,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
       if (Devices.Contains(deviceWrapper))
       {
         Devices.Remove(deviceWrapper);
+        UpdateAddButtonVisibility();
         RemoveDeviceFromDatabase(deviceWrapper.Device);
         DeleteEvent?.Invoke(this, deviceWrapper.Device);
       }
@@ -164,7 +180,32 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <param name="e">Аргументы события.</param>
     private void PlusPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+      if (IsSingleDeviceOnly && Devices.Count > 0)
+      {
+        return;
+      }
+
       PlusEvent?.Invoke(this, e);
+    }
+
+    private static void OnIsSingleDeviceOnlyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is DeviceListControl control)
+      {
+        control.UpdateAddButtonVisibility();
+      }
+    }
+
+    private void UpdateAddButtonVisibility()
+    {
+      if (AddButtonContainer == null)
+      {
+        return;
+      }
+
+      AddButtonContainer.Visibility = IsSingleDeviceOnly && Devices.Count > 0
+          ? Visibility.Collapsed
+          : Visibility.Visible;
     }
   }
 
