@@ -1,6 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Executor;
 using ICSharpCode.AvalonEdit.Rendering;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -12,7 +12,6 @@ using UI.Controls;
 using UI.Controls.TextEditor;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
-using Ask.Core.Shared.DTO.Executor;
 
 namespace UI.Components.MultiEditorMethods
 {

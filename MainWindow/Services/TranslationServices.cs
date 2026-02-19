@@ -4,7 +4,6 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using ICSharpCode.AvalonEdit.Document;
 using Message;
 using System.IO;
 using System.Windows;

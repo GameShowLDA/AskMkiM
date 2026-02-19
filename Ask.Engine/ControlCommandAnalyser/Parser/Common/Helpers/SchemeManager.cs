@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;

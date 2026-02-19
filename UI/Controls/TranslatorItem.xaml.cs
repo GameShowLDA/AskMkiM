@@ -4,12 +4,9 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
-using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.UI.Shared.Contracts;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.TextFormatting;
 using UI.Controls.TextEditor;
 
 namespace UI.Controls
