@@ -13,6 +13,17 @@
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#303843"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#1ca3e9"/>
     <SolidColorBrush x:Key="SettingsMainBackground" Color="#3a4655"/>
+    <SolidColorBrush x:Key="DrawerBackdropBrush" Color="#6610151C"/>
+    <SolidColorBrush x:Key="DrawerPanelBackgroundBrush" Color="#2A313D"/>
+    <SolidColorBrush x:Key="DrawerSurfaceBackgroundBrush" Color="#222933"/>
+    <SolidColorBrush x:Key="DrawerBorderBrush" Color="#3D4757"/>
+    <SolidColorBrush x:Key="DrawerTextBrush" Color="#F2F5FA"/>
+    <SolidColorBrush x:Key="DrawerSecondaryTextBrush" Color="#B4BECF"/>
+    <SolidColorBrush x:Key="DrawerItemHoverBrush" Color="#343E4F"/>
+    <SolidColorBrush x:Key="DrawerItemSelectedBrush" Color="#42516A"/>
+    <SolidColorBrush x:Key="DrawerAccentBrush" Color="#78A8E6"/>
+    <SolidColorBrush x:Key="DrawerGlowBrush" Color="#4D6FA3"/>
+    <SolidColorBrush x:Key="DrawerHighlightBrush" Color="#40FFFFFF"/>
     <!--#endregion-->
 
     <!--#region Главное меню -->

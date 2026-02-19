@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.View;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
@@ -232,6 +233,11 @@ namespace MainWindowProgram.Events
     /// <param name="e">Аргументы события нажатия клавиши.</param>
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
       if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
       {
         ConsoleVisibilityController.ToggleConsole();

@@ -2,6 +2,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
@@ -155,6 +156,11 @@ namespace MainWindowProgram
     /// </summary>
     private async void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
       if (e.Key == Key.Escape && SearchWindow != null && SearchWindow.IsVisible)
       {
         SearchWindow.CloseDialog();
@@ -214,6 +220,27 @@ namespace MainWindowProgram
     /// </summary>
     private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
     {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        if (e.StagingItem.Input is KeyEventArgs drawerKeyArgs && drawerKeyArgs.RoutedEvent == Keyboard.KeyDownEvent)
+        {
+          var drawerKey = drawerKeyArgs.SystemKey == Key.None ? drawerKeyArgs.Key : drawerKeyArgs.SystemKey;
+          if (drawerKey == Key.F4 && Keyboard.Modifiers == ModifierKeys.None)
+          {
+            DrawerHostService.Instance.ViewModel.Cancel();
+            drawerKeyArgs.Handled = true;
+            return;
+          }
+
+          if (!IsDrawerNavigationKey(drawerKey))
+          {
+            drawerKeyArgs.Handled = true;
+          }
+        }
+
+        return;
+      }
+
       if (SearchWindow == null || !SearchWindow.IsVisible)
       {
         return;
@@ -292,6 +319,20 @@ namespace MainWindowProgram
           return;
         }
       }
+    }
+
+    private static bool IsDrawerNavigationKey(Key key)
+    {
+      return key == Key.Up
+             || key == Key.Down
+             || key == Key.Left
+             || key == Key.Right
+             || key == Key.Enter
+             || key == Key.Tab
+             || key == Key.PageUp
+             || key == Key.PageDown
+             || key == Key.Home
+             || key == Key.End;
     }
   }
 }

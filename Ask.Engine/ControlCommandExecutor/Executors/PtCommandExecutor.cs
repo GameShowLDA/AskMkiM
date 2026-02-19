@@ -23,7 +23,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
 
-      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
 
       foreach (var item in command.BusPointsDictionary.Keys)

@@ -41,6 +41,22 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     public BaseCommandModel this[int index] => _commands[index];
 
     /// <summary>
+    /// Возвращает снимок текущего списка команд.
+    /// </summary>
+    public IReadOnlyList<BaseCommandModel> Snapshot()
+    {
+      return _commands.ToArray();
+    }
+
+    /// <summary>
+    /// Возвращает индекс команды в коллекции.
+    /// </summary>
+    public int IndexOf(BaseCommandModel command)
+    {
+      return _commands.IndexOf(command);
+    }
+
+    /// <summary>
     /// Выполняет поиск команды по её номеру.
     /// </summary>
     /// <param name="number">
