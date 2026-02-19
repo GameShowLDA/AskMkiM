@@ -5,8 +5,8 @@ using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
-using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
-using Ask.Engine.ControlCommandAnalyser.Parser.Pipeline;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr

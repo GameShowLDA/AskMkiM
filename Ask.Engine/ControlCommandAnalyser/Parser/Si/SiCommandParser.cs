@@ -5,62 +5,67 @@ using Ask.Core.Services.Translator;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
-using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
-using Ask.Engine.ControlCommandAnalyser.Parser.Pipeline;
-using static Ask.LogLib.LoggerUtility;
-
+using Ask.Engine.ControlCommandAnalyser.Parser.Common;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
 {
-  /// <summary>
-  /// Парсер для команд СИ (сопротивление изоляции).
-  /// </summary>
-  public class SiCommandParser : ICommandParser
+  internal class SiCommandParser : CommandParserBase<SiCommandModel>
   {
-    public bool CanParse(MnemonicIdentifier mnemonic)
-    => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.SI);
+    public override bool CanParse(MnemonicIdentifier mnemonic)
+      => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.SI);
 
-    public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
+    protected override SiCommandModel CreateModel(string commandNumber, int numberLine, List<string> lines) => new()
     {
-      LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}");
+      CommandNumber = commandNumber,
+      SourceLines = lines is null ? new List<string>() : new List<string>(lines),
+      StartLineNumber = numberLine
+    };
 
-      var model = new SiCommandModel
-      {
-        CommandNumber = commandNumber,
-        SourceLines = lines?.ToList() ?? [],
-        StartLineNumber = numberLine
-      };
-
-      var rmCommandModel = CheckPoints.CheckRm(model, numberLine, commandNumber, mnemonic);
-
-      if (!SourceLinesManager.Check(model, lines, numberLine))
-        return model;
-
+    protected override bool AfterSourceLinesCheck(
+      SiCommandModel model,
+      string commandNumber,
+      string mnemonic,
+      int numberLine,
+      List<string> lines)
+    {
       var breakdown = ServiceLocator.GetRequired<IBreakdownTester>();
-
       if (breakdown == null)
       {
         model.Errors.Add(GeneralErrors.FastMeterNotFound(numberLine, $"{commandNumber} {mnemonic}"));
-        return model;
+        return false;
       }
-
-      var remainder = PreprocessSourceLines.GetClearCommandBody(model, lines);
-      remainder = TextRemoveManager.RemoveCommandPrefix(remainder);
-
-      var ctx = new ParameterContext(commandNumber, mnemonic, numberLine, breakdown);
-
-      remainder = SiParameterPipeline.Execute(model, remainder, ctx, breakdown);
-
-      model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
-
-      UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
-
-      AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
-
-      LogInformation($"Завершён парсинг команды: {commandNumber} {mnemonic}");
-
-      return model;
+      return true;
     }
+
+    protected override ParameterContext CreateContext(
+      string commandNumber,
+      string mnemonic,
+      int numberLine,
+      SiCommandModel model)
+      => new(commandNumber, mnemonic, numberLine, ServiceLocator.GetRequired<IBreakdownTester>());
+
+    protected override string ParseParameters(SiCommandModel model, string remainder, ParameterContext ctx, List<string> lines)
+    {
+      var breakdown = ctx.Breakdown;
+      if (breakdown == null)
+        return remainder;
+
+      return SiParameterPipeline.Execute(model, remainder, ctx, breakdown);
+    }
+
+    protected override void ParseStructure(
+      SiCommandModel model,
+      RmCommandModel rmCommandModel,
+      string commandNumber,
+      string mnemonic,
+      int numberLine,
+      List<string> lines,
+      ref string remainder)
+      => model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
+
+    protected override void HandleUnparsed(SiCommandModel model, int numberLine, string remainder)
+      => UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
   }
 }

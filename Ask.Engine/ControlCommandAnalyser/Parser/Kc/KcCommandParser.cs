@@ -1,16 +1,12 @@
-﻿using Ask.Core.Services.Errors.Translation;
-using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
-using Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr; // Для LoggerUtility
-using Ask.Engine.ControlCommandAnalyser.Parser.Helpers;
-using Ask.Engine.ControlCommandAnalyser.Parser.Pipeline;
-using System.Text.RegularExpressions;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
