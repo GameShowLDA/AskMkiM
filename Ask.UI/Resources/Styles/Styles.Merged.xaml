@@ -4,6 +4,8 @@
                     xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization"
                     >
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/ButtonStyle.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/BorderStyle.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.File.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Admin.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Execution.xaml"/>

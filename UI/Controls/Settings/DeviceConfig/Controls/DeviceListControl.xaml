@@ -52,43 +52,43 @@
         </Style>
 
         <Style x:Key="RemoveButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
-            <Setter Property="MinWidth" Value="28"/>
-            <Setter Property="MinHeight" Value="28"/>
-            <Setter Property="Padding" Value="6"/>
-            <Setter Property="Background" Value="#22E45757"/>
-            <Setter Property="BorderBrush" Value="#66E45757"/>
-            <Setter Property="Foreground" Value="#FFE57A7A"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonForegroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#33E45757"/>
-                    <Setter Property="BorderBrush" Value="#AAE45757"/>
-                    <Setter Property="Foreground" Value="#FFFFA8A8"/>
+                    <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonHoverForegroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#66E45757"/>
-                    <Setter Property="BorderBrush" Value="#FFE45757"/>
-                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                    <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonPressedForegroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="EditButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
-            <Setter Property="MinWidth" Value="28"/>
-            <Setter Property="MinHeight" Value="28"/>
-            <Setter Property="Padding" Value="6"/>
-            <Setter Property="Background" Value="#2B4F8BFF"/>
-            <Setter Property="BorderBrush" Value="#9C4F8BFF"/>
-            <Setter Property="Foreground" Value="#FFBFD4FF"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonForegroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#3F5F9FFF"/>
-                    <Setter Property="BorderBrush" Value="#CF5F9FFF"/>
-                    <Setter Property="Foreground" Value="#FFE5EEFF"/>
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonHoverForegroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#6A4F8BFF"/>
-                    <Setter Property="BorderBrush" Value="#FF4F8BFF"/>
-                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonPressedForegroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -97,19 +97,19 @@
             <Setter Property="MinWidth" Value="30"/>
             <Setter Property="MinHeight" Value="30"/>
             <Setter Property="Padding" Value="5"/>
-            <Setter Property="Background" Value="#3D2FA84F"/>
-            <Setter Property="BorderBrush" Value="#B02FA84F"/>
-            <Setter Property="Foreground" Value="#FF7BFF8A"/>
+            <Setter Property="Background" Value="{DynamicResource DeviceListAddButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListAddButtonBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListAddButtonForegroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#553BCB61"/>
-                    <Setter Property="BorderBrush" Value="#E03BCB61"/>
-                    <Setter Property="Foreground" Value="#FFA8FFB2"/>
+                    <Setter Property="Background" Value="{DynamicResource DeviceListAddButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListAddButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListAddButtonHoverForegroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#7A2FA84F"/>
-                    <Setter Property="BorderBrush" Value="#FF2FA84F"/>
-                    <Setter Property="Foreground" Value="#FFD9FFD9"/>
+                    <Setter Property="Background" Value="{DynamicResource DeviceListAddButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListAddButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListAddButtonPressedForegroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -168,7 +168,7 @@
                                         CommandParameter="{Binding}"
                                         ToolTip="Редактировать устройство"
                                         Margin="0,0,6,0">
-                                    <askUiIcons:EditIcon Size="14"
+                                    <askUiIcons:EditIcon Size="16"
                                                          ToolTip="Редактировать устройство"
                                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                                 </Button>
@@ -178,7 +178,7 @@
                                         Click="RemoveDeviceButton_Click"
                                         CommandParameter="{Binding}"
                                         ToolTip="Удалить устройство">
-                                    <askUiIcons:TrashDeleteIcon Size="14"
+                                    <askUiIcons:TrashDeleteIcon Size="16"
                                                                  ToolTip="Удалить устройство"
                                                                  IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                                  Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
