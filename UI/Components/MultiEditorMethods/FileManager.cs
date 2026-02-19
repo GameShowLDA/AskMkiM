@@ -1,4 +1,5 @@
-﻿using UI.Controls.TextEditor;
+﻿using Ask.Core.Shared.Metadata.View.EditorHost;
+using UI.Controls.TextEditor;
 using UI.Services;
 using UI.Services.FileManager;
 using UI.Services.ProtocolManager;
@@ -35,6 +36,8 @@ namespace UI.Components.MultiEditorMethods
       TranslationService = new TranslationService(this);
       FileService = new FileService(this);
     }
+
+    public IEditorDocumentService EditorDocumentService => FileService;
 
     /// <summary>
     /// Модель рабочего пространства редактора, содержащая информацию о состоянии вкладок, контейнеров, путей и активных редакторов.

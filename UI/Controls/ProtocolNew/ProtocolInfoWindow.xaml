@@ -92,14 +92,14 @@
                 <Button 
                     Grid.Column="1"
                     Content="Сохранить" 
-                    Style="{StaticResource ConfigButtonStyle}" 
+                    Style="{DynamicResource ButtonStyleV10}" 
                     HorizontalAlignment="Center"
                     Width="150"
                     PreviewMouseDown="SaveButton_Click"/>
                 <Button 
                     Grid.Column="0"
                     Content="Отмена" 
-                    Style="{StaticResource ConfigButtonStyle}" 
+                    Style="{DynamicResource ButtonStyleV10}" 
                     HorizontalAlignment="Center"
                     Width="150"
                     PreviewMouseDown="CancelButton_Click"/>

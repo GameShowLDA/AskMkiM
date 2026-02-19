@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using ICSharpCode.AvalonEdit;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.ViewModels;
@@ -82,7 +83,7 @@ namespace MainWindowProgram.Events
       var firstFileName = Path.GetFileName(firstFilePath);
       var secondFileName = Path.GetFileName(secondFilePath);
       var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
-      _multiWindow.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
+      _multiWindow.WorkspaceService.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
     }
 
     /// <summary>

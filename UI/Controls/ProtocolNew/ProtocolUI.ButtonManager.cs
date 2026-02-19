@@ -238,7 +238,14 @@ namespace UI.Controls.ProtocolNew
 
       KeyboardManager.OnExitPressed = () =>
         Application.Current.Dispatcher.Invoke(() =>
-          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs()));
+        {
+          if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
+          {
+            return;
+          }
+
+          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
+        });
 
       KeyboardManager.OnPausePressed = () =>
       {
@@ -356,9 +363,6 @@ namespace UI.Controls.ProtocolNew
 
         StepOverButtonElement.Visibility = Visibility.Collapsed;
         StepIntoButtonElement.Visibility = Visibility.Collapsed;
-
-        adminContinue.Visibility = Visibility.Collapsed;
-        adminExit.Visibility = Visibility.Collapsed;
       });
     }
 
@@ -471,17 +475,6 @@ namespace UI.Controls.ProtocolNew
         }
       });
 
-    }
-
-    public void SetupAdminButton()
-    {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        SetNonVisibleAllButton();
-
-        adminExit.Visibility = Visibility.Visible;
-        adminContinue.Visibility = Visibility.Visible;
-      });
     }
 
     public void ShowButtonsOnPause()

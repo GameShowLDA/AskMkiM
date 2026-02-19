@@ -75,19 +75,24 @@ namespace NewCore.FunctionAdapters.Keysight3466new
       }
     }
 
-    public async Task<double> CheckContinuityAsync(double expectedOutcome, IUserInteractionService? userMessageService = null)
+    public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
+      if (rangeTo == -1)
       {
-        return expectedOutcome;
+        rangeTo = double.MaxValue;
+      }
+
+      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo);
+      if (random != -1)
+      {
+        return random;
       }
 
       try
       {
-        double result = await _measurement.CheckContinuityAsync(expectedOutcome);
+        double result = await _measurement.CheckContinuityAsync(param);
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат прозвонки", expectedOutcome.ToString(), true, 2, userMessageService);
-
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат прозвонки", result.ToString(), true, 2, userMessageService);
         return result;
       }
       catch (Exception ex)

@@ -20,6 +20,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <summary>
     /// Проверяет наличие проводимости.
     /// </summary>
-    Task<double> CheckContinuityAsync(double expectedOutcome, IUserInteractionService? userMessageService = null);
+    Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null);
   }
 }

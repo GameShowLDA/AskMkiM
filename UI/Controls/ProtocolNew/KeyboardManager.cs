@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
@@ -8,7 +9,8 @@ namespace UI.Controls.ProtocolNew
 {
   /// <summary>
   /// Менеджер для глобальной обработки клавиш, связанных с пошаговым режимом выполнения.
-  /// Обрабатывает клавиши F5, F10 и F11, и позволяет асинхронно ожидать следующую команду пользователя.
+  /// Обрабатывает клавиши F5, F10, F11 и специальный F4,
+  /// и позволяет асинхронно ожидать следующую команду пользователя.
   /// </summary>
   public static class KeyboardManager
   {
@@ -39,7 +41,7 @@ namespace UI.Controls.ProtocolNew
 
     /// <summary>
     /// Регистрирует глобальный обработчик нажатий клавиш.
-    /// Используется для отслеживания F5, F10, F11 во всех окнах приложения.
+    /// Используется для отслеживания F5, F10, F11 и F4 во всех окнах приложения.
     /// </summary>
     public static void RegisterGlobalStepHooks()
     {
@@ -56,18 +58,49 @@ namespace UI.Controls.ProtocolNew
 
     /// <summary>
     /// Обработчик глобальных нажатий клавиш.
-    /// Отслеживает F10 (Step Over), F11 (Step Into) и F5 (Continue).
+    /// Отслеживает F10 (Step Over), F11 (Step Into), F5 (Continue)
+    /// и F4 для режима, активированного от брейкпоинта.
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Аргументы события нажатия клавиши.</param>
     private static void OnGlobalKeyPressed(object sender, PreProcessInputEventArgs e)
     {
-      if (_tcs == null) return;
-
       var args = e.StagingItem.Input as KeyEventArgs;
       if (args == null || args.RoutedEvent != Keyboard.KeyDownEvent) return;
 
       var key = args.Key == Key.System ? args.SystemKey : args.Key;
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
+      if (StepControlManager.IsBreakpointStepModeActive && _tcs == null && Keyboard.Modifiers == ModifierKeys.None)
+      {
+        switch (key)
+        {
+          case Key.F5:
+            ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.Run);
+            args.Handled = true;
+            return;
+          case Key.F10:
+            ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.StepOver);
+            args.Handled = true;
+            return;
+          case Key.F11:
+            ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.StepInto);
+            args.Handled = true;
+            return;
+        }
+      }
+
+      if (key == Key.F4 && Keyboard.Modifiers == ModifierKeys.None && TryHandleBreakpointF4())
+      {
+        args.Handled = true;
+        return;
+      }
+
+      if (_tcs == null) return;
+      if (!StepControlManager.StepMode) return;
 
       LogInformation($"[KEYBOARD] Detected key: {key}");
 
@@ -109,6 +142,32 @@ namespace UI.Controls.ProtocolNew
     }
 
     /// <summary>
+    /// Обрабатывает F4 только для пошагового режима, включенного из BreakpointHandler.
+    /// </summary>
+    /// <returns><c>true</c>, если F4 был обработан.</returns>
+    private static bool TryHandleBreakpointF4()
+    {
+      if (!StepControlManager.IsBreakpointStepModeActive || StepControlManager.BreakpointCommandInfo == null)
+      {
+        return false;
+      }
+
+      var command = StepControlManager.BreakpointCommandInfo;
+      var caption = $"{command.CommandNumber} {command.Mnemonic}".Trim();
+      var body = string.IsNullOrWhiteSpace(command.CommandBody)
+        ? "<пусто>"
+        : command.CommandBody;
+
+      LogInformation($"[KEYBOARD] F4 pressed on breakpoint command: {caption}");
+      ExecutionEventAdapter.RaiseBreakpointF4Pressed(command);
+      MessageEventAdapter.RaiseInfoMessage(
+        $"Нажата клавиша: F4 на команде {caption}. Тело команды: {body}",
+        true);
+
+      return true;
+    }
+
+    /// <summary>
     /// Ожидает нажатие одной из клавиш управления пошаговым выполнением.
     /// Может быть отменено с помощью переданного CancellationToken.
     /// </summary>
@@ -142,3 +201,5 @@ namespace UI.Controls.ProtocolNew
   }
 
 }
+
+

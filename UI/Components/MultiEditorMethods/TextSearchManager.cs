@@ -12,6 +12,7 @@ using UI.Controls;
 using UI.Controls.TextEditor;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
+using Ask.Core.Shared.DTO.Executor;
 
 namespace UI.Components.MultiEditorMethods
 {
@@ -213,6 +214,8 @@ namespace UI.Components.MultiEditorMethods
 
               if (allOccurrences != null)
               {
+                currentIndex = -1; // сброс перед вычислением позиции от каретки
+                SetCurrentIndexFromCaret(textEditor);
                 InitializeCurrentIndex();
                 GoToOccurrence(currentIndex);
               }
@@ -731,6 +734,30 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Устанавливает currentIndex так, чтобы поиск начинался от позиции каретки.
+    /// </summary>
+    private void SetCurrentIndexFromCaret(TextEditorUI textEditor)
+    {
+      if (textEditor?.TextArea?.Caret == null || foundResults.Count == 0)
+      {
+        return;
+      }
+
+      int caretOffset = textEditor.TextArea.Caret.Offset;
+
+      if (_searchParameters == "FindNext")
+      {
+        int idx = foundResults.FindIndex(r => r.StartOffset >= caretOffset);
+        currentIndex = idx >= 0 ? idx : 0; // если дальше нет совпадений — переходим к первому
+      }
+      else if (_searchParameters == "FindPrevious")
+      {
+        int idx = foundResults.FindLastIndex(r => r.StartOffset < caretOffset);
+        currentIndex = idx >= 0 ? idx : foundResults.Count - 1; // если левее нет — переходим к последнему
+      }
+    }
+
+    /// <summary>
     /// Ищет все вхождения текста в каждой строке текста, с учётом параметров поиска.
     /// </summary>
     /// <param name="fullText">Полный текст для поиска.</param>
@@ -1176,7 +1203,7 @@ namespace UI.Components.MultiEditorMethods
       int lineToCheck = Math.Min(sourceLineNumber, leftEditor.Document.LineCount);
       for (int lineNumber = lineToCheck; lineNumber >= 1; lineNumber--)
       {
-        var line = leftEditor.Document.GetLineByNumber(lineNumber);
+        var line = leftEditor.Document.GetLine(lineNumber);
         string lineText = leftEditor.Document.GetText(line);
         var match = Regex.Match(lineText, SourceCommandHeaderPattern);
         if (!match.Success)
@@ -1205,7 +1232,7 @@ namespace UI.Components.MultiEditorMethods
         return false;
       }
 
-      var line = leftEditor.Document.GetLineByNumber(modelLine);
+      var line = leftEditor.Document.GetLine(modelLine);
       string lineText = leftEditor.Document.GetText(line);
       var match = Regex.Match(lineText, SourceCommandHeaderPattern);
       if (!match.Success)
@@ -1241,7 +1268,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      var line = rightEditor.Document.GetLineByNumber(formattedLineNumber);
+      var line = rightEditor.Document.GetLine(formattedLineNumber);
       string lineText = rightEditor.Document.GetText(line);
       if (string.IsNullOrWhiteSpace(lineText))
       {

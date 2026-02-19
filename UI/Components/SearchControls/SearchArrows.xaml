@@ -16,6 +16,7 @@
                   Background="Transparent"
                   BorderThickness="0"
                   Margin="-4,-1,-21,1"
+                  ToolTip="{Binding SelectedItem.Description, RelativeSource={RelativeSource Self}}"
                   PreviewMouseDown="searchArrowsComboBox_PreviewMouseDown"
                   > 
 
@@ -33,6 +34,12 @@
                           VerticalAlignment="Center"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
+
+            <ComboBox.ItemContainerStyle>
+                <Style TargetType="ComboBoxItem">
+                    <Setter Property="ToolTip" Value="{Binding Description}"/>
+                </Style>
+            </ComboBox.ItemContainerStyle>
 
             <!-- Шаблон для отображения выбранного элемента -->
             <ComboBox.Template>

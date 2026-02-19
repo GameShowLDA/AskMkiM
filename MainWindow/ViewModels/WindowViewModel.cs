@@ -37,7 +37,7 @@ namespace MainWindowProgram.ViewModels
     /// Команда для перетаскивания окна по экрану.
     /// </summary>
     [RelayCommand]
-    private async Task DragMoveAsync() => await _service.DragMoveAsync();
+    private async Task DragMoveAsync() => _service.DragMoveAsync();
 
     /// <summary>
     /// Команда для завершения работы приложения.

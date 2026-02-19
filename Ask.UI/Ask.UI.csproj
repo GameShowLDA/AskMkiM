@@ -15,10 +15,8 @@
 		<Folder Include="Resources\Assets\Image\" />
 		<Folder Include="Resources\Assets\Fonts\" />
 		<Folder Include="Resources\Theme\" />
-		<Folder Include="Resources\Styles\" />
 		<Folder Include="Shared\Components\Icons\" />
 		<Folder Include="Shared\Validation\" />
-		<Folder Include="Shared\Contracts\" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -73,7 +73,7 @@
                     <ItemsControl ItemsSource="{Binding SystemsChassis}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnSystemSelected">
+                                <Button Margin="5" Padding="10" Style="{DynamicResource ButtonStyleV9}" Click="OnSystemSelected">
                                     <StackPanel>
                                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                         <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
@@ -136,7 +136,7 @@
                     <ItemsControl ItemsSource="{Binding SystemsRack}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Margin="5" Padding="10" Style="{StaticResource ConfigAdditionalButtonStyle}" Click="OnRackSelected">
+                                <Button Margin="5" Padding="10" Style="{DynamicResource ButtonStyleV9}" Click="OnRackSelected">
                                     <StackPanel>
                                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                         <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>

@@ -1,9 +1,13 @@
 ﻿using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Support;
+using Ask.UI.Shared.Contracts;
+using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -23,7 +27,7 @@ namespace UI.Controls.TextEditor
   /// <summary>
   /// Логика взаимодействия для TextEditorUI.xaml.
   /// </summary>
-  public partial class TextEditorUI : UserControl, ITextEditorAdapter
+  public partial class TextEditorUI : UserControl, ITextEditorAdapter, ITextEditorView, IUiViewAdapter
   {
 
     #region Поля.
@@ -64,9 +68,15 @@ namespace UI.Controls.TextEditor
     /// </summary>
     private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
 
+    private AvalonTextDocumentAdapter _documentAdapter;
+
     #endregion
 
     #region Св-ва.
+
+    public UserControl View => this;
+
+    public object NativeView => this;
 
     /// <summary>
     /// Переопределяет фоновую кисть элемента управления,
@@ -97,7 +107,7 @@ namespace UI.Controls.TextEditor
     /// специфичных для формата настроек. Устанавливается при создании
     /// редактора и доступно только для чтения извне.
     /// </summary>
-    public FileType FileTypeDock { get; private set; }
+    public FileType FileType { get; private set; }
 
     /// <summary>
     /// Модель данных, описывающая состояние и параметры текущего
@@ -113,7 +123,7 @@ namespace UI.Controls.TextEditor
     /// <value>
     /// Возвращает объект <see cref="TextDocument"/>, который представляет текст, загруженный в редактор.
     /// </value>
-    public TextDocument Document => textEditor.Document;
+    public ITextDocumentView Document => _documentAdapter;
 
     /// <summary>
     /// Получает экземпляр текстового редактора AvalonEdit.
@@ -136,7 +146,7 @@ namespace UI.Controls.TextEditor
       {
         textEditor.Text = value;
 
-        if (FileTypeDock == FileType.OPKW)
+        if (FileType == FileType.OPKW)
         {
           InitializeFolding();
         }
@@ -257,7 +267,7 @@ namespace UI.Controls.TextEditor
     /// Подсвечивает набор диапазонов текста.
     /// </summary>
     /// <param name="ranges">Список диапазонов (начало, конец).</param>
-    public void HighlightRanges(List<(int start, int end)> ranges)
+    public void HighlightRanges(IReadOnlyList<(int start, int end)> ranges)
     {
       if (_markerService == null)
       {
@@ -406,17 +416,32 @@ namespace UI.Controls.TextEditor
         return;
       }
 
-      string xshdFile = FileTypeDock switch
+      string? xshdFile = FileType switch
       {
         FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
         FileType.PK or FileType.PKW => "MKI_PK.xshd",
         FileType.Protocol => "MKI_PROTOCOL.xshd",
-        _ => "MKI.xshd"
+        _ => null
       };
+
+      if (string.IsNullOrWhiteSpace(xshdFile))
+      {
+        textEditor.SyntaxHighlighting = null;
+        LogDebug($"Для типа файла {FileType} подсветка не назначена.");
+        return;
+      }
+
+      var xshdPath = ResolveHighlightingPath(xshdFile);
+      if (xshdPath == null)
+      {
+        textEditor.SyntaxHighlighting = null;
+        LogWarning($"Файл подсветки не найден: {xshdFile}");
+        return;
+      }
 
       try
       {
-        using var stream = File.OpenRead(xshdFile);
+        using var stream = File.OpenRead(xshdPath);
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
@@ -426,6 +451,26 @@ namespace UI.Controls.TextEditor
         LogError($"Ошибка загрузки подсветки: {ex.Message}");
         textEditor.SyntaxHighlighting = null;
       }
+    }
+
+    private static string? ResolveHighlightingPath(string fileName)
+    {
+      var candidates = new[]
+      {
+        Path.Combine(AppContext.BaseDirectory, fileName),
+        Path.Combine(AppContext.BaseDirectory, "UI", fileName),
+        Path.GetFullPath(fileName),
+      };
+
+      foreach (var candidate in candidates)
+      {
+        if (File.Exists(candidate))
+        {
+          return candidate;
+        }
+      }
+
+      return null;
     }
 
     #region Конструкторы
@@ -445,7 +490,7 @@ namespace UI.Controls.TextEditor
     {
       InitializeComponent();
 
-      FileTypeDock = fileType;
+      FileType = fileType;
       TextEditorModel = textEditorModel;
       _defaultFontSize = textEditor.FontSize;
 
@@ -488,6 +533,11 @@ namespace UI.Controls.TextEditor
       EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(
         e => ApplySyntaxHighlighting(e.IsEnabled)
       );
+
+      if (textEditor.Document == null)
+        textEditor.Document = new TextDocument();
+
+      _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
     }
 
     #endregion

@@ -1,7 +1,10 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Message;
 using System.Windows;
 using System.Windows.Controls.Primitives;
@@ -33,6 +36,16 @@ namespace UI.Components
     /// Список пользовательских элементов управления, соответствующих открытым вкладкам. Каждый элемент управления представляет собой экземпляр <see cref="UserControl"/>.
     /// </summary>
     internal List<UserControl> userControls = new List<UserControl>();
+    
+    public IRunService RunService => MultiEditor.RunService;
+
+    public IEditorDocumentService EditorDocumentService => MultiEditor.EditorDocumentService;
+
+    public IProtocolViewerService ProtocolViewerService => MultiEditor.ProtocolViewerService;
+    public IWorkspaceService WorkspaceService => MultiEditor.WorkspaceService;
+
+    public ITranslationService TranslationService => MultiEditor.TranslationService;
+
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
@@ -86,38 +99,6 @@ namespace UI.Components
           RemoveControl(foundPage, activeDataGrid);
         }
       }
-    }
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileInEditor(string filePath)
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.OpenFile(filePath);
-    }
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware)
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.ViewProtocol(protocol, showInSoftware);
     }
 
     /// <summary>
@@ -211,112 +192,11 @@ namespace UI.Components
       return MultiEditor.RemoveActiveTextEditor(isTranslation);
     }
 
-    public void RemoveControl(EditorType editorType)
+    public Task<bool> TryCloseActiveTabAsync(bool eventAlreadyHandled = false)
     {
-      MultiEditor.RemoveControl(editorType);
+      return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
     }
 
-    /// <summary>
-    /// Получает активный текстовый редактор.
-    /// </summary>
-    /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
-    /// </returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
-    {
-      return MultiEditor.CreateTranslationFileAsync(parentFilePath);
-    }
-
-    /// <summary>
-    /// Добавляет новый элемент управления в редактор.
-    /// </summary>
-    /// <param name="name">
-    /// Имя для нового элемента управления.
-    /// </param>
-    /// <param name="userControl">
-    /// Элемент управления, который будет добавлен.
-    /// </param>
-    public void AddControl(string name, UserControl userControl, TypeWindow tabType)
-    {
-      MultiEditor.AddControl(name, userControl, tabType);
-    }
-
-    /// <summary>
-    /// Создает новый файл в редакторе.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает создание нового файла в редакторе, если редактор был инициализирован.
-    /// Если редактор не инициализирован, выводится сообщение об ошибке.
-    /// </remarks>
-    public void CreateNewFile()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.CreateNewFile();
-    }
-
-    /// <summary>
-    /// Сохраняет текущий файл в редакторе.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает сохранение файла в редакторе. Если редактор не инициализирован,
-    /// выводится сообщение об ошибке.
-    /// </remarks>
-    public void SaveFile()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.SaveFile();
-    }
-
-    /// <summary>
-    /// Сохраняет файл под новым именем.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает сохранение файла под новым именем в редакторе. Если редактор не инициализирован,
-    /// выводится сообщение об ошибке.
-    /// </remarks>
-    public void SaveFileAs()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.SaveFileAs();
-    }
-
-
-    /// <summary>
-    /// Отправляет текущий файл на печать.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает функцию печати файла в редакторе. Если редактор не инициализирован,
-    /// выводится сообщение об ошибке.
-    /// </remarks>
-    public void PrintFile()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.PrintFile();
-    }
 
     /// <summary>
     /// Выполняет поиск по тексту в редакторе.
@@ -691,39 +571,15 @@ namespace UI.Components
     /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
     /// <param name="editorType">Тип вкладки.</param>
     /// <returns>Асинхронная задача, представляющая результат добавления вкладки с <see cref="TranslatorItem"/>.</returns>
-    public Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    public Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType)
     {
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-    public Task AddRunItem(RunControl runControl, EditorType editorType)
-    {
-      return MultiEditor.AddRunItem(runControl, editorType);
-    }
 
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
-    }
-
-    /// <summary>
-    /// Открывает папку, содержащую файл, в проводнике.
-    /// </summary>
-    public void OpenFolder()
-    {
-      if (MultiEditor == null)
-      {
-        MessageBoxCustom.Show("Редактор не инициализирован!", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
-        LogError("Редактор не инициализирован");
-        return;
-      }
-
-      MultiEditor.OpenFolder();
-    }
-
-    public async Task CloseRunItem(RunControl runControl, EditorType editorType)
-    {
-      await MultiEditor.CloseRunItem(runControl, editorType);
     }
   }
 }

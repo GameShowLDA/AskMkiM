@@ -1,5 +1,7 @@
 ﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
+using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Attributes;

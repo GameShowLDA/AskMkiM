@@ -1,4 +1,5 @@
-﻿using Ask.Support;
+﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Support;
 using UI.Controls.Settings;
 using static UI.Components.Invoke.OpenFileButton;
 
@@ -26,7 +27,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Открывает WebView2 со справочником к программе.
     /// </summary>
-    public void OpenSettings() => _multiWindow.AddControl("Параметры", new SettingsProgrammControl(), TypeWindow.Settings);
+    public void OpenSettings() => _multiWindow.WorkspaceService.AddControl("Параметры", new SettingsProgrammControl(), TypeWindow.Settings);
 
     /// <summary>
     /// Открывает справочник на нужной странице

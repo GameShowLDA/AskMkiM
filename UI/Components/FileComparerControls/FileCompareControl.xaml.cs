@@ -1,4 +1,6 @@
-﻿using Ask.Support;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
+using Ask.Support;
 using Message;
 using Microsoft.Win32;
 using System.IO;
@@ -90,10 +92,11 @@ namespace UI.Components.FileComparerControls
     {
       foreach (var lineNumber in lineNumbers)
       {
-        var docLine = editor.Document.GetLineByNumber(lineNumber + 1); // AvalonEdit: строки с 1, не с 0
-        if (docLine != null)
+        TextLine? docLine = editor.Document.GetLine(lineNumber + 1);
+
+        if (docLine is TextLine line)
         {
-          editor.MarkerService.AddMarker(docLine.Offset, docLine.Length, color);
+          editor.MarkerService.AddMarker(line.Offset, line.Length, color);
         }
       }
     }

@@ -19,7 +19,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
 
-      BreakpointHandler.Handle(command, context.Console);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
 
       var relayModules = EquipmentService.ValidRelayModules;

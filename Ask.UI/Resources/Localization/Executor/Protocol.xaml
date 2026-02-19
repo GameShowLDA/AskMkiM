@@ -15,4 +15,12 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Previous_Arrow" Key="protocol.button.previous.arrow" />
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Exit"           Key="protocol.button.exit" />
 
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Start"      Key="protocol.tooltip.start" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Continue"   Key="protocol.tooltip.continue" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Pause"      Key="protocol.tooltip.pause" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Stop"       Key="protocol.tooltip.stop" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Repeat"     Key="protocol.tooltip.repeat" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_StepOver"   Key="protocol.tooltip.stepover" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_StepInto"   Key="protocol.tooltip.stepinto" />
+
 </ResourceDictionary>

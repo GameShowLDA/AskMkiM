@@ -1,6 +1,10 @@
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using System.Windows.Controls;
+using System.Windows.Forms.Design;
 using UI.Components;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -21,63 +25,43 @@ namespace MainWindowProgram.Services
     private readonly MultiWindowControl _multiWindowControl;
 
     /// <summary>
+    /// Подсистема выполнения: управляет вкладками запуска и отображением результатов выполнения в редакторном хосте.
+    /// </summary>
+    public readonly IRunService RunService;
+
+    /// <summary>
+    /// Подсистема документов: обеспечивает операции создания, открытия, сохранения и печати документов редактора.
+    /// </summary>
+    public readonly IEditorDocumentService EditorDocumentService;
+    public readonly IProtocolViewerService ProtocolViewerService;
+    public readonly IWorkspaceService WorkspaceService;
+    public readonly ITranslationService TranslationService;
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowService"/>.
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
-    public MultiWindowService(MultiWindowControl multiWindowControl)
+    public MultiWindowService(
+      MultiWindowControl multiWindowControl, 
+      IRunService runService, 
+      IEditorDocumentService editorDocumentService, 
+      IProtocolViewerService protocolViewerService, 
+      IWorkspaceService workspaceService,
+      ITranslationService translationService)
     {
       _multiWindowControl = multiWindowControl;
+      RunService = runService;
+      EditorDocumentService = editorDocumentService;
+      ProtocolViewerService = protocolViewerService;
+      WorkspaceService = workspaceService;
+      TranslationService = translationService;
     }
 
     /// <summary>
-    /// Асинхронно добавляет элемент управления в редактор.
-    /// </summary>
-    /// <param name="name">Название вкладки или окна.</param>
-    /// <param name="control">Элемент управления, который необходимо отобразить.</param>
-    /// <param name="type">Тип окна, в котором должен отображаться элемент управления.</param>
-    public void AddControl(string name, UserControl control, TypeWindow type) => _multiWindowControl.AddControl(name, control, type);
-
-    /// <summary>
     /// Добавляет новый MultiEditorControl в контейнер.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileInEditor(string filePath) => _multiWindowControl.OpenFileInEditor(filePath);
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware) => _multiWindowControl.ViewProtocol(protocol, showInSoftware);
-
-    /// <summary>
-    /// Добавляет новый MultiEditorControl в контейнер.
-    /// </summary>
-    /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileFromEvent(string filePath) => _multiWindowControl.OpenFileInEditor(filePath);
-
-    /// <summary>
-    /// Создает новый файл в редакторе.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод вызывает создание нового файла в редакторе, если редактор был инициализирован.
-    /// Если редактор не инициализирован, выводится сообщение об ошибке.
-    /// </remarks>
-    public void CreateNewFile() => _multiWindowControl.CreateNewFile();
-
-    /// <summary>
-    /// Сохраняет файл.
-    /// </summary>
-    public void SaveFile() => _multiWindowControl.SaveFile();
-
-    /// <summary>
-    /// Сохранить файл как.
-    /// </summary>
-    public void SaveFileAs() => _multiWindowControl.SaveFileAs();
-
-    /// <summary>
-    /// Выводит файл на печать.
-    /// </summary>
-    public void PrintFile() => _multiWindowControl.PrintFile();
+    public void OpenFileFromEvent(string filePath) => EditorDocumentService.OpenFile(filePath);
 
     /// <summary>
     /// Получает активный текстовый редактор.
@@ -95,24 +79,6 @@ namespace MainWindowProgram.Services
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       return _multiWindowControl.RemoveActiveTextEditor(isTranslation);
-    }
-
-    /// <summary>
-    /// Удаляет контрол.
-    /// </summary>
-    /// <param name="editorType">Тип вкладки.</param>
-    public void RemoveControl(EditorType editorType)
-    {
-      _multiWindowControl.RemoveControl(editorType);
-    }
-
-    /// <summary>
-    /// Создает файл трансляции.
-    /// </summary>
-    /// <returns>Текстовый редактор с файлом трансляции.</returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
-    {
-      return _multiWindowControl.CreateTranslationFileAsync(parentFilePath);
     }
 
     /// <summary>
@@ -135,24 +101,9 @@ namespace MainWindowProgram.Services
     /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
     /// <param name="editorType">Тип вкладки.</param>
     /// <returns>Асинхронную задачу, представляющую результат выполнения.</returns>
-    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    internal Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType)
     {
       return _multiWindowControl.AddTranslatorItem(editor, translateEditor, editorType);
-    }
-
-    internal Task AddRunItem(RunControl runControl, EditorType editorType)
-    {
-      return _multiWindowControl.AddRunItem(runControl, editorType);
-    }
-
-    /// <summary>
-    /// Открывает папку, содержащую файл, в проводнике.
-    /// </summary>
-    internal void OpenFolder() => _multiWindowControl.OpenFolder();
-
-    internal async Task CloseRunItem(RunControl runControl, EditorType editorType)
-    {
-      await _multiWindowControl.CloseRunItem(runControl, editorType);
     }
   }
 }

@@ -1,5 +1,8 @@
-﻿using Ask.Core.Shared.Metadata.Enums.FileEnums;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Message;
 using System.Windows;
 using UI.Components.MultiEditorMethods;
@@ -19,7 +22,7 @@ namespace UI.Services
   ///   <item>Удаление вкладок транслятора и освобождение ресурсов контейнера.</item>
   /// </list>
   /// </summary>
-  public class TranslationService
+  public class TranslationService : ITranslationService
   {
     private readonly UI.Components.MultiEditorMethods.FileManager _fileManager;
 
@@ -36,7 +39,7 @@ namespace UI.Services
     /// Создаёт новый текстовый редактор для отображения результатов трансляции.
     /// </summary>
     /// <returns>Экземпляр <see cref="TextEditorUI"/> с предзаполненным сообщением и режимом только для чтения
-    public TextEditorUI CreateTranslationEditor(string parentFilePath)
+    public ITextEditorView CreateTranslationFile(string parentFilePath)
     {
       string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
       var textEditorModel = new TextEditorModel(parentFilePath, fileName);
@@ -57,7 +60,7 @@ namespace UI.Services
     /// <param name="translatedEditor">Редактор с результатом трансляции.</param>
     /// <param name="editorType">Тип контейнера для размещения вкладки.</param>
     /// <returns>Экземпляр <see cref="TranslatorItem"/>, отображающий оба редактора.</returns>
-    public async Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType)
+    public async Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType)
     {
       // TODO: добавить событие на закрытие вкладок
       try

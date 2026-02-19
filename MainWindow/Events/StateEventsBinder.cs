@@ -1,6 +1,9 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.View;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
@@ -23,7 +26,7 @@ namespace MainWindowProgram.Events
     /// Сервис отслеживания подключения и отключения USB-устройств.
     /// Используется для реагирования на смену прав администратора.
     /// </summary>
-    private readonly UsbServices _usbMonitorService;
+    private readonly IUsbMonitorView _usbMonitorService;
 
     /// <summary>
     /// Ссылка на главное окно приложения, интерфейс которого необходимо обновлять.
@@ -41,7 +44,7 @@ namespace MainWindowProgram.Events
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
     /// <param name="usbMonitorService">Сервис мониторинга USB-подключений.</param>
-    public StateEventsBinder(MainWindow mainWindow, UsbServices usbMonitorService)
+    public StateEventsBinder(MainWindow mainWindow, IUsbMonitorView usbMonitorService)
     {
       _usbMonitorService = usbMonitorService;
       _mainWindow = mainWindow;
@@ -63,7 +66,7 @@ namespace MainWindowProgram.Events
       AdminCommand.PauseInStopChanged += AdminCommand_PauseInStopChanged;
       AdminCommand.PowerChanged += AdminCommand_PowerChanged;
 
-      _usbMonitorService.UsbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
+      _usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
 
       var idleMode = ExecutionConfig.GetIsIdleModeEnabled();
@@ -230,6 +233,11 @@ namespace MainWindowProgram.Events
     /// <param name="e">Аргументы события нажатия клавиши.</param>
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
       if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Oem3)
       {
         ConsoleVisibilityController.ToggleConsole();

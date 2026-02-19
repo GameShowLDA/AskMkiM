@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -29,7 +28,7 @@ namespace UI.Controls.Search
     /// </summary>
     private bool _isExpanded = false;
 
-    private const double MinWindowHeight = 80;  // Высота окна без строки 2
+    private const double MinWindowHeight = 90;  // Высота окна без строки 2 (увеличено под более высокую 3ю строку)
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
@@ -38,16 +37,19 @@ namespace UI.Controls.Search
 
     public event Action SelectFileForSearch;
     public string SearchTextData { get; set; }
+    public bool IsReplaceExpanded => _isExpanded;
 
     private bool _isDraggingSlider = false;
     private Point _dragStartScreenPoint;
     private double _windowStartLeft;
+    private Grid ReplaceRowPanelElement => (Grid)FindName("ReplaceRowPanel");
+    private Grid OptionsRowPanelElement => (Grid)FindName("OptionsRowPanel");
 
 
     /// <summary>
     /// Высота окна при развернутой строке замены.
     /// </summary>
-    private double ExpandedWindowHeight => 120;
+    private double ExpandedWindowHeight => 130;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="SearchWindow"/>.
@@ -62,6 +64,7 @@ namespace UI.Controls.Search
       EventAggregator.Subscribe<SearchEvents.ReplaceAllWordsButtonPressed>(_ => OnReplaceAllWordsButtonPressed());
       EventAggregator.Subscribe<SearchEvents.CloseSearchWindow>(_ => OnCloseSearchWindowRequested());
       EventAggregator.Subscribe<SearchEvents.SearchTextRequested>(e => OnSearchTextRequested(e.SelectedText));
+      this.PreviewKeyDown += SearchWindow_PreviewKeyDown;
 
       this.Focus();
       SearchTextBox.Focus();
@@ -86,6 +89,9 @@ namespace UI.Controls.Search
 
       this.IsLoaded = true;
       ReplaceRow.Height = new GridLength(0);
+      ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
+      ReplaceRowPanelElement.Opacity = 0;
+      OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
       UpdateWindowHeight(MinWindowHeight);
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
       showAnimation.Begin();
@@ -128,7 +134,7 @@ namespace UI.Controls.Search
 
       // Получаем рабочую область экрана, на котором находится родительское окно
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
-      Screen screen = Screen.FromHandle(parentWindowHandle);
+      System.Windows.Forms.Screen screen = System.Windows.Forms.Screen.FromHandle(parentWindowHandle);
       System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
 
       // Располагаем окно поиска по центру сверху относительно родительского окна
@@ -184,7 +190,7 @@ namespace UI.Controls.Search
     {
       CloseDialog();
     }
-    public void ShowWindow()
+    public async Task ShowWindow(bool expandReplaceRow = false, bool focusReplaceField = false)
     {
       if (this.Top < 0)
       {
@@ -196,7 +202,40 @@ namespace UI.Controls.Search
 
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
       showAnimation.Begin();
+
+      if (expandReplaceRow || focusReplaceField)
+      {
+        await SetReplaceRowStateAsync(true, focusReplaceField);
+      }
+
+      // Фокус: если нужно сразу вводить замену — ставим курсор в Replace; иначе в поиск.
+      this.Dispatcher.InvokeAsync(() =>
+      {
+        this.Focus();
+        if (focusReplaceField)
+        {
+          FocusReplaceTextBox();
+        }
+        else
+        {
+          SearchTextBox.Focus();
+          Keyboard.Focus(SearchTextBox);
+        }
+      }, System.Windows.Threading.DispatcherPriority.Input);
     }
+
+    public void FocusReplaceField() => FocusReplaceTextBox();
+
+    public Task CollapseReplaceRowAsync() => SetReplaceRowStateAsync(false);
+
+    public Task ToggleReplaceRowAsync()
+    {
+      bool expand = !_isExpanded;
+      return SetReplaceRowStateAsync(expand, focusReplaceField: expand);
+    }
+
+    /// <summary>Возвращает true, если поле поиска непустое.</summary>
+    public bool HasSearchText() => !string.IsNullOrWhiteSpace(SearchTextBox.Text);
 
     public void CloseDialog()
     {
@@ -210,14 +249,7 @@ namespace UI.Controls.Search
 
     private async void ToggleArrow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      _isExpanded = !_isExpanded;
-
-      ToggleArrow.IsArrowUp = !_isExpanded;
-
-      await Task.Delay(250);
-      ReplaceRow.Height = _isExpanded ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
-
-      UpdateWindowHeight(_isExpanded ? ExpandedWindowHeight : MinWindowHeight);
+      await SetReplaceRowStateAsync(!_isExpanded);
     }
     private void PART_EditableTextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -335,6 +367,53 @@ namespace UI.Controls.Search
       return null;
     }
 
+    private async Task SetReplaceRowStateAsync(bool expand, bool focusReplaceField = false)
+    {
+      if (_isExpanded == expand)
+      {
+        if (expand && focusReplaceField)
+        {
+          FocusReplaceTextBox();
+        }
+        return;
+      }
+
+      _isExpanded = expand;
+      ToggleArrow.IsArrowUp = !expand;
+
+      if (expand)
+      {
+        UpdateWindowHeight(ExpandedWindowHeight);
+        ReplaceRow.Height = new GridLength(1, GridUnitType.Star);
+        ReplaceRowPanelElement.Visibility = Visibility.Visible;
+        await Task.WhenAll(
+          PlayStoryboardAsync("ExpandReplaceRowAnimation"),
+          PlayStoryboardAsync("OptionsShiftDownAnimation"));
+        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
+        if (focusReplaceField)
+        {
+          FocusReplaceTextBox();
+        }
+      }
+      else
+      {
+        await Task.WhenAll(
+          PlayStoryboardAsync("CollapseReplaceRowAnimation"),
+          PlayStoryboardAsync("OptionsShiftUpAnimation"));
+        ReplaceRow.Height = new GridLength(0);
+        ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
+        OptionsRowPanelElement.RenderTransform = new TranslateTransform(0, 0);
+        UpdateWindowHeight(MinWindowHeight);
+      }
+    }
+
+    private void FocusReplaceTextBox()
+    {
+      ReplaceTextBox.Focus();
+      ReplaceTextBox.CaretIndex = ReplaceTextBox.Text.Length;
+      ReplcePlaceholder.Visibility = Visibility.Collapsed;
+    }
+
     private void searchArrows_MouseEnter(object sender, MouseEventArgs e)
     {
       var searchArrows = (SearchArrows)sender;
@@ -362,6 +441,11 @@ namespace UI.Controls.Search
 
     private void OnSearchButtonPressed(string searchParameters)
     {
+      SendSearchRequest(searchParameters);
+    }
+
+    private void SendSearchRequest(string searchParameters)
+    {
       var searchText = SearchTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
@@ -369,6 +453,7 @@ namespace UI.Controls.Search
       if (searchArea == 2)
       {
         searchAreaParameters.SelectedIndex = 0;
+        searchArea = 0;
       }
 
       SearchEventAdapter.RaiseSearchText(searchText, wholeWord, caseWord, searchArea, searchParameters);
@@ -455,6 +540,54 @@ namespace UI.Controls.Search
       }
     }
 
+    private void SearchWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key == Key.Escape)
+      {
+        e.Handled = true;
+        CloseDialog();
+        return;
+      }
+
+      if (e.Key == Key.F3)
+      {
+        if (Keyboard.Modifiers == ModifierKeys.Shift)
+        {
+          e.Handled = true;
+          SendSearchRequest("FindPrevious");
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.None)
+        {
+          e.Handled = true;
+          SendSearchRequest("FindNext");
+        }
+      }
+
+      // Внутри окна: Alt+R — Replace current, Alt+A — Replace all
+      if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+      {
+        if (e.SystemKey == Key.R || e.Key == Key.R)
+        {
+          e.Handled = true;
+          _ = SetReplaceRowStateAsync(true, focusReplaceField: true);
+          OnReplaceWordButtonPressed();
+        }
+        else if (e.SystemKey == Key.A || e.Key == Key.A)
+        {
+          e.Handled = true;
+          _ = SetReplaceRowStateAsync(true, focusReplaceField: false);
+          OnReplaceAllWordsButtonPressed();
+        }
+      }
+
+      if (e.Key == Key.Tab && _isExpanded && ReplaceRowPanelElement.Visibility == Visibility.Visible)
+      {
+        e.Handled = true;
+        FocusReplaceTextBox();
+      }
+
+    }
+
     private void SearchSlider_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       StopAnimations();
@@ -514,8 +647,32 @@ namespace UI.Controls.Search
       if (Resources["HideAnimation"] is Storyboard hideAnimation)
         hideAnimation.Stop();
 
-      WindowContainer.RenderTransform = new TranslateTransform(0, 0); // Сброс
+      var resetGroup = new TransformGroup();
+      resetGroup.Children.Add(new ScaleTransform(1, 1));
+      resetGroup.Children.Add(new TranslateTransform(0, 0));
+      WindowContainer.RenderTransform = resetGroup; // Сброс
       WindowContainer.Opacity = 1;
+    }
+
+    private Task PlayStoryboardAsync(string storyboardResourceKey)
+    {
+      if (Resources[storyboardResourceKey] is Storyboard baseStoryboard)
+      {
+        var storyboard = baseStoryboard.Clone();
+        var tcs = new TaskCompletionSource<bool>();
+
+        void OnCompleted(object sender, EventArgs args)
+        {
+          storyboard.Completed -= OnCompleted;
+          tcs.TrySetResult(true);
+        }
+
+        storyboard.Completed += OnCompleted;
+        storyboard.Begin(this, true);
+        return tcs.Task;
+      }
+
+      return Task.CompletedTask;
     }
   }
 }

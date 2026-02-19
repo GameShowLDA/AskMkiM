@@ -19,14 +19,14 @@
                 <ComboBoxItem Content="Выберите USB-накопитель" IsSelected="True" />
             </ComboBox>
             <Button x:Name="createKeyButton" Content="Создать ключ" Width="350" Height="50" Margin="0,0,0,10"
-                    Style="{StaticResource MetrologyButtonStyle}" Click="CreateKeyButton_Click"/>
+                    Style="{DynamicResource ButtonStyleV12}" Click="CreateKeyButton_Click"/>
             <Button x:Name="overwriteKeyButton" Content="Перезаписать ключ" Width="350" Height="50" Margin="0,0,0,10"
-                    Style="{StaticResource MetrologyButtonStyle}" Click="OverwriteKeyButton_Click"/>
+                    Style="{DynamicResource ButtonStyleV12}" Click="OverwriteKeyButton_Click"/>
             <Button x:Name="deleteKeyButton" Content="Удалить ключ" Margin="0,0,0,10" Width="350" Height="50"
-                    Style="{StaticResource MetrologyButtonStyle}" Click="DeleteKeyButton_Click"/>
+                    Style="{DynamicResource ButtonStyleV12}" Click="DeleteKeyButton_Click"/>
 
             <Button Content="Выход" Width="350" Height="50" Margin="0,0,0,10" Click="ExitButton_Click"
-                 Style="{StaticResource MetrologyButtonStyle}"/>
+                 Style="{DynamicResource ButtonStyleV12}"/>
         </StackPanel>
     </Grid>
 </Window>
