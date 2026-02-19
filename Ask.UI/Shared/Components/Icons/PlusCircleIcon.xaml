@@ -1,0 +1,14 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.PlusCircleIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24" Height="24">
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm7-11.12a1.5 1.5 0 0 1-1.47 1.52l-4 .07.07 4a1.5 1.5 0 0 1-3 .06l-.07-4-4 .07a1.5 1.5 0 0 1-.06-3l4-.07-.07-4a1.5 1.5 0 1 1 3-.06l.07 4 4-.07A1.5 1.5 0 0 1 19 11.88Z" />
+    </Grid>
+  </Viewbox>
+</UserControl>

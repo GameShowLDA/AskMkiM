@@ -72,6 +72,27 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="AddButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="#3D2FA84F"/>
+            <Setter Property="BorderBrush" Value="#B02FA84F"/>
+            <Setter Property="Foreground" Value="#FF7BFF8A"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#553BCB61"/>
+                    <Setter Property="BorderBrush" Value="#E03BCB61"/>
+                    <Setter Property="Foreground" Value="#FFA8FFB2"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#7A2FA84F"/>
+                    <Setter Property="BorderBrush" Value="#FF2FA84F"/>
+                    <Setter Property="Foreground" Value="#FFD9FFD9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
 
     <Border CornerRadius="10" Background="{DynamicResource BackgroundBrushes}"  
@@ -96,16 +117,12 @@
                     <Button x:Name="AddButtonContainer"
                             Grid.Column="1"
                             Margin="5,0"
-                            Style="{StaticResource TopMenuLikeIconButtonStyle}"
+                            Style="{StaticResource AddButtonStyle}"
                             PreviewMouseDown="PlusPreviewMouseDown"
                             ToolTip="Добавить устройство">
-                        <Path Data="M 8,2 L 8,14 M 2,8 L 14,8"
-                              Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
-                              StrokeThickness="1.8"
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"/>
+                        <askUiIcons:PlusCircleIcon Size="16"
+                                                   ToolTip="Добавить устройство"
+                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
                 </Grid>
             </Border>
@@ -129,6 +146,7 @@
                                         CommandParameter="{Binding}"
                                         ToolTip="Удалить устройство">
                                     <askUiIcons:TrashDeleteIcon Size="14"
+                                                                 ToolTip="Удалить устройство"
                                                                  IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                                  Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                                 </Button>
