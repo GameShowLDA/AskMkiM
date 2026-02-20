@@ -1,6 +1,11 @@
-﻿using Ask.Support;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.View;
+using Ask.Support;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace MainWindowProgram.Engine
 {
@@ -14,12 +19,16 @@ namespace MainWindowProgram.Engine
     /// </summary>
     /// <param name="window">Главное окно приложения.</param>
     /// <returns>Кортеж из ViewModel и UsbServices.</returns>
-    public static (MainWindowViewModel viewModel, UsbServices usb) Build(MainWindow window)
+    public static (MainWindowViewModel viewModel, IUsbMonitorView usb) Build(MainWindow window)
     {
-      var multi = new MultiWindowService(window.MultiWindow);
-      var usb = new UsbServices();
+      var multi = new MultiWindowService(window.MultiWindow, window.RunService, window.EditorDocumentService, window.ProtocolViewerService, window.WorkspaceService, window.TranslationService);
+
+      var usb = ServiceLocator.GetRequired<IUsbMonitorView>();
       var file = new FileService(window, multi, () => window.IsLocked);
-      var metrology = new MetrologyService(multi);
+
+      // TODO : Как толкьо разберусь с MultiWindowService, надо будет пихнуть в синглтон. Интерфейс IMetrologyServiceView
+      var metrology = ActivatorUtilities.CreateInstance<MetrologyService>(ServiceLocator.Services, multi);
+
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
       var settings = new SettingsService(multi);

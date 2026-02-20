@@ -1,10 +1,13 @@
-﻿namespace UI.Services.FileManager
+﻿using Ask.Core.Shared.Metadata.View.EditorHost;
+using UI.Components.MultiEditorMethods;
+
+namespace UI.Services.FileManager
 {
   /// <summary>
   /// Предоставляет высокоуровневый доступ к основным операциям работы с файлами:
   /// сравнением, созданием, получением информации о названии и открытием файлов.
   /// </summary>
-  public class FileService
+  public class FileService : IEditorDocumentService
   {
     /// <summary>
     /// Сервис для сравнения файлов по содержимому или другим критериям.
@@ -27,6 +30,11 @@
     public FileOpenService Opening { get; }
 
     /// <summary>
+    /// Объект, управляющей операциями связанными с сохранением файлов.
+    /// </summary>
+    public SaveFileManager SaveFileManager;
+
+    /// <summary>
     /// Инициализирует экземпляр <see cref="FileService"/> со всеми необходимыми подсервисами.
     /// </summary>
     public FileService(UI.Components.MultiEditorMethods.FileManager fileManager)
@@ -35,6 +43,36 @@
       Creation = new FileCreateService(fileManager);
       Name = new FileNameService(fileManager.EditorWorkspaceModel);
       Opening = new FileOpenService(fileManager);
+      SaveFileManager = new SaveFileManager(fileManager);
+      FileManager = fileManager;
     }
+
+    Components.MultiEditorMethods.FileManager FileManager { get; }
+
+    public void CreateNewFile()
+    {
+      Creation.CreateNewFile();
+    }
+
+    public void OpenFile(string filePath)
+    {
+      Opening.OpenFile(filePath);
+    }
+
+    public void SaveFile()
+    {
+      SaveFileManager.SaveFile();
+    }
+
+    public void SaveFileAs()
+    {
+      SaveFileManager.SaveFileAs();
+    }
+
+    /// <summary>
+    /// Выводит файл на печать.
+    /// </summary>
+    public void PrintFile() => PrintFileManager.PrintFile(FileManager.EditorWorkspaceModel.OpenPages, FileManager.EditorWorkspaceModel.UserControls);
+    public void OpenFolder() => FileManager.FolderService.OpenActiveFileFolder();
   }
 }

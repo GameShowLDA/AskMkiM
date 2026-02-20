@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Title" Key="input.bus.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_A" Key="input.bus.a" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_B" Key="input.bus.b" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_Title" Key="input.bus.group.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB1" Key="input.bus.group.ab1" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB2" Key="input.bus.group.ab2" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB3" Key="input.bus.group.ab3" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Bus_Group_AB4" Key="input.bus.group.ab4" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Electrical_Title" Key="input.electrical.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_First_Title" Key="input.first.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Second_Title" Key="input.second.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Time_Title" Key="input.time.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_TimeRamp_Title" Key="input.timeramp.title" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Voltage_Title" Key="input.voltage.title" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Placeholder" Key="input.placeholder" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Input_Placeholder_Time" Key="input.time.placeholder" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Unit_Seconds" Key="unit.seconds.suffix" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Unit_Volts" Key="unit.volts.suffix" />
+
+    <LocalizeStrings:LocalizedString x:Key="Point_StartingPoint" Key="point.startingPoint" />
+    <LocalizeStrings:LocalizedString x:Key="Point_FinalPoint" Key="point.finalPoint" />
+</ResourceDictionary>

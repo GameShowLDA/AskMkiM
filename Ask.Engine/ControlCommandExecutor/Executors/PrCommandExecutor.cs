@@ -18,8 +18,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   internal class PrCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
-    private double firstValue = 0;
-    private double secondValue = -1;
+    private double lowValue = 0;
+    private double hightValue = -1;
     private bool continuityManager = true;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
@@ -29,7 +29,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
 
       SetActiveLine(context, command);
-      BreakpointHandler.Handle(command, context.Console);
 
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
@@ -59,32 +58,26 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (!command.AlgorithmKey.Contains("ЗС"))
       {
+        lowValue = 0;
+        hightValue = -1;
+
         if (command.ConnectedLowerLimitResistance.HasValue)
         {
-          firstValue = command.ConnectedLowerLimitResistance.Value;
-          resistance = command.ConnectedLowerLimitResistance.Value;
-        }
-        else
-        {
-          firstValue = 0;
+          lowValue = command.ConnectedLowerLimitResistance.Value;
         }
 
         if (command.ConnectedHigherLimitResistance.HasValue)
         {
-          secondValue = command.ConnectedHigherLimitResistance.Value;
-        }
-        else
-        {
-          secondValue = meter.MaxContinuityResistance;
+          hightValue = command.ConnectedHigherLimitResistance.Value;
         }
 
-        if (secondValue >= 1000)
+        if (hightValue >= 1000)
         {
           continuityManager = false;
         }
 
-        methodExecutionContext.LowerLimit = firstValue;
-        methodExecutionContext.HigherLimit = secondValue != null ? secondValue : -1;
+        methodExecutionContext.LowerLimit = lowValue;
+        methodExecutionContext.HigherLimit = hightValue != null ? hightValue : -1;
 
         ConnectedPointChecker.PerformMeasurementAsync measurePointConnected = ConnectedPointCheckerMeasurementAsync;
 
@@ -97,33 +90,27 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
       if (!command.AlgorithmKey.Contains("ЗР"))
       {
+        lowValue = 0;
+        hightValue = -1;
+
         if (command.DisconnectedLowerLimitResistance.HasValue)
         {
-          firstValue = command.DisconnectedLowerLimitResistance.Value;
-          resistance = command.DisconnectedLowerLimitResistance.Value;
-        }
-        else
-        {
-          firstValue = 0;
+          lowValue = command.DisconnectedLowerLimitResistance.Value;
         }
 
         if (command.DisconnectedHigherLimitResistance.HasValue)
         {
-          secondValue = command.DisconnectedHigherLimitResistance.Value;
-        }
-        else
-        {
-          secondValue = meter.MaxContinuityResistance;
+          hightValue = command.DisconnectedHigherLimitResistance.Value;
         }
 
-        if (secondValue >= 1000)
+        if (hightValue >= 1000)
         {
           continuityManager = false;
         }
 
-        methodExecutionContext.LowerLimit = firstValue;
-        methodExecutionContext.HigherLimit = secondValue != null ? secondValue : -1;
-        methodExecutionContext.Value = firstValue + 1;
+        methodExecutionContext.LowerLimit = lowValue;
+        methodExecutionContext.HigherLimit = hightValue != null ? hightValue : -1;
+        methodExecutionContext.Value = lowValue;
 
         NodeFullContext nodeFullContext = methodExecutionContext.CreateChild<NodeFullContext>();
         nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
@@ -132,16 +119,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         NodeAccumulationContext nodeAccumulationContext = methodExecutionContext.CreateChild<NodeAccumulationContext>();
         nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        nodeAccumulationContext.LowerLimit = command.DisconnectedLowerLimitResistance.Value;
-
-        if (command.DisconnectedHigherLimitResistance == null)
-        {
-          nodeAccumulationContext.HigherLimit = -1;
-        }
-        else
-        {
-          nodeAccumulationContext.HigherLimit = command.DisconnectedHigherLimitResistance.Value;
-        }
 
         DisconnectionCheckRequest disconnectionCheckRequest = new DisconnectionCheckRequest()
         {
@@ -162,11 +139,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (errorMessage.Count > 0)
       {
-        protocolModel.Errors.Add(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, errorMessage);
       }
       if (infoMessage.Count > 0)
       {
-        protocolModel.Info.Add(nameCommand, infoMessage);
+        protocolModel.AddInfo(nameCommand, infoMessage);
       }
     }
     private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
@@ -208,11 +185,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         if (continuityManager)
         {
-          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue);
         }
         else
         {
-          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance);
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance, lowValue, hightValue);
         }
 
         if (answer < 0)
@@ -220,7 +197,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, firstValue, -1, answer);
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, lowValue, -1, answer);
 
       }, messageService);
 
@@ -241,11 +218,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         if (continuityManager)
         {
-          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, messageService);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue, messageService);
         }
         else
         {
-          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance);
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance, lowValue, hightValue);
         }
 
         if (answer < 0)
@@ -253,7 +230,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, firstValue, -1, answer);
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, lowValue, hightValue, answer);
       }, messageService);
 
       return result;
@@ -271,45 +248,28 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
+        if (continuityManager)
         {
-          answer = new Random().Next(0, (int)secondValue + 1000);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue, messageService) - errorResistance;
         }
         else
         {
-          if (continuityManager)
-          {
-            answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, messageService) - errorResistance;
-          }
-          else
-          {
-            answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance) - errorResistance;
-          }
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance, lowValue, hightValue) - errorResistance;
         }
-
 
         if (answer < 0)
         {
           answer = 0;
         }
 
-        var result = answer >= firstValue && answer <= secondValue;
+        var result = answer >= lowValue && answer <= hightValue;
 
-        if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{answer} Ом", type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        }
-
-        if (!result)
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {firstValue} до {secondValue} Ом") { IndentLevel = 2 }, skipPause: true);
-        }
-
-        return result;
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, lowValue, hightValue, answer);
       }, messageService);
 
-      return (result, answer);
+      return result;
     }
   }
     #endregion
 }
+

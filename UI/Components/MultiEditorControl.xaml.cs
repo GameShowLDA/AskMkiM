@@ -1,7 +1,10 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -55,10 +58,17 @@ namespace UI.Components
     /// </summary>
     internal ControlManager controlManager;
 
-    /// <summary>
-    /// Объект, управляющей операциями связанными с сохранением файлов.
-    /// </summary>
-    internal SaveFileManager saveFileManager;
+    public IRunService RunService => fileManager.RunControlService;
+
+    public IEditorDocumentService EditorDocumentService => fileManager.EditorDocumentService;
+
+    public IProtocolViewerService ProtocolViewerService => fileManager.ProtocolService;
+
+    public IWorkspaceService WorkspaceService => controlManager;
+
+    public ITranslationService TranslationService => fileManager.TranslationService;
+
+
 
     /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
@@ -89,7 +99,6 @@ namespace UI.Components
       fileManager = new FileManager(this);
       textSearchManager = new TextSearchManager(fileManager, this);
       controlManager = new ControlManager(fileManager, this);
-      saveFileManager = new SaveFileManager(fileManager);
       textReplacementManager = new TextReplacementManager(fileManager);
     }
 
@@ -111,8 +120,8 @@ namespace UI.Components
         _clickTimer.Stop();
       };
 
-      this.KeyDown -= MultiWindowControl_KeyDown;
-      this.KeyDown += MultiWindowControl_KeyDown;
+      this.RemoveHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MultiWindowControl_KeyDown));
+      this.AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MultiWindowControl_KeyDown), true);
 
       EventAggregator.Subscribe<SearchEvents.FoundTextSelectRow>(e => OnFoundTextSelectRow(e.FileName, e.LineNumber, e.StartOffset, e.LineText, e.SearchText));
 
@@ -149,39 +158,100 @@ namespace UI.Components
       {
         _clickTimer.Stop();
         _clickCount = 0;
-        CreateNewFile();
+        EditorDocumentService.CreateNewFile();
       }
     }
 
     /// <summary>
-    /// Обрабатывает событие нажатия клавиш. 
-    /// Позволяет закрыть активную вкладку при нажатии Alt+System+X.
+    /// Обрабатывает событие нажатия клавиш.
+    /// Позволяет закрыть активную вкладку при нажатии Ctrl+F4.
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Данные события клавиатуры.</param>
     private async void MultiWindowControl_KeyDown(object sender, KeyEventArgs e)
     {
-      if (e.Key == Key.System && e.SystemKey == Key.X && Keyboard.Modifiers == ModifierKeys.Alt)
+      if (e.Handled || !IsCloseActiveTabShortcut(e))
       {
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-          page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-        if (activeTab != null)
+        return;
+      }
+
+      if (await TryCloseActiveTabAsync(e.Handled))
+      {
+        e.Handled = true;
+      }
+    }
+
+    internal async Task<bool> TryCloseActiveTabAsync(bool eventAlreadyHandled)
+    {
+      if (!TryGetActiveTab(out var activeTab, out int index))
+      {
+        return false;
+      }
+
+      if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer textEditorContainer)
+      {
+        // Для текстового контейнера Ctrl+F4 также обрабатывается самим DockManager.
+        // Если событие уже обработано, повторно не закрываем, чтобы избежать двойного закрытия.
+        if (eventAlreadyHandled)
         {
-          int index = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
-          if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer textEditorContainer)
+          return false;
+        }
+
+        var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveDocument == true);
+        if (foundItem == null)
+        {
+          return false;
+        }
+
+        foundItem.PerformClose();
+
+        return true;
+      }
+
+      await controlManager.RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
+
+      return true;
+    }
+
+    private static bool IsCloseActiveTabShortcut(KeyEventArgs e)
+    {
+      bool isCtrlF4 = (e.Key == Key.F4 || (e.Key == Key.System && e.SystemKey == Key.F4))
+        && Keyboard.Modifiers == ModifierKeys.Control;
+
+      return isCtrlF4;
+    }
+
+    private bool TryGetActiveTab(out OpenFileButton activeTab, out int index)
+    {
+      activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
+        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      index = activeTab == null ? -1 : fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+
+      if (activeTab == null || index < 0 || index >= fileManager.EditorWorkspaceModel.UserControls.Count)
+      {
+        var visibleControl = fileManager.EditorWorkspaceModel.UserControls
+          .FirstOrDefault(control => control.Visibility == Visibility.Visible);
+        if (visibleControl != null)
+        {
+          index = fileManager.EditorWorkspaceModel.UserControls.IndexOf(visibleControl);
+          if (index >= 0 && index < fileManager.EditorWorkspaceModel.OpenPages.Count)
           {
-            var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveDocument == true);
-            if (foundItem != null)
-            {
-              foundItem.PerformClose();
-            }
-          }
-          else
-          {
-            await RemoveControl(activeTab, fileManager.EditorWorkspaceModel.UserControls[index]);
+            activeTab = fileManager.EditorWorkspaceModel.OpenPages[index];
           }
         }
       }
+
+      if (activeTab == null)
+      {
+        return false;
+      }
+
+      if (index < 0 || index >= fileManager.EditorWorkspaceModel.UserControls.Count)
+      {
+        return false;
+      }
+
+      return true;
     }
 
     /// <summary>
@@ -227,99 +297,9 @@ namespace UI.Components
 
     #endregion
 
-    #region Translator
-
-    /// <summary>
-    /// Получает активный текстовый редактор.
-    /// </summary>
-    /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
-    /// </returns>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath) => fileManager.TranslationService.CreateTranslationEditor(parentFilePath);
-
-    #endregion
-
-    /// <summary>
-    /// Удаляет указанный элемент управления и соответствующую вкладку.
-    /// </summary>
-    public void RemoveControl(EditorType editorType)
-    {
-      var control = fileManager.ContainerService.GetEditorContainer(editorType);
-      var page = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
-      if (control != null && page != null)
-      {
-        controlManager.RemoveControl(page, control).ConfigureAwait(true);
-      }
-    }
-
-    /// <summary>
-    /// Добавляет элемент управления и соответствующую вкладку в панель управления.
-    /// </summary>
-    /// <param name="header">Заголовок для кнопки, отображаемой в панели вкладок.</param>
-    /// <param name="control">Элемент управления для отображения в панели управления.</param>
-    /// <param name="description">Дополнительное описание для вкладки (опционально).</param>
-    public void AddControl(string header, UserControl control, TypeWindow tabType, string description = null) => controlManager.AddControl(header, control, tabType, description);
 
     public bool GetEmtyControl() => controlManager.GetEmtyControl();
 
-    /// <summary>
-    /// Открывает диалоговое окно для открытия файла.
-    /// </summary>
-    /// <param name="path">Путь к файлу.</param>
-    public void OpenFile(string path) => fileManager.FileService.Opening.OpenFile(path);
-
-
-    /// <summary>
-    /// Открывает диалоговое окно для открытия файла.
-    /// </summary>
-    /// <param name="path">Путь к файлу.</param>
-    public void ViewProtocol(ProtocolModel protocol, bool showInSoftware) => fileManager.ProtocolService.DisplayProtocol(protocol, showInSoftware);
-
-    /// <summary>
-    /// Создаёт новый файл.
-    /// </summary>
-    public void CreateNewFile() => fileManager.FileService.Creation.CreateNewFile();
-
-    /// <summary>
-    /// Открывает диалоговое окно для сохранения файла в новом месте.
-    /// В случае успешного сохранения, возвращает true, в противном случае false.
-    /// </summary>
-    /// <returns>True, если файл был успешно сохранен, иначе false.</returns>
-    public bool SaveFileAs() => saveFileManager.SaveFileAs();
-
-    /// <summary>
-    /// Удаляет указанный элемент управления и соответствующую вкладку.
-    /// </summary>
-    /// <param name="tabButton">Вкладка для удаления.</param>
-    /// <param name="control">Элемент управления для удаления.</param>
-    private async Task RemoveControl(OpenFileButton tabButton, UserControl control) => await controlManager.RemoveControl(tabButton, control);
-
-    /// <summary>
-    /// Обрабатывает сохранение файла.
-    /// </summary>
-    /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
-    public bool SaveFile()
-    {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
-      int index = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
-      if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer)
-      {
-        var activeTextEditorContainer = fileManager.EditorWorkspaceModel.UserControls[index] as TextEditorContainer;
-        if (activeTextEditorContainer != null)
-        {
-          var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab =>
-            tab.IsActiveItem == true);
-          return saveFileManager.SaveFile(activeDockItem);
-        }
-      }
-      return false;
-    }
-
-    /// <summary>
-    /// Выводит файл на печать.
-    /// </summary>
-    public void PrintFile() => PrintFileManager.PrintFile(fileManager.EditorWorkspaceModel.OpenPages, fileManager.EditorWorkspaceModel.UserControls);
 
     /// <summary>
     /// Выполняет поиск по тектсу.
@@ -351,7 +331,11 @@ namespace UI.Components
       await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
       if (string.Equals(searchParameters, "FindNext"))
       {
-        ReplaceNextWord(replaceText, searchText);
+        bool replaced = ReplaceNextWord(replaceText, searchText);
+        if (replaced)
+        {
+          await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, "FindNext");
+        }
       }
       else if (string.Equals(searchParameters, "FindAll"))
       {
@@ -368,57 +352,123 @@ namespace UI.Components
           for (int i = file.Value.Count - 1; i >= 0; i--)
           {
             var result = file.Value[i];
-            var lineStartOffset = result.StartOffset;
-            int globalStartOffset = CalculateGlobalStartOffset(lineStartOffset, result.SubstringFromWord, searchText);
-            if (globalStartOffset >= 0)
-            {
-              textReplacementManager.ReplaceWord(file.Key, result, globalStartOffset, replaceText, searchText);
-            }
+            textReplacementManager.ReplaceWord(file.Key, result, result.StartOffset, replaceText, searchText);
           }
         }
       }
     }
 
-    private void ReplaceNextWord(string replaceText, string searchText)
+    private bool ReplaceNextWord(string replaceText, string searchText)
     {
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
-        var searchResult = textSearchManager.foundInOpenedFiles.FirstOrDefault();
-        var lineStartOffset = searchResult.Value.FirstOrDefault().StartOffset;
-        if (lineStartOffset >= 0)
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
+          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+
+        if (activeTab != null)
         {
-          textReplacementManager.ReplaceWord(searchResult.Key, searchResult.Value.FirstOrDefault(), lineStartOffset, replaceText, searchText);
+          int pageIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+          if (pageIndex >= 0 && pageIndex < fileManager.EditorWorkspaceModel.UserControls.Count
+            && fileManager.EditorWorkspaceModel.UserControls[pageIndex] is TextEditorContainer textEditorContainer)
+          {
+            var activeDockItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+            TextEditorUI textEditor = null;
+            string activeTitle = null;
+
+            if (activeDockItem != null)
+            {
+              activeTitle = activeDockItem.Title;
+              if (activeDockItem.Content is TextEditorUI te)
+              {
+                textEditor = te;
+              }
+              else if (activeDockItem.Content is TranslatorItem translatorItem)
+              {
+                textEditor = translatorItem.GetLeftEditor();
+              }
+            }
+
+            if (!string.IsNullOrEmpty(activeTitle) && textSearchManager.foundInOpenedFiles.TryGetValue(activeTitle, out var occurrences) && occurrences.Count > 0)
+            {
+              var selectedOccurrence = TryGetSelectedOccurrence(textEditor, occurrences, searchText);
+              int caretOffset = textEditor?.TextArea?.Caret?.Offset ?? 0;
+              var currentOccurrence = TryGetCurrentOccurrenceByCaret(occurrences, caretOffset);
+              var next = selectedOccurrence
+                ?? currentOccurrence
+                ?? occurrences.FirstOrDefault(r => r.StartOffset >= caretOffset)
+                ?? occurrences.First();
+
+              if (next != null)
+              {
+                textReplacementManager.ReplaceWord(activeTitle, next, next.StartOffset, replaceText, searchText);
+                return true;
+              }
+            }
+          }
+        }
+
+        // Fallback: используем первое совпадение, если активный документ не определён
+        var first = textSearchManager.foundInOpenedFiles.FirstOrDefault();
+        var firstOccurrence = first.Value.FirstOrDefault();
+        if (firstOccurrence != null)
+        {
+          textReplacementManager.ReplaceWord(first.Key, firstOccurrence, firstOccurrence.StartOffset, replaceText, searchText);
+          return true;
         }
       }
+
+      return false;
     }
 
-    private int CalculateGlobalStartOffset(int lineStartOffset, string lineText, string searchText)
+    private static SearchResult TryGetCurrentOccurrenceByCaret(List<SearchResult> occurrences, int caretOffset)
     {
-      int wordStartIndex = lineText.IndexOf(searchText, StringComparison.OrdinalIgnoreCase);
+      if (occurrences == null || occurrences.Count == 0)
+      {
+        return null;
+      }
 
-      if (wordStartIndex >= 0)
-      {
-        return lineStartOffset + wordStartIndex;
-      }
-      else
-      {
-        return -1;
-      }
+      return occurrences.FirstOrDefault(occurrence =>
+        occurrence.StartOffset <= caretOffset && caretOffset <= occurrence.StartOffset + occurrence.Length);
     }
 
-    internal Task<TranslatorItem> AddTranslatorItem(TextEditorUI editor, TextEditorUI translateEditor, EditorType editorType) =>
+    private SearchResult TryGetSelectedOccurrence(TextEditorUI textEditor, List<SearchResult> occurrences, string searchText)
+    {
+      if (textEditor?.TextEditor == null || occurrences == null || occurrences.Count == 0)
+      {
+        return null;
+      }
+
+      if (textEditor.TextEditor.SelectionLength <= 0)
+      {
+        return null;
+      }
+
+      if (!IsMatchedSelectedText(textEditor.TextEditor.SelectedText, searchText, textSearchManager._caseWord))
+      {
+        return null;
+      }
+
+      int selectionStart = textEditor.TextEditor.SelectionStart;
+      int selectionLength = textEditor.TextEditor.SelectionLength;
+      return occurrences.FirstOrDefault(occurrence => occurrence.StartOffset == selectionStart && occurrence.Length == selectionLength);
+    }
+
+    private static bool IsMatchedSelectedText(string selectedText, string searchText, bool? caseWord)
+    {
+      if (string.IsNullOrEmpty(selectedText) || string.IsNullOrEmpty(searchText))
+      {
+        return false;
+      }
+
+      var comparison = caseWord == true ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+      return string.Equals(selectedText, searchText, comparison);
+    }
+
+    internal Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType) =>
       fileManager.TranslationService.AddTranslatorItem(editor, translateEditor, editorType);
 
-    internal Task AddRunItem(RunControl runControl, EditorType editorType) =>
-      fileManager.RunControlService.AddRunTabAsync(runControl, editorType);
 
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType) =>
       await fileManager.TranslationService.RemoveTranslatorTabAsync(translatorItem, editorType);
-
-    internal void OpenFolder() =>
-      fileManager.FolderService.OpenActiveFileFolder();
-
-    internal async Task CloseRunItem(RunControl runControl, EditorType editorType) =>
-      await fileManager.RunControlService.CloseRunTabAsync(runControl, editorType);
   }
 }

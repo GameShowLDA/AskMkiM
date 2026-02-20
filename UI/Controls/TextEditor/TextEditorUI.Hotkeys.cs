@@ -126,12 +126,12 @@ namespace UI.Controls.TextEditor
     }
 
     /// <summary>
-    /// Обрабатывает клавишу F8 — переключение точки остановки
+    /// Обрабатывает клавишу F9 — переключение точки остановки
     /// на текущей строке каретки.
     /// </summary>
     private bool HandleBreakpointShortcut(KeyEventArgs e)
     {
-      if (e.Key != Key.F8)
+      if (e.Key != Key.F9)
         return false;
 
       if (!_executionMargin.BreakpointsInteractive)

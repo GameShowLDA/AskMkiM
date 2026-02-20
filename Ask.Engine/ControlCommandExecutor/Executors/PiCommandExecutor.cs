@@ -30,7 +30,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
 
       SetActiveLine(context, command);
-      BreakpointHandler.Handle(command, context.Console);
 
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
@@ -133,7 +132,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await PointFormater.MessageResult(errorMessage, context.Console);
       if (errorMessage.Count > 0)
       {
-        protocolModel.Errors.Add(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, errorMessage);
       }
 
       await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
@@ -285,3 +284,4 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     }
   }
 }
+

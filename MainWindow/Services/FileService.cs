@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Microsoft.Win32;
 using System.Windows;
 using UI.Components.FileComparerControls;
@@ -32,6 +33,7 @@ namespace MainWindowProgram.Services
     private readonly Func<bool> _isLockedProvider;
 
     private bool _isSearchWindowOpen;
+    private bool _selectFileHandlerAttached;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
@@ -72,7 +74,7 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает диалог выбора файла и загружает его в редактор.
+    /// Открывает диалог выбора файлов и загружает их в редактор.
     /// </summary>
     public void OpenFileAsync()
     {
@@ -84,14 +86,17 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Filter = "PKW files (*.pkw, *.Pkw, *.PKW)|*.pkw; *.Pkw; *.PKW|PK files (*.pk, *.Pk, *.PK)|*.pk; *.Pk; *.PK|ACS files (*.ACS, *.Acs, *.acs)|*.ACS; *.Acs; *.ACs; *.AcS; *.aCS; *.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+          Filter = "Supported files (*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt)|*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt|PK/PKW files (*.pk;*.pkw)|*.pk;*.pkw|OPK/OPKW files (*.opk;*.opkw)|*.opk;*.opkw|Protocol files (*.lst;*.lstw)|*.lst;*.lstw|ACS files (*.acs)|*.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
           Title = "Выберите файл",
+          Multiselect = true
         };
 
         if (openFileDialog.ShowDialog() == true)
         {
-          string filePath = openFileDialog.FileName;
-          _multiWindow.OpenFileInEditor(filePath);
+          foreach (string filePath in openFileDialog.FileNames)
+          {
+            _multiWindow.EditorDocumentService.OpenFile(filePath);
+          }
         }
       }
     }
@@ -104,7 +109,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
+        _multiWindow.ProtocolViewerService.ViewProtocol(protocol, ProtocolConfig.GetShowProtocolInSoftware());
       }
     }
 
@@ -119,7 +124,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.OpenFileInEditor(filePath);
+        _multiWindow.EditorDocumentService.OpenFile(filePath);
       }
     }
 
@@ -134,7 +139,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.CreateNewFile();
+        _multiWindow.EditorDocumentService.CreateNewFile();
       }
     }
 
@@ -143,7 +148,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void SaveFileAsync()
     {
-      _multiWindow.SaveFile();
+      _multiWindow.EditorDocumentService.SaveFile();
     }
 
     /// <summary>
@@ -151,7 +156,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void SaveFileAsAsync()
     {
-      _multiWindow.SaveFileAs();
+      _multiWindow.EditorDocumentService.SaveFileAs();
     }
 
     /// <summary>
@@ -159,7 +164,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void PrintFileAsync()
     {
-      _multiWindow.PrintFile();
+      _multiWindow.EditorDocumentService.PrintFile();
     }
 
     /// <summary>
@@ -175,28 +180,17 @@ namespace MainWindowProgram.Services
     /// </summary>
     public async Task SearchFileAsync()
     {
-      TextEditorUI activeEditor = _multiWindow.GetActiveTextEditor();
-
-      if (_isSearchWindowOpen == false && activeEditor != null)
-      {
-        _mainWindow.SearchWindow.Owner = _mainWindow;
-        _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
-        _mainWindow.SearchWindow.ShowWindow();
-        _isSearchWindowOpen = true;
-      }
-
-      if (activeEditor != null)
-      {
-        string selectedText = activeEditor?.TextArea.Selection.GetText();
-
-        if (!string.IsNullOrEmpty(selectedText))
-        {
-          SearchEventAdapter.RaiseSearchTextRequested(selectedText);
-        }
-      }
-      else
+      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: false, focusReplaceField: false);
+      if (activeEditor == null)
       {
         return;
+      }
+
+      string selectedText = activeEditor.TextArea.Selection.GetText();
+
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        SearchEventAdapter.RaiseSearchTextRequested(selectedText);
       }
     }
 
@@ -222,7 +216,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Создает новый файл трансляции (.opkw) в редакторе.
     /// </summary>
-    public TextEditorUI CreateTranslationFileAsync(string parentFilePath)
+    public ITextEditorView CreateTranslationFileAsync(string parentFilePath)
     {
       if (_isLockedProvider())
       {
@@ -231,9 +225,77 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        return _multiWindow.CreateTranslationFileAsync(parentFilePath);
+        return _multiWindow.TranslationService.CreateTranslationFile(parentFilePath);
       }
     }
-    internal void OpenFolder() => _multiWindow.OpenFolder();
+    internal void OpenFolder() => _multiWindow.EditorDocumentService.OpenFolder();
+
+    /// <summary>
+    /// Открывает окно поиска сразу с раскрытой строкой замены.
+    /// </summary>
+    public async Task SearchReplaceFileAsync()
+    {
+      string selectedText = null;
+      // вычислим заранее, т.к. EnsureSearchWindowAsync может менять фокус
+      var editorForSelection = _multiWindow.GetActiveTextEditor();
+      if (editorForSelection != null)
+      {
+        selectedText = editorForSelection.TextArea.Selection.GetText();
+      }
+
+      bool focusReplaceField = _mainWindow.SearchWindow.HasSearchText() || !string.IsNullOrEmpty(selectedText);
+
+      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: true, focusReplaceField: focusReplaceField);
+      if (activeEditor == null)
+      {
+        return;
+      }
+
+      if (string.IsNullOrEmpty(selectedText))
+      {
+        selectedText = activeEditor.TextArea.Selection.GetText();
+        if (!string.IsNullOrEmpty(selectedText))
+        {
+          focusReplaceField = true;
+        }
+      }
+
+      if (!string.IsNullOrEmpty(selectedText))
+      {
+        SearchEventAdapter.RaiseSearchTextRequested(selectedText);
+      }
+      if (focusReplaceField)
+      {
+        _mainWindow.SearchWindow.FocusReplaceField();
+      }
+    }
+
+    private async Task<TextEditorUI?> EnsureSearchWindowAsync(bool expandReplaceRow, bool focusReplaceField)
+    {
+      var activeEditor = _multiWindow.GetActiveTextEditor();
+      if (activeEditor == null)
+      {
+        return null;
+      }
+
+      if (!_isSearchWindowOpen)
+      {
+        _mainWindow.SearchWindow.Owner = _mainWindow;
+        if (!_selectFileHandlerAttached)
+        {
+          _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
+          _selectFileHandlerAttached = true;
+        }
+        _isSearchWindowOpen = true;
+      }
+
+      if (!expandReplaceRow && _mainWindow.SearchWindow.IsReplaceExpanded)
+      {
+        await _mainWindow.SearchWindow.CollapseReplaceRowAsync();
+      }
+
+      await _mainWindow.SearchWindow.ShowWindow(expandReplaceRow, focusReplaceField);
+      return activeEditor;
+    }
   }
 }

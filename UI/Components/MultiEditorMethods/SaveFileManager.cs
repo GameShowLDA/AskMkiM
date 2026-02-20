@@ -54,6 +54,28 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Обрабатывает сохранение файла.
+    /// </summary>
+    /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
+    public bool SaveFile()
+    {
+      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
+        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      int index = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
+      if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer)
+      {
+        var activeTextEditorContainer = fileManager.EditorWorkspaceModel.UserControls[index] as TextEditorContainer;
+        if (activeTextEditorContainer != null)
+        {
+          var activeDockItem = activeTextEditorContainer.DockManager.DockItems.FirstOrDefault(tab =>
+            tab.IsActiveItem == true);
+          return SaveFile(activeDockItem);
+        }
+      }
+      return false;
+    }
+
+    /// <summary>
     /// Сохраняет файл. Если файл еще не сохранен, вызывает диалоговое окно для сохранения как нового файла.
     /// </summary>
     /// <param name="activeTab">Активная вкладка, для которой будет сохранен файл.</param>

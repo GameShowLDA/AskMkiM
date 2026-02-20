@@ -4,33 +4,11 @@
              x:Name="root"
              Width="{Binding Size, ElementName=root}"
              Height="{Binding Size, ElementName=root}"
-             Cursor="Hand"
-             >
+             Cursor="Hand">
     <Viewbox Stretch="Uniform">
-        <Canvas Width="100" Height="100">
-            <!-- Вертикальная стрелка -->
-            <Line X1="50" Y1="20" X2="50" Y2="60"
-                  Stroke="#3d7dab"
-                  StrokeThickness="15"
-                  StrokeStartLineCap="Round"
-                  StrokeEndLineCap="Round" />
-
-            <!-- Лапки стрелки -->
-            <Line X1="40" Y1="50" X2="50" Y2="60"
-                  Stroke="#3d7dab"
-                  StrokeThickness="15"
-                  StrokeStartLineCap="Round"
-                  StrokeEndLineCap="Round" />
-            <Line X1="60" Y1="50" X2="50" Y2="60"
-                  Stroke="#3d7dab"
-                  StrokeThickness="15"
-                  StrokeStartLineCap="Round"
-                  StrokeEndLineCap="Round" />
-
-            <!-- Кружочек под стрелкой -->
-            <Ellipse Width="16" Height="15"
-                     Canvas.Left="42" Canvas.Top="75"
-                     Fill="#3d7dab"/>
+        <Canvas Width="24" Height="24">
+            <Path Fill="{DynamicResource LightBlueColorSolidColorBrush}"
+                  Data="M11.94 2c.83 0 1.5.67 1.5 1.5v9.38l2.38-2.38a1.5 1.5 0 0 1 2.12 2.12L13 17.56a1.5 1.5 0 0 1-2.12 0L5.82 12.5a1.5 1.5 0 1 1 2.12-2.12l2.5 2.5V3.5c0-.83.67-1.5 1.5-1.5Z M4.44 22a1.5 1.5 0 0 1 0-3h15a1.5 1.5 0 1 1 0 3h-15Z"/>
         </Canvas>
     </Viewbox>
 </UserControl>

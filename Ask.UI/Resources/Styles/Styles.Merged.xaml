@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeConv="clr-namespace:Ask.UI.Infrastructure.Localization"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization"
+                    >
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/ButtonStyle.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/BorderStyle.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/ComboBoxStyle.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.File.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Admin.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Execution.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Help.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Settings.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Menu/Menu.Test.xaml"/>
+        
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Executor/Input.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Executor/Protocol.xaml"/>
+        
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.Execution.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

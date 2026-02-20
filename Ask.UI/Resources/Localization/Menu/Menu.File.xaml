@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+    
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_File" Key="menu.file" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Create" Key="menu.file.new" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Open" Key="menu.file.open" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Exit" Key="menu.file.exit" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Archive" Key="menu.file.archive" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Save" Key="menu.file.save" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_SaveAs" Key="menu.file.saveas" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_OpenFolder" Key="menu.file.openfolder" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Print" Key="menu.file.print" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Search" Key="menu.file.search" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
+</ResourceDictionary>

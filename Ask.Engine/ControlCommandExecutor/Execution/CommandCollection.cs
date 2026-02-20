@@ -1,4 +1,5 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,24 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// Модель команды управляющей программы.
     /// </returns>
     public BaseCommandModel this[int index] => _commands[index];
+
+    /// <summary>
+    /// Возвращает снимок текущего списка команд.
+    /// </summary>
+    public IReadOnlyList<BaseCommandModel> Snapshot()
+    {
+      return _commands.ToArray();
+    }
+
+    /// <summary>
+    /// Возвращает индекс команды в коллекции.
+    /// </summary>
+    public int IndexOf(BaseCommandModel command)
+    {
+      return _commands.IndexOf(command);
+    }
+
+    public List<BaseCommandModel> GetAllCommands() => _commands;
 
     /// <summary>
     /// Выполняет поиск команды по её номеру.

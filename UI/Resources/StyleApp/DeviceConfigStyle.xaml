@@ -3,69 +3,6 @@
                     xmlns:CustomControls="clr-namespace:UI.Components" 
                     >
 
-    <!--Кнопки заголовков устройств конфигурации-->
-    <Style x:Key="ConfigHeaderButtonStyle" TargetType="Button">
-        <Setter Property="Height" Value="50"/>
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="Background" Value="{DynamicResource PrimarySolidColorBrush}"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderThickness" Value="3,3,3,0"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-       CornerRadius="0" 
-       BorderThickness="{TemplateBinding BorderThickness}" 
-       BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="3,3,3,0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <!--Кнопки устройств конфигурации-->
-    <Style x:Key="ConfigAdditionalButtonStyle" TargetType="Button">
-        <Setter Property="Height" Value="50"/>
-        <Setter Property="FontSize" Value="20"/>
-        <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-        <Setter Property="BorderThickness" Value="0"/>
-
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                        CornerRadius="0" 
-                        BorderThickness="{TemplateBinding BorderThickness}" 
-                        BorderBrush="{TemplateBinding BorderBrush}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
-                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                <Setter Property="BorderThickness" Value="5,0,0,0"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <!--Кнопки добавления устройств конфигурации-->
     <Style x:Key="PlusButtonStyle" TargetType="CustomControls:PlusButtonControl">
         <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>

@@ -14,6 +14,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
   /// </summary>
   public partial class ModuleVoltageCurrentSourceWindow : Window, IDataProcessor
   {
+    public Action? CloseActionOverride { get; set; }
+    private PowerSourceModuleEntity? _editingEntity;
+
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
     /// </summary>
@@ -37,6 +40,12 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     /// </summary>
     public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
 
+    public DeviceSettingsControl DetachSettingsControl()
+    {
+      Content = null;
+      return deviceSettingsWindow;
+    }
+
     /// <summary>
     /// Обрабатывает данные устройства.
     /// </summary>
@@ -52,11 +61,16 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e)
+    public void SetSettings(object? sender, IHeadUnit e, PowerSourceModuleEntity? editingEntity = null)
     {
+      _editingEntity = editingEntity;
       deviceSettingsWindow.NameDevice = "МИНТ";
       deviceSettingsWindow.LoadDeviceModels<IPowerSourceModule>();
       deviceSettingsWindow.SetHeadUnit(e);
+      if (editingEntity != null)
+      {
+        deviceSettingsWindow.LoadFromDevice(editingEntity);
+      }
 
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
@@ -72,9 +86,18 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
         {
           try
           {
-            new PowerSourceModuleServices().Create(deviceEntity);
+            if (_editingEntity == null)
+            {
+              new PowerSourceModuleServices().Create(deviceEntity);
+            }
+            else
+            {
+              deviceEntity.Id = _editingEntity.Id;
+              new PowerSourceModuleServices().Update(deviceEntity);
+            }
+
             RequestSave?.Invoke(s, deviceEntity);
-            Close();
+            RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)
           {
@@ -88,8 +111,20 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
       deviceSettingsWindow.RequestClose += (s, a) =>
       {
         RequestClose?.Invoke(s, a);
-        Close();
+        RequestCloseWindow();
       };
+    }
+
+    private void RequestCloseWindow()
+    {
+      if (CloseActionOverride != null)
+      {
+        CloseActionOverride.Invoke();
+        return;
+      }
+
+      Close();
     }
   }
 }
+

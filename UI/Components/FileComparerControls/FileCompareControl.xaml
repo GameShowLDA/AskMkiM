@@ -172,20 +172,20 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <Button x:Name="ChangeFirstFile" Grid.Row="0" Content="Заменить первый файл" PreviewMouseDown="ChangeFile_PreviewMouseDown"
-                Style="{StaticResource CompareButtonStyle}" 
+                Style="{DynamicResource ButtonStyleV8}" 
                 />
 
             <Button x:Name="ChangeSecondFile" Grid.Row="1"  Content="Заменить второй файл" PreviewMouseDown="ChangeFile_PreviewMouseDown"
-                            Style="{StaticResource CompareButtonStyle}" />
+                            Style="{DynamicResource ButtonStyleV8}" />
 
             <Button Name="CompareFiles" Grid.Row="2"  Content="Сравнить" PreviewMouseDown="CompareFiles_PreviewMouseDown"
-                            Style="{StaticResource CompareButtonStyle}" />
+                            Style="{DynamicResource ButtonStyleV8}" />
 
             <Button x:Name="UpDown" Grid.Row="3" Content="Сверху/снизу" 
-                            Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" Visibility="Collapsed"/>
+                            Style="{DynamicResource ButtonStyleV8}" PreviewMouseDown="ToggleOrientation" Visibility="Collapsed"/>
 
             <Button x:Name="LeftRight" Grid.Row="3"  Content="Слева/справа"                
-                    Style="{StaticResource CompareButtonStyle}" PreviewMouseDown="ToggleOrientation" />
+                    Style="{DynamicResource ButtonStyleV8}" PreviewMouseDown="ToggleOrientation" />
         </Grid>
         </Grid>
     </Grid>

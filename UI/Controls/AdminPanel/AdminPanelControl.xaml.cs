@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UI.Controls.GPT;
 
 namespace UI.Controls.AdminPanel
 {
@@ -32,6 +34,11 @@ namespace UI.Controls.AdminPanel
     private void ResistanceButton_Click(object sender, MouseButtonEventArgs e)
     {
       RightContentPresenter.Content = new CheckResistanceControl();
+    }
+
+    private void Gpt_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      RightContentPresenter.Content = new GPTPunchControl();
     }
   }
 

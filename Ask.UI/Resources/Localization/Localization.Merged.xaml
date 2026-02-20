@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeConv="clr-namespace:Ask.UI.Infrastructure.Localization"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization"
+                    >
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/ButtonStyle.xaml"/>
+        
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

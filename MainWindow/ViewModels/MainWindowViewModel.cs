@@ -1,4 +1,5 @@
-﻿using MainWindowProgram.Services;
+﻿using Ask.Core.Shared.Metadata.View;
+using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
 {
@@ -56,7 +57,7 @@ namespace MainWindowProgram.ViewModels
     /// <param name="adminServices">Сервис административных функций.</param>
     /// <param name="window">Сервис для управления главным окном.</param>
     public MainWindowViewModel(
-      MetrologyService metrologyService,
+      IMetrologyServiceView metrologyService,
       FileService fileService,
       TestService testService,
       SettingsService settingsService,

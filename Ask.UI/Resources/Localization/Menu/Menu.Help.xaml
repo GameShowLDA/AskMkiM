@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help" Key="menu.help" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_GeneralInformation" Key="menu.help.generalInformation"/>
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_LanguageControlPrograms" Key="menu.help.languageControlPrograms"/>
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_ProgramComposition" Key="menu.help.programComposition"/>
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_AboutProgram" Key="menu.help.aboutProgram"/>
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_FastMenuCommand" Key="menu.help.fastMenuCommand"/>
+
+</ResourceDictionary>

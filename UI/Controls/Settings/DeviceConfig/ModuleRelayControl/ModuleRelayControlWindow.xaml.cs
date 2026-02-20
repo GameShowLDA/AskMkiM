@@ -15,6 +15,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   /// </summary>
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
+    public Action? CloseActionOverride { get; set; }
+    private RelaySwitchModuleEntity? _editingEntity;
+
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
     /// </summary>
@@ -38,6 +41,12 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// </summary>
     public DeviceBase Property => new DeviceBase(deviceSettingsWindow);
 
+    public DeviceSettingsControl DetachSettingsControl()
+    {
+      Content = null;
+      return deviceSettingsWindow;
+    }
+
     /// <summary>
     /// Обрабатывает данные устройства.
     /// </summary>
@@ -53,11 +62,16 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e)
+    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleEntity? editingEntity = null)
     {
+      _editingEntity = editingEntity;
       deviceSettingsWindow.NameDevice = "МКР";
       deviceSettingsWindow.LoadDeviceModels<IRelaySwitchModule>();
       deviceSettingsWindow.SetHeadUnit(e);
+      if (editingEntity != null)
+      {
+        deviceSettingsWindow.LoadFromDevice(editingEntity);
+      }
 
       deviceSettingsWindow.SaveEvent += (s, a) =>
       {
@@ -76,9 +90,18 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           deviceEntity.SwitchResistance = deviceSettingsWindow.GetResistance();
           try
           {
-            new RelaySwitchModuleServices().Create(deviceEntity);
+            if (_editingEntity == null)
+            {
+              new RelaySwitchModuleServices().Create(deviceEntity);
+            }
+            else
+            {
+              deviceEntity.Id = _editingEntity.Id;
+              new RelaySwitchModuleServices().Update(deviceEntity);
+            }
+
             RequestSave?.Invoke(s, deviceEntity);
-            Close();
+            RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)
           {
@@ -92,8 +115,20 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
       deviceSettingsWindow.RequestClose += (s, a) =>
       {
         RequestClose?.Invoke(s, a);
-        Close();
+        RequestCloseWindow();
       };
+    }
+
+    private void RequestCloseWindow()
+    {
+      if (CloseActionOverride != null)
+      {
+        CloseActionOverride.Invoke();
+        return;
+      }
+
+      Close();
     }
   }
 }
+

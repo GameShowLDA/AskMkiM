@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -79,6 +80,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     public List<BaseCommandModel> CommandsToExecute { get; set; } = new();
 
+    public IReadOnlyList<BaseCommandModel> GetCommandsSnapshot() => _commands.Snapshot();
+
     public CommandExecutionManager(
      IUserInteractionService console,
      ITextEditorAdapter textEditor,
@@ -92,6 +95,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       _commands = new CommandCollection(controlProgram);
       _executorRegistry = new CommandExecutorRegistry();
       _breakpointManager = new BreakpointManager(_commands);
+      CommandsToExecute = _commands.GetAllCommands();
     }
 
     /// <summary>
@@ -104,6 +108,26 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       while (index < _commands.Count)
       {
         var command = _commands[index];
+        if (command.FormattedStartLineNumber >= 0)
+        {
+          _textEditor.SetActiveLine(command.FormattedStartLineNumber);
+        }
+
+        var selected = await BreakpointHandler.OnBreakpointHitAsync(command, _commands.Snapshot(), _console);
+        if (selected == null)
+        {
+          break;
+        }
+
+        if (!ReferenceEquals(selected, command))
+        {
+          var selectedIndex = _commands.IndexOf(selected);
+          if (selectedIndex >= 0)
+          {
+            index = selectedIndex;
+            command = selected;
+          }
+        }
 
         var context = new CommandExecutionContext(
             this, command, _console, _textEditor, _opkFilePath);

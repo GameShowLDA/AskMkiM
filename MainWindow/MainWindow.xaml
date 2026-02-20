@@ -11,6 +11,8 @@
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
         xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
+        xmlns:askUi="clr-namespace:Ask.UI.Features.ExecutionSelection.Views;assembly=Ask.UI"
+        xmlns:askUiRuntime="clr-namespace:Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;assembly=Ask.UI"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 
         mc:Ignorable="d"
@@ -38,6 +40,39 @@
     </i:Interaction.Triggers>
 
     <Grid>
+        <Grid x:Name="MainContentLayer">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <BlurEffect Radius="0"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Source={x:Static askUiRuntime:DrawerHostService.Instance}, Path=ViewModel.IsOpen}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
+                                                         To="3"
+                                                         Duration="0:0:0.20"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
+                                                         To="0"
+                                                         Duration="0:0:0.18"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -70,6 +105,7 @@
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_OpenFolder}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}" utilities:HelpProvider.HelpKey="FuncOpenFolderInExplorer"/>
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Print}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" utilities:HelpProvider.HelpKey="FuncPrint"/>
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" utilities:HelpProvider.HelpKey="FuncSearch"/>
+                    <MenuItem Header="Замена" Style="{DynamicResource StyleMenuItem}" Tag="SearchReplace" x:Name="searchReplaceMenuItem" Visibility="Collapsed" Command="{Binding File.SearchReplaceFileCommand}"/>
 
                     <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
@@ -281,5 +317,8 @@
                 Tag="Power"
                 />
         </Grid>
+        </Grid>
+
+        <askUi:DrawerControl Panel.ZIndex="9999" />
     </Grid>
 </Window>

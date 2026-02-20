@@ -1,4 +1,5 @@
-﻿using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using System;
 using System.Collections.Generic;
 using System.Linq;

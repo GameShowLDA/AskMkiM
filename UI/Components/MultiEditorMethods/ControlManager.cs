@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -21,13 +23,26 @@ namespace UI.Components.MultiEditorMethods
   /// <summary>
   /// Класс для работы с контролами.
   /// </summary>
-  public class ControlManager
+  public class ControlManager : IWorkspaceService
   {
     private Dictionary<string, (int lineNumber, int lineLength)> _pendingHighlights = new Dictionary<string, (int lineNumber, int lineLength)>();
 
     internal FileManager fileManager { get; set; }
 
     private MultiEditorControl multiEditorControl { get; set; }
+
+    /// <summary>
+    /// Удаляет указанный элемент управления и соответствующую вкладку.
+    /// </summary>
+    public void RemoveControl(EditorType editorType)
+    {
+      var control = fileManager.ContainerService.GetEditorContainer(editorType);
+      var page = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(item => item.Text == editorType.ToString());
+      if (control != null && page != null)
+      {
+        RemoveControl(page, control).ConfigureAwait(true);
+      }
+    }
 
     /// <summary>
     /// Удаляет указанный элемент управления и соответствующую вкладку.

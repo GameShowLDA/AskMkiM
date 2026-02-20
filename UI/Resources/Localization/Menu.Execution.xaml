@@ -1,9 +1,0 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:LocalizeStrings="clr-namespace:UI.Localization"
-                    >
-    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution" Key="menu.execution" />
-    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Build" Key="menu.execution.build" />
-    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_Run" Key="menu.execution.run" />
-    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Execution_RunStepByStepMode" Key="menu.execution.run.stepByStepMode" />
-</ResourceDictionary>

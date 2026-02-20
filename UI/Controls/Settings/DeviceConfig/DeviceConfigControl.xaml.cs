@@ -2,8 +2,12 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using UI.Controls.Settings.DeviceConfig.BreakDown;
@@ -21,6 +25,8 @@ namespace UI.Controls.Settings.DeviceConfig
   /// </summary>
   public partial class DeviceConfigControl : UserControl
   {
+    private const double DeviceConfigDrawerPanelWidth = 470d;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceConfigControl"/>.
     /// </summary>
@@ -76,59 +82,56 @@ namespace UI.Controls.Settings.DeviceConfig
       devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
       devices.ModuleRelayEvent += (s, a) => Devices_ModuleRalayEvent(s, a, system, devices);
       devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
+      devices.EditBreakdownEvent += (s, a) => Devices_EditBreakdownEvent(system, devices, a);
+      devices.EditDeviceBusCommutationEvent += (s, a) => Devices_EditSwitchingEvent(system, devices, a);
+      devices.EditPowerModuleEvent += (s, a) => Devices_EditPowerModuleEvent(system, devices, a);
+      devices.EditModuleRelayEvent += (s, a) => Devices_EditRelayEvent(system, devices, a);
+      devices.EditFastMeterEvent += (s, a) => Devices_EditFastMeterEvent(system, devices, a);
       devices.ExitEvent += Devices_ExitEvent;
     }
 
     /// <summary>
     /// Отображает окно быстрого измерителя.
     /// </summary>
-    private void Devices_FastMeterEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
+    private async void Devices_FastMeterEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
-      this.Effect = new System.Windows.Media.Effects.BlurEffect();
       FastMeterWindow fastMeterWindow = new FastMeterWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += (s, a) => LoadFastMeters(system, devices);
-      fastMeterWindow.ShowDialog();
-      this.Effect = null;
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
     /// <summary>
     /// Отображает окно источника напряжения.
     /// </summary>
-    private void Devices_PowerModuleEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
+    private async void Devices_PowerModuleEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
-      this.Effect = new System.Windows.Media.Effects.BlurEffect();
       ModuleVoltageCurrentSourceWindow fastMeterWindow = new ModuleVoltageCurrentSourceWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += (s, a) => LoadPowerSources(system, devices);
-      fastMeterWindow.ShowDialog();
-      this.Effect = null;
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
     /// <summary>
     /// Отображает окно источника напряжения.
     /// </summary>
-    private void Devices_ModuleRalayEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
+    private async void Devices_ModuleRalayEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
-      this.Effect = new System.Windows.Media.Effects.BlurEffect();
       ModuleRelayControlWindow fastMeterWindow = new ModuleRelayControlWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += (s, a) => LoadRelaySwitchModules(system, devices);
-      fastMeterWindow.ShowDialog();
-      this.Effect = null;
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
     /// <summary>
     /// Отображает окно коммутации шин.
     /// </summary>
-    private void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
+    private async void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
-      this.Effect = new System.Windows.Media.Effects.BlurEffect();
       DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
       deviceSettingsWindow.SetSettings(sender, e);
       deviceSettingsWindow.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
-      deviceSettingsWindow.ShowDialog();
-      this.Effect = null;
+      await OpenWindowInDrawerAsync(deviceSettingsWindow, "Добавление устройства", "F4 - закрыть");
     }
 
     /// <summary>
@@ -144,14 +147,52 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <summary>
     /// Отображает окно пробойной установки.
     /// </summary>
-    private void Devices_AddBreakdownEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
+    private async void Devices_AddBreakdownEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
-      this.Effect = new System.Windows.Media.Effects.BlurEffect();
       BreakDownWindow fastMeterWindow = new BreakDownWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
-      fastMeterWindow.ShowDialog();
-      this.Effect = null;
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterEntity entity)
+    {
+      BreakDownWindow window = new BreakDownWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceEntity entity)
+    {
+      DeviceBusCommutationWindow window = new DeviceBusCommutationWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleEntity entity)
+    {
+      ModuleVoltageCurrentSourceWindow window = new ModuleVoltageCurrentSourceWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadPowerSources(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleEntity entity)
+    {
+      ModuleRelayControlWindow window = new ModuleRelayControlWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadRelaySwitchModules(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterEntity entity)
+    {
+      FastMeterWindow window = new FastMeterWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
     /// <summary>
@@ -279,16 +320,13 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <summary>
     /// Создает новое шасси.
     /// </summary>
-    private void NewSystem()
+    private async void NewSystem()
     {
       ChassisManagerWindow chassisManagerWindow = new ChassisManagerWindow();
       chassisManagerWindow.SetSettings();
-      chassisManagerWindow.RequestClose += Setting_RequestClose;
       chassisManagerWindow.RequestSave += ChassisManagerSettings_DeviceSaved;
 
-      this.Effect = new System.Windows.Media.Effects.BlurEffect();
-      chassisManagerWindow.ShowDialog();
-      this.Effect = null;
+      await OpenWindowInDrawerAsync(chassisManagerWindow, "Добавление системы", "F4 - закрыть", () => Setting_RequestClose(null, EventArgs.Empty));
     }
 
     /// <summary>
@@ -314,5 +352,48 @@ namespace UI.Controls.Settings.DeviceConfig
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;
     }
+
+    private async Task OpenWindowInDrawerAsync(BreakDownWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private async Task OpenWindowInDrawerAsync(FastMeterWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private async Task OpenWindowInDrawerAsync(ModuleVoltageCurrentSourceWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private async Task OpenWindowInDrawerAsync(ModuleRelayControlWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private async Task OpenWindowInDrawerAsync(DeviceBusCommutationWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private async Task OpenWindowInDrawerAsync(ChassisManagerWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
   }
 }
+

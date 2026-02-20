@@ -8,7 +8,6 @@ namespace UI.Components.ProtocolListBox
   {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      // value = Header
       var header = value as string;
 
       if (!ProtocolConfig.GetHeaderInfo())

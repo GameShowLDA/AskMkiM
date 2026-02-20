@@ -2,6 +2,7 @@
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using DataBaseConfiguration;
+using DataBaseConfiguration.Services.Device;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init
@@ -13,6 +14,7 @@ namespace MainWindowProgram.Init
       try
       {
         await DataBaseConfig.InitializeDB();
+        WarmUpDeviceCaches();
 
         var protocolTask = new DataBaseConfiguration.Services.Settings.ProtocolService().GetProtocolAsync();
         var executionTask = new DataBaseConfiguration.Services.Settings.ExecutionService().GetExecutionAsync();
@@ -77,6 +79,29 @@ namespace MainWindowProgram.Init
       catch (Exception ex)
       {
         LogException(ex);
+      }
+    }
+
+    /// <summary>
+    /// Прогревает кэш всех сервисов устройств при старте приложения.
+    /// </summary>
+    private static void WarmUpDeviceCaches()
+    {
+      try
+      {
+        new ChassisManagerServices().ReloadCache();
+        new RelaySwitchModuleServices().ReloadCache();
+        new PowerSourceModuleServices().ReloadCache();
+        new SwitchingDeviceServices().ReloadCache();
+        new FastMeterServices().ReloadCache();
+        new BreakdownTesterServices().ReloadCache();
+        new RackServices().ReloadCache();
+
+        LogInformation("Кэш устройств прогрет при старте приложения.");
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, "Ошибка прогрева кэша устройств.");
       }
     }
   }

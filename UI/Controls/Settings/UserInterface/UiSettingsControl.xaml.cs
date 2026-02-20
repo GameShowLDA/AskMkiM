@@ -5,10 +5,10 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Infrastructure.Localization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using UI.Localization;
 
 namespace UI.Controls.Settings.UserInterface
 {

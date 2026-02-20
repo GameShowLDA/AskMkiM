@@ -202,7 +202,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type, revers);
           }
-          else
+          else if (rightPart.ChainModels.Count > 1)
           {
             measured = await performMeasurementAsync(resistance, messageService, cancellationToken, module.SwitchResistance, type: type);
             if (!measured.Result)

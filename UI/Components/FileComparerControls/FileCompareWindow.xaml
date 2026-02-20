@@ -119,7 +119,7 @@
                     </Border>
                     
                     <Button Name="SaveButton" Grid.Row="3" Grid.Column="1" Content="Сравнить" 
-                            Style="{StaticResource ConfigButtonStyle}" 
+                            Style="{DynamicResource ButtonStyleV10}" 
                             Width="250" HorizontalAlignment="Right" 
                             PreviewMouseDown="CompareButton_PreviewMouseDown"
                             />

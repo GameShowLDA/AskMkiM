@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin" Key="menu.admin" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin_Error" Key="menu.admin.error" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin_USB" Key="menu.admin.usb" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Admin_Management" Key="menu.admin.management" />
+
+</ResourceDictionary>

@@ -2,6 +2,7 @@
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -298,7 +299,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
         LogDebug($"Для времени установлено значение по умолчанию 5 с.'");
         time = "5с";
         timeValue = 5;
-        model.Warnings.Add(GeneralWarnings.DefaultTime(model.StartLineNumber, $"{commandNumber} {mnemonic}", time));
       }
       else
       {

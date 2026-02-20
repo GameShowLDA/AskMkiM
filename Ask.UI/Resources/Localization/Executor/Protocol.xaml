@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Header_File"        Key="protocol.header.file" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Header_Title"       Key="protocol.header.title" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Start"          Key="protocol.button.start" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Repeat"         Key="protocol.button.repeat" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Loop"           Key="protocol.button.loop" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Stop"           Key="protocol.button.stop" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_StepOver"       Key="protocol.button.stepover" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_StepInto"       Key="protocol.button.stepinto" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Continue"       Key="protocol.button.continue" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Previous_Arrow" Key="protocol.button.previous.arrow" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Btn_Exit"           Key="protocol.button.exit" />
+
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Start"      Key="protocol.tooltip.start" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Continue"   Key="protocol.tooltip.continue" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Pause"      Key="protocol.tooltip.pause" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Stop"       Key="protocol.tooltip.stop" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Repeat"     Key="protocol.tooltip.repeat" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_StepOver"   Key="protocol.tooltip.stepover" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_StepInto"   Key="protocol.tooltip.stepinto" />
+
+</ResourceDictionary>

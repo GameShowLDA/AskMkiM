@@ -36,6 +36,7 @@
 		<ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
 		<ProjectReference Include="..\Ask.Engine\Ask.Engine.csproj" />
 		<ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
+		<ProjectReference Include="..\Ask.UI\Ask.UI.csproj" />
 		<ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
 		<ProjectReference Include="..\Message\Message.csproj" />
 		<ProjectReference Include="..\NewCore\NewCore.csproj" />
@@ -54,21 +55,6 @@
 		<Resource Include="Resources\Font\Winston-Regular.ttf">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Localization\Strings.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Strings.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Localization\Strings.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -110,9 +96,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Resources\Localization\Menu.File.xaml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Page>
 		<Page Update="Windows\WpfDocking\Themes\Generic.xaml">
 			<Generator>
 				XamlIntelliSenseFileGenerator

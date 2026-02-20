@@ -33,16 +33,7 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список модулей коммутации реле.</returns>
     public List<IRelaySwitchModule> GetAllDevices()
     {
-      var data = _context.Set<RelaySwitchModuleEntity>()
-                         .ToList();
-
-      var result = data
-          .OfType<IRelaySwitchModule>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList();
-
-      return result;
+      return GetAll();
     }
 
     /// <summary>
@@ -52,17 +43,9 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список модулей коммутации реле.</returns>
     public List<IRelaySwitchModule> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<RelaySwitchModuleEntity>()
-                         .Where(device => device.NumberChassis == numberChassis)
-                         .ToList();
-
-      var result = data
-          .OfType<IRelaySwitchModule>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList();
-
-      return result;
+      return GetAll()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     /// <summary>
@@ -72,17 +55,8 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список модулей коммутации реле.</returns>
     public IRelaySwitchModule GetDeviceByNumberChassis(int numberChassis, int number)
     {
-      var data = _context.Set<RelaySwitchModuleEntity>()
-                         .Where(device => device.NumberChassis == numberChassis && device.Number == number)
-                         .ToList();
-
-      var result = data
-          .OfType<IRelaySwitchModule>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList().FirstOrDefault();
-
-      return result;
+      return GetAll()
+        .FirstOrDefault(device => device.NumberChassis == numberChassis && device.Number == number);
     }
 
     /// <summary>
@@ -92,9 +66,10 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
     public List<RelaySwitchModuleEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<RelaySwitchModuleEntity>()
-                     .Where(device => device.NumberChassis == numberChassis)
-                     .ToList();
+      return GetAllData()
+        .OfType<RelaySwitchModuleEntity>()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     public List<RelaySwitchModuleEntity> GetAllEntities()
@@ -118,6 +93,7 @@ namespace DataBaseConfiguration.Services.Device
       entity.SwitchResistance = value;
 
       _context.SaveChanges();
+      ReloadCache();
     }
   }
 }

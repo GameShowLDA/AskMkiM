@@ -3,8 +3,10 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using NewCore.Base.Device;
 using NewCore.Device;
+using NewCore.Base;
 using System.IO.Ports;
 using System.Management;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -86,13 +88,13 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// </summary>
     private void VisibilityElements()
     {
-      DeviceNumberContainer.Visibility = Visibility.Collapsed;
+      DeviceNumberContainer.Visibility = Visibility.Visible;
       BusTypeContainer.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
-      ConnectionTypeContainer.Visibility = Visibility.Collapsed;
+      ConnectionTypeContainer.Visibility = Visibility.Visible;
       IPAddressContainer.Visibility = Visibility.Collapsed;
       COMContainer.Visibility = Visibility.Collapsed;
-      AdditionalSettingsContainer.Visibility = Visibility.Collapsed;
+      AdditionalSettingsContainer.Visibility = Visibility.Visible;
     }
 
     /// <summary>
@@ -260,6 +262,106 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void ConnectionTypeSelectionBox_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
       e.Handled = true;
+    }
+
+    public void LoadFromDevice(IDevice device)
+    {
+      if (device == null)
+      {
+        return;
+      }
+
+      DeviceNumberTextBox.Text = device.Number.ToString();
+
+      var model = DeviceModelMap
+        .FirstOrDefault(x => string.Equals(x.Value.FullName, device.DeviceClass, StringComparison.Ordinal));
+
+      if (!string.IsNullOrWhiteSpace(model.Key))
+      {
+        DeviceModelSelectionBox.SelectedItem = model.Key;
+      }
+
+      if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.IRelaySwitchModule relayDevice)
+      {
+        ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
+      }
+
+      ApplyConnectionDetails(device.ConnectionDetails);
+    }
+
+    private void ApplyConnectionDetails(string connectionDetails)
+    {
+      if (string.IsNullOrWhiteSpace(connectionDetails))
+      {
+        return;
+      }
+
+      if (IPAddress.TryParse(connectionDetails, out var ip))
+      {
+        ConnectionTypeSelectionBox.SelectedIndex = 1; // IP
+        string[] parts = ip.ToString().Split('.');
+        if (parts.Length == 4)
+        {
+          IpPart1.Text = parts[0];
+          IpPart2.Text = parts[1];
+          IpPart3.Text = parts[2];
+          IpPart4.Text = parts[3];
+        }
+
+        return;
+      }
+
+      var serial = SerialPortCustom.ToObject(connectionDetails);
+      if (serial == null)
+      {
+        return;
+      }
+
+      ConnectionTypeSelectionBox.SelectedIndex = 2; // COM
+      PopulateCOMPorts();
+
+      if (COMPortSelectionBox.ItemsSource is IEnumerable<string> ports && !ports.Contains(serial.PortName))
+      {
+        var allPorts = ports.ToList();
+        allPorts.Add(serial.PortName);
+        COMPortSelectionBox.ItemsSource = allPorts;
+      }
+
+      COMPortSelectionBox.SelectedItem = serial.PortName;
+      SetComboBoxByText(BaudRateSelectionBox, serial.BaudRate.ToString());
+      SetComboBoxByText(DataBitsSelectionBox, serial.DataBits.ToString());
+      string stopBitsText = serial.StopBits switch
+      {
+        StopBits.One => "1",
+        StopBits.OnePointFive => "1.5",
+        StopBits.Two => "2",
+        _ => "1",
+      };
+      SetComboBoxByText(StopBitsSelectionBox, stopBitsText);
+
+      string parityText = serial.Parity switch
+      {
+        Parity.Even => "Чет",
+        Parity.Odd => "Нечет",
+        Parity.Mark => "Маркер",
+        Parity.Space => "Пробел",
+        _ => "Нет",
+      };
+      SetComboBoxByText(ParitySelectionBox, parityText);
+    }
+
+    private static void SetComboBoxByText(ComboBox comboBox, string text)
+    {
+      foreach (var item in comboBox.Items)
+      {
+        string itemContent = item is ComboBoxItem cbItem ? cbItem.Content?.ToString() ?? string.Empty : item?.ToString() ?? string.Empty;
+        if (string.Equals(itemContent, text, StringComparison.OrdinalIgnoreCase))
+        {
+          comboBox.SelectedItem = item;
+          return;
+        }
+      }
     }
   }
 }

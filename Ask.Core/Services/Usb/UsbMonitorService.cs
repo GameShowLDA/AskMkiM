@@ -1,4 +1,5 @@
-﻿using System.Management;
+﻿using Ask.Core.Shared.Metadata.View;
+using System.Management;
 using System.Windows.Threading;
 using static Ask.LogLib.LoggerUtility;
 
@@ -7,7 +8,7 @@ namespace Ask.Core.Services.Usb
   /// <summary>
   /// Сервис мониторинга USB-устройств и проверки USB-ключей.
   /// </summary>
-  public class UsbMonitorService
+  public class UsbMonitorService : IUsbMonitorView
   {
     private readonly ManagementEventWatcher _insertWatcher;
     private readonly ManagementEventWatcher _removeWatcher;
@@ -62,10 +63,35 @@ namespace Ask.Core.Services.Usb
       return watcher;
     }
 
+
+    /// <summary>
+    /// Включает или отключает мониторинг USB в зависимости от режима администратора.
+    /// </summary>
+    /// <param name="admin">Если <c>true</c> — включить режим администратора, иначе — отключить.</param>
+    public void SetUsbMonitoring(bool admin)
+    {
+      if (!admin)
+      {
+        Start();
+      }
+      else
+      {
+        AdminRights = admin;
+      }
+    }
+
+    /// <summary>
+    /// Останавливает сервис мониторинга USB.
+    /// </summary>
+    public void StopUsbMonitoring()
+    {
+      Stop();
+    }
+
     /// <summary>
     /// Запускает мониторинг USB-устройств.
     /// </summary>
-    public void Start()
+    private void Start()
     {
       _insertWatcher.Start();
       _removeWatcher.Start();
@@ -76,7 +102,7 @@ namespace Ask.Core.Services.Usb
     /// <summary>
     /// Останавливает мониторинг USB-устройств.
     /// </summary>
-    public void Stop()
+    private void Stop()
     {
       _insertWatcher.Stop();
       _removeWatcher.Stop();
