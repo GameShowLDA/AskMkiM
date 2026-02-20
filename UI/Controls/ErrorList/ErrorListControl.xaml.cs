@@ -52,6 +52,9 @@ namespace UI.Controls.ErrorList
       {
         HelpProvider.SetHelpKey(this, "DescriptionWorkTranslator");
       };
+
+      Items.CollectionChanged += (_, __) => UpdateTabsVisibilityAndSelection();
+      Breakpoints.CollectionChanged += (_, __) => UpdateTabsVisibilityAndSelection();
     }
 
     #region События для вкладки "Точки остановки"
@@ -76,6 +79,14 @@ namespace UI.Controls.ErrorList
       });
     }
 
+    private void UpdateTabsVisibilityAndSelection()
+    {
+      bool hasBreakpoints = Breakpoints.Count > 0;
+
+      if (!hasBreakpoints && MainTabControl.SelectedItem == BreakpointsTab)
+        MainTabControl.SelectedItem = ErrorsTab;
+    }
+
     public Visibility StringsNumberVisible
     {
       get => StringsNumber.Visibility;
@@ -96,6 +107,8 @@ namespace UI.Controls.ErrorList
     public void Clear()
     {
       Items.Clear();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -109,6 +122,8 @@ namespace UI.Controls.ErrorList
         Items.Add(error);
 
       ApplyInitialButtonState();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -122,6 +137,8 @@ namespace UI.Controls.ErrorList
         Items.Add(warning);
 
       ApplyInitialButtonState();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -138,6 +155,8 @@ namespace UI.Controls.ErrorList
       }
 
       ApplyInitialButtonState();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -154,6 +173,8 @@ namespace UI.Controls.ErrorList
       }
 
       ApplyInitialButtonState();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     public void ClearAll()
@@ -165,6 +186,8 @@ namespace UI.Controls.ErrorList
       _warningTotal = 0;
 
       UpdateButtons();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -188,6 +211,8 @@ namespace UI.Controls.ErrorList
       }
 
       UpdateButtons();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     private void UpdateButtons()
@@ -253,6 +278,8 @@ namespace UI.Controls.ErrorList
       }
 
       UpdateButtons();
+
+      UpdateTabsVisibilityAndSelection();
     }
 
     private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)

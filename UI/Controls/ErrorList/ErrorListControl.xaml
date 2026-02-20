@@ -34,13 +34,14 @@
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource ErrorListBackground}">
-        <TabControl TabStripPlacement="Bottom"
+        <TabControl x:Name="MainTabControl"
+                TabStripPlacement="Bottom"
                 Style="{StaticResource BottomTabControlStyle}"
                 ItemContainerStyle="{StaticResource BottomTabItemStyle}"
                 Background="{DynamicResource ErrorListBackground}"
                 BorderThickness="0">
 
-            <TabItem Header="Ошибки">
+            <TabItem x:Name="ErrorsTab" Header="Ошибки">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -179,15 +180,9 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Точки остановки">
+            <TabItem x:Name="BreakpointsTab" Header="Точки остановки">
                 <TabItem.Style>
                     <Style TargetType="TabItem" BasedOn="{StaticResource BottomTabItemStyle}">
-                        <Setter Property="Visibility" Value="Visible"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Breakpoints.Count, ElementName=root}" Value="0">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
                     </Style>
                 </TabItem.Style>
 
