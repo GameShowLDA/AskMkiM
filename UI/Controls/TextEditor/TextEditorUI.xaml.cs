@@ -364,7 +364,7 @@ namespace UI.Controls.TextEditor
       {
         var line = textEditor.Document.GetLineByNumber(lineNumber);
         textEditor.ScrollToLine(lineNumber);
-        textEditor.Select(line.Offset, line.Length);
+        //textEditor.Select(line.Offset, line.Length);
         textEditor.Focus();
       }
     }
