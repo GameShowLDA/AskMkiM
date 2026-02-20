@@ -1,4 +1,4 @@
-using Ask.UI.Features.ExecutionSelection.ViewModels;
+﻿using Ask.UI.Features.ExecutionSelection.ViewModels;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.ComponentModel;
 using System.Windows;
@@ -26,6 +26,11 @@ namespace Ask.UI.Features.ExecutionSelection.Views
 
     private void OnItemDoubleClick(object sender, MouseButtonEventArgs e)
     {
+      if (ViewModel.IsCustomContent)
+      {
+        return;
+      }
+
       ViewModel.ConfirmSelection();
     }
 
@@ -33,7 +38,11 @@ namespace Ask.UI.Features.ExecutionSelection.Views
     {
       if (e.Key == Key.Enter)
       {
-        ViewModel.ConfirmSelection();
+        if (!ViewModel.IsCustomContent)
+        {
+          ViewModel.ConfirmSelection();
+        }
+
         e.Handled = true;
       }
       else if (e.Key == Key.F4)
@@ -56,7 +65,7 @@ namespace Ask.UI.Features.ExecutionSelection.Views
       }
 
       e.Handled = true;
-      Dispatcher.InvokeAsync(() => CommandsList.Focus(), System.Windows.Threading.DispatcherPriority.Input);
+      Dispatcher.InvokeAsync(EnsureDrawerFocus, System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -97,7 +106,7 @@ namespace Ask.UI.Features.ExecutionSelection.Views
         EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
       });
 
-      Dispatcher.InvokeAsync(() => CommandsList.Focus());
+      Dispatcher.InvokeAsync(EnsureDrawerFocus, System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private void ResetVisualState()
@@ -106,6 +115,25 @@ namespace Ask.UI.Features.ExecutionSelection.Views
       Backdrop.BeginAnimation(UIElement.OpacityProperty, null);
       PanelTranslate.X = Panel.Width;
       Backdrop.Opacity = 0;
+    }
+
+    private void EnsureDrawerFocus()
+    {
+      if (!ViewModel.IsOpen)
+      {
+        return;
+      }
+
+      if (!ViewModel.IsCustomContent)
+      {
+        CommandsList.Focus();
+        Keyboard.Focus(CommandsList);
+        return;
+      }
+
+      Focus();
+      Keyboard.Focus(this);
+      MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
     }
 
     private static bool IsFocusInsideDrawer(DependencyObject target)
@@ -125,3 +153,4 @@ namespace Ask.UI.Features.ExecutionSelection.Views
     }
   }
 }
+

@@ -38,6 +38,10 @@ namespace DataBaseConfiguration.Services.Device
     { typeof(IRack), typeof(RackEntity) },
   };
 
+    private static readonly object CacheSync = new();
+    private static List<T> EntityCache = new();
+    private static bool IsCacheInitialized;
+
     /// <summary>
     /// Контекст базы данных.
     /// </summary>
@@ -50,6 +54,7 @@ namespace DataBaseConfiguration.Services.Device
     internal Service(AppDbContext context)
     {
       _context = context;
+      EnsureCacheInitialized();
     }
 
     /// <summary>
@@ -64,6 +69,7 @@ namespace DataBaseConfiguration.Services.Device
 
         _context.Add(entity);
         _context.SaveChanges();
+        SyncCacheOnCreate(entity);
 
         LogInformation($"[{nameof(Service<T>)}] Сущность {typeof(T).Name} успешно добавлена.");
       }
@@ -84,6 +90,7 @@ namespace DataBaseConfiguration.Services.Device
       {
         _context.Remove(entity);
         _context.SaveChanges();
+        SyncCacheOnDelete(entity);
       }
     }
 
@@ -96,6 +103,7 @@ namespace DataBaseConfiguration.Services.Device
       _context.Attach(entity);
       _context.Entry(entity).State = EntityState.Modified;
       _context.SaveChanges();
+      SyncCacheOnUpdate(entity);
     }
 
     /// <summary>
@@ -104,9 +112,7 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список экземпляров.</returns>
     public List<T> GetAll()
     {
-      var dbSet = GetDbSet();
-      var devices = dbSet
-        .Cast<T>()
+      var devices = GetCachedEntities()
         .Select(GetDeviceInstance)
         .Where(x => x != null)
         .Cast<T>()
@@ -121,8 +127,9 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список необработанных сущностей.</returns>
     internal virtual List<object> GetAllData()
     {
-      var dbSet = GetDbSet();
-      return dbSet.Cast<object>().ToList();
+      return GetCachedEntities()
+        .Cast<object>()
+        .ToList();
     }
 
     /// <summary>
@@ -132,15 +139,7 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Объект сущности или <c>null</c>, если не найден.</returns>
     public object GetEntityById(int id)
     {
-      var dbSet = GetDbSet();
-
-      var method = dbSet.GetType().GetMethod("Find", new[] { typeof(object[]) });
-      if (method == null)
-      {
-        throw new InvalidOperationException("Метод Find не найден.");
-      }
-
-      return method.Invoke(dbSet, new object[] { new object[] { id } });
+      return GetCachedEntities().FirstOrDefault(x => x.Id == id);
     }
 
     /// <summary>
@@ -150,17 +149,8 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Экземпляр устройства, либо <c>null</c>.</returns>
     public T GetById(int id)
     {
-      var dbSet = GetDbSet();
-      var method = dbSet.GetType().GetMethod("Find", new[] { typeof(object[]) });
-
-      if (method == null)
-      {
-        throw new InvalidOperationException("Метод Find не найден.");
-      }
-
-      var entity = method.Invoke(dbSet, new object[] { new object[] { id } });
-
-      if (entity is not T device)
+      var device = GetCachedEntities().FirstOrDefault(x => x.Id == id);
+      if (device is null)
       {
         return null;
       }
@@ -185,6 +175,92 @@ namespace DataBaseConfiguration.Services.Device
 
       var genericSet = setMethod.MakeGenericMethod(entityType);
       return (IQueryable)genericSet.Invoke(_context, null);
+    }
+
+    /// <summary>
+    /// Принудительно перезагружает кэш сущностей из базы данных.
+    /// </summary>
+    public void ReloadCache()
+    {
+      lock (CacheSync)
+      {
+        LoadCacheFromDb();
+      }
+    }
+
+    private List<T> GetCachedEntities()
+    {
+      EnsureCacheInitialized();
+      lock (CacheSync)
+      {
+        return EntityCache.ToList();
+      }
+    }
+
+    private void EnsureCacheInitialized()
+    {
+      if (IsCacheInitialized)
+        return;
+
+      lock (CacheSync)
+      {
+        if (IsCacheInitialized)
+          return;
+
+        LoadCacheFromDb();
+      }
+    }
+
+    private void LoadCacheFromDb()
+    {
+      var dbSet = GetDbSet();
+      EntityCache = dbSet.Cast<T>().ToList();
+      IsCacheInitialized = true;
+    }
+
+    private static void SyncCacheOnCreate(T entity)
+    {
+      lock (CacheSync)
+      {
+        if (!IsCacheInitialized)
+          return;
+
+        var index = EntityCache.FindIndex(x => x.Id == entity.Id);
+        if (index >= 0)
+        {
+          EntityCache[index] = entity;
+        }
+        else
+        {
+          EntityCache.Add(entity);
+        }
+      }
+    }
+
+    private static void SyncCacheOnUpdate(T entity)
+    {
+      lock (CacheSync)
+      {
+        if (!IsCacheInitialized)
+          return;
+
+        var index = EntityCache.FindIndex(x => x.Id == entity.Id);
+        if (index >= 0)
+        {
+          EntityCache[index] = entity;
+        }
+      }
+    }
+
+    private static void SyncCacheOnDelete(T entity)
+    {
+      lock (CacheSync)
+      {
+        if (!IsCacheInitialized)
+          return;
+
+        EntityCache.RemoveAll(x => x.Id == entity.Id);
+      }
     }
 
     /// <summary>
@@ -221,10 +297,21 @@ namespace DataBaseConfiguration.Services.Device
         instance = casted;
       }
 
-      // Копируем свойства, кроме runtime (COMPort и т.п.)
-      CopyProperties(device, instance);
+      // Применяем конфигурацию, по умолчанию через копирование свойств.
+      ApplyConfiguration(device, instance);
 
       return instance;
+    }
+
+    /// <summary>
+    /// Применяет конфигурацию из объекта-источника к runtime-экземпляру устройства.
+    /// По умолчанию используется копирование свойств через рефлексию.
+    /// </summary>
+    /// <param name="source">Источник конфигурации (обычно сущность БД).</param>
+    /// <param name="target">Готовый экземпляр устройства.</param>
+    protected virtual void ApplyConfiguration(T source, T target)
+    {
+      CopyProperties(source, target);
     }
 
     /// <summary>

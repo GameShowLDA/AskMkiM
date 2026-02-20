@@ -19,6 +19,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock 
@@ -34,6 +35,7 @@
             <Button Grid.Row="2" Style="{DynamicResource ButtonStyleV13}" Content="USB" Margin="10" PreviewMouseDown="UsbButton_Click"/>
             <Button Grid.Row="3" Style="{DynamicResource ButtonStyleV13}" Content="SetCommand" Margin="10" PreviewMouseDown="SetCommandButton_Click"/>
             <Button Grid.Row="4" Style="{DynamicResource ButtonStyleV13}" Content="Сопротивление МКР" Margin="10" PreviewMouseDown="ResistanceButton_Click"/>
+            <Button Grid.Row="5" Style="{DynamicResource ButtonStyleV13}" Content="GPT" Margin="10" PreviewMouseDown="Gpt_PreviewMouseDown"/>
 
         </Grid>
 

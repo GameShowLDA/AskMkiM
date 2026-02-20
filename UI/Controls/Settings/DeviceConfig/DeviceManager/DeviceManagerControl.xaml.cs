@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+﻿using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using System.Windows.Controls;
 
 namespace UI.Controls.Settings.DeviceConfig.DeviceManager
@@ -33,6 +34,12 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     /// </summary>
     public event EventHandler<IHeadUnit> ModuleRelayEvent;
 
+    public event EventHandler<BreakdownTesterEntity> EditBreakdownEvent;
+    public event EventHandler<FastMeterEntity> EditFastMeterEvent;
+    public event EventHandler<PowerSourceModuleEntity> EditPowerModuleEvent;
+    public event EventHandler<RelaySwitchModuleEntity> EditModuleRelayEvent;
+    public event EventHandler<SwitchingDeviceEntity> EditDeviceBusCommutationEvent;
+
     /// <summary>
     /// Событие, вызываемое при выходе из управления устройствами.
     /// </summary>
@@ -49,11 +56,57 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     public DeviceManagerControl()
     {
       InitializeComponent();
+
+      FastMeterControl.IsSingleDeviceOnly = true;
+      PrecisionMeterControl.IsSingleDeviceOnly = true;
+      BreakdownTesterControl.IsSingleDeviceOnly = true;
+      SwitchingDeviceControl.IsSingleDeviceOnly = true;
+
       BreakdownTesterControl.PlusEvent += (s, a) => AddBreakdownEvent?.Invoke(this, _headUnit);
       SwitchingDeviceControl.PlusEvent += (s, a) => DeviceBusCommutationSelected?.Invoke(this, _headUnit);
       FastMeterControl.PlusEvent += (s, a) => FastMeterEvent?.Invoke(this, _headUnit);
       PowerSourceModuleControl.PlusEvent += (s, a) => PowerModuleEvent?.Invoke(this, _headUnit);
       RelaySwitchModuleControl.PlusEvent += (s, a) => ModuleRelayEvent?.Invoke(this, _headUnit);
+
+      BreakdownTesterControl.EditEvent += (s, device) =>
+      {
+        if (device is BreakdownTesterEntity entity)
+        {
+          EditBreakdownEvent?.Invoke(this, entity);
+        }
+      };
+
+      FastMeterControl.EditEvent += (s, device) =>
+      {
+        if (device is FastMeterEntity entity)
+        {
+          EditFastMeterEvent?.Invoke(this, entity);
+        }
+      };
+
+      PowerSourceModuleControl.EditEvent += (s, device) =>
+      {
+        if (device is PowerSourceModuleEntity entity)
+        {
+          EditPowerModuleEvent?.Invoke(this, entity);
+        }
+      };
+
+      RelaySwitchModuleControl.EditEvent += (s, device) =>
+      {
+        if (device is RelaySwitchModuleEntity entity)
+        {
+          EditModuleRelayEvent?.Invoke(this, entity);
+        }
+      };
+
+      SwitchingDeviceControl.EditEvent += (s, device) =>
+      {
+        if (device is SwitchingDeviceEntity entity)
+        {
+          EditDeviceBusCommutationEvent?.Invoke(this, entity);
+        }
+      };
     }
 
     /// <summary>
