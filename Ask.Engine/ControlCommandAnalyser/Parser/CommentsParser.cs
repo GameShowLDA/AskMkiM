@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
@@ -20,29 +19,34 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
   /// </summary>
   public static class CommentsParser
   {
-    /// <summary>
-    /// Удаляет комментарии из набора строк и возвращает очищенные строки.
-    /// </summary>
-    /// <param name="lines">Исходные строки команды.</param>
-    /// <param name="model">
-    /// Модель команды, в которую сохраняются найденные комментарии.
-    /// </param>
-    /// <returns>
-    /// Список строк без комментариев и пустых значений.
+    /// <summary> 
+    /// Удаляет комментарии из набора строк и возвращает очищенные строки. 
+    /// </summary> 
+    /// <param name="lines">Исходные строки команды.</param> 
+    /// <param name="model"> 
+    /// Модель команды, в которую добавляются найденные комментарии.
+    /// </param> 
+    /// <returns> 
+    /// Список строк без комментариев и без пустых значений.
     /// </returns>
     /// <remarks>
-    /// Алгоритм:
+    /// <para><b>Порядок обработки:</b></para>
     /// <list type="number">
-    /// <item><description>Ищет фигурные комментарии <c>{…}</c>;</description></item>
-    /// <item><description>затем блоки <c>/*…*/</c>;</description></item>
-    /// <item><description>в конце — однострочные <c>//</c>.</description></item>
+    /// <item><description>Фигурные комментарии <c>{…}</c></description></item>
+    /// <item><description>Блоки <c>/*…*/</c></description></item>
+    /// <item><description>Однострочные <c>//</c></description></item> 
     /// </list>
-    /// При обнаружении многострочных комментариев корректно изменяет
-    /// содержимое следующих строк.
+    /// <para>
+    /// Если комментарий занимает две строки, метод корректно изменяет 
+    /// содержимое следующей строки, удаляя из неё часть комментария.
+    /// </para>
+    /// <para> 
+    /// Метод не изменяет порядок строк, но может изменить их содержимое. 
+    /// </para>
     /// </remarks>
     public static List<string> ParseComments(List<string> lines, BaseCommandModel model)
     {
-      if (lines == null || lines.Count == 0)
+      if (IsEmpty(lines))
         return new List<string>();
 
       var result = new List<string>(lines.Count);
@@ -50,125 +54,252 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       int i = 0;
       while (i < lines.Count)
       {
-        string line = lines[i];
-        if (string.IsNullOrWhiteSpace(line))
+        if (string.IsNullOrWhiteSpace(lines[i]))
         {
           i++;
           continue;
         }
 
-        var current = new StringBuilder(line);
-        string? nextLine = (i + 1 < lines.Count) ? lines[i + 1] : null;
+        var current = new StringBuilder(lines[i]);
+        string? nextLine = GetNextLine(lines, i);
 
-        bool changed;
-        do
-        {
-          changed = false;
+        RemoveCommentsFromLine(lines, model, current, ref nextLine, i);
 
-          // 1) Фигурные { ... } (приоритет над /*...*/ если они вложены внутрь) 
-          // Пытаемся найти '{' и соответствующую '}' в той же строке
-          int openBrace = current.ToString().IndexOf('{');
-          if (openBrace >= 0)
-          {
-            int closeBrace = current.ToString().IndexOf('}', openBrace + 1);
+        AddProcessedLine(result, current);
 
-            if (closeBrace >= 0)
-            {
-              // { ... } в одной строке
-              string block = current.ToString().Substring(openBrace, closeBrace - openBrace + 1);
-              model.Comment.Add(block);
-              LogInformation($"Комментарий {{…}} найден: {TrimForLog(block)}");
-
-              current.Remove(openBrace, closeBrace - openBrace + 1);
-              changed = true;
-              continue;
-            }
-            else if (nextLine != null)
-            {
-              // Попробуем замкнуть на следующей строке
-              int nextClose = nextLine.IndexOf('}');
-              if (nextClose >= 0)
-              {
-                string thisTail = lines[i].Substring(openBrace);
-                string nextHead = nextLine.Substring(0, nextClose + 1);
-                string block = thisTail + "\n" + nextHead;
-
-                model.Comment.Add(block);
-                LogInformation($"Комментарий {{…}}(2 строки) найден: {TrimForLog(block)}");
-
-                // Вырезаем из текущей и следующей
-                current.Remove(openBrace, current.Length - openBrace);
-                lines[i + 1] = nextLine.Substring(nextClose + 1);
-                nextLine = lines[i + 1];
-                changed = true;
-                continue;
-              }
-            }
-          }
-
-          // 2) C-style /* ... */
-          int openBlock = current.ToString().IndexOf("/*");
-          if (openBlock >= 0)
-          {
-            int closeBlock = current.ToString().IndexOf("*/", openBlock + 2);
-            if (closeBlock >= 0)
-            {
-              // /* ... */ в одной строке
-              string block = current.ToString().Substring(openBlock, closeBlock + 2 - openBlock);
-              model.Comment.Add(block);
-              LogInformation($"Комментарий (/*…*/) найден: {TrimForLog(block)}");
-
-              current.Remove(openBlock, closeBlock + 2 - openBlock);
-              changed = true;
-              continue;
-            }
-            else if (nextLine != null)
-            {
-              int nextClose = nextLine.IndexOf("*/");
-              if (nextClose >= 0)
-              {
-                string thisTail = lines[i].Substring(openBlock);
-                string nextHead = nextLine.Substring(0, nextClose + 2);
-                string block = thisTail + "\n" + nextHead;
-
-                model.Comment.Add(block);
-                LogInformation($"Комментарий (/*…*/)(2 строки) найден: {TrimForLog(block)}");
-
-                current.Remove(openBlock, current.Length - openBlock);
-                lines[i + 1] = nextLine.Substring(nextClose + 2);
-                nextLine = lines[i + 1];
-                changed = true;
-                continue;
-              }
-            }
-          }
-
-          //  3) Линейные // ... (только в текущей строке) 
-          // Важно: обрабатываем в конце, чтобы не мешали блокам выше.
-          var mLine = Regex.Match(current.ToString(), @"//.*$");
-          if (mLine.Success)
-          {
-            string block = mLine.Value;
-            model.Comment.Add(block);
-            LogInformation($"Комментарий (//) найден: {TrimForLog(block)}");
-
-            current.Remove(mLine.Index, current.Length - mLine.Index);
-            changed = true;
-            continue;
-          }
-
-        } while (changed); 
-
-        string processedThis = current.ToString().TrimEnd();
-        if (!string.IsNullOrWhiteSpace(processedThis))
-          result.Add(processedThis);
-
-        // Если мы что-то вырезали из следующей строки (при 2-строчных блоках),
-        // lines[i+1] уже обновлена; дальше цикл перейдёт на неё.
         i++;
       }
 
       return result;
+    }
+
+    /// <summary> 
+    /// Проверяет, что список строк пустой или равен <see langword="null"/>.
+    /// </summary> 
+    /// <param name="lines">Список строк.</param> 
+    /// <returns> 
+    /// <see langword="true"/>, если список отсутствует или не содержит элементов. 
+    /// </returns>
+    private static bool IsEmpty(List<string>? lines)
+    {
+      return lines == null || lines.Count == 0;
+    }
+
+    /// <summary> 
+    /// Возвращает следующую строку из списка, если она существует. 
+    /// </summary> 
+    /// <param name="lines">Список строк.</param> 
+    /// <param name="index">Текущий индекс.</param>
+    /// <returns> 
+    /// Следующая строка или <see langword="null"/>, если текущая строка последняя. 
+    /// </returns>
+    private static string? GetNextLine(List<string> lines, int index)
+    {
+      return (index + 1 < lines.Count) ? lines[index + 1] : null;
+    }
+
+    /// <summary> 
+    /// Удаляет комментарии из текущей строки, пока изменения возможны. 
+    /// </summary> 
+    /// <param name="lines">Список всех строк.</param>
+    /// <param name="model">Модель для сохранения комментариев.</param> 
+    /// <param name="current">Буфер текущей строки.</param> 
+    /// <param name="nextLine">Следующая строка (может быть изменена).</param> 
+    /// <param name="index">Индекс текущей строки.</param> 
+    /// <remarks> 
+    /// Используется цикл до тех пор, пока в строке находятся новые комментарии. 
+    /// Это позволяет корректно обработать несколько комментариев в одной строке. 
+    /// </remarks>
+    private static void RemoveCommentsFromLine(List<string> lines, BaseCommandModel model, StringBuilder current, ref string? nextLine, int index)
+    {
+      bool changed;
+      do
+      {
+        changed = false;
+
+        if (TryExtractBraceComment(lines, model, current, ref nextLine, index))
+        {
+          changed = true;
+          continue;
+        }
+
+        if (TryExtractCStyleComment(lines, model, current, ref nextLine, index))
+        {
+          changed = true;
+          continue;
+        }
+
+        if (TryExtractLineComment(model, current))
+        {
+          changed = true;
+          continue;
+        }
+
+      } while (changed);
+    }
+
+    /// <summary> 
+    /// Пытается извлечь фигурный комментарий <c>{ … }</c>.
+    /// </summary> 
+    /// <param name="lines">Список строк.</param> 
+    /// <param name="model">Модель для сохранения комментариев.</param> 
+    /// <param name="current">Буфер текущей строки.</param> 
+    /// <param name="nextLine">Следующая строка.</param> 
+    /// <param name="index">Индекс текущей строки.</param> 
+    /// <returns> 
+    /// <see langword="true"/>, если комментарий найден и удалён. 
+    /// </returns> 
+    /// <remarks> 
+    /// Поддерживаются: 
+    /// <list type="bullet"> 
+    /// <item><description>однострочные блоки</description></item> 
+    /// <item><description>двухстрочные блоки</description></item> 
+    /// </list> 
+    /// При двухстрочном блоке изменяется следующая строка. 
+    /// </remarks>
+    private static bool TryExtractBraceComment(List<string> lines, BaseCommandModel model, StringBuilder current, ref string? nextLine, int index)
+    {
+      int openBrace = current.ToString().IndexOf('{');
+      if (openBrace < 0) return false;
+
+      int closeBrace = current.ToString().IndexOf('}', openBrace + 1);
+
+      if (closeBrace >= 0)
+      {
+        string block = current.ToString().Substring(openBrace, closeBrace - openBrace + 1);
+        AddComment(model, block, "{…}");
+
+        current.Remove(openBrace, closeBrace - openBrace + 1);
+        return true;
+      }
+
+      if (nextLine != null)
+      {
+        int nextClose = nextLine.IndexOf('}');
+        if (nextClose >= 0)
+        {
+          string thisTail = lines[index].Substring(openBrace);
+          string nextHead = nextLine.Substring(0, nextClose + 1);
+          string block = thisTail + "\n" + nextHead;
+
+          AddComment(model, block, "{…}(2 строки)");
+
+          current.Remove(openBrace, current.Length - openBrace);
+          lines[index + 1] = nextLine.Substring(nextClose + 1);
+          nextLine = lines[index + 1];
+
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    /// <summary> 
+    /// Пытается извлечь C-style комментарий <c>/* … */</c>. 
+    /// </summary> 
+    /// <param name="lines">Список строк.</param> 
+    /// <param name="model">Модель для сохранения комментариев.</param> 
+    /// <param name="current">Буфер текущей строки.</param> 
+    /// <param name="nextLine">Следующая строка.</param> 
+    /// <param name="index">Индекс текущей строки.</param> 
+    /// <returns> 
+    /// <see langword="true"/>, если комментарий найден. 
+    /// </returns> 
+    /// <remarks> 
+    /// Логика аналогична фигурным комментариям: 
+    /// поддерживаются однострочные и двухстрочные блоки. 
+    /// </remarks>
+    private static bool TryExtractCStyleComment(List<string> lines, BaseCommandModel model, StringBuilder current, ref string? nextLine, int index)
+    {
+      int openBlock = current.ToString().IndexOf("/*");
+      if (openBlock < 0) return false;
+
+      int closeBlock = current.ToString().IndexOf("*/", openBlock + 2);
+
+      if (closeBlock >= 0)
+      {
+        string block = current.ToString().Substring(openBlock, closeBlock + 2 - openBlock);
+        AddComment(model, block, "/*…*/");
+
+        current.Remove(openBlock, closeBlock + 2 - openBlock);
+        return true;
+      }
+
+      if (nextLine != null)
+      {
+        int nextClose = nextLine.IndexOf("*/");
+        if (nextClose >= 0)
+        {
+          string thisTail = lines[index].Substring(openBlock);
+          string nextHead = nextLine.Substring(0, nextClose + 2);
+          string block = thisTail + "\n" + nextHead;
+
+          AddComment(model, block, "/*…*/(2 строки)");
+
+          current.Remove(openBlock, current.Length - openBlock);
+          lines[index + 1] = nextLine.Substring(nextClose + 2);
+          nextLine = lines[index + 1];
+
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    /// <summary> 
+    /// Пытается извлечь однострочный комментарий <c>// …</c>. 
+    /// </summary> 
+    /// <param name="model">Модель для сохранения комментариев.</param> 
+    /// <param name="current">Буфер текущей строки.</param> 
+    /// <returns> 
+    /// <see langword="true"/>, если комментарий найден. 
+    /// </returns> 
+    /// <remarks> 
+    /// Используется регулярное выражение для поиска комментария 
+    /// до конца строки. 
+    /// </remarks>
+    private static bool TryExtractLineComment(BaseCommandModel model, StringBuilder current)
+    {
+      var match = Regex.Match(current.ToString(), @"//.*$");
+      if (!match.Success) return false;
+
+      string block = match.Value;
+      AddComment(model, block, "//");
+
+      current.Remove(match.Index, current.Length - match.Index);
+      return true;
+    }
+
+    /// <summary> 
+    /// Добавляет комментарий в модель и записывает сообщение в лог. 
+    /// </summary> 
+    /// <param name="model">Модель команды.</param> 
+    /// <param name="block">Текст комментария.</param>
+    /// <param name="type">Тип комментария (для логирования).</param> 
+    /// <remarks> 
+    /// Метод инкапсулирует побочный эффект — запись в лог. 
+    /// </remarks>
+    private static void AddComment(BaseCommandModel model, string block, string type)
+    {
+      model.Comment.Add(block);
+      LogInformation($"Комментарий {type} найден: {TrimForLog(block)}");
+    }
+
+    /// <summary> 
+    /// Добавляет очищенную строку в результирующий список. 
+    /// </summary> 
+    /// <param name="result">Результирующий список.</param>
+    /// <param name="current">Буфер текущей строки.</param>
+    /// <remarks>
+    /// Строка добавляется только если она не пустая после удаления комментариев. 
+    /// </remarks>
+    private static void AddProcessedLine(List<string> result, StringBuilder current)
+    {
+      string processed = current.ToString().TrimEnd();
+      if (!string.IsNullOrWhiteSpace(processed))
+        result.Add(processed);
     }
 
     /// <summary>
