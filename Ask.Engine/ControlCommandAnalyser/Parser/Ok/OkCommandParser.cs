@@ -9,13 +9,31 @@ using System.Text.RegularExpressions;
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
 {
   /// <summary>
-  /// Парсер для команды ОК (объект контроля).
+  /// Парсер команды ОК (объект контроля).
+  /// Извлекает код и наименование объекта, а также параметры,
+  /// описывающие объект контроля.
   /// </summary>
   public class OkCommandParser : ICommandParser
   {
+    /// <summary>
+    /// Определяет, может ли парсер обработать указанную мнемонику.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники.</param>
+    /// <returns>
+    /// <c>true</c>, если мнемоника соответствует команде ОК; иначе <c>false</c>.
+    /// </returns>
     public bool CanParse(MnemonicIdentifier mnemonic)
     => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.OK);
 
+    /// <summary>
+    /// Выполняет разбор команды ОК, формируя модель объекта контроля
+    /// и извлекая его параметры.
+    /// </summary>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="mnemonic">Мнемоника команды.</param>
+    /// <param name="numberLine">Номер строки начала команды.</param>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <returns>Заполненная модель команды ОК.</returns>
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       var model = new OkCommandModel

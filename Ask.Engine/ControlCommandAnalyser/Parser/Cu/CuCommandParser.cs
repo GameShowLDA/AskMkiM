@@ -8,13 +8,30 @@ using System.Text.RegularExpressions;
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
 {
   /// <summary>
-  /// Парсер для команд ЦУ.
+  /// Парсер команды ЦУ.
+  /// Формирует модель сообщения, определяет тип команды
+  /// и извлекает текст сообщения.
   /// </summary>
   public class CuCommandParser : ICommandParser
   {
+    /// <summary>
+    /// Определяет, может ли парсер обработать указанную мнемонику.
+    /// </summary>
+    /// <param name="mnemonic">Идентификатор мнемоники.</param>
+    /// <returns>
+    /// <c>true</c>, если мнемоника соответствует команде ЦУ; иначе <c>false</c>.
+    /// </returns>
     public bool CanParse(MnemonicIdentifier mnemonic)
     => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.CU);
 
+    /// <summary>
+    /// Выполняет разбор команды ЦУ и формирует модель сообщения.
+    /// </summary>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="mnemonic">Мнемоника команды.</param>
+    /// <param name="numberLine">Номер строки начала команды.</param>
+    /// <param name="lines">Исходные строки команды.</param>
+    /// <returns>Заполненная модель команды ЦУ.</returns>
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       var model = new CuCommandModel

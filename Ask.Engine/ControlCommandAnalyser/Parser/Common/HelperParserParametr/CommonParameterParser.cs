@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
+namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
   /// <summary>
   /// Предоставляет методы для парсинга общих параметров команд: напряжения, сопротивления и времени.
@@ -44,7 +44,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       if (string.IsNullOrWhiteSpace(input))
         throw new FormatException("Входная строка пуста.");
 
-      // заменяем запятую на точку для унификации
       string normalized = input.Replace(',', '.');
 
       if (double.TryParse(normalized, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))

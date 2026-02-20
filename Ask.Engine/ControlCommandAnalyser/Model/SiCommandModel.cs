@@ -3,6 +3,7 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
@@ -17,7 +18,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// </summary>
   [AllowedKeys(К,С,П,Т,И,Г,Т1)]
   [MeasurementDevice(MeasurementDevice.BreakdownTester)]
-  public class SiCommandModel : BaseCommandModel, IHasScheme
+  public class SiCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.

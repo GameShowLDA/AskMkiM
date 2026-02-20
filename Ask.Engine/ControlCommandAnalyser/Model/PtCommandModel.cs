@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -9,7 +10,7 @@ using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [AllowedKeys(Б, П, С)]
-  public class PtCommandModel : BaseCommandModel
+  public class PtCommandModel : BaseCommandModel, ITimeCommandModel
   {
     public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.PT).DisplayName;
 
