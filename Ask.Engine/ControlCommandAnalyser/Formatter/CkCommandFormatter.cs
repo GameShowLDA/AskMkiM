@@ -15,7 +15,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var firstLine = $"{ck.CommandNumber} {ck.Mnemonic}";
       yield return firstLine;
 
-      yield return $"\tСбрасываемые шины: ";
+      yield return $"\tСбрасываемые точки с шин: ";
       foreach (var bus in ck.BusList)
       {
         yield return $"\t\t{bus}";
