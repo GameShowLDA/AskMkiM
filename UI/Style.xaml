@@ -48,6 +48,10 @@
     <SolidColorBrush x:Key="ToggleButtonActiveBorderColor" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ToggleButtonSecondActiveBorderColor" Color="{DynamicResource IsCheckedColor}"/>
 
+    <SolidColorBrush x:Key="Cb_BackBrush" Color="{StaticResource GreenColor}"/>
+    <SolidColorBrush x:Key="Cb_BorderBrush" Color="{StaticResource ForegroundColor}"/>
+    <SolidColorBrush x:Key="Cb_DisabledBrush" Color="{StaticResource ForegroundColor}"/>
+
     <Style TargetType="{x:Type ToolTip}">
         <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
@@ -697,6 +701,84 @@
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Box" Property="Opacity" Value="0.6"/>
                         </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MarkingCheckBox" TargetType="{x:Type CheckBox}">
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Focusable" Value="True"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid x:Name="Root" SnapsToDevicePixels="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="Box"
+                        Width="20"
+                        Height="20"
+                        Background="{StaticResource Cb_BackBrush}"
+                        BorderBrush="{StaticResource Cb_BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        VerticalAlignment="Center">
+                            <Border.Effect>
+                                <DropShadowEffect Color="Black"
+                              BlurRadius="5"
+                              ShadowDepth="0"
+                              Opacity="0.20"/>
+                            </Border.Effect>
+
+                            <TextBlock x:Name="CheckMark"
+                            Text="✓"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="White"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Opacity="0"
+                            RenderTransformOrigin="0.5,0.5">
+                                <TextBlock.RenderTransform>
+                                    <ScaleTransform ScaleX="0.4" ScaleY="0.4"/>
+                                </TextBlock.RenderTransform>
+                            </TextBlock>
+                        </Border>
+
+                        <ContentPresenter Grid.Column="1"
+                          Margin="6,0,0,0"
+                          VerticalAlignment="Center"
+                          RecognizesAccessKey="True"/>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckMark" Property="Opacity" Value="1"/>
+                            <Setter TargetName="CheckMark" Property="RenderTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Box" Property="Background" Value="{StaticResource Cb_DisabledBrush}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Cb_DisabledBrush}"/>
+                            <Setter Property="Foreground" Value="#FF777777"/>
+                            <Setter TargetName="CheckMark" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Box" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

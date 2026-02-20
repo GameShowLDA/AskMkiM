@@ -242,7 +242,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Style="{StaticResource AnimatedSwitch}"
+                            Style="{StaticResource MarkingCheckBox}"
                             VerticalAlignment="Center"
                             Click="BreakpointEnabled_Click"/>
                                 </DataTemplate>
