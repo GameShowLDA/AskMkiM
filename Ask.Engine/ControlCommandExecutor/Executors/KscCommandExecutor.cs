@@ -28,7 +28,43 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
 
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      var relayModules = EquipmentService.ValidRelayModules;
+      var switchingDevice = EquipmentService.ValidSwitchingDevice;
+
+      Core.Shared.Interfaces.DeviceInterfaces.Multimeter.IFastMeter? fastMeter = null;
+      try
+      {
+        fastMeter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      }
+      catch { }
+
+      Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.IBreakdownTester? breakdownTester = null;
+      try
+      {
+        breakdownTester = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
+      }
+      catch { }
+
+      foreach (var item in relayModules)
+      {
+        await item.ConnectableManager.ResetAsync();
+      }
+
+      if (switchingDevice != null)
+      {
+        await switchingDevice.ConnectableManager.ResetAsync();
+      }
+
+      if (fastMeter != null)
+      {
+        await fastMeter.ConnectableManager.ResetAsync();
+      }
+
+      if (breakdownTester != null)
+      {
+        await breakdownTester.ConnectableManager.ResetAsync();
+      }
+
       GetProtocol(context, command, protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
     }

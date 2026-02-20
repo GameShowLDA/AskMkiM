@@ -135,8 +135,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         protocolModel.AddErrors(nameCommand, errorMessage);
       }
 
-      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
-
       if (command.SiCommand != null)
       {
         nameSiCommand = $"ПИ/СИ2";

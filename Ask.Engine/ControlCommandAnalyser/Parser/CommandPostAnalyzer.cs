@@ -5,12 +5,33 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
 {
+  /// <summary>
+  /// Выполняет пост-анализ разобранных команд.
+  /// <para>
+  /// Проверяет корректность структуры сценария:
+  /// <list type="bullet">
+  /// <item><description>наличие обязательных команд;</description></item>
+  /// <item><description>уникальность мнемоник;</description></item>
+  /// <item><description>корректность переходов по меткам;</description></item>
+  /// <item><description>связи точек РМ.</description></item>
+  /// </list>
+  /// </para>
+  /// </summary>
   internal class CommandPostAnalyzer
   {
     /// <summary>
-    /// Выполняет проверку всех команд и при необходимости добавляет ошибки в модели.
+    /// Запускает полный набор пост-проверок для списка команд.
     /// </summary>
-    /// <param name="models">Список разобранных команд.</param>
+    /// <param name="models">Список разобранных моделей команд.</param>
+    /// <remarks>
+    /// Последовательно выполняет:
+    /// <list type="number">
+    /// <item><description>проверку первой и последней команды;</description></item>
+    /// <item><description>проверку уникальности обязательных мнемоник;</description></item>
+    /// <item><description>проверку корректности меток УП;</description></item>
+    /// <item><description>проверку связей точек через РМ.</description></item>
+    /// </list>
+    /// </remarks>
     public static void Analyze(List<BaseCommandModel> models)
     {
       if (models.Count == 0)
@@ -38,6 +59,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       { }
     }
 
+    /// <summary>
+    /// Проверяет, что у точек РМ нет повторяющихся конечных точек назначения.
+    /// </summary>
+    /// <param name="models">Список команд.</param>
+    /// <param name="pointsMap">Словарь соответствия точек.</param>
+    /// <remarks>
+    /// При обнаружении повторов добавляет ошибки в модель команды РМ.
+    /// </remarks>
     private static void CheckPointLinks(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
     {
       var duplicateDestinations = pointsMap
@@ -55,6 +84,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
     }
 
+    /// <summary>
+    /// Преобразует список строковых обозначений точек в модели точек.
+    /// </summary>
+    /// <param name="points">Список обозначений точек.</param>
+    /// <param name="pointsMap">Словарь соответствий точек из команды РМ.</param>
+    /// <returns>
+    /// Кортеж:
+    /// <list type="bullet">
+    /// <item><description><c>bool</c> — признак наличия ошибок сопоставления;</description></item>
+    /// <item><description>список моделей точек.</description></item>
+    /// </list>
+    /// </returns>
     public static (bool, List<PointModel>) GetPointsModel(List<string> points, Dictionary<string, string> pointsMap)
     {
       List<PointModel> pointModels = new List<PointModel>();
@@ -77,28 +118,36 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Проверяет, что первая команда — ОК, а последняя — КЦ. В противном случае добавляет ошибки.
+    /// Проверяет, что первая команда — «ОК», а последняя — «КЦ».
     /// </summary>
-    /// <param name="models">Список разобранных команд.</param>
+    /// <param name="models">Список команд.</param>
+    /// <remarks>
+    /// Если условие нарушено, ошибки добавляются в соответствующие модели.
+    /// </remarks>
     private static void CheckStartAndEnd(List<BaseCommandModel> models)
     {
       var first = models[0];
       var last = models[^1];
 
-      if (!string.Equals(first.Mnemonic, "ОК", System.StringComparison.OrdinalIgnoreCase))
+      if (!string.Equals(first.Mnemonic, "ОК", StringComparison.OrdinalIgnoreCase))
       {
         first.Errors.Add(GeneralErrors.FirstCommandMustBeOk(first.StartLineNumber, $"{first.CommandNumber} {first.Mnemonic}"));
       }
 
-      if (!string.Equals(last.Mnemonic, "КЦ", System.StringComparison.OrdinalIgnoreCase))
+      if (!string.Equals(last.Mnemonic, "КЦ", StringComparison.OrdinalIgnoreCase))
       {
         last.Errors.Add(GeneralErrors.LastCommandMustBeKc(last.StartLineNumber, $"{last.CommandNumber} {last.Mnemonic}"));
       }
     }
 
     /// <summary>
-    /// Проверяет, что указанные команды присутствуют строго по одному разу.
+    /// Проверяет, что обязательные мнемоники присутствуют строго по одному разу.
     /// </summary>
+    /// <param name="models">Список команд.</param>
+    /// <remarks>
+    /// Контролируются мнемоники:
+    /// <c>ОК</c>, <c>РМ</c>, <c>СП</c>, <c>КЦ</c>.
+    /// </remarks>
     private static void CheckUniqueMnemonics(List<BaseCommandModel> models)
     {
       // Мнемоники, которые должны быть строго один раз
@@ -128,6 +177,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
     }
 
+    /// <summary>
+    /// Проверяет корректность меток переходов в командах УП.
+    /// </summary>
+    /// <param name="models">Список команд.</param>
+    /// <remarks>
+    /// Проверяется:
+    /// <list type="bullet">
+    /// <item><description>наличие метки;</description></item>
+    /// <item><description>существование команды с указанным номером;</description></item>
+    /// <item><description>числовой формат метки;</description></item>
+    /// <item><description>что переход осуществляется вперёд по сценарию.</description></item>
+    /// </list>
+    /// </remarks>
     private static void CheckUpLabels(List<BaseCommandModel> models)
     {
       var allNumbers = new HashSet<string>(models.Select(m => m.CommandNumber));

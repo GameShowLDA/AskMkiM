@@ -1,8 +1,11 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
+namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
+  /// <summary>
+  /// Класс ResistanceParser.
+  /// </summary>
   public class ResistanceParser
   {
     /// <summary>
@@ -48,7 +51,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       string unit = m.Groups["unit"].Value;
       double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
       string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-      return (value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture), "Ом", remainder);
+      return (value?.ToString("G", CultureInfo.InvariantCulture), "Ом", remainder);
     }
 
     private (string? Value, string? Unit, string Remainder) ParseSiHigherLimitR(string input, Match m)
@@ -57,7 +60,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
       string op = m.Groups["op"].Value;
       string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
-      return (value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture), "Ом", remainder);
+      return (value?.ToString("G", CultureInfo.InvariantCulture), "Ом", remainder);
     }
 
     /// <summary>
@@ -97,8 +100,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       ).Trim();
 
       return (
-        minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-        maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+        minValue?.ToString("G", CultureInfo.InvariantCulture),
+        maxValue?.ToString("G", CultureInfo.InvariantCulture),
         "Ом",
         remainder
       );
@@ -135,7 +138,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
         string remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
 
         return (
-          value?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+          value?.ToString("G", CultureInfo.InvariantCulture),
           "Ом",
           remainder.Trim()
         );
@@ -283,8 +286,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       }
       var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
       return (
-         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         minValue?.ToString("G", CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", CultureInfo.InvariantCulture),
          "Ом",
          remainder
          );
@@ -305,8 +308,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       }
       var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
       return (
-         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         minValue?.ToString("G", CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", CultureInfo.InvariantCulture),
          "Ом",
          remainder
          );
@@ -319,8 +322,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
       double? minValue = UnitsConvertor.TryParseValue(m.Groups["min"].Value, unit);
       var remainder = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
       return (
-         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         minValue?.ToString("G", CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", CultureInfo.InvariantCulture),
          "Ом",
          remainder
          );
@@ -336,8 +339,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
 
       var remainder1 = RemoveMatchedWithNeighborComma(input, m.Index, m.Length);
       return (
-         minValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
-         maxValue?.ToString("G", System.Globalization.CultureInfo.InvariantCulture),
+         minValue?.ToString("G", CultureInfo.InvariantCulture),
+         maxValue?.ToString("G", CultureInfo.InvariantCulture),
          "Ом",
          remainder1
          );

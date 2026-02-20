@@ -3,18 +3,18 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
-  [AllowedKeys(Г, К, Т1)]
+  [AllowedKeys(Г, К, Т1, П, С)]
   [MeasurementDevice(MeasurementDevice.BreakdownTester)]
-  public class PiCommandModel : BaseCommandModel, IHasScheme
+  public class PiCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.

@@ -3,6 +3,10 @@ using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
 {
+  /// <summary>
+  /// Утилита для разделения строки параметров команды ПИ на части СИ и ПИ.
+  /// Выполняет лексический разбор, поиск точки разделения и нормализацию текста.
+  /// </summary>
   public static partial class PiSiSplitter
   {
     private static readonly HashSet<string> SiKeys = new(StringComparer.OrdinalIgnoreCase)
@@ -20,6 +24,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       public int End => Start + Length;
     }
 
+    /// <summary>
+    /// Разделяет строку параметров на части СИ и ПИ,
+    /// выполняя токенизацию и выбор оптимальной точки разреза.
+    /// </summary>
+    /// <param name="input">Исходная строка параметров.</param>
+    /// <returns>Кортеж: часть СИ и часть ПИ.</returns>
     public static (string SiPart, string PiPart) SplitSiFromPi(string input)
     {
       if (string.IsNullOrWhiteSpace(input))
@@ -77,6 +87,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return (NormalizeSi(siStr), piStr.Trim());
     }
 
+    /// <summary>
+    /// Проверяет, может ли набор токенов быть корректной частью СИ.
+    /// </summary>
+    /// <param name="toks">Список токенов.</param>
+    /// <returns>true, если структура СИ валидна.</returns>
     private static bool IsValidSi(List<Tok> toks)
     {
       if (toks.Count == 0) return true;
@@ -101,6 +116,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return (volt + time + res + keys) > 0;
     }
 
+    /// <summary>
+    /// Проверяет, может ли набор токенов быть корректной частью ПИ.
+    /// </summary>
+    /// <param name="toks">Список токенов.</param>
+    /// <returns>true, если структура ПИ валидна.</returns>
     private static bool IsValidPi(List<Tok> toks)
     {
       if (toks.Count == 0) return false;
@@ -123,8 +143,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return volt >= 1;
     }
 
+    /// <summary>
+    /// Проверяет, является ли ключ допустимым ключом СИ.
+    /// </summary>
+    /// <param name="k">Текст ключа.</param>
+    /// <returns>true, если ключ относится к СИ.</returns>
     private static bool IsSiKey(string k) => SiKeys.Contains(k);
 
+    /// <summary>
+    /// Выполняет лексический разбор строки на токены.
+    /// </summary>
+    /// <param name="s">Исходная строка.</param>
+    /// <returns>Список токенов.</returns>
     private static List<Tok> Lex(string s)
     {
       var toks = new List<Tok>();
@@ -215,6 +245,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return toks.Where(t => t.Type is not TokType.Ws and not TokType.Comma).ToList();
     }
 
+    /// <summary>
+    /// Нормализует запись сопротивления (приводит единицы и формат).
+    /// </summary>
+    /// <param name="text">Исходный текст.</param>
+    /// <returns>Нормализованная строка сопротивления.</returns>
     private static string NormalizeRes(string text)
     {
       var t = Regex.Replace(text, @"\s+", "");
@@ -222,6 +257,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return t;
     }
 
+    /// <summary>
+    /// Определяет, есть ли между частями строки «широкая» граница (много пробелов или таб).
+    /// </summary>
+    /// <param name="input">Исходная строка.</param>
+    /// <param name="left">Левая часть токенов.</param>
+    /// <param name="right">Правая часть токенов.</param>
+    /// <returns>true, если граница считается значимой.</returns>
     private static bool IsBigWhitespaceBoundary(string input, List<Tok> left, List<Tok> right)
     {
       if (left.Count == 0 || right.Count == 0) return false;
@@ -241,6 +283,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return hasTab || spaces >= 2;
     }
 
+    /// <summary>
+    /// Восстанавливает подстроку исходного текста по диапазону токенов.
+    /// </summary>
+    /// <param name="input">Исходная строка.</param>
+    /// <param name="tokens">Токены.</param>
+    /// <returns>Подстрока исходного текста.</returns>
     private static string Reconstruct(string input, IEnumerable<Tok> tokens)
     {
       var list = tokens.ToList();
@@ -250,6 +298,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return input.Substring(from, to - from);
     }
 
+    /// <summary>
+    /// Выполняет предварительную нормализацию строки:
+    /// заменяет специальные пробелы и латинские аналоги букв.
+    /// </summary>
+    /// <param name="s">Исходная строка.</param>
+    /// <returns>Нормализованная строка.</returns>
     public static string PreNormalize(string s)
     {
       if (string.IsNullOrEmpty(s)) return s;
@@ -296,8 +350,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
     }
   }
 
+  /// <summary>
+  /// Расширенные методы разделения ПИ/СИ с диагностикой ошибок.
+  /// </summary>
   public static partial class PiSiSplitter
   {
+    /// <summary>
+    /// Строго разделяет строку на части СИ и ПИ,
+    /// возвращая диагностические ошибки при нарушении структуры.
+    /// </summary>
+    /// <param name="input">Исходная строка.</param>
+    /// <returns>Кортеж: часть СИ, часть ПИ и список ошибок.</returns>
     public static (string SiPart, string PiPart, List<string> Errors) SplitSiFromPiStrict(string input)
     {
       var errors = new List<string>();
@@ -365,6 +428,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       return (si, pi, errors);
     }
 
+    /// <summary>
+    /// Нормализует текст части СИ (пробелы и форматирование).
+    /// </summary>
+    /// <param name="s">Исходная строка.</param>
+    /// <returns>Нормализованная строка СИ.</returns>
     private static string NormalizeSi(string s)
     {
       if (string.IsNullOrWhiteSpace(s)) return s?.Trim() ?? string.Empty;

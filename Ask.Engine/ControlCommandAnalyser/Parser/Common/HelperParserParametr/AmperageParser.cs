@@ -1,7 +1,10 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Ask.Engine.ControlCommandAnalyser.Parser.HelperParserParametr
+namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
+  /// <summary>
+  /// Класс AmperageParser.
+  /// </summary>
   public class AmperageParser
   {
     /// <summary>

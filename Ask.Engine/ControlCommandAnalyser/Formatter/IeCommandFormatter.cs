@@ -39,11 +39,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       else if (!string.IsNullOrWhiteSpace(ie.LowerLimitCapacitySource))
       {
         yield return $"\tНижний порог электрической емкости: {ie.LowerLimitCapacitySource}";
-      }
-      // Верхний порог электрической емкости
-      else if (!string.IsNullOrWhiteSpace(ie.HigherLimitCapacitySource))
-      {
-        yield return $"\tВерхний порог электрической емкости: {ie.HigherLimitCapacitySource}";
+        // Верхний порог электрической емкости
+        if (!string.IsNullOrWhiteSpace(ie.HigherLimitCapacitySource))
+        {
+          yield return $"\tВерхний порог электрической емкости: {ie.HigherLimitCapacitySource}";
+        }
       }
 
       if (ie.Comment.Count > 0)
