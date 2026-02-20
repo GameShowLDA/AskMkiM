@@ -537,13 +537,12 @@ namespace UI.Controls.ProtocolNew
         LogWarning($"Попытка завершить \"{name}\", когда задача не запущена.");
       }
 
+      StepControlManager.DisableStepMode();
+      KeyboardManager.TriggerStep();
+
       if (stopDelegate != null)
       {
         var token = CancellationTokenSource?.Token ?? CancellationToken.None;
-
-        StepControlManager.DisableStepMode();
-        KeyboardManager.TriggerStep();
-
         await stopDelegate(token);
       }
 

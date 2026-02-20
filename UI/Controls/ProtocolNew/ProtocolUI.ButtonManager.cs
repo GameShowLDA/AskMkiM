@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Windows;
 using System.Windows.Input;
@@ -186,9 +187,7 @@ namespace UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
 
-      SetNonVisibleAllButton();
-      ContinueButtonElement.Visibility = Visibility.Visible;
-      StopButtonElement.Visibility = Visibility.Visible;
+      ShowButtonsOnPause();
 
       PauseButtonPreviewMouseDown?.Invoke(this, e);
     }
@@ -200,10 +199,15 @@ namespace UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Продолжить\"");
 
-      SetNonVisibleAllButton();
+      // "Продолжить" в UI всегда продолжает без пошагового режима.
+      if (ActionExecutor.StepMode || StepControlManager.StepMode)
+      {
+        ExecutionConfig.SetStepByStepMode(false);
+        StepControlManager.DisableStepMode();
+        KeyboardManager.TriggerStep();
+      }
 
-      PauseButtonElement.Visibility = Visibility.Visible;
-      StopButtonElement.Visibility = Visibility.Visible;
+      ShowOnlyStopAndFinishButtons(false);
 
       NextButtonPreviewMouseDown?.Invoke(this, e);
     }
@@ -301,6 +305,13 @@ namespace UI.Controls.ProtocolNew
     private void TopLayer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Поверх\"");
+
+      if (ContinueButtonElement.Visibility == Visibility.Visible)
+      {
+        EnterStepModeFromPause(isStepInto: false, e);
+        return;
+      }
+
       TopLayerButtonPreviewMouseDown?.Invoke(this, e);
     }
 
@@ -310,6 +321,13 @@ namespace UI.Controls.ProtocolNew
     private void BottomLayer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Вглубь\"");
+
+      if (ContinueButtonElement.Visibility == Visibility.Visible)
+      {
+        EnterStepModeFromPause(isStepInto: true, e);
+        return;
+      }
+
       BottomLayerButtonPreviewMouseDown?.Invoke(this, e);
     }
     #endregion
@@ -386,15 +404,7 @@ namespace UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        SetNonVisibleAllButton();
-        if (ActionExecutor.StepMode)
-        {
-          StepOverButtonElement.Visibility = Visibility.Visible;
-          StepIntoButtonElement.Visibility = Visibility.Visible;
-        }
-
-        PauseButtonElement.Visibility = Visibility.Visible;
-        StopButtonElement.Visibility = Visibility.Visible;
+        ShowExecutionButtonsOnRunning(ActionExecutor.StepMode);
       });
     }
 
@@ -406,15 +416,7 @@ namespace UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        SetNonVisibleAllButton();
-        if (stepMode)
-        {
-          StepOverButtonElement.Visibility = Visibility.Visible;
-          StepIntoButtonElement.Visibility = Visibility.Visible;
-        }
-
-        PauseButtonElement.Visibility = Visibility.Visible;
-        StopButtonElement.Visibility = Visibility.Visible;
+        ShowExecutionButtonsOnRunning(stepMode);
       });
     }
 
@@ -437,13 +439,7 @@ namespace UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        SetNonVisibleAllButton();
-        NextButtonVisibility = Visibility.Visible;
-        ExitButtonVisibility = Visibility.Visible;
-        if (repeatVisible)
-        {
-          ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
-        }
+        ShowExecutionButtonsOnPause(ActionExecutor.StepMode, repeatVisible);
       });
     }
 
@@ -481,10 +477,62 @@ namespace UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        SetNonVisibleAllButton();
-        NextButtonVisibility = Visibility.Visible;
-        ExitButtonVisibility = Visibility.Visible;
+        ShowExecutionButtonsOnPause(ActionExecutor.StepMode, repeatVisible: false);
       });
+    }
+
+    public void UpdateStepButtonsForCurrentState(bool stepModeEnabled)
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (ContinueButtonElement.Visibility == Visibility.Visible)
+        {
+          ShowExecutionButtonsOnPause(stepModeEnabled, RepeatButtonElement.Visibility == Visibility.Visible);
+          return;
+        }
+
+        if (PauseButtonElement.Visibility == Visibility.Visible)
+        {
+          ShowExecutionButtonsOnRunning(stepModeEnabled);
+          return;
+        }
+
+        StepIntoButtonElement.Visibility = Visibility.Collapsed;
+        StepOverButtonElement.Visibility = Visibility.Collapsed;
+      });
+    }
+
+    private void ShowExecutionButtonsOnRunning(bool stepMode)
+    {
+      SetNonVisibleAllButton();
+      PauseButtonElement.Visibility = Visibility.Visible;
+      StopButtonElement.Visibility = Visibility.Visible;
+      StepOverButtonElement.Visibility = stepMode ? Visibility.Visible : Visibility.Collapsed;
+      StepIntoButtonElement.Visibility = stepMode ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void ShowExecutionButtonsOnPause(bool stepMode, bool repeatVisible)
+    {
+      SetNonVisibleAllButton();
+      ContinueButtonElement.Visibility = Visibility.Visible;
+      StopButtonElement.Visibility = Visibility.Visible;
+      if (repeatVisible)
+      {
+        RepeatButtonElement.Visibility = Visibility.Visible;
+      }
+
+      // На паузе кнопки шага доступны всегда, чтобы можно было перейти в step-mode.
+      StepOverButtonElement.Visibility = Visibility.Visible;
+      StepIntoButtonElement.Visibility = Visibility.Visible;
+    }
+
+    private void EnterStepModeFromPause(bool isStepInto, MouseButtonEventArgs e)
+    {
+      ExecutionConfig.SetStepByStepMode(true);
+      StepControlManager.EnableStepMode(isStepInto);
+      ShowOnlyStopAndFinishButtons(true);
+      NextButtonPreviewMouseDown?.Invoke(this, e);
+      KeyboardManager.TriggerStep();
     }
 
     public void StartTask()
