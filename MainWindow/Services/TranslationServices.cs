@@ -162,8 +162,8 @@ namespace MainWindowProgram.Services
     /// </summary>
     private static void RestoreBreakpoints(
       List<BaseCommandModel> models,
-      TextEditorUI leftEditor,
-      TextEditorUI rightEditor,
+      ITextEditorView leftEditor,
+      ITextEditorView rightEditor,
       Dictionary<int, bool> preserved)
     {
       var requiredCommands = new HashSet<int>();

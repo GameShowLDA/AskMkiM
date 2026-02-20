@@ -102,6 +102,16 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     public void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false);
 
     /// <summary>
+    /// Включает точку остановки, делая её активной для отладки и взаимодействия.
+    /// </summary>
+    public void EnableBreakpoint(int commandNumber, bool raiseEvents = false);
+
+    /// <summary>
+    /// Выключает точку остановки, делая её неактивной для отладки и взаимодействия.
+    /// </summary>
+    public void DisableBreakpoint(int commandNumber, bool raiseEvents = false);
+
+    /// <summary>
     /// Подсвечивает набор диапазонов текста.
     /// </summary>
     /// <param name="ranges">Список диапазонов (начало, конец).</param>
