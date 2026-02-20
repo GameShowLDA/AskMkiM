@@ -24,6 +24,46 @@
     <SolidColorBrush x:Key="DrawerAccentBrush" Color="#78A8E6"/>
     <SolidColorBrush x:Key="DrawerGlowBrush" Color="#4D6FA3"/>
     <SolidColorBrush x:Key="DrawerHighlightBrush" Color="#40FFFFFF"/>
+    <SolidColorBrush x:Key="DeviceInputShellBackgroundBrush" Color="#2A313D"/>
+    <SolidColorBrush x:Key="DeviceInputSectionBorderBrush" Color="#5A6A7D"/>
+    <Color x:Key="DeviceInputSectionShadowColor">#000000</Color>
+    <SolidColorBrush x:Key="DeviceListAddButtonBackgroundBrush" Color="#3D2FA84F"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonBorderBrush" Color="#B02FA84F"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonForegroundBrush" Color="#FF7BFF8A"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonHoverBackgroundBrush" Color="#553BCB61"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonHoverBorderBrush" Color="#E03BCB61"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonHoverForegroundBrush" Color="#FFA8FFB2"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonPressedBackgroundBrush" Color="#7A2FA84F"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonPressedBorderBrush" Color="#FF2FA84F"/>
+    <SolidColorBrush x:Key="DeviceListAddButtonPressedForegroundBrush" Color="#FFD9FFD9"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonBackgroundBrush" Color="#2B4F8BFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonBorderBrush" Color="#9C4F8BFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonForegroundBrush" Color="#FFBFD4FF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonHoverBackgroundBrush" Color="#3F5F9FFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonHoverBorderBrush" Color="#CF5F9FFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonHoverForegroundBrush" Color="#FFE5EEFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonPressedBackgroundBrush" Color="#6A4F8BFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonPressedBorderBrush" Color="#FF4F8BFF"/>
+    <SolidColorBrush x:Key="DeviceListEditButtonPressedForegroundBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonBackgroundBrush" Color="#22E45757"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonBorderBrush" Color="#66E45757"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonForegroundBrush" Color="#FFE57A7A"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonHoverBackgroundBrush" Color="#33E45757"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonHoverBorderBrush" Color="#AAE45757"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonHoverForegroundBrush" Color="#FFFFA8A8"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonPressedBackgroundBrush" Color="#66E45757"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonPressedBorderBrush" Color="#FFE45757"/>
+    <SolidColorBrush x:Key="DeviceListDeleteButtonPressedForegroundBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ComboBoxModernBackgroundBrush" Color="#29313C"/>
+    <SolidColorBrush x:Key="ComboBoxModernBorderBrush" Color="#4D596A"/>
+    <SolidColorBrush x:Key="ComboBoxModernHoverBorderBrush" Color="#6B809A"/>
+    <SolidColorBrush x:Key="ComboBoxModernFocusBorderBrush" Color="#7AA8E6"/>
+    <SolidColorBrush x:Key="ComboBoxModernGlyphBrush" Color="#C6D5EA"/>
+    <SolidColorBrush x:Key="ComboBoxModernPopupBackgroundBrush" Color="#252D38"/>
+    <SolidColorBrush x:Key="ComboBoxModernPopupBorderBrush" Color="#465468"/>
+    <SolidColorBrush x:Key="ComboBoxModernItemHoverBrush" Color="#334153"/>
+    <SolidColorBrush x:Key="ComboBoxModernItemSelectedBrush" Color="#3E526C"/>
+    <Color x:Key="ComboBoxModernShadowColor">#000000</Color>
     <!--#endregion-->
 
     <!--#region Главное меню -->

@@ -24,8 +24,14 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     };
 
     private bool _isOpen;
+    private bool _isCustomContent;
     private CommandPreviewViewModel? _selectedCommand;
     private Action<BaseCommandModel?>? _onComplete;
+    private Action? _onClose;
+    private object? _customContent;
+    private string _title = "Выбор команды";
+    private string _subtitle = "Enter / DoubleClick — выбрать, F4 — закрыть";
+    private double _panelWidth = 900d;
 
     public ObservableCollection<CommandPreviewViewModel> Commands { get; } = new();
 
@@ -33,6 +39,36 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     {
       get => _isOpen;
       private set => SetProperty(ref _isOpen, value);
+    }
+
+    public bool IsCustomContent
+    {
+      get => _isCustomContent;
+      private set => SetProperty(ref _isCustomContent, value);
+    }
+
+    public object? CustomContent
+    {
+      get => _customContent;
+      private set => SetProperty(ref _customContent, value);
+    }
+
+    public string Title
+    {
+      get => _title;
+      private set => SetProperty(ref _title, value);
+    }
+
+    public string Subtitle
+    {
+      get => _subtitle;
+      private set => SetProperty(ref _subtitle, value);
+    }
+
+    public double PanelWidth
+    {
+      get => _panelWidth;
+      private set => SetProperty(ref _panelWidth, value);
     }
 
     public CommandPreviewViewModel? SelectedCommand
@@ -71,6 +107,11 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     public void Open(IReadOnlyList<BaseCommandModel> commands, BaseCommandModel breakpointCommand, Action<BaseCommandModel?> onComplete)
     {
       Commands.Clear();
+      IsCustomContent = false;
+      CustomContent = null;
+      Title = "Выбор команды";
+      Subtitle = "Enter / DoubleClick — выбрать, F4 — закрыть";
+      PanelWidth = 900d;
 
       foreach (var command in commands)
       {
@@ -88,7 +129,23 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
       }
 
       _onComplete = onComplete;
+      _onClose = null;
       SelectedCommand = Commands.FirstOrDefault();
+      IsOpen = true;
+    }
+
+    public void OpenContent(object content, string title, string subtitle, Action? onClose = null, double panelWidth = 900d)
+    {
+      Commands.Clear();
+      SelectedCommand = null;
+      _onComplete = null;
+      _onClose = onClose;
+
+      IsCustomContent = true;
+      CustomContent = content;
+      Title = title;
+      Subtitle = subtitle;
+      PanelWidth = panelWidth;
       IsOpen = true;
     }
 
@@ -115,9 +172,14 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     private void Close(BaseCommandModel? selectedCommand)
     {
       IsOpen = false;
+      CustomContent = null;
+      PanelWidth = 900d;
       var callback = _onComplete;
+      var closeCallback = _onClose;
       _onComplete = null;
+      _onClose = null;
       callback?.Invoke(selectedCommand);
+      closeCallback?.Invoke();
     }
 
     private static bool IsExcludedMnemonic(string? mnemonic)
@@ -173,3 +235,4 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     }
   }
 }
+

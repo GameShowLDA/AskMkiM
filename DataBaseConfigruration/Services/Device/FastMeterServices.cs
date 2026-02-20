@@ -36,17 +36,9 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список быстрых измерителей.</returns>
     public List<IFastMeter> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<FastMeterEntity>()
-                         .Where(device => device.NumberChassis == numberChassis)
-                         .ToList();
-
-      var result = data
-          .OfType<IFastMeter>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList();
-
-      return result;
+      return GetAll()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     /// <summary>
@@ -56,9 +48,10 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
     public List<FastMeterEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<FastMeterEntity>()
-                     .Where(device => device.NumberChassis == numberChassis)
-                     .ToList();
+      return GetAllData()
+        .OfType<FastMeterEntity>()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     public List<FastMeterEntity> GetAllEntities()

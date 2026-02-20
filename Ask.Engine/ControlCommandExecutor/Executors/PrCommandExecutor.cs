@@ -135,7 +135,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       await PointFormater.MessageResult(errorMessage, context.Console);
-      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
 
       if (errorMessage.Count > 0)
       {

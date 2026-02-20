@@ -35,17 +35,9 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список модулей источников питания.</returns>
     public List<IPowerSourceModule> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<PowerSourceModuleEntity>()
-                         .Where(device => device.NumberChassis == numberChassis)
-                         .ToList();
-
-      var result = data
-          .OfType<IPowerSourceModule>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList();
-
-      return result;
+      return GetAll()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     /// <summary>
@@ -55,9 +47,10 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
     public List<PowerSourceModuleEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<PowerSourceModuleEntity>()
-                     .Where(device => device.NumberChassis == numberChassis)
-                     .ToList();
+      return GetAllData()
+        .OfType<PowerSourceModuleEntity>()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     public List<PowerSourceModuleEntity> GetAllEntities()

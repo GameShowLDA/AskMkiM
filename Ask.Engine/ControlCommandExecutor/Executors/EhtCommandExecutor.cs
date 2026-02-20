@@ -73,8 +73,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       errorMessage.AddRange(messageResult.errorMessage);
       infoMessage.AddRange(messageResult.infoMessage);
 
-      await DeviceManager.RelayModule.PointManager.ResetAllPointsAsync(relayModules, context.Console);
-
       if (errorMessage.Count > 0)
       {
         protocolModel.AddErrors(nameCommand, errorMessage);

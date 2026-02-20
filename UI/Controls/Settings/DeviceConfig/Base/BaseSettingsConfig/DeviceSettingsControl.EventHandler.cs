@@ -66,6 +66,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
+        ConnectionTypeContainer.Visibility = Visibility.Visible;
+        AdditionalSettingsContainer.Visibility = Visibility.Visible;
+        IPAddressContainer.Visibility = Visibility.Collapsed;
+        COMContainer.Visibility = Visibility.Collapsed;
+        ConnectionTypeSelectionBox.SelectedIndex = 0;
 
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
         {
@@ -97,14 +102,21 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="e">Аргументы события выбора.</param>
     private void ConnectionTypeSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+      if (IPAddressContainer == null || COMContainer == null)
+      {
+        return;
+      }
+
       if (ConnectionTypeSelectionBox.SelectedItem is ComboBoxItem selectedItem)
       {
-        if (AdditionalSettingsContainer != null)
-        {
-          AdditionalSettingsContainer.Visibility = Visibility.Visible;
-        }
+        IPAddressContainer.Visibility = Visibility.Collapsed;
+        COMContainer.Visibility = Visibility.Collapsed;
 
-        string selectedType = selectedItem.Content.ToString().ToLower();
+        string? selectedType = selectedItem.Content?.ToString()?.ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(selectedType))
+        {
+          return;
+        }
 
         if (selectedType.Contains("ip"))
         {
@@ -135,13 +147,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="e">Аргументы события изменения текста.</param>
     private void NumberDevice_TextChanged(object sender, TextChangedEventArgs e)
     {
-      if (sender is TextBox textBox)
-      {
-        if (int.TryParse(textBox.Text, out int number) && number >= 1 && number <= 250)
-        {
-          ConnectionTypeContainer.Visibility = Visibility.Visible;
-        }
-      }
+      return;
     }
 
 
@@ -165,7 +171,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       if (string.IsNullOrWhiteSpace(textBox.Text))
       {
-        ConnectionTypeContainer.Visibility = Visibility.Collapsed;
         return;
       }
 
@@ -196,11 +201,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
             CultureInfo.InvariantCulture,
             out _))
       {
-        ConnectionTypeContainer.Visibility = Visibility.Visible;
+        return;
       }
       else
       {
-        ConnectionTypeContainer.Visibility = Visibility.Collapsed;
+        return;
       }
     }
 

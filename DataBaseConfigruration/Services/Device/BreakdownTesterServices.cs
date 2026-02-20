@@ -36,17 +36,9 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список пробойных установок.</returns>
     public List<IBreakdownTester> GetDevicesByNumberChassis(int numberChassis)
     {
-      var data = _context.Set<BreakdownTesterEntity>()
-                         .Where(device => device.NumberChassis == numberChassis)
-                         .ToList();
-
-      var result = data
-          .OfType<IBreakdownTester>()
-          .Select(GetDeviceInstance)
-          .Where(instance => instance != null)
-          .ToList();
-
-      return result;
+      return GetAll()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     /// <summary>
@@ -56,14 +48,34 @@ namespace DataBaseConfiguration.Services.Device
     /// <returns>Список <see cref="BreakdownTesterEntity"/>.</returns>
     public List<BreakdownTesterEntity> GetEntitiesByNumberChassis(int numberChassis)
     {
-      return _context.Set<BreakdownTesterEntity>()
-                     .Where(device => device.NumberChassis == numberChassis)
-                     .ToList();
+      return GetAllData()
+        .OfType<BreakdownTesterEntity>()
+        .Where(device => device.NumberChassis == numberChassis)
+        .ToList();
     }
 
     public List<BreakdownTesterEntity> GetAllEntities()
     {
       return GetAllData().OfType<BreakdownTesterEntity>().ToList();
+    }
+
+    /// <summary>
+    /// Применяет конфигурацию ППУ без рефлексии.
+    /// Сохраняет текущий runtime-объект (singleton) и обновляет только конфигурационные поля.
+    /// </summary>
+    protected override void ApplyConfiguration(IBreakdownTester source, IBreakdownTester target)
+    {
+      target.Id = source.Id;
+      target.NumberChassis = source.NumberChassis;
+      target.Name = source.Name;
+      target.Description = source.Description;
+      target.Number = source.Number;
+      target.ConnectionDetails = source.ConnectionDetails;
+      target.DeviceClass = source.DeviceClass;
+
+      target.PiMaxVoltage = source.PiMaxVoltage;
+      target.SiMaxVoltage = source.SiMaxVoltage;
+      target.IRMinVoltage = source.IRMinVoltage;
     }
   }
 }
