@@ -34,7 +34,9 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       await ShowBreakpointCommandHeaderAsync(command, userInteractionService).ConfigureAwait(false);
       StepControlManager.EnableStepModeByBreakpoint(command, true);
       var cancellationToken = userInteractionService.GetCancellationToken();
+      userInteractionService.ButtonService?.ShowButtonsOnPause();
       var shouldOpenDrawer = await WaitForBreakpointActionAsync(command, cancellationToken).ConfigureAwait(false);
+      userInteractionService.ButtonService?.ShowOnlyStopAndFinishButtons();
       if (!shouldOpenDrawer)
       {
         return command;
@@ -85,7 +87,14 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       Action<ControlButtonPressed>? onControlPressed = null;
       onControlPressed = e =>
       {
-        if (e.Button is ExecutionControlButton.Run or ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
+        if (e.Button == ExecutionControlButton.Run)
+        {
+          StepControlManager.DisableStepMode();
+          tcs.TrySetResult(false);
+          return;
+        }
+
+        if (e.Button is ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
         {
           tcs.TrySetResult(false);
         }

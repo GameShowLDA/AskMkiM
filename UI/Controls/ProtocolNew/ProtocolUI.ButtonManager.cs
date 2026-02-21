@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using System.Windows;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
@@ -198,6 +200,15 @@ namespace UI.Controls.ProtocolNew
     private void NextButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Продолжить\"");
+
+      // Для брейкпоинта "Продолжить" должно отправлять управляющее событие выполнения.
+      if (StepControlManager.IsBreakpointStepModeActive)
+      {
+        StepControlManager.DisableStepMode();
+        ShowOnlyStopAndFinishButtons(false);
+        ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(ExecutionControlButton.Run);
+        return;
+      }
 
       // "Продолжить" в UI всегда продолжает без пошагового режима.
       if (ActionExecutor.StepMode || StepControlManager.StepMode)
@@ -528,6 +539,14 @@ namespace UI.Controls.ProtocolNew
 
     private void EnterStepModeFromPause(bool isStepInto, MouseButtonEventArgs e)
     {
+      if (StepControlManager.IsBreakpointStepModeActive)
+      {
+        ShowOnlyStopAndFinishButtons(true);
+        ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(
+          isStepInto ? ExecutionControlButton.StepInto : ExecutionControlButton.StepOver);
+        return;
+      }
+
       ExecutionConfig.SetStepByStepMode(true);
       StepControlManager.EnableStepMode(isStepInto);
       ShowOnlyStopAndFinishButtons(true);
