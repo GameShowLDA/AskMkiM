@@ -81,18 +81,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       if (valLower.HasValue && valHigher.HasValue)
       {
         ApplyRange(model, lower, higher, PR_MIN, PR_MAX, infinity, valLower, lowerUnit, valHigher, higherUnit);
+        model.ResistanceUnit = unit;
         return;
       }
 
       if (!valLower.HasValue && valHigher.HasValue)
       {
         ApplyUpper(model, higher, PR_MAX, infinity, valHigher, higherUnit);
+        model.ResistanceUnit = unit;
         return;
       }
 
       if (valLower.HasValue && !valHigher.HasValue)
       {
         ApplyLower(model, lower, PR_MIN, infinity, valLower, lowerUnit);
+        model.ResistanceUnit = unit;
         return;
       }
 
@@ -121,6 +124,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       model.ConnectedLowerLimitResistanceSource = $"{min} Ом";
       model.ConnectedHigherLimitResistance = defLower;
       model.ConnectedHigherLimitResistanceSource = $"{defLower} Ом";
+
+      model.ResistanceUnit = "Ом";
+
     }
 
     /// <summary>
