@@ -557,9 +557,9 @@ namespace UI.Controls.ProtocolNew
 
       ExecutionConfig.SetStepByStepMode(true);
       StepControlManager.EnableStepMode(isStepInto);
-      ShowButtonsOnPause();
       NextButtonPreviewMouseDown?.Invoke(this, e);
       KeyboardManager.TriggerStep();
+      ShowOnlyStopAndFinishButtons(isStepInto);
     }
 
     public void StartTask()

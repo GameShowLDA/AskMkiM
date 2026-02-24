@@ -266,13 +266,13 @@ namespace UI.Controls.ProtocolNew
 
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      StepControlManager.IsStepInto = false;
+      StepControlManager.RequestStepOverUntilNextControlCommand();
       KeyboardManager.TriggerStep();
     }
 
     private void stepIntoButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      StepControlManager.IsStepInto = true;
+      StepControlManager.SetStepIntoMode();
       KeyboardManager.TriggerStep();
     }
 
@@ -335,13 +335,9 @@ namespace UI.Controls.ProtocolNew
         return;
       }
 
-      // В активном пошаговом режиме F5 = продолжить без пошагового.
-      if (StepControlManager.StepMode)
-      {
-        KeyboardManager.OnContinuePressed?.Invoke();
-        return;
-      }
-
+      // Приоритет у текущего отображаемого состояния:
+      // если видна "Продолжить" — продолжаем,
+      // если видна "Пауза" — ставим на паузу (в т.ч. во время F10-run).
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
         KeyboardManager.OnContinuePressed?.Invoke();

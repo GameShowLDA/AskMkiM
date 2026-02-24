@@ -104,7 +104,7 @@ namespace UI.Controls.ProtocolNew
       switch (key)
       {
         case Key.F10:
-          StepControlManager.IsStepInto = false;
+          StepControlManager.RequestStepOverUntilNextControlCommand();
           _tcs.TrySetResult(true);
           args.Handled = true;
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F10", true);
@@ -117,7 +117,7 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case Key.F11:
-          StepControlManager.IsStepInto = true;
+          StepControlManager.SetStepIntoMode();
           _tcs.TrySetResult(true);
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F11", true);
           break;
