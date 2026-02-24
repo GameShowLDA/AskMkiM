@@ -496,6 +496,14 @@ namespace UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
+        // Для пошагового режима из точки останова всегда нужен сценарий
+        // "Продолжить / Завершить", а не "Пауза / Завершить".
+        if (StepControlManager.IsBreakpointStepModeActive)
+        {
+          ShowExecutionButtonsOnPause(stepModeEnabled, repeatVisible: false);
+          return;
+        }
+
         if (ContinueButtonElement.Visibility == Visibility.Visible)
         {
           ShowExecutionButtonsOnPause(stepModeEnabled, RepeatButtonElement.Visibility == Visibility.Visible);
@@ -541,7 +549,7 @@ namespace UI.Controls.ProtocolNew
     {
       if (StepControlManager.IsBreakpointStepModeActive)
       {
-        ShowOnlyStopAndFinishButtons(true);
+        ShowButtonsOnPause();
         ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(
           isStepInto ? ExecutionControlButton.StepInto : ExecutionControlButton.StepOver);
         return;
@@ -549,7 +557,7 @@ namespace UI.Controls.ProtocolNew
 
       ExecutionConfig.SetStepByStepMode(true);
       StepControlManager.EnableStepMode(isStepInto);
-      ShowOnlyStopAndFinishButtons(true);
+      ShowButtonsOnPause();
       NextButtonPreviewMouseDown?.Invoke(this, e);
       KeyboardManager.TriggerStep();
     }

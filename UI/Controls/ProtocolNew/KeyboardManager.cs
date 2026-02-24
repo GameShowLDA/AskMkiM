@@ -132,6 +132,12 @@ namespace UI.Controls.ProtocolNew
           {
             _tcs.TrySetResult(true);
           }
+          // Синхронизируем UI с действием "Продолжить":
+          // убираем шаговые кнопки и возвращаем "Пауза / Завершить".
+          if (OnContinuePressed != null)
+          {
+            Application.Current.Dispatcher.Invoke(() => OnContinuePressed?.Invoke());
+          }
           args.Handled = true;
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F5", true);
           break;
@@ -174,16 +180,20 @@ namespace UI.Controls.ProtocolNew
     /// <param name="cancellationToken">Токен отмены ожидания.</param>
     public static async Task WaitForNextStepKeyAsync(CancellationToken cancellationToken)
     {
+      LogInformation($"[EXEC_TRACE] WaitForNextStepKeyAsync enter: StepMode={StepControlManager.StepMode}, IsStepInto={StepControlManager.IsStepInto}");
       _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
       using (cancellationToken.Register(() => _tcs.TrySetCanceled(cancellationToken)))
       {
         try
         {
+          LogInformation("[EXEC_TRACE] WaitForNextStepKeyAsync awaiting _tcs.Task");
           await _tcs.Task;
+          LogInformation("[EXEC_TRACE] WaitForNextStepKeyAsync resumed");
         }
         catch (TaskCanceledException)
         {
+          LogInformation("[EXEC_TRACE] WaitForNextStepKeyAsync canceled");
           throw new OperationCanceledException("Ожидание пошаговой команды было прервано.", cancellationToken);
         }
         finally

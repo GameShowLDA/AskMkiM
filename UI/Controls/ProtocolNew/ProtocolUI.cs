@@ -257,7 +257,9 @@ namespace UI.Controls.ProtocolNew
 
       if (ActionExecutor.IsPaused)
       {
+        LogInformation($"[EXEC_TRACE] ShowMessageAsync waiting pause: Header='{showMessageModel.Header}', Status={showMessageModel.Status}");
         await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
+        LogInformation($"[EXEC_TRACE] ShowMessageAsync pause released: Header='{showMessageModel.Header}'");
       }
 
       if (!skipPause)
@@ -273,7 +275,9 @@ namespace UI.Controls.ProtocolNew
         }
         else
         {
+          LogInformation($"[EXEC_TRACE] ShowMessageAsync waiting step key: Header='{showMessageModel.Header}', IsStepInto={StepControlManager.IsStepInto}, InsideBlock={StepControlManager.InsideBlock}");
           await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
+          LogInformation("[EXEC_TRACE] ShowMessageAsync step key received");
         }
       }
 

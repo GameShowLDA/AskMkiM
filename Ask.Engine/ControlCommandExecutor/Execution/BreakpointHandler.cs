@@ -7,6 +7,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using static Ask.LogLib.LoggerUtility;
 using static Ask.Core.Services.EventCore.Events.ExecutionEvents;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
@@ -34,9 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       await ShowBreakpointCommandHeaderAsync(command, userInteractionService).ConfigureAwait(false);
       StepControlManager.EnableStepModeByBreakpoint(command, true);
       var cancellationToken = userInteractionService.GetCancellationToken();
-      userInteractionService.ButtonService?.ShowButtonsOnPause();
       var shouldOpenDrawer = await WaitForBreakpointActionAsync(command, cancellationToken).ConfigureAwait(false);
-      userInteractionService.ButtonService?.ShowOnlyStopAndFinishButtons();
       if (!shouldOpenDrawer)
       {
         return command;
@@ -71,6 +70,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     private static async Task<bool> WaitForBreakpointActionAsync(BaseCommandModel command, CancellationToken cancellationToken)
     {
+      LogInformation($"[EXEC_TRACE] Breakpoint wait enter: {command.CommandNumber} {command.Mnemonic}");
       var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
       Action<BreakpointF4Pressed>? onF4Pressed = null;
@@ -81,6 +81,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           return;
         }
 
+        LogInformation("[EXEC_TRACE] Breakpoint wait: F4 pressed");
         tcs.TrySetResult(true);
       };
 
@@ -89,6 +90,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         if (e.Button == ExecutionControlButton.Run)
         {
+          LogInformation("[EXEC_TRACE] Breakpoint wait: Run pressed");
           StepControlManager.DisableStepMode();
           tcs.TrySetResult(false);
           return;
@@ -96,6 +98,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (e.Button is ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
         {
+          LogInformation($"[EXEC_TRACE] Breakpoint wait: {e.Button} pressed");
           tcs.TrySetResult(false);
         }
       };
@@ -107,6 +110,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
         {
+          LogInformation("[EXEC_TRACE] Breakpoint wait awaiting user action");
           return await tcs.Task.ConfigureAwait(false);
         }
       }
