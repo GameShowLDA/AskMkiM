@@ -63,7 +63,12 @@ namespace NewCore.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (bus == BusPoint.A)
+        if (bus == BusPoint.AB)
+        { 
+          IsConnectedPointBusA[number] = true;
+          IsConnectedPointBusB[number] = true;
+        }
+        else if (bus == BusPoint.A)
         {
           IsConnectedPointBusA[number] = true;
         }
@@ -85,7 +90,12 @@ namespace NewCore.Function.ModuleRelayControl
 
         if (parsed?.Answer == $"8.{number}.{(int)bus}.1")
         {
-          if (bus == BusPoint.A)
+          if (bus == BusPoint.AB)
+          {
+            IsConnectedPointBusA[number] = true;
+            IsConnectedPointBusB[number] = true;
+          }
+          else if (bus == BusPoint.A)
           {
             IsConnectedPointBusA[number] = true;
           }
@@ -120,7 +130,12 @@ namespace NewCore.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (bus == BusPoint.A)
+        if (bus == BusPoint.AB)
+        {
+          IsConnectedPointBusA[number] = false;
+          IsConnectedPointBusB[number] = false;
+        }
+        else if (bus == BusPoint.A)
         {
           IsConnectedPointBusA[number] = false;
         }
@@ -142,7 +157,12 @@ namespace NewCore.Function.ModuleRelayControl
 
         if (parsed?.Answer == $"8.{number}.{(int)bus}.2")
         {
-          if (bus == BusPoint.A)
+          if (bus == BusPoint.AB)
+          {
+            IsConnectedPointBusA[number] = false;
+            IsConnectedPointBusB[number] = false;
+          }
+          else if (bus == BusPoint.A)
           {
             IsConnectedPointBusA[number] = false;
           }
@@ -193,10 +213,19 @@ namespace NewCore.Function.ModuleRelayControl
         {
           for (int number = firstPoint; number <= lastPoint; number++)
           {
-            if (bus == BusPoint.A)
+            if (bus == BusPoint.AB)
+            {
               IsConnectedPointBusA[number] = true;
-            else
               IsConnectedPointBusB[number] = true;
+            }
+            else if (bus == BusPoint.A)
+            {
+              IsConnectedPointBusA[number] = true;
+            }
+            else
+            {
+              IsConnectedPointBusB[number] = true;
+            }
           }
 
           return true;
@@ -241,10 +270,19 @@ namespace NewCore.Function.ModuleRelayControl
         {
           for (int number = firstPoint; number <= lastPoint; number++)
           {
-            if (bus == BusPoint.A)
+            if (bus == BusPoint.AB)
+            {
               IsConnectedPointBusA[number] = false;
-            else
               IsConnectedPointBusB[number] = false;
+            }
+            else if (bus == BusPoint.A)
+            {
+              IsConnectedPointBusA[number] = false;
+            }
+            else
+            {
+              IsConnectedPointBusB[number] = false;
+            }
           }
 
           return true;
