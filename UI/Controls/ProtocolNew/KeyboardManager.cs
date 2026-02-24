@@ -3,7 +3,6 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
-using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -102,8 +101,6 @@ namespace UI.Controls.ProtocolNew
       if (_tcs == null) return;
       if (!StepControlManager.StepMode) return;
 
-      LogInformation($"[KEYBOARD] Detected key: {key}");
-
       switch (key)
       {
         case Key.F10:
@@ -127,10 +124,15 @@ namespace UI.Controls.ProtocolNew
 
         case Key.F5:
           StepControlManager.DisableStepMode();
-          LogInformation("[KEYBOARD] Step mode DISABLED via F5");
           if (_tcs != null && !_tcs.Task.IsCompleted)
           {
             _tcs.TrySetResult(true);
+          }
+          // Синхронизируем UI с действием "Продолжить":
+          // убираем шаговые кнопки и возвращаем "Пауза / Завершить".
+          if (OnContinuePressed != null)
+          {
+            Application.Current.Dispatcher.Invoke(() => OnContinuePressed?.Invoke());
           }
           args.Handled = true;
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F5", true);
@@ -158,7 +160,6 @@ namespace UI.Controls.ProtocolNew
         ? "<пусто>"
         : command.CommandBody;
 
-      LogInformation($"[KEYBOARD] F4 pressed on breakpoint command: {caption}");
       ExecutionEventAdapter.RaiseBreakpointF4Pressed(command);
       MessageEventAdapter.RaiseInfoMessage(
         $"Нажата клавиша: F4 на команде {caption}. Тело команды: {body}",

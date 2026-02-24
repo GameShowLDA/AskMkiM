@@ -132,13 +132,7 @@ namespace UI.Controls.ProtocolNew
 
     private void EventAggregator_StepByStepModeChanged(bool obj)
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        StepOver.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
-        StepInto.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
-        StepOverButtonElement.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
-        StepIntoButtonElement.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
-      });
+      UpdateStepButtonsForCurrentState(obj);
     }
 
     private void InitializeInternal()
@@ -184,6 +178,7 @@ namespace UI.Controls.ProtocolNew
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
     {
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      var modifiers = Keyboard.Modifiers;
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {
         return;
@@ -195,52 +190,69 @@ namespace UI.Controls.ProtocolNew
       switch (key)
       {
         case Key.Enter:
-          if (StartButtonElement.Visibility == Visibility.Visible)
+          if (modifiers == ModifierKeys.None && StartButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnStartPressed?.Invoke();
+            e.Handled = true;
           }
-          e.Handled = true;
           break;
 
         case Key.F5:
-          HandleRunOrPause();
-          e.Handled = true;
+          if (modifiers == ModifierKeys.None)
+          {
+            HandleRunOrPause();
+            e.Handled = true;
+          }
           break;
 
         case Key.F10:
+          if (modifiers == ModifierKeys.None)
+          {
+            HandleStepModeStart(isStepInto: false);
+            e.Handled = true;
+          }
+          break;
+
         case Key.F11:
-          HandleStepModeStart();
-          e.Handled = true;
+          if (modifiers == ModifierKeys.None)
+          {
+            HandleStepModeStart(isStepInto: true);
+            e.Handled = true;
+          }
           break;
 
         case Key.P:
-          if (ContinueButtonElement.Visibility == Visibility.Visible)
+          if (modifiers == ModifierKeys.None && ContinueButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnContinuePressed?.Invoke();
           }
-          else if (PauseButtonElement.Visibility == Visibility.Visible)
+          else if (modifiers == ModifierKeys.None && PauseButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnPausePressed?.Invoke();
           }
-          e.Handled = true;
+          if (modifiers == ModifierKeys.None)
+          {
+            e.Handled = true;
+          }
           break;
 
         case Key.Escape:
-          if (StopButtonElement.Visibility == Visibility.Visible
+          if (modifiers == ModifierKeys.None &&
+              (StopButtonElement.Visibility == Visibility.Visible
               || ContinueButtonElement.Visibility == Visibility.Visible
-              || PauseButtonElement.Visibility == Visibility.Visible)
+              || PauseButtonElement.Visibility == Visibility.Visible))
           {
             KeyboardManager.OnExitPressed?.Invoke();
+            e.Handled = true;
           }
-          e.Handled = true;
           break;
 
         case Key.R:
-          if (RepeatButtonElement.Visibility == Visibility.Visible)
+          if (modifiers == ModifierKeys.None && RepeatButtonElement.Visibility == Visibility.Visible)
           {
             KeyboardManager.OnRepeatPressed?.Invoke();
+            e.Handled = true;
           }
-          e.Handled = true;
           break;
         default:
           var focus = Keyboard.FocusedElement;
@@ -297,8 +309,11 @@ namespace UI.Controls.ProtocolNew
           break;
 
         case ExecutionControlButton.StepOver:
+          HandleStepModeStart(isStepInto: false);
+          break;
+
         case ExecutionControlButton.StepInto:
-          HandleStepModeStart();
+          HandleStepModeStart(isStepInto: true);
           break;
       }
     }
@@ -317,8 +332,17 @@ namespace UI.Controls.ProtocolNew
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
         KeyboardManager.OnStartPressed?.Invoke();
+        return;
       }
-      else if (ContinueButtonElement.Visibility == Visibility.Visible)
+
+      // В активном пошаговом режиме F5 = продолжить без пошагового.
+      if (StepControlManager.StepMode)
+      {
+        KeyboardManager.OnContinuePressed?.Invoke();
+        return;
+      }
+
+      if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
         KeyboardManager.OnContinuePressed?.Invoke();
       }
@@ -332,11 +356,24 @@ namespace UI.Controls.ProtocolNew
     /// Обрабатывает запуск выполнения в пошаговом режиме
     /// (F10 / F11), если доступен старт.
     /// </summary>
-    private void HandleStepModeStart()
+    private void HandleStepModeStart(bool isStepInto)
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
         KeyboardManager.OnStartPressedByStepMode?.Invoke();
+        return;
+      }
+
+      if (ContinueButtonElement.Visibility == Visibility.Visible)
+      {
+        if (isStepInto)
+        {
+          BottomLayer_PreviewMouseDown(StepIntoButtonElement, CreateMouseArgs());
+        }
+        else
+        {
+          TopLayer_PreviewMouseDown(StepOverButtonElement, CreateMouseArgs());
+        }
       }
     }
   }

@@ -101,6 +101,16 @@ namespace UI.Controls.ProtocolNew
     {
       isExit = false;
       processName = name;
+      IsPaused = false;
+
+      // Новый запуск не должен наследовать "залипшее" состояние
+      // брейкпоинта/пошагового режима от предыдущего выполнения.
+      StepControlManager.Reset();
+      if (StepControlManager.StepMode)
+      {
+        StepControlManager.DisableStepMode();
+      }
+      StepMode = false;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
       if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
@@ -482,7 +492,7 @@ namespace UI.Controls.ProtocolNew
         }
         catch (OperationCanceledException)
         {
-
+          // Отмена ожидаема при остановке выполнения.
         }
         catch (Exception ex)
         {
@@ -537,13 +547,12 @@ namespace UI.Controls.ProtocolNew
         LogWarning($"Попытка завершить \"{name}\", когда задача не запущена.");
       }
 
+      StepControlManager.DisableStepMode();
+      KeyboardManager.TriggerStep();
+
       if (stopDelegate != null)
       {
         var token = CancellationTokenSource?.Token ?? CancellationToken.None;
-
-        StepControlManager.DisableStepMode();
-        KeyboardManager.TriggerStep();
-
         await stopDelegate(token);
       }
 

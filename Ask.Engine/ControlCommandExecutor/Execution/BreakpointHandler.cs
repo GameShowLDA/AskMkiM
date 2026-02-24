@@ -85,7 +85,14 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       Action<ControlButtonPressed>? onControlPressed = null;
       onControlPressed = e =>
       {
-        if (e.Button is ExecutionControlButton.Run or ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
+        if (e.Button == ExecutionControlButton.Run)
+        {
+          StepControlManager.DisableStepMode();
+          tcs.TrySetResult(false);
+          return;
+        }
+
+        if (e.Button is ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
         {
           tcs.TrySetResult(false);
         }
