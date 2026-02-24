@@ -267,17 +267,52 @@ namespace UI.Controls.ProtocolNew
 
       if (StepControlManager.StepMode && !SkipStepModeCheck)
       {
-        if (!StepControlManager.IsStepInto && StepControlManager.InsideBlock)
+        if (ShouldWaitStepKey(showMessageModel, IsBlockStart))
         {
-          // Поверх — внутри блока, пропускаем ожидание
-        }
-        else
-        {
+          // Остановились на шаге: показываем режим "Продолжить/Завершить".
+          ShowButtonsOnPause(repeatVisible: false);
           await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
+
+          // После шага выполнение снова "бежит":
+          // для F10 показываем только Пауза/Завершить,
+          // для F11 оставляем шаговые кнопки.
+          bool showStepButtons = StepControlManager.IsStepInto && !StepControlManager.StepOverUntilNextControlCommand;
+          ShowOnlyStopAndFinishButtons(showStepButtons);
         }
       }
 
       await Task.Delay(1);
+    }
+
+    private static bool ShouldWaitStepKey(ShowMessageModel showMessageModel, bool isBlockStart)
+    {
+      if (StepControlManager.IsStepInto)
+      {
+        return true;
+      }
+
+      if (!StepControlManager.StepOverUntilNextControlCommand)
+      {
+        return false;
+      }
+
+      if (!IsControlProgramCommandStart(showMessageModel, isBlockStart))
+      {
+        return false;
+      }
+
+      StepControlManager.CompleteStepOverUntilNextControlCommand();
+      return true;
+    }
+
+    private static bool IsControlProgramCommandStart(ShowMessageModel showMessageModel, bool isBlockStart)
+    {
+      if (!isBlockStart || showMessageModel.Status != MessageType.Command)
+      {
+        return false;
+      }
+
+      return showMessageModel.IsControlProgramCommandHeader;
     }
 
     /// <summary>

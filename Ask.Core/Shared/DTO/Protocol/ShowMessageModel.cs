@@ -99,6 +99,13 @@ namespace Ask.Core.Shared.DTO.Protocol
     public bool IsDeviceMessage { get; set; }
 
     /// <summary>
+    /// Признак заголовка начала выполнения команды программы контроля.
+    /// Используется пошаговым режимом F10, чтобы останавливаться
+    /// только на старте следующей команды.
+    /// </summary>
+    public bool IsControlProgramCommandHeader { get; set; }
+
+    /// <summary>
     /// Размер табуляции перед строкой.
     /// </summary>
     public int IndentLevel { get; set; }
@@ -154,6 +161,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       ExecutionError = false;
       CanBeDeleted = false;
       IsDeviceMessage = false;
+      IsControlProgramCommandHeader = false;
       IndentLevel = 0;
 
       try

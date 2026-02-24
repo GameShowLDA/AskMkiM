@@ -25,7 +25,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       command.ProtocolModel = new ProtocolModel();
       command.ProtocolModel.ProgramPath = command.ObjectName;
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение программы контроля для \"{command.ObjectName}({command.ObjectCode})\"", type: ShowMessageModel.MessageType.Command), IsBlockStart: true);
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение программы контроля для \"{command.ObjectName}({command.ObjectCode})\"", type: ShowMessageModel.MessageType.Command)
+      {
+        IsControlProgramCommandHeader = true
+      }, IsBlockStart: true);
     }
   }
 }
