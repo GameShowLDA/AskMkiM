@@ -3,7 +3,6 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
-using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.ProtocolNew
 {
@@ -102,8 +101,6 @@ namespace UI.Controls.ProtocolNew
       if (_tcs == null) return;
       if (!StepControlManager.StepMode) return;
 
-      LogInformation($"[KEYBOARD] Detected key: {key}");
-
       switch (key)
       {
         case Key.F10:
@@ -127,7 +124,6 @@ namespace UI.Controls.ProtocolNew
 
         case Key.F5:
           StepControlManager.DisableStepMode();
-          LogInformation("[KEYBOARD] Step mode DISABLED via F5");
           if (_tcs != null && !_tcs.Task.IsCompleted)
           {
             _tcs.TrySetResult(true);
@@ -164,7 +160,6 @@ namespace UI.Controls.ProtocolNew
         ? "<пусто>"
         : command.CommandBody;
 
-      LogInformation($"[KEYBOARD] F4 pressed on breakpoint command: {caption}");
       ExecutionEventAdapter.RaiseBreakpointF4Pressed(command);
       MessageEventAdapter.RaiseInfoMessage(
         $"Нажата клавиша: F4 на команде {caption}. Тело команды: {body}",
@@ -180,20 +175,16 @@ namespace UI.Controls.ProtocolNew
     /// <param name="cancellationToken">Токен отмены ожидания.</param>
     public static async Task WaitForNextStepKeyAsync(CancellationToken cancellationToken)
     {
-      LogInformation($"[EXEC_TRACE] WaitForNextStepKeyAsync enter: StepMode={StepControlManager.StepMode}, IsStepInto={StepControlManager.IsStepInto}");
       _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
       using (cancellationToken.Register(() => _tcs.TrySetCanceled(cancellationToken)))
       {
         try
         {
-          LogInformation("[EXEC_TRACE] WaitForNextStepKeyAsync awaiting _tcs.Task");
           await _tcs.Task;
-          LogInformation("[EXEC_TRACE] WaitForNextStepKeyAsync resumed");
         }
         catch (TaskCanceledException)
         {
-          LogInformation("[EXEC_TRACE] WaitForNextStepKeyAsync canceled");
           throw new OperationCanceledException("Ожидание пошаговой команды было прервано.", cancellationToken);
         }
         finally

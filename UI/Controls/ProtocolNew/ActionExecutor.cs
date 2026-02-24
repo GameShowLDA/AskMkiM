@@ -106,7 +106,10 @@ namespace UI.Controls.ProtocolNew
       // Новый запуск не должен наследовать "залипшее" состояние
       // брейкпоинта/пошагового режима от предыдущего выполнения.
       StepControlManager.Reset();
-      StepControlManager.DisableStepMode();
+      if (StepControlManager.StepMode)
+      {
+        StepControlManager.DisableStepMode();
+      }
       StepMode = false;
 
       await ProtocolSelfCheck.ClearAllMessagesAsync();
@@ -334,7 +337,6 @@ namespace UI.Controls.ProtocolNew
     /// <returns>Задача ожидания выхода из паузы или отмены.</returns>
     public async Task WaitWhilePausedAsync(CancellationToken cancellationToken, IMessageOutputService protocolSelfCheck = null)
     {
-      LogInformation($"[EXEC_TRACE] WaitWhilePausedAsync enter: IsPaused={IsPaused}, HasTcs={PauseCompletionSource != null}, Completed={PauseCompletionSource?.Task.IsCompleted}");
       if (IsPaused && PauseCompletionSource != null && !PauseCompletionSource.Task.IsCompleted)
       {
         LogInformation("Срабатывание ожидания при самоконтроле");
@@ -361,14 +363,11 @@ namespace UI.Controls.ProtocolNew
         {
           try
           {
-            LogInformation("[EXEC_TRACE] WaitWhilePausedAsync awaiting PauseCompletionSource.Task");
             await PauseCompletionSource.Task;
-            LogInformation("[EXEC_TRACE] WaitWhilePausedAsync resumed from PauseCompletionSource.Task");
           }
           catch (TaskCanceledException)
           {
             // Отмена ожидания — просто выйти
-            LogInformation("[EXEC_TRACE] WaitWhilePausedAsync canceled");
             return;
           }
           finally
@@ -478,12 +477,9 @@ namespace UI.Controls.ProtocolNew
         {
           SystemStateManager._stopwatch.Restart();
 
-          LogInformation($"[EXEC_TRACE] ExecuteTaskAsync start Task.Run for process '{name}'");
           ProcessTask = Task.Run(() => startDelegate(ProtocolSelfCheck, ProtocolSelfCheck, ProtocolSelfCheck.GetInputHighlightService(), CancellationTokenSource.Token));
           SystemStateManager.SetIsLocked(true);
-          LogInformation($"[EXEC_TRACE] ExecuteTaskAsync awaiting ProcessTask for process '{name}'");
           await ProcessTask;
-          LogInformation($"[EXEC_TRACE] ExecuteTaskAsync ProcessTask completed for process '{name}'");
 
           if (isRepeatEnabled)
           {
@@ -496,7 +492,7 @@ namespace UI.Controls.ProtocolNew
         }
         catch (OperationCanceledException)
         {
-          LogInformation($"[EXEC_TRACE] ExecuteTaskAsync canceled for process '{name}'");
+          // Отмена ожидаема при остановке выполнения.
         }
         catch (Exception ex)
         {
