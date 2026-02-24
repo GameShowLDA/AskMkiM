@@ -1,5 +1,6 @@
 ﻿using Ask.UI.Features.ExecutionSelection.ViewModels;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using System.Linq;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,6 +60,13 @@ namespace Ask.UI.Features.ExecutionSelection.Views
         return;
       }
 
+      // ComboBox dropdowns are hosted in a separate popup visual tree.
+      // While one is open, allowing temporary focus leave prevents immediate popup close.
+      if (HasOpenComboBoxDropDown())
+      {
+        return;
+      }
+
       if (e.NewFocus is DependencyObject newFocus && IsFocusInsideDrawer(newFocus))
       {
         return;
@@ -66,6 +74,34 @@ namespace Ask.UI.Features.ExecutionSelection.Views
 
       e.Handled = true;
       Dispatcher.InvokeAsync(EnsureDrawerFocus, System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    private bool HasOpenComboBoxDropDown()
+    {
+      return FindVisualChildren<ComboBox>(this).Any(comboBox => comboBox.IsDropDownOpen);
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject root) where T : DependencyObject
+    {
+      if (root == null)
+      {
+        yield break;
+      }
+
+      int childrenCount = VisualTreeHelper.GetChildrenCount(root);
+      for (int i = 0; i < childrenCount; i++)
+      {
+        DependencyObject child = VisualTreeHelper.GetChild(root, i);
+        if (child is T typedChild)
+        {
+          yield return typedChild;
+        }
+
+        foreach (var nested in FindVisualChildren<T>(child))
+        {
+          yield return nested;
+        }
+      }
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
