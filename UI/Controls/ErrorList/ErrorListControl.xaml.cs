@@ -4,9 +4,11 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Support;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace UI.Controls.ErrorList
@@ -54,7 +56,11 @@ namespace UI.Controls.ErrorList
       };
 
       Items.CollectionChanged += (_, __) => UpdateTabsVisibilityAndSelection();
-      Breakpoints.CollectionChanged += (_, __) => UpdateTabsVisibilityAndSelection();
+      Breakpoints.CollectionChanged += (_, __) => 
+      { 
+        UpdateTabsVisibilityAndSelection();
+        EnsureBreakpointsSorting();
+      };
     }
 
     #region События для вкладки "Точки остановки"
@@ -213,6 +219,18 @@ namespace UI.Controls.ErrorList
       UpdateButtons();
 
       UpdateTabsVisibilityAndSelection();
+    }
+
+    private void EnsureBreakpointsSorting()
+    {
+      var view = CollectionViewSource.GetDefaultView(Breakpoints);
+      if (view == null) return;
+
+      using (view.DeferRefresh())
+      {
+        view.SortDescriptions.Clear();
+        view.SortDescriptions.Add(new SortDescription(nameof(BreakpointListItem.RightLine), ListSortDirection.Ascending));
+      }
     }
 
     private void UpdateButtons()
