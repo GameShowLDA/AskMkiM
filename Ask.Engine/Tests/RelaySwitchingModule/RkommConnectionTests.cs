@@ -107,9 +107,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       // Подключение к устройствам (МКР + УКШ + мультиметр)
       await RelayModuleHelper.ConnectIfNeededAsync(_module, _userInteractionService, cancellationToken);
-
       await RelayModuleHelper.ConnectIfNeededAsync(_busSwitcher, _userInteractionService, cancellationToken);
-
       await RelayModuleHelper.ConnectIfNeededAsync(_fastMeter, _userInteractionService, cancellationToken);
 
       await _userInteractionService.ShowMessageAsync(
@@ -153,8 +151,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
         // Коммутируем точку
-        await RelayModuleHelper.PointConnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
-        await RelayModuleHelper.PointConnectAsync(_module, BusPoint.B, i, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.PointConnectAsync(_module, BusPoint.AB, i, _userInteractionService, cancellationToken);
 
         // Измеряем сопротивление ПОСЛЕ коммутации точки
         result = await RelayModuleHelper.MeasureResistanceAsync(
@@ -166,8 +163,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
             data.Param);
 
         // Отключаем точку
-        await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
-        await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.B, i, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.AB, i, _userInteractionService, cancellationToken);
       }
     }
 
