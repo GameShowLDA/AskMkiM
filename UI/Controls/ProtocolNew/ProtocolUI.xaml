@@ -154,9 +154,8 @@
 
                     <Grid Height="Auto">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="20,20,0,0">
@@ -198,39 +197,44 @@
                             </Grid>
                         </Border>
 
-                        <ContentControl  x:Name="ContentPanel" Content="{Binding ContentView}" Grid.Row="1" Margin="20,10,20,10"/>
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      CanContentScroll="False">
+                            <StackPanel>
+                                <ContentControl  x:Name="ContentPanel" Content="{Binding ContentView}" Margin="20,10,20,10"/>
 
-                        <StackPanel x:Name="BigButtonsPanel" Grid.Row="2" Margin="20,0,20,20">
+                                <StackPanel x:Name="BigButtonsPanel" Margin="20,0,20,20">
 
-                            <Button x:Name="StartButton" 
+                                    <Button x:Name="StartButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Start}, Path=Value}" 
                                     Style="{DynamicResource ShadowButtonStyle}"/>
 
-                            <Button x:Name="RepeatButton" 
+                                    <Button x:Name="RepeatButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" 
                                     Margin="0,10,0,0" 
                                     Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
-                            <Button x:Name="loopButton" 
+                                    <Button x:Name="loopButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
                                     Margin="0,10,0,0" 
                                     Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
-                            <Button x:Name="PauseButton" 
+                                    <Button x:Name="PauseButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" 
                                     Margin="0,10,0,0"
                                     Style="{DynamicResource ButtonStyleV5}"
                                     />
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                <Button x:Name="StepOver" 
+                                        <Button x:Name="StepOver" 
                                         Content="{Binding Source={StaticResource LS_Protocol_Btn_StepOver}, Path=Value}" 
                                         FontSize="18" 
                                         Grid.Column="0" 
@@ -238,7 +242,7 @@
                                         Style="{StaticResource ShadowButtonStyle}" 
                                         PreviewMouseDown="stepOverButton_PreviewMouseDown" />
                                 
-                                <Button x:Name="StepInto" 
+                                        <Button x:Name="StepInto" 
                                         Content="{Binding Source={StaticResource LS_Protocol_Btn_StepInto}, Path=Value}" 
                                         FontSize="18" 
                                         Grid.Column="1" 
@@ -247,9 +251,9 @@
                                         Style="{StaticResource ShadowButtonStyle}" 
                                         PreviewMouseDown="stepIntoButton_PreviewMouseDown"/>
 
-                            </Grid>
+                                    </Grid>
 
-                            <Button x:Name="ContinueButton"  
+                                    <Button x:Name="ContinueButton"  
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Continue}, Path=Value}" 
                                     FontSize="18" 
                                     Grid.Column="0" 
@@ -257,7 +261,7 @@
                                     Style="{DynamicResource ButtonStyleV6}"
                                     />
 
-                            <Button x:Name="StopButton" 
+                                    <Button x:Name="StopButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Exit}, Path=Value}" 
                                     FontSize="18" 
                                     Grid.Column="1" 
@@ -265,7 +269,9 @@
                                     Style="{DynamicResource ButtonStyleV7}"
                                     />
 
-                        </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
 
