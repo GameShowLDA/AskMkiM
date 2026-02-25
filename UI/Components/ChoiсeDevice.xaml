@@ -16,12 +16,14 @@
                     BorderThickness="0"
                     Padding="8"
                     Background="Transparent"
+                    Checked="toggleButton_Checked"
+                    Unchecked="toggleButton_Unchecked"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center" />
 
             <Popup x:Name="popup"
              IsOpen="{Binding IsChecked, ElementName=toggleButton}"
-             StaysOpen="False"
+             StaysOpen="True"
              Placement="Bottom"
              AllowsTransparency="True"
              PlacementTarget="{Binding ElementName=toggleButton}">

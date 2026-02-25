@@ -1,10 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -21,12 +23,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
+      StepControlManager.EnableStepMode(false);
       EventAggregator.Subscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
 
       var command = GetRequiredCommand<KscCommandModel>(context);
+      SetActiveLine(context, command);
+
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      SetActiveLine(context, command);
+
 
       var relayModules = EquipmentService.ValidRelayModules;
       var switchingDevice = EquipmentService.ValidSwitchingDevice;
@@ -47,22 +52,22 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       foreach (var item in relayModules)
       {
-        await item.ConnectableManager.ResetAsync();
+        await item.ConnectableManager.ResetAsync(context.Console);
       }
 
       if (switchingDevice != null)
       {
-        await switchingDevice.ConnectableManager.ResetAsync();
+        await switchingDevice.ConnectableManager.ResetAsync(context.Console);
       }
 
       if (fastMeter != null)
       {
-        await fastMeter.ConnectableManager.ResetAsync();
+        await fastMeter.ConnectableManager.ResetAsync(context.Console);
       }
 
       if (breakdownTester != null)
       {
-        await breakdownTester.ConnectableManager.ResetAsync();
+        await breakdownTester.ConnectableManager.ResetAsync(context.Console);
       }
 
       GetProtocol(context, command, protocolModel);

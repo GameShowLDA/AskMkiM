@@ -68,6 +68,13 @@ namespace Ask.Core.Services.App
     public static bool InsideBlock { get; private set; } = false;
 
     /// <summary>
+    /// Флаг F10 до следующей команды для программ контроля.
+    /// Пока <c>true</c>, ожидание шага пропускается до момента появления
+    /// заголовка следующей команды выполнения ПК.
+    /// </summary>
+    public static bool StepOverUntilNextControlCommand { get; private set; }
+
+    /// <summary>
     /// Источник активации текущего пошагового режима.
     /// </summary>
     public static StepModeActivationSource ActivationSource => _activationSource;
@@ -92,7 +99,6 @@ namespace Ask.Core.Services.App
     public static void EnterBlock()
     {
       InsideBlock = true;
-      IsStepInto = true;
     }
 
     /// <summary>
@@ -109,8 +115,35 @@ namespace Ask.Core.Services.App
     {
       IsStepInto = false;
       InsideBlock = false;
+      StepOverUntilNextControlCommand = false;
       _activationSource = StepModeActivationSource.Unknown;
       _breakpointCommandInfo = null;
+    }
+
+    /// <summary>
+    /// Переводит пошаговый режим в F10 до начала следующей команды ПК.
+    /// </summary>
+    public static void RequestStepOverUntilNextControlCommand()
+    {
+      IsStepInto = false;
+      StepOverUntilNextControlCommand = true;
+    }
+
+    /// <summary>
+    /// Переводит режим в F11 шаг вглубь и сбрасывает режим F10-обхода.
+    /// </summary>
+    public static void SetStepIntoMode()
+    {
+      IsStepInto = true;
+      StepOverUntilNextControlCommand = false;
+    }
+
+    /// <summary>
+    /// Сбрасывает флаг ожидания следующей команды для F10.
+    /// </summary>
+    public static void CompleteStepOverUntilNextControlCommand()
+    {
+      StepOverUntilNextControlCommand = false;
     }
 
     /// <summary>
@@ -186,6 +219,7 @@ namespace Ask.Core.Services.App
     {
       _stepMode = true;
       IsStepInto = isStepInto;
+      StepOverUntilNextControlCommand = !isStepInto;
       _stepBypassRequested = false;
       _activationSource = activationSource;
       _breakpointCommandInfo = activationSource == StepModeActivationSource.Breakpoint
@@ -203,6 +237,7 @@ namespace Ask.Core.Services.App
     {
       _stepMode = false;
       _stepBypassRequested = true;
+      StepOverUntilNextControlCommand = false;
       _activationSource = StepModeActivationSource.Unknown;
       _breakpointCommandInfo = null;
       ExecutionEventAdapter.RaiseStepByStepModeChanged(false);
@@ -218,3 +253,4 @@ namespace Ask.Core.Services.App
     }
   }
 }
+

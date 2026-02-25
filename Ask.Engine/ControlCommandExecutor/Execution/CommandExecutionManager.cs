@@ -172,12 +172,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       StepControlManager.EnableStepMode(false);
       try
       {
-        await _console.ShowMessageAsync(
+        if (!IsStepCancellation(ex))
+        {
+          await _console.ShowMessageAsync(
           new ShowMessageModel(
             "\r\nОшибка выполнения команды",
             message: $"Команда: {failedCommand.CommandNumber} {failedCommand.Mnemonic}. {ex.Message} Запускается аварийное выполнение КЦ.",
             type: ShowMessageModel.MessageType.Error)
           { IndentLevel = 3 });
+        }
 
         var kscCommand = _commands
           .Snapshot()
@@ -208,6 +211,21 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         _isExecutingEmergencyKsc = false;
       }
+    }
+
+    private static bool IsStepCancellation(Exception ex)
+    {
+      if (ex is OperationCanceledException)
+        return true;
+
+      if (ex.InnerException is OperationCanceledException)
+        return true;
+
+      // иногда кидают просто Exception с текстом
+      if (ex.Message.Contains("Ожидание пошаговой команды было прервано"))
+        return true;
+
+      return false;
     }
   }
 }

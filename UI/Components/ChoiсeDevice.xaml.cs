@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace UI.Components
 {
@@ -11,6 +13,8 @@ namespace UI.Components
   /// </summary>
   public partial class ChoiceDevice : UserControl, INotifyPropertyChanged
   {
+    private Window? _hostWindow;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ChoiceDevice"/>.
     /// </summary>
@@ -18,6 +22,8 @@ namespace UI.Components
     {
       InitializeComponent();
       DataContext = this;
+      Loaded += ChoiceDevice_Loaded;
+      Unloaded += ChoiceDevice_Unloaded;
     }
 
     /// <inheritdoc/>
@@ -112,7 +118,6 @@ namespace UI.Components
       }
     }
 
-    // 📣 Отображаемый текст
     private string _selectedDisplayText = "Выберите устройство";
 
     /// <summary>
@@ -141,7 +146,7 @@ namespace UI.Components
       if (index >= 0 && index < DisplayFields.Count)
         SelectedDisplayText = DisplayFields[index];
       else
-        SelectedDisplayText = SelectedItem.ToString(); // fallback
+        SelectedDisplayText = SelectedItem.ToString();
     }
 
     /// <summary>
@@ -174,6 +179,79 @@ namespace UI.Components
         SelectedItem = selected;
         toggleButton.IsChecked = false;
       }
+    }
+
+    private void ChoiceDevice_Loaded(object sender, RoutedEventArgs e)
+    {
+      _hostWindow = Window.GetWindow(this);
+    }
+
+    private void ChoiceDevice_Unloaded(object sender, RoutedEventArgs e)
+    {
+      DetachOutsideClickHandler();
+    }
+
+    private void toggleButton_Checked(object sender, RoutedEventArgs e)
+    {
+      AttachOutsideClickHandler();
+    }
+
+    private void toggleButton_Unchecked(object sender, RoutedEventArgs e)
+    {
+      DetachOutsideClickHandler();
+    }
+
+    private void AttachOutsideClickHandler()
+    {
+      _hostWindow ??= Window.GetWindow(this);
+      if (_hostWindow != null)
+      {
+        _hostWindow.PreviewMouseDown -= HostWindow_PreviewMouseDown;
+        _hostWindow.PreviewMouseDown += HostWindow_PreviewMouseDown;
+      }
+    }
+
+    private void DetachOutsideClickHandler()
+    {
+      if (_hostWindow != null)
+      {
+        _hostWindow.PreviewMouseDown -= HostWindow_PreviewMouseDown;
+      }
+    }
+
+    private void HostWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      if (toggleButton.IsChecked != true)
+      {
+        return;
+      }
+
+      if (e.OriginalSource is not DependencyObject source)
+      {
+        toggleButton.IsChecked = false;
+        return;
+      }
+
+      if (!IsDescendantOf(source, this))
+      {
+        toggleButton.IsChecked = false;
+      }
+    }
+
+    private static bool IsDescendantOf(DependencyObject source, DependencyObject ancestor)
+    {
+      DependencyObject? current = source;
+      while (current != null)
+      {
+        if (ReferenceEquals(current, ancestor))
+        {
+          return true;
+        }
+
+        current = VisualTreeHelper.GetParent(current);
+      }
+
+      return false;
     }
 
     /// <summary>

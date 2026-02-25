@@ -241,8 +241,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {pointModel.ToString()} к шинам А и В"), IsBlockStart: true);
       var relayModule = EquipmentService.GetModuleByPoint(pointModel);
 
-      await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, pointModel.PointNumber, userMessageService);
-      await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService);
+      await relayModule.PointManager.ConnectRelayAsync(BusPoint.AB, pointModel.PointNumber, userMessageService);
     }
 
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)

@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using System;
 using System.Reflection;
 
 namespace Ask.Core.Shared.Metadata.Static.Messages
@@ -48,7 +49,8 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           type: ShowMessageModel.MessageType.Command
       )
       {
-        IndentLevel = 1
+        IndentLevel = 1,
+        IsControlProgramCommandHeader = !commandName.Contains("ПИ/", StringComparison.OrdinalIgnoreCase)
       };
     }
 
