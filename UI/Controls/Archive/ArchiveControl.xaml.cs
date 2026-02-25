@@ -1,23 +1,24 @@
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Ask.Core.Services.Archive;
+using Path = System.IO.Path;
 
-namespace TestArchive
+namespace UI.Controls.Archive
 {
-  public partial class ArchiveExplorerWindow : Window
+  /// <summary>
+  /// Логика взаимодействия для ArchiveControl.xaml
+  /// </summary>
+  public partial class ArchiveControl : UserControl
   {
     private static readonly string[] ArchivesFolderCandidates = new[]
     {
-      Path.Combine(@"D:\AskMkiM\Bin", "Archives"),
+      System.IO.Path.Combine(@"D:\AskMkiM\Bin", "Archives"),
       Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Archives"),
       Path.Combine(Directory.GetCurrentDirectory(), "Archives"),
     };
@@ -36,11 +37,9 @@ namespace TestArchive
     private string _lastSelectedArchivePath;
     private string _lastSelectedEntryName;
     private ArchiveTreeNode _contextMenuNode;
-
-    public ArchiveExplorerWindow()
+    public ArchiveControl()
     {
       InitializeComponent();
-
       _archivesFolderPath = ResolveArchivesFolderPath();
 
       _autoRefreshTimer = new DispatcherTimer
@@ -54,18 +53,6 @@ namespace TestArchive
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
       ResetTree();
     }
-
-    protected override void OnClosed(EventArgs e)
-    {
-      _autoRefreshTimer.Stop();
-
-      _archivesWatcher.EnableRaisingEvents = false;
-      _archivesWatcher.Dispose();
-      _archiveManager.Dispose();
-
-      base.OnClosed(e);
-    }
-
     private string ResolveArchivesFolderPath()
     {
       var existing = ArchivesFolderCandidates.FirstOrDefault(Directory.Exists);
@@ -281,7 +268,7 @@ namespace TestArchive
       catch (Exception ex)
       {
         archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Archive read error."));
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -489,7 +476,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -558,7 +545,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -578,7 +565,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -597,7 +584,7 @@ namespace TestArchive
         Multiselect = false,
       };
 
-      if (openFileDialog.ShowDialog(this) != true)
+      if (openFileDialog.ShowDialog(Window.GetWindow(this)) != true)
       {
         return;
       }
@@ -615,7 +602,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -628,7 +615,7 @@ namespace TestArchive
       }
 
       var confirmation = MessageBox.Show(
-        this,
+        Window.GetWindow(this),
         $"Delete archive '{node.DisplayName}'?",
         "Delete archive",
         MessageBoxButton.YesNo,
@@ -660,7 +647,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -682,7 +669,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -697,7 +684,7 @@ namespace TestArchive
       }
 
       var confirmation = MessageBox.Show(
-        this,
+        Window.GetWindow(this),
         $"Delete file '{node.DisplayName}' from archive?",
         "Delete file",
         MessageBoxButton.YesNo,
@@ -721,7 +708,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -730,7 +717,7 @@ namespace TestArchive
       var dialog = new Window
       {
         Title = "Create archive",
-        Owner = this,
+        //Owner = this,
         WindowStartupLocation = WindowStartupLocation.CenterOwner,
         ResizeMode = ResizeMode.NoResize,
         SizeToContent = SizeToContent.WidthAndHeight,
@@ -839,7 +826,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -868,7 +855,7 @@ namespace TestArchive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -878,87 +865,5 @@ namespace TestArchive
       public HashSet<string> ExpandedArchivePaths { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
-  }
-
-  internal enum ArchiveTreeNodeKind
-  {
-    Root,
-    Archive,
-    File,
-    Placeholder,
-  }
-
-  internal sealed class ArchiveTreeNode
-  {
-    public string DisplayName { get; private set; }
-    public ArchiveTreeNodeKind Kind { get; private set; }
-    public string ArchivePath { get; private set; }
-    public string EntryName { get; private set; }
-    public bool IsExpanded { get; set; }
-    public ObservableCollection<ArchiveTreeNode> Children { get; } = new ObservableCollection<ArchiveTreeNode>();
-
-    private ArchiveTreeNode()
-    {
-    }
-
-    public static ArchiveTreeNode CreateRoot(string name)
-    {
-      return new ArchiveTreeNode
-      {
-        DisplayName = name,
-        Kind = ArchiveTreeNodeKind.Root,
-      };
-    }
-
-    public static ArchiveTreeNode CreateArchive(string name, string archivePath)
-    {
-      return new ArchiveTreeNode
-      {
-        DisplayName = name,
-        Kind = ArchiveTreeNodeKind.Archive,
-        ArchivePath = archivePath,
-      };
-    }
-
-    public static ArchiveTreeNode CreateFile(string name, string archivePath, string entryName)
-    {
-      return new ArchiveTreeNode
-      {
-        DisplayName = name,
-        Kind = ArchiveTreeNodeKind.File,
-        ArchivePath = archivePath,
-        EntryName = entryName,
-      };
-    }
-
-    public static ArchiveTreeNode CreatePlaceholder(string text)
-    {
-      return new ArchiveTreeNode
-      {
-        DisplayName = text,
-        Kind = ArchiveTreeNodeKind.Placeholder,
-      };
-    }
-  }
-
-  internal sealed class ArchiveEntryInfo
-  {
-    public string ArchivePath { get; }
-    public string EntryName { get; }
-    public string Name { get; }
-    public string Extension => string.IsNullOrWhiteSpace(Path.GetExtension(Name)) ? "(none)" : Path.GetExtension(Name).ToLowerInvariant();
-    public long SizeBytes { get; }
-    public long PackedBytes { get; }
-    public DateTime LastModified { get; }
-
-    public ArchiveEntryInfo(string archivePath, string entryName, long sizeBytes, long packedBytes, DateTimeOffset lastModified)
-    {
-      ArchivePath = archivePath;
-      EntryName = entryName;
-      Name = entryName;
-      SizeBytes = sizeBytes;
-      PackedBytes = packedBytes;
-      LastModified = lastModified.LocalDateTime;
-    }
   }
 }
