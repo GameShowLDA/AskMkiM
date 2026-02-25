@@ -14,8 +14,9 @@ namespace UI.Controls.ErrorList
 
     private int? _leftLine;
     /// <summary>
-    /// Номер строки в левом редакторе (1-based). null — если неизвестно/не применимо.
+    /// Номер строки в левом редакторе (1-based).
     /// </summary>
+    /// <remarks><see langword="null"/> - если неизвестно/не применимо.</remarks>
     public int? LeftLine
     {
       get => _leftLine;
@@ -24,8 +25,9 @@ namespace UI.Controls.ErrorList
 
     private int? _rightLine;
     /// <summary>
-    /// Номер строки в правом редакторе (1-based). null — если неизвестно/не применимо.
+    /// Номер строки в правом редакторе (1-based).
     /// </summary>
+    /// <remarks><see langword="null"/> - если неизвестно/не применимо.</remarks>
     public int? RightLine
     {
       get => _rightLine;
@@ -34,8 +36,9 @@ namespace UI.Controls.ErrorList
 
     private bool _isEnabled = true;
     /// <summary>
-    /// Включена ли точка остановки (true) или выключена (false).
+    /// Состояние работы точки остановки.
     /// </summary>
+    /// <remarks><see langword="true"/> - если включена.</remarks>
     public bool IsEnabled
     {
       get => _isEnabled;
@@ -44,7 +47,7 @@ namespace UI.Controls.ErrorList
 
     private string? _leftFile;
     /// <summary>
-    /// Имя/путь файла левого редактора (опционально, если хочешь показывать в таблице).
+    /// Имя/путь файла левого редактора.
     /// </summary>
     public string? LeftFile
     {
@@ -54,7 +57,7 @@ namespace UI.Controls.ErrorList
 
     private string? _rightFile;
     /// <summary>
-    /// Имя/путь файла правого редактора (опционально, если хочешь показывать в таблице).
+    /// Имя/путь файла правого редактора.
     /// </summary>
     public string? RightFile
     {

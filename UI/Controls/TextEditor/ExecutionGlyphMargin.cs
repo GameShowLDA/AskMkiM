@@ -25,7 +25,9 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
 
-  //TODO: Если буду рисовать дырку в точках остановки (когда те выключены) с помощью наложения поверх ещё одного кружка, то цвет HEX #303843.
+  /// <summary>
+  /// Цвет накладываемого кружка для отключённой точки остановки.
+  /// </summary>
   private static readonly Brush BreakpointHoleBrush = (Brush)new BrushConverter().ConvertFromString("#303843");
 
 

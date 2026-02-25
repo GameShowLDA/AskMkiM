@@ -25,8 +25,8 @@ namespace UI.Controls.ErrorList
 
     /// <summary>
     /// Коллекция точек остановки для вкладки "Точки остановки".
-    /// Должна обновляться сразу при появлении/удалении/переключении точки.
     /// </summary>
+    /// <remarks>Должна обновляться сразу при появлении/удалении/переключении точки.</remarks>
     public ObservableCollection<BreakpointListItem> Breakpoints { get; } = new();
 
     private readonly List<IDisplayIssue> _allIssues = new();
@@ -66,12 +66,12 @@ namespace UI.Controls.ErrorList
     #region События для вкладки "Точки остановки"
 
     /// <summary>
-    /// Срабатывает при двойном клике по брейкпоинту в таблице (нужно перейти к нему в редакторе).
+    /// Срабатывает при двойном клике по точке остановки в таблице (нужно перейти к нему в редакторе).
     /// </summary>
     public event Action<BreakpointListItem>? BreakpointItemDoubleClicked;
 
     /// <summary>
-    /// Срабатывает при изменении состояния чекбокса брейкпоинта (вкл/выкл).
+    /// Срабатывает при изменении состояния чекбокса точки (вкл/выкл).
     /// </summary>
     public event Action<BreakpointListItem, bool>? BreakpointEnabledChanged;
 
@@ -105,7 +105,7 @@ namespace UI.Controls.ErrorList
       set => MeasureResult.Visibility = value;
     }
 
-    #region Ошибки/предупреждения (старый функционал)
+    #region Ошибки/предупреждения
 
     /// <summary>
     /// Очищает все элементы.
@@ -310,10 +310,10 @@ namespace UI.Controls.ErrorList
 
     #endregion
 
-    #region Точки остановки (новый функционал)
+    #region Точки остановки
 
     /// <summary>
-    /// Добавляет брейкпоинт в список или обновляет существующий по номеру команды.
+    /// Добавляет точку остановки в список или обновляет существующий по номеру команды.
     /// </summary>
     public void UpsertBreakpoint(int commandNumber, int? lineNumber, bool isEnabled)
     {
@@ -345,7 +345,7 @@ namespace UI.Controls.ErrorList
     }
 
     /// <summary>
-    /// Удаляет брейкпоинт из списка по номеру команды.
+    /// Удаляет точку остановки из списка по номеру команды.
     /// </summary>
     public void RemoveBreakpoint(int commandNumber)
     {
@@ -366,7 +366,7 @@ namespace UI.Controls.ErrorList
     }
 
     /// <summary>
-    /// Полностью очищает список брейкпоинтов.
+    /// Полностью очищает список точек остановки.
     /// </summary>
     public void ClearBreakpoints()
     {
@@ -380,7 +380,7 @@ namespace UI.Controls.ErrorList
     }
 
     /// <summary>
-    /// Двойной клик по таблице брейкпоинтов -> запрос перехода к месту в редакторе.
+    /// Двойной клик по таблице для перехода на строку с точкой остановки.
     /// </summary>
     private void BreakpointsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
@@ -392,7 +392,7 @@ namespace UI.Controls.ErrorList
     }
 
     /// <summary>
-    /// Клик по чекбоксу брейкпоинта -> запрос включить/выключить.
+    /// Клик по чекбоксу для включения/отключения точки остановки.
     /// </summary>
     private void BreakpointEnabled_Click(object sender, RoutedEventArgs e)
     {
