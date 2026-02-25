@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Windows;
 
 namespace TestArchive
 {
   internal class Program
   {
+    [STAThread]
     static void Main(string[] args)
     {
       Console.OutputEncoding = Encoding.UTF8;
@@ -52,6 +54,9 @@ namespace TestArchive
                 archiveManager.CloseArchive();
                 Console.WriteLine("Archive is closed.");
                 break;
+              case "10":
+                OpenArchiveExplorerWindow();
+                break;
               case "0":
                 isRunning = false;
                 break;
@@ -91,6 +96,7 @@ namespace TestArchive
       Console.WriteLine("7 - Delete archive");
       Console.WriteLine("8 - Show checksum notifications");
       Console.WriteLine("9 - Close opened archive");
+      Console.WriteLine("10 - Open archive explorer UI (XAML)");
       Console.WriteLine("0 - Exit");
       Console.WriteLine();
     }
@@ -107,6 +113,12 @@ namespace TestArchive
       catch (IOException)
       {
       }
+    }
+
+    private static void OpenArchiveExplorerWindow()
+    {
+      var window = new ArchiveExplorerWindow();
+      window.ShowDialog();
     }
 
     private static void CreateArchive(ArchiveManager archiveManager)
