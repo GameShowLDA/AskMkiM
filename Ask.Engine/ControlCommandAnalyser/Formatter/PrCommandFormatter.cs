@@ -34,7 +34,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
 
       if (pr.Comment.Count > 0)
       {
-        yield return $"\tКомметрии:";
+        yield return $"\tКомментарии:";
         foreach (var line in pr.Comment)
         {
           var trimmed = line.Trim();
@@ -46,11 +46,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       // Время
       if (!string.IsNullOrWhiteSpace(pr.TimeSource))
       {
-        yield return $"\tВремя выполнения: {pr.TimeSource}";
+        yield return $"\tВремя выдержки: {pr.TimeSource}";
       }
       else
       {
-        yield return $"\tВремя выполнения не задано.";
+        yield return $"\tВремя выдержки не задано.";
       }
 
       if (CommandsModel.GetRMModel() == null)
