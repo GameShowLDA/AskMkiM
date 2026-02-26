@@ -581,7 +581,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       CancellationToken cancellationToken)
     {
       await tested_module.PointManager.DisconnectRelayAsync(busA, point, _userInteractionService);
-      await verificat_module.PointManager.ConnectRelayVerifiedAsync(busB, point, _userInteractionService);
+      await verificat_module.PointManager.ConnectRelayAsync(busB, point, _userInteractionService);
     }
 
     /// <summary>
