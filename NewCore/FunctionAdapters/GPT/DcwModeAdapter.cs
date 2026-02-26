@@ -760,9 +760,20 @@ namespace NewCore.FunctionAdapters.GPT
       /// </returns>
       public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
+        if (rangeTo == -1)
+        {
+          rangeTo = double.MaxValue;
+        }
+
+        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.DielectricWithstandDC);
+        if (random != -1)
+        {
+          return (random, "мА");
+        }
+
         try
         {
-          var (result, unit) = await _dcwMode.Measure.MeasureAsync(param);
+          var (result, unit) = await _dcwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);
 
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
