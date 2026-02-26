@@ -58,7 +58,7 @@ namespace Ask.Engine.Tests.Base
     public static async Task<bool> BusDisconnectAsync(SwitchingBus bus, IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      await module.BusManager.DisconnectBusAsync(bus);
+      await module.BusManager.DisconnectBusAsync(bus, _userInteractionService);
 
       return true;
     }
@@ -73,45 +73,6 @@ namespace Ask.Engine.Tests.Base
     {
       cancellationToken.ThrowIfCancellationRequested();
       await module.ConnectableManager.InitializeAsync(messageService);
-
-      return true;
-    }
-
-    /// <summary>
-    /// Выполняет сброс указанного БК.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    public static async Task ResetModule(IUserInteractionService messageService, IUserInteractionService _userInteractionService, IRelaySwitchModule module)
-    {
-      await module.ConnectableManager.ResetAsync(messageService);
-    }
-
-    /// <summary>
-    /// Подключает точку (реле) заданного БК к указанной шине.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="bus">Шина</param>
-    /// <param name="point">Точка (реле)</param>
-    /// <returns>Возвращает <c>true</c>, если точка успешно подключена; иначе — <c>false</c>.</returns>
-    public static async Task<bool> PointConnectAsync(IRelaySwitchModule module, BusPoint bus, int point, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.PointManager.ConnectRelayAsync(bus, point, _userInteractionService);
-
-      return true;
-    }
-
-    /// <summary>
-    /// Отключает точку (реле) заданного БК от указанной шины.
-    /// </summary>
-    /// <param name="module">Блок коммутации</param>
-    /// <param name="bus">Шина</param>
-    /// <param name="point">Точка (реле)</param>
-    /// <returns>Возвращает <c>true</c>, если точка успешно отключена; иначе — <c>false</c>.</returns>
-    public static async Task<bool> PointDisconnectAsync(IRelaySwitchModule module, BusPoint bus, int point, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
-    {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.PointManager.DisconnectRelayAsync(bus, point, _userInteractionService);
 
       return true;
     }
@@ -149,10 +110,15 @@ namespace Ask.Engine.Tests.Base
     /// <returns>Возвращает <c>true</c>, если есть замыкание; иначе — <c>false</c>.</returns>
     public static async Task<bool> GetMeterAnswer(IRelaySwitchModule module, IUserInteractionService _userInteractionService, CancellationToken cancellationToken)
     {
-      cancellationToken.ThrowIfCancellationRequested();
-      await module.MeterManager.GetMeterResponseAsync(_userInteractionService);
-
-      return true;
+      try
+      {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await module.MeterManager.GetMeterResponseAsync();
+      }
+      catch 
+      {
+        return false;
+      }
     }
 
     /// <summary>

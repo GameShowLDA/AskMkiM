@@ -61,7 +61,14 @@ namespace Ask.Core.Services.UI
 
       do
       {
-        result = await operation();
+        try
+        {
+          result = await operation();
+        }
+        catch (Exception ex)
+        {
+          result = (false, ex.Message);
+        }
 
         if (result.Connect && next)
           return result;
@@ -114,7 +121,14 @@ namespace Ask.Core.Services.UI
 
       do
       {
-        result = await operation();
+        try
+        {
+          result = await operation();
+        }
+        catch (Exception ex)
+        {
+          result = (false, -1);
+        }
 
         if (result.Connect && next)
           return result;
@@ -171,7 +185,7 @@ namespace Ask.Core.Services.UI
           messageService?.GetCancellationToken().ThrowIfCancellationRequested();
         }
         catch
-        { 
+        {
 
         }
 
