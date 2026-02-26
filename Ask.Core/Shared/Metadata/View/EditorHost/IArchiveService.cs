@@ -1,12 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Ask.Core.Shared.Metadata.View.EditorHost
+﻿namespace Ask.Core.Shared.Metadata.View.EditorHost
 {
-  internal interface IArchiveService
+  public interface IArchiveService
   {
+    /// <summary>
+    /// Создаёт новый пустой архив.
+    /// </summary>
+    void CreateNewArchive();
+
+    /// <summary>
+    /// Открывает архив по указанному пути.
+    /// </summary>
+    /// <param name="filePath">Абсолютный путь к файлу.</param>
+    void OpenArchive();
+
+    /// <summary>
+    /// Удаляет выбранный архив.
+    /// </summary>
+    void DeleteArchive();
   }
 }

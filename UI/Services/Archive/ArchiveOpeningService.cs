@@ -1,11 +1,10 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Text;
-using UI.Services.Archive;
 
-namespace UI.Services.FileManager
+namespace UI.Services.Archive
 {
-  internal sealed class ArchiveOpening : IDisposable
+  internal sealed class ArchiveOpeningService : IDisposable
   {
     private const string ArchiveExtension = ".apkw";
 

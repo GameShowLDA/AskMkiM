@@ -3,7 +3,7 @@ using System.IO.Compression;
 
 namespace UI.Services.Archive
 {
-  public class ArchiveCreation
+  public class ArchiveCreationService
   {
     private const string ArchiveExtension = ".apkw";
     private const string MainOutputPath = @"D:\AskMkiM\Bin";

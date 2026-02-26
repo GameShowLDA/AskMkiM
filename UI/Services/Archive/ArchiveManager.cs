@@ -1,12 +1,10 @@
-﻿using UI.Services.FileManager;
-
-namespace UI.Services.Archive
+﻿namespace UI.Services.Archive
 {
   public sealed class ArchiveManager : IDisposable
   {
-    private readonly ArchiveCreation _archiveCreation = new ArchiveCreation();
+    private readonly ArchiveCreationService _archiveCreation = new ArchiveCreationService();
     private readonly ArchiveFileManager _archiveFileAdder = new ArchiveFileManager();
-    private readonly ArchiveOpening _archiveOpening = new ArchiveOpening();
+    private readonly ArchiveOpeningService _archiveOpening = new ArchiveOpeningService();
 
     public string OpenedArchivePath => _archiveOpening.OpenedArchivePath;
     public IReadOnlyList<string> IntegrityNotifications => _archiveOpening.IntegrityNotifications;
