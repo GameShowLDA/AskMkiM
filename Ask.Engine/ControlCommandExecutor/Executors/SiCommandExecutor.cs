@@ -117,7 +117,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var answer = (await breadDown.IrManger.Measure.MeasureAsync(value)).value;
+        var answer = (await breadDown.IrManger.Measure.MeasureAsync(value, firstValue)).value;
         var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer);
 
         return result;

@@ -204,12 +204,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (type == VoltageEnum.Type.ACW)
         {
-          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value);
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value, 0, amperhMaxACW);
           return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
         }
         else
         {
-          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value);
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value, 0, amperhMaxDCW);
           return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
         }
 
@@ -236,9 +236,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
-          answer = !ExecutionConfig.GetIsIdleModeEnabled() ?
-                   (await breadDown.AcwManger.Measure.MeasureAsync(10)).value :
-                   !await ExecutionConfig.GetIsErrorSimulationEnabled() ? 10 : new Random().Next(80, 150);
+          answer = (await breadDown.AcwManger.Measure.MeasureAsync(10)).value;
 
           var type = ShowMessageModel.MessageType.Success;
           if (answer >= value)

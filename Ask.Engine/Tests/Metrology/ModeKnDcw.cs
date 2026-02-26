@@ -91,10 +91,10 @@ namespace Ask.Engine.Tests.Metrology
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, param);
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(fastMeter, protocolUI, param);
-
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_DCW, resultReferenceMeterMeasured);
+        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, param, LowerBound, UpperBound);
+
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Результат проверки"));
         var result = resultFastMeterMeasured >= LowerBound && resultFastMeterMeasured <= UpperBound;
 
@@ -116,7 +116,7 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param)
+      private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
         var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param);
         return result;

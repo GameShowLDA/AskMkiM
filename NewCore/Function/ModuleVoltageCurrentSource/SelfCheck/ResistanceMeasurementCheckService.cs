@@ -79,7 +79,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
         double firstNorm = resistance - ((resistance / 100.0 * error.Percent) + error.Numeric);
         double lastNorm = resistance + ((resistance / 100.0 * error.Percent) + error.Numeric);
 
-        var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(resistance, messageService);
+        var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(resistance, firstNorm, lastNorm, messageService);
         double result = resistance;
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())

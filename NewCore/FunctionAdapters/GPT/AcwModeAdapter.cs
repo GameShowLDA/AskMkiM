@@ -838,6 +838,17 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
+        if (rangeTo == -1)
+        {
+          rangeTo = double.MaxValue;
+        }
+
+        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.DielectricWithstandAC);
+        if (random != -1)
+        {
+          return (random, "мА");
+        }
+
         try
         {
           var (result, unit) = await _acwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);
