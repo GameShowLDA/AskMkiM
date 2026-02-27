@@ -41,17 +41,28 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
         string commandName,
         string? message = null)
     {
-      return new ShowMessageModel
+      var header = string.Empty;
+      if (!string.IsNullOrEmpty(message))
+      {
+        header += message;
+      }
+
+      var model = new ShowMessageModel
       (
-          header: $"\r\nВыполнение команды {commandName}",
-          headerColor: ShowMessageModel.SuccessMessage.TitleColor,
-          message: message,
+          header: header,
           type: ShowMessageModel.MessageType.Command
       )
       {
         IndentLevel = 1,
         IsControlProgramCommandHeader = !commandName.Contains("ПИ/", StringComparison.OrdinalIgnoreCase)
       };
+
+      if (model.MessageColor.HasValue)
+      {
+        model.HeaderColor = model.MessageColor.Value;
+      }
+
+      return model;
     }
 
     /// <summary>
