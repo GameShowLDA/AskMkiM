@@ -379,9 +379,21 @@
     <value>Switchboard resistance</value>
   </data>
   <data name="settings.userinterface.commandBodyBackground.title" xml:space="preserve">
-    <value>Command body background highlight</value>
+    <value>Command background highlight</value>
   </data>
   <data name="settings.userinterface.commandBodyBackground.description" xml:space="preserve">
-    <value>Enables or disables background highlighting for command body lines in the execution protocol.</value>
+    <value>Enables or disables background highlighting for command lines in the execution protocol.</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.title" xml:space="preserve">
+    <value>Protocol highlights and colors</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.description" xml:space="preserve">
+    <value>Settings for syntax highlighting and line background highlighting in the execution protocol.</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.title" xml:space="preserve">
+    <value>Chain and point background highlight</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.description" xml:space="preserve">
+    <value>Enables or disables background highlighting for chain and point check lines in the execution protocol.</value>
   </data>
 </root>

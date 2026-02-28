@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using System;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Ask.Core.Shared.Metadata.Static.Messages
@@ -120,7 +121,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// </summary>
     public static ShowMessageModel BuildChainCheckBlock(string chains)
     {
-      return new ShowMessageModel
+      var model = new ShowMessageModel
       (
           header: "Проверка цепи",
           message: chains,
@@ -129,6 +130,9 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       {
         IndentLevel = 1
       };
+
+      ApplyCommandBlockBackground(model);
+      return model;
     }
 
     /// <summary>
@@ -142,7 +146,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       string secondAddress = showAddress ? $"({secondPoint})" : string.Empty;
       char symbol = circuitFaultType == CircuitFaultType.OpenCircuit ? '*' : ',';
 
-      return new ShowMessageModel
+      var model = new ShowMessageModel
       (
           header: $"Проверка",
           message: $"{firstPoint.Mnemonic}{firstAddress}{symbol}{secondPoint.Mnemonic}{secondAddress}",
@@ -151,6 +155,53 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       {
         IndentLevel = 1
       };
+
+      ApplyCommandBlockBackground(model);
+      return model;
+    }
+
+    /// <summary>
+    /// Применяет бледный фон для сообщений блока команд (цепи/точки).
+    /// </summary>
+    private static void ApplyCommandBlockBackground(ShowMessageModel model)
+    {
+      if (!UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting())
+      {
+        model.HeaderBackgroundColor = null;
+        return;
+      }
+
+      var commandBlockColor = TryGetResourceColor("LightBlueColorSolidColorBrush");
+      if (commandBlockColor.HasValue)
+      {
+        model.HeaderBackgroundColor = BuildPaleTextBackground(commandBlockColor.Value);
+      }
+    }
+
+    /// <summary>
+    /// Безопасно получает цвет из ресурсов приложения.
+    /// </summary>
+    private static Color? TryGetResourceColor(string resourceKey)
+    {
+      Color? color = null;
+      try
+      {
+        if (Application.Current != null)
+        {
+          Application.Current.Dispatcher.Invoke(() =>
+          {
+            if (Application.Current?.Resources[resourceKey] is SolidColorBrush brush)
+            {
+              color = brush.Color;
+            }
+          });
+        }
+      }
+      catch (Exception)
+      {
+      }
+
+      return color;
     }
 
     /// <summary>

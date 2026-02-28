@@ -473,6 +473,7 @@
     <!--#region Общая панель с настройками -->
     <SolidColorBrush x:Key="SettingsPanelBackgroundSolidColorBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="SettingsPanelBorderSolidColorBrush" Color="#282E37"/>
+    <SolidColorBrush x:Key="SettingsNestedGroupBackgroundSolidColorBrush" Color="#2C343E"/>
 
     <Style x:Key="SettingPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"/>

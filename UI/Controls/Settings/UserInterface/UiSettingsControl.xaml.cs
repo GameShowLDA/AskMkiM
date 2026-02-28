@@ -87,6 +87,7 @@ namespace UI.Controls.Settings.UserInterface
       ThemeSelect.ValueChanged += ValueChanged;
       SyntaxHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
       CommandBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
+      ChainPointBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
 
       Success.PreviewMouseDown += Success_PreviewMouseDown;
       Error.PreviewMouseDown += Error_PreviewMouseDown;
@@ -154,6 +155,7 @@ namespace UI.Controls.Settings.UserInterface
 
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
+      ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
     }
 
     /// <summary>
@@ -174,7 +176,8 @@ namespace UI.Controls.Settings.UserInterface
         Language = languageCode,
         Theme = parsedTheme,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
-        UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked
+        UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
+        UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked
       };
     }
 
@@ -185,6 +188,7 @@ namespace UI.Controls.Settings.UserInterface
       a.Language == b.Language &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
+      a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
       b.Theme == a.Theme;
 
     /// <summary>

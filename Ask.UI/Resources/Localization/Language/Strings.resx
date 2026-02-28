@@ -379,9 +379,21 @@
     <value>Сопротивление коммутатора</value>
   </data>
   <data name="settings.userinterface.commandBodyBackground.title" xml:space="preserve">
-    <value>Фоновое выделение тела команды</value>
+    <value>Фоновое выделение команд</value>
   </data>
   <data name="settings.userinterface.commandBodyBackground.description" xml:space="preserve">
-    <value>Включает или отключает фоновое выделение строк тела команды в протоколе выполнения.</value>
+    <value>Включает или отключает фоновое выделение строк команд в протоколе выполнения.</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.title" xml:space="preserve">
+    <value>Подсветка и цвета протокола</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.description" xml:space="preserve">
+    <value>Настройки подсветки синтаксиса и фонового выделения строк в протоколе выполнения.</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.title" xml:space="preserve">
+    <value>Фоновое выделение цепей и точек</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.description" xml:space="preserve">
+    <value>Включает или отключает фоновое выделение строк проверки цепей и точек в протоколе выполнения.</value>
   </data>
 </root>

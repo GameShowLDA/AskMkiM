@@ -43,6 +43,11 @@ namespace Ask.Core.Services.Config.Base
       UserInterfaceModel.UseCommandBodyBackgroundHighlighting = enable;
     }
 
+    public static async Task SetChainPointBodyBackgroundHighlighting(bool enable)
+    {
+      UserInterfaceModel.UseChainPointBodyBackgroundHighlighting = enable;
+    }
+
     public static async Task SetUserInterfaceModel(UserInterfaceModel user)
     {
       await Task.Run(async () =>
@@ -51,6 +56,7 @@ namespace Ask.Core.Services.Config.Base
         await SetTheme(user.Theme);
         await SetSyntaxHighlighting(user.UseSyntaxHighlighting);
         await SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
+        await SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
       });
     }
 
@@ -66,6 +72,7 @@ namespace Ask.Core.Services.Config.Base
     public static async Task<ThemeMode> GetTheme() => UserInterfaceModel.Theme;
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
     public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
+    public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
 
 
     public static async Task<UserInterfaceModel> GetParameterModel()
@@ -75,6 +82,7 @@ namespace Ask.Core.Services.Config.Base
       parametrModel.Theme = UserInterfaceModel.Theme;
       parametrModel.UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting;
       parametrModel.UseCommandBodyBackgroundHighlighting = UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
+      parametrModel.UseChainPointBodyBackgroundHighlighting = UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
       return parametrModel;
     }
 
@@ -84,6 +92,7 @@ namespace Ask.Core.Services.Config.Base
       await SetTheme(parametrModel.Theme);
       await SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
       await SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
+      await SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
 
 

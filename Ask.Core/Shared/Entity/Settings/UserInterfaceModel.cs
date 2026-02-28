@@ -27,5 +27,10 @@ namespace Ask.Core.Shared.Entity.Settings
     /// Флаг, указывающий, нужно ли выделять тело команды фоновым цветом в протоколе выполнения.
     /// </summary>
     public bool UseCommandBodyBackgroundHighlighting { get; set; } = true;
+
+    /// <summary>
+    /// Флаг, указывающий, нужно ли выделять строки цепей и точек фоновым цветом в протоколе выполнения.
+    /// </summary>
+    public bool UseChainPointBodyBackgroundHighlighting { get; set; } = true;
   }
 }
