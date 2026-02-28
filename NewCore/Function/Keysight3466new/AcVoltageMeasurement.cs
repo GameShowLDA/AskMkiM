@@ -48,7 +48,7 @@ namespace NewCore.Function.Keysight3466new
         _device.TypeMode = MultimeterTypeMode.AcVoltage;
         return true;
       }
-      
+
       return false;
     }
 
@@ -66,7 +66,6 @@ namespace NewCore.Function.Keysight3466new
       }
 
       string response = await _device.DeviceProtocol.QueryAsync("MEAS:VOLT:AC?", timeout: 1000);
-
       response = response.Trim().Replace("+", "");
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))

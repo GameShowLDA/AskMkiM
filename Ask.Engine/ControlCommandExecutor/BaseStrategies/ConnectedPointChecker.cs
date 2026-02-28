@@ -3,16 +3,13 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using static Ask.LogLib.LoggerUtility;
-using System.Linq;
 using System.Text;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using static Ask.Core.Shared.Metadata.Static.DelegateManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -38,7 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронно выполняет проверку соединённых точек в схеме, формируя новый список цепей (ССИРТ)
     /// с учётом обнаруженных разрывов.
     /// </summary>
-    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context)
+    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context, PreMeasurementDelegate preMeasurementDelegate = null)
     {
       var errors = new List<ShowMessageModel>();
       var infos = new List<ShowMessageModel>();
@@ -71,7 +68,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             ExecutorMessageBuilder.BuildChainCheckBlock(BuildChainDisplayString(chainCopy)),
             IsBlockStart: true);
 
-          var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1);
+          var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1, preMeasurementDelegate);
 
           LogDebug($"[ConnectedPointChecker] Chain checked. Fragments={result.Fragments.Count}. Display={BuildDisconnectionDisplayString(result.Fragments)}");
 
@@ -143,7 +140,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Рекурсивная проверка цепи: первая точка подключается к нижней шине,
     /// остальные по очереди к верхней шине с тестом на связь.
     /// </summary>
-    private static async Task<ChainProcessingResult> ProcessChainAsync(List<PointModel> points, ConnectedPointContext context, int indentLevel)
+    private static async Task<ChainProcessingResult> ProcessChainAsync(List<PointModel> points, ConnectedPointContext context, int indentLevel, PreMeasurementDelegate preMeasurementDelegate = null)
     {
       var result = new ChainProcessingResult();
 
@@ -171,6 +168,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = indentLevel }, IsBlockStart: true);
       await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(basePoint, messageService, false);
       baseConnected = true;
+
+      if (preMeasurementDelegate != null)
+      {
+        await preMeasurementDelegate(messageService.GetCancellationToken());
+      }
 
       try
       {
@@ -236,7 +238,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       // Если найдены разрывы, формируем новую цепь из точек с разрывами и повторяем проверку.
       if (brokenPoints.Count > 0)
       {
-        var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1);
+        var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1, preMeasurementDelegate);
         result.Append(nextFragment);
       }
       else
@@ -273,13 +275,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fragmentStrings = fragments.Select(fragment =>
       {
-          var points = fragment.PointModels.Select(p =>
-          {
-            var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
-            return $"{p.Mnemonic}{address}";
-          });
+        var points = fragment.PointModels.Select(p =>
+        {
+          var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
+          return $"{p.Mnemonic}{address}";
+        });
 
-          return string.Join(",", points);
+        return string.Join(",", points);
       });
 
       return $"*{string.Join("**", fragmentStrings)}*";
