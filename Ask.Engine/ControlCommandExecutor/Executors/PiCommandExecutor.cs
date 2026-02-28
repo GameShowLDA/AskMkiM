@@ -26,12 +26,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
-      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}/{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
+      message = message.Replace("ПИ", "ПИ/ПИ");
 
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
@@ -50,7 +50,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.SiCommand != null)
       {
-        await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 1", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
         command.SiCommand.FormattedStartLineNumber = command.FormattedStartLineNumber;
         command.SiCommand.CommandNumber = siCommanNumber + " " + 1;
 
@@ -61,7 +60,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 2", message: $"{nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 });
+       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
@@ -137,10 +136,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.SiCommand != null)
       {
-        nameSiCommand = $"ПИ/СИ2";
-        await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 3", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
         var siCommandExecutor = new SiCommandExecutor();
+        commandExecutionContext.IsInvokedByAnotherCommand = true;
 
         command.SiCommand.CommandNumber = siCommanNumber + " " + 2;
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);

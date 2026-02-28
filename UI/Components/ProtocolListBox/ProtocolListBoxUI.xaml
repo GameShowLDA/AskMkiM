@@ -21,7 +21,13 @@
                  Background="Transparent"
                  BorderThickness="0"
                  ItemsSource="{Binding Messages, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                    FontFamily="Consolas"
                     HorizontalContentAlignment="Stretch"
+                    UseLayoutRounding="True"
+                    SnapsToDevicePixels="True"
+                    TextOptions.TextFormattingMode="Display"
+                    TextOptions.TextRenderingMode="ClearType"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -34,7 +40,10 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock TextWrapping="Wrap"
-                                   FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                                   FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=FontSize}"
+                                   FontFamily="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=FontFamily}"
+                                   SnapsToDevicePixels="True"
+                                   TextOptions.TextFormattingMode="Display"
                                    Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
                             <Run>
                                 <Run.Text>
@@ -69,7 +78,6 @@
                         <Setter Property="IsHitTestVisible" Value="False" />
                         <Setter Property="Background" Value="{Binding HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="FontFamily" Value="Consolas" />
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                     </Style>
                 </ListBox.ItemContainerStyle>
