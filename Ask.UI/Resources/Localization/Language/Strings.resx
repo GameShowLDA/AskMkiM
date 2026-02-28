@@ -378,4 +378,10 @@
   <data name="menu.test.tests.relay.contact.resist.rkomm" xml:space="preserve">
     <value>Сопротивление коммутатора</value>
   </data>
+  <data name="settings.userinterface.commandBodyBackground.title" xml:space="preserve">
+    <value>Фоновое выделение тела команды</value>
+  </data>
+  <data name="settings.userinterface.commandBodyBackground.description" xml:space="preserve">
+    <value>Включает или отключает фоновое выделение строк тела команды в протоколе выполнения.</value>
+  </data>
 </root>

@@ -6,8 +6,14 @@
              xmlns:local="clr-namespace:UI.Controls.Settings.UserInterface"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:Components ="clr-namespace:UI.Components"
+             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Title" Key="settings.userinterface.commandBodyBackground.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Description" Key="settings.userinterface.commandBodyBackground.description" />
+    </UserControl.Resources>
+
     <Border 
         Style="{DynamicResource SettingPanelStyle}"
         Margin="15,10" 
@@ -111,6 +117,14 @@
                         Margin="10,10"
                         VerticalAlignment="Top"
                         x:Name="SyntaxHighlighting"/>
+
+                <Components:SettingsCard
+                        Title="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Description}, Path=Value}"
+                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                        Margin="10,10"
+                        VerticalAlignment="Top"
+                        x:Name="CommandBodyBackgroundHighlighting"/>
                 
             </WrapPanel>
         </Grid>

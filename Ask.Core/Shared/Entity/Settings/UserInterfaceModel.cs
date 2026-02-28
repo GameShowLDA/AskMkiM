@@ -22,5 +22,10 @@ namespace Ask.Core.Shared.Entity.Settings
     /// Флаг, указывающий, нужно ли включить подсветку синтаксиса в редакторе.
     /// </summary>
     public bool UseSyntaxHighlighting { get; set; }
+
+    /// <summary>
+    /// Флаг, указывающий, нужно ли выделять тело команды фоновым цветом в протоколе выполнения.
+    /// </summary>
+    public bool UseCommandBodyBackgroundHighlighting { get; set; } = true;
   }
 }

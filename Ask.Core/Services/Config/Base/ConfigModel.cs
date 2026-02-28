@@ -44,6 +44,7 @@ namespace Ask.Core.Services.Config.Base
       await UserInterfaceConfig.SetLanguage(executionModel.Language);
       await UserInterfaceConfig.SetTheme(executionModel.Theme);
       await UserInterfaceConfig.SetSyntaxHighlighting(executionModel.UseSyntaxHighlighting);
+      await UserInterfaceConfig.SetCommandBodyBackgroundHighlighting(executionModel.UseCommandBodyBackgroundHighlighting);
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -61,7 +62,9 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       if (model.MessageColor.HasValue)
       {
         model.HeaderColor = model.MessageColor.Value;
-        model.HeaderBackgroundColor = BuildPaleTextBackground(model.MessageColor.Value);
+        model.HeaderBackgroundColor = UserInterfaceConfig.GetCommandBodyBackgroundHighlighting()
+          ? BuildPaleTextBackground(model.MessageColor.Value)
+          : null;
       }
 
       return model;
