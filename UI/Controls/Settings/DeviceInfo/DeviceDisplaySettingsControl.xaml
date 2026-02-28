@@ -5,9 +5,23 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.DeviceInfo"
              xmlns:Components ="clr-namespace:UI.Components"
-             xmlns:Icons="clr-namespace:UI.Icon"    
+             xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_Group_Title" Key="settings.protocol.deviceInfo.group.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_Group_Description" Key="settings.protocol.deviceInfo.group.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MachineAddresses_Title" Key="settings.protocol.deviceInfo.machineAddresses.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MachineAddresses_Description" Key="settings.protocol.deviceInfo.machineAddresses.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_ConnectionInfo_Title" Key="settings.protocol.deviceInfo.connectionInfo.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_ConnectionInfo_Description" Key="settings.protocol.deviceInfo.connectionInfo.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Title" Key="settings.protocol.deviceInfo.deviceExecutionParameters.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Description" Key="settings.protocol.deviceInfo.deviceExecutionParameters.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MeasurementResults_Title" Key="settings.protocol.deviceInfo.measurementResults.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MeasurementResults_Description" Key="settings.protocol.deviceInfo.measurementResults.description" />
+    </UserControl.Resources>
+
     <Border 
      Margin="15,10" 
      Style="{DynamicResource SettingPanelStyle}">
@@ -30,7 +44,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0"
-                                       Text="Информация об оборудовании"
+                                       Text="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_Group_Title}, Path=Value}"
                                        Style="{DynamicResource SettingsTitleStyle}"
                                        Padding="0,4,0,4"
                                        Margin="0,0,6,0"/>
@@ -60,36 +74,36 @@
                                 </Style>
                             </StackPanel.Style>
 
-                            <TextBlock Text="Настройка отображения информации об оборудовании в протоколе выполнения."
+                            <TextBlock Text="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_Group_Description}, Path=Value}"
                                        Style="{DynamicResource SettingsDescriptionStyle}"
                                        Margin="0,0,0,8"/>
 
                             <WrapPanel Orientation="Horizontal">
                                 <Components:SettingsCard
-                                    Title="Машинные адреса"
-                                    Description="Отображение машинных адресов точек системы АСК-МКИ-М."
+                                    Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MachineAddresses_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MachineAddresses_Description}, Path=Value}"
                                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
                                     Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="MachineAddressesCard"/>
 
                                 <Components:SettingsCard
-                                    Title="Подключение точек и шин"
-                                    Description="Отображает информацию о подключении точек и шин на устройствах."
+                                    Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_ConnectionInfo_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_ConnectionInfo_Description}, Path=Value}"
                                     Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="ConnectionInfo"/>
 
                                 <Components:SettingsCard
-                                    Title="Параметры устройств"
-                                    Description="Отображает параметры, которые устанавливаются на устройства в ходе выполнения."
+                                    Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Description}, Path=Value}"
                                     Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="DeviceExecutionParameters"/>
 
                                 <Components:SettingsCard
-                                    Title="Результаты измерений"
-                                    Description="Отображает результаты измерений, полученные в ходе выполнения программ контроля."
+                                    Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MeasurementResults_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MeasurementResults_Description}, Path=Value}"
                                     Margin="0,6,0,0"
                                     VerticalAlignment="Top"
                                     x:Name="MeasurementResults"/>

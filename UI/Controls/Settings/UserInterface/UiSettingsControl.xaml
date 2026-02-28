@@ -10,6 +10,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Section_Title" Key="settings.userinterface.section.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Language_Title" Key="settings.userinterface.language.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Language_Description" Key="settings.userinterface.language.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Title" Key="settings.userinterface.theme.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Description" Key="settings.userinterface.theme.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Title" Key="settings.userinterface.syntaxHighlighting.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Description" Key="settings.userinterface.syntaxHighlighting.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Title" Key="settings.userinterface.highlightsGroup.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Description" Key="settings.userinterface.highlightsGroup.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Title" Key="settings.userinterface.commandBodyBackground.title" />
@@ -36,7 +43,7 @@
 
 
                 <TextBlock 
-                 Text="Интерфейс" 
+                 Text="{Binding Source={StaticResource Settings_UserInterface_Section_Title}, Path=Value}" 
                  Padding="10,10"
                  Style="{DynamicResource SettingsTitleStyle}"
                  Grid.Row="0"/>
@@ -100,8 +107,8 @@
                     <Components:SettingsCardSelect
                         Margin="10,10"
                         x:Name="LanguageSelect"
-                        Title="Язык"
-                        Description="Выберите язык интерфейса, на котором будут надписи и сообщения"
+                        Title="{Binding Source={StaticResource Settings_UserInterface_Language_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_UserInterface_Language_Description}, Path=Value}"
                         DisplayMemberPath="Title"
                         SelectedValuePath="Key"/>
 
@@ -109,8 +116,8 @@
                     <Components:SettingsCardSelect
                         Margin="10,10"
                         x:Name="ThemeSelect"
-                        Title="Тема приложения"
-                        Description="Выберите тему оформления интерфейса, которая будет использоваться в приложении"
+                        Title="{Binding Source={StaticResource Settings_UserInterface_Theme_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_UserInterface_Theme_Description}, Path=Value}"
                         DisplayMemberPath="Title"
                         Visibility="Visible"
                         SelectedValuePath="Key"/>
@@ -170,8 +177,8 @@
 
                             <WrapPanel Orientation="Horizontal">
                                 <Components:SettingsCard
-                                        Title="Подсветка синтаксиса"
-                                        Description="Включает или отключает подсветку синтаксиса в редакторе протокола."
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_SyntaxHighlighting_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_SyntaxHighlighting_Description}, Path=Value}"
                                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                                         Margin="0,6,10,0"
                                         VerticalAlignment="Top"

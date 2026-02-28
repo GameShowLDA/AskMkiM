@@ -7,7 +7,10 @@ namespace Ask.Core.Services.Config.Base
 {
   public static class UserInterfaceConfig
   {
-    private static UserInterfaceModel UserInterfaceModel = new UserInterfaceModel();
+    private static UserInterfaceModel UserInterfaceModel = new UserInterfaceModel
+    {
+      Language = "ru"
+    };
 
     static public Action<UserInterfaceModel> SaveUserInterfaceEvent;
 
@@ -19,7 +22,7 @@ namespace Ask.Core.Services.Config.Base
     /// <param name="enable">true для отображения, false для скрытия.</param>
     public static async Task SetLanguage(string enable)
     {
-      var lang = string.IsNullOrWhiteSpace(enable) ? "ru" : enable.ToLowerInvariant();
+      var lang = LanguageSettings.NormalizeLanguageCode(enable);
       UserInterfaceModel.Language = lang;
       await LanguageSettings.SetLanguageAsync(lang);
     }
