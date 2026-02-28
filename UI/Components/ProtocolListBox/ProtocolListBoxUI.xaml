@@ -29,10 +29,13 @@
                     SelectionMode="Single"
                     Focusable="True"
                     IsHitTestVisible="True"
+                    PreviewMouseWheel="ProtocolListBox_PreviewMouseWheel"
                  >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock TextWrapping="Wrap" FontSize="20"  Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
+                        <TextBlock TextWrapping="Wrap"
+                                   FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                                   Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
                             <Run>
                                 <Run.Text>
                                     <MultiBinding Converter="{StaticResource MessageToLeadingNewLineConverter}">

@@ -16,6 +16,27 @@ namespace UI.Components.ProtocolListBox
   /// </summary>
   public partial class ProtocolListBoxUI : UserControl, IMessageOutputService
   {
+    private const double MinFontSize = 12.0;
+    private const double MaxFontSize = 48.0;
+    private const double ZoomStep = 1.0;
+    private const double DefaultFontSize = 20.0;
+
+    /// <summary>
+    /// Размер шрифта строк протокола.
+    /// </summary>
+    public static readonly DependencyProperty ProtocolFontSizeProperty =
+      DependencyProperty.Register(
+        nameof(ProtocolFontSize),
+        typeof(double),
+        typeof(ProtocolListBoxUI),
+        new PropertyMetadata(DefaultFontSize));
+
+    public double ProtocolFontSize
+    {
+      get => (double)GetValue(ProtocolFontSizeProperty);
+      set => SetValue(ProtocolFontSizeProperty, value);
+    }
+
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
     public string Header { get; set; }
 
@@ -30,8 +51,13 @@ namespace UI.Components.ProtocolListBox
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
     }
 
-    private async void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
+    private void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+      if (HandleZoomShortcuts(e))
+      {
+        return;
+      }
+
       if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
       {
         e.Handled = true;
@@ -47,6 +73,84 @@ namespace UI.Components.ProtocolListBox
         }
       }
     }
+
+    /// <summary>
+    /// Масштабирование текста протокола по Ctrl+колесо мыши.
+    /// </summary>
+    private void ProtocolListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+      if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+      {
+        return;
+      }
+
+      if (e.Delta > 0)
+      {
+        Zoom(true);
+      }
+      else if (e.Delta < 0)
+      {
+        Zoom(false);
+      }
+
+      e.Handled = true;
+    }
+
+    /// <summary>
+    /// Обрабатывает Ctrl + '+', Ctrl + '-', Ctrl + '0' для масштаба.
+    /// </summary>
+    private bool HandleZoomShortcuts(KeyEventArgs e)
+    {
+      if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+      {
+        return false;
+      }
+
+      switch (e.Key)
+      {
+        case Key.OemPlus:
+        case Key.Add:
+          Zoom(true);
+          e.Handled = true;
+          return true;
+
+        case Key.OemMinus:
+        case Key.Subtract:
+          Zoom(false);
+          e.Handled = true;
+          return true;
+
+        case Key.D0:
+        case Key.NumPad0:
+          ResetZoom();
+          e.Handled = true;
+          return true;
+      }
+
+      return false;
+    }
+
+    private void Zoom(bool zoomIn)
+    {
+      var candidate = zoomIn
+        ? ProtocolFontSize + ZoomStep
+        : ProtocolFontSize - ZoomStep;
+
+      SetProtocolFontSize(Clamp(candidate, MinFontSize, MaxFontSize));
+    }
+
+    private void ResetZoom()
+    {
+      SetProtocolFontSize(DefaultFontSize);
+    }
+
+    private void SetProtocolFontSize(double size)
+    {
+      ProtocolFontSize = size;
+    }
+
+    private static double Clamp(double value, double min, double max)
+      => Math.Max(min, Math.Min(max, value));
 
     public ObservableCollection<ShowMessageModel> GetShowMessageModels()
     {
