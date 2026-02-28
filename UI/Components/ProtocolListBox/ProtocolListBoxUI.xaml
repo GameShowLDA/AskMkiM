@@ -21,6 +21,7 @@
                  Background="Transparent"
                  BorderThickness="0"
                  ItemsSource="{Binding Messages, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    HorizontalContentAlignment="Stretch"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -63,9 +64,10 @@
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Focusable" Value="False" />
                         <Setter Property="IsHitTestVisible" Value="False" />
-                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Background" Value="{Binding HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="FontFamily" Value="Consolas" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                     </Style>
                 </ListBox.ItemContainerStyle>
 

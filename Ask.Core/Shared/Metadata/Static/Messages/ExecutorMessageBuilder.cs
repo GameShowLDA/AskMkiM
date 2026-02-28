@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using System;
 using System.Reflection;
+using System.Windows.Media;
 
 namespace Ask.Core.Shared.Metadata.Static.Messages
 {
@@ -60,9 +61,19 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
       if (model.MessageColor.HasValue)
       {
         model.HeaderColor = model.MessageColor.Value;
+        model.HeaderBackgroundColor = BuildPaleTextBackground(model.MessageColor.Value);
       }
 
       return model;
+    }
+
+    /// <summary>
+    /// Формирует бледный фон для текста на основе его цвета.
+    /// </summary>
+    private static Color BuildPaleTextBackground(Color textColor)
+    {
+      const byte paleAlpha = 70; // ~27% непрозрачности
+      return Color.FromArgb(paleAlpha, textColor.R, textColor.G, textColor.B);
     }
 
     /// <summary>
