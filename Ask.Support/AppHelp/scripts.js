@@ -17,7 +17,7 @@
     const contentFrame = document.getElementById('content-frame');
 
     /* === Страница, открывающаяся по-умолчанию, если cmd не найден === */
-    const FALLBACK_ID = 'LanguageControlProgramsBasicConcepts';  // ← при необходимости замените
+    const FALLBACK_ID = 'GeneralInformation';  // ← при необходимости замените
 
     /* ───────── Data from DOM */
     // «Страницей» считаем любой .tree-item, у которого есть data-src
