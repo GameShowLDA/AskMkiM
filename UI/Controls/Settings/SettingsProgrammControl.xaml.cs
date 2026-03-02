@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.UI.Infrastructure.Localization;
 using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -17,6 +18,12 @@ namespace UI.Controls.Settings
     public SettingsProgrammControl()
     {
       InitializeComponent();
+      Loaded += SettingsProgrammControl_Loaded;
+    }
+
+    private void SettingsProgrammControl_Loaded(object sender, RoutedEventArgs e)
+    {
+      LocalizationService.RefreshCurrentLanguage();
     }
 
     private void PrintConfig(object sender, MouseButtonEventArgs e)
@@ -173,3 +180,5 @@ namespace UI.Controls.Settings
     }
   }
 }
+
+

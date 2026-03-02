@@ -426,6 +426,12 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<int>("Theme")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("UseChainPointBodyBackgroundHighlighting")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseCommandBodyBackgroundHighlighting")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("UseSyntaxHighlighting")
                         .HasColumnType("INTEGER");
 

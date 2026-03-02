@@ -11,10 +11,14 @@
              xmlns:Config="clr-namespace:UI.Controls.Settings.DeviceConfig"
              xmlns:UiSetting="clr-namespace:UI.Controls.Settings.UserInterface"
              xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="Settings_Main_Title" Key="settings.main.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Config_Title" Key="settings.config.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Config_PrintButton" Key="settings.config.printButton" />
 
         <Style TargetType="ScrollBar">
             <Setter Property="Width" Value="10"/>
@@ -67,7 +71,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock 
-            Text="Параметры" 
+            Text="{Binding Source={StaticResource Settings_Main_Title}, Path=Value}" 
             Padding="15,10"
             Style="{DynamicResource SettingsTitleStyle}"
             FontFamily="{DynamicResource WinstonBold}"
@@ -103,7 +107,7 @@
 
 
                                 <TextBlock 
-                                Text="Конфигурация АСК" 
+                                Text="{Binding Source={StaticResource Settings_Config_Title}, Path=Value}" 
                                 Padding="10,10"
                                 Style="{DynamicResource SettingsTitleStyle}"
                                 VerticalAlignment="Center"  
@@ -115,7 +119,7 @@
                                 Height="30"
                                 Style="{DynamicResource ButtonStyleV10}"
                                 BorderThickness="1"
-                                Content="Печать"
+                                Content="{Binding Source={StaticResource Settings_Config_PrintButton}, Path=Value}"
                                 Foreground="{DynamicResource ForegrounfBrushes}"
                                 PreviewMouseDown="PrintConfig"
                                     />

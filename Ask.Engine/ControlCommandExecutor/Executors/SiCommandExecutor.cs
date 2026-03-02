@@ -25,8 +25,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<SiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
-
+      var message = string.Empty;
       SetActiveLine(context, command);
 
       if (context.IsInvokedByAnotherCommand)
@@ -39,8 +38,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           nameCommand = $"{command.CommandNumber} ПИ/{command.Mnemonic}";
         }
+
+        message = nameCommand;
       }
 
+      message += BuildSourceLinesMessage(command);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 

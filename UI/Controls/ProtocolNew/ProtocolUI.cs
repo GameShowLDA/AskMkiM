@@ -413,6 +413,8 @@ namespace UI.Controls.ProtocolNew
         showMessageModel.HeaderColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
         showMessageModel.MessageColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
         showMessageModel.TimeColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
+        showMessageModel.HeaderBackgroundColor = null;
+        return;
       }
     }
 

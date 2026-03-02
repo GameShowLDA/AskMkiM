@@ -31,7 +31,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
 
       var relayModules = EquipmentService.ValidRelayModules;
       var switchingDevice = EquipmentService.ValidSwitchingDevice;
