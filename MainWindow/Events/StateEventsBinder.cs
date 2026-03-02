@@ -162,15 +162,23 @@ namespace MainWindowProgram.Events
         if (newValue)
         {
           _mainWindow.TopPanel.Visibility = Visibility.Collapsed;
-          _mainWindow.PowerButton.Visibility = Visibility.Collapsed;
           _mainWindow.UploadErrorIndicator.Visibility = Visibility.Visible;
+          if (!ExecutionConfig.GetIsIdleModeEnabled())
+          {
+            _mainWindow.PowerButton.Visibility = Visibility.Collapsed;
+          }
+
           isLocked = true;
         }
         else
         {
           _mainWindow.TopPanel.Visibility = Visibility.Visible;
-          _mainWindow.PowerButton.Visibility = Visibility.Visible;
           _mainWindow.UploadErrorIndicator.Visibility = Visibility.Collapsed;
+          if (!ExecutionConfig.GetIsIdleModeEnabled())
+          {
+            _mainWindow.PowerButton.Visibility = Visibility.Visible;
+          }
+
           isLocked = false;
         }
       });
