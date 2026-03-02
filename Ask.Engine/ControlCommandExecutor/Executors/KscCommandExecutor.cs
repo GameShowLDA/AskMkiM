@@ -5,6 +5,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -35,20 +36,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var relayModules = EquipmentService.ValidRelayModules;
       var switchingDevice = EquipmentService.ValidSwitchingDevice;
-
-      Core.Shared.Interfaces.DeviceInterfaces.Multimeter.IFastMeter? fastMeter = null;
-      try
-      {
-        fastMeter = EquipmentService.GetFastMeterOrThrow(context.Console);
-      }
-      catch { }
-
-      Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.IBreakdownTester? breakdownTester = null;
-      try
-      {
-        breakdownTester = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-      }
-      catch { }
+      var unique = context.GetUniqueMeasurementDevices();
 
       foreach (var item in relayModules)
       {
@@ -60,14 +48,16 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await switchingDevice.ConnectableManager.ResetAsync(context.Console);
       }
 
-      if (fastMeter != null)
+      if (unique.Contains(MeasurementDevice.Multimeter))
       {
-        await fastMeter.ConnectableManager.ResetAsync(context.Console);
+        var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+        await meter.ConnectableManager.ResetAsync(context.Console);
       }
 
-      if (breakdownTester != null)
+      if (unique.Contains(MeasurementDevice.BreakdownTester))
       {
-        await breakdownTester.ConnectableManager.ResetAsync(context.Console);
+        var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
+        await breakDown.ConnectableManager.ResetAsync(context.Console);
       }
 
       GetProtocol(context, command, protocolModel);

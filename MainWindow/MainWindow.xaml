@@ -357,6 +357,7 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Button Grid.Column="0"
@@ -426,8 +427,18 @@
                 Grid.Column="3" 
 				/>
 
+            <askUiIcons:UploadErrorIcon x:Name="UploadErrorIndicator"
+                                        Visibility="Collapsed"
+                                        Grid.Column="5"
+                                        Size="22"
+                                        Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right"
+                                        Foreground="{DynamicResource NotificationErrorIconBrush}"
+                                        ToolTip="Ошибка выгрузки" />
+
             <DefaultGUI:PowerButton
-                Grid.Column="5" 
+                Grid.Column="6" 
                 Width="200"
                 Name="PowerButton"
                 Tag="Power"

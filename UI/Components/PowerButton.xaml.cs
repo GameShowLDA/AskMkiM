@@ -171,8 +171,11 @@ namespace UI.Components
     /// </summary>
     private async Task StartPowerSequenceAsync()
     {
-      await model.PowerManager.StartPowerAsync();
-      await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
+      if (!await model.PowerManager.VerifyPowerAsync(null))
+      {
+        await model.PowerManager.StartPowerAsync();
+        await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
+      }
 
       if (!await TryConnectAsync())
       {
