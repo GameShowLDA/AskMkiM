@@ -69,7 +69,7 @@ namespace UI.Services.Archive
         .Select(entry => new ArchiveManifestFileRecord
         {
           Name = NormalizeEntryName(entry.FullName),
-          Checksum = ComputeChecksum(entry)
+          Checksum = ComputeChecksum(entry), 
         })
         .OrderBy(record => record.Name, StringComparer.OrdinalIgnoreCase)
         .ToList();
@@ -87,7 +87,8 @@ namespace UI.Services.Archive
         .Select(record => new ArchiveManifestFileRecord
         {
           Name = NormalizeEntryName(record.Name),
-          Checksum = NormalizeChecksum(record.Checksum)
+          Checksum = NormalizeChecksum(record.Checksum),
+          CreationDate = DateOnly.FromDateTime(DateTime.UtcNow).ToString("o")
         })
         .OrderBy(record => record.Name, StringComparer.OrdinalIgnoreCase)
         .ToList();
@@ -183,7 +184,8 @@ namespace UI.Services.Archive
           .Select(file => new ArchiveManifestFileRecord
           {
             Name = NormalizeEntryName(file.Name),
-            Checksum = NormalizeChecksum(file.Checksum)
+            Checksum = NormalizeChecksum(file.Checksum),
+            CreationDate = file.CreationDate
           })
           .ToList();
 
@@ -229,5 +231,8 @@ namespace UI.Services.Archive
 
     [DataMember(Name = "checksum")]
     public string Checksum { get; set; }
+
+    [DataMember(Name = "creationdate")]
+    public string CreationDate { get; set; }
   }
 }

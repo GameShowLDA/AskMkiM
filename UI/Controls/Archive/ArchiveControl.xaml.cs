@@ -1,13 +1,20 @@
-﻿using Microsoft.Win32;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Services.Archive;
+using Button = System.Windows.Controls.Button;
+using MessageBox = System.Windows.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Controls.Archive
 {
@@ -25,6 +32,10 @@ namespace UI.Controls.Archive
 
     private readonly Dictionary<string, IReadOnlyList<ArchiveEntryInfo>> _archiveEntriesCache =
       new Dictionary<string, IReadOnlyList<ArchiveEntryInfo>>(StringComparer.OrdinalIgnoreCase);
+    private static readonly JsonSerializerOptions ManifestJsonOptions = new JsonSerializerOptions
+    {
+      PropertyNameCaseInsensitive = true
+    };
 
     private readonly string _archivesFolderPath;
     private readonly FileSystemWatcher _archivesWatcher;
@@ -37,6 +48,9 @@ namespace UI.Controls.Archive
     private string _lastSelectedArchivePath;
     private string _lastSelectedEntryName;
     private ArchiveTreeNode _contextMenuNode;
+
+    private readonly Dictionary<string, Dictionary<string, DateTime>> _manifestCache = new();
+
     public ArchiveControl()
     {
       InitializeComponent();
@@ -52,6 +66,43 @@ namespace UI.Controls.Archive
 
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
       ResetTree();
+    }
+    private async Task<Dictionary<string, DateTime>> GetManifestCacheAsync(string archivePath)
+    {
+      if (_manifestCache.TryGetValue(archivePath, out var cached))
+        return cached;
+
+      var result = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+
+      using var archive = ZipFile.OpenRead(archivePath);
+      var manifestEntry = archive.GetEntry("__apkw_manifest.json");
+
+      if (manifestEntry != null)
+      {
+        using var stream = manifestEntry.Open();
+
+        var manifest = await JsonSerializer.DeserializeAsync<ArchiveManifest>(stream, ManifestJsonOptions);
+
+        if (manifest?.Files != null)
+        {
+          foreach (var r in manifest.Files)
+          {
+            if (r == null || string.IsNullOrWhiteSpace(r.Name) || string.IsNullOrWhiteSpace(r.CreationDate))
+            {
+              continue;
+            }
+
+            if (DateTime.TryParse(r.CreationDate, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeLocal | DateTimeStyles.AllowWhiteSpaces, out var date))
+            {
+              result[NormalizeEntryName(r.Name)] = date;
+            }
+          }
+        }
+      }
+
+      _manifestCache[archivePath] = result;
+      return result;
     }
     private string ResolveArchivesFolderPath()
     {
@@ -106,6 +157,7 @@ namespace UI.Controls.Archive
     {
       _autoRefreshTimer.Stop();
       _archiveEntriesCache.Clear();
+      _manifestCache.Clear();
       await RefreshTreePreservingStateAsync(preservePanels: true);
     }
 
@@ -140,9 +192,9 @@ namespace UI.Controls.Archive
     {
       var state = CaptureTreeRefreshState();
 
-      var rootNode = ArchiveTreeNode.CreateRoot("Archives");
+      var rootNode = ArchiveTreeNode.CreateRoot("Архивы");
       rootNode.IsExpanded = state.IsRootExpanded;
-      rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Loading..."));
+      rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
       ArchivesTreeView.ItemsSource = new ObservableCollection<ArchiveTreeNode> { rootNode };
 
       if (state.IsRootExpanded || state.ExpandedArchivePaths.Count > 0)
@@ -184,8 +236,8 @@ namespace UI.Controls.Archive
 
     private void ResetTree()
     {
-      var rootNode = ArchiveTreeNode.CreateRoot("Archives");
-      rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Loading..."));
+      var rootNode = ArchiveTreeNode.CreateRoot("Архивы");
+      rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
       ArchivesTreeView.ItemsSource = new ObservableCollection<ArchiveTreeNode> { rootNode };
       ClearFilePanels();
     }
@@ -193,9 +245,9 @@ namespace UI.Controls.Archive
     private void ClearFilePanels()
     {
       ApplyGridItemsSource(Array.Empty<ArchiveEntryInfo>());
-      FilesHintTextBlock.Text = "Select an archive in the tree to view files.";
+      FilesHintTextBlock.Text = "Выберите архив для просмотра файлов.";
       FileContentTextBox.Text = string.Empty;
-      EditorHintTextBlock.Text = "Select a file in the tree or table to view text.";
+      EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра.";
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
     }
 
@@ -216,7 +268,7 @@ namespace UI.Controls.Archive
 
       if (archivePaths.Count == 0)
       {
-        rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("No archives found."));
+        rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Архивы не найдены."));
         return;
       }
 
@@ -227,7 +279,7 @@ namespace UI.Controls.Archive
 
         var archiveNode = ArchiveTreeNode.CreateArchive(Path.GetFileName(archivePath), archivePath);
         archiveNode.IsExpanded = isExpanded;
-        archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Expand to load files..."));
+        archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Разверните для загрузки файлов..."));
         rootNode.Children.Add(archiveNode);
 
         if (isExpanded)
@@ -256,18 +308,18 @@ namespace UI.Controls.Archive
         var entries = await GetArchiveEntriesAsync(archiveNode.ArchivePath);
         if (entries.Count == 0)
         {
-          archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Archive is empty."));
+          archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Архив пуст."));
           return;
         }
 
         foreach (var entry in entries)
         {
-          archiveNode.Children.Add(ArchiveTreeNode.CreateFile(entry.Name, archiveNode.ArchivePath, entry.EntryName));
+          archiveNode.Children.Add(ArchiveTreeNode.CreateFile(entry.EntryName, archiveNode.ArchivePath, entry.EntryName));
         }
       }
       catch (Exception ex)
       {
-        archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Archive read error."));
+        archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Ошибка чтения архива."));
         MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
@@ -311,7 +363,7 @@ namespace UI.Controls.Archive
       }
     }
 
-    private static IReadOnlyList<ArchiveEntryInfo> ReadArchiveEntries(string archivePath)
+    private IReadOnlyList<ArchiveEntryInfo> ReadArchiveEntries(string archivePath)
     {
       var items = new List<ArchiveEntryInfo>();
 
@@ -330,18 +382,114 @@ namespace UI.Controls.Archive
             continue;
           }
 
-          items.Add(new ArchiveEntryInfo(
-            archivePath,
-            NormalizeEntryName(entry.FullName),
-            entry.Length,
-            entry.CompressedLength,
-            entry.LastWriteTime));
+          ArchiveEntryInfo? info = GetEntryInfoAsync(archivePath, entry).GetAwaiter().GetResult();
+          if (info != null)
+          {
+            items.Add(info);
+          }
         }
       }
 
       return items
         .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
         .ToList();
+    }
+
+    private async Task<ArchiveEntryInfo?> GetEntryInfoAsync(string archivePath, ZipArchiveEntry entry)
+    {
+      var manifest = await GetManifestCacheAsync(archivePath);
+      manifest.TryGetValue(NormalizeEntryName(entry.FullName), out var creationDate);
+      if (creationDate == default)
+      {
+        creationDate = entry.LastWriteTime.LocalDateTime;
+      }
+
+      Regex CommandStartRegex = new (@"^\s*\d+\s+\S+", RegexOptions.Compiled);
+      var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, NormalizeEntryName(entry.FullName)));
+      if (string.IsNullOrWhiteSpace(text))
+        return null;
+
+      var lines = text
+           .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+           .Select(l => l.Trim())
+           .ToList();
+
+      if (lines.Count == 0)
+        return null;
+
+      var startIndex = lines.FindIndex(l => CommandStartRegex.IsMatch(l));
+
+      if (startIndex < 0)
+        return null; 
+
+      var firstLine = Regex.Replace(lines[startIndex], @"^\s*\d+\s+\S+\s*", string.Empty);
+      var starIndex = firstLine.IndexOf('*');
+
+      string? name = null;
+      string? nameOk = null;
+      string? opk = null;
+      string? ik = null;
+      string? order = null;
+      string? department = null;
+      string? comment = null;
+      List<string> opkFileName = new();
+
+      if (starIndex >= 0)
+      {
+        name = firstLine.Substring(0, starIndex).Trim();
+        nameOk = firstLine[(starIndex + 1)..].Trim();
+      }
+      else
+      {
+        name = firstLine.Trim();
+      }
+
+      foreach (var line in lines.Skip(1))
+      {
+        var temp = Regex.Replace(line.ToLowerInvariant(), @"\s+", string.Empty);
+        var eqIndex = line.IndexOf('=');
+        var value = string.Empty;
+        if (eqIndex >= 0)
+        {
+          value = line[(eqIndex + 1)..].Trim();
+        }
+        if (temp.StartsWith("опк"))
+        {
+          opk = value;
+        }
+        else if (temp.StartsWith("ик"))
+        {
+          ik = value;
+        } 
+        else if (temp.StartsWith("кд"))
+        {
+          opkFileName.Add(value);
+        }
+        else if (temp.StartsWith("заказ"))
+        {
+          order = value;
+        }
+        else if (temp.StartsWith("цех"))
+        {
+          department = value;
+        }
+        else if (temp.StartsWith("прим"))
+        {
+          comment = value;
+        }
+      }
+      return new ArchiveEntryInfo(
+        archivePath,
+        NormalizeEntryName(entry.FullName),
+        name,
+        nameOk,
+        order,
+        opkFileName,
+        department,
+        comment,
+        opk,
+        ik,
+        creationDate);
     }
 
     private static string NormalizeEntryName(string entryName)
@@ -356,34 +504,26 @@ namespace UI.Controls.Archive
 
     private void UpdateRightPanels(bool isFilesVisible, bool isEditorVisible)
     {
-      FilesPanel.Visibility = isFilesVisible ? Visibility.Visible : Visibility.Collapsed;
-      EditorPanel.Visibility = isEditorVisible ? Visibility.Visible : Visibility.Collapsed;
+      FilesPanel.Visibility = Visibility.Visible;
+      ArchiveFilesDataGrid.Visibility = isFilesVisible ? Visibility.Visible : Visibility.Collapsed;
+      ArchiveFilesTextBlock.Visibility = Visibility.Visible;
+      FileContentTextBox.Visibility = isEditorVisible ? Visibility.Visible : Visibility.Collapsed;
+      SelectFileContentTextBlock.Visibility = isEditorVisible ? Visibility.Visible : Visibility.Collapsed;
 
-      if (isFilesVisible && isEditorVisible)
-      {
-        FilesRowDefinition.Height = new GridLength(1, GridUnitType.Star);
-        EditorRowDefinition.Height = new GridLength(1, GridUnitType.Star);
-        RightSplitter.Visibility = Visibility.Visible;
-        return;
-      }
-
-      if (isFilesVisible)
-      {
-        FilesRowDefinition.Height = new GridLength(1, GridUnitType.Star);
-        EditorRowDefinition.Height = new GridLength(0);
-        RightSplitter.Visibility = Visibility.Collapsed;
-        return;
-      }
+      // Панель файлов всегда отображается; переключаем только её внутреннее содержимое.
+      FilesRowDefinition.Height = new GridLength(1, GridUnitType.Star);
 
       if (isEditorVisible)
       {
-        FilesRowDefinition.Height = new GridLength(0);
         EditorRowDefinition.Height = new GridLength(1, GridUnitType.Star);
         RightSplitter.Visibility = Visibility.Collapsed;
+        if (isFilesVisible)
+        {
+          RightSplitter.Visibility = Visibility.Visible;
+        }
         return;
       }
 
-      FilesRowDefinition.Height = new GridLength(0);
       EditorRowDefinition.Height = new GridLength(0);
       RightSplitter.Visibility = Visibility.Collapsed;
     }
@@ -407,8 +547,8 @@ namespace UI.Controls.Archive
 
       ApplyGridItemsSource(entries);
       var baseHint = entries.Count == 0
-        ? "Archive is empty."
-        : "Select a file in the table or tree.";
+        ? "Архив пуст."
+        : "Выберите файл в архиве для просмотра..";
       FilesHintTextBlock.Text = integrityNotifications.Count == 0
         ? baseHint
         : $"{baseHint} Integrity warnings: {integrityNotifications.Count}.";
@@ -416,7 +556,7 @@ namespace UI.Controls.Archive
       if (clearEditor)
       {
         FileContentTextBox.Text = string.Empty;
-        EditorHintTextBlock.Text = "Select a file in the tree or table to view text.";
+        EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра..";
         UpdateRightPanels(isFilesVisible: true, isEditorVisible: false);
       }
       else
@@ -443,7 +583,7 @@ namespace UI.Controls.Archive
 
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
       FileContentTextBox.Text = text;
-      EditorHintTextBlock.Text = "File content is shown in read-only mode.";
+      EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
       UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
     }
 
@@ -541,6 +681,7 @@ namespace UI.Controls.Archive
         }
 
         _archiveEntriesCache.Clear();
+        _manifestCache.Clear();
         await RefreshTreePreservingStateAsync(preservePanels: true);
       }
       catch (Exception ex)
@@ -579,7 +720,7 @@ namespace UI.Controls.Archive
 
       var openFileDialog = new OpenFileDialog
       {
-        Title = "Select file to add",
+        Title = "Выберите файл для добавления",
         CheckFileExists = true,
         Multiselect = false,
       };
@@ -598,6 +739,7 @@ namespace UI.Controls.Archive
         }
 
         _archiveEntriesCache.Remove(node.ArchivePath);
+        _manifestCache.Remove(node.ArchivePath);
         await RefreshTreePreservingStateAsync(preservePanels: true);
       }
       catch (Exception ex)
@@ -616,8 +758,8 @@ namespace UI.Controls.Archive
 
       var confirmation = MessageBox.Show(
         Window.GetWindow(this),
-        $"Delete archive '{node.DisplayName}'?",
-        "Delete archive",
+        $"Удалить архив '{node.DisplayName}'?",
+        "Удаление архива",
         MessageBoxButton.YesNo,
         MessageBoxImage.Warning);
 
@@ -643,6 +785,7 @@ namespace UI.Controls.Archive
         }
 
         _archiveEntriesCache.Clear();
+        _manifestCache.Clear();
         await RefreshTreePreservingStateAsync(preservePanels: !activeArchiveDeleted);
       }
       catch (Exception ex)
@@ -685,8 +828,8 @@ namespace UI.Controls.Archive
 
       var confirmation = MessageBox.Show(
         Window.GetWindow(this),
-        $"Delete file '{node.DisplayName}' from archive?",
-        "Delete file",
+        $"Удалить файл '{node.DisplayName}' из архива?",
+        "Удаление файла",
         MessageBoxButton.YesNo,
         MessageBoxImage.Warning);
 
@@ -704,11 +847,12 @@ namespace UI.Controls.Archive
         }
 
         _archiveEntriesCache.Remove(node.ArchivePath);
+        _manifestCache.Remove(node.ArchivePath);
         await RefreshTreePreservingStateAsync(preservePanels: true);
       }
       catch (Exception ex)
       {
-        //MessageBox.Show(this, ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -716,8 +860,8 @@ namespace UI.Controls.Archive
     {
       var dialog = new Window
       {
-        Title = "Create archive",
-        //Owner = this,
+        Title = "Создание архива",
+        Owner = Window.GetWindow(this),
         WindowStartupLocation = WindowStartupLocation.CenterOwner,
         ResizeMode = ResizeMode.NoResize,
         SizeToContent = SizeToContent.WidthAndHeight,
@@ -734,10 +878,10 @@ namespace UI.Controls.Archive
 
       var label = new TextBlock
       {
-        Text = "Archive name:",
+        Text = "Введите название архива:",
       };
 
-      var inputBox = new TextBox
+      var inputBox = new System.Windows.Controls.TextBox
       {
         MinWidth = 320,
         Margin = new Thickness(0, 8, 0, 0),
@@ -747,13 +891,13 @@ namespace UI.Controls.Archive
       var buttonsPanel = new StackPanel
       {
         Orientation = Orientation.Horizontal,
-        HorizontalAlignment = HorizontalAlignment.Right,
+        HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
         Margin = new Thickness(0, 12, 0, 0),
       };
 
       var createButton = new Button
       {
-        Content = "Create",
+        Content = "Создать",
         MinWidth = 90,
         IsDefault = true,
       };
@@ -761,7 +905,7 @@ namespace UI.Controls.Archive
 
       var cancelButton = new Button
       {
-        Content = "Cancel",
+        Content = "Отмена",
         MinWidth = 90,
         IsCancel = true,
         Margin = new Thickness(8, 0, 0, 0),
@@ -850,7 +994,7 @@ namespace UI.Controls.Archive
 
         var text = await Task.Run(() => ReadArchiveEntryTextWithManager(selected.ArchivePath, selected.EntryName));
         FileContentTextBox.Text = text;
-        EditorHintTextBlock.Text = "File content is shown in read-only mode.";
+        EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
         UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
       }
       catch (Exception ex)

@@ -7,12 +7,19 @@ namespace UI.Services.Archive
   internal sealed class ArchiveOpeningService : IDisposable
   {
     private const string ArchiveExtension = ".apkw";
+    private static readonly Encoding Windows1251Encoding;
 
     private FileStream _archiveStream;
     private ZipArchive _archive;
 
     public string OpenedArchivePath { get; private set; }
     public IReadOnlyList<string> IntegrityNotifications { get; private set; } = Array.Empty<string>();
+
+    static ArchiveOpeningService()
+    {
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+      Windows1251Encoding = Encoding.GetEncoding(1251);
+    }
 
     public void Open(string archivePath)
     {
@@ -63,28 +70,34 @@ namespace UI.Services.Archive
 
       var normalizedEntryName = NormalizeRequiredEntryName(archiveEntryName, nameof(archiveEntryName));
       var archiveEntry = _archive.Entries.FirstOrDefault(entry =>
-        ArchiveManifestService.IsArchiveFileEntry(entry) &&
-        ArchiveManifestService.NormalizeEntryName(entry.FullName)
-          .Equals(normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+          ArchiveManifestService.IsArchiveFileEntry(entry) &&
+          ArchiveManifestService.NormalizeEntryName(entry.FullName)
+              .Equals(normalizedEntryName, StringComparison.OrdinalIgnoreCase));
 
       if (archiveEntry == null)
       {
         throw new FileNotFoundException(
-          $"File '{normalizedEntryName}' was not found in archive '{OpenedArchivePath}'.",
-          normalizedEntryName);
+            $"File '{normalizedEntryName}' was not found in archive '{OpenedArchivePath}'.",
+            normalizedEntryName);
       }
 
       try
       {
-        using (var stream = archiveEntry.Open())
-        using (var reader = new StreamReader(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true), detectEncodingFromByteOrderMarks: true))
-        {
-          return reader.ReadToEnd();
-        }
+        // 1) Пробуем UTF-8 строго.
+        using var stream = archiveEntry.Open();
+        using var reader = new StreamReader(
+            stream,
+            new UTF8Encoding(false, true),
+            detectEncodingFromByteOrderMarks: true);
+
+        return reader.ReadToEnd();
       }
-      catch (DecoderFallbackException ex)
+      catch (DecoderFallbackException)
       {
-        throw new InvalidDataException($"File '{normalizedEntryName}' is not valid UTF-8 text.", ex);
+        // 2) Поток ZipEntry не поддерживает Position/Seek, открываем заново.
+        using var stream = archiveEntry.Open();
+        using var reader = new StreamReader(stream, Encoding.GetEncoding(866));
+        return reader.ReadToEnd();
       }
     }
 
