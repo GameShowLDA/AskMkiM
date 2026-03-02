@@ -516,6 +516,12 @@
   <data name="settings.protocol.deviceInfo.measurementResults.description" xml:space="preserve">
     <value>Shows measurement results obtained during test program execution.</value>
   </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.title" xml:space="preserve">
+    <value>Intermediate measurement results</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
+    <value>Shows intermediate measurement results obtained during test program execution.</value>
+  </data>
   <data name="settings.main.title" xml:space="preserve">
     <value>Settings</value>
   </data>
