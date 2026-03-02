@@ -147,6 +147,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
 
@@ -166,6 +168,28 @@
                                                                 ToolTip="Печать активной конфигурации"
                                                                 IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
+
+                                <Button Grid.Column="3"
+                                        Margin="8,0,0,0"
+                                        Style="{StaticResource ConfigActionIconButtonStyle}"
+                                        ToolTip="Экспорт конфигурации в JSON"
+                                        PreviewMouseDown="ExportConfig">
+                                    <askUiIcons:ExportConfigIcon Size="15"
+                                                                 ToolTip="Экспорт конфигурации в JSON"
+                                                                 IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
+
+                                <Button Grid.Column="4"
+                                        Margin="8,0,0,0"
+                                        Style="{StaticResource ConfigActionIconButtonStyle}"
+                                        ToolTip="Импорт конфигурации из JSON"
+                                        PreviewMouseDown="ImportConfig">
+                                    <askUiIcons:ImportConfigIcon Size="15"
+                                                                 ToolTip="Импорт конфигурации из JSON"
+                                                                 IsImporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                                 </Button>
 
                                 <Grid Grid.Column="1"  Margin="20,0">
@@ -189,7 +213,8 @@
                                 </Grid>
                             </Grid>
 
-                            <Config:DeviceConfigControl Grid.Row="1">
+                            <Config:DeviceConfigControl x:Name="DeviceConfigManager"
+                                                        Grid.Row="1">
                                 <Config:DeviceConfigControl.Style>
                                     <Style TargetType="{x:Type Config:DeviceConfigControl}">
                                         <Setter Property="Visibility" Value="Visible"/>
