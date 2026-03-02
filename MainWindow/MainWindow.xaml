@@ -12,6 +12,7 @@
         xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
         xmlns:askUi="clr-namespace:Ask.UI.Features.ExecutionSelection.Views;assembly=Ask.UI"
+        xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
         xmlns:askUiRuntime="clr-namespace:Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;assembly=Ask.UI"
         xmlns:askUiNotifications="clr-namespace:Ask.UI.Features.Notifications.Views;assembly=Ask.UI"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -27,6 +28,63 @@
         
         Name="MainWinApp"
         >
+
+    <Window.Resources>
+        <Style x:Key="WindowActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DarkThemeToggleButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource WindowActionButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#1E1E1E"/>
+                    <Setter Property="Background" Value="#33FFFFFF"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Foreground" Value="#111111"/>
+                    <Setter Property="Background" Value="#55FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LightThemeToggleButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource WindowActionButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                    <Setter Property="Background" Value="#5537404F"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                    <Setter Property="Background" Value="#7737404F"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="SizeChanged">
@@ -230,6 +288,30 @@
                     Background="Transparent"
                     >
 
+                <Button x:Name="DarkThemeButton"
+                        Style="{StaticResource DarkThemeToggleButtonStyle}"
+                        Width="{Binding ActualHeight, ElementName=mainMenu}"
+                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        Visibility="Collapsed"
+                        ToolTip="Тёмная тема"
+                        PreviewMouseDown="ThemeToggleButton_PreviewMouseDown">
+                    <askUiIcons:MoonThemeIcon Size="15"
+                                              IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                </Button>
+
+                <Button x:Name="LightThemeButton"
+                        Style="{StaticResource LightThemeToggleButtonStyle}"
+                        Width="{Binding ActualHeight, ElementName=mainMenu}"
+                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        Visibility="Collapsed"
+                        ToolTip="Светлая тема"
+                        PreviewMouseDown="ThemeToggleButton_PreviewMouseDown">
+                    <askUiIcons:SunThemeIcon Size="15"
+                                             IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                </Button>
+
                 <DefaultGUI:WindowButtons 
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
@@ -270,23 +352,56 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
+            <Button Grid.Column="0"
+                    Width="20"
+                    Height="20"
+                    Margin="8,0,4,0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    Cursor="Hand"
+                    Opacity="0.32"
+                    BorderBrush="Transparent"
+                    Background="Transparent"
+                    Foreground="{DynamicResource MainTitleSolidColorBrush}"
+                    ToolTip="Терминал (Ctrl + ~)"
+                    PreviewMouseDown="TerminalButton_PreviewMouseDown">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Opacity" Value="0.32" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.75" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.95" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <askUiIcons:TerminalIcon Size="14"
+                                         IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                         Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+            </Button>
+
             <TextBlock 
+                Grid.Column="1"
                 x:Name="InfoBlock" 
                 VerticalAlignment="Center" 
-                Padding="10,0,0,0" 
+                Padding="6,0,0,0" 
                 FontSize="14" 
                 Foreground="{DynamicResource MainTitleSolidColorBrush}" 
 				/>
 
 
             <Controls:StatusBarControl
-                Grid.Column="1" 
+                Grid.Column="2" 
                 x:Name="StatusBar"
                 HorizontalAlignment="Right"
                 Visibility="Hidden"
@@ -298,7 +413,7 @@
                 Margin="0,0,10,0" 
                 FontSize="13" 
                 Foreground="{DynamicResource ForegrounfBrushes}"
-                Grid.Column="3" 
+                Grid.Column="4" 
                 Cursor="Hand"
 				/>
 
@@ -308,11 +423,11 @@
                 VerticalAlignment="Center" 
                 FontSize="15" 
                 Foreground="{DynamicResource ForegrounfBrushes}"
-                Grid.Column="2" 
+                Grid.Column="3" 
 				/>
 
             <DefaultGUI:PowerButton
-                Grid.Column="4" 
+                Grid.Column="5" 
                 Width="200"
                 Name="PowerButton"
                 Tag="Power"
