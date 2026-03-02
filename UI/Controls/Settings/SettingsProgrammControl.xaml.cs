@@ -1,4 +1,7 @@
 ﻿using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -33,16 +36,59 @@ namespace UI.Controls.Settings
   {
     private static readonly JsonSerializerOptions ExportJsonOptions = CreateJsonOptions(writeIndented: true);
     private static readonly JsonSerializerOptions ImportJsonOptions = CreateJsonOptions(writeIndented: false);
+    private readonly Action<SystemStateEvents.AdminRightsChanged> _adminRightsChangedHandler;
+    private bool _isAdminRightsSubscribed;
 
     public SettingsProgrammControl()
     {
       InitializeComponent();
+      _adminRightsChangedHandler = OnAdminRightsChanged;
       Loaded += SettingsProgrammControl_Loaded;
+      Unloaded += SettingsProgrammControl_Unloaded;
     }
 
     private void SettingsProgrammControl_Loaded(object sender, RoutedEventArgs e)
     {
       LocalizationService.RefreshCurrentLanguage();
+      UpdateImportExportVisibility(AdminConfig.GetAdminRights());
+
+      if (_isAdminRightsSubscribed)
+      {
+        return;
+      }
+
+      EventAggregator.Subscribe(_adminRightsChangedHandler);
+      _isAdminRightsSubscribed = true;
+    }
+
+    private void SettingsProgrammControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+      if (!_isAdminRightsSubscribed)
+      {
+        return;
+      }
+
+      EventAggregator.Unsubscribe(_adminRightsChangedHandler);
+      _isAdminRightsSubscribed = false;
+    }
+
+    private void OnAdminRightsChanged(SystemStateEvents.AdminRightsChanged eventData)
+    {
+      if (Dispatcher.CheckAccess())
+      {
+        UpdateImportExportVisibility(eventData.IsAdmin);
+      }
+      else
+      {
+        Dispatcher.Invoke(() => UpdateImportExportVisibility(eventData.IsAdmin));
+      }
+    }
+
+    private void UpdateImportExportVisibility(bool isAdmin)
+    {
+      var visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+      ExportConfigButton.Visibility = visibility;
+      ImportConfigButton.Visibility = visibility;
     }
 
     private void PrintConfig(object sender, MouseButtonEventArgs e)
