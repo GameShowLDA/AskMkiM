@@ -56,7 +56,6 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           type: ShowMessageModel.MessageType.Command
       )
       {
-        IndentLevel = 1,
         IsControlProgramCommandHeader = !commandName.Contains("ПИ/", StringComparison.OrdinalIgnoreCase)
       };
 
