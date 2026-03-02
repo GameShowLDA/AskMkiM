@@ -133,7 +133,7 @@ namespace UI.Controls.Settings
           return;
         }
 
-        var confirmation = MessageBox.Show(
+        var confirmation = Message.MessageBoxCustom.Show(
           "При импорте текущая конфигурация устройств будет полностью удалена и заменена содержимым JSON-файла. Продолжить?",
           "Импорт конфигурации",
           MessageBoxButton.YesNo,

@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
 using System.Diagnostics;
@@ -126,7 +128,10 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     private void HandleGenerationError(Exception ex)
     {
-      Message.MessageBoxCustom.Show("Ошибка при сохранении PDF: " + ex.Message);
+      NotificationHostService.Instance.Show(
+        "Ошибка сохранения PDF",
+        ex.Message,
+        NotificationType.Error);
       LogException("Ошибка при сохранении PDF", ex);
     }
 
