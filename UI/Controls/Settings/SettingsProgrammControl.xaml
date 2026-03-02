@@ -11,6 +11,7 @@
              xmlns:Config="clr-namespace:UI.Controls.Settings.DeviceConfig"
              xmlns:UiSetting="clr-namespace:UI.Controls.Settings.UserInterface"
              xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              
              mc:Ignorable="d" 
@@ -18,7 +19,50 @@
     <UserControl.Resources>
         <LocalizeStrings:LocalizedString x:Key="Settings_Main_Title" Key="settings.main.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Config_Title" Key="settings.config.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Config_PrintButton" Key="settings.config.printButton" />
+
+        <Style x:Key="ConfigActionIconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonForegroundBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonHoverForegroundBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonPressedForegroundBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
         <Style TargetType="ScrollBar">
             <Setter Property="Width" Value="10"/>
@@ -103,6 +147,8 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
 
@@ -113,16 +159,40 @@
                                 VerticalAlignment="Center"  
                                 Grid.Row="0"/>
 
-                                <Button 
-                                Grid.Column="2"
-                                Width="100"
-                                Height="30"
-                                Style="{DynamicResource ButtonStyleV10}"
-                                BorderThickness="1"
-                                Content="{Binding Source={StaticResource Settings_Config_PrintButton}, Path=Value}"
-                                Foreground="{DynamicResource ForegrounfBrushes}"
-                                PreviewMouseDown="PrintConfig"
-                                    />
+                                <Button Grid.Column="2"
+                                        Margin="8,0,0,0"
+                                        Style="{StaticResource ConfigActionIconButtonStyle}"
+                                        ToolTip="Печать активной конфигурации"
+                                        PreviewMouseDown="PrintConfig">
+                                    <askUiIcons:PrintConfigIcon Size="15"
+                                                                ToolTip="Печать активной конфигурации"
+                                                                IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
+
+                                <Button x:Name="ExportConfigButton"
+                                        Grid.Column="3"
+                                        Margin="8,0,0,0"
+                                        Style="{StaticResource ConfigActionIconButtonStyle}"
+                                        ToolTip="Экспорт конфигурации в JSON"
+                                        PreviewMouseDown="ExportConfig">
+                                    <askUiIcons:ExportConfigIcon Size="15"
+                                                                 ToolTip="Экспорт конфигурации в JSON"
+                                                                 IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
+
+                                <Button x:Name="ImportConfigButton"
+                                        Grid.Column="4"
+                                        Margin="8,0,0,0"
+                                        Style="{StaticResource ConfigActionIconButtonStyle}"
+                                        ToolTip="Импорт конфигурации из JSON"
+                                        PreviewMouseDown="ImportConfig">
+                                    <askUiIcons:ImportConfigIcon Size="15"
+                                                                 ToolTip="Импорт конфигурации из JSON"
+                                                                 IsImporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                </Button>
 
                                 <Grid Grid.Column="1"  Margin="20,0">
 
@@ -145,7 +215,8 @@
                                 </Grid>
                             </Grid>
 
-                            <Config:DeviceConfigControl Grid.Row="1">
+                            <Config:DeviceConfigControl x:Name="DeviceConfigManager"
+                                                        Grid.Row="1">
                                 <Config:DeviceConfigControl.Style>
                                     <Style TargetType="{x:Type Config:DeviceConfigControl}">
                                         <Setter Property="Visibility" Value="Visible"/>

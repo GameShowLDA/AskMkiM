@@ -24,6 +24,15 @@
     <SolidColorBrush x:Key="DrawerAccentBrush" Color="#78A8E6"/>
     <SolidColorBrush x:Key="DrawerGlowBrush" Color="#4D6FA3"/>
     <SolidColorBrush x:Key="DrawerHighlightBrush" Color="#40FFFFFF"/>
+    <SolidColorBrush x:Key="NotificationCardBackgroundBrush" Color="#474A54"/>
+    <SolidColorBrush x:Key="NotificationCardBorderBrush" Color="#5B6070"/>
+    <SolidColorBrush x:Key="NotificationTitleBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="NotificationMessageBrush" Color="#F2F5FA"/>
+    <SolidColorBrush x:Key="NotificationInfoIconBrush" Color="#7FB3FF"/>
+    <SolidColorBrush x:Key="NotificationSuccessIconBrush" Color="#59C770"/>
+    <SolidColorBrush x:Key="NotificationWarningIconBrush" Color="#F3B24E"/>
+    <SolidColorBrush x:Key="NotificationErrorIconBrush" Color="#FF7A5D"/>
+    <Color x:Key="NotificationCardShadowColor">#66000000</Color>
     <SolidColorBrush x:Key="DeviceInputShellBackgroundBrush" Color="#2A313D"/>
     <SolidColorBrush x:Key="DeviceInputSectionBorderBrush" Color="#5A6A7D"/>
     <Color x:Key="DeviceInputSectionShadowColor">#000000</Color>

@@ -13,6 +13,7 @@
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
         xmlns:askUi="clr-namespace:Ask.UI.Features.ExecutionSelection.Views;assembly=Ask.UI"
         xmlns:askUiRuntime="clr-namespace:Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;assembly=Ask.UI"
+        xmlns:askUiNotifications="clr-namespace:Ask.UI.Features.Notifications.Views;assembly=Ask.UI"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
 
         mc:Ignorable="d"
@@ -319,6 +320,7 @@
         </Grid>
         </Grid>
 
+        <askUiNotifications:WindowNotificationManagerControl Panel.ZIndex="9998" />
         <askUi:DrawerControl Panel.ZIndex="9999" />
     </Grid>
 </Window>
