@@ -2,7 +2,9 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using DataBaseConfiguration;
 using DataBaseConfiguration.Services.Device;
 using Microsoft.Win32;
@@ -99,15 +101,17 @@ namespace UI.Controls.Settings
         string json = JsonSerializer.Serialize(configuration, ExportJsonOptions);
         File.WriteAllText(saveDialog.FileName, json, Encoding.UTF8);
 
-        MessageBox.Show($"Конфигурация сохранена в файл:\n{saveDialog.FileName}",
+        NotificationHostService.Instance.Show(
           "Экспорт конфигурации",
-          MessageBoxButton.OK,
-          MessageBoxImage.Information);
+          $"Конфигурация сохранена в файл:\n{saveDialog.FileName}",
+          NotificationType.Success);
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при экспорте конфигурации: {ex.Message}", "Ошибка",
-          MessageBoxButton.OK, MessageBoxImage.Error);
+        NotificationHostService.Instance.Show(
+          "Ошибка экспорта конфигурации",
+          ex.Message,
+          NotificationType.Error);
       }
     }
 
@@ -147,15 +151,17 @@ namespace UI.Controls.Settings
 
         DeviceConfigManager?.ReloadConfiguration();
 
-        MessageBox.Show("Конфигурация успешно импортирована.",
+        NotificationHostService.Instance.Show(
           "Импорт конфигурации",
-          MessageBoxButton.OK,
-          MessageBoxImage.Information);
+          "Конфигурация успешно импортирована.",
+          NotificationType.Success);
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Ошибка при импорте конфигурации: {ex.Message}", "Ошибка",
-          MessageBoxButton.OK, MessageBoxImage.Error);
+        NotificationHostService.Instance.Show(
+          "Ошибка импорта конфигурации",
+          ex.Message,
+          NotificationType.Error);
       }
     }
 
