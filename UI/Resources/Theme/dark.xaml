@@ -12,6 +12,9 @@
     <SolidColorBrush x:Key="MenuBackgroundBrushes" Color="#232932"/>
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#303843"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#1ca3e9"/>
+    <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#282E37"/>
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#282E37"/>
+    <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="SettingsMainBackground" Color="#3a4655"/>
     <SolidColorBrush x:Key="DrawerBackdropBrush" Color="#6610151C"/>
     <SolidColorBrush x:Key="DrawerPanelBackgroundBrush" Color="#2A313D"/>
