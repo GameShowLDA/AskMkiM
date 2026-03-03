@@ -303,13 +303,27 @@ namespace UI.Controls.TextEditor
     /// <param name="lineNumber">Номер строки (1-based).</param>
     public void GoToLine(int lineNumber)
     {
-      if (lineNumber > 0 && lineNumber <= textEditor.Document.LineCount)
-      {
-        var line = textEditor.Document.GetLineByNumber(lineNumber);
-        textEditor.ScrollToLine(lineNumber);
-        textEditor.Select(line.Offset, line.Length);
-        textEditor.Focus();
-      }
+      GoToLineCore(lineNumber, selectLine: true);
+    }
+
+    /// <summary>
+    /// Переходит к указанной строке без выделения текста.
+    /// </summary>
+    /// <param name="lineNumber">Номер строки (1-based).</param>
+    public void GoToLineWithoutSelection(int lineNumber)
+    {
+      GoToLineCore(lineNumber, selectLine: false);
+    }
+
+    private void GoToLineCore(int lineNumber, bool selectLine)
+    {
+      if (textEditor.Document == null || lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
+        return;
+
+      var line = textEditor.Document.GetLineByNumber(lineNumber);
+      textEditor.ScrollToLine(lineNumber);
+      textEditor.Select(line.Offset, selectLine ? line.Length : 0);
+      textEditor.Focus();
     }
 
 

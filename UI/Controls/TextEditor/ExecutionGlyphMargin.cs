@@ -19,6 +19,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   private const double ActiveRangeLinePadding = 2;
   private const double ActiveRangeLineThickness = 4;
   private const double ActiveRangeBackgroundLeftOverflow = 80;
+  private const byte BreakpointBackgroundAlpha = 72;
   private const string ActiveRangeStripeBrushKey = "TextEditorActiveCommandStripeBrush";
   private const string ActiveRangeBackgroundBrushKey = "TextEditorActiveCommandBackgroundBrush";
   private static readonly Geometry ActiveArrowGeometry = CreateActiveArrowGeometry();
@@ -51,9 +52,14 @@ public class ExecutionGlyphMargin : AbstractMargin
     ?? Brushes.Transparent;
 
   /// <summary>
-  /// Цвет фоновой подсветки строки, на которой установлена точка остановки (для <see cref="TextMarkerService"/>).
+  /// Базовый цвет подсветки точки останова.
   /// </summary>
   public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
+
+  /// <summary>
+  /// Кисть фоновой заливки диапазона команды с точкой останова.
+  /// </summary>
+  public Brush BreakpointRangeBackgroundBrush { get; private set; } = Brushes.Transparent;
 
   /// <summary>
   /// Определяет, должны ли клики по марджину изменять состояние точек остановки.
@@ -83,6 +89,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   private readonly HashSet<int> _rightBreakpoints = new();        
   private readonly Dictionary<int, TextAnchor> _bpByCommand = new();
   private readonly ActiveCommandRangeBackgroundRenderer _activeRangeBackgroundRenderer;
+  private readonly BreakpointRangeBackgroundRenderer _breakpointRangeBackgroundRenderer;
   private int _activeRangeStartLine = -1; // 0-based line number
   private int _activeRangeEndLine = -1;   // 0-based line number
 
@@ -100,7 +107,9 @@ public class ExecutionGlyphMargin : AbstractMargin
     _textEditor = textEditor;
     RefreshThemeBrushes();
     _activeRangeBackgroundRenderer = new ActiveCommandRangeBackgroundRenderer(this);
+    _breakpointRangeBackgroundRenderer = new BreakpointRangeBackgroundRenderer(this);
     _textEditor.TextArea.TextView.BackgroundRenderers.Add(_activeRangeBackgroundRenderer);
+    _textEditor.TextArea.TextView.BackgroundRenderers.Add(_breakpointRangeBackgroundRenderer);
 
     _textEditor.DocumentChanged += (_, __) =>
     {
@@ -131,6 +140,22 @@ public class ExecutionGlyphMargin : AbstractMargin
       (Brush?)Application.Current?.Resources[ActiveRangeBackgroundBrushKey]
       ?? (Brush?)Application.Current?.Resources["TestsProtocolBackgroundBrush"]
       ?? ActiveRangeBackgroundBrush;
+
+    if (Application.Current?.Resources["RedColorSolidColorBrush"] is SolidColorBrush redBrush)
+    {
+      LineBrush = redBrush.Color;
+      BreakpointBrush = redBrush;
+      BreakpointRangeBackgroundBrush = CreateTransparentBrush(redBrush.Color, BreakpointBackgroundAlpha);
+    }
+  }
+
+  private static Brush CreateTransparentBrush(Color baseColor, byte alpha)
+  {
+    var brush = new SolidColorBrush(Color.FromArgb(alpha, baseColor.R, baseColor.G, baseColor.B));
+    if (brush.CanFreeze)
+      brush.Freeze();
+
+    return brush;
   }
 
   /// <summary>
@@ -312,38 +337,42 @@ public class ExecutionGlyphMargin : AbstractMargin
   }
 
   /// <summary>
-  /// Пытается получить экземпляр <see cref="TextMarkerService"/>, зарегистрированный в сервисах визуального слоя AvalonEdit.
+  /// Вычисляет диапазон команды по строкам документа (1-based):
+  /// от заголовка команды до строки перед следующим заголовком.
   /// </summary>
-  /// <remarks>
-  /// Сервис маркеров обычно добавляется один раз при инициализации редактора и хранится внутри
-  /// <see cref="ICSharpCode.AvalonEdit.Rendering.TextView.Services"/>.
-  /// </remarks>
-  /// <returns>
-  /// Экземпляр <see cref="TextMarkerService"/>, если он доступен; иначе <c>null</c>.
-  /// </returns>
-  private TextMarkerService? GetMarkerService()
+  private bool TryGetCommandLineRange(int startDocLine, out int endDocLine)
   {
-    return _textEditor?.TextArea?.TextView?.Services?
-      .GetService(typeof(TextMarkerService)) as TextMarkerService;
+    var document = _textEditor.Document;
+    endDocLine = -1;
+
+    if (document == null || document.LineCount == 0)
+      return false;
+
+    int startLine = Math.Clamp(startDocLine, 1, document.LineCount);
+    int endLine = document.LineCount;
+
+    for (int lineNumber = startLine + 1; lineNumber <= document.LineCount; lineNumber++)
+    {
+      var line = document.GetLineByNumber(lineNumber);
+      var text = document.GetText(line);
+
+      if (!CommandHeaderRegex.IsMatch(text))
+        continue;
+
+      endLine = lineNumber - 1;
+      break;
+    }
+
+    endDocLine = Math.Max(startLine, endLine);
+    return true;
   }
 
   /// <summary>
-  /// Пересоздаёт подсветку строк, на которых установлены точки остановки.
+  /// Инвалидирует фон для перерисовки диапазонов команд с точками останова.
   /// </summary>
   private void RebuildBreakpointLineHighlights()
   {
-    if (!BreakpointsVisible) return;
-
-    var doc = _textEditor.Document;
-    var svc = GetMarkerService();
-
-    svc.ClearAllMarkers();
-
-    for (int i = 0; i < BreakpointLines.Count; i++)
-    {
-      var line = doc.GetLineByOffset(BreakpointLines[i].Offset);
-      svc.AddMarker(line.Offset, line.Length, LineBrush);
-    }
+    InvalidateEditorBackground();
   }
 
   protected override Size MeasureOverride(Size availableSize) => new Size(24, 0);
@@ -418,10 +447,12 @@ public class ExecutionGlyphMargin : AbstractMargin
   private static int ParseLeadingInt(ReadOnlySpan<char> text)
   {
     int i = 0;
-    while (text[i] == ' ' || text[i] == '\t') i++;
+    while (i < text.Length && (text[i] == ' ' || text[i] == '\t')) i++;
+    if (i >= text.Length)
+      return 0;
 
     int value = 0;
-    for (; ; i++)
+    for (; i < text.Length; i++)
     {
       int d = text[i] - '0';
       if ((uint)d > 9) break;
@@ -580,6 +611,71 @@ public class ExecutionGlyphMargin : AbstractMargin
           y1,
           textView.ActualWidth + ActiveRangeBackgroundLeftOverflow,
           y2 - y1));
+    }
+  }
+
+  /// <summary>
+  /// Фоновый рендерер диапазонов команд с точками останова.
+  /// Рисует полупрозрачный прямоугольник на всю ширину текстовой области.
+  /// </summary>
+  private sealed class BreakpointRangeBackgroundRenderer : IBackgroundRenderer
+  {
+    private readonly ExecutionGlyphMargin _owner;
+
+    public BreakpointRangeBackgroundRenderer(ExecutionGlyphMargin owner)
+    {
+      _owner = owner;
+    }
+
+    public KnownLayer Layer => KnownLayer.Background;
+
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+      if (!textView.VisualLinesValid || !_owner.BreakpointsVisible || _owner.BreakpointLines.Count == 0)
+        return;
+
+      var document = _owner._textEditor.Document;
+      if (document == null)
+        return;
+
+      _owner.RefreshThemeBrushes();
+      var brush = _owner.BreakpointRangeBackgroundBrush;
+      if (brush == null)
+        return;
+
+      double verticalOffset = textView.ScrollOffset.Y;
+      double lineHeight = textView.DefaultLineHeight;
+      var renderedStartLines = new HashSet<int>();
+
+      for (int i = 0; i < _owner.BreakpointLines.Count; i++)
+      {
+        var anchor = _owner.BreakpointLines[i];
+        int startDocLine = document.GetLineByOffset(anchor.Offset).LineNumber;
+        if (!renderedStartLines.Add(startDocLine))
+          continue;
+
+        if (!_owner.TryGetCommandLineRange(startDocLine, out int endDocLine))
+          continue;
+
+        double startTop = textView.GetVisualTopByDocumentLine(startDocLine);
+        double endTop = textView.GetVisualTopByDocumentLine(endDocLine);
+        if (double.IsNaN(startTop) || double.IsNaN(endTop))
+          continue;
+
+        double y1 = startTop - verticalOffset + ActiveRangeLinePadding;
+        double y2 = endTop - verticalOffset + lineHeight - ActiveRangeLinePadding;
+        if (y2 <= y1)
+          continue;
+
+        drawingContext.DrawRectangle(
+          brush,
+          null,
+          new Rect(
+            -ActiveRangeBackgroundLeftOverflow,
+            y1,
+            textView.ActualWidth + ActiveRangeBackgroundLeftOverflow,
+            y2 - y1));
+      }
     }
   }
 
@@ -1050,11 +1146,57 @@ public class ExecutionGlyphMargin : AbstractMargin
 
   private void HandleBreakpointToggle(int lineNumber)
   {
-    if (!_rightBreakpoints.Contains(lineNumber))
+    var doc = _textEditor.Document;
+    if (doc == null || lineNumber < 1 || lineNumber > doc.LineCount)
       return;
 
-    ToggleBreakpointAtLine(lineNumber);
+    if (!TryResolveCommandHeaderLine(lineNumber, out int commandHeaderLine))
+      return;
+
+    if (!IsBreakpointAllowedLine(commandHeaderLine))
+      return;
+
+    ToggleBreakpointAtLine(commandHeaderLine);
     InvalidateVisual();
+  }
+
+  /// <summary>
+  /// Проверяет, можно ли поставить брейкпоинт на строке команды с учётом разрешённого списка.
+  /// Поддерживает как 1-based, так и 0-based списки линий.
+  /// </summary>
+  private bool IsBreakpointAllowedLine(int commandHeaderLine)
+  {
+    if (_rightBreakpoints.Count == 0)
+      return true;
+
+    return _rightBreakpoints.Contains(commandHeaderLine)
+      || _rightBreakpoints.Contains(commandHeaderLine - 1);
+  }
+
+  /// <summary>
+  /// Находит заголовок команды для произвольной строки: сама строка, если это заголовок,
+  /// либо ближайший заголовок выше по документу.
+  /// </summary>
+  private bool TryResolveCommandHeaderLine(int lineNumber, out int commandHeaderLine)
+  {
+    var doc = _textEditor.Document;
+    commandHeaderLine = -1;
+
+    if (doc == null || lineNumber < 1 || lineNumber > doc.LineCount)
+      return false;
+
+    for (int currentLine = lineNumber; currentLine >= 1; currentLine--)
+    {
+      var line = doc.GetLineByNumber(currentLine);
+      var text = doc.GetText(line);
+      if (!CommandHeaderRegex.IsMatch(text))
+        continue;
+
+      commandHeaderLine = currentLine;
+      return true;
+    }
+
+    return false;
   }
 
   /// <summary>
