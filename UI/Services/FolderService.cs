@@ -52,8 +52,8 @@ namespace UI.Services.Services
           var translatorEditor = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
           if (translatorEditor != null && translatorEditor.Content is TranslatorItem translator)
           {
-            var leftEditor = translator.GetLeftEditor();
-            OpenFileFolder(leftEditor.TextEditorModel.FilePath);
+            var leftEditor = translator.GetLeftBox();
+            OpenFileFolder(leftEditor.GetTextEditor().TextEditorModel.FilePath);
           }
         }
       }

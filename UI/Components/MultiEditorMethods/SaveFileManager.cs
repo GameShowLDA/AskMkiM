@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Message;
@@ -117,7 +118,7 @@ namespace UI.Components.MultiEditorMethods
         {
           if (control.Content is TranslatorItem translator)
           {
-            var textEditor = translator.GetLeftEditor();
+            var textEditor = translator.GetLeftBox().GetTextEditor();
             if (textEditor.TextEditorModel.FilePath.Contains(FileLocations.BackupDirectory))
             {
               return SaveFileAs();
@@ -151,10 +152,10 @@ namespace UI.Components.MultiEditorMethods
         {
           if (control.Content is TranslatorItem translator)
           {
-            var leftTextEditor = translator.GetLeftEditor();
-            var rightTextEditor = translator.GetRightEditor();
-            var fullPath = SetBackup(leftTextEditor.TextEditorModel.FileName, leftTextEditor.Text);
-            rightTextEditor.TextEditorModel.FilePath = fullPath;
+            var leftTextEditor = translator.GetLeftBox();
+            var rightTextEditor = translator.GetRightBox();
+            var fullPath = SetBackup(leftTextEditor.GetTextEditor().TextEditorModel.FileName, leftTextEditor.Text);
+            rightTextEditor.GetTextEditor().TextEditorModel.FilePath = fullPath;
             return true;
           }
         }
@@ -203,7 +204,7 @@ namespace UI.Components.MultiEditorMethods
               var textEditor = new TextEditorUI();
               if (activeDockItem.Content is TranslatorItem translatorItem)
               {
-                textEditor = translatorItem.GetLeftEditor();
+                textEditor = translatorItem.GetLeftBox().GetTextEditor();
               }
               if (activeDockItem.Content is TextEditorUI activeTextEditor)
               {
