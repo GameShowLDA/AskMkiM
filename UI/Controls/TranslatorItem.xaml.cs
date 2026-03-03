@@ -3,12 +3,14 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using UI.Controls.TextEditor;
 using UI.Services;
 
@@ -123,13 +125,49 @@ namespace UI.Controls
       }
 
       rightEditor.SetEditor(textEditorUI);
-      rightEditor.BackRequested -= RightEditor_BackRequested;
-      rightEditor.BackRequested += RightEditor_BackRequested;
+      rightEditor.BackRequested -= RightEditor_BackRequestedAsync;
+      rightEditor.BackRequested += RightEditor_BackRequestedAsync;
     }
 
-    private void RightEditor_BackRequested(object? sender, EventArgs e)
+    private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
     {
-      TranslatorNavigationService.TryOpenSourceFileFromTranslator(GetRightBox());
+      if (TranslatorNavigationService.TryOpenSourceFileFromTranslator(GetRightBox()))
+      {
+        CloseTranslatorTab();
+      }
+    }
+
+    private void CloseTranslatorTab()
+    {
+      var textEditorContainer = FindTextEditorContainer();
+      if (textEditorContainer == null)
+      {
+        return;
+      }
+
+      var translatorDockItem = textEditorContainer.DockManager.DockItems
+        .FirstOrDefault(item => item.Content == this);
+
+      translatorDockItem?.PerformClose();
+    }
+
+    private TextEditorContainer? FindTextEditorContainer()
+    {
+      DependencyObject? current = this;
+
+      while (current != null)
+      {
+        if (current is TextEditorContainer textEditorContainer)
+        {
+          return textEditorContainer;
+        }
+
+        current = current is FrameworkElement frameworkElement && frameworkElement.Parent != null
+          ? frameworkElement.Parent
+          : VisualTreeHelper.GetParent(current);
+      }
+
+      return null;
     }
 
     public TranslatorEditor GetRightBox()
