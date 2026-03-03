@@ -10,6 +10,11 @@ using UI.Controls.TextEditor;
 
 public class ExecutionGlyphMargin : AbstractMargin
 {
+  private const double MarkerCenterX = 12;
+  private const double ActiveArrowSize = 16;
+  private const double ActiveArrowStrokeThickness = 1.4;
+  private static readonly Geometry ActiveArrowGeometry = CreateActiveArrowGeometry();
+
   /// <summary>
   /// Список активных строк выполнения.
   /// </summary>
@@ -18,7 +23,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// <summary>
   /// Кисть маркера активной строки выполнения.
   /// </summary>
-  public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["GreenColorSolidColorBrush"];
+  public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["YellowColorSolidColorBrush"];
 
   /// <summary>
   /// Цвет фоновой подсветки строки, на которой установлена точка остановки (для <see cref="TextMarkerService"/>).
@@ -253,7 +258,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     }
   }
 
-  protected override Size MeasureOverride(Size availableSize) => new Size(20, 0);
+  protected override Size MeasureOverride(Size availableSize) => new Size(24, 0);
 
   /// <summary>
   /// Отрисовывает одиночный маркер напротив строки документа.
@@ -276,7 +281,44 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (double.IsNaN(top)) return;
 
     double centerY = top - verticalOffset + lineHeight * 0.5;
-    drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
+    drawingContext.DrawEllipse(brush, null, new Point(MarkerCenterX, centerY), 8, 8);
+  }
+
+  /// <summary>
+  /// Builds a filled arrow geometry and rotates it to the right.
+  /// </summary>
+  private static Geometry CreateActiveArrowGeometry()
+  {
+    var parsedGeometry = Geometry.Parse(
+      "m1.85 11.15 9.8-9.8c.2-.2.5-.2.7 0l9.8 9.8a.5.5 0 0 1-.36.85H16v9a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-9H2.2a.5.5 0 0 1-.35-.85Z");
+
+    var geometry = parsedGeometry.Clone();
+    geometry.Transform = new RotateTransform(90, 11, 11);
+    geometry.Freeze();
+    return geometry;
+  }
+
+  /// <summary>
+  /// Draws active-command marker as a right-pointing arrow centered on the target line.
+  /// </summary>
+  private static void DrawActiveArrow(DrawingContext drawingContext, Brush brush, double centerY)
+  {
+    var bounds = ActiveArrowGeometry.Bounds;
+    double maxSide = Math.Max(bounds.Width, bounds.Height);
+    double scale = maxSide <= 0 ? 1 : ActiveArrowSize / maxSide;
+    Brush strokeBrush = (Brush?)Application.Current?.Resources["ForegroundSolidColorBrush"] ?? Brushes.Black;
+    var pen = new Pen(strokeBrush, ActiveArrowStrokeThickness);
+    if (pen.CanFreeze) pen.Freeze();
+
+    var transform = new TransformGroup();
+    transform.Children.Add(new ScaleTransform(scale, scale));
+    transform.Children.Add(new TranslateTransform(
+      MarkerCenterX - (bounds.X + bounds.Width * 0.5) * scale,
+      centerY - (bounds.Y + bounds.Height * 0.5) * scale));
+
+    drawingContext.PushTransform(transform);
+    drawingContext.DrawGeometry(brush, pen, ActiveArrowGeometry);
+    drawingContext.Pop();
   }
 
   /// <summary>
@@ -372,7 +414,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       if (double.IsNaN(top)) continue;
 
       double centerY = top - verticalOffset + lineHeight * 0.5;
-      drawingContext.DrawEllipse(brush, null, new Point(10, centerY), 8, 8);
+      DrawActiveArrow(drawingContext, brush, centerY);
     }
   }
 
