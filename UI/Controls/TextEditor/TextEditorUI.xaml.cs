@@ -610,7 +610,7 @@ namespace UI.Controls.TextEditor
 
       textEditor.SetResourceReference(
         ICSharpCode.AvalonEdit.TextEditor.LineNumbersForegroundProperty,
-        "ForegroundSolidColorBrush60");
+        "TextEditorLineNumberBrush");
     }
 
     /// <summary>

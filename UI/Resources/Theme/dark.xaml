@@ -522,6 +522,11 @@
         <Setter Property="Background" Value="#303843"/>
         <Setter Property="Foreground" Value="#f3f0f9"/>
     </Style>
+    <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#8CF3F0F9"/>
+    <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#B3F3F0F9"/>
+    <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#FFF3F0F9"/>
+    <SolidColorBrush x:Key="TextEditorActiveCommandStripeBrush" Color="#A98BFF"/>
+    <SolidColorBrush x:Key="TextEditorActiveCommandBackgroundBrush" Color="#3A4655"/>
     
     <!--#endregion-->
 

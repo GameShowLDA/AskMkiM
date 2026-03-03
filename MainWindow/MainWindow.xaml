@@ -435,7 +435,7 @@
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Right"
                                         Foreground="{DynamicResource NotificationErrorIconBrush}"
-                                        ToolTip="Ошибка выгрузки" />
+                                        ToolTip="Работа оборудования!" />
 
             <DefaultGUI:PowerButton
                 Grid.Column="6" 

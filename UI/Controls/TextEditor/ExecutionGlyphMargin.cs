@@ -4,6 +4,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Rendering;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -18,6 +19,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   private const double ActiveRangeLinePadding = 2;
   private const double ActiveRangeLineThickness = 4;
   private const double ActiveRangeBackgroundLeftOverflow = 80;
+  private const string ActiveRangeStripeBrushKey = "TextEditorActiveCommandStripeBrush";
+  private const string ActiveRangeBackgroundBrushKey = "TextEditorActiveCommandBackgroundBrush";
   private static readonly Geometry ActiveArrowGeometry = CreateActiveArrowGeometry();
   private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+[А-ЯA-Z]{2,}\b", RegexOptions.Compiled);
 
@@ -34,12 +37,18 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// <summary>
   /// Кисть вертикальной линии диапазона активной команды.
   /// </summary>
-  public Brush ActiveRangeBrush { get; set; } = new SolidColorBrush(Color.FromRgb(150, 115, 255));
+  public Brush ActiveRangeBrush { get; set; } =
+    (Brush?)Application.Current?.Resources[ActiveRangeStripeBrushKey]
+    ?? (Brush?)Application.Current?.Resources["ForegroundSolidColorBrush"]
+    ?? Brushes.DodgerBlue;
 
   /// <summary>
   /// Кисть фоновой заливки диапазона активной команды.
   /// </summary>
-  public Brush ActiveRangeBackgroundBrush { get; set; } = (Brush)Application.Current.Resources["TestsProtocolBackgroundBrush"];
+  public Brush ActiveRangeBackgroundBrush { get; set; } =
+    (Brush?)Application.Current?.Resources[ActiveRangeBackgroundBrushKey]
+    ?? (Brush?)Application.Current?.Resources["TestsProtocolBackgroundBrush"]
+    ?? Brushes.Transparent;
 
   /// <summary>
   /// Цвет фоновой подсветки строки, на которой установлена точка остановки (для <see cref="TextMarkerService"/>).
@@ -89,6 +98,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   public ExecutionGlyphMargin(TextEditor textEditor)
   {
     _textEditor = textEditor;
+    RefreshThemeBrushes();
     _activeRangeBackgroundRenderer = new ActiveCommandRangeBackgroundRenderer(this);
     _textEditor.TextArea.TextView.BackgroundRenderers.Add(_activeRangeBackgroundRenderer);
 
@@ -105,6 +115,22 @@ public class ExecutionGlyphMargin : AbstractMargin
       InvalidateVisual();
       InvalidateEditorBackground();
     };
+  }
+
+  /// <summary>
+  /// Подтягивает кисти активной команды из текущей темы.
+  /// </summary>
+  private void RefreshThemeBrushes()
+  {
+    ActiveRangeBrush =
+      (Brush?)Application.Current?.Resources[ActiveRangeStripeBrushKey]
+      ?? (Brush?)Application.Current?.Resources["ForegroundSolidColorBrush"]
+      ?? ActiveRangeBrush;
+
+    ActiveRangeBackgroundBrush =
+      (Brush?)Application.Current?.Resources[ActiveRangeBackgroundBrushKey]
+      ?? (Brush?)Application.Current?.Resources["TestsProtocolBackgroundBrush"]
+      ?? ActiveRangeBackgroundBrush;
   }
 
   /// <summary>
@@ -524,6 +550,8 @@ public class ExecutionGlyphMargin : AbstractMargin
       if (!textView.VisualLinesValid)
         return;
 
+      _owner.RefreshThemeBrushes();
+
       if (!_owner.TryGetActiveRange(out int startDocLine, out int endDocLine))
         return;
 
@@ -578,6 +606,8 @@ public class ExecutionGlyphMargin : AbstractMargin
       if (TextView == null || !TextView.VisualLinesValid)
         return;
 
+      _owner.RefreshThemeBrushes();
+
       if (!_owner.TryGetActiveRange(out int startDocLine, out int endDocLine))
         return;
 
@@ -607,23 +637,43 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   private sealed class ActiveRangeFoldingMargin : FoldingMargin
   {
+    private const string ChevronDownGeometryData =
+      "M4.08 7.6a1.5 1.5 0 0 1 2.12 0l5.66 5.65 5.66-5.65a1.5 1.5 0 1 1 2.12 2.12l-6.72 6.72a1.5 1.5 0 0 1-2.12 0L4.08 9.72a1.5 1.5 0 0 1 0-2.12Z";
+    private const double ChevronMarkerScale = 0.9;
+    private const double ChevronStrokeThickness = 1.15;
+    private const double ExpandedAngle = 0;
+    private const double CollapsedAngle = -90;
+    private const double RotationStepDegrees = 12;
+    private const double RotationSnapEpsilon = 0.1;
+    private static readonly Geometry ChevronDownGeometry = CreateChevronDownGeometry();
+    private static readonly Type? FoldingMarkerType =
+      typeof(FoldingMargin).Assembly.GetType("ICSharpCode.AvalonEdit.Folding.FoldingMarginMarker");
+    private static readonly PropertyInfo? MarkerIsExpandedProperty =
+      FoldingMarkerType?.GetProperty("IsExpanded", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
     private readonly ExecutionGlyphMargin _owner;
+    private readonly Dictionary<UIElement, double> _markerAngles = new();
+    private bool _renderLoopAttached;
 
     public ActiveRangeFoldingMargin(ExecutionGlyphMargin owner)
     {
       _owner = owner;
+      AddHandler(QueryCursorEvent, new QueryCursorEventHandler(OnAnyQueryCursor), true);
+      Unloaded += (_, _) => DetachRenderLoop();
     }
 
     protected override void OnRender(DrawingContext drawingContext)
     {
       DrawActiveRangeBackground(drawingContext);
       base.OnRender(drawingContext);
+      DrawChevronMarkers(drawingContext);
     }
 
     private void DrawActiveRangeBackground(DrawingContext drawingContext)
     {
       if (TextView == null || !TextView.VisualLinesValid)
         return;
+
+      _owner.RefreshThemeBrushes();
 
       if (!_owner.TryGetActiveRange(out int startDocLine, out int endDocLine))
         return;
@@ -647,11 +697,252 @@ public class ExecutionGlyphMargin : AbstractMargin
 
       drawingContext.DrawRectangle(brush, null, new Rect(0, y1, ActualWidth, y2 - y1));
     }
+
+    private static Geometry CreateChevronDownGeometry()
+    {
+      var geometry = Geometry.Parse(ChevronDownGeometryData);
+      if (geometry.CanFreeze)
+        geometry.Freeze();
+
+      return geometry;
+    }
+
+    private void DrawChevronMarkers(DrawingContext drawingContext)
+    {
+      int childCount = VisualTreeHelper.GetChildrenCount(this);
+      if (childCount == 0)
+      {
+        _markerAngles.Clear();
+        DetachRenderLoop();
+        return;
+      }
+
+      var activeMarkers = new HashSet<UIElement>();
+      bool hasAnimatedMarkers = false;
+
+      for (int i = 0; i < childCount; i++)
+      {
+        if (VisualTreeHelper.GetChild(this, i) is not UIElement markerElement)
+          continue;
+
+        markerElement.Opacity = 0;
+
+        if (markerElement is not Visual markerVisual)
+          continue;
+
+        var markerSize = markerElement.RenderSize;
+        if (markerSize.Width <= 0 || markerSize.Height <= 0)
+          continue;
+
+        Vector markerOffset = VisualTreeHelper.GetOffset(markerVisual);
+        var markerRect = new Rect(markerOffset.X, markerOffset.Y, markerSize.Width, markerSize.Height);
+
+        activeMarkers.Add(markerElement);
+
+        bool isExpanded = GetMarkerIsExpanded(markerElement);
+        double targetAngle = isExpanded ? ExpandedAngle : CollapsedAngle;
+        double currentAngle = _markerAngles.TryGetValue(markerElement, out double knownAngle)
+          ? knownAngle
+          : targetAngle;
+        double renderedAngle = AnimateAngle(currentAngle, targetAngle, out bool isAnimating);
+        _markerAngles[markerElement] = renderedAngle;
+        hasAnimatedMarkers |= isAnimating;
+
+        Brush markerBrush = ResolveChevronBrush(markerElement);
+        DrawChevronGeometry(drawingContext, markerRect, markerBrush, renderedAngle);
+      }
+
+      RemoveDeadMarkers(activeMarkers);
+
+      if (hasAnimatedMarkers)
+        AttachRenderLoop();
+      else
+        DetachRenderLoop();
+    }
+
+    protected override void OnMouseMove(MouseEventArgs e)
+    {
+      base.OnMouseMove(e);
+      Cursor = IsPointOverAnyMarker(e.GetPosition(this)) ? Cursors.Hand : null;
+    }
+
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+      base.OnMouseLeave(e);
+      Cursor = null;
+    }
+
+    protected override void OnQueryCursor(QueryCursorEventArgs e)
+    {
+      if (IsPointOverAnyMarker(e.GetPosition(this)))
+      {
+        e.Cursor = Cursors.Hand;
+        e.Handled = true;
+        return;
+      }
+
+      base.OnQueryCursor(e);
+    }
+
+    private void OnAnyQueryCursor(object sender, QueryCursorEventArgs e)
+    {
+      if (!IsPointOverAnyMarker(e.GetPosition(this)))
+        return;
+
+      e.Cursor = Cursors.Hand;
+      e.Handled = true;
+    }
+
+    private Brush ResolveChevronBrush(UIElement markerElement)
+    {
+      // Цвет выделения шеврона = основной цвет текста.
+      if (markerElement.IsMouseOver)
+        return (Brush?)Application.Current?.Resources["TextEditorFoldingChevronHoverBrush"] ?? Brushes.White;
+
+      return (Brush?)Application.Current?.Resources["TextEditorFoldingChevronBrush"] ?? Brushes.Gray;
+    }
+
+    private static bool GetMarkerIsExpanded(UIElement markerElement)
+    {
+      if (FoldingMarkerType == null
+          || MarkerIsExpandedProperty == null
+          || !FoldingMarkerType.IsInstanceOfType(markerElement))
+        return true;
+
+      return MarkerIsExpandedProperty.GetValue(markerElement) as bool? ?? true;
+    }
+
+    private static void DrawChevronGeometry(
+      DrawingContext drawingContext,
+      Rect markerRect,
+      Brush brush,
+      double angle)
+    {
+      if (brush == null)
+        return;
+
+      Rect geometryBounds = ChevronDownGeometry.Bounds;
+      if (geometryBounds.IsEmpty || geometryBounds.Width <= 0 || geometryBounds.Height <= 0)
+        return;
+
+      double markerSize = Math.Min(markerRect.Width, markerRect.Height) * ChevronMarkerScale;
+      if (markerSize <= 0)
+        return;
+
+      double scale = markerSize / Math.Max(geometryBounds.Width, geometryBounds.Height);
+      double iconWidth = geometryBounds.Width * scale;
+      double iconHeight = geometryBounds.Height * scale;
+      double x = markerRect.X + ((markerRect.Width - iconWidth) * 0.5) - (geometryBounds.X * scale);
+      double y = markerRect.Y + ((markerRect.Height - iconHeight) * 0.5) - (geometryBounds.Y * scale);
+
+      var transformGroup = new TransformGroup();
+      transformGroup.Children.Add(new ScaleTransform(scale, scale));
+      transformGroup.Children.Add(new TranslateTransform(x, y));
+
+      if (Math.Abs(angle) > RotationSnapEpsilon)
+      {
+        double centerX = markerRect.X + (markerRect.Width * 0.5);
+        double centerY = markerRect.Y + (markerRect.Height * 0.5);
+        transformGroup.Children.Add(new RotateTransform(angle, centerX, centerY));
+      }
+
+      var pen = new Pen(brush, ChevronStrokeThickness)
+      {
+        StartLineCap = PenLineCap.Round,
+        EndLineCap = PenLineCap.Round,
+        LineJoin = PenLineJoin.Round
+      };
+
+      drawingContext.PushTransform(transformGroup);
+      drawingContext.DrawGeometry(brush, pen, ChevronDownGeometry);
+      drawingContext.Pop();
+    }
+
+    private static double AnimateAngle(double currentAngle, double targetAngle, out bool isAnimating)
+    {
+      double delta = targetAngle - currentAngle;
+      if (Math.Abs(delta) <= RotationSnapEpsilon)
+      {
+        isAnimating = false;
+        return targetAngle;
+      }
+
+      isAnimating = true;
+      double step = Math.Sign(delta) * Math.Min(Math.Abs(delta), RotationStepDegrees);
+      return currentAngle + step;
+    }
+
+    private void RemoveDeadMarkers(HashSet<UIElement> activeMarkers)
+    {
+      if (_markerAngles.Count == 0)
+        return;
+
+      var deadMarkers = new List<UIElement>();
+      foreach (var marker in _markerAngles.Keys)
+      {
+        if (!activeMarkers.Contains(marker))
+          deadMarkers.Add(marker);
+      }
+
+      for (int i = 0; i < deadMarkers.Count; i++)
+        _markerAngles.Remove(deadMarkers[i]);
+    }
+
+    private bool IsPointOverAnyMarker(Point point)
+    {
+      int childCount = VisualTreeHelper.GetChildrenCount(this);
+      if (childCount == 0)
+        return false;
+
+      for (int i = 0; i < childCount; i++)
+      {
+        if (VisualTreeHelper.GetChild(this, i) is not UIElement markerElement)
+          continue;
+
+        if (markerElement is not Visual markerVisual)
+          continue;
+
+        var markerSize = markerElement.RenderSize;
+        if (markerSize.Width <= 0 || markerSize.Height <= 0)
+          continue;
+
+        Vector markerOffset = VisualTreeHelper.GetOffset(markerVisual);
+        var markerRect = new Rect(markerOffset.X, markerOffset.Y, markerSize.Width, markerSize.Height);
+        if (markerRect.Contains(point))
+          return true;
+      }
+
+      return false;
+    }
+
+    private void AttachRenderLoop()
+    {
+      if (_renderLoopAttached)
+        return;
+
+      CompositionTarget.Rendering += OnCompositionTargetRendering;
+      _renderLoopAttached = true;
+    }
+
+    private void DetachRenderLoop()
+    {
+      if (!_renderLoopAttached)
+        return;
+
+      CompositionTarget.Rendering -= OnCompositionTargetRendering;
+      _renderLoopAttached = false;
+    }
+
+    private void OnCompositionTargetRendering(object? sender, EventArgs e)
+    {
+      InvalidateVisual();
+    }
   }
 
   protected override void OnRender(DrawingContext drawingContext)
   {
     base.OnRender(drawingContext);
+    RefreshThemeBrushes();
 
     drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
 
