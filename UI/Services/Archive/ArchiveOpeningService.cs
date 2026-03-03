@@ -83,7 +83,6 @@ namespace UI.Services.Archive
 
       try
       {
-        // 1) Пробуем UTF-8 строго.
         using var stream = archiveEntry.Open();
         using var reader = new StreamReader(
             stream,
@@ -94,7 +93,6 @@ namespace UI.Services.Archive
       }
       catch (DecoderFallbackException)
       {
-        // 2) Поток ZipEntry не поддерживает Position/Seek, открываем заново.
         using var stream = archiveEntry.Open();
         using var reader = new StreamReader(stream, Encoding.GetEncoding(866));
         return reader.ReadToEnd();
