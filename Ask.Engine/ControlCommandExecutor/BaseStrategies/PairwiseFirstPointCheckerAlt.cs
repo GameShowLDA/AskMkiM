@@ -83,7 +83,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
           }
 
-          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
           {
@@ -119,7 +119,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
@@ -155,12 +155,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               {
                 if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
                 {
-                  await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({_basePoint.Mnemonic}{machineAdressFirst})", message: $"{Rt:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
+                  await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond})", message: $"{Rt:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
                 }
               }
             }
 
-            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
             if (!errorPoint)
             {
               double Rx = 0;
