@@ -16,6 +16,7 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.IO;
+using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -398,6 +399,8 @@ namespace UI.Controls.TextEditor
         foldingManager = FoldingManager.Install(textEditor.TextArea);
 
       foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
+      ReplaceLineNumberMargin();
+      ReplaceFoldingMargin();
     }
 
     /// <summary>
@@ -500,6 +503,8 @@ namespace UI.Controls.TextEditor
       {
         _executionMargin = new ExecutionGlyphMargin(textEditor);
         textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
+        ReplaceLineNumberMargin();
+        ReplaceFoldingMargin();
       }
 
       if (_markerService == null)
@@ -538,6 +543,88 @@ namespace UI.Controls.TextEditor
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+    }
+
+    /// <summary>
+    /// Заменяет стандартный марджин номеров строк на версию
+    /// с поддержкой фоновой заливки активного диапазона команды.
+    /// </summary>
+    private void ReplaceLineNumberMargin()
+    {
+      var leftMargins = textEditor.TextArea.LeftMargins;
+
+      for (int i = 0; i < leftMargins.Count; i++)
+      {
+        if (leftMargins[i].GetType().Name == "ActiveRangeLineNumberMargin")
+          return;
+
+        if (leftMargins[i] is not LineNumberMargin)
+          continue;
+
+        var rangeAwareMargin = _executionMargin.CreateRangeAwareLineNumberMargin();
+        leftMargins.RemoveAt(i);
+        leftMargins.Insert(i, rangeAwareMargin);
+        return;
+      }
+    }
+
+    /// <summary>
+    /// Заменяет стандартный марджин сворачивания на версию
+    /// с поддержкой фоновой заливки активного диапазона команды.
+    /// </summary>
+    private void ReplaceFoldingMargin()
+    {
+      var leftMargins = textEditor.TextArea.LeftMargins;
+
+      for (int i = 0; i < leftMargins.Count; i++)
+      {
+        if (leftMargins[i].GetType().Name == "ActiveRangeFoldingMargin")
+          return;
+
+        if (leftMargins[i] is not FoldingMargin foldingMargin)
+          continue;
+
+        var rangeAwareMargin = _executionMargin.CreateRangeAwareFoldingMargin();
+        CopyFoldingMarginState(foldingMargin, rangeAwareMargin);
+
+        leftMargins.RemoveAt(i);
+        leftMargins.Insert(i, rangeAwareMargin);
+        return;
+      }
+    }
+
+    /// <summary>
+    /// Копирует состояние штатного FoldingMargin в пользовательский,
+    /// чтобы сохранить работу glyph-иконок и взаимодействие с FoldingManager.
+    /// </summary>
+    private static void CopyFoldingMarginState(FoldingMargin source, AbstractMargin target)
+    {
+      CopyProperty(source, target, "FoldingManager");
+      CopyProperty(source, target, "FoldingMarkerBrush");
+      CopyProperty(source, target, "SelectedFoldingMarkerBrush");
+      CopyProperty(source, target, "SelectedFoldingMarkerBackgroundBrush");
+      CopyProperty(source, target, "FoldingControlPen");
+    }
+
+    /// <summary>
+    /// Безопасно копирует свойство через reflection при совпадении типов.
+    /// </summary>
+    private static void CopyProperty(object source, object target, string propertyName)
+    {
+      var sourceProp = source.GetType().GetProperty(
+        propertyName,
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+      var targetProp = target.GetType().GetProperty(
+        propertyName,
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+      if (sourceProp?.CanRead != true || targetProp?.CanWrite != true)
+        return;
+
+      if (!targetProp.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
+        return;
+
+      targetProp.SetValue(target, sourceProp.GetValue(source));
     }
 
     #endregion

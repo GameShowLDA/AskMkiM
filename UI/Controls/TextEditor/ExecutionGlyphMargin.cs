@@ -2,7 +2,9 @@
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Rendering;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -13,7 +15,11 @@ public class ExecutionGlyphMargin : AbstractMargin
   private const double MarkerCenterX = 12;
   private const double ActiveArrowSize = 16;
   private const double ActiveArrowStrokeThickness = 1.4;
+  private const double ActiveRangeLinePadding = 2;
+  private const double ActiveRangeLineThickness = 4;
+  private const double ActiveRangeBackgroundLeftOverflow = 80;
   private static readonly Geometry ActiveArrowGeometry = CreateActiveArrowGeometry();
+  private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+[А-ЯA-Z]{2,}\b", RegexOptions.Compiled);
 
   /// <summary>
   /// Список активных строк выполнения.
@@ -24,6 +30,16 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// Кисть маркера активной строки выполнения.
   /// </summary>
   public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["YellowColorSolidColorBrush"];
+
+  /// <summary>
+  /// Кисть вертикальной линии диапазона активной команды.
+  /// </summary>
+  public Brush ActiveRangeBrush { get; set; } = new SolidColorBrush(Color.FromRgb(150, 115, 255));
+
+  /// <summary>
+  /// Кисть фоновой заливки диапазона активной команды.
+  /// </summary>
+  public Brush ActiveRangeBackgroundBrush { get; set; } = (Brush)Application.Current.Resources["TestsProtocolBackgroundBrush"];
 
   /// <summary>
   /// Цвет фоновой подсветки строки, на которой установлена точка остановки (для <see cref="TextMarkerService"/>).
@@ -57,6 +73,9 @@ public class ExecutionGlyphMargin : AbstractMargin
 
   private readonly HashSet<int> _rightBreakpoints = new();        
   private readonly Dictionary<int, TextAnchor> _bpByCommand = new();
+  private readonly ActiveCommandRangeBackgroundRenderer _activeRangeBackgroundRenderer;
+  private int _activeRangeStartLine = -1; // 0-based line number
+  private int _activeRangeEndLine = -1;   // 0-based line number
 
   /// <summary>
   /// Ссылка на редактор AvalonEdit для прокрутки.
@@ -70,6 +89,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   public ExecutionGlyphMargin(TextEditor textEditor)
   {
     _textEditor = textEditor;
+    _activeRangeBackgroundRenderer = new ActiveCommandRangeBackgroundRenderer(this);
+    _textEditor.TextArea.TextView.BackgroundRenderers.Add(_activeRangeBackgroundRenderer);
 
     _textEditor.DocumentChanged += (_, __) =>
     {
@@ -77,9 +98,12 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointCommandsNumbers.Clear();
       _bpByCommand.Clear();
       ActiveLines.Clear();
+      _activeRangeStartLine = -1;
+      _activeRangeEndLine = -1;
 
       RebuildBreakpointLineHighlights();
       InvalidateVisual();
+      InvalidateEditorBackground();
     };
   }
 
@@ -90,6 +114,22 @@ public class ExecutionGlyphMargin : AbstractMargin
   {
     get => _rightBreakpoints.ToList();
     set => SetRightBreakpoints(value);
+  }
+
+  /// <summary>
+  /// Создаёт марджин номеров строк с заливкой активного диапазона команды.
+  /// </summary>
+  public LineNumberMargin CreateRangeAwareLineNumberMargin()
+  {
+    return new ActiveRangeLineNumberMargin(this);
+  }
+
+  /// <summary>
+  /// Создаёт марджин сворачивания с заливкой активного диапазона команды.
+  /// </summary>
+  public AbstractMargin CreateRangeAwareFoldingMargin()
+  {
+    return new ActiveRangeFoldingMargin(this);
   }
 
   /// <summary>
@@ -203,8 +243,10 @@ public class ExecutionGlyphMargin : AbstractMargin
 
     ActiveLines.Clear();
     ActiveLines.Add(lineNumber);
+    UpdateActiveRangeFromStart(lineNumber);
 
     InvalidateVisual();
+    InvalidateEditorBackground();
     _textEditor.ScrollTo(lineNumber, 1);
   }
 
@@ -215,7 +257,27 @@ public class ExecutionGlyphMargin : AbstractMargin
   {
     if (ActiveLines.Count == 0) return;
     ActiveLines.Clear();
+    _activeRangeStartLine = -1;
+    _activeRangeEndLine = -1;
     InvalidateVisual();
+    InvalidateEditorBackground();
+  }
+
+  /// <summary>
+  /// Возвращает активный диапазон команд в номерах строк документа (1-based).
+  /// </summary>
+  public bool TryGetActiveRange(out int startDocLine, out int endDocLine)
+  {
+    if (_activeRangeStartLine < 0 || _activeRangeEndLine < _activeRangeStartLine)
+    {
+      startDocLine = -1;
+      endDocLine = -1;
+      return false;
+    }
+
+    startDocLine = _activeRangeStartLine + 1;
+    endDocLine = _activeRangeEndLine + 1;
+    return true;
   }
 
   public void ToggleBreakpointFromKeyboard(int lineNumber)
@@ -315,7 +377,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     transform.Children.Add(new TranslateTransform(
       MarkerCenterX - (bounds.X + bounds.Width * 0.5) * scale,
       centerY - (bounds.Y + bounds.Height * 0.5) * scale));
-
+     
     drawingContext.PushTransform(transform);
     drawingContext.DrawGeometry(brush, pen, ActiveArrowGeometry);
     drawingContext.Pop();
@@ -364,6 +426,229 @@ public class ExecutionGlyphMargin : AbstractMargin
     SetBreakpoint(lineNumber, commandNumber, raiseEvents: true);
   }
 
+  /// <summary>
+  /// Calculates active command visual range from the command header line to the line before next command header.
+  /// </summary>
+  /// <param name="startLineZeroBased">Active command start line (0-based).</param>
+  private void UpdateActiveRangeFromStart(int startLineZeroBased)
+  {
+    var document = _textEditor.Document;
+    if (document == null || document.LineCount == 0)
+    {
+      _activeRangeStartLine = -1;
+      _activeRangeEndLine = -1;
+      return;
+    }
+
+    int start = Math.Clamp(startLineZeroBased, 0, document.LineCount - 1);
+    int end = document.LineCount - 1;
+
+    for (int lineNumber = start + 2; lineNumber <= document.LineCount; lineNumber++)
+    {
+      var line = document.GetLineByNumber(lineNumber);
+      var text = document.GetText(line);
+
+      if (!CommandHeaderRegex.IsMatch(text))
+        continue;
+
+      end = lineNumber - 2;
+      break;
+    }
+
+    _activeRangeStartLine = start;
+    _activeRangeEndLine = Math.Max(start, end);
+  }
+
+  /// <summary>
+  /// Draws vertical range marker for currently active command.
+  /// </summary>
+  private static void DrawActiveRange(
+    DrawingContext drawingContext,
+    TextView textView,
+    double verticalOffset,
+    double lineHeight,
+    int startLineZeroBased,
+    int endLineZeroBased,
+    double lineX,
+    Brush brush)
+  {
+    int startDocLine = startLineZeroBased + 1;
+    int endDocLine = endLineZeroBased + 1;
+
+    double startTop = textView.GetVisualTopByDocumentLine(startDocLine);
+    double endTop = textView.GetVisualTopByDocumentLine(endDocLine);
+    if (double.IsNaN(startTop) || double.IsNaN(endTop))
+      return;
+
+    double y1 = startTop - verticalOffset + ActiveRangeLinePadding;
+    double y2 = endTop - verticalOffset + lineHeight - ActiveRangeLinePadding;
+    if (y2 <= y1)
+      y2 = y1 + 1;
+
+    var pen = new Pen(brush, ActiveRangeLineThickness);
+    if (pen.CanFreeze)
+      pen.Freeze();
+
+    drawingContext.DrawLine(pen, new Point(lineX, y1), new Point(lineX, y2));
+  }
+
+  /// <summary>
+  /// Инвалидирует слой фона текстовой области для перерисовки активного диапазона.
+  /// </summary>
+  private void InvalidateEditorBackground()
+  {
+    _textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
+
+    foreach (var margin in _textEditor.TextArea.LeftMargins)
+    {
+      margin.InvalidateVisual();
+    }
+  }
+
+  /// <summary>
+  /// Фоновый рендерер активного диапазона команды (как в VS): прямоугольник на всю ширину текстовой области.
+  /// </summary>
+  private sealed class ActiveCommandRangeBackgroundRenderer : IBackgroundRenderer
+  {
+    private readonly ExecutionGlyphMargin _owner;
+
+    public ActiveCommandRangeBackgroundRenderer(ExecutionGlyphMargin owner)
+    {
+      _owner = owner;
+    }
+
+    public KnownLayer Layer => KnownLayer.Background;
+
+    public void Draw(TextView textView, DrawingContext drawingContext)
+    {
+      if (!textView.VisualLinesValid)
+        return;
+
+      if (!_owner.TryGetActiveRange(out int startDocLine, out int endDocLine))
+        return;
+
+      double verticalOffset = textView.ScrollOffset.Y;
+      double lineHeight = textView.DefaultLineHeight;
+
+      double startTop = textView.GetVisualTopByDocumentLine(startDocLine);
+      double endTop = textView.GetVisualTopByDocumentLine(endDocLine);
+      if (double.IsNaN(startTop) || double.IsNaN(endTop))
+        return;
+
+      double y1 = startTop - verticalOffset + ActiveRangeLinePadding;
+      double y2 = endTop - verticalOffset + lineHeight - ActiveRangeLinePadding;
+      if (y2 <= y1)
+        return;
+
+      var brush = _owner.ActiveRangeBackgroundBrush;
+      if (brush == null)
+        return;
+
+      drawingContext.DrawRectangle(
+        brush,
+        null,
+        new Rect(
+          -ActiveRangeBackgroundLeftOverflow,
+          y1,
+          textView.ActualWidth + ActiveRangeBackgroundLeftOverflow,
+          y2 - y1));
+    }
+  }
+
+  /// <summary>
+  /// Марджин номеров строк с фоновой заливкой активной команды.
+  /// </summary>
+  private sealed class ActiveRangeLineNumberMargin : LineNumberMargin
+  {
+    private readonly ExecutionGlyphMargin _owner;
+
+    public ActiveRangeLineNumberMargin(ExecutionGlyphMargin owner)
+    {
+      _owner = owner;
+    }
+
+    protected override void OnRender(DrawingContext drawingContext)
+    {
+      DrawActiveRangeBackground(drawingContext);
+      base.OnRender(drawingContext);
+    }
+
+    private void DrawActiveRangeBackground(DrawingContext drawingContext)
+    {
+      if (TextView == null || !TextView.VisualLinesValid)
+        return;
+
+      if (!_owner.TryGetActiveRange(out int startDocLine, out int endDocLine))
+        return;
+
+      double verticalOffset = TextView.ScrollOffset.Y;
+      double lineHeight = TextView.DefaultLineHeight;
+
+      double startTop = TextView.GetVisualTopByDocumentLine(startDocLine);
+      double endTop = TextView.GetVisualTopByDocumentLine(endDocLine);
+      if (double.IsNaN(startTop) || double.IsNaN(endTop))
+        return;
+
+      double y1 = startTop - verticalOffset + ActiveRangeLinePadding;
+      double y2 = endTop - verticalOffset + lineHeight - ActiveRangeLinePadding;
+      if (y2 <= y1)
+        return;
+
+      var brush = _owner.ActiveRangeBackgroundBrush;
+      if (brush == null)
+        return;
+
+      drawingContext.DrawRectangle(brush, null, new Rect(0, y1, ActualWidth, y2 - y1));
+    }
+  }
+
+  /// <summary>
+  /// Марджин сворачивания с фоновой заливкой активной команды.
+  /// </summary>
+  private sealed class ActiveRangeFoldingMargin : FoldingMargin
+  {
+    private readonly ExecutionGlyphMargin _owner;
+
+    public ActiveRangeFoldingMargin(ExecutionGlyphMargin owner)
+    {
+      _owner = owner;
+    }
+
+    protected override void OnRender(DrawingContext drawingContext)
+    {
+      DrawActiveRangeBackground(drawingContext);
+      base.OnRender(drawingContext);
+    }
+
+    private void DrawActiveRangeBackground(DrawingContext drawingContext)
+    {
+      if (TextView == null || !TextView.VisualLinesValid)
+        return;
+
+      if (!_owner.TryGetActiveRange(out int startDocLine, out int endDocLine))
+        return;
+
+      double verticalOffset = TextView.ScrollOffset.Y;
+      double lineHeight = TextView.DefaultLineHeight;
+
+      double startTop = TextView.GetVisualTopByDocumentLine(startDocLine);
+      double endTop = TextView.GetVisualTopByDocumentLine(endDocLine);
+      if (double.IsNaN(startTop) || double.IsNaN(endTop))
+        return;
+
+      double y1 = startTop - verticalOffset + ActiveRangeLinePadding;
+      double y2 = endTop - verticalOffset + lineHeight - ActiveRangeLinePadding;
+      if (y2 <= y1)
+        return;
+
+      var brush = _owner.ActiveRangeBackgroundBrush;
+      if (brush == null)
+        return;
+
+      drawingContext.DrawRectangle(brush, null, new Rect(0, y1, ActualWidth, y2 - y1));
+    }
+  }
+
   protected override void OnRender(DrawingContext drawingContext)
   {
     base.OnRender(drawingContext);
@@ -376,6 +661,22 @@ public class ExecutionGlyphMargin : AbstractMargin
 
     double verticalOffset = TextView.ScrollOffset.Y;
     double lineHeight = TextView.DefaultLineHeight;
+
+    if (_activeRangeStartLine >= 0 && _activeRangeEndLine >= _activeRangeStartLine)
+    {
+      // Keep the stripe on the right edge of this margin:
+      // arrow (left) -> stripe -> line numbers (next margin).
+      double activeRangeLineX = Math.Max(0, ActualWidth - (ActiveRangeLineThickness * 0.5));
+      DrawActiveRange(
+        drawingContext,
+        TextView,
+        verticalOffset,
+        lineHeight,
+        _activeRangeStartLine,
+        _activeRangeEndLine,
+        activeRangeLineX,
+        ActiveRangeBrush);
+    }
 
     if (BreakpointsVisible && BreakpointLines.Count != 0)
     {
