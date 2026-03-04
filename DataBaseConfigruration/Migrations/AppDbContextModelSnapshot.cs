@@ -332,6 +332,9 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<bool>("ShowDeviceExecutionParameters")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShowIntermediateMeasurementResults")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("ShowMachineAddresses")
                         .HasColumnType("INTEGER");
 

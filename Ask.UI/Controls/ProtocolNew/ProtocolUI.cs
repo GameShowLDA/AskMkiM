@@ -15,12 +15,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using UI.Components;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.Core.Shared.Metadata.Static.DelegateManager;
 using static Ask.LogLib.LoggerUtility;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
   public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider
@@ -525,11 +524,11 @@ namespace UI.Controls.ProtocolNew
 
     public IInputFieldAccessor? GetInputFieldAccessor()
     {
-      InputField? result = null;
+      IInputFieldAccessor? result = null;
 
       void TryGet()
       {
-        if (ContentView is InputField inputField)
+        if (ContentView is IInputFieldAccessor inputField)
         {
           result = inputField;
         }
@@ -549,11 +548,11 @@ namespace UI.Controls.ProtocolNew
 
     public IInputHighlightService? GetInputHighlightService()
     {
-      InputField? result = null;
+      IInputHighlightService? result = null;
 
       void TryGet()
       {
-        if (ContentView is InputField inputField)
+        if (ContentView is IInputHighlightService inputField)
         {
           result = inputField;
         }
@@ -578,11 +577,11 @@ namespace UI.Controls.ProtocolNew
 
     public IDeviceSelector GetDeviceSelector()
     {
-      DeviceSelectorPanel? result = null;
+      IDeviceSelector? result = null;
 
       void TryGet()
       {
-        if (ContentView is DeviceSelectorPanel inputField)
+        if (ContentView is IDeviceSelector inputField)
         {
           result = inputField;
         }
@@ -597,7 +596,8 @@ namespace UI.Controls.ProtocolNew
         Dispatcher.Invoke(TryGet);
       }
 
-      return result;
+      return result!;
     }
   }
 }
+

@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
@@ -13,7 +14,7 @@ using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
-using UI.Controls.ProtocolNew;
+using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
@@ -148,17 +149,21 @@ namespace UI.Components
     /// <param name="e">Данные события мыши.</param>
     private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-      _clickCount++;
+      if (!SystemStateManager.GetIsLocked())
+      {
+        _clickCount++;
 
-      if (_clickCount == 1)
-      {
-        _clickTimer.Start();
-      }
-      else if (_clickCount == 2)
-      {
-        _clickTimer.Stop();
-        _clickCount = 0;
-        EditorDocumentService.CreateNewFile();
+        if (_clickCount == 1)
+        {
+          _clickTimer.Start();
+        }
+        else if (_clickCount == 2)
+        {
+          _clickTimer.Stop();
+          _clickCount = 0;
+
+          EditorDocumentService.CreateNewFile();
+        }
       }
     }
 
@@ -472,3 +477,4 @@ namespace UI.Components
       await fileManager.TranslationService.RemoveTranslatorTabAsync(translatorItem, editorType);
   }
 }
+

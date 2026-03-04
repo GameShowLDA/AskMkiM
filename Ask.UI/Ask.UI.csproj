@@ -21,6 +21,13 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+	  <ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
+	  <ProjectReference Include="..\Message\Message.csproj" />
+	  <ProjectReference Include="..\NewCore\NewCore.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="InputSimulator" Version="1.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -12,6 +12,9 @@
     <SolidColorBrush x:Key="MenuBackgroundBrushes" Color="#232932"/>
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#303843"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#1ca3e9"/>
+    <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#282E37"/>
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#282E37"/>
+    <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="SettingsMainBackground" Color="#3a4655"/>
     <SolidColorBrush x:Key="DrawerBackdropBrush" Color="#6610151C"/>
     <SolidColorBrush x:Key="DrawerPanelBackgroundBrush" Color="#2A313D"/>
@@ -519,6 +522,11 @@
         <Setter Property="Background" Value="#303843"/>
         <Setter Property="Foreground" Value="#f3f0f9"/>
     </Style>
+    <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#8CF3F0F9"/>
+    <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#B3F3F0F9"/>
+    <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#FFF3F0F9"/>
+    <SolidColorBrush x:Key="TextEditorActiveCommandStripeBrush" Color="#A98BFF"/>
+    <SolidColorBrush x:Key="TextEditorActiveCommandBackgroundBrush" Color="#3A4655"/>
     
     <!--#endregion-->
 

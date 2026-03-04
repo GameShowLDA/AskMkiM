@@ -516,6 +516,12 @@
   <data name="settings.protocol.deviceInfo.measurementResults.description" xml:space="preserve">
     <value>Отображает результаты измерений, полученные в ходе выполнения программ контроля.</value>
   </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.title" xml:space="preserve">
+    <value>Промежуточные результаты измерений</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
+    <value>Отображает промежуточные результаты измерений, полученные в ходе выполнения программ контроля.</value>
+  </data>
   <data name="settings.main.title" xml:space="preserve">
     <value>Параметры</value>
   </data>

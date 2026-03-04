@@ -1,8 +1,12 @@
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.Services;
@@ -51,6 +55,7 @@ namespace MainWindowProgram
     /// Связывает интерфейс с бизнес-логикой.
     /// </summary>
     private readonly MainWindowViewModel _viewModel;
+    private bool _isThemeToggleInProgress;
 
     /// <summary>
     /// Показывает, активен ли в данный момент текстовый редактор.
@@ -95,6 +100,14 @@ namespace MainWindowProgram
 
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
+
+      ThemeSettings.ThemeChanged += OnThemeChanged;
+      UpdateThemeToggleButtons(ThemeSettings.CurrentTheme);
+
+      this.Closed += (_, _) =>
+      {
+        ThemeSettings.ThemeChanged -= OnThemeChanged;
+      };
     }
 
     /// <summary>
@@ -149,6 +162,76 @@ namespace MainWindowProgram
     private void ErrorMenuItem_Click(object sender, RoutedEventArgs e)
     {
 
+    }
+
+    private void TerminalButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
+      {
+        return;
+      }
+
+      ConsoleVisibilityController.ToggleConsole();
+      e.Handled = true;
+    }
+
+    private void OnThemeChanged(ThemeMode theme)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(() => UpdateThemeToggleButtons(theme));
+        return;
+      }
+
+      UpdateThemeToggleButtons(theme);
+    }
+
+    private void UpdateThemeToggleButtons(ThemeMode theme)
+    {
+      if (DarkThemeButton == null || LightThemeButton == null)
+      {
+        return;
+      }
+
+      DarkThemeButton.Visibility = theme == ThemeMode.Dark
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+
+      LightThemeButton.Visibility = theme == ThemeMode.Light
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+    }
+
+    private async void ThemeToggleButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      e.Handled = true;
+
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput || _isThemeToggleInProgress)
+      {
+        return;
+      }
+
+      var nextTheme = ThemeSettings.CurrentTheme == ThemeMode.Dark
+        ? ThemeMode.Light
+        : ThemeMode.Dark;
+
+      try
+      {
+        _isThemeToggleInProgress = true;
+
+        var uiConfig = await UserInterfaceConfig.GetParameterModel();
+        uiConfig.Theme = nextTheme;
+        await UserInterfaceConfig.SaveProtocolModel(uiConfig);
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка переключения темы интерфейса", exception);
+        MessageBoxCustom.Show($"Ошибка переключения темы: {exception.Message}", image: MessageBoxImage.Error);
+      }
+      finally
+      {
+        _isThemeToggleInProgress = false;
+      }
     }
 
     /// <summary>
