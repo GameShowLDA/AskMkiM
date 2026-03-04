@@ -71,6 +71,11 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <StreamGeometry x:Key="SemiIconArchive">
+            M3 3a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3Z
+            M3 9.5c0-.28.22-.5.5-.5h17c.28 0 .5.22.5.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5ZM8 12a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Z
+        </StreamGeometry>
     </UserControl.Resources>
 
     <Grid>
@@ -124,12 +129,11 @@
                         VerticalAlignment="Center"
                         Click="SaveButton_Click"
                         ToolTip="Save">
-                    <Path Data="M3,8 L7,12 L13,4"
-                          Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
-                          StrokeThickness="2"
-                          StrokeStartLineCap="Round"
-                          StrokeEndLineCap="Round"
-                          StrokeLineJoin="Round"/>
+                    <Path Data="{StaticResource SemiIconArchive}"
+                          Width="18"
+                          Height="18"
+                          Stretch="Uniform"
+                          Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                 </Button>
             </Grid>
         </Border>
