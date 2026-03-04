@@ -1,13 +1,13 @@
-﻿<UserControl x:Class="UI.Controls.ProtocolNew.ProtocolUI"
+﻿<UserControl x:Class="Ask.UI.Controls.ProtocolNew.ProtocolUI"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:UI.Controls.ProtocolNew"
-             xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox"
-             xmlns:TextEditor="clr-namespace:UI.Components.ProtocolListBox"
-             xmlns:Icons="clr-namespace:UI.Icon"
-             xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
+             xmlns:local="clr-namespace:Ask.UI.Controls.ProtocolNew"
+                          xmlns:TextEditor="clr-namespace:Ask.UI.Components.ProtocolListBox"
+             xmlns:Icons="clr-namespace:Ask.UI.Shared.Components.Icons"
+             xmlns:ErrorList="clr-namespace:Ask.UI.Controls.ErrorList"
+             xmlns:conv="clr-namespace:Ask.UI.Shared.Converters.Math"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
@@ -275,7 +275,7 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Column="1" Margin="5" xmlns:conv="clr-namespace:UI.Converter">
+                <Grid Grid.Column="1" Margin="5">
                     <Grid.Resources>
                         <conv:MultiplyConverter x:Key="MultiplyConverter"/>
                     </Grid.Resources>
@@ -312,3 +312,5 @@
     </Grid>
 
 </UserControl>
+
+

@@ -252,7 +252,7 @@ namespace UI.Controls
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: true, raiseEvents: false);
 
       if (obj.LineNumber == leftLine - 1)
-        right.GoToLine(rightLine);
+        right.GoToLineWithoutSelection(rightLine);
     }
 
     /// <summary>
@@ -278,7 +278,7 @@ namespace UI.Controls
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: false, raiseEvents: false);
 
       if (obj.LineNumber == leftLine - 1)
-        right.GoToLine(rightLine);
+        right.GoToLineWithoutSelection(rightLine);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)

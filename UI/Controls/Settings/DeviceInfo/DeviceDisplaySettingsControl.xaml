@@ -20,6 +20,8 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Description" Key="settings.protocol.deviceInfo.deviceExecutionParameters.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MeasurementResults_Title" Key="settings.protocol.deviceInfo.measurementResults.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MeasurementResults_Description" Key="settings.protocol.deviceInfo.measurementResults.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Title" Key="settings.protocol.deviceInfo.intermediateMeasurementResults.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Description" Key="settings.protocol.deviceInfo.intermediateMeasurementResults.description" />
     </UserControl.Resources>
 
     <Border 
@@ -104,9 +106,16 @@
                                 <Components:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MeasurementResults_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MeasurementResults_Description}, Path=Value}"
-                                    Margin="0,6,0,0"
+                                    Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="MeasurementResults"/>
+
+                                <Components:SettingsCard
+                                    Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Description}, Path=Value}"
+                                    Margin="0,6,0,0"
+                                    VerticalAlignment="Top"
+                                    x:Name="IntermediateMeasurementResults"/>
                             </WrapPanel>
                         </StackPanel>
                     </Grid>

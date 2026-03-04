@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.Runner"
              mc:Ignorable="d" 
              xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
-             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
+             xmlns:Protocol="clr-namespace:Ask.UI.Controls.ProtocolNew;assembly=Ask.UI"
              xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              xmlns:MultiWindow="clr-namespace:UI.Components"
              xmlns:Icons="clr-namespace:UI.Icon"
@@ -75,3 +75,4 @@
     </Grid>
 
 </UserControl>
+

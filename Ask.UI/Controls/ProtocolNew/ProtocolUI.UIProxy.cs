@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   public partial class ProtocolUI
   {
@@ -13,3 +13,4 @@ namespace UI.Controls.ProtocolNew
     private UIElement ContinueButtonElement => IsTopMenuVisible ? ContinueButtonTop : ContinueButton;
   }
 }
+

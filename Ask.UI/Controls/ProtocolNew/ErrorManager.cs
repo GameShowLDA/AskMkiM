@@ -2,12 +2,12 @@
 using Ask.Core.Services.EventCore.Adapters;
 using System.Windows;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   public class ErrorManager
   {
     private int ErrorCount { get; set; } = 0;
-    private ErrorList.ErrorListControl ErrorListBoxVertical;
+    private Ask.UI.Controls.ErrorList.ErrorListControl ErrorListBoxVertical;
 
     public void AddError(ErrorItem errorItem)
     {
@@ -32,10 +32,11 @@ namespace UI.Controls.ProtocolNew
       });
     }
 
-    public ErrorManager(ErrorList.ErrorListControl errorListBoxVertical)
+    public ErrorManager(Ask.UI.Controls.ErrorList.ErrorListControl errorListBoxVertical)
     {
       ErrorCount = 0;
       ErrorListBoxVertical = errorListBoxVertical;
     }
   }
 }
+

@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Data;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   public class InverseBooleanToVisibilityConverter : IValueConverter
   {
@@ -18,3 +18,4 @@ namespace UI.Controls.ProtocolNew
     }
   }
 }
+

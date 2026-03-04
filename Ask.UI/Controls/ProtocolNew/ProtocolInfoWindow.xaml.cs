@@ -6,7 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   /// <summary>
   /// Логика взаимодействия для ProtocolInfoWindow.xaml
@@ -95,3 +95,4 @@ namespace UI.Controls.ProtocolNew
     }
   }
 }
+

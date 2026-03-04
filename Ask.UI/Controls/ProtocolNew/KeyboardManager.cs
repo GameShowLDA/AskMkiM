@@ -4,7 +4,7 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   /// <summary>
   /// Менеджер для глобальной обработки клавиш, связанных с пошаговым режимом выполнения.
@@ -202,5 +202,6 @@ namespace UI.Controls.ProtocolNew
   }
 
 }
+
 
 
