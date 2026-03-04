@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:TextEditor="clr-namespace:UI.Controls.TextEditor"
+             xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -72,22 +73,18 @@
             </Style.Triggers>
         </Style>
 
-        <StreamGeometry x:Key="SemiIconArchive">
-            M3 3a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3Z
-            M3 9.5c0-.28.22-.5.5-.5h17c.28 0 .5.22.5.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5ZM8 12a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Z
-        </StreamGeometry>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
                 Height="40"
                 MaxHeight="40"
-                Margin="10,0,10,2"
+                Margin="5"
                 Padding="6,4"
                 Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
                 Style="{DynamicResource SettingCardStyle}">
@@ -129,11 +126,8 @@
                         VerticalAlignment="Center"
                         Click="SaveButton_Click"
                         ToolTip="Save">
-                    <Path Data="{StaticResource SemiIconArchive}"
-                          Width="18"
-                          Height="18"
-                          Stretch="Uniform"
-                          Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    <icons:ArchiveIcon Size="18"
+                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                 </Button>
             </Grid>
         </Border>
