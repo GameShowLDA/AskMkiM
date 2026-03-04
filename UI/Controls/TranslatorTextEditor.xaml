@@ -76,14 +76,14 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
             Height="40"
             MaxHeight="40"
-            Margin="10,0,10,2"
+            Margin="5"
             Padding="6,4"
             Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
             Style="{DynamicResource SettingCardStyle}">
@@ -94,18 +94,18 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                
+
                 <TextBlock x:Name="FileName" 
                        Grid.Column = "1" 
                        Text="Some text"
                        FontSize="16"
                        Margin="12,0"
-                       HorizontalAlignment="Center"
+                       FontFamily="{DynamicResource WinstonBold}"
+                       HorizontalAlignment="Left"
                        VerticalAlignment="Center"
                        TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis"/>
-
-                
+                       TextTrimming="CharacterEllipsis"
+                       />
             </Grid>
         </Border>
 

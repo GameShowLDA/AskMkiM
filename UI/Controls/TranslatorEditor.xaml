@@ -95,7 +95,7 @@
             <Grid Cursor="">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
@@ -118,7 +118,7 @@
                 </icons:ArrowButton>
 
                 <TextBlock x:Name="TranslationFileName" 
-                           Grid.Column = "1" 
+                           Grid.Column = "2" 
                            Text="Some text"
                            FontSize="16"
                            Margin="12,0"
@@ -128,7 +128,7 @@
                            TextTrimming="CharacterEllipsis"/>
 
                 <Button x:Name="SaveButton"
-                        Grid.Column="2"
+                        Grid.Column="1"
                         Style="{StaticResource SaveButtonStyle}"
                         Margin="8,0,0,0"
                         VerticalAlignment="Center"
