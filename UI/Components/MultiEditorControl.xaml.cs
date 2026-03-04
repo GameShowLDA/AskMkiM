@@ -14,7 +14,7 @@ using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
-using UI.Controls.ProtocolNew;
+using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static UI.Components.Invoke.OpenFileButton;
@@ -477,3 +477,4 @@ namespace UI.Components
       await fileManager.TranslationService.RemoveTranslatorTabAsync(translatorItem, editorType);
   }
 }
+

@@ -7,11 +7,12 @@ using System.Windows;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   public partial class ProtocolUI : IButtonService
   {
     private TaskCompletionSource<bool>? _adminButtonTcs;
+    private bool _startRequestedInStepMode;
 
     #region Делегаты по нажатию кнопок.
 
@@ -177,8 +178,15 @@ namespace UI.Controls.ProtocolNew
     private void StartMeasureResistanceButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Запустить\"");
+
+      // Режим шага выбирается только в момент запуска:
+      // F10/F11 выставляют флаг заранее, обычный старт сбрасывает его.
+      var startInStepMode = _startRequestedInStepMode;
+      _startRequestedInStepMode = false;
+      ExecutionConfig.SetStepByStepMode(startInStepMode);
+
       SetNonVisibleAllButton();
-      ShowOnlyStopAndFinishButtons(ActionExecutor.StepMode);
+      ShowOnlyStopAndFinishButtons(startInStepMode);
       StartMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
     }
 
@@ -189,6 +197,9 @@ namespace UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
 
+      // Фиксируем запрос паузы сразу в executor, чтобы избежать гонки
+      // между быстрым "Пауза -> Продолжить" и запуском async-обработчика.
+      ActionExecutor.RequestPause();
       ShowButtonsOnPause();
 
       PauseButtonPreviewMouseDown?.Invoke(this, e);
@@ -239,6 +250,7 @@ namespace UI.Controls.ProtocolNew
       KeyboardManager.OnStartPressed = () =>
         Application.Current.Dispatcher.Invoke(() =>
         {
+          _startRequestedInStepMode = false;
           ExecutionConfig.SetStepByStepMode(false);
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
@@ -246,6 +258,7 @@ namespace UI.Controls.ProtocolNew
       KeyboardManager.OnStartPressedByStepMode = () =>
         Application.Current.Dispatcher.Invoke(() =>
         {
+          _startRequestedInStepMode = true;
           ExecutionConfig.SetStepByStepMode(true);
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
@@ -608,3 +621,4 @@ namespace UI.Controls.ProtocolNew
     #endregion
   }
 }
+

@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace UI.Controls.ProtocolNew
+namespace Ask.UI.Controls.ProtocolNew
 {
   /// <summary>
   /// Класс управления пользовательским интерфейсом протокола выполнения.
@@ -109,6 +109,8 @@ namespace UI.Controls.ProtocolNew
     private Window _attachedWindow;
 
     private Action<ExecutionEvents.ControlButtonPressed> _controlButtonHandler;
+    private Action<ExecutionEvents.StepByStepModeChanged> _stepByStepModeChangedHandler;
+    private bool _eventSubscriptionsAttached;
 
     /// <summary>
     /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
@@ -116,9 +118,6 @@ namespace UI.Controls.ProtocolNew
     /// </summary>
     public ProtocolUI() : this(false)
     {
-      _controlButtonHandler = OnControlButtonPressed;
-      EventAggregator.Subscribe(_controlButtonHandler);
-      Unloaded += OnUnloaded;
     }
 
     public ProtocolUI(bool isTopMenuVisible)
@@ -126,8 +125,11 @@ namespace UI.Controls.ProtocolNew
       IsTopMenuVisible = isTopMenuVisible;
       Items = new ObservableCollection<object>();
       ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+      _controlButtonHandler = OnControlButtonPressed;
+      _stepByStepModeChangedHandler = e => EventAggregator_StepByStepModeChanged(e.IsEnabled);
       InitializeInternal();
-      EventAggregator.Subscribe<ExecutionEvents.StepByStepModeChanged>(e => EventAggregator_StepByStepModeChanged(e.IsEnabled));
+      Loaded += OnLoaded;
+      Unloaded += OnUnloaded;
     }
 
     private void EventAggregator_StepByStepModeChanged(bool obj)
@@ -151,6 +153,9 @@ namespace UI.Controls.ProtocolNew
 
       this.Loaded += (s, e) =>
       {
+        AttachEventSubscriptions();
+
+        ErrorListBoxVertical.ItemDoubleClicked -= ErrorListBoxVertical_ErrorItemDoubleClicked;
         ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
         _attachedWindow = Application.Current?.MainWindow;
         if (_attachedWindow != null)
@@ -173,6 +178,23 @@ namespace UI.Controls.ProtocolNew
       };
 
       ButtonService = this;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+      AttachEventSubscriptions();
+    }
+
+    private void AttachEventSubscriptions()
+    {
+      if (_eventSubscriptionsAttached)
+      {
+        return;
+      }
+
+      EventAggregator.Subscribe(_controlButtonHandler);
+      EventAggregator.Subscribe(_stepByStepModeChangedHandler);
+      _eventSubscriptionsAttached = true;
     }
 
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
@@ -320,7 +342,14 @@ namespace UI.Controls.ProtocolNew
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+      if (!_eventSubscriptionsAttached)
+      {
+        return;
+      }
+
       EventAggregator.Unsubscribe(_controlButtonHandler);
+      EventAggregator.Unsubscribe(_stepByStepModeChangedHandler);
+      _eventSubscriptionsAttached = false;
     }
 
     /// <summary>
@@ -374,3 +403,4 @@ namespace UI.Controls.ProtocolNew
     }
   }
 }
+

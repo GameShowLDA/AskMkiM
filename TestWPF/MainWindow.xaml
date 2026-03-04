@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestWPF"
-        xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew;assembly=UI"
+        xmlns:Protocol="clr-namespace:Ask.UI.Controls.ProtocolNew;assembly=Ask.UI"
         xmlns:Calendar="clr-namespace:UI.Controls.Calendar;assembly=UI"
         xmlns:Components="clr-namespace:UI.Components;assembly=UI"
         mc:Ignorable="d"
@@ -15,3 +15,4 @@
         >
     <Components:InputField Name="testInput" IsTimeVisible="True" IsVoltageVisible="True" IsBusVisible="True"/>
 </Window>
+
