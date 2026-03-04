@@ -4,7 +4,7 @@ using System.IO;
 using UI.Controls;
 using UI.Controls.TextEditor;
 
-namespace UI.Services.Services
+namespace UI.Services
 {
   /// <summary>
   /// Сервис для работы с файловой системой, связанной с редактором.
@@ -18,13 +18,13 @@ namespace UI.Services.Services
   /// </summary>
   public class FolderService
   {
-    private readonly UI.Components.MultiEditorMethods.FileManager _fileManager;
+    private readonly Components.MultiEditorMethods.FileManager _fileManager;
 
     /// <summary>
     /// Инициализирует новый экземпляр сервиса работы с папками.
     /// </summary>
     /// <param name="fileManager">Главный файловый менеджер, предоставляющий доступ к контейнерам редактора.</param>
-    public FolderService(UI.Components.MultiEditorMethods.FileManager fileManager)
+    public FolderService(Components.MultiEditorMethods.FileManager fileManager)
     {
       _fileManager = fileManager;
     }

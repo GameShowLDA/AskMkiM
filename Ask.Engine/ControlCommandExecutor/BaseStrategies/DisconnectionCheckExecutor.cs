@@ -1,10 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
-using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {

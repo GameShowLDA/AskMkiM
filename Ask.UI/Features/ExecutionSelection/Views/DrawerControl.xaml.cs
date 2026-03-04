@@ -1,6 +1,5 @@
 ﻿using Ask.UI.Features.ExecutionSelection.ViewModels;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
-using System.Linq;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;

@@ -1,11 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Annotations;
 using System.Windows.Controls;
 
 namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
@@ -34,85 +28,85 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     /// Используется хостом интерфейса для размещения редактора в layout,
     /// но не должен использоваться логикой ядра напрямую.
     /// </summary>
-    public UserControl View { get; }
+    UserControl View { get; }
 
     /// <summary>
     /// Документ редактора, предоставляющий абстрактный доступ к тексту.
     /// Не зависит от конкретной реализации редактора.
     /// </summary>
-    public ITextDocumentView Document { get; }
+    ITextDocumentView Document { get; }
 
 
     /// <summary>
     /// Возникает при изменении текста документа пользователем или программно.
     /// Используется анализаторами и механизмами синхронизации.
     /// </summary>
-    public event EventHandler TextChanged;
+    event EventHandler TextChanged;
 
     /// <summary>
     /// Тип файла, определяющий поведение редактора
     /// (подсветка, правила анализа, форматирование и т.д.).
     /// </summary>
-    public FileType FileType { get; }
+    FileType FileType { get; }
 
     /// <summary>
     /// Связанная модель редактора.
     /// Хранит служебные данные: путь, состояние, параметры отображения.
     /// </summary>
-    public TextEditorModel TextEditorModel { get; set; }
+    TextEditorModel TextEditorModel { get; set; }
 
     /// <summary>
     /// Полный текст документа.
     /// </summary>
-    public string Text { get; set; }
+    string Text { get; set; }
 
     /// <summary>
     /// Устанавливает, является ли текстовый редактор доступным только для чтения.
     /// </summary>
-    public bool IsReadOnly { get; set; }
+    bool IsReadOnly { get; set; }
 
     /// <summary>
     /// Установка разрешенных строк, где можно ставить точки остановки, и вытаскивание данных об этом.
     /// </summary>
-    public List<int> RightBreakpoint { get; set; }
+    List<int> RightBreakpoint { get; set; }
 
     /// <summary>
     /// Лист номеров команд, на которых установлены точки остановки.
     /// </summary>
-    public List<int> BreakpointCommandsNumbers { get; }
+    List<int> BreakpointCommandsNumbers { get; }
 
     /// <summary>
     /// Установить маркер на указанную строку, очищая остальные.
     /// </summary>
-    public void SetActiveLine(int lineNumber);
+    void SetActiveLine(int lineNumber);
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
     /// </summary>
-    public void InitializeMarkerService();
+    void InitializeMarkerService();
 
     /// <summary>
     /// Включает или отключает интерактивность и видимость точек остановки.
     /// </summary>
-    public void ConfigureBreakpoints(bool interactive, bool visible);
+    void ConfigureBreakpoints(bool interactive, bool visible);
 
     /// <summary>
     /// Устанавливает или снимает точку остановки.
     /// </summary>
-    public void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false);
+    void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false);
 
     /// <summary>
     /// Подсвечивает набор диапазонов текста.
     /// </summary>
     /// <param name="ranges">Список диапазонов (начало, конец).</param>
-    public void HighlightRanges(IReadOnlyList<(int start, int end)> ranges);
+    void HighlightRanges(IReadOnlyList<(int start, int end)> ranges);
 
     /// <summary>
     /// Переходит к указанной строке, разворачивает folding при необходимости
     /// и прокручивает редактор так, чтобы строка была видна.
     /// </summary>
     /// <param name="lineNumber">Номер строки (1-based).</param>
-    public void GoToLine(int lineNumber);
+    void GoToLine(int lineNumber);
 
     /// <summary>
     /// Прокручивает редактор до указанной строки.
@@ -120,7 +114,7 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     /// <param name="line">
     /// Номер строки, до которой нужно прокрутить текст в редакторе.
     /// </param>
-    public void ScrollToLine(int line);
+    void ScrollToLine(int line);
 
     /// <summary>
     /// Выделяет текст в редакторе, начиная с указанного смещения и заданной длины.
@@ -131,6 +125,6 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     /// <param name="length">
     /// Длина выделяемого текста.
     /// </param>
-    public void Select(int startOffset, int length);
+    void Select(int startOffset, int length);
   }
 }

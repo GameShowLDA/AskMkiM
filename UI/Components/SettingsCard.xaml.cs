@@ -11,8 +11,8 @@ namespace UI.Components
     public SettingsCard()
     {
       InitializeComponent();
-      Loaded += (_, __) => _suppressEvents = false;   
-      Unloaded += (_, __) => _suppressEvents = true; 
+      Loaded += (_, __) => _suppressEvents = false;
+      Unloaded += (_, __) => _suppressEvents = true;
     }
 
     // Заголовок

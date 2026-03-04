@@ -1,7 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
-using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
 {

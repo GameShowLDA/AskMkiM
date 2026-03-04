@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;

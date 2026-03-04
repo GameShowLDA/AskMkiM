@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {

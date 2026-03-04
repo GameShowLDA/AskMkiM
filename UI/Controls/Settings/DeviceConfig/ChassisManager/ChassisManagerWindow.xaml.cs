@@ -2,7 +2,6 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;

@@ -1,4 +1,4 @@
-﻿namespace UI.Windows.WpfDocking
+﻿namespace UI.Windows.WpfDocking.Internal
 {
   internal static partial class Extension
   {

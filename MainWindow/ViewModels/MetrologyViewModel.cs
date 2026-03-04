@@ -1,7 +1,6 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.MetrologyEnums;
 using Ask.Core.Shared.Metadata.View;
 using CommunityToolkit.Mvvm.Input;
-using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
 {

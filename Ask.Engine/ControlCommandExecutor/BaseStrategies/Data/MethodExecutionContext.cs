@@ -1,12 +1,6 @@
-﻿using Ask.Core.Services.Extensions;
-using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.Metadata.Atributes;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Engine.ControlCommandAnalyser.Model;
+﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
-using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using System.Reflection;
 using static Ask.Engine.ControlCommandExecutor.BaseStrategies.NodeFullChecker;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data

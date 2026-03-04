@@ -1,6 +1,4 @@
-﻿using Ask.Core.Services.Usb;
-using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Controls.GPT;
 

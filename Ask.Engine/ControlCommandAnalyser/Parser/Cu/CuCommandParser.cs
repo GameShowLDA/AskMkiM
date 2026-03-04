@@ -68,7 +68,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
       }
       else
       {
-        textLines.Add(firstLine); 
+        textLines.Add(firstLine);
       }
       if (lines.Count > 1)
       {

@@ -2,7 +2,6 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {

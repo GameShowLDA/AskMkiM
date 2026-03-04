@@ -6,7 +6,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution

@@ -1,14 +1,11 @@
 ﻿
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Base.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.ModuleRelayControl;
 
@@ -54,7 +51,7 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _busManager.DisconnectBusAsync(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())

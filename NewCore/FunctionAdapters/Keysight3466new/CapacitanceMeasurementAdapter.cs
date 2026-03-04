@@ -37,7 +37,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения ёмкости", succes ? true : false, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения ёмкости", succes, 1, userMessageService);
         }
 
         return succes;

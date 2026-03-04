@@ -1,7 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
-using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ks;
 using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.ProcessorFactory;

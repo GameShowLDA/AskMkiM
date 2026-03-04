@@ -1,9 +1,4 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {

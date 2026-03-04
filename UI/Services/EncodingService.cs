@@ -1,9 +1,8 @@
 ﻿using System.IO;
 using System.Text;
-using System.Text.Unicode;
 using Ude;
 
-namespace Utilities.Services
+namespace UI.Services
 {
   /// <summary>
   /// Предоставляет методы для автоматического определения кодировки текстовых файлов.
@@ -61,7 +60,7 @@ namespace Utilities.Services
         try
         {
           var enc = Encoding.GetEncoding(detector.Charset);
-          return enc; 
+          return enc;
         }
         catch
         {

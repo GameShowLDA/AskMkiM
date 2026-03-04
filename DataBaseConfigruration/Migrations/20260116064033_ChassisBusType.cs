@@ -4,26 +4,26 @@
 
 namespace DataBaseConfiguration.Migrations
 {
+  /// <inheritdoc />
+  public partial class ChassisBusType : Migration
+  {
     /// <inheritdoc />
-    public partial class ChassisBusType : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "BusType",
-                table: "ChassisManagers",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "BusType",
-                table: "ChassisManagers");
-        }
+      migrationBuilder.AddColumn<int>(
+          name: "BusType",
+          table: "ChassisManagers",
+          type: "INTEGER",
+          nullable: false,
+          defaultValue: 0);
     }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.DropColumn(
+          name: "BusType",
+          table: "ChassisManagers");
+    }
+  }
 }

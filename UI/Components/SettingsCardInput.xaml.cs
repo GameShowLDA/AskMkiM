@@ -1,7 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using CommonWin32;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Controls;
 using UI.Controls.AdminPanel;
 
@@ -21,7 +19,7 @@ namespace UI.Components
       DataContext = relaySwitchModule;
       defaultValue = relaySwitchModule.SwitchResistance;
 
-      ResistanceDataTexBox.TextChanged  += ResistanceDevice_TextChanged;
+      ResistanceDataTexBox.TextChanged += ResistanceDevice_TextChanged;
       baseControl.SetDefaultValue += SetDefaultValue;
     }
 

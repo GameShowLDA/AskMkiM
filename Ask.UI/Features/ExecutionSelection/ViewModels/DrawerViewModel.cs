@@ -1,10 +1,7 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.UI.Shared.Commands;
 using Ask.UI.Shared.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows.Input;
 
 namespace Ask.UI.Features.ExecutionSelection.ViewModels

@@ -4,26 +4,26 @@
 
 namespace DataBaseConfiguration.Migrations
 {
+  /// <inheritdoc />
+  public partial class AddBusTypeFromRSM : Migration
+  {
     /// <inheritdoc />
-    public partial class AddBusTypeFromRSM : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "BusType",
-                table: "RelaySwitchModules",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "BusType",
-                table: "RelaySwitchModules");
-        }
+      migrationBuilder.AddColumn<int>(
+          name: "BusType",
+          table: "RelaySwitchModules",
+          type: "INTEGER",
+          nullable: false,
+          defaultValue: 0);
     }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+      migrationBuilder.DropColumn(
+          name: "BusType",
+          table: "RelaySwitchModules");
+    }
+  }
 }

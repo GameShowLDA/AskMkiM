@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
 {

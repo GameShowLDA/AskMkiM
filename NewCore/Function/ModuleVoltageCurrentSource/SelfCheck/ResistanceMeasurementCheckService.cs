@@ -92,7 +92,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
           type: (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error
           );
 
-        showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
+        showMessageModel.ExecutionError = result < firstNorm || result > lastNorm;
         showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
         await messageService.ShowMessageAsync(showMessageModel);
 

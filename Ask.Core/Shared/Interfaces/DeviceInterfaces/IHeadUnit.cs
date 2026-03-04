@@ -5,7 +5,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
   /// <summary>
   /// Интерфейс, представляющий головное устройство, наследуемое от <see cref="IDevice"/>.
   /// </summary>
-  public interface IHeadUnit : IDevice 
+  public interface IHeadUnit : IDevice
   {
     /// <summary>
     /// Тип структурной шины тестера АСК.

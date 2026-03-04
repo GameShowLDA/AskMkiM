@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
 {
@@ -133,7 +132,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         //bool missingComma = isLast && !hasTrailingComma;
 
         bool error = markAsError;
-          //|| missingComma;
+        //|| missingComma;
 
         result.Add((keys[i], error));
       }

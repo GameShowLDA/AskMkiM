@@ -1,8 +1,6 @@
 ﻿using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Features.Notifications.ViewModels;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;

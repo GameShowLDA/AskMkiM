@@ -27,7 +27,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
     /// Менеджер для управления реле и точками подключения.
     /// </summary>
     IPointManager PointManager { get; set; }
-    
+
     /// <summary>
     /// Тип структурной шины.
     /// </summary>

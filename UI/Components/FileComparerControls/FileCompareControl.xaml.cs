@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.DTO.TextEditor;
-using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
+﻿using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
 using Ask.Support;
 using Message;
 using Microsoft.Win32;

@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using static Ask.LogLib.LoggerUtility;
 
 
@@ -60,7 +59,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           LogError(error);
           model.Errors.Add(GeneralErrors.IndentationError(model.Mnemonic, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
         }
-          return false;
+        return false;
       }
       return true;
     }

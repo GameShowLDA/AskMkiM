@@ -3,7 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
-using System.Text;
 
 namespace NewCore.Function.DeviceBusCommutation
 {

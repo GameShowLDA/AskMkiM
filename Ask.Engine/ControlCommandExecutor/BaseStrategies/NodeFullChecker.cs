@@ -5,7 +5,6 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -57,10 +56,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         if (!answer.Result)
         {
           context.CommandManager.AddErrorMethod(
-            context.CommandModel.PointErrors.NodeExecutePointError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", 
-            PointModel.ConvertToPointStrings(chainModels.PointModels), 
+            context.CommandModel.PointErrors.NodeExecutePointError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+            PointModel.ConvertToPointStrings(chainModels.PointModels),
             $"{answer.Value} МОм (>{context.Value} МОм)",
-             context.MessageService.GetLastLineNumber(), 
+             context.MessageService.GetLastLineNumber(),
             context.CommandModel.FormattedStartLineNumber));
           ErrorsPoints.Add(chainModels);
         }
@@ -85,9 +84,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var chainStr = await PointFormater.GetFormatDisconnectPoint(chain.Chain);
           context.CommandManager.AddErrorMethod(
             context.CommandModel.PointErrors.ChainError(
-              $"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", 
-              chainStr, 
-              context.MessageService.GetLastLineNumber(), 
+              $"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+              chainStr,
+              context.MessageService.GetLastLineNumber(),
               context.CommandModel.FormattedStartLineNumber));
           errorChains.AddRange(chain.Chain);
 

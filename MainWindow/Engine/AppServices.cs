@@ -1,11 +1,9 @@
 ﻿using Ask.Core.Services.App;
-using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Support;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 
 namespace MainWindowProgram.Engine
 {

@@ -1,7 +1,5 @@
-﻿using Ask.Core.Services.Usb;
-using Ask.Core.Shared.Metadata.View;
+﻿using Ask.Core.Shared.Metadata.View;
 using MainWindowProgram.Events;
-using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 
 namespace MainWindowProgram.Engine

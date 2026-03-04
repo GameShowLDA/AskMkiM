@@ -450,7 +450,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
     /// <value><see langword="true"/> if <see cref="DockItem"/> is in auto hide mode, otherwise <see langword="false"/>.</value>
     public bool IsAutoHide
     {
-      get { return FirstPane == null ? false : FirstPane.IsAutoHide; }
+      get { return FirstPane != null && FirstPane.IsAutoHide; }
     }
 
     /// <summary>Gets a value indicates whether the <see cref="DockItem"/> is invisible. This is a dependency property.</summary>
@@ -642,7 +642,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
       }
       else if (FirstPane.SelectedItem != null)
       {
-        bool isSelected2 = FirstPane.IsAutoHide ? DockControl.SelectedAutoHideItem == FirstPane.SelectedItem : true;
+        bool isSelected2 = !FirstPane.IsAutoHide || DockControl.SelectedAutoHideItem == FirstPane.SelectedItem;
         FirstPane.SelectedItem.IsSelected = isSelected2;
       }
     }

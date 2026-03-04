@@ -7,6 +7,6 @@ namespace Ask.Core.Shared.Metadata.View
     /// <summary>
     /// Открывает пользовательский элемент управления режима метрологии.
     /// </summary>
-    public void OpenMetrologyMode(MetrologyType metrologyType);
+    void OpenMetrologyMode(MetrologyType metrologyType);
   }
 }

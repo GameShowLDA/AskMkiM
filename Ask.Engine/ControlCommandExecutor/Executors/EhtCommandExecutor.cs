@@ -1,12 +1,8 @@
-﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;

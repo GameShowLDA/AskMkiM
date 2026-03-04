@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Reflection;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter

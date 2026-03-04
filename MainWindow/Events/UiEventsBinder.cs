@@ -10,7 +10,6 @@ using System.Windows.Controls;
 using UI.Components;
 using UI.Components.FileComparerControls;
 using UI.Controls.TextEditor;
-using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Events
 {

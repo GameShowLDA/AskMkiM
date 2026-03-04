@@ -3,8 +3,6 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using System.Reflection;
@@ -104,7 +102,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       BaseCommandModel command,
       IHasScheme hasScheme,
       double value = 0,
-      double lowerLimit =0,
+      double lowerLimit = 0,
       double higherLimit = 0)
     {
       TypeCommand = command.TypeCommand;

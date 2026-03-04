@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;

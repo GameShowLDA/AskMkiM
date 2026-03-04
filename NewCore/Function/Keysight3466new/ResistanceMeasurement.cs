@@ -3,7 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using NewCore.Device;
-using NewCore.Function.Helpers;
 
 namespace NewCore.Function.Keysight3466new
 {

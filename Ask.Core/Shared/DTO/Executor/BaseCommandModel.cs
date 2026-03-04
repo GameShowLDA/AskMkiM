@@ -2,11 +2,6 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Core.Shared.DTO.Executor
 {

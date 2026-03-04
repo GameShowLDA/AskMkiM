@@ -1,9 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.View;
 using MainWindowProgram.Init;
-using MainWindowProgram.Services;
 
 namespace MainWindowProgram.Engine
 {

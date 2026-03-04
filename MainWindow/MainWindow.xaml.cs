@@ -1,7 +1,6 @@
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
-using Ask.Core.Services.Usb;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
@@ -9,7 +8,6 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
-using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;

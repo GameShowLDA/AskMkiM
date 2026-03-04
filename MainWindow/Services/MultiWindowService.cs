@@ -1,15 +1,9 @@
-using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
-using System.Windows.Controls;
-using System.Windows.Forms.Design;
 using UI.Components;
 using UI.Controls;
-using UI.Controls.Runner;
 using UI.Controls.TextEditor;
-using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services
 {
@@ -42,10 +36,10 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <param name="multiWindowControl">Контейнер окон и вкладок, с которым работает сервис.</param>
     public MultiWindowService(
-      MultiWindowControl multiWindowControl, 
-      IRunService runService, 
-      IEditorDocumentService editorDocumentService, 
-      IProtocolViewerService protocolViewerService, 
+      MultiWindowControl multiWindowControl,
+      IRunService runService,
+      IEditorDocumentService editorDocumentService,
+      IProtocolViewerService protocolViewerService,
       IWorkspaceService workspaceService,
       ITranslationService translationService)
     {

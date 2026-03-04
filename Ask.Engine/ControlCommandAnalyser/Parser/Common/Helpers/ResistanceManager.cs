@@ -106,12 +106,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// <summary>
     /// Результат парсинга параметров сопротивления.
     /// </summary>
-    private record ParsedResistance( double? Lower, double? Higher, double? Cabel, string Unit, string CabelUnit);
+    private record ParsedResistance(double? Lower, double? Higher, double? Cabel, string Unit, string CabelUnit);
 
     /// <summary>
     /// Проверяет корректность диапазона сопротивления.
     /// </summary>
-    private static bool ValidateResistanceLimits(BaseCommandModel model, ParsedResistance parsed, ResistanceDefaults defaults, 
+    private static bool ValidateResistanceLimits(BaseCommandModel model, ParsedResistance parsed, ResistanceDefaults defaults,
       string commandNumber, string mnemonic, int numberLine)
     {
       if (!parsed.Lower.HasValue || !parsed.Higher.HasValue)

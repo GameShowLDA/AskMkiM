@@ -4,10 +4,10 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.UI.Controls.ProtocolNew;
 using Microsoft.Win32;
 using System.Windows;
 using UI.Components.FileComparerControls;
-using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 

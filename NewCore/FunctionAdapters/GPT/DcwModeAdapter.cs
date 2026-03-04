@@ -680,7 +680,7 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetArcCurrentAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
           var succes = await _dcwMode.ArcCurrent.SetArcCurrentAsync(value);
 

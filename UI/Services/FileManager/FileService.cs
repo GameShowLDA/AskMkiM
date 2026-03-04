@@ -47,7 +47,7 @@ namespace UI.Services.FileManager
       FileManager = fileManager;
     }
 
-    Components.MultiEditorMethods.FileManager FileManager { get; }
+    private Components.MultiEditorMethods.FileManager FileManager { get; }
 
     public void CreateNewFile()
     {

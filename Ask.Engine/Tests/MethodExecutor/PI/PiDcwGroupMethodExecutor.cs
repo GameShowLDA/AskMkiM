@@ -84,7 +84,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
             type = ShowMessageModel.MessageType.Error;
           }
 
-          return type == ShowMessageModel.MessageType.Success ? true : false;
+          return type == ShowMessageModel.MessageType.Success;
 
         }, messageService);
       }

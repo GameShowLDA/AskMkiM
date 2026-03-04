@@ -125,7 +125,7 @@ namespace Ask.Core.Services.UI
         {
           result = await operation();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
           result = (false, -1);
         }

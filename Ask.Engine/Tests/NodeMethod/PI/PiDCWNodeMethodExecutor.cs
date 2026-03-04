@@ -94,7 +94,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
                 type = ShowMessageModel.MessageType.Error;
               }
 
-              return type == ShowMessageModel.MessageType.Success ? true : false;
+              return type == ShowMessageModel.MessageType.Success;
             }, protocolUI);
           }
           else

@@ -142,9 +142,9 @@ namespace NewCore.Function.ModuleRelayControl.SelfCheck
         isErrorSimulation = isErrorSimulation && point % 10 == 0;
         model = new SelfPointModel
         {
-          DisconnectBusB = isErrorSimulation ? random.Next(2) == 1 : true,
-          DisconnectBusA = isErrorSimulation ? random.Next(2) == 1 : true,
-          ConnectPoint = isErrorSimulation ? random.Next(2) == 1 : true,
+          DisconnectBusB = !isErrorSimulation || random.Next(2) == 1,
+          DisconnectBusA = !isErrorSimulation || random.Next(2) == 1,
+          ConnectPoint = !isErrorSimulation || random.Next(2) == 1,
         };
         model.SelfControl = model.DisconnectBusB && model.DisconnectBusA && model.ConnectPoint;
       }

@@ -34,7 +34,7 @@ namespace Ask.Core.Services.EventCore.Services
           try
           {
             if (subscriber is Action<TEvent> action)
-              
+
               action.Invoke(eventData);
           }
           catch (Exception ex)

@@ -209,7 +209,7 @@ namespace UI.Components.MultiEditorMethods
                 return;
               }
               var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
-              
+
 
               if (allOccurrences != null)
               {

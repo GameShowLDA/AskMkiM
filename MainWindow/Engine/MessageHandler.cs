@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using static Ask.LogLib.LoggerUtility;
 
-namespace MainWindowProgram
+namespace MainWindowProgram.Engine
 {
   /// <summary>
   /// Класс MessageHandler предназначен для отображения сообщений в элементе TextBlock с использованием таймера.

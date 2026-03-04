@@ -6,7 +6,6 @@ using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 
 namespace UI.Controls.Settings.Execution
 {

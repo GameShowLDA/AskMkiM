@@ -98,7 +98,7 @@ namespace MainWindowProgram.Services
           char c = text[i];
           if (c < '0' || c > '9') break;
           hasDigits = true;
-          value = value * 10 + (c - '0');
+          value = (value * 10) + (c - '0');
           i++;
         }
 

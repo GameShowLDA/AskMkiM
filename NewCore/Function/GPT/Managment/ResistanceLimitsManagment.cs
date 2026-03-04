@@ -85,7 +85,7 @@ namespace NewCore.Function.GPT.Managment
     public async Task<(bool Success, string Message)> SetLowResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
       if (_getIsIdleMode())
-      { 
+      {
         _lowLimit = value;
         return (true, string.Empty);
       }

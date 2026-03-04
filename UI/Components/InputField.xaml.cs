@@ -2,10 +2,10 @@
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.UI.Controls.ProtocolNew;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Ask.UI.Controls.ProtocolNew;
 using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace UI.Components
