@@ -351,6 +351,12 @@
   <data name="protocol.tooltip.stepinto" xml:space="preserve">
     <value>Шаг с заходом (F11)</value>
   </data>
+  <data name="translator.editor.tooltip.back" xml:space="preserve">
+    <value>Вернуться к исходному файлу</value>
+  </data>
+  <data name="translator.editor.tooltip.save.archive" xml:space="preserve">
+    <value>Сохранить переведенный файл в архив</value>
+  </data>
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>Режим ЭТ</value>
   </data>

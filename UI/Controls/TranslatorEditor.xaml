@@ -5,9 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:TextEditor="clr-namespace:UI.Controls.TextEditor"
              xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
+             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="LS_TranslatorEditor_Tooltip_Back" Key="translator.editor.tooltip.back" />
+        <LocalizeStrings:LocalizedString x:Key="LS_TranslatorEditor_Tooltip_SaveArchive" Key="translator.editor.tooltip.save.archive" />
+
         <Style x:Key="TopMenuLikeIconButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
@@ -100,7 +104,7 @@
                                    VerticalAlignment="Center"
                                    Width="30"
                                    Height="30"
-                                   ToolTip="Back"
+                                   ToolTip="{Binding Source={StaticResource LS_TranslatorEditor_Tooltip_Back}, Path=Value}"
                                    ToggleOnClick="False"
                                    ButtonBackground="{DynamicResource DeviceListEditButtonBackgroundBrush}"
                                    ButtonBorder="{DynamicResource DeviceListEditButtonBorderBrush}"
@@ -129,7 +133,7 @@
                         Margin="8,0,0,0"
                         VerticalAlignment="Center"
                         Click="SaveButton_Click"
-                        ToolTip="Save">
+                        ToolTip="{Binding Source={StaticResource LS_TranslatorEditor_Tooltip_SaveArchive}, Path=Value}">
                     <icons:ArchiveIcon Size="18"
                                        Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                 </Button>
