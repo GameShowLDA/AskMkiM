@@ -88,26 +88,30 @@
                 Padding="6,4"
                 Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
                 Style="{DynamicResource SettingCardStyle}">
-            <Grid>
+            <Grid Cursor="">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="BackButton"
-                        Grid.Column="0"
-                        Style="{StaticResource BackButtonStyle}"
-                        VerticalAlignment="Center"
-                        Click="BackButton_Click"
-                        ToolTip="Back">
-                    <Path Data="M11,3 L5,8 L11,13 M5,8 L15,8"
-                          Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
-                          StrokeThickness="2"
-                          StrokeStartLineCap="Round"
-                          StrokeEndLineCap="Round"
-                          StrokeLineJoin="Round"/>
-                </Button>
+                <icons:ArrowButton x:Name="BackButton"
+                                   Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Width="30"
+                                   Height="30"
+                                   ToolTip="Back"
+                                   ToggleOnClick="False"
+                                   ButtonBackground="{DynamicResource DeviceListEditButtonBackgroundBrush}"
+                                   ButtonBorder="{DynamicResource DeviceListEditButtonBorderBrush}"
+                                   ArrowBrush="{DynamicResource DeviceListEditButtonForegroundBrush}"
+                                   ArrowHoverBrush="{DynamicResource DeviceListEditButtonHoverForegroundBrush}"
+                                   RenderTransformOrigin="0.5,0.5"
+                                   Click="BackButton_Click">
+                    <icons:ArrowButton.RenderTransform>
+                        <RotateTransform Angle="90"/>
+                    </icons:ArrowButton.RenderTransform>
+                </icons:ArrowButton>
 
                 <TextBlock x:Name="TranslationFileName" 
                            Grid.Column = "1" 
@@ -133,7 +137,7 @@
         </Border>
 
         <Border Grid.Row="1"
-                Style="{DynamicResource SettingCardStyle}"
+                Style="{DynamicResource SettingCardStyle}" BorderThickness="0"
                 ClipToBounds="True">
             <ContentControl x:Name="EditorHost">
                 <TextEditor:TextEditorUI x:Name="TranslatorTextEditor"
