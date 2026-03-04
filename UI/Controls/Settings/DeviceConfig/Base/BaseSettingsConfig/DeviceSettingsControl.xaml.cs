@@ -1,9 +1,9 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using NewCore.Base;
 using NewCore.Base.Device;
 using NewCore.Device;
+using NewCore.Base;
 using System.IO.Ports;
 using System.Management;
 using System.Net;

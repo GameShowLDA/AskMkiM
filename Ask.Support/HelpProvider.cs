@@ -182,7 +182,7 @@ namespace Ask.Support
     /// <summary>
     /// Открывает окно справки на странице быстрого меню команд.
     /// </summary>
-    public static void OpenFastMenuCommand()
+    public static void OpenFastMenuCommand() 
     {
       LogInformation($"Путь до старницы: /FastMenuCommand.html");
       if (HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow("/FastMenuCommand.html");

@@ -83,7 +83,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           }
 
           await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
-          return type == ShowMessageModel.MessageType.Success;
+          return type == ShowMessageModel.MessageType.Success ? true : false;
         }, messageService);
       }
 

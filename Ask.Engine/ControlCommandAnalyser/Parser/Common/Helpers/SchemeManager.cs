@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
       var scheme = new SchemeModel(new List<GroupModel>());
-      if ((model is PiCommandModel) == false && (model is PrCommandModel) == false && (model is SiCommandModel) == false)
+      if (model is PiCommandModel == false && model is PrCommandModel == false && model is SiCommandModel == false)
       {
         if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
         {
@@ -91,7 +91,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       {
         scheme = ParseScheme(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
         modelScheme = scheme;
-        modelScheme = HandleKeysSP(numberLine, model, modelScheme);
+        modelScheme = HandleKeysSP(numberLine,model, modelScheme);
       }
       else if (model.AlgorithmKey.Contains(AlgorithmKey.П.ToString()))
       {
@@ -217,7 +217,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
       {
-        if ((model is OtCommandModel) == false)
+        if (model is OtCommandModel == false)
         {
           HandleNoPointsBlock(model, numberLine);
         }

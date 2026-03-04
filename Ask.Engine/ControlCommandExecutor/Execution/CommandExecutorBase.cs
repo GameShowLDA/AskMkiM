@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
 {

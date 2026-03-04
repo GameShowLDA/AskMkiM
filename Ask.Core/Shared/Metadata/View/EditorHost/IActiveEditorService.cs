@@ -1,4 +1,11 @@
-﻿namespace Ask.Core.Shared.Metadata.View.EditorHost
+﻿using Ask.Core.Shared.Metadata.Static;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Ask.Core.Shared.Metadata.View.EditorHost
 {
   /// <summary>
   /// Предоставляет доступ к активным редакторам и управляет их закрытием.

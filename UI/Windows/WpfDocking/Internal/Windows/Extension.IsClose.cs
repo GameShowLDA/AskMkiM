@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace UI.Windows.WpfDocking.Internal.Windows
+namespace UI.Windows.WpfDocking.Windows
 {
   internal static partial class Extension
   {

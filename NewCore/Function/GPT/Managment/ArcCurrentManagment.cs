@@ -55,7 +55,7 @@ namespace NewCore.Function.GPT.Managment
           newValue: value);
 
       if (result.Success)
-      {
+      { 
         _arcCurrent = value;
       }
 

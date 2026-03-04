@@ -174,7 +174,7 @@ namespace UI.Controls.GPT.Mode
         double value = soundState == "ON" ? 1 : 0;
         OnValueChanged("BUZZER_PSOUND", value);
 
-        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimarySound(value == 1);
+        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimarySound(value == 1 ? true : false);
       }
     }
 
@@ -190,7 +190,7 @@ namespace UI.Controls.GPT.Mode
         double value = soundState == "ON" ? 1 : 0;
         OnValueChanged("BUZZER_FSOUND", value);
 
-        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackSound(value == 1);
+        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackSound(value == 1 ? true : false);
       }
     }
 

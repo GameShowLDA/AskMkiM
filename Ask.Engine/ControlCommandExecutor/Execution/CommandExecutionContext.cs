@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Reflection;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution

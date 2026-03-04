@@ -1,10 +1,15 @@
 ﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
+using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
+using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
+using System.Text.RegularExpressions;
+using static Ask.LogLib.LoggerUtility;
 
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Ck

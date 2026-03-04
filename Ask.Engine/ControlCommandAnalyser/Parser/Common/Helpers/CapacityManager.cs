@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
@@ -204,7 +205,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       var higherValue = UnitsConvertor.TryConvertBack(finalHigher, unit);
       model.HigherLimitCapacity = higherValue.Item1;
       model.HigherLimitCapacitySource = $"{higherValue.Item1} {higherValue.Item2}";
-
+    
       return model;
     }
 

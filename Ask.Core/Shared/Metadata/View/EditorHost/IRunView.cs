@@ -1,12 +1,17 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace Ask.Core.Shared.Metadata.View.EditorHost
 {
   public interface IRunView
   {
-    string FileName { get; }
+    public string FileName { get; }
 
     string OpkFilePath { get; set; }
-    UserControl View { get; }
+    public UserControl View { get; }
   }
 }

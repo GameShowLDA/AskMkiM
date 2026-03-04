@@ -77,7 +77,7 @@ namespace UI.Controls.Settings.Protocol
       Loaded += async (s, e) =>
       {
         if (!string.IsNullOrEmpty(ProtocolEditor.Text))
-          return;
+          return; 
 
         if (IsErrorsTemplate)
           BaseTemplate = ProtocolConfig.GetBaseTextErrorsProtocol();

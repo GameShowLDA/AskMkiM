@@ -73,6 +73,6 @@ namespace Ask.Core.Shared.Entity.Devices
     public IDeviceProtocol DeviceProtocol { get; set; }
 
     [NotMapped]
-    public MultimeterTypeMode TypeMode { get; set; }
+    public MultimeterTypeMode TypeMode { get ; set; }
   }
 }

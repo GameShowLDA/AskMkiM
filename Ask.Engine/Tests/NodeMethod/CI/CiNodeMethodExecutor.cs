@@ -87,7 +87,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                 type = ShowMessageModel.MessageType.Error;
               }
 
-              return type == ShowMessageModel.MessageType.Success;
+              return type == ShowMessageModel.MessageType.Success ? true : false;
 
             }, protocolUI);
           }

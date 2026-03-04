@@ -1,4 +1,10 @@
-﻿namespace Ask.Core.Shared.Metadata.View
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Ask.Core.Shared.Metadata.View
 {
   public interface IUsbMonitorView
   {
@@ -11,16 +17,16 @@
     /// <summary>
     /// Останавливает сервис мониторинга USB.
     /// </summary>
-    void StopUsbMonitoring();
+    public void StopUsbMonitoring();
 
     /// <summary>
     /// Текущее состояние прав администратора.
     /// </summary>
-    bool AdminRights { get; set; }
+    public bool AdminRights { get; set; }
 
     /// <summary>
     /// Событие изменения прав администратора.
     /// </summary>
-    event EventHandler<bool> AdminRightsChanged;
+    public event EventHandler<bool> AdminRightsChanged;
   }
 }

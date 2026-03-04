@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace UI.Windows.WpfDocking.Internal.Windows
+namespace UI.Windows.WpfDocking.Windows
 {
   internal abstract class DragHandlerBase
   {

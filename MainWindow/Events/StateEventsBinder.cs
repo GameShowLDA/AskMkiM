@@ -1,11 +1,13 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.View;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
+using MainWindowProgram.Services;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;

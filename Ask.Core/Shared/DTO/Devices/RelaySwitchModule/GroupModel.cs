@@ -1,4 +1,10 @@
-﻿namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {
   /// <summary>
   /// Модель данных, содержащая все части цепей в одной цепи.

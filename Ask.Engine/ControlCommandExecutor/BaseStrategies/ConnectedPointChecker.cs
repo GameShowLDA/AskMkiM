@@ -3,12 +3,16 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using System.Text;
 using static Ask.LogLib.LoggerUtility;
+using System.Linq;
+using System.Text;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -269,13 +273,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fragmentStrings = fragments.Select(fragment =>
       {
-        var points = fragment.PointModels.Select(p =>
-        {
-          var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
-          return $"{p.Mnemonic}{address}";
-        });
+          var points = fragment.PointModels.Select(p =>
+          {
+            var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
+            return $"{p.Mnemonic}{address}";
+          });
 
-        return string.Join(",", points);
+          return string.Join(",", points);
       });
 
       return $"*{string.Join("**", fragmentStrings)}*";

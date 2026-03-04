@@ -1,4 +1,4 @@
-﻿namespace UI.Windows.WpfDocking.Internal
+﻿namespace UI.Windows.WpfDocking
 {
   internal static class BooleanBoxes
   {

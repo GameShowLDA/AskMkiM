@@ -1,11 +1,15 @@
 ﻿using Ask.Core.Shared.DTO.Devices;
+using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace UI.Controls.AdminPanel
 {
@@ -673,7 +677,7 @@ namespace UI.Controls.AdminPanel
 
         await SendUdpAsync(command, ip);
       }
-      catch (Exception)
+      catch (Exception e)
       {
         AddConsoleLine("Incorrect IP", Brushes.Red);
       }

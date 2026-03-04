@@ -112,7 +112,7 @@ namespace Ask.Engine.Tests.Metrology
         await meterDevice.AcwManger.Measure.MeasureAsync(param, LowerBound, UpperBound);
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
-        var answer = result < LowerBound || result > UpperBound;
+        var answer = (result >= LowerBound && result <= UpperBound) ? false : true;
         var err = result - param;
         Measurements.Add(err);
 

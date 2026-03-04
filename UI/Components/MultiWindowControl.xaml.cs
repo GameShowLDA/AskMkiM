@@ -1,5 +1,7 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -11,8 +13,10 @@ using System.Windows.Media;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls;
+using UI.Controls.Runner;
 using UI.Controls.TextEditor;
 using static Ask.LogLib.LoggerUtility;
+using static UI.Components.Invoke.OpenFileButton;
 using Application = System.Windows.Application;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -32,7 +36,7 @@ namespace UI.Components
     /// Список пользовательских элементов управления, соответствующих открытым вкладкам. Каждый элемент управления представляет собой экземпляр <see cref="UserControl"/>.
     /// </summary>
     internal List<UserControl> userControls = new List<UserControl>();
-
+    
     public IRunService RunService => MultiEditor.RunService;
 
     public IEditorDocumentService EditorDocumentService => MultiEditor.EditorDocumentService;

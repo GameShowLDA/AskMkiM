@@ -67,7 +67,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
       try
       {
-        double result = await _measurement.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
+        double result = await _measurement.MeasureDCVoltageAsync(param, rangeFrom , rangeTo);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения постоянного напряжения", $"{result}В", result >= 0, 2, userMessageService);
 

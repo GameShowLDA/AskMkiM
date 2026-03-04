@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
@@ -35,7 +36,7 @@ namespace UI.Components
     /// </summary>
     public ChoiceDevice PartDataControl;
 
-    private bool _isHasDevice = false;
+    bool _isHasDevice = false;
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceSelectorPanel"/>.

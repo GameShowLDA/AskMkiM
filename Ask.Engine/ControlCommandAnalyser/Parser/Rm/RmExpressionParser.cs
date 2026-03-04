@@ -420,7 +420,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
             result.Add(new RmPairModel
             {
               OkPoint = leftPtr++.ToString(),
-              Synonym = middle,
+              Synonym = middle, 
               AskInput = $"{rightPrefix}.{mid}.{rightNum}"
             });
           }

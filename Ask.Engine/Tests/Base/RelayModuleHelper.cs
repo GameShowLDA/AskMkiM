@@ -115,7 +115,7 @@ namespace Ask.Engine.Tests.Base
         cancellationToken.ThrowIfCancellationRequested();
         return await module.MeterManager.GetMeterResponseAsync();
       }
-      catch
+      catch 
       {
         return false;
       }

@@ -20,7 +20,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// <returns>
     /// Модель команды РМ, если она найдена; иначе <c>null</c>.
     /// </returns>
-    public static RmCommandModel CheckRm(BaseCommandModel model, int numberLine, string commandNumber, string mnemonic)
+    public static RmCommandModel CheckRm(BaseCommandModel model ,int numberLine, string commandNumber, string mnemonic)
     {
       var rmCommandModel = CommandsModel.GetRMModel();
 

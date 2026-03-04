@@ -1,11 +1,16 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using ICSharpCode.AvalonEdit;
 using Message;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using UI.Components.FileComparerControls;
+using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.Runner;

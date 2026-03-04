@@ -1,9 +1,19 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
 namespace Ask.UI.Shared.Converters.Layout
 {
+  using System;
+  using System.Globalization;
+  using System.Windows;
+  using System.Windows.Data;
+
   /// <summary>
   /// Преобразует значение <see cref="Slider"/> в пропорциональную ширину элемента UI.
   /// </summary>

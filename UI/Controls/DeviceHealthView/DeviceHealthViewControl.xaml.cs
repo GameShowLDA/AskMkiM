@@ -1,6 +1,7 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 
 namespace UI.Controls.DeviceHealthView
 {

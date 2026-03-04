@@ -56,9 +56,9 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         headerColor: ShowMessageModel.SuccessMessage.TitleColor,
         message: $"{commandBody}",
         type: ShowMessageModel.MessageType.Command)
-      {
-        IndentLevel = 1
-      };
+        {
+          IndentLevel = 1
+        };
 
       return userInteractionService.ShowMessageAsync(
         header,

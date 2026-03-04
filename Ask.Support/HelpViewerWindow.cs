@@ -32,8 +32,8 @@ namespace Ask.Support
     /// Если окно ещё не создано (<see cref="_helpWindow"/> равен <see langword="null"/>), метод ничего не сделает.
     /// Для типового сценария используй <see cref="LoadAndShow"/>.
     /// </remarks>
-    public static void Load(string page)
-    {
+    public static void Load(string page) 
+    { 
       _helpWindow?.Load($"http://localhost:{HelpServer.Port}" + page);
       _helpWindow?.SetTopMost(true);
       _helpWindow?.SetTopMost(false);

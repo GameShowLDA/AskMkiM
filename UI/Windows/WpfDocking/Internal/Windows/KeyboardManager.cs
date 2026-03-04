@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 
-namespace UI.Windows.WpfDocking.Internal.Windows
+namespace UI.Windows.WpfDocking.Windows
 {
   internal static class KeyboardManager
   {

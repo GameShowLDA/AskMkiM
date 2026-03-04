@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -69,9 +70,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           errorsMessage.Add(err);
           context.CommandManager.AddErrorMethod(
-            context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
-            chainStr,
-            context.MessageService.GetLastLineNumber(),
+            context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", 
+            chainStr, 
+            context.MessageService.GetLastLineNumber(), 
             context.CommandModel.FormattedStartLineNumber));
         }
 

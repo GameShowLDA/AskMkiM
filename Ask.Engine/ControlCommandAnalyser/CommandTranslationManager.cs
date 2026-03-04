@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -406,7 +407,7 @@ namespace Ask.Engine.ControlCommandAnalyser
           if (algorithmKey != null)
           {
             var algorithmKeysList = algorithmKey.ToList();
-            foreach (var key in algorithmKeysList)
+            foreach(var key in algorithmKeysList)
             {
               if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
               {

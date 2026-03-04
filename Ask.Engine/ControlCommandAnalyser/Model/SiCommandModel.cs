@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 
@@ -15,7 +16,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// <summary>
   /// Модель для команды СИ (сопротивление изоляции).
   /// </summary>
-  [AllowedKeys(К, С, П, Т, И, Г, Т1)]
+  [AllowedKeys(К,С,П,Т,И,Г,Т1)]
   [MeasurementDevice(MeasurementDevice.BreakdownTester)]
   public class SiCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel
   {

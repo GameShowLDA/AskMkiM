@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using UI.Controls.TextEditor;
 
 public class ExecutionGlyphMargin : AbstractMargin
 {
@@ -85,7 +86,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   public Brush BreakpointBrush { get; set; } = (Brush)Application.Current.Resources["RedColorSolidColorBrush"];
 
-  private readonly HashSet<int> _rightBreakpoints = new();
+  private readonly HashSet<int> _rightBreakpoints = new();        
   private readonly Dictionary<int, TextAnchor> _bpByCommand = new();
   private readonly ActiveCommandRangeBackgroundRenderer _activeRangeBackgroundRenderer;
   private readonly BreakpointRangeBackgroundRenderer _breakpointRangeBackgroundRenderer;
@@ -396,7 +397,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     double top = textView.GetVisualTopByDocumentLine(lineNumber);
     if (double.IsNaN(top)) return;
 
-    double centerY = top - verticalOffset + (lineHeight * 0.5);
+    double centerY = top - verticalOffset + lineHeight * 0.5;
     drawingContext.DrawEllipse(brush, null, new Point(MarkerCenterX, centerY), 8, 8);
   }
 
@@ -429,9 +430,9 @@ public class ExecutionGlyphMargin : AbstractMargin
     var transform = new TransformGroup();
     transform.Children.Add(new ScaleTransform(scale, scale));
     transform.Children.Add(new TranslateTransform(
-      MarkerCenterX - ((bounds.X + (bounds.Width * 0.5)) * scale),
-      centerY - ((bounds.Y + (bounds.Height * 0.5)) * scale)));
-
+      MarkerCenterX - (bounds.X + bounds.Width * 0.5) * scale,
+      centerY - (bounds.Y + bounds.Height * 0.5) * scale));
+     
     drawingContext.PushTransform(transform);
     drawingContext.DrawGeometry(brush, pen, ActiveArrowGeometry);
     drawingContext.Pop();
@@ -455,7 +456,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     {
       int d = text[i] - '0';
       if ((uint)d > 9) break;
-      value = (value * 10) + d;
+      value = value * 10 + d;
     }
     return value;
   }
@@ -1100,7 +1101,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       double top = textView.GetVisualTopByDocumentLine(margin[i] + 1);
       if (double.IsNaN(top)) continue;
 
-      double centerY = top - verticalOffset + (lineHeight * 0.5);
+      double centerY = top - verticalOffset + lineHeight * 0.5;
       DrawActiveArrow(drawingContext, brush, centerY);
     }
   }

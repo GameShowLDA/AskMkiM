@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using static Ask.Engine.ControlCommandExecutor.BaseStrategies.ConnectedPointChecker;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data

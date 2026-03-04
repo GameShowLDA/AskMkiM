@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
 {

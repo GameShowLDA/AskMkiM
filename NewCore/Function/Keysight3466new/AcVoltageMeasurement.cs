@@ -48,7 +48,7 @@ namespace NewCore.Function.Keysight3466new
         _device.TypeMode = MultimeterTypeMode.AcVoltage;
         return true;
       }
-
+      
       return false;
     }
 

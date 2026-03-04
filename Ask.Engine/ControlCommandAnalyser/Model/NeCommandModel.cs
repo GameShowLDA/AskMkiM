@@ -4,11 +4,12 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
-  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т,
+  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т, 
     //Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б,
     Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Н)]
   public class NeCommandModel : BaseCommandModel, IHasScheme

@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditor;
+using Utilities.Services;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.FileManager
