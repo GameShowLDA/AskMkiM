@@ -357,6 +357,9 @@
   <data name="translator.editor.tooltip.save.archive" xml:space="preserve">
     <value>Сохранить переведенный файл в архив</value>
   </data>
+  <data name="translator.editor.tooltip.save.source" xml:space="preserve">
+    <value>Сохранить исходный файл</value>
+  </data>
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>Режим ЭТ</value>
   </data>
