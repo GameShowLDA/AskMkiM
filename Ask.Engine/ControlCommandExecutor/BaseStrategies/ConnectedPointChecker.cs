@@ -48,7 +48,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errors, infos);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
+      if (context.TypeCommand != MeasurementTypeCommand.KC)
+      {
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
+      }
+      else
+      { 
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.ResistanceRelativeToFirstPoint, context.IsPolarityReversed));
+      }
 
       var newGroups = new List<GroupModel>();
 
@@ -234,7 +241,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       result.FirstFailureValue ??= firstFailureValue;
 
       // Если найдены разрывы, формируем новую цепь из точек с разрывами и повторяем проверку.
-      if (brokenPoints.Count > 0)
+      if (brokenPoints.Count > 0 && context.TypeCommand != MeasurementTypeCommand.KC)
       {
         var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1);
         result.Append(nextFragment);
@@ -273,13 +280,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fragmentStrings = fragments.Select(fragment =>
       {
-          var points = fragment.PointModels.Select(p =>
-          {
-            var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
-            return $"{p.Mnemonic}{address}";
-          });
+        var points = fragment.PointModels.Select(p =>
+        {
+          var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
+          return $"{p.Mnemonic}{address}";
+        });
 
-          return string.Join(",", points);
+        return string.Join(",", points);
       });
 
       return $"*{string.Join("**", fragmentStrings)}*";
