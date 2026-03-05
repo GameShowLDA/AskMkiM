@@ -883,6 +883,11 @@ namespace NewCore.FunctionAdapters.GPT
       /// <returns>Задача, представляющая завершение операции остановки измерения.</returns>
       public async Task StopMeasure()
       {
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return;
+        }
+
         await _acwMode.Measure.StopMeasure();
       }
 
