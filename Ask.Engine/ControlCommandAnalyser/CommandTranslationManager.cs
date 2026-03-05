@@ -194,7 +194,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Возвращает строки исходника и номер первой строки.
     /// </summary>
-    private List<string> GetSourceLines(BaseCommandModel model, out int startSourceLineNumber)
+    public List<string> GetSourceLines(BaseCommandModel model, out int startSourceLineNumber)
     {
       var sourceLines = new List<string>();
       startSourceLineNumber = 1;

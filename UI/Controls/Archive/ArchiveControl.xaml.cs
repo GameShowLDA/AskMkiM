@@ -1,4 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using Ask.Core.Shared.Metadata.Static;
+using System.Collections.ObjectModel;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -7,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using UI.Services.Archive;
 using Button = System.Windows.Controls.Button;
@@ -25,9 +29,9 @@ namespace UI.Controls.Archive
   {
     private static readonly string[] ArchivesFolderCandidates = new[]
     {
-      System.IO.Path.Combine(@"D:\AskMkiM\Bin", "Archives"),
-      Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Archives"),
-      Path.Combine(Directory.GetCurrentDirectory(), "Archives"),
+      //System.IO.Path.Combine(@"D:\AskMkiM\Bin", "Archives"),
+      Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory),
+      Path.Combine(Directory.GetCurrentDirectory(), FileLocations.ArchiveDirectory),
     };
 
     private readonly Dictionary<string, IReadOnlyList<ArchiveEntryInfo>> _archiveEntriesCache =
@@ -320,7 +324,7 @@ namespace UI.Controls.Archive
       catch (Exception ex)
       {
         archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Ошибка чтения архива."));
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -616,7 +620,7 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -646,7 +650,7 @@ namespace UI.Controls.Archive
       CreateArchiveMenuItem.Visibility = isRoot ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
-      AddFileToArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      //AddFileToArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
 
@@ -667,26 +671,43 @@ namespace UI.Controls.Archive
 
     private async void CreateArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
-      try
+      var suggestedArchiveName = "new_archive";
+      while (true)
       {
-        var archiveName = PromptForArchiveName();
+        var archiveName = PromptForArchiveName(suggestedArchiveName);
         if (string.IsNullOrWhiteSpace(archiveName))
         {
           return;
         }
 
-        lock (_archiveManagerSync)
-        {
-          _archiveManager.CreateArchive(archiveName);
-        }
+        suggestedArchiveName = archiveName;
 
-        _archiveEntriesCache.Clear();
-        _manifestCache.Clear();
-        await RefreshTreePreservingStateAsync(preservePanels: true);
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        try
+        {
+          string createdArchivePath;
+          lock (_archiveManagerSync)
+          {
+            createdArchivePath = _archiveManager.CreateArchive(archiveName);
+          }
+
+          _archiveEntriesCache.Clear();
+          _manifestCache.Clear();
+          await RefreshTreePreservingStateAsync(preservePanels: true);
+
+          var archiveDisplayName = Path.GetFileNameWithoutExtension(createdArchivePath);
+          ShowArchiveNotification(
+            "Создание архива",
+            $"Архив '{archiveDisplayName}' успешно создан.",
+            NotificationType.Success);
+          return;
+        }
+        catch (Exception ex)
+        {
+          ShowArchiveNotification(
+            "Создание архива",
+            GetUserFriendlyCreateArchiveErrorMessage(ex),
+            NotificationType.Error);
+        }
       }
     }
 
@@ -706,7 +727,7 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Открытие архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -721,6 +742,7 @@ namespace UI.Controls.Archive
       var openFileDialog = new OpenFileDialog
       {
         Title = "Выберите файл для добавления",
+        Filter = "OPKW file (*.opkw)|*.opkw",
         CheckFileExists = true,
         Multiselect = false,
       };
@@ -744,7 +766,7 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Добавление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -790,7 +812,7 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Удаление архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -812,7 +834,7 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Открытие файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -852,11 +874,11 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Удаление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
-    private string PromptForArchiveName()
+    private string PromptForArchiveName(string suggestedArchiveName)
     {
       var dialog = new Window
       {
@@ -866,11 +888,23 @@ namespace UI.Controls.Archive
         ResizeMode = ResizeMode.NoResize,
         SizeToContent = SizeToContent.WidthAndHeight,
         ShowInTaskbar = false,
+        WindowStyle = WindowStyle.None,
+        AllowsTransparency = true,
+        Background = Brushes.Transparent,
+      };
+
+      var shell = new Border
+      {
+        Background = GetThemeBrush("IsCheckedColorSolidColorBrush", Color.FromRgb(230, 232, 236)),
+        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromRgb(120, 130, 140)),
+        BorderThickness = new Thickness(1),
+        CornerRadius = new CornerRadius(20),
+        Padding = new Thickness(20),
       };
 
       var layout = new Grid
       {
-        Margin = new Thickness(12),
+        MinWidth = 420,
       };
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -878,51 +912,74 @@ namespace UI.Controls.Archive
 
       var label = new TextBlock
       {
-        Text = "Введите название архива:",
+        Text = "Введите название нового архива:",
+        Margin = new Thickness(0, 0, 0, 4),
+        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
+        FontFamily = Application.Current?.Resources["WinstonMedium"] as FontFamily,
+        FontSize = 16,
+        TextWrapping = TextWrapping.Wrap,
       };
 
-      var inputBox = new System.Windows.Controls.TextBox
+      var inputBorder = new Border
       {
-        MinWidth = 320,
+        Background = GetThemeBrush("PrimarySolidColorBrush", Color.FromRgb(239, 239, 224)),
+        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromArgb(120, 0, 0, 0)),
+        BorderThickness = new Thickness(1),
+        CornerRadius = new CornerRadius(10),
         Margin = new Thickness(0, 8, 0, 0),
-        Text = "new_archive",
+        Padding = new Thickness(10, 8, 10, 8),
       };
+
+      var inputBox = new TextBox
+      {
+        MinWidth = 360,
+        Background = Brushes.Transparent,
+        BorderThickness = new Thickness(0),
+        Text = string.IsNullOrWhiteSpace(suggestedArchiveName) ? "new_archive" : suggestedArchiveName,
+        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
+        FontSize = 15,
+      };
+
+      inputBorder.Child = inputBox;
 
       var buttonsPanel = new StackPanel
       {
         Orientation = Orientation.Horizontal,
-        HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+        HorizontalAlignment = HorizontalAlignment.Right,
         Margin = new Thickness(0, 12, 0, 0),
       };
 
       var createButton = new Button
       {
         Content = "Создать",
-        MinWidth = 90,
+        MinWidth = 140,
         IsDefault = true,
+        Margin = new Thickness(0, 0, 8, 0),
       };
-      createButton.Click += (o, args) => dialog.DialogResult = true;
+      ApplyDialogButtonStyle(createButton);
+      createButton.Click += (_, _) => dialog.DialogResult = true;
 
       var cancelButton = new Button
       {
         Content = "Отмена",
-        MinWidth = 90,
+        MinWidth = 120,
         IsCancel = true,
-        Margin = new Thickness(8, 0, 0, 0),
       };
+      ApplyDialogButtonStyle(cancelButton);
 
       buttonsPanel.Children.Add(createButton);
       buttonsPanel.Children.Add(cancelButton);
 
       Grid.SetRow(label, 0);
-      Grid.SetRow(inputBox, 1);
+      Grid.SetRow(inputBorder, 1);
       Grid.SetRow(buttonsPanel, 2);
       layout.Children.Add(label);
-      layout.Children.Add(inputBox);
+      layout.Children.Add(inputBorder);
       layout.Children.Add(buttonsPanel);
-      dialog.Content = layout;
+      shell.Child = layout;
+      dialog.Content = shell;
 
-      dialog.Loaded += (o, args) =>
+      dialog.Loaded += (_, _) =>
       {
         inputBox.Focus();
         inputBox.SelectAll();
@@ -970,7 +1027,7 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -999,8 +1056,94 @@ namespace UI.Controls.Archive
       }
       catch (Exception ex)
       {
-        MessageBox.Show(Window.GetWindow(this), ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
+    }
+
+    private void ApplyDialogButtonStyle(Button button)
+    {
+      if (TryFindResource("ButtonStyleV10") is Style style)
+      {
+        button.Style = style;
+      }
+
+      button.Height = 44;
+      button.Padding = new Thickness(14, 6, 14, 6);
+      button.FontSize = 16;
+    }
+
+    private Brush GetThemeBrush(string key, Color fallbackColor)
+    {
+      if (TryFindResource(key) is Brush brush)
+      {
+        return brush;
+      }
+
+      if (Application.Current?.Resources[key] is Brush appBrush)
+      {
+        return appBrush;
+      }
+
+      return new SolidColorBrush(fallbackColor);
+    }
+
+    private void ShowArchiveNotification(string title, string message, NotificationType notificationType)
+    {
+      NotificationHostService.Instance.Show(title, message, notificationType);
+    }
+
+    private static string GetUserFriendlyCreateArchiveErrorMessage(Exception ex)
+    {
+      if (ex is InvalidOperationException invalidOperation &&
+          invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+      {
+        return "Архив с таким именем уже существует. Выберите другое имя.";
+      }
+
+      if (ex is ArgumentException)
+      {
+        return "Имя архива содержит недопустимые символы.";
+      }
+
+      if (ex is IOException ioException &&
+          ioException.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase))
+      {
+        return "Архив сейчас используется другим процессом. Повторите попытку.";
+      }
+
+      return "Не удалось создать архив.";
+    }
+
+    private static string GetUserFriendlyArchiveErrorMessage(Exception ex)
+    {
+      if (ex is InvalidOperationException invalidOperation &&
+          invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+      {
+        return "Файл или архив с таким именем уже существует.";
+      }
+
+      if (ex is FileNotFoundException)
+      {
+        return "Архив или файл не найден.";
+      }
+
+      if (ex is IOException ioException &&
+          ioException.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase))
+      {
+        return "Архив сейчас используется другим процессом. Повторите попытку.";
+      }
+
+      if (ex is InvalidDataException invalidDataException)
+      {
+        return invalidDataException.Message;
+      }
+
+      if (ex is ArgumentException argumentException && !string.IsNullOrWhiteSpace(argumentException.Message))
+      {
+        return argumentException.Message;
+      }
+
+      return "Не удалось выполнить операцию с архивом.";
     }
 
     private sealed class TreeRefreshState

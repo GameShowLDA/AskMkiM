@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Ask.Core.Shared.Metadata.Static;
+using System.IO;
 using System.IO.Compression;
 
 namespace UI.Services.Archive
@@ -6,8 +7,6 @@ namespace UI.Services.Archive
   public class ArchiveCreationService
   {
     private const string ArchiveExtension = ".apkw";
-    private const string MainOutputPath = @"D:\AskMkiM\Bin";
-    private const string ArchivesFolderName = "Archives";
 
     public string Create(string archiveName)
     {
@@ -17,7 +16,7 @@ namespace UI.Services.Archive
 
       if (File.Exists(archivePath))
       {
-        File.Delete(archivePath);
+        throw new InvalidOperationException($"Archive '{Path.GetFileName(archivePath)}' already exists.");
       }
 
       using (var archiveStream = new FileStream(archivePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
@@ -29,14 +28,15 @@ namespace UI.Services.Archive
       return archivePath;
     }
 
-    private static string EnsureArchivesDirectory()
+    private string EnsureArchivesDirectory()
     {
-      var archivesDirectoryPath = Path.Combine(MainOutputPath, ArchivesFolderName);
+      var baseDir = new DirectoryInfo(AppContext.BaseDirectory);
+      var archivesDirectoryPath = Path.Combine(baseDir.FullName, FileLocations.ArchiveDirectory);
       var directoryInfo = Directory.CreateDirectory(archivesDirectoryPath);
-
+     
       if ((directoryInfo.Attributes & FileAttributes.Hidden) == 0)
       {
-        directoryInfo.Attributes |= FileAttributes.Hidden;
+          directoryInfo.Attributes |= FileAttributes.Hidden;
       }
 
       return directoryInfo.FullName;

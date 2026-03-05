@@ -42,7 +42,8 @@ namespace UI.Services.Archive
 
       Close();
 
-      _archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+      // Keep the archive readable while allowing parallel update operations.
+      _archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
       _archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read, leaveOpen: false);
       OpenedArchivePath = fullArchivePath;
 
