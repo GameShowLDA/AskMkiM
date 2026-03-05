@@ -86,8 +86,32 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           errors.AddRange(result.Errors);
           infos.AddRange(result.Infos);
 
+          if (context.TypeCommand == MeasurementTypeCommand.KC)
+          {
+            foreach (var failedMeasurement in result.FailedMeasurements)
+            {
+              var error = BuildKsDisconnectedPointError(
+                failedMeasurement.Chain,
+                context.LowerLimit,
+                context.HigherLimit,
+                failedMeasurement.Value,
+                context.Unit);
+
+              errors.Add(error);
+
+              context.CommandManager.AddErrorMethod(
+                context.CommandModel.PointErrors.DisconnectChainError(
+                  $"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+                  error.Header,
+                  error.Message,
+                  context.CommandModel.StartLineNumber,
+                  context.CommandModel.FormattedStartLineNumber));
+
+              await context.MessageService.ShowMessageAsync(error);
+            }
+          }
           // Добавляем одну запись об ошибке на исходную цепь, если есть разрывы (фрагментов > 1).
-          if (result.Fragments.Count > 1)
+          else if (result.Fragments.Count > 1)
           {
             var chainStr = BuildDisconnectionDisplayString(result.Fragments);
 
@@ -205,6 +229,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               brokenPoints.Add(point);
               firstFailureValue ??= measured.Value;
+
+              if (context.TypeCommand == MeasurementTypeCommand.KC)
+              {
+                result.FailedMeasurements.Add(new FailedMeasurement(chainStr, measured.Value));
+              }
             }
             else
             {
@@ -292,11 +321,37 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       return $"*{string.Join("**", fragmentStrings)}*";
     }
 
+    private static ShowMessageModel BuildKsDisconnectedPointError(string chain, double lowerLimit, double higherLimit, double value, string unit)
+    {
+      var actualUnit = string.IsNullOrEmpty(unit) ? "Ом" : unit;
+      var rangeText = higherLimit != -1
+        ? $"{lowerLimit}-{higherLimit} {actualUnit}"
+        : $"{lowerLimit}<{actualUnit}";
+
+      return new ShowMessageModel($"{chain} ({rangeText})", message: $"Rизм.= {value} {actualUnit}", type: ShowMessageModel.MessageType.Error)
+      {
+        IndentLevel = 2
+      };
+    }
+
+    private sealed class FailedMeasurement
+    {
+      public FailedMeasurement(string chain, double value)
+      {
+        Chain = chain;
+        Value = value;
+      }
+
+      public string Chain { get; }
+      public double Value { get; }
+    }
+
     private sealed class ChainProcessingResult
     {
       public List<ChainModel> Fragments { get; } = new();
       public List<ShowMessageModel> Errors { get; } = new();
       public List<ShowMessageModel> Infos { get; } = new();
+      public List<FailedMeasurement> FailedMeasurements { get; } = new();
       public double? FirstFailureValue { get; set; }
 
       public void Append(ChainProcessingResult other)
@@ -307,6 +362,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         Fragments.AddRange(other.Fragments);
         Errors.AddRange(other.Errors);
         Infos.AddRange(other.Infos);
+        FailedMeasurements.AddRange(other.FailedMeasurements);
         FirstFailureValue ??= other.FirstFailureValue;
       }
     }
