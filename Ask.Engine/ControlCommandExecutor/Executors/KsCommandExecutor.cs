@@ -147,7 +147,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ContinuityManager.CheckContinuityAsync(value) - errorResistance;
+        answer = await meter.ContinuityManager.CheckContinuityAsync(value, firstValue, secondValue);
+
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          answer -= errorResistance;
+        }
 
         if (answer < 0)
         {

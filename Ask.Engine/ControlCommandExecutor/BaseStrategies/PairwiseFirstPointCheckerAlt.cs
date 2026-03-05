@@ -63,7 +63,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var errorMessageModels = new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: "Rизм = Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
             errorPoint = true;
 
+            await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Результат измерений"));
             await context.MessageService.ShowMessageAsync(errorMessageModels);
+
             errorsMessgae.Add(errorMessageModels);
             await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
             context.CommandManager.AddErrorMethod(
@@ -75,13 +77,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           else
           {
             var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
-            if (DeviceDisplayConfig.GetMeasurementResultsVisibility())
+            if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
             {
-              await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: $"Rизм = {Rt1:F5} Ом", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
+              await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({_basePoint.Mnemonic}{machineAdress})", message: $"{Rt1:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
             }
           }
 
-          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
           {
@@ -97,6 +99,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               var errorMessageModels = new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
               errorPoint = true;
 
+              await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"));
               await context.MessageService.ShowMessageAsync(errorMessageModels);
               errorsMessgae.Add(errorMessageModels);
               context.CommandManager.AddErrorMethod(
@@ -110,13 +113,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             else
             {
               var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
-              if (DeviceDisplayConfig.GetMeasurementResultsVisibility())
+              if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
               {
-                await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Rизм = {Rt2:F5} Ом", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
+                await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({point.Mnemonic}{machineAdress})", message: $"{Rt2:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
               }
             }
 
-            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
@@ -136,6 +139,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 errorMessageModels.IndentLevel = 1;
                 errorPoint = true;
 
+                await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"));
                 await context.MessageService.ShowMessageAsync(errorMessageModels);
                 context.CommandManager.AddErrorMethod(
                   EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
@@ -149,15 +153,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
               else
               {
-                await context.MessageService.ShowMessageAsync(new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}", message: $"{Rt:F5} Ом") { IndentLevel = 1 });
+                if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
+                {
+                  await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond})", message: $"{Rt:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
+                }
               }
             }
 
-            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
             if (!errorPoint)
             {
-              await context.MessageService.ShowMessageAsync(new ShowMessageModel("Итог измерений"));
-
               double Rx = 0;
               if (!errorPoint)
               {
@@ -198,17 +203,19 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               var succes = result >= LowerBound && result <= UpperBound;
 
-              var error = new ShowMessageModel(
-                $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond} ({LowerBound} - {UpperBound} Ом)",
+              var message = new ShowMessageModel(
+                $"Результат измерения сопротивления ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond} ({LowerBound} - {UpperBound} Ом)",
                 message: $"Rизм = {result:F5} Ом",
-                type: succes ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)
-              { IndentLevel = 3 };
+                type: succes ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error);
 
-              await context.MessageService.ShowMessageAsync(error);
+              if (DeviceDisplayConfig.GetMeasurementResultsVisibility() || !succes)
+              {
+                await context.MessageService.ShowMessageAsync(message);
+              }
 
               if (!succes)
               {
-                errorsMessgae.Add(error);
+                errorsMessgae.Add(message);
                 context.CommandManager.AddErrorMethod(
                   EhtErrors.ResistanceOutOfRange($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
                   result,
@@ -219,7 +226,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   context.MessageService.GetLastLineNumber(),
                   baseCommandModel.FormattedStartLineNumber));
 
-                await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {error.ToString()}"));
+                await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {message.ToString()}"));
               }
 
               if (context.IsProtocolAttribute)
@@ -238,17 +245,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
     static private async Task ConnectToBusAAndBAsync(IUserInteractionService userMessageService, PointModel pointModel)
     {
-      await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {pointModel.ToString()} к шинам А и В"), IsBlockStart: true);
       var relayModule = EquipmentService.GetModuleByPoint(pointModel);
-
-      await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, pointModel.PointNumber, userMessageService);
-      await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, pointModel.PointNumber, userMessageService);
+      await relayModule.PointManager.ConnectRelayAsync(BusPoint.AB, pointModel.PointNumber, userMessageService);
     }
 
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
     {
       var fastMeter = EquipmentService.GetFastMeterOrThrow(userMessageService);
-      await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
       var result = await fastMeter.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
       return result;
     }

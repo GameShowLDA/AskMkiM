@@ -94,6 +94,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (e.Button is ExecutionControlButton.StepOver or ExecutionControlButton.StepInto)
         {
+          if (e.Button == ExecutionControlButton.StepOver)
+          {
+            StepControlManager.RequestStepOverUntilNextControlCommand();
+          }
+          else
+          {
+            StepControlManager.SetStepIntoMode();
+          }
+
           tcs.TrySetResult(false);
         }
       };

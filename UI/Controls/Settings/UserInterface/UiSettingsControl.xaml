@@ -6,8 +6,25 @@
              xmlns:local="clr-namespace:UI.Controls.Settings.UserInterface"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:Components ="clr-namespace:UI.Components"
+             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Section_Title" Key="settings.userinterface.section.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Language_Title" Key="settings.userinterface.language.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Language_Description" Key="settings.userinterface.language.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Title" Key="settings.userinterface.theme.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Description" Key="settings.userinterface.theme.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Title" Key="settings.userinterface.syntaxHighlighting.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Description" Key="settings.userinterface.syntaxHighlighting.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Title" Key="settings.userinterface.highlightsGroup.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Description" Key="settings.userinterface.highlightsGroup.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Title" Key="settings.userinterface.commandBodyBackground.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Description" Key="settings.userinterface.commandBodyBackground.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Title" Key="settings.userinterface.chainPointBodyBackground.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Description" Key="settings.userinterface.chainPointBodyBackground.description" />
+    </UserControl.Resources>
+
     <Border 
         Style="{DynamicResource SettingPanelStyle}"
         Margin="15,10" 
@@ -26,7 +43,7 @@
 
 
                 <TextBlock 
-                 Text="Интерфейс" 
+                 Text="{Binding Source={StaticResource Settings_UserInterface_Section_Title}, Path=Value}" 
                  Padding="10,10"
                  Style="{DynamicResource SettingsTitleStyle}"
                  Grid.Row="0"/>
@@ -74,9 +91,9 @@
                 </Grid>
             </Grid>
 
-            <WrapPanel Orientation="Horizontal" Grid.Row="1">
-                <WrapPanel.Style>
-                    <Style TargetType="WrapPanel">
+            <StackPanel Grid.Row="1">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
@@ -84,35 +101,110 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </WrapPanel.Style>
+                </StackPanel.Style>
 
-                <Components:SettingsCardSelect
-                    Margin="10,10"
-                    x:Name="LanguageSelect"
-                    Title="Язык"
-                    Description="Выберите язык интерфейса, на котором будут надписи и сообщения"
-                    DisplayMemberPath="Title"
-                    SelectedValuePath="Key"/>
-
-
-                <Components:SettingsCardSelect
-                    Margin="10,10"
-                    x:Name="ThemeSelect"
-                    Title="Тема приложения"
-                    Description="Выберите тему оформления интерфейса, которая будет использоваться в приложении"
-                    DisplayMemberPath="Title"
-                    Visibility="Visible"
-                    SelectedValuePath="Key"/>
-
-                <Components:SettingsCard
-                        Title="Подсветка синтаксиса"
-                        Description="Включает или отключает подсветку синтаксиса в редакторе протокола."
-                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                <WrapPanel Orientation="Horizontal">
+                    <Components:SettingsCardSelect
                         Margin="10,10"
-                        VerticalAlignment="Top"
-                        x:Name="SyntaxHighlighting"/>
+                        x:Name="LanguageSelect"
+                        Title="{Binding Source={StaticResource Settings_UserInterface_Language_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_UserInterface_Language_Description}, Path=Value}"
+                        DisplayMemberPath="Title"
+                        SelectedValuePath="Key"/>
+
+
+                    <Components:SettingsCardSelect
+                        Margin="10,10"
+                        x:Name="ThemeSelect"
+                        Title="{Binding Source={StaticResource Settings_UserInterface_Theme_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_UserInterface_Theme_Description}, Path=Value}"
+                        DisplayMemberPath="Title"
+                        Visibility="Visible"
+                        SelectedValuePath="Key"/>
+                </WrapPanel>
+
+                <Border Margin="10,0,10,10"
+                        HorizontalAlignment="Left"
+                        Padding="10"
+                        Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                        Style="{DynamicResource SettingCardStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Source={StaticResource Settings_UserInterface_HighlightsGroup_Title}, Path=Value}"
+                                       Style="{DynamicResource SettingsTitleStyle}"
+                                       Padding="0,4,0,4"
+                                       Margin="0,0,6,0"/>
+
+                            <Icons:ArrowButton x:Name="ToggleHighlightsSettingsButton"
+                                               Grid.Column="1"
+                                               HorizontalAlignment="Left"
+                                               Width="30"
+                                               Height="30"
+                                               Margin="0"
+                                               ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                               ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                               ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                               ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
+                                               VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <StackPanel Grid.Row="1">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=ToggleHighlightsSettingsButton, Path=IsArrowUp}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <TextBlock Text="{Binding Source={StaticResource Settings_UserInterface_HighlightsGroup_Description}, Path=Value}"
+                                       Style="{DynamicResource SettingsDescriptionStyle}"
+                                       Margin="0,0,0,8"/>
+
+                            <WrapPanel Orientation="Horizontal">
+                                <Components:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_SyntaxHighlighting_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_SyntaxHighlighting_Description}, Path=Value}"
+                                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="SyntaxHighlighting"/>
+
+                                <Components:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Description}, Path=Value}"
+                                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="CommandBodyBackgroundHighlighting"/>
+
+                                <Components:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_ChainPointBodyBackground_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_ChainPointBodyBackground_Description}, Path=Value}"
+                                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                                        Margin="0,6,0,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="ChainPointBodyBackgroundHighlighting"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
                 
-            </WrapPanel>
+            </StackPanel>
         </Grid>
     </Border>
 </UserControl>

@@ -107,9 +107,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       // Подключение к устройствам (МКР + УКШ + мультиметр)
       await RelayModuleHelper.ConnectIfNeededAsync(_module, _userInteractionService, cancellationToken);
-
       await RelayModuleHelper.ConnectIfNeededAsync(_busSwitcher, _userInteractionService, cancellationToken);
-
       await RelayModuleHelper.ConnectIfNeededAsync(_fastMeter, _userInteractionService, cancellationToken);
 
       await _userInteractionService.ShowMessageAsync(
@@ -149,14 +147,11 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       double result = 0;
 
-      // Основной цикл теста
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
-        // Коммутируем точку
-        await RelayModuleHelper.PointConnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
-        await RelayModuleHelper.PointConnectAsync(_module, BusPoint.B, i, _userInteractionService, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        await _module.PointManager.ConnectRelayAsync(BusPoint.AB, i, _userInteractionService);
 
-        // Измеряем сопротивление ПОСЛЕ коммутации точки
         result = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
             _userInteractionService,
@@ -165,9 +160,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
             _module,
             data.Param);
 
-        // Отключаем точку
-        await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.A, i, _userInteractionService, cancellationToken);
-        await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.B, i, _userInteractionService, cancellationToken);
+        await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, i, _userInteractionService);
       }
     }
 
@@ -180,8 +173,12 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken)
     {
-      if (!needReset) return;
-      await RelayModuleHelper.ResetModule(_userInteractionService, _userInteractionService, _module);
+      if (!needReset)
+      {
+        return;
+      }
+
+      await _module.ConnectableManager.ResetAsync();
       await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);

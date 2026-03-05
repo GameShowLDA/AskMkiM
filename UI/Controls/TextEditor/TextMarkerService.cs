@@ -105,6 +105,7 @@ namespace UI.Controls.TextEditor
 
       _colorizer = new TextMarkerColorizer(markers);
       editor.TextArea.TextView.LineTransformers.Add(_colorizer);
+      EnsureColorizerIsLast();
     }
 
     /// <summary>
@@ -125,17 +126,24 @@ namespace UI.Controls.TextEditor
     /// <param name="backgroundColor">Цвет фона подсветки.</param>
     public void AddMarker(int startOffset, int length, Color backgroundColor)
     {
+      if (!TryNormalizeRange(ref startOffset, ref length))
+        return;
+
       var marker = new TextMarker(startOffset, length)
       {
         BackgroundColor = backgroundColor,
       };
 
       markers.Add(marker);
+      EnsureColorizerIsLast();
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
     public void AddStyledMarker(int startOffset, int length, Color? foreground, FontWeight? weight = null)
     {
+      if (!TryNormalizeRange(ref startOffset, ref length))
+        return;
+
       var marker = new TextMarker(startOffset, length)
       {
         ForegroundColor = foreground,
@@ -144,7 +152,42 @@ namespace UI.Controls.TextEditor
       };
 
       markers.Add(marker);
+      EnsureColorizerIsLast();
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    private bool TryNormalizeRange(ref int startOffset, ref int length)
+    {
+      if (editor.Document == null || length <= 0)
+        return false;
+
+      if (startOffset < 0 || startOffset >= editor.Document.TextLength)
+        return false;
+
+      int maxLength = editor.Document.TextLength - startOffset;
+      if (maxLength <= 0)
+        return false;
+
+      if (length > maxLength)
+        length = maxLength;
+
+      return length > 0;
+    }
+
+    /// <summary>
+    /// Держит colorizer маркеров последним в конвейере,
+    /// чтобы стилевые маркеры могли перекрывать синтаксическую раскраску.
+    /// </summary>
+    private void EnsureColorizerIsLast()
+    {
+      if (_colorizer == null)
+        return;
+
+      var transformers = editor.TextArea.TextView.LineTransformers;
+      if (transformers.Contains(_colorizer))
+        transformers.Remove(_colorizer);
+
+      transformers.Add(_colorizer);
     }
 
 
@@ -197,7 +240,12 @@ namespace UI.Controls.TextEditor
       {
         foreach (var marker in _markers.FindOverlappingSegments(line.Offset, line.Length))
         {
-          ChangeLinePart(marker.StartOffset, marker.EndOffset, element =>
+          int start = Math.Max(marker.StartOffset, line.Offset);
+          int end = Math.Min(marker.EndOffset, line.EndOffset);
+          if (end <= start)
+            continue;
+
+          ChangeLinePart(start, end, element =>
           {
             if (marker.ForegroundColor.HasValue)
             {

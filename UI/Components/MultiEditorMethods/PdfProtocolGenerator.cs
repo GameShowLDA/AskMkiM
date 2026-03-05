@@ -1,4 +1,6 @@
-﻿using MigraDoc.DocumentObjectModel;
+﻿using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
 using System.Diagnostics;
 using System.IO;
@@ -16,7 +18,7 @@ namespace UI.Components.MultiEditorMethods
       var historyPath = Path.Combine(parent2.FullName, "History");
       var dateFolderName = DateTime.Now.ToString("yyyy-MM-dd");
       var datePath = Path.Combine(historyPath, dateFolderName);
-      var fileName = $"{programName}_{DateTime.Now.ToString("HHmmss")}.pdf";
+      var fileName = $"{programName}_{DateTime.Now:HHmmss}.pdf";
       var fullFilePath = Path.Combine(datePath, fileName);
 
       // Создаём документ
@@ -42,7 +44,10 @@ namespace UI.Components.MultiEditorMethods
       }
       catch (Exception ex)
       {
-        Message.MessageBoxCustom.Show("Ошибка при сохранении PDF: " + ex.Message);
+        NotificationHostService.Instance.Show(
+          "Ошибка сохранения PDF",
+          ex.Message,
+          NotificationType.Error);
         LogError("Ошибка при сохранении PDF: " + ex.Message);
       }
     }

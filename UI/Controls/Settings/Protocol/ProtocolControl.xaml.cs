@@ -17,6 +17,9 @@ namespace UI.Controls.Settings.Protocol
     /// Используется как эталон для сравнения с текущими значениями UI.
     /// </summary>
     private SettingsProtocolModel _baseProtocolModel { get; set; }
+    private bool _isInitialized;
+    private bool _hasProtocolChanges;
+    private bool _hasDeviceDisplayChanges;
 
     /// <summary>
     /// Создаёт экземпляр контрола протокола.
@@ -40,60 +43,38 @@ namespace UI.Controls.Settings.Protocol
     private void ProtocolControl_Loaded(object sender, RoutedEventArgs e)
     {
       _baseProtocolModel = ProtocolConfig.GetProtocolModel();
+      DeviceDisplaySettingsCon.SetBaseModel();
       DefalultData();
+      DeviceDisplaySettingsCon.DefalultData();
 
-      // DeviceInfo.CheckedChanged += CheckedChanged;
-      AutoSave.CheckedChanged += CheckedChanged;
-      AutoPrint.CheckedChanged += CheckedChanged;
-      OperationTime.CheckedChanged += CheckedChanged;
-      ProtocolFromPO.CheckedChanged += CheckedChanged;
-      ProtocolGeneration.CheckedChanged += CheckedChanged;
-      Header.CheckedChanged += CheckedChanged;
-      BaseTextProtocol.TextChanged += (s, ev) => CheckedChanged(s, true);
-      BaseTextProtocolErrors.TextChanged += (s, ev) => CheckedChanged(s, true);
-
-      Success.PreviewMouseDown += Success_PreviewMouseDown;
-      Error.PreviewMouseDown += Error_PreviewMouseDown;
-
-      Error.Visibility = Visibility.Collapsed;
-      Success.Visibility = Visibility.Collapsed;
-      HasUnsavedChanges = false;
-
-      DeviceDisplaySettingsCon.DeviceDisplayModelChanged += DeviceDisplaySettingsCon_DeviceDisplayModelChanged;
-
-      if (BaseTextProtocol.Text != ProtocolConfig.GetBaseTextProtocol())
+      if (!_isInitialized)
       {
-        RestartClearProtocol.Visibility = Visibility.Visible;
-      }
-      else
-      {
-        RestartClearProtocol.Visibility = Visibility.Collapsed;
+        AutoSave.CheckedChanged += CheckedChanged;
+        AutoPrint.CheckedChanged += CheckedChanged;
+        OperationTime.CheckedChanged += CheckedChanged;
+        ProtocolFromPO.CheckedChanged += CheckedChanged;
+        ProtocolGeneration.CheckedChanged += CheckedChanged;
+        Header.CheckedChanged += CheckedChanged;
+        BaseTextProtocol.TextChanged += (s, ev) => CheckedChanged(s, true);
+        BaseTextProtocolErrors.TextChanged += (s, ev) => CheckedChanged(s, true);
+
+        Success.PreviewMouseDown += Success_PreviewMouseDown;
+        Error.PreviewMouseDown += Error_PreviewMouseDown;
+        DeviceDisplaySettingsCon.DeviceDisplayModelChanged += DeviceDisplaySettingsCon_DeviceDisplayModelChanged;
+
+        _isInitialized = true;
       }
 
-      if (BaseTextProtocolErrors.Text != ProtocolConfig.GetBaseTextErrorsProtocol())
-      {
-        RestartClearProtocolErrors.Visibility = Visibility.Visible;
-      }
-      else
-      {
-        RestartClearProtocolErrors.Visibility = Visibility.Collapsed;
-      }
+      _hasProtocolChanges = false;
+      _hasDeviceDisplayChanges = false;
+      UpdateUnsavedState();
+      UpdateTemplateResetButtonsVisibility();
     }
 
     private void DeviceDisplaySettingsCon_DeviceDisplayModelChanged(bool changed)
     {
-      if (changed)
-      {
-        Error.Visibility = Visibility.Visible;
-        Success.Visibility = Visibility.Visible;
-        HasUnsavedChanges = true;
-      }
-      else
-      {
-        Error.Visibility = Visibility.Collapsed;
-        Success.Visibility = Visibility.Collapsed;
-        HasUnsavedChanges = false;
-      }
+      _hasDeviceDisplayChanges = changed;
+      UpdateUnsavedState();
     }
 
     /// <summary>
@@ -106,13 +87,13 @@ namespace UI.Controls.Settings.Protocol
       DeviceDisplaySettingsModel model = DeviceDisplaySettingsCon.GetModel();
 
       DeviceDisplayConfig.SaveSettings(model);
+      DeviceDisplaySettingsCon.SetBaseModel();
       ProtocolConfig.SaveProtocolModel(GetModel());
-
       _baseProtocolModel = ProtocolConfig.GetProtocolModel();
-
-      Error.Visibility = Visibility.Collapsed;
-      Success.Visibility = Visibility.Collapsed;
-      HasUnsavedChanges = false;
+      _hasProtocolChanges = false;
+      _hasDeviceDisplayChanges = false;
+      UpdateUnsavedState();
+      UpdateTemplateResetButtonsVisibility();
     }
 
     /// <summary>
@@ -122,11 +103,13 @@ namespace UI.Controls.Settings.Protocol
     private void Error_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       DefalultData();
+      DeviceDisplaySettingsCon.SetBaseModel();
       DeviceDisplaySettingsCon.DefalultData();
 
-      Error.Visibility = Visibility.Collapsed;
-      Success.Visibility = Visibility.Collapsed;
-      HasUnsavedChanges = false;
+      _hasProtocolChanges = false;
+      _hasDeviceDisplayChanges = false;
+      UpdateUnsavedState();
+      UpdateTemplateResetButtonsVisibility();
     }
 
     /// <summary>
@@ -135,36 +118,30 @@ namespace UI.Controls.Settings.Protocol
     /// </summary>
     private void CheckedChanged(object? sender, bool e)
     {
-      if (!ProtocolEquals(_baseProtocolModel, GetModel()))
-      {
-        Error.Visibility = Visibility.Visible;
-        Success.Visibility = Visibility.Visible;
-        HasUnsavedChanges = true;
-      }
-      else
-      {
-        Error.Visibility = Visibility.Collapsed;
-        Success.Visibility = Visibility.Collapsed;
-        HasUnsavedChanges = false;
-      }
+      _hasProtocolChanges = !ProtocolEquals(_baseProtocolModel, GetModel());
+      UpdateUnsavedState();
+      UpdateTemplateResetButtonsVisibility();
+    }
 
-      if (BaseTextProtocol.Text != ProtocolConfig.GetBaseTextProtocol())
-      {
-        RestartClearProtocol.Visibility = Visibility.Visible;
-      }
-      else
-      {
-        RestartClearProtocol.Visibility = Visibility.Collapsed;
-      }
+    private void UpdateUnsavedState()
+    {
+      bool hasUnsaved = _hasProtocolChanges || _hasDeviceDisplayChanges;
+      Error.Visibility = hasUnsaved ? Visibility.Visible : Visibility.Collapsed;
+      Success.Visibility = hasUnsaved ? Visibility.Visible : Visibility.Collapsed;
+      HasUnsavedChanges = hasUnsaved;
+    }
 
-      if (BaseTextProtocolErrors.Text != ProtocolConfig.GetBaseTextErrorsProtocol())
-      {
-        RestartClearProtocolErrors.Visibility = Visibility.Visible;
-      }
-      else
-      {
-        RestartClearProtocolErrors.Visibility = Visibility.Collapsed;
-      }
+    private void UpdateTemplateResetButtonsVisibility()
+    {
+      RestartClearProtocol.Visibility =
+        BaseTextProtocol.Text != ProtocolConfig.GetBaseTextProtocol()
+          ? Visibility.Visible
+          : Visibility.Collapsed;
+
+      RestartClearProtocolErrors.Visibility =
+        BaseTextProtocolErrors.Text != ProtocolConfig.GetBaseTextErrorsProtocol()
+          ? Visibility.Visible
+          : Visibility.Collapsed;
     }
 
     /// <summary>

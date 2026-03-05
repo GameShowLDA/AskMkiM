@@ -21,6 +21,13 @@
                  Background="Transparent"
                  BorderThickness="0"
                  ItemsSource="{Binding Messages, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                    FontFamily="Consolas"
+                    HorizontalContentAlignment="Stretch"
+                    UseLayoutRounding="True"
+                    SnapsToDevicePixels="True"
+                    TextOptions.TextFormattingMode="Display"
+                    TextOptions.TextRenderingMode="ClearType"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -28,10 +35,16 @@
                     SelectionMode="Single"
                     Focusable="True"
                     IsHitTestVisible="True"
+                    PreviewMouseWheel="ProtocolListBox_PreviewMouseWheel"
                  >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock TextWrapping="Wrap" FontSize="20"  Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
+                        <TextBlock TextWrapping="Wrap"
+                                   FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=FontSize}"
+                                   FontFamily="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=FontFamily}"
+                                   SnapsToDevicePixels="True"
+                                   TextOptions.TextFormattingMode="Display"
+                                   Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
                             <Run>
                                 <Run.Text>
                                     <MultiBinding Converter="{StaticResource MessageToLeadingNewLineConverter}">
@@ -63,9 +76,9 @@
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Focusable" Value="False" />
                         <Setter Property="IsHitTestVisible" Value="False" />
-                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Background" Value="{Binding HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="FontFamily" Value="Consolas" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                     </Style>
                 </ListBox.ItemContainerStyle>
 

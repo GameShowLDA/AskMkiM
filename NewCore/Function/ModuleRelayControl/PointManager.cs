@@ -48,12 +48,7 @@ namespace NewCore.Function.ModuleRelayControl
       }
     }
 
-    /// <summary>
-    /// Подключает точку (реле) МКР к указанной шине.
-    /// </summary>
-    /// <param name="bus">Шина, к которой подключается реле.</param>
-    /// <param name="number">Номер точки (реле).</param>
-    /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
+    /// <inheritdoc />
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
       if (CheckPointConnected(number, bus, true))
@@ -63,7 +58,12 @@ namespace NewCore.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (bus == BusPoint.A)
+        if (bus == BusPoint.AB)
+        {
+          IsConnectedPointBusA[number] = true;
+          IsConnectedPointBusB[number] = true;
+        }
+        else if (bus == BusPoint.A)
         {
           IsConnectedPointBusA[number] = true;
         }
@@ -85,7 +85,12 @@ namespace NewCore.Function.ModuleRelayControl
 
         if (parsed?.Answer == $"8.{number}.{(int)bus}.1")
         {
-          if (bus == BusPoint.A)
+          if (bus == BusPoint.AB)
+          {
+            IsConnectedPointBusA[number] = true;
+            IsConnectedPointBusB[number] = true;
+          }
+          else if (bus == BusPoint.A)
           {
             IsConnectedPointBusA[number] = true;
           }
@@ -105,12 +110,7 @@ namespace NewCore.Function.ModuleRelayControl
       return false;
     }
 
-    /// <summary>
-    /// Отключает точку (реле) МКР от указанной шины.
-    /// </summary>
-    /// <param name="bus">Шина, от которой отключается реле.</param>
-    /// <param name="number">Номер точки (реле).</param>
-    /// <returns>Возвращает <c>true</c>, если команда успешно отправлена.</returns>
+    /// <inheritdoc />
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
       if (CheckPointConnected(number, bus, false))
@@ -120,7 +120,12 @@ namespace NewCore.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (bus == BusPoint.A)
+        if (bus == BusPoint.AB)
+        {
+          IsConnectedPointBusA[number] = false;
+          IsConnectedPointBusB[number] = false;
+        }
+        else if (bus == BusPoint.A)
         {
           IsConnectedPointBusA[number] = false;
         }
@@ -142,7 +147,12 @@ namespace NewCore.Function.ModuleRelayControl
 
         if (parsed?.Answer == $"8.{number}.{(int)bus}.2")
         {
-          if (bus == BusPoint.A)
+          if (bus == BusPoint.AB)
+          {
+            IsConnectedPointBusA[number] = false;
+            IsConnectedPointBusB[number] = false;
+          }
+          else if (bus == BusPoint.A)
           {
             IsConnectedPointBusA[number] = false;
           }
@@ -162,13 +172,131 @@ namespace NewCore.Function.ModuleRelayControl
       return false;
     }
 
-    /// <summary>
-    /// Подключает диапазон точек (реле) МКР к указанной шине.
-    /// </summary>
-    /// <param name="bus">Шина, к которой подключается диапазон реле.</param>
-    /// <param name="firstPoint">Первая точка в диапазоне.</param>
-    /// <param name="lastPoint">Последняя точка в диапазоне.</param>
-    /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
+    /// <inheritdoc />
+    public async Task<bool> ConnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
+    {
+      if (CheckPointConnected(number, bus, true))
+      {
+        return true;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        if (bus == BusPoint.AB)
+        {
+          IsConnectedPointBusA[number] = true;
+          IsConnectedPointBusB[number] = true;
+        }
+        else if (bus == BusPoint.A)
+        {
+          IsConnectedPointBusA[number] = true;
+        }
+        else
+        {
+          IsConnectedPointBusB[number] = true;
+        }
+
+        return true;
+      }
+
+      var cmd = new DeviceCommand(82, number, (int)bus, 1);
+      string commandText = cmd.ToString();
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = RelayVerifiedAnswer.FromJson(response);
+
+        if (parsed != null && parsed.Checked)
+        {
+          if (bus == BusPoint.AB)
+          {
+            IsConnectedPointBusA[number] = true;
+            IsConnectedPointBusB[number] = true;
+          }
+          else if (bus == BusPoint.A)
+          {
+            IsConnectedPointBusA[number] = true;
+          }
+          else
+          {
+            IsConnectedPointBusB[number] = true;
+          }
+
+          return true;
+        }
+
+        LogWarning($"Ответ на команду подключения точки {number} не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
+        await Task.Delay(100);
+      }
+
+      LogError($"Не удалось подключить точку {number} к шине {bus}.", isDeviceLog: true);
+      return false;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
+    {
+      if (CheckPointConnected(number, bus, false))
+      {
+        return true;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        if (bus == BusPoint.AB)
+        {
+          IsConnectedPointBusA[number] = false;
+          IsConnectedPointBusB[number] = false;
+        }
+        else if (bus == BusPoint.A)
+        {
+          IsConnectedPointBusA[number] = false;
+        }
+        else
+        {
+          IsConnectedPointBusB[number] = false;
+        }
+
+        return true;
+      }
+
+      var cmd = new DeviceCommand(82, number, (int)bus, 2);
+      string commandText = cmd.ToString();
+
+      for (int attempt = 1; attempt <= 2; attempt++)
+      {
+        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        var parsed = RelayVerifiedAnswer.FromJson(response);
+
+        if (parsed != null && parsed.Checked)
+        {
+          if (bus == BusPoint.AB)
+          {
+            IsConnectedPointBusA[number] = false;
+            IsConnectedPointBusB[number] = false;
+          }
+          else if (bus == BusPoint.A)
+          {
+            IsConnectedPointBusA[number] = false;
+          }
+          else
+          {
+            IsConnectedPointBusB[number] = false;
+          }
+
+          return true;
+        }
+
+        LogWarning($"Ответ на команду отключения точки {number} не получен или некорректный. Попытка {attempt}.", isDeviceLog: true);
+        await Task.Delay(100);
+      }
+
+      LogError($"Не удалось отключить точку {number} от шины {bus}.", isDeviceLog: true);
+      return false;
+    }
+
+    /// <inheritdoc />
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -193,10 +321,19 @@ namespace NewCore.Function.ModuleRelayControl
         {
           for (int number = firstPoint; number <= lastPoint; number++)
           {
-            if (bus == BusPoint.A)
+            if (bus == BusPoint.AB)
+            {
               IsConnectedPointBusA[number] = true;
-            else
               IsConnectedPointBusB[number] = true;
+            }
+            else if (bus == BusPoint.A)
+            {
+              IsConnectedPointBusA[number] = true;
+            }
+            else
+            {
+              IsConnectedPointBusB[number] = true;
+            }
           }
 
           return true;
@@ -210,13 +347,7 @@ namespace NewCore.Function.ModuleRelayControl
       return false;
     }
 
-    /// <summary>
-    /// Отключает диапазон точек (реле) МКР от указанной шины.
-    /// </summary>
-    /// <param name="bus">Шина, от которой отключается диапазон реле.</param>
-    /// <param name="firstPoint">Первая точка в диапазоне.</param>
-    /// <param name="lastPoint">Последняя точка в диапазоне.</param>
-    /// <returns>Возвращает <c>true</c>, если команда выполнена успешно.</returns>
+    /// <inheritdoc />
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -241,10 +372,19 @@ namespace NewCore.Function.ModuleRelayControl
         {
           for (int number = firstPoint; number <= lastPoint; number++)
           {
-            if (bus == BusPoint.A)
+            if (bus == BusPoint.AB)
+            {
               IsConnectedPointBusA[number] = false;
-            else
               IsConnectedPointBusB[number] = false;
+            }
+            else if (bus == BusPoint.A)
+            {
+              IsConnectedPointBusA[number] = false;
+            }
+            else
+            {
+              IsConnectedPointBusB[number] = false;
+            }
           }
 
           return true;
@@ -258,11 +398,7 @@ namespace NewCore.Function.ModuleRelayControl
       return false;
     }
 
-    /// <summary>
-    /// Проверяет работоспособность точки (реле) в модуле МКР.
-    /// </summary>
-    /// <param name="numberPoint">Номер проверяемой точки.</param>
-    /// <returns>Строка с ответом от устройства.</returns>
+    /// <inheritdoc />
     public async Task<string> CheckPoint(int numberPoint, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -317,6 +453,7 @@ namespace NewCore.Function.ModuleRelayControl
       return result;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisconnectingAllPoint(IUserInteractionService? userMessageService = null)
     {
       bool success = true;
@@ -344,6 +481,7 @@ namespace NewCore.Function.ModuleRelayControl
       return success;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null)
     {
       bool success = true;
@@ -361,6 +499,7 @@ namespace NewCore.Function.ModuleRelayControl
       return success;
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisconnectingAllPointFromBusB(IUserInteractionService? userMessageService = null)
     {
       bool success = true;
@@ -378,6 +517,7 @@ namespace NewCore.Function.ModuleRelayControl
       return success;
     }
 
+    /// <inheritdoc />
     private bool CheckPointConnected(int number, BusPoint busPoint, bool connect)
     {
       if (busPoint == BusPoint.A)
@@ -400,6 +540,7 @@ namespace NewCore.Function.ModuleRelayControl
       return false;
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<PointConnectionInfo> GetConnectedPoints()
     {
       var result = new List<PointConnectionInfo>();

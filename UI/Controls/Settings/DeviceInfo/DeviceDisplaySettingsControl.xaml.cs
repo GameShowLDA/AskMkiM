@@ -15,6 +15,7 @@ namespace UI.Controls.Settings.DeviceInfo
     /// Используется как эталон для сравнения с текущими значениями UI.
     /// </summary>
     private DeviceDisplaySettingsModel _baseModel { get; set; }
+    private bool _isInitialized;
 
     public event Action<bool> DeviceDisplayModelChanged;
 
@@ -33,10 +34,15 @@ namespace UI.Controls.Settings.DeviceInfo
       _baseModel = DeviceDisplayConfig.GetDeviceDisplayModel();
       DefalultData();
 
-      MachineAddressesCard.CheckedChanged += CheckedChanged;
-      ConnectionInfo.CheckedChanged += CheckedChanged;
-      DeviceExecutionParameters.CheckedChanged += CheckedChanged;
-      MeasurementResults.CheckedChanged += CheckedChanged;
+      if (!_isInitialized)
+      {
+        MachineAddressesCard.CheckedChanged += CheckedChanged;
+        ConnectionInfo.CheckedChanged += CheckedChanged;
+        DeviceExecutionParameters.CheckedChanged += CheckedChanged;
+        MeasurementResults.CheckedChanged += CheckedChanged;
+        IntermediateMeasurementResults.CheckedChanged += CheckedChanged;
+        _isInitialized = true;
+      }
     }
 
     /// <summary>
@@ -66,6 +72,7 @@ namespace UI.Controls.Settings.DeviceInfo
         ShowConnectionInfo = ConnectionInfo.IsChecked,
         ShowDeviceExecutionParameters = DeviceExecutionParameters.IsChecked,
         ShowMeasurementResults = MeasurementResults.IsChecked,
+        ShowIntermediateMeasurementResults = IntermediateMeasurementResults.IsChecked,
       };
 
       return model;
@@ -85,6 +92,7 @@ namespace UI.Controls.Settings.DeviceInfo
       ConnectionInfo.IsChecked = _baseModel.ShowConnectionInfo;
       DeviceExecutionParameters.IsChecked = _baseModel.ShowDeviceExecutionParameters;
       MeasurementResults.IsChecked = _baseModel.ShowMeasurementResults;
+      IntermediateMeasurementResults.IsChecked = _baseModel.ShowIntermediateMeasurementResults;
     }
 
     /// <summary>
@@ -94,6 +102,7 @@ namespace UI.Controls.Settings.DeviceInfo
       a.ShowMachineAddresses == b.ShowMachineAddresses &&
       a.ShowConnectionInfo == b.ShowConnectionInfo &&
       a.ShowDeviceExecutionParameters == b.ShowDeviceExecutionParameters &&
-      a.ShowMeasurementResults == b.ShowMeasurementResults;
+      a.ShowMeasurementResults == b.ShowMeasurementResults &&
+      a.ShowIntermediateMeasurementResults == b.ShowIntermediateMeasurementResults;
   }
 }
