@@ -7,7 +7,6 @@ namespace UI.Services.Archive
   internal sealed class ArchiveFileManager
   {
     private const string ArchiveExtension = ".apkw";
-    private const string ArchiveContentFileExtension = ".opkw";
 
     public void AddFile(string archivePath, string filePath)
     {
@@ -80,19 +79,8 @@ namespace UI.Services.Archive
         throw new ArgumentException("Archive path is required.", nameof(archivePath));
       }
 
-      if (string.IsNullOrWhiteSpace(fileName))
-      {
-        throw new ArgumentException("File name is required.", nameof(fileName));
-      }
-
-      var safeFileName = Path.GetFileName(fileName.Trim());
-      if (!string.Equals(Path.GetExtension(safeFileName), ArchiveContentFileExtension, StringComparison.OrdinalIgnoreCase))
-      {
-        throw new InvalidDataException("В архив можно добавлять только файлы формата .opkw.");
-      }
-
       var fullArchivePath = Path.GetFullPath(archivePath);
-      var fullFilePathArchive = Path.Combine(fullArchivePath, safeFileName);
+      var fullFilePathArchive = Path.Combine(fullArchivePath, fileName);
 
       if (!File.Exists(fullArchivePath))
       {
@@ -183,11 +171,6 @@ namespace UI.Services.Archive
     private static string ResolveArchiveEntryNameFromFilePath(string filePath)
     {
       var fileName = Path.GetFileName(filePath);
-      if (!string.Equals(Path.GetExtension(fileName), ArchiveContentFileExtension, StringComparison.OrdinalIgnoreCase))
-      {
-        throw new InvalidDataException("В архив можно добавлять только файлы формата .opkw.");
-      }
-
       var normalizedName = ArchiveManifestService.NormalizeEntryName(fileName);
       if (string.IsNullOrWhiteSpace(normalizedName))
       {

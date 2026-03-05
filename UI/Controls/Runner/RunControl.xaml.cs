@@ -16,6 +16,7 @@ using System.Windows.Input;
 using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using UI.Services;
+using UI.Services.Archive;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -50,6 +51,7 @@ namespace UI.Controls.Runner
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
 
     private TextEditorContainer _leftEditor;
+    private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -211,6 +213,8 @@ namespace UI.Controls.Runner
       var rightEditor = new TranslatorEditor();
       rightEditor.SetEditor(textEditorUI);
       rightEditor.BackRequested += TranslatorEditor_BackRequested;
+      rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
+      rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
       rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(textEditorUI.TextEditorModel.FileName) ?
         Path.GetFileName(textEditorUI.TextEditorModel.FilePath) : textEditorUI.TextEditorModel.FileName; ;
       var fileName = textEditorUI.TextEditorModel.FileName;
@@ -347,6 +351,18 @@ namespace UI.Controls.Runner
       TranslatorNavigationService.TryOpenSourceFileFromTranslator(
         textEditorContainer,
         onSourceOpened: () => EditorEventAdapter.RaiseCloseRunItem(this));
+    }
+
+    private void RightEditor_SaveRequestedAsync(object? sender, EventArgs e)
+    {
+      var rightEditor = sender as TranslatorEditor;
+      var sourceFilePath = rightEditor?.GetTextEditor()?.TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(sourceFilePath))
+      {
+        sourceFilePath = OpkFilePath;
+      }
+
+      _archiveSaveService.SaveFileToArchive(this, this.TranslationModels, sourceFilePath);
     }
 
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
