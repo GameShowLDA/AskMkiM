@@ -116,6 +116,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
       try
       {
+        ProtocolSelfCheck.HideProtocolManager();
+
         // Новый запуск не должен наследовать "залипшее" состояние
         // брейкпоинта/пошагового режима от предыдущего выполнения.
         StepControlManager.Reset();
@@ -225,6 +227,7 @@ namespace Ask.UI.Controls.ProtocolNew
       StartProcessing?.Invoke(false);
 
       await ProtocolSelfCheck.SaveProtocolAsync(ProtocolSelfCheck.Header, ".lstw");
+      ProtocolSelfCheck.ShowProtocolManager();
     }
 
     /// <summary>
