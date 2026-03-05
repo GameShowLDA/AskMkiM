@@ -8,7 +8,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using Message;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +15,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
+using UI.Services;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -70,17 +70,6 @@ namespace UI.Controls.Runner
         }
       }
     }
-    public string HeaderFile
-    {
-      get
-      {
-        return headerFile.Text;
-      }
-      set
-      {
-        headerFile.Text = value;
-      }
-    }
 
     public UserControl View => this;
 
@@ -111,15 +100,21 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        if (newValue)
+        var translatorItem = ChildTextEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.Content.GetType() is TranslatorEditor);
+        if (translatorItem != null)
         {
-          BackToFileButton.Visibility = Visibility.Collapsed;
-          isLocked = true;
-        }
-        else
-        {
-          BackToFileButton.Visibility = Visibility.Visible;
-          isLocked = false;
+          var translatorEditor = translatorItem.Content as TranslatorEditor;
+          if (newValue)
+          {
+            translatorEditor.BackButton.Visibility = Visibility.Collapsed;
+            isLocked = true;
+          }
+
+          else
+          {
+            translatorEditor.BackButton.Visibility = Visibility.Visible;
+            isLocked = false;
+          }
         }
       });
     }
@@ -213,13 +208,18 @@ namespace UI.Controls.Runner
         }
       }
 
+      var rightEditor = new TranslatorEditor();
+      rightEditor.SetEditor(textEditorUI);
+      rightEditor.BackRequested += TranslatorEditor_BackRequested;
+      rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(textEditorUI.TextEditorModel.FileName) ?
+        Path.GetFileName(textEditorUI.TextEditorModel.FilePath) : textEditorUI.TextEditorModel.FileName; ;
       var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
       var dockItemPk = new DockItem
       {
         Title = fileName,
         TabText = fileName,
-        Content = textEditorUI,
+        Content = rightEditor,
       };
 
       var dockItemDeviceState = new DockItem
@@ -303,10 +303,11 @@ namespace UI.Controls.Runner
       Application.Current.Dispatcher.Invoke(() =>
       {
         var dockManager = ChildTextEditorContainer.DockManager;
-        var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TextEditorUI);
+        var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TranslatorEditor);
         if (dockItem != null)
         {
-          editor = dockItem.Content as TextEditorUI;
+          var translatorEditor = dockItem.Content as TranslatorEditor;
+          editor = translatorEditor?.GetTextEditor();
         }
       });
 
@@ -340,44 +341,12 @@ namespace UI.Controls.Runner
       });
     }
 
-    private void ArrowButton_Click(object sender, RoutedEventArgs e)
+    private void TranslatorEditor_BackRequested(object? sender, EventArgs e)
     {
-      if (BackToFileButton.Visibility == Visibility.Visible)
-      {
-        var test = this.LeftBox.Children[0];
-        if (test != null && test is TextEditorContainer textEditorContainer)
-        {
-          var foundItem = textEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.Title != "Состояние оборудования");
-          if (foundItem != null && foundItem.Content is TextEditorUI textEditor)
-          {
-            if (textEditor.TextEditorModel != null)
-            {
-              if (!string.IsNullOrEmpty(textEditor.TextEditorModel.FilePath)
-                && File.Exists(textEditor.TextEditorModel.FilePath))
-              {
-                FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(textEditor.TextEditorModel.FilePath);
-                EditorEventAdapter.RaiseCloseRunItem(this);
-              }
-              else
-              {
-                MessageBoxCustom.Show("Ошибка обнаружения исходного файла", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
-              }
-            }
-            else
-            {
-              MessageBoxCustom.Show("Текстовый редактор не найден", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-          }
-          else
-          {
-            MessageBoxCustom.Show("Ошибка обнаружения исходного файла", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
-          }
-        }
-        else
-        {
-          MessageBoxCustom.Show("Ошибка обнаружения исходного файла", "Ошибка открытия файла", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-      }
+      var textEditorContainer = LeftBox.Children.Count > 0 ? LeftBox.Children[0] as TextEditorContainer : null;
+      TranslatorNavigationService.TryOpenSourceFileFromTranslator(
+        textEditorContainer,
+        onSourceOpened: () => EditorEventAdapter.RaiseCloseRunItem(this));
     }
 
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)

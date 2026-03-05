@@ -389,7 +389,7 @@ namespace UI.Components
               }
               else if (activeDockItem.Content is TranslatorItem translatorItem)
               {
-                textEditor = translatorItem.GetLeftEditor();
+                textEditor = translatorItem.GetLeftBox().GetTextEditor();
               }
             }
 

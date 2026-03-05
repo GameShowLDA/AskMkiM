@@ -121,7 +121,7 @@ namespace UI.Services
 
       return activeDockItem.Content switch
       {
-        TranslatorItem translatorItem => translatorItem.GetLeftEditor(),
+        TranslatorItem translatorItem => translatorItem.GetLeftBox().GetTextEditor(),
         TextEditorUI textEditor => textEditor,
         _ => null
       };

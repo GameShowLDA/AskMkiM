@@ -125,7 +125,7 @@
                                         Style="{StaticResource ConfigActionIconButtonStyle}"
                                         ToolTip="Печать активной конфигурации"
                                         PreviewMouseDown="PrintConfig">
-                                    <askUiIcons:PrintConfigIcon Size="15"
+                                    <askUiIcons:PrintIcon Size="15"
                                                                 ToolTip="Печать активной конфигурации"
                                                                 IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />

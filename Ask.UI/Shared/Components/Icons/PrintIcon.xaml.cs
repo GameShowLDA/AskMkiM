@@ -4,23 +4,23 @@ using System.Windows.Media.Animation;
 
 namespace Ask.UI.Shared.Components.Icons
 {
-  public partial class PrintConfigIcon : UserControl
+  public partial class PrintIcon : UserControl
   {
     public static readonly DependencyProperty SizeProperty =
       DependencyProperty.Register(
         nameof(Size),
         typeof(double),
-        typeof(PrintConfigIcon),
+        typeof(PrintIcon),
         new PropertyMetadata(16d));
 
     public static readonly DependencyProperty IsPrintingProperty =
       DependencyProperty.Register(
         nameof(IsPrinting),
         typeof(bool),
-        typeof(PrintConfigIcon),
+        typeof(PrintIcon),
         new PropertyMetadata(false, OnIsPrintingChanged));
 
-    public PrintConfigIcon()
+    public PrintIcon()
     {
       InitializeComponent();
     }
@@ -39,7 +39,7 @@ namespace Ask.UI.Shared.Components.Icons
 
     private static void OnIsPrintingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-      if (d is PrintConfigIcon control && e.NewValue is bool isPrinting)
+      if (d is PrintIcon control && e.NewValue is bool isPrinting)
       {
         control.PlayPrintAnimation(isPrinting);
       }
