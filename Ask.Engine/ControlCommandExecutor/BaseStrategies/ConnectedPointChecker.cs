@@ -90,12 +90,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             foreach (var failedMeasurement in result.FailedMeasurements)
             {
-              var error = BuildKsDisconnectedPointError(
-                failedMeasurement.Chain,
+              var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
+                MeasurementTypeCommand.KC,
                 context.LowerLimit,
                 context.HigherLimit,
                 failedMeasurement.Value,
-                context.Unit);
+                chains: $"{failedMeasurement.Chain} ");
+              error.Status = ShowMessageModel.MessageType.Error;
+              error.IndentLevel = 2;
 
               errors.Add(error);
 
@@ -154,16 +156,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      if (errors.Count > 0)
-      {
-        await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результаты проверки") { IndentLevel = 1 });
-        foreach (var error in errors)
-        {
-          await context.MessageService.ShowMessageAsync(error);
-        }
-      }
-
-      // Формируем новый ССИРТ с учётом разрывов и сохраняем в контекст (не затираем исходный).
       var updatedScheme = new SchemeModel(newGroups);
       context.NewScheme = updatedScheme;
 
@@ -319,19 +311,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       });
 
       return $"*{string.Join("**", fragmentStrings)}*";
-    }
-
-    private static ShowMessageModel BuildKsDisconnectedPointError(string chain, double lowerLimit, double higherLimit, double value, string unit)
-    {
-      var actualUnit = string.IsNullOrEmpty(unit) ? "Ом" : unit;
-      var rangeText = higherLimit != -1
-        ? $"{lowerLimit}-{higherLimit} {actualUnit}"
-        : $"{lowerLimit}<{actualUnit}";
-
-      return new ShowMessageModel($"{chain} ({rangeText})", message: $"Rизм.= {value} {actualUnit}", type: ShowMessageModel.MessageType.Error)
-      {
-        IndentLevel = 2
-      };
     }
 
     private sealed class FailedMeasurement
