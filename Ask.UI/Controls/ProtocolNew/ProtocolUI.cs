@@ -74,6 +74,7 @@ namespace Ask.UI.Controls.ProtocolNew
     private PreActionDelegate _preActionDelegate;
 
     private bool _isRepeatEnabled;
+    private string? _lastSavedProtocolPath;
     #endregion
 
     #endregion
@@ -456,10 +457,48 @@ namespace Ask.UI.Controls.ProtocolNew
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
       }
 
-      var lines = protocolTextBox.Messages.Select(m =>
-          $"{m.Header}: {m.Message}");
+      var lines = protocolTextBox.Messages
+        .Select(FormatProtocolLineForSave)
+        .Where(static line => !string.IsNullOrWhiteSpace(line));
 
       await File.WriteAllLinesAsync(fullPath, lines);
+      _lastSavedProtocolPath = Path.GetFullPath(fullPath);
+
+      if (Dispatcher.CheckAccess())
+      {
+        FileName.Text = Path.GetFileName(_lastSavedProtocolPath);
+      }
+      else
+      {
+        await Dispatcher.InvokeAsync(() => FileName.Text = Path.GetFileName(_lastSavedProtocolPath));
+      }
+    }
+
+    private static string FormatProtocolLineForSave(ShowMessageModel message)
+    {
+      string header = message.Header?.TrimEnd() ?? string.Empty;
+      string body = message.Message?.TrimEnd() ?? string.Empty;
+
+      bool hasHeader = !string.IsNullOrWhiteSpace(header);
+      bool hasBody = !string.IsNullOrWhiteSpace(body);
+
+      if (!hasHeader && !hasBody)
+      {
+        return string.Empty;
+      }
+
+      if (!hasHeader)
+      {
+        return body;
+      }
+
+      if (!hasBody)
+      {
+        return header;
+      }
+
+      string separator = header.EndsWith(' ') || body.StartsWith(' ') ? string.Empty : " ";
+      return $"{header}{separator}{body}";
     }
 
     #endregion
