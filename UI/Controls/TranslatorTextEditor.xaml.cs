@@ -41,6 +41,16 @@ namespace UI.Controls
     public event EventHandler? SaveRequested;
 
     /// <summary>
+    /// Raised when open-folder action is requested.
+    /// </summary>
+    public event EventHandler? OpenFolderRequested;
+
+    /// <summary>
+    /// Raised when print action is requested.
+    /// </summary>
+    public event EventHandler? PrintRequested;
+
+    /// <summary>
     /// Gets the underlying text editor control.
     /// </summary>
     public TextEditorUI Editor => _activeEditor ?? TextEditor;
@@ -75,6 +85,15 @@ namespace UI.Controls
       EditorHost.Content = element;
       _activeEditor = element as TextEditorUI;
     }
+
+    private void SaveButton_Click(object sender, RoutedEventArgs e) =>
+      SaveRequested?.Invoke(this, EventArgs.Empty);
+
+    private void OpenFolderButton_Click(object sender, RoutedEventArgs e) =>
+      OpenFolderRequested?.Invoke(this, EventArgs.Empty);
+
+    private void PrintButton_Click(object sender, RoutedEventArgs e) =>
+      PrintRequested?.Invoke(this, EventArgs.Empty);
 
     private static void DetachFromParent(UIElement element)
     {

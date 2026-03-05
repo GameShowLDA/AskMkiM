@@ -3,16 +3,16 @@ using System.Windows.Controls;
 
 namespace Ask.UI.Shared.Components.Icons
 {
-  public partial class SemiIconSave : UserControl
+  public partial class SaveIcon : UserControl
   {
     public static readonly DependencyProperty SizeProperty =
       DependencyProperty.Register(
         nameof(Size),
         typeof(double),
-        typeof(SemiIconSave),
+        typeof(SaveIcon),
         new PropertyMetadata(16d));
 
-    public SemiIconSave()
+    public SaveIcon()
     {
       InitializeComponent();
     }

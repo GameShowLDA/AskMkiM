@@ -73,7 +73,36 @@ namespace UI.Services.Services
     /// <param name="path">Полный путь к файлу.</param>
     public static void OpenFileFolder(string path)
     {
-      string folder = Path.GetDirectoryName(path);
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return;
+      }
+
+      string fullPath;
+      try
+      {
+        fullPath = Path.GetFullPath(path);
+      }
+      catch
+      {
+        fullPath = path;
+      }
+
+      if (File.Exists(fullPath))
+      {
+        Process.Start(new ProcessStartInfo
+        {
+          FileName = "explorer.exe",
+          Arguments = $"/select,\"{fullPath}\"",
+          UseShellExecute = true
+        });
+        return;
+      }
+
+      string folder = Directory.Exists(fullPath)
+        ? fullPath
+        : Path.GetDirectoryName(fullPath);
+
       if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
       {
         Process.Start(new ProcessStartInfo

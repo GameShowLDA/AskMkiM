@@ -24,6 +24,11 @@ namespace UI.Controls.TextEditor
           var textEditor = (TextEditorUI)foundDockItem.Content;
           return textEditor.Text;
         }
+
+        if (foundDockItem.Content is TranslatorItem translatorItem)
+        {
+          return translatorItem.GetLeftBox()?.GetTextEditor()?.Text ?? string.Empty;
+        }
       }
       return string.Empty;
     }

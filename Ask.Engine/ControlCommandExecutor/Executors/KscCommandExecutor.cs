@@ -38,6 +38,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var switchingDevice = EquipmentService.ValidSwitchingDevice;
       var unique = context.GetUniqueMeasurementDevices();
 
+      if (relayModules == null)
+        return;
+
       foreach (var item in relayModules)
       {
         await item.ConnectableManager.ResetAsync(context.Console);

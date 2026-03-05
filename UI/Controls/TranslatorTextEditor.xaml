@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls"
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              xmlns:TextEditor="clr-namespace:UI.Controls.TextEditor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -72,6 +73,24 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonForegroundBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonHoverForegroundBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonPressedForegroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -90,13 +109,46 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <Button x:Name="SaveButton"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Click="SaveButton_Click"
+                        ToolTip="Сохранить файл"
+                        Style="{StaticResource SaveButtonStyle}">
+                    <askUiIcons:SaveIcon Size="16"
+                                         Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                </Button>
+
+                <Button x:Name="OpenFolderButton"
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        Click="OpenFolderButton_Click"
+                        ToolTip="Показать файл в папке"
+                        Style="{StaticResource ActionButtonStyle}">
+                    <askUiIcons:FolderOpenIcon Size="16"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                </Button>
+
+                <Button x:Name="PrintButton"
+                        Grid.Column="2"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        Click="PrintButton_Click"
+                        ToolTip="Печать файла"
+                        Style="{StaticResource ActionButtonStyle}">
+                    <askUiIcons:PrintIcon Size="16"
+                                          IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                </Button>
 
                 <TextBlock x:Name="FileName" 
-                       Grid.Column = "1" 
+                       Grid.Column = "3" 
                        Text="Some text"
                        FontSize="16"
                        Margin="12,0"

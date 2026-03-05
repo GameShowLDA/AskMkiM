@@ -11,6 +11,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UI.Components;
 using UI.Controls.TextEditor;
 using UI.Services;
 
@@ -106,7 +107,14 @@ namespace UI.Controls
         leftEditor = new TranslatorTextEditor();
         LeftBox.Children.Add(leftEditor);
       }
+
       leftEditor.SetEditor(editor);
+      leftEditor.SaveRequested -= LeftEditor_SaveRequested;
+      leftEditor.SaveRequested += LeftEditor_SaveRequested;
+      leftEditor.OpenFolderRequested -= LeftEditor_OpenFolderRequested;
+      leftEditor.OpenFolderRequested += LeftEditor_OpenFolderRequested;
+      leftEditor.PrintRequested -= LeftEditor_PrintRequested;
+      leftEditor.PrintRequested += LeftEditor_PrintRequested;
     }
 
     public void SetRightEditor(ITextEditorView textEditorUI)
@@ -137,6 +145,21 @@ namespace UI.Controls
       }
     }
 
+    private void LeftEditor_SaveRequested(object? sender, EventArgs e)
+    {
+      FindMultiEditorControl()?.EditorDocumentService.SaveFile();
+    }
+
+    private void LeftEditor_OpenFolderRequested(object? sender, EventArgs e)
+    {
+      FindMultiEditorControl()?.EditorDocumentService.OpenFolder();
+    }
+
+    private void LeftEditor_PrintRequested(object? sender, EventArgs e)
+    {
+      FindMultiEditorControl()?.EditorDocumentService.PrintFile();
+    }
+
     private void CloseTranslatorTab()
     {
       var textEditorContainer = FindTextEditorContainer();
@@ -160,6 +183,25 @@ namespace UI.Controls
         if (current is TextEditorContainer textEditorContainer)
         {
           return textEditorContainer;
+        }
+
+        current = current is FrameworkElement frameworkElement && frameworkElement.Parent != null
+          ? frameworkElement.Parent
+          : VisualTreeHelper.GetParent(current);
+      }
+
+      return null;
+    }
+
+    private MultiEditorControl? FindMultiEditorControl()
+    {
+      DependencyObject? current = this;
+
+      while (current != null)
+      {
+        if (current is MultiEditorControl multiEditorControl)
+        {
+          return multiEditorControl;
         }
 
         current = current is FrameworkElement frameworkElement && frameworkElement.Parent != null
