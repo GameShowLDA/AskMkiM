@@ -1,6 +1,8 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -20,15 +22,25 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       SetActiveLine(context, command);
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
+      var sourceMessage = BuildSourceLinesMessage(command);
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, sourceMessage));
 
-      CommandExecutionState.LastCuResult = command.CuType switch
+      var isQuestion = command.CuType == CuCommandType.Question ||
+                       command.MessageText.TrimEnd().EndsWith("?");
+
+      if (!isQuestion)
       {
-        CuCommandType.Information => ShowInformation(command.MessageText),
-        CuCommandType.Question => AskQuestion(command.MessageText),
-        _ => MessageBoxResult.None
-      };
+        CommandExecutionState.LastCuResult = ShowInformation(command.MessageText);
+        CommandExecutionState.LastRejectFlag = false;
+        return;
+      }
+
+      var nextCommand = context.CommandExecutionManager.GetNextCommand(command);
+      var questionResult = await AskQuestionWithSingleDialogAsync(context.Console, command.MessageText);
+
+      CommandExecutionState.LastCuResult = questionResult;
+      CommandExecutionState.LastRejectFlag = nextCommand is UpCommandModel &&
+                                             questionResult == MessageBoxResult.No;
     }
 
     private static MessageBoxResult ShowInformation(string message)
@@ -37,9 +49,32 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return MessageBoxResult.OK;
     }
 
-    private static MessageBoxResult AskQuestion(string message)
+    private static async Task<MessageBoxResult> AskQuestionWithSingleDialogAsync(IUserInteractionService userInteractionService, string message)
     {
-      return MessageBoxCustom.Show(message, "Запрос оператору", MessageBoxButton.YesNo, MessageBoxImage.Question);
+      while (true)
+      {
+        var result = MessageBoxCustom.Show(
+          $"{message}\r\n\r\nКоманда ЦУ: Yes-Да No-Нет Esc-Временный останов ПК",
+          "Запрос оператору",
+          MessageBoxButton.YesNoCancel,
+          MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Cancel)
+        {
+          return result;
+        }
+
+        if (!await WaitForTemporaryResumeAsync(userInteractionService))
+        {
+          throw new OperationCanceledException("Выполнение остановлено оператором на команде ЦУ.");
+        }
+      }
+    }
+
+    private static async Task<bool> WaitForTemporaryResumeAsync(IUserInteractionService userInteractionService)
+    {
+      var action = await userInteractionService.WaitUserActionAsync(deviceTask: true);
+      return action is UserAction.Continue or UserAction.Retry or UserAction.None;
     }
   }
 }
