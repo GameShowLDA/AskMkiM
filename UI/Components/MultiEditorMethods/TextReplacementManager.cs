@@ -45,7 +45,7 @@ namespace UI.Components.MultiEditorMethods
             }
             else if (foundPage.Content is TranslatorItem translatorItem)
             {
-              ReplaceTextInEditor(translatorItem.GetLeftEditor(), searchResult, startOffset, replaceText, searchText);
+              ReplaceTextInEditor(translatorItem.GetLeftBox().GetTextEditor(), searchResult, startOffset, replaceText, searchText);
             }
             else
             {

@@ -102,7 +102,7 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
 
-        var result = !ExecutionConfig.GetIsIdleModeEnabled() ? (await meterDevice.IrManger.Measure.MeasureAsync(param, LowerBound, UpperBound, userMessageService: protocolUI)).value : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param : new Random().Next((int)LowerBound - 100, (int)UpperBound + 100);
+        var result = (await meterDevice.IrManger.Measure.MeasureAsync(param, LowerBound, UpperBound, userMessageService: protocolUI)).value;
 
         var err = result - param;
         Measurements.Add(err);

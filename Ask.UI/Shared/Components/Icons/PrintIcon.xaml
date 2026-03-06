@@ -1,0 +1,64 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.PrintIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <UserControl.Resources>
+    <StreamGeometry x:Key="SemiIconPrint">
+      M7 2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a2 2 0 0 0-2-2H7Z
+      M2 12a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v5a2 2 0 0 1-2 2h-2v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-2H4a2 2 0 0 1-2-2v-5Zm16 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM8 15h8v6H8v-6Z
+    </StreamGeometry>
+
+    <Storyboard x:Key="PrintInStoryboard">
+      <DoubleAnimation Storyboard.TargetName="IconScale"
+                       Storyboard.TargetProperty="ScaleX"
+                       To="1.1"
+                       Duration="0:0:0.12" />
+      <DoubleAnimation Storyboard.TargetName="IconScale"
+                       Storyboard.TargetProperty="ScaleY"
+                       To="1.1"
+                       Duration="0:0:0.12" />
+      <DoubleAnimation Storyboard.TargetName="IconTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="-0.5"
+                       Duration="0:0:0.12" />
+    </Storyboard>
+
+    <Storyboard x:Key="PrintOutStoryboard">
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconScale"
+                                     Storyboard.TargetProperty="ScaleX">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.98" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconScale"
+                                     Storyboard.TargetProperty="ScaleY">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.98" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimation Storyboard.TargetName="IconTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="0"
+                       Duration="0:0:0.18" />
+    </Storyboard>
+  </UserControl.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24"
+          Height="24"
+          RenderTransformOrigin="0.5,0.5">
+      <Grid.RenderTransform>
+        <TransformGroup>
+          <ScaleTransform x:Name="IconScale"
+                          ScaleX="1"
+                          ScaleY="1" />
+          <TranslateTransform x:Name="IconTranslate"
+                              Y="0" />
+        </TransformGroup>
+      </Grid.RenderTransform>
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="{StaticResource SemiIconPrint}" />
+    </Grid>
+  </Viewbox>
+</UserControl>

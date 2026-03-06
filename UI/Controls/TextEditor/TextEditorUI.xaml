@@ -22,58 +22,7 @@
         PreviewMouseWheel="TextEditor_PreviewMouseWheel">
 
             <avalonEdit:TextEditor.Resources>
-                <Style TargetType="ScrollBar">
-                    <Setter Property="Width" Value="10"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="ScrollBar">
-                                <Grid Background="Transparent">
-                                    <Track Name="PART_Track" IsDirectionReversed="true">
-                                        <Track.DecreaseRepeatButton>
-                                            <RepeatButton Command="ScrollBar.LineUpCommand" 
-                                       Background="Transparent" 
-                                       BorderThickness="0" 
-                                       Height="10"/>
-                                        </Track.DecreaseRepeatButton>
-                                        <Track.Thumb>
-                                            <Thumb Name="Thumb" 
-                                         Background="{DynamicResource SecondarySolidColorBrush}" 
-                                         BorderThickness="0"
-                                         Cursor="ScrollNS">
-                                                <Thumb.Template>
-                                                    <ControlTemplate TargetType="Thumb">
-                                                        <Border Background="{TemplateBinding Background}" 
-                                                 BorderBrush="Transparent" 
-                                                 BorderThickness="0"
-                                                 CornerRadius="10"/>
-                                                    </ControlTemplate>
-                                                </Thumb.Template>
-                                            </Thumb>
-                                        </Track.Thumb>
-                                        <Track.IncreaseRepeatButton>
-                                            <RepeatButton Command="ScrollBar.LineDownCommand" 
-                                       Background="Transparent" 
-                                       BorderThickness="0" 
-                                       Height="10"/>
-                                        </Track.IncreaseRepeatButton>
-                                    </Track>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-                <Style TargetType="Thumb">
-                    <Setter Property="Background" Value="{StaticResource SecondarySolidColorBrush}"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Thumb">
-                                <Border Background="{TemplateBinding Background}" 
-                         BorderBrush="Transparent" 
-                         BorderThickness="0"></Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
+                <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}" />
             </avalonEdit:TextEditor.Resources>
         </avalonEdit:TextEditor>
 </UserControl>

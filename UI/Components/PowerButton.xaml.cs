@@ -171,8 +171,11 @@ namespace UI.Components
     /// </summary>
     private async Task StartPowerSequenceAsync()
     {
-      await model.PowerManager.StartPowerAsync();
-      await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
+      if (!await model.PowerManager.VerifyPowerAsync(null))
+      {
+        await model.PowerManager.StartPowerAsync();
+        await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
+      }
 
       if (!await TryConnectAsync())
       {
@@ -301,7 +304,6 @@ namespace UI.Components
       {
         nameTextBlock.Text = text;
         GridBlock.SetResourceReference(BackgroundProperty, color);
-        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
         GridBlock.Opacity = 1;
       });
     }
@@ -314,8 +316,7 @@ namespace UI.Components
       Application.Current.Dispatcher.Invoke(() =>
       {
         nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, "GreenColorSolidColorBrush");
-        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ActiveForegroundSolidColorBrush"];
+        GridBlock.SetResourceReference(BackgroundProperty, "FadedRedSolidColorBrush");
         GridBlock.Opacity = 0.5;
         active = true;
       });
@@ -329,8 +330,7 @@ namespace UI.Components
       Application.Current.Dispatcher.Invoke(() =>
       {
         nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, "RedColorSolidColorBrush");
-        nameTextBlock.Foreground = (SolidColorBrush)Application.Current.Resources["ForegroundSolidColorBrush"];
+        GridBlock.SetResourceReference(BackgroundProperty, "GreenColorSolidColorBrush");
         GridBlock.Opacity = 0.5;
         active = false;
       });

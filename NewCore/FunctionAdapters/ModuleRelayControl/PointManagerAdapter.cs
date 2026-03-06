@@ -75,6 +75,50 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     }
 
     /// <inheritdoc />
+    public async Task<bool> ConnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
+    {
+      var description = $"{number} к шине [{bus}]";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _pointManager.ConnectRelayVerifiedAsync(bus, number);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw RelayExceptionFactory.ConnectPointFailed(description);
+      }
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
+    {
+      var description = $"{number} от шины [{bus}]";
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _pointManager.DisconnectRelayVerifiedAsync(bus, number);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
+        }
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw RelayExceptionFactory.DisconnectPointFailed(description);
+      }
+      return result;
+    }
+
+    /// <inheritdoc />
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
       var description = $"{firstPoint}-{lastPoint} к шине [{bus}]";

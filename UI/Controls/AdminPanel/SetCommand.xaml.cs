@@ -194,6 +194,33 @@ namespace UI.Controls.AdminPanel
         },
         new()
         {
+          Id = 82,
+          Name = "Подключить/отключить точку с контролем подключения",
+          Syntax = "82.a.b.с.",
+          Variables = """
+                      a – номер точки
+                      b – шина, на которую необходимо подключить точку:
+                          1 – шина A
+                          2 – шина B
+                      c – состояние:
+                          1 – подлючить
+                          2 – отключить
+                      """,
+          Response = """
+                      JSON:
+                        ModuleName       – тип модуля (MKR)
+                        NumberDevice     – номер устройства
+                        NumberChassis    – номер шасси
+                        Answer           – подтверждение выполненной команды (82.a.b.c)
+                        Checked         – результат проверки подключения:
+                                           true  – точка успешно подключена/отключена
+                                           false – не удалось подключить/отключить точку 
+                      """,
+          ResponseExample =
+            "{\"ModuleName\":\"MKR\",\"NumberDevice\":6,\"NumberChassis\":1,\"Checked\":true,\"Answer\":\"82.a.b.c\"}"
+        },
+        new()
+        {
           Id = 9,
           Name = "Подключить или отключить все точки к шине",
           Syntax = "9.a.b.0.",
@@ -531,9 +558,6 @@ namespace UI.Controls.AdminPanel
       InitializeComponent();
       socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     }
-
-
-
     private async void CommandInput_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.Up)

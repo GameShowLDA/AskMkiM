@@ -7,7 +7,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Microsoft.Win32;
 using System.Windows;
 using UI.Components.FileComparerControls;
-using UI.Controls.ProtocolNew;
+using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
 
@@ -299,3 +299,4 @@ namespace MainWindowProgram.Services
     }
   }
 }
+

@@ -5,7 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using UI.Controls.ProtocolNew;
+using Ask.UI.Controls.ProtocolNew;
 using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace UI.Components
@@ -238,6 +238,7 @@ namespace UI.Components
       SubscribeToValidationEvents();
       ShinaACheckBox.IsChecked = true;
       PreviewKeyDown += HotkeyChecked;
+      Unloaded += InputField_Unloaded;
     }
 
     /// <summary>
@@ -250,6 +251,17 @@ namespace UI.Components
       InputValidationEvents.OnInvalidElectricalParameter += HighlightElectricalTextBox;
       InputValidationEvents.OnDuplicatePoints += HighlightBothPoints;
       ActionExecutor.StartProcessing += ActionExecutor_StartProcessing;
+    }
+
+    private void InputField_Unloaded(object sender, RoutedEventArgs e)
+    {
+      InputValidationEvents.OnInvalidFirstPoint -= HighlightFirstTextBox;
+      InputValidationEvents.OnInvalidSecondPoint -= HighlightSecondTextBox;
+      InputValidationEvents.OnInvalidElectricalParameter -= HighlightElectricalTextBox;
+      InputValidationEvents.OnDuplicatePoints -= HighlightBothPoints;
+      ActionExecutor.StartProcessing -= ActionExecutor_StartProcessing;
+      PreviewKeyDown -= HotkeyChecked;
+      Unloaded -= InputField_Unloaded;
     }
 
     /// <summary>

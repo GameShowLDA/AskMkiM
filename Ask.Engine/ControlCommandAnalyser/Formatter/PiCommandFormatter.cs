@@ -23,47 +23,47 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       if (!string.IsNullOrWhiteSpace(pi.UnparsedParameters))
         yield return $"\t{pi.UnparsedParameters}";
 
-      //var si = pi.SiCommand;
-      //yield return $"\tПараметры команды СИ:";
-      //// Ключи команды СИ
-      //if (si.AlgorithmKey.Count > 0)
-      //{
-      //  yield return $"\t\tКлючи команды: {string.Join(", ", si.AlgorithmKey)}";
-      //}
-      //else
-      //{
-      //  yield return $"\t\tКлючи команды СИ не указаны.";
-      //}
+      var si = pi.SiCommand;
+      yield return $"\tПараметры команды СИ:";
+      // Ключи команды СИ
+      if (si.AlgorithmKey.Count > 0)
+      {
+        yield return $"\t\tКлючи команды: {string.Join(", ", si.AlgorithmKey)}";
+      }
+      else
+      {
+        yield return $"\t\tКлючи команды СИ не указаны.";
+      }
 
-      //// Напряжение
-      //if (!string.IsNullOrWhiteSpace(si.VoltageSource))
-      //{
-      //  yield return $"\t\tНапряжение: {si.VoltageSource}";
-      //}
-      //else
-      //{
-      //  yield return $"\t\tНапряжение не задано!";
-      //}
+      // Напряжение
+      if (!string.IsNullOrWhiteSpace(si.VoltageSource))
+      {
+        yield return $"\t\tНапряжение: {si.VoltageSource}";
+      }
+      else
+      {
+        yield return $"\t\tНапряжение не задано!";
+      }
 
-      //// Время
-      //if (!string.IsNullOrWhiteSpace(si.TimeSource))
-      //{
-      //  yield return $"\t\tВремя выполнения: {si.TimeSource}";
-      //}
-      //else
-      //{
-      //  yield return $"\t\tВремя выполнения не задано!";
-      //}
+      // Время
+      if (!string.IsNullOrWhiteSpace(si.TimeSource))
+      {
+        yield return $"\t\tВремя выполнения: {si.TimeSource}";
+      }
+      else
+      {
+        yield return $"\t\tВремя выполнения не задано!";
+      }
 
-      //// Сопротивление
-      //if (!string.IsNullOrWhiteSpace(si.ResistanceSource))
-      //{
-      //  yield return $"\t\tСопротивление: {si.ResistanceSource}";
-      //}
-      //else
-      //{
-      //  yield return $"\t\tСопротивление не задано!";
-      //}
+      // Сопротивление
+      if (!string.IsNullOrWhiteSpace(si.ResistanceSource))
+      {
+        yield return $"\t\tСопротивление: {si.ResistanceSource}";
+      }
+      else
+      {
+        yield return $"\t\tСопротивление не задано!";
+      }
 
       yield return $"\tПараметры команды ПИ:";
       // Ключи команды ПИ
@@ -106,7 +106,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
 
       if (pi.Comment.Count > 0)
       {
-        yield return $"\tКомметрии:";
+        yield return $"\tКомментарии:";
         foreach (var line in pi.Comment)
         {
           var trimmed = line.Trim();

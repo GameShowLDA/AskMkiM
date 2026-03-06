@@ -38,13 +38,24 @@ namespace Ask.UI.Infrastructure.Localization
     {
       try
       {
-        var result = _resourceManager.GetString(key, CultureInfo.CurrentUICulture);
+        var culture = ResolveCulture(LanguageSettings.CurrentLanguage);
+        var result = _resourceManager.GetString(key, culture)
+                     ?? _resourceManager.GetString(key, CultureInfo.InvariantCulture);
         return result ?? $"!{key}!";
       }
       catch
       {
         return $"!{key}!";
       }
+    }
+
+    /// <summary>
+    /// Принудительно применяет текущий язык из настроек и обновляет все локализованные строки в UI.
+    /// </summary>
+    public static void RefreshCurrentLanguage()
+    {
+      SetCulture(LanguageSettings.CurrentLanguage);
+      LocalizedString.RefreshAll();
     }
 
     private static bool _metadataOverridden = false;
@@ -56,7 +67,7 @@ namespace Ask.UI.Infrastructure.Localization
     {
       try
       {
-        var culture = new CultureInfo(langCode);
+        var culture = ResolveCulture(langCode);
 
         void ApplyCulture()
         {
@@ -101,6 +112,17 @@ namespace Ask.UI.Infrastructure.Localization
       {
         LogException(ex);
       }
+    }
+
+    /// <summary>
+    /// Приводит значение языка к поддерживаемой культуре.
+    /// </summary>
+    private static CultureInfo ResolveCulture(string? langCode)
+    {
+      var normalized = LanguageSettings.NormalizeLanguageCode(langCode);
+      return normalized == "en"
+        ? CultureInfo.GetCultureInfo("en")
+        : CultureInfo.GetCultureInfo("ru");
     }
 
     /// <summary>

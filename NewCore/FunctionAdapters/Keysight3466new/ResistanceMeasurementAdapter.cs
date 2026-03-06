@@ -28,6 +28,17 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     /// <inheritdoc />
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
+      if (rangeTo == -1)
+      {
+        rangeTo = double.MaxValue;
+      }
+
+      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.Resistance);
+      if (random != -1)
+      {
+        return random;
+      }
+
       var resistance = await _resistanceMeasurement.MeasureResistanceAsync(param, rangeFrom, rangeTo);
       return resistance;
     }

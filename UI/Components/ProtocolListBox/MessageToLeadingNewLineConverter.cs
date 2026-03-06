@@ -10,7 +10,9 @@ namespace UI.Components.ProtocolListBox
       string header = values[0] as string;
       string message = values[1] as string;
 
-      return string.IsNullOrEmpty(message) ? !string.IsNullOrEmpty(header) ? "\n" : "" : "";
+      bool isHeaderOnly = string.IsNullOrEmpty(message) && !string.IsNullOrEmpty(header);
+      bool isMultiLineHeader = !string.IsNullOrEmpty(header) && (header.Contains('\n') || header.Contains('\r'));
+      return isHeaderOnly && isMultiLineHeader ? "\n" : "";
     }
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
