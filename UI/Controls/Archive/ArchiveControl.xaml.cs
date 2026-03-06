@@ -29,7 +29,6 @@ namespace UI.Controls.Archive
   {
     private static readonly string[] ArchivesFolderCandidates = new[]
     {
-      //System.IO.Path.Combine(@"D:\AskMkiM\Bin", "Archives"),
       Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory),
       Path.Combine(Directory.GetCurrentDirectory(), FileLocations.ArchiveDirectory),
     };
@@ -512,27 +511,35 @@ namespace UI.Controls.Archive
     private void UpdateRightPanels(bool isFilesVisible, bool isEditorVisible)
     {
       FilesPanel.Visibility = Visibility.Visible;
-      ArchiveFilesDataGrid.Visibility = isFilesVisible ? Visibility.Visible : Visibility.Collapsed;
-      ArchiveFilesTextBlock.Visibility = Visibility.Visible;
-      FileContentTextBox.Visibility = isEditorVisible ? Visibility.Visible : Visibility.Collapsed;
-      SelectFileContentTextBlock.Visibility = isEditorVisible ? Visibility.Visible : Visibility.Collapsed;
 
-      // Панель файлов всегда отображается; переключаем только её внутреннее содержимое.
-      FilesRowDefinition.Height = new GridLength(1, GridUnitType.Star);
+      ArchiveFilesDataGrid.Visibility =
+          isFilesVisible ? Visibility.Visible : Visibility.Collapsed;
+
+      ArchiveFilesTextBlock.Visibility = Visibility.Visible;
+
+      EditorPanel.Visibility =
+          isEditorVisible ? Visibility.Visible : Visibility.Collapsed;
 
       if (isEditorVisible)
       {
+        FilesRowDefinition.Height = new GridLength(1, GridUnitType.Star);
         EditorRowDefinition.Height = new GridLength(1, GridUnitType.Star);
-        RightSplitter.Visibility = Visibility.Collapsed;
-        if (isFilesVisible)
-        {
-          RightSplitter.Visibility = Visibility.Visible;
-        }
-        return;
-      }
 
-      EditorRowDefinition.Height = new GridLength(0);
-      RightSplitter.Visibility = Visibility.Collapsed;
+        EditorRowDefinition.MinHeight = 120;
+
+        RightSplitter.Visibility = Visibility.Visible;
+        SplitterRowDefinition.MinHeight = 4;
+      }
+      else
+      {
+        FilesRowDefinition.Height = new GridLength(1, GridUnitType.Star);
+
+        EditorRowDefinition.Height = new GridLength(0);
+        EditorRowDefinition.MinHeight = 0;
+
+        RightSplitter.Visibility = Visibility.Collapsed;
+        SplitterRowDefinition.MinHeight = 0;
+      }
     }
 
     private void ApplyGridItemsSource(IReadOnlyList<ArchiveEntryInfo> entries)

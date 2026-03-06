@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using System.IO.Compression;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
@@ -16,7 +17,9 @@ namespace UI.Services.Archive
 
       if (File.Exists(archivePath))
       {
-        throw new InvalidOperationException($"Archive '{Path.GetFileName(archivePath)}' already exists.");
+        var message = $"Архив '{Path.GetFileName(archivePath)}' уже существует.";
+        LogError(message);
+        throw new InvalidOperationException(message);
       }
 
       using (var archiveStream = new FileStream(archivePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
@@ -46,7 +49,9 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archiveName))
       {
-        throw new ArgumentException("Archive name is required.", nameof(archiveName));
+        var message = "Требуется указать имя архива";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveName));
       }
 
       var normalizedName = Path.GetFileNameWithoutExtension(archiveName.Trim());
@@ -58,7 +63,9 @@ namespace UI.Services.Archive
 
       if (string.IsNullOrWhiteSpace(normalizedName))
       {
-        throw new ArgumentException("Archive name contains only invalid characters.", nameof(archiveName));
+        var message = "Имя архива содержит только недопустимые символы.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveName));
       }
 
       return normalizedName;

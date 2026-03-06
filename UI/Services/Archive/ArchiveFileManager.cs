@@ -216,7 +216,7 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archiveEntryName))
       {
-        var message = "Требуется указать имя записи в архиве".;
+        var message = "Требуется указать имя записи в архиве";
         LogError(message);
         throw new ArgumentException(message, nameof(archiveEntryName));
       }
@@ -224,7 +224,7 @@ namespace UI.Services.Archive
       var normalizedName = ArchiveManifestService.NormalizeEntryName(archiveEntryName.Trim());
       if (string.IsNullOrWhiteSpace(normalizedName))
       {
-        var message = "Имя записи в архиве не может быть пустым".;
+        var message = "Имя записи в архиве не может быть пустым";
         LogError(message);
         throw new ArgumentException(message, nameof(archiveEntryName));
       }
