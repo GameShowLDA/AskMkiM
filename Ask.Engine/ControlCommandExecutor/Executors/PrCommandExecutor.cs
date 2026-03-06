@@ -249,16 +249,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (continuityManager)
         {
-          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue, messageService);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue, messageService) - errorResistance;
         }
         else
         {
-          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance, lowValue, hightValue);
-        }
-
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(resistance, lowValue, hightValue) - errorResistance;
         }
 
         if (answer < 0)

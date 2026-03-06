@@ -35,12 +35,6 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums
     /// Проверка на сообщение относительно первой точки.
     /// </summary>
     [Description("Проверка на сообщение относительно первой точки")]
-    MessageRelativeToFirstPoint,
-
-    /// <summary>
-    /// Контроль сопротивления относительно первой точки.
-    /// </summary>
-    [Description("Контроль сопротивления относительно первой точки")]
-    ResistanceRelativeToFirstPoint
+    MessageRelativeToFirstPoint
   }
 }

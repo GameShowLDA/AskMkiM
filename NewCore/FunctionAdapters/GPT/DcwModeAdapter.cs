@@ -680,7 +680,7 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetArcCurrentAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
         {
           var succes = await _dcwMode.ArcCurrent.SetArcCurrentAsync(value);
 
@@ -760,20 +760,9 @@ namespace NewCore.FunctionAdapters.GPT
       /// </returns>
       public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
-        if (rangeTo == -1)
-        {
-          rangeTo = double.MaxValue;
-        }
-
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.DielectricWithstandDC);
-        if (random != -1)
-        {
-          return (random, "мА");
-        }
-
         try
         {
-          var (result, unit) = await _dcwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);
+          var (result, unit) = await _dcwMode.Measure.MeasureAsync(param);
 
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
@@ -813,11 +802,6 @@ namespace NewCore.FunctionAdapters.GPT
       /// </summary>
       public async Task StopMeasure()
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return;
-        }
-
         await _dcwMode.Measure.StopMeasure();
       }
     }

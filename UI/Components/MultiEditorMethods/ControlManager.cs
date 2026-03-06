@@ -233,7 +233,7 @@ namespace UI.Components.MultiEditorMethods
       }
       else if (foundDockItem.Content is TranslatorItem translator)
       {
-        var leftEditor = translator.GetLeftBox().GetTextEditor();
+        var leftEditor = translator.GetLeftEditor();
         path = leftEditor.TextEditorModel.FilePath;
         content = leftEditor.Text;
         foundDockItemType = EditorType.Translator;

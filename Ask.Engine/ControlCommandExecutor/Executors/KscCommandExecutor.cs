@@ -5,7 +5,6 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -32,14 +31,24 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
+
 
       var relayModules = EquipmentService.ValidRelayModules;
       var switchingDevice = EquipmentService.ValidSwitchingDevice;
-      var unique = context.GetUniqueMeasurementDevices();
 
-      if (relayModules == null)
-        return;
+      Core.Shared.Interfaces.DeviceInterfaces.Multimeter.IFastMeter? fastMeter = null;
+      try
+      {
+        fastMeter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      }
+      catch { }
+
+      Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.IBreakdownTester? breakdownTester = null;
+      try
+      {
+        breakdownTester = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
+      }
+      catch { }
 
       foreach (var item in relayModules)
       {
@@ -51,16 +60,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await switchingDevice.ConnectableManager.ResetAsync(context.Console);
       }
 
-      if (unique.Contains(MeasurementDevice.Multimeter))
+      if (fastMeter != null)
       {
-        var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
-        await meter.ConnectableManager.ResetAsync(context.Console);
+        await fastMeter.ConnectableManager.ResetAsync(context.Console);
       }
 
-      if (unique.Contains(MeasurementDevice.BreakdownTester))
+      if (breakdownTester != null)
       {
-        var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-        await breakDown.ConnectableManager.ResetAsync(context.Console);
+        await breakdownTester.ConnectableManager.ResetAsync(context.Console);
       }
 
       GetProtocol(context, command, protocolModel);

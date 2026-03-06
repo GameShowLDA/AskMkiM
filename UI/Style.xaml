@@ -238,41 +238,21 @@
     </Style>
 
     <Style x:Key="ScrollBarButtonStyle" TargetType="RepeatButton">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+        <Setter Property="Background" Value="#465060"/>
+        <Setter Property="BorderBrush" Value="#1e2828"/>
+        <Setter Property="Foreground" Value="#f3f0f9"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="Focusable" Value="False"/>
     </Style>
 
     <Style x:Key="ScrollBarThumbStyle" TargetType="Thumb">
-        <Setter Property="Background" Value="{DynamicResource ScrollBarThumbBackgroundBrush}"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Background" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="#1e2828"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Thumb">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10"/>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ScrollBarThumbHoverBackgroundBrush}"/>
-            </Trigger>
-            <Trigger Property="IsDragging" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ScrollBarThumbPressedBackgroundBrush}"/>
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <Style TargetType="ScrollBar">
         <Setter Property="Width" Value="10"/>
-        <Setter Property="Margin" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
@@ -280,29 +260,36 @@
                         <Track Name="PART_Track" IsDirectionReversed="true">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="ScrollBar.LineUpCommand" 
-                                              Style="{StaticResource ScrollBarButtonStyle}"
-                                              Height="10"/>
+                        Background="Transparent" 
+                        BorderThickness="0" 
+                        Height="10"/>
                             </Track.DecreaseRepeatButton>
                             <Track.Thumb>
-                                <Thumb Name="Thumb"
-                                       Style="{StaticResource ScrollBarThumbStyle}"
-                                       Cursor="ScrollNS"/>
+                                <Thumb Name="Thumb" 
+                          Background="{DynamicResource SecondarySolidColorBrush}" 
+                          BorderThickness="0"
+                          Cursor="ScrollNS">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="{TemplateBinding Background}" 
+                                  BorderBrush="Transparent" 
+                                  BorderThickness="0"
+                                  CornerRadius="10"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
                             </Track.Thumb>
                             <Track.IncreaseRepeatButton>
                                 <RepeatButton Command="ScrollBar.LineDownCommand" 
-                                              Style="{StaticResource ScrollBarButtonStyle}"
-                                              Height="10"/>
+                        Background="Transparent" 
+                        BorderThickness="0" 
+                        Height="10"/>
                             </Track.IncreaseRepeatButton>
                         </Track>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-            <Trigger Property="Orientation" Value="Vertical">
-                <Setter Property="Margin" Value="0,0,5,0"/>
-            </Trigger>
-        </Style.Triggers>
     </Style>
     
     <Style TargetType="Thumb">

@@ -96,7 +96,7 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления"), IsBlockStart: true);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KC, param);
 
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, LowerBound, UpperBound);
+        var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ResistanceManager.MeasureResistanceAsync(param, LowerBound, UpperBound) : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param : new Random().Next((int)LowerBound - 100, (int)UpperBound + 100);
 
         var err = result - param;
         Measurements.Add(err);

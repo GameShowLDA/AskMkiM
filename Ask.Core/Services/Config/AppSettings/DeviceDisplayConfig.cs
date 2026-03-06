@@ -46,19 +46,12 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static void SetMeasurementResultsVisibility(bool isVisible) => _settingsModel.ShowMeasurementResults = isVisible;
 
-    /// <summary>
-    /// Устанавливает значение отображения промежуточных результатов измерений,
-    /// получаемых в процессе выполнения программы контроля.
-    /// </summary>
-    public static void SetIntermediateMeasurementResultsVisibility(bool isVisible) => _settingsModel.ShowIntermediateMeasurementResults = isVisible;
-
     public static async Task SetDeviceDisplaySettingsModel(DeviceDisplaySettingsModel model)
     {
       SetMachineAddressVisibility(model.ShowMachineAddresses);
       SetConnectionInfoVisibility(model.ShowConnectionInfo);
       SetExecutionParametersVisibility(model.ShowDeviceExecutionParameters);
       SetMeasurementResultsVisibility(model.ShowMeasurementResults);
-      SetIntermediateMeasurementResultsVisibility(model.ShowIntermediateMeasurementResults);
     }
 
     #endregion
@@ -84,11 +77,6 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static bool GetMeasurementResultsVisibility() => _settingsModel.ShowMeasurementResults;
 
-    /// <summary>
-    /// Возвращает признак отображения промежуточных результатов измерений.
-    /// </summary>
-    public static bool GetIntermediateMeasurementResultsVisibility() => _settingsModel.ShowIntermediateMeasurementResults;
-
     public static DeviceDisplaySettingsModel GetDeviceDisplayModel()
     {
       DeviceDisplaySettingsModel protocolModel = new DeviceDisplaySettingsModel();
@@ -96,7 +84,6 @@ namespace Ask.Core.Services.Config.AppSettings
       protocolModel.ShowConnectionInfo = _settingsModel.ShowConnectionInfo;
       protocolModel.ShowDeviceExecutionParameters = _settingsModel.ShowDeviceExecutionParameters;
       protocolModel.ShowMeasurementResults = _settingsModel.ShowMeasurementResults;
-      protocolModel.ShowIntermediateMeasurementResults = _settingsModel.ShowIntermediateMeasurementResults;
       return protocolModel;
     }
     #endregion
@@ -113,7 +100,6 @@ namespace Ask.Core.Services.Config.AppSettings
       SetConnectionInfoVisibility(model.ShowConnectionInfo);
       SetExecutionParametersVisibility(model.ShowDeviceExecutionParameters);
       SetMeasurementResultsVisibility(model.ShowMeasurementResults);
-      SetIntermediateMeasurementResultsVisibility(model.ShowIntermediateMeasurementResults);
 
       DeviceDisplaySettingsSaved?.Invoke(model);
     }

@@ -87,7 +87,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       {
         await powerSource.BusManager.ConnectBusToPositiveAsync(switchingBus, messageService);
         await Task.Delay(100);
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(5, userMessageService: messageService);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(5, messageService);
 
         if (Math.Abs(result - 5.0) < 0.15)
         {
@@ -102,7 +102,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       else if (switchingBus.ToString().StartsWith("B"))
       {
         await powerSource.BusManager.ConnectBusToNegativeAsync(switchingBus, messageService);
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(5, userMessageService: messageService);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(5, messageService);
 
         if (Math.Abs(result - 5.0) < 0.15)
         {

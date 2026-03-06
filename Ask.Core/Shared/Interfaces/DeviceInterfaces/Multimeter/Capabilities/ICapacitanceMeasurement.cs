@@ -16,6 +16,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// Выполняет измерение ёмкости.
     /// </summary>
     /// <param name="param">Ожиданемео знчение.</param>
-    Task<double> MeasureCapacitanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null);
+    Task<double> MeasureCapacitanceAsync(double param = 0, IUserInteractionService? userMessageService = null);
   }
 }

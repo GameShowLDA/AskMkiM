@@ -695,17 +695,6 @@ namespace NewCore.FunctionAdapters.GPT
       {
         if (rangeTo == -1) rangeTo = 600000;
 
-        if (rangeTo == -1)
-        {
-          rangeTo = double.MaxValue;
-        }
-
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.InsulationResistance);
-        if (random != -1)
-        {
-          return (random, "МОм");
-        }
-
         try
         {
           var (result, unit) = await _irMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);

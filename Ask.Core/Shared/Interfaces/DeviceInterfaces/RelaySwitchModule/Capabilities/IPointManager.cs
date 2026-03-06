@@ -26,26 +26,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabili
     Task<bool> DisconnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null);
 
     /// <summary>
-    /// Подключает точку (реле) МКР с проверкой фактического замыкания.
-    /// Выполняет команду подключения и затем опрашивает измеритель,
-    /// подтверждая, что соединение действительно установлено.
-    /// </summary>
-    /// <param name="bus">Шина подключения.</param>
-    /// <param name="number">Номер точки (реле).</param>
-    /// <returns>True, если реле замкнулось и это подтверждено измерением.</returns>
-    Task<bool> ConnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null);
-
-    /// <summary>
-    /// Отключает точку (реле) МКР с проверкой фактического размыкания.
-    /// Выполняет команду отключения и затем опрашивает измеритель,
-    /// подтверждая, что соединение действительно разорвано.
-    /// </summary>
-    /// <param name="bus">Шина подключения.</param>
-    /// <param name="number">Номер точки (реле).</param>
-    /// <returns>True, если реле разомкнулось и это подтверждено измерением.</returns>
-    Task<bool> DisconnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null);
-
-    /// <summary>
     /// Подключает диапазон точек МКР.
     /// </summary>
     /// <param name="bus">Подключаемая шина.</param>

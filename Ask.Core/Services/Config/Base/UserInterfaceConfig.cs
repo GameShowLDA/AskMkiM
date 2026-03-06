@@ -7,10 +7,7 @@ namespace Ask.Core.Services.Config.Base
 {
   public static class UserInterfaceConfig
   {
-    private static UserInterfaceModel UserInterfaceModel = new UserInterfaceModel
-    {
-      Language = "ru"
-    };
+    private static UserInterfaceModel UserInterfaceModel = new UserInterfaceModel();
 
     static public Action<UserInterfaceModel> SaveUserInterfaceEvent;
 
@@ -22,7 +19,7 @@ namespace Ask.Core.Services.Config.Base
     /// <param name="enable">true для отображения, false для скрытия.</param>
     public static async Task SetLanguage(string enable)
     {
-      var lang = LanguageSettings.NormalizeLanguageCode(enable);
+      var lang = string.IsNullOrWhiteSpace(enable) ? "ru" : enable.ToLowerInvariant();
       UserInterfaceModel.Language = lang;
       await LanguageSettings.SetLanguageAsync(lang);
     }
@@ -41,16 +38,6 @@ namespace Ask.Core.Services.Config.Base
       UserInterfaceModel.UseSyntaxHighlighting = enable;
     }
 
-    public static async Task SetCommandBodyBackgroundHighlighting(bool enable)
-    {
-      UserInterfaceModel.UseCommandBodyBackgroundHighlighting = enable;
-    }
-
-    public static async Task SetChainPointBodyBackgroundHighlighting(bool enable)
-    {
-      UserInterfaceModel.UseChainPointBodyBackgroundHighlighting = enable;
-    }
-
     public static async Task SetUserInterfaceModel(UserInterfaceModel user)
     {
       await Task.Run(async () =>
@@ -58,8 +45,6 @@ namespace Ask.Core.Services.Config.Base
         await SetLanguage(user.Language);
         await SetTheme(user.Theme);
         await SetSyntaxHighlighting(user.UseSyntaxHighlighting);
-        await SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
-        await SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
       });
     }
 
@@ -74,8 +59,6 @@ namespace Ask.Core.Services.Config.Base
     public static async Task<string> GetLanguage() => UserInterfaceModel.Language;
     public static async Task<ThemeMode> GetTheme() => UserInterfaceModel.Theme;
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
-    public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
-    public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
 
 
     public static async Task<UserInterfaceModel> GetParameterModel()
@@ -84,8 +67,6 @@ namespace Ask.Core.Services.Config.Base
       parametrModel.Language = UserInterfaceModel.Language;
       parametrModel.Theme = UserInterfaceModel.Theme;
       parametrModel.UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting;
-      parametrModel.UseCommandBodyBackgroundHighlighting = UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
-      parametrModel.UseChainPointBodyBackgroundHighlighting = UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
       return parametrModel;
     }
 
@@ -94,8 +75,6 @@ namespace Ask.Core.Services.Config.Base
       await SetLanguage(parametrModel.Language);
       await SetTheme(parametrModel.Theme);
       await SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
-      await SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
-      await SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
 
 

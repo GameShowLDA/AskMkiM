@@ -1,0 +1,308 @@
+﻿<UserControl x:Class="UI.Controls.ProtocolNew.ProtocolUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UI.Controls.ProtocolNew"
+             xmlns:InvokeConrols="clr-namespace:UI.Components.Invoke.InvokeRichTextBox"
+             xmlns:TextEditor="clr-namespace:UI.Components.ProtocolListBox"
+             xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+
+        <Style x:Key="BorderedTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="Wheat"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style x:Key="BorderStyle" TargetType="Border">
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <Style x:Key="TopMenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Margin" Value="3,4"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="MinWidth" Value="34"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractivePressedSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TopMenuStartButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuButtonStyle}">
+            <Setter Property="MinWidth" Value="150"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+
+        <DataTemplate x:Key="DynamicContentTemplate">
+            <StackPanel>
+                <ContentPresenter Content="{Binding}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Background="{DynamicResource IsCheckedColorSolidColorBrush}" Name="TopMenuButton" MinHeight="40" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Continue}, Path=Value}">
+                <Icons:ContinueIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StartButtonTop" Grid.Column="1" Style="{StaticResource TopMenuStartButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Start}, Path=Value}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Icons:PlayIcon Size="16" IsHitTestVisible="False"/>
+                    <TextBlock Name="headerFile" 
+                               Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+            </Button>
+
+            <Button x:Name="PauseButtonTop" Grid.Column="2" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Pause}, Path=Value}">
+                <Icons:PauseIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StopButtonTop" Grid.Column="3" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Stop}, Path=Value}">
+                <Icons:StopIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="RepeatButtonTop" Grid.Column="4" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Repeat}, Path=Value}">
+                <Icons:RepeatIcon Size="18" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StepOverTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepOver}, Path=Value}">
+                <Icons:StepOverIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
+                <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+        </Grid>
+
+        <Border  Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="1" Background="{DynamicResource TestsProtocolBackgroundBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MaxWidth="400"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border  Padding="0,0" Margin="5" CornerRadius="20" Name="MenuButton" Height="Auto" Width="Auto" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}" 
+                         Background="{DynamicResource TestsMainPanelBackgroundBrush}">
+
+                    <Grid Height="Auto">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="20,20,0,0">
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Icons:ArrowButton x:Name="ArrowButton" Margin="10" RenderTransformOrigin="0.5,0.5" 
+                                                   ButtonBackground="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"
+                                                   ButtonBorder="{DynamicResource TestsInteractiveBorderSolidColorBrush}"
+                                                   ArrowBrush="{DynamicResource TestsInteractiveBorderSolidColorBrush}"
+                                                   ArrowHoverBrush="{DynamicResource TestsInteractivePressedSolidColorBrush}"
+                                                   Click="ArrowButton_Click">
+                                    <Icons:ArrowButton.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform/>
+                                            <SkewTransform/>
+                                            <RotateTransform Angle="90"/>
+                                            <TranslateTransform/>
+                                        </TransformGroup>
+                                    </Icons:ArrowButton.RenderTransform>
+                                </Icons:ArrowButton>
+
+                                <TextBlock Name="header"  Grid.Column="1"
+                               Text="{Binding Source={StaticResource LS_Protocol_Header_Title}, Path=Value}" 
+                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" 
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Left"
+                               TextAlignment="Center"
+                               Padding="10,10,10,10" 
+                               FontSize="25"
+                               TextWrapping="Wrap" TextTrimming="None"
+                               FontFamily="{DynamicResource WinstonBold}"
+                               MaxWidth="250"
+                               />
+
+                            </Grid>
+                        </Border>
+
+                        <ContentControl  x:Name="ContentPanel" Content="{Binding ContentView}" Grid.Row="1" Margin="20,10,20,10"/>
+
+                        <StackPanel x:Name="BigButtonsPanel" Grid.Row="2" Margin="20,0,20,20">
+
+                            <Button x:Name="StartButton" 
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Start}, Path=Value}" 
+                                    Style="{DynamicResource ShadowButtonStyle}"/>
+
+                            <Button x:Name="RepeatButton" 
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" 
+                                    Margin="0,10,0,0" 
+                                    Style="{DynamicResource ShadowButtonStyle}" 
+                                    />
+
+                            <Button x:Name="loopButton" 
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
+                                    Margin="0,10,0,0" 
+                                    Style="{DynamicResource ShadowButtonStyle}" 
+                                    />
+
+                            <Button x:Name="PauseButton" 
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" 
+                                    Margin="0,10,0,0"
+                                    Style="{DynamicResource ButtonStyleV5}"
+                                    />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button x:Name="StepOver" 
+                                        Content="{Binding Source={StaticResource LS_Protocol_Btn_StepOver}, Path=Value}" 
+                                        FontSize="18" 
+                                        Grid.Column="0" 
+                                        Margin="0,10,5,0" 
+                                        Style="{StaticResource ShadowButtonStyle}" 
+                                        PreviewMouseDown="stepOverButton_PreviewMouseDown" />
+                                
+                                <Button x:Name="StepInto" 
+                                        Content="{Binding Source={StaticResource LS_Protocol_Btn_StepInto}, Path=Value}" 
+                                        FontSize="18" 
+                                        Grid.Column="1" 
+                                        Margin="5,10,0,0" 
+                                        Cursor="Hand" 
+                                        Style="{StaticResource ShadowButtonStyle}" 
+                                        PreviewMouseDown="stepIntoButton_PreviewMouseDown"/>
+
+                            </Grid>
+
+                            <Button x:Name="ContinueButton"  
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Continue}, Path=Value}" 
+                                    FontSize="18" 
+                                    Grid.Column="0" 
+                                    Margin="0,10,0,0" 
+                                    Style="{DynamicResource ButtonStyleV6}"
+                                    />
+
+                            <Button x:Name="StopButton" 
+                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Exit}, Path=Value}" 
+                                    FontSize="18" 
+                                    Grid.Column="1" 
+                                    Margin="0,10,0,0" 
+                                    Style="{DynamicResource ButtonStyleV7}"
+                                    />
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Column="1" Margin="5" xmlns:conv="clr-namespace:UI.Converter">
+                    <Grid.Resources>
+                        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
+                    </Grid.Resources>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+
+                        <RowDefinition Height="Auto" MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
+                                                                 Path=ActualHeight,
+                                                                 Converter={StaticResource MultiplyConverter},
+                                                                 ConverterParameter=0.5}"/>
+                    </Grid.RowDefinitions>
+
+                    <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />
+
+                    <GridSplitter  
+                        x:Name="SeparatorError"
+                        Grid.Row="1" 
+                        Height="5"
+                        Background="{StaticResource RedColorSolidColorBrush}"
+                        HorizontalAlignment="Stretch"
+                        ResizeDirection="Rows"/>
+
+                    <ErrorList:ErrorListControl Grid.Row="2"
+                              x:Name="ErrorListBoxVertical"
+                              StringsNumberVisible="Collapsed"
+                              MeasureResultVisible="Collapsed"
+                              />
+                </Grid>
+
+            </Grid>
+        </Border>
+    </Grid>
+
+</UserControl>

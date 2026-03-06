@@ -72,7 +72,7 @@ namespace Ask.UI.Shared.Converters.Brush
       {
         if (UserInterfaceConfig.GetSyntaxHighlighting())
         {
-          return headerColor ?? SuccessBrush;
+          return SuccessBrush;
         }
 
         return (SolidColorBrush)Application.Current.Resources["TestsProtocolHeaderForeground"];

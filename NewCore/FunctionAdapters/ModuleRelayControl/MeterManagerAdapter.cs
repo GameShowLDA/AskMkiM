@@ -97,24 +97,14 @@ namespace NewCore.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> GetMeterResponseAsync(IUserInteractionService? userMessageService = null)
     {
-      return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-       {
-         var succes = await _meterManager.GetMeterResponseAsync();
-         await DeviceMessageBuilder.ShowConnectionMessageAsync(
-           _moduleRelayControl,
-           succes ? "Обнаружено подлючение шин/точек (МКР)" : "Подлючение шин/точек не обнаружено (МКР)",
-           succes,
-           1,
-           userMessageService);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _meterManager.GetMeterResponseAsync(), userMessageService, deviceTask: true);
 
-         if (!succes)
-         {
-           throw MeterExceptionFactory.MeterAnswerFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
-         }
+      if (!result)
+      {
+        throw MeterExceptionFactory.MeterAnswerFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
+      }
 
-         return succes;
-
-       }, userMessageService, deviceTask: true);
+      return result;
     }
   }
 }

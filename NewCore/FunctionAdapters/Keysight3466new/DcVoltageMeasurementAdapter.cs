@@ -52,22 +52,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureDCVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    public async Task<double> MeasureDCVoltageAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (rangeTo == -1)
-      {
-        rangeTo = double.MaxValue;
-      }
-
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.DCVoltage);
-      if (random != -1)
-      {
-        return random;
-      }
-
       try
       {
-        double result = await _measurement.MeasureDCVoltageAsync(param, rangeFrom , rangeTo);
+        double result = await _measurement.MeasureDCVoltageAsync(param);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения постоянного напряжения", $"{result}В", result >= 0, 2, userMessageService);
 

@@ -139,14 +139,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
       if (e.ChangedButton == MouseButton.Middle && IsMouseCaptured)
       {
         ReleaseMouseCapture();
-
-        if (DockItem != null && GetHideCloseButton(DockItem))
-        {
-          e.Handled = true;
-          return;
-        }
-
-        DockItem?.PerformClose();
+        DockItem.PerformClose();
         e.Handled = true;
       }
 

@@ -5,21 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.Execution"
              xmlns:Components ="clr-namespace:UI.Components"
-             xmlns:Icons="clr-namespace:UI.Icon"
-             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
+             xmlns:Icons="clr-namespace:UI.Icon"    
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_Section_Title" Key="settings.execution.section.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StopOnError_Title" Key="settings.execution.stopOnError.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StopOnError_Description" Key="settings.execution.stopOnError.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Title" Key="settings.execution.stepByStepMode.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Description" Key="settings.execution.stepByStepMode.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Title" Key="settings.execution.idleMode.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Description" Key="settings.execution.idleMode.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Title" Key="settings.execution.errorSimulation.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Description" Key="settings.execution.errorSimulation.description" />
-    </UserControl.Resources>
 
     <Border 
         Margin="15,10" 
@@ -38,7 +26,7 @@
 
 
                 <TextBlock 
-                    Text="{Binding Source={StaticResource Settings_Execution_Section_Title}, Path=Value}" 
+                    Text="Выполнение" 
                     Padding="10,10"
                     Style="{DynamicResource SettingsTitleStyle}"
                     Grid.Row="0"/>
@@ -98,8 +86,8 @@
                 </WrapPanel.Style>
 
                 <Components:SettingsCard
-                    Title="{Binding Source={StaticResource Settings_Execution_StopOnError_Title}, Path=Value}"
-                    Description="{Binding Source={StaticResource Settings_Execution_StopOnError_Description}, Path=Value}"
+                    Title="Остановка по ошибке"
+                    Description="При возникновении ошибки выполнение приостанавливается, чтобы оператор мог омознано выбрать дальнейшее действие и управлять ходом работы."
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
                     Margin="10,10"
                     VerticalAlignment="Top"
@@ -107,8 +95,8 @@
                  />
 
                 <Components:SettingsCard
-                     Title="{Binding Source={StaticResource Settings_Execution_StepByStepMode_Title}, Path=Value}"
-                     Description="{Binding Source={StaticResource Settings_Execution_StepByStepMode_Description}, Path=Value}"
+                     Title="Пошаговый режим"
+                     Description="Включает отладочное выполнение: F10- выполнить блок целиком(Поверх); F11- заходить в блок и останавливаться на каждом шаге(Вглубь)"
                      IsChecked="{Binding IdleMode, Mode=TwoWay}" 
                      Margin="10,10"
                      VerticalAlignment="Top"
@@ -116,8 +104,8 @@
                      />
 
                 <Components:SettingsCard 
-                    Title="{Binding Source={StaticResource Settings_Execution_IdleMode_Title}, Path=Value}" 
-                    Description="{Binding Source={StaticResource Settings_Execution_IdleMode_Description}, Path=Value}"
+                    Title="Холостой режим выполнения" 
+                    Description="Включает холостой режим выполнения программы, при котором не происходит взаимодействие с оборудованием."
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
                     Margin="10,10"
                     VerticalAlignment="Top"
@@ -125,8 +113,8 @@
                     />
 
                 <Components:SettingsCard
-                    Title="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Title}, Path=Value}"
-                    Description="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Description}, Path=Value}"
+                    Title="Выполнение с ошибками"
+                    Description="Добавляет случайные ошибки при холостом режиме для проверки обработки ошибок."
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
                     Margin="10,10"
                     VerticalAlignment="Top"

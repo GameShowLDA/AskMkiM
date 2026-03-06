@@ -152,7 +152,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = sourceLineNumber,
         FormattedLineNumber = formaterLineNumber,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = chain,
+        Description = $"Разрыв в цепи {chain}",
         MeasureResult = measureResult
       };
 

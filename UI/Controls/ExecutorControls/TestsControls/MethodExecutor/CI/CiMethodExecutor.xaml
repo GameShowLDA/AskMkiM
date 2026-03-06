@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             xmlns:Protocol="clr-namespace:Ask.UI.Controls.ProtocolNew;assembly=Ask.UI"
+             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
              xmlns:Custom="clr-namespace:UI.Components"
              >
     
@@ -17,4 +17,3 @@
     </Protocol:ProtocolUI>
     
 </UserControl>
-

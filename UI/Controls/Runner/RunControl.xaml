@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.Runner"
              mc:Ignorable="d" 
              xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
-             xmlns:Protocol="clr-namespace:Ask.UI.Controls.ProtocolNew;assembly=Ask.UI"
+             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
              xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              xmlns:MultiWindow="clr-namespace:UI.Components"
              xmlns:Icons="clr-namespace:UI.Icon"
@@ -66,6 +66,35 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
+                <Grid x:Name="TopPanel" Height="20">
+                    <Grid x:Name="StartButtonTop" Grid.Column="1" Background="{StaticResource IsCheckedColorSolidColorBrush}" Cursor="Hand">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Icons:ArrowButton x:Name="BackToFileButton"
+                               ButtonBackground="Transparent" 
+                               Cursor="Hand" Height="15" Width="15" 
+                               RenderTransformOrigin="0.5,0.5" Click="ArrowButton_Click" 
+                               Margin="5,0" 
+                               ButtonBorder="Transparent" ArrowBrush="{StaticResource ForegroundSolidColorBrush}"
+                               ArrowHoverBrush="{StaticResource ActiveForegroundSolidColorBrush}">
+                            <Icons:ArrowButton.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Icons:ArrowButton.RenderTransform>
+                        </Icons:ArrowButton>
+                        <TextBlock Name="headerFile" 
+   Text="{Binding Source={StaticResource LS_Protocol_Header_File}, Path=Value}" Grid.Column="2" Foreground="{StaticResource ForegroundSolidColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"/>
+
+                    </Grid>
+                </Grid>
 
                 <Grid x:Name="LeftBox" Grid.Row="1">
                     <Controls:TextEditorContainer x:Name="ChildTextEditorContainer"/>
@@ -75,4 +104,3 @@
     </Grid>
 
 </UserControl>
-

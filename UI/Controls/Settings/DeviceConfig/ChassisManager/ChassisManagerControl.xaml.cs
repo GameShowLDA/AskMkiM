@@ -123,21 +123,6 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     }
 
     /// <summary>
-    /// Сбрасывает локальное состояние отображения шасси и стоек.
-    /// </summary>
-    public void Reset()
-    {
-      SystemsChassis.Clear();
-      SystemsRack.Clear();
-
-      SelectedSystem = null;
-      SelectedRack = null;
-
-      addChassisButton.Visibility = Visibility.Visible;
-      addRackButton.Visibility = Visibility.Collapsed;
-    }
-
-    /// <summary>
     /// Обрабатывает выбор системы.
     /// </summary>
     /// <param name="sender">Источник события.</param>

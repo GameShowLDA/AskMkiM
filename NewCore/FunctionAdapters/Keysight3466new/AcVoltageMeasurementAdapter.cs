@@ -51,22 +51,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureACVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    public async Task<double> MeasureACVoltageAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (rangeTo == -1)
-      {
-        rangeTo = double.MaxValue;
-      }
-
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.ACVoltage);
-      if (random != -1)
-      {
-        return random;
-      }
-
       try
       {
-        double result = await _measurement.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
+        double result = await _measurement.MeasureACVoltageAsync(param);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения переменного напряжения", $"{result} В", result >= 0, 1, userMessageService);
 

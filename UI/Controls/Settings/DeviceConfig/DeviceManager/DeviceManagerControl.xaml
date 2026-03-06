@@ -10,7 +10,47 @@
              Width="Auto"
              Height="Auto">
     <UserControl.Resources>
-        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}" />
+        <!-- Стилизация ScrollBar -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Track Name="PART_Track" IsDirectionReversed="true">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineUpCommand" 
+                                                  Background="Transparent" 
+                                                  BorderThickness="0" 
+                                                  Height="10"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Name="Thumb" 
+                                           Background="{StaticResource SecondarySolidColorBrush}" 
+                                           BorderThickness="0"
+                                           Cursor="ScrollNS">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                        BorderBrush="Transparent" 
+                                                        BorderThickness="0"
+                                                        CornerRadius="10"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineDownCommand" 
+                                                  Background="Transparent" 
+                                                  BorderThickness="0" 
+                                                  Height="10"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <Border CornerRadius="0,0,0,0" Width="Auto">
         <Grid>
@@ -24,7 +64,7 @@
                     <Grid x:Name="ButtonsPanel" Background="Transparent">
                         <StackPanel Background="Transparent" Margin="2">
                             <DeviceList:DeviceListControl x:Name="SwitchingDeviceControl" DeviceTitle="Устройство коммутации шин" Margin="5,5,5,0"/>
-                            <DeviceList:DeviceListControl x:Name="RelaySwitchModuleControl" DeviceTitle="Модуль коммутации релейный" Margin="5,5,5,0"/>
+                            <DeviceList:DeviceListControl x:Name="RelaySwitchModuleControl" DeviceTitle="Модуль коммутации реле" Margin="5,5,5,0"/>
                             <DeviceList:DeviceListControl x:Name="PowerSourceModuleControl" DeviceTitle="Модуль ист. напряжения и тока" Margin="5,5,5,0"/>
                             <DeviceList:DeviceListControl x:Name="PrecisionMeterControl" DeviceTitle="Измеритель (точный)" Margin="5,5,5,0"/>
                             <DeviceList:DeviceListControl x:Name="FastMeterControl" DeviceTitle="Измеритель (быстрый)" Margin="5,5,5,0"/>

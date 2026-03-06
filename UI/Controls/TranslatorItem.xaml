@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.TextEditor"
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              xmlns:DefaultGUI="clr-namespace:UI.Components" 
-             xmlns:Controls="clr-namespace:UI.Controls"
+             xmlns:Controls="clr-namespace:UI.Controls.TextEditor"
              xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -30,19 +30,48 @@
             </Grid.ColumnDefinitions>
 
             <!-- Левая панель -->
-            
-            <Grid Grid.Column="0" Grid.RowSpan="2"  x:Name="LeftBox" >
-                <Controls:TranslatorTextEditor />
+            <Border Grid.Row="0" Grid.Column="0" 
+                    BorderThickness="0,0,0,1"
+                    Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
+                <TextBlock 
+                    x:Name="FirstFileName"
+                    Text="Сравнение файлов"
+                    Margin="10,5"
+                    FontWeight="SemiBold"
+                    FontSize="14"
+                    Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Stretch" 
+                    TextWrapping="Wrap"/>
+            </Border>
 
+            <Grid Grid.Column="0" Grid.Row="1"  x:Name="LeftBox" >
+                <Controls:TextEditorUI />
             </Grid>
 
 
-            <GridSplitter Grid.Column="1" Grid.RowSpan="2" Background="{StaticResource RedColorSolidColorBrush}" 
+            <GridSplitter Grid.Column="1" Grid.Row="1" Background="{StaticResource RedColorSolidColorBrush}" 
                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
 
+            <Border Grid.Row="0" Grid.Column="2" 
+                 BorderThickness="0,0,0,1"
+                 Background="{StaticResource IsCheckedColorSolidColorBrush}" Height="auto">
 
-            <Grid Grid.Column="2" Grid.RowSpan="2"  x:Name="RightBox" >
-                <Controls:TranslatorEditor />
+                <TextBlock 
+                     x:Name="SecondFileName"
+                     Text="Сравнение файлов"
+                     Margin="10,5"
+                     FontWeight="SemiBold"
+                     FontSize="14"
+                     Foreground="{StaticResource ActiveForegroundSolidColorBrush}"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Stretch" 
+                     TextWrapping="Wrap"/>
+            </Border>
+
+
+            <Grid Grid.Column="2" Grid.Row="1"  x:Name="RightBox" >
+                <Controls:TextEditorUI />
             </Grid>
 
             <GridSplitter  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"

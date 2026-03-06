@@ -105,7 +105,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, firstValue, secondValue, userMessageService: messageService);
+        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, userMessageService: messageService);
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, answer, answer);
 
       }, messageService);

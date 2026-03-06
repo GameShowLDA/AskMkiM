@@ -1,7 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Executor.MeasurementError;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.UI.Features.Notifications.Models;
-using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using DataBaseConfiguration.Services.MeasurementError;
 using System.Windows;
 using System.Windows.Controls;
@@ -245,18 +243,12 @@ namespace UI.Components.MeasurementErrorCardControl
         HasUnsavedChanges = false;
         UpdateIcons();
 
-        NotificationHostService.Instance.Show(
-          "Сохранение",
-          "Изменения успешно сохранены.",
-          NotificationType.Success);
+        MessageBox.Show("Изменения успешно сохранены.", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
       }
       catch (Exception ex)
       {
         LogException(ex, "Ошибка при сохранении диапазонов");
-        NotificationHostService.Instance.Show(
-          "Ошибка сохранения",
-          ex.Message,
-          NotificationType.Error);
+        MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 

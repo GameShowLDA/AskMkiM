@@ -7,27 +7,31 @@
              xmlns:Components ="clr-namespace:UI.Components"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:DeviceInfo="clr-namespace:UI.Controls.Settings.DeviceInfo"
-             xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800">
     <UserControl.Resources>
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_Section_Title" Key="settings.protocol.section.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_OperationTime_Title" Key="settings.protocol.operationTime.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_OperationTime_Description" Key="settings.protocol.operationTime.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_ShowActionHeaders_Title" Key="settings.protocol.showActionHeaders.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_ShowActionHeaders_Description" Key="settings.protocol.showActionHeaders.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_AutoSave_Title" Key="settings.protocol.autoSave.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_AutoSave_Description" Key="settings.protocol.autoSave.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_AutoPrint_Title" Key="settings.protocol.autoPrint.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_AutoPrint_Description" Key="settings.protocol.autoPrint.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_ShowInSoftware_Title" Key="settings.protocol.showInSoftware.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_ShowInSoftware_Description" Key="settings.protocol.showInSoftware.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_Generate_Title" Key="settings.protocol.generate.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_Generate_Description" Key="settings.protocol.generate.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_CleanTextCard_Title" Key="settings.protocol.cleanTextCard.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_CleanTextCard_Description" Key="settings.protocol.cleanTextCard.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_ErrorTextCard_Title" Key="settings.protocol.errorTextCard.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_ErrorTextCard_Description" Key="settings.protocol.errorTextCard.description" />
+
+        <Style x:Key="SettingCardWithToggleStyle" TargetType="Border">
+
+            <!-- копия базового стиля -->
+            <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+
+            <!-- твой функциональный сеттер -->
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <!-- триггер на кнопку -->
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}"
+                         Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+
+        </Style>
+
     </UserControl.Resources>
 
     <Border 
@@ -45,7 +49,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock 
-                    Text="{Binding Source={StaticResource Settings_Protocol_Section_Title}, Path=Value}"
+                    Text="Протокол"
                     Padding="10,10"
                     Style="{DynamicResource SettingsTitleStyle}"
                     />
@@ -99,6 +103,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
 
@@ -115,48 +121,48 @@
                     </WrapPanel.Style>
 
                     <Components:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_OperationTime_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_OperationTime_Description}, Path=Value}"
+                        Title="Вывод времени операции"
+                        Description="Показывает, сколько времени прошло с момента запуска на каждом шаге выполнения."
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                         Margin="10,10"
                         x:Name="OperationTime"
                         VerticalAlignment="Top"/>
 
                     <Components:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_ShowActionHeaders_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_ShowActionHeaders_Description}, Path=Value}"
+                        Title="Отображение заголовков действий"
+                        Description="Отображает краткое описание текущего шага выполнения в виде заголовка."
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                         Margin="10,10"
                         x:Name="Header"
                         VerticalAlignment="Top"/>
 
                     <Components:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_AutoSave_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_AutoSave_Description}, Path=Value}"
+                        Title="Сохранение протокола"
+                        Description="Автоматически сохраняет протокол каждого запуска. Имя файла содержит дату, время и название выполняемых действий."
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                         Margin="10,10"
                         x:Name="AutoSave"
                         VerticalAlignment="Top"/>
 
                     <Components:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_AutoPrint_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_AutoPrint_Description}, Path=Value}"
+                        Title="Печать протокола"
+                        Description="По завершении выполнения отображает диалог выбора принтера для печати итогового протокола."
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                         x:Name="AutoPrint"
                         Margin="10,10"
                         VerticalAlignment="Top"/>
 
                     <Components:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_ShowInSoftware_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_ShowInSoftware_Description}, Path=Value}"
+                        Title="Вывод протокола в ПО"
+                        Description="По завершении выполнения протокол отображается в программном обеспечении, по умолчанию открывается как PDF-файл."
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                         x:Name="ProtocolFromPO"
                         Margin="10,10"
                         VerticalAlignment="Top"/>
 
                     <Components:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_Generate_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_Generate_Description}, Path=Value}"
+                        Title="Формирование протокола"
+                        Description="Протокол будет формироваться после выполнения программ контроля."
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
                         Margin="10,10"
                         VerticalAlignment="Top"
@@ -165,9 +171,9 @@
 
                 </WrapPanel>
 
-                <WrapPanel Grid.Row="1" Orientation="Horizontal">
-                    <WrapPanel.Style>
-                        <Style TargetType="WrapPanel">
+                <DeviceInfo:DeviceDisplaySettingsControl x:Name="DeviceDisplaySettingsCon" Grid.Row="1">
+                    <DeviceInfo:DeviceDisplaySettingsControl.Style>
+                        <Style TargetType="DeviceInfo:DeviceDisplaySettingsControl">
                             <Setter Property="Visibility" Value="Visible"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
@@ -175,169 +181,142 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </WrapPanel.Style>
+                    </DeviceInfo:DeviceDisplaySettingsControl.Style>
+                </DeviceInfo:DeviceDisplaySettingsControl>
 
-                    <DeviceInfo:DeviceDisplaySettingsControl x:Name="DeviceDisplaySettingsCon"
-                                                             VerticalAlignment="Top">
-                        <DeviceInfo:DeviceDisplaySettingsControl.Style>
-                            <Style TargetType="DeviceInfo:DeviceDisplaySettingsControl">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DeviceInfo:DeviceDisplaySettingsControl.Style>
-                    </DeviceInfo:DeviceDisplaySettingsControl>
+                <Border Grid.Row="2" 
+                        Style="{DynamicResource SettingCardWithToggleStyle}" 
+                        Margin="15,10" 
+                        >
 
-                    <Border Margin="15,10"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Padding="10"
-                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                            Style="{DynamicResource SettingCardStyle}">
-                        <Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBlock 
-                                Grid.Column="0"
-                                Text="{Binding Source={StaticResource Settings_Protocol_CleanTextCard_Title}, Path=Value}" 
-                                Style="{DynamicResource SettingsTitleStyle}"
-                                Padding="0,4,0,4"
-                                Margin="0,0,6,0"/>
+                                    Text="Текст протокола без ошибок" 
+                                    Style="{DynamicResource SettingsTitleStyle}"
+                                    Padding="10,10"
+                                    Grid.Row="0"/>
 
-                            <StackPanel Grid.Column="1"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <Icons:ArrowButton x:Name="ToggleSettingsTextProtocolButton"
-                                                   HorizontalAlignment="Left"
-                                                   Width="30"
-                                                   Height="30"
-                                                   Margin="0"
+                            <Grid Grid.Column="1"  Margin="20,0">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Icons:ArrowButton x:Name="ToggleSettingsTextProtocolButton" 
+                                                    Grid.Column="0"
+                                                    HorizontalAlignment="Right"
+                                                    Width="30" Height="30"
                                                    ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                                                   ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                   ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                   ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
-                                                   VerticalAlignment="Center"/>
+                                                    ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                    ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                    ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
+                                                    VerticalAlignment="Center"/>
 
-                                <Icons:RepeatIcon x:Name="RestartClearProtocol"
-                                                  Margin="8,0,0,0"
-                                                  Size="20"
-                                                  PreviewMouseDown="RepeatIcon_PreviewMouseDown"/>
-                            </StackPanel>
+                                <Icons:RepeatIcon x:Name="RestartClearProtocol" Grid.Column="1" Margin="10,0" Size="20" PreviewMouseDown="RepeatIcon_PreviewMouseDown"/>
+                            </Grid>
                         </Grid>
-                    </Border>
 
-                    <Border Margin="15,10"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Padding="10"
-                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                            Style="{DynamicResource SettingCardStyle}">
-                        <Grid>
+                        <local:ProtocolTemplateEditorControl Grid.Row="1" Margin="10" x:Name="BaseTextProtocol" IsErrorsTemplate="False">
+                            <local:ProtocolTemplateEditorControl.Style>
+                                <Style TargetType="local:ProtocolTemplateEditorControl">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding ElementName=ToggleSettingsTextProtocolButton, Path=IsArrowUp}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+
+                                    </Style.Triggers>
+                                </Style>
+                            </local:ProtocolTemplateEditorControl.Style>
+                        </local:ProtocolTemplateEditorControl>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3" 
+                        Style="{DynamicResource SettingCardWithToggleStyle}" 
+                        Margin="15,10" 
+                        >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
+
                             <TextBlock 
-                                Grid.Column="0"
-                                Text="{Binding Source={StaticResource Settings_Protocol_ErrorTextCard_Title}, Path=Value}" 
-                                Padding="0,4,0,4"
+                                Text="Текст протокола с ошибками" 
+                                Padding="10,10"
                                 Style="{DynamicResource SettingsTitleStyle}"
-                                Margin="0,0,6,0"/>
+                                Grid.Row="0"/>
 
-                            <StackPanel Grid.Column="1"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center">
-                                <Icons:ArrowButton x:Name="ToggleSettingsTextProtocolErrorsButton"
-                                                   HorizontalAlignment="Left"
-                                                   Width="30"
-                                                   Height="30"
-                                                   Margin="0"
-                                                   ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                                                   ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                   ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                   ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
-                                                   VerticalAlignment="Center"/>
+                            <Grid Grid.Column="1"  Margin="20,0">
 
-                                <Icons:RepeatIcon x:Name="RestartClearProtocolErrors"
-                                                  Margin="8,0,0,0"
-                                                  Size="20"
-                                                  PreviewMouseDown="RepeatErrorIcon_PreviewMouseDown"/>
-                            </StackPanel>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Icons:ArrowButton x:Name="ToggleSettingsTextProtocolErrorsButton" 
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    Width="30" Height="30"
+                                    ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                    ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                    ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                    ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
+                                    VerticalAlignment="Center"/>
+
+                                <Icons:RepeatIcon x:Name="RestartClearProtocolErrors" Grid.Column="1" Margin="10,0" Size="20" PreviewMouseDown="RepeatErrorIcon_PreviewMouseDown"/>
+                            </Grid>
                         </Grid>
-                    </Border>
-                </WrapPanel>
 
-                <StackPanel Grid.Row="2">
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Visible"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Style>
+                        <local:ProtocolTemplateEditorControl Grid.Row="1" Margin="10" x:Name="BaseTextProtocolErrors" IsErrorsTemplate="True">
+                            <local:ProtocolTemplateEditorControl.Style>
+                                <Style TargetType="local:ProtocolTemplateEditorControl">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
 
-                    <ContentControl Margin="15,0,15,10">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=ToggleSettingsTextProtocolButton, Path=IsArrowUp}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
+                                        <DataTrigger Binding="{Binding ElementName=ToggleSettingsTextProtocolErrorsButton, Path=IsArrowUp}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
 
-                        <Border HorizontalAlignment="Left"
-                                Padding="10"
-                                Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                                Style="{DynamicResource SettingCardStyle}">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Source={StaticResource Settings_Protocol_CleanTextCard_Description}, Path=Value}"
-                                           Style="{DynamicResource SettingsDescriptionStyle}"
-                                           Margin="0,0,0,8"/>
-
-                                <local:ProtocolTemplateEditorControl x:Name="BaseTextProtocol" IsErrorsTemplate="False"/>
-                            </StackPanel>
-                        </Border>
-                    </ContentControl>
-
-                    <ContentControl Margin="15,0,15,10">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=ToggleSettingsTextProtocolErrorsButton, Path=IsArrowUp}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-
-                        <Border HorizontalAlignment="Left"
-                                Padding="10"
-                                Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                                Style="{DynamicResource SettingCardStyle}">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Source={StaticResource Settings_Protocol_ErrorTextCard_Description}, Path=Value}"
-                                           Style="{DynamicResource SettingsDescriptionStyle}"
-                                           Margin="0,0,0,8"/>
-
-                                <local:ProtocolTemplateEditorControl x:Name="BaseTextProtocolErrors" IsErrorsTemplate="True"/>
-                            </StackPanel>
-                        </Border>
-                    </ContentControl>
-                </StackPanel>
+                                    </Style.Triggers>
+                                </Style>
+                            </local:ProtocolTemplateEditorControl.Style>
+                        </local:ProtocolTemplateEditorControl>
+                    </Grid>
+                </Border>
 
             </Grid>
 

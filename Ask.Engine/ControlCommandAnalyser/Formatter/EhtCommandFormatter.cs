@@ -59,7 +59,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
 
       if (eht.Comment.Count > 0)
       {
-        yield return $"\tКомментарии:";
+        yield return $"\tКомметрии:";
         foreach (var line in eht.Comment)
         {
           var trimmed = line.Trim();

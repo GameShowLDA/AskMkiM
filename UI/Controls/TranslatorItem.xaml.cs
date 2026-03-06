@@ -2,18 +2,12 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
-using ICSharpCode.AvalonEdit;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using UI.Controls.ErrorList;
-using System.Windows.Media;
-using UI.Components;
 using UI.Controls.TextEditor;
-using UI.Services;
 
 namespace UI.Controls
 {
@@ -79,11 +73,11 @@ namespace UI.Controls
 
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(IDisplayIssue item)
     {
-      var leftEditor = GetLeftBox().GetTextEditor();
-      leftEditor.GoToLine(item.SourceLineNumber);
+      var leftEditor = GetLeftEditor();
+      leftEditor?.GoToLine(item.SourceLineNumber);
 
-      var rightEditor = GetRightBox().GetTextEditor();
-      rightEditor.GoToLine(item.FormattedLineNumber);
+      var rightEditor = GetRightEditor();
+      rightEditor?.GoToLine(item.FormattedLineNumber);
     }
 
     private void ErrorClear()
@@ -102,26 +96,8 @@ namespace UI.Controls
 
       DetachFromParent(element);
 
-      if (LeftBox == null || element == null)
-      {
-        return;
-      }
-
-      var leftEditor = GetLeftBox();
-      if (leftEditor == null)
-      {
-        LeftBox.Children.Clear();
-        leftEditor = new TranslatorTextEditor();
-        LeftBox.Children.Add(leftEditor);
-      }
-
-      leftEditor.SetEditor(editor);
-      leftEditor.SaveRequested -= LeftEditor_SaveRequested;
-      leftEditor.SaveRequested += LeftEditor_SaveRequested;
-      leftEditor.OpenFolderRequested -= LeftEditor_OpenFolderRequested;
-      leftEditor.OpenFolderRequested += LeftEditor_OpenFolderRequested;
-      leftEditor.PrintRequested -= LeftEditor_PrintRequested;
-      leftEditor.PrintRequested += LeftEditor_PrintRequested;
+      LeftBox.Children.Clear();
+      LeftBox.Children.Add(element);
     }
 
     public void SetRightEditor(ITextEditorView textEditorUI)
@@ -129,101 +105,17 @@ namespace UI.Controls
       if (RightBox == null || textEditorUI == null)
         return;
 
-      var rightEditor = GetRightBox();
-      if (rightEditor == null)
-      {
-        RightBox.Children.Clear();
-        rightEditor = new TranslatorEditor();
-        RightBox.Children.Add(rightEditor);
-      }
-
-      rightEditor.SetEditor(textEditorUI);
-      rightEditor.BackRequested -= RightEditor_BackRequestedAsync;
-      rightEditor.BackRequested += RightEditor_BackRequestedAsync;
+      RightBox.Children.Clear();
+      RightBox.Children.Add(textEditorUI.View);
     }
 
-    private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
-    {
-      if (TranslatorNavigationService.TryOpenSourceFileFromTranslator(GetRightBox()))
-      {
-        CloseTranslatorTab();
-      }
-    }
-
-    private void LeftEditor_SaveRequested(object? sender, EventArgs e)
-    {
-      FindMultiEditorControl()?.EditorDocumentService.SaveFile();
-    }
-
-    private void LeftEditor_OpenFolderRequested(object? sender, EventArgs e)
-    {
-      FindMultiEditorControl()?.EditorDocumentService.OpenFolder();
-    }
-
-    private void LeftEditor_PrintRequested(object? sender, EventArgs e)
-    {
-      FindMultiEditorControl()?.EditorDocumentService.PrintFile();
-    }
-
-    private void CloseTranslatorTab()
-    {
-      var textEditorContainer = FindTextEditorContainer();
-      if (textEditorContainer == null)
-      {
-        return;
-      }
-
-      var translatorDockItem = textEditorContainer.DockManager.DockItems
-        .FirstOrDefault(item => item.Content == this);
-
-      translatorDockItem?.PerformClose();
-    }
-
-    private TextEditorContainer? FindTextEditorContainer()
-    {
-      DependencyObject? current = this;
-
-      while (current != null)
-      {
-        if (current is TextEditorContainer textEditorContainer)
-        {
-          return textEditorContainer;
-        }
-
-        current = current is FrameworkElement frameworkElement && frameworkElement.Parent != null
-          ? frameworkElement.Parent
-          : VisualTreeHelper.GetParent(current);
-      }
-
-      return null;
-    }
-
-    private MultiEditorControl? FindMultiEditorControl()
-    {
-      DependencyObject? current = this;
-
-      while (current != null)
-      {
-        if (current is MultiEditorControl multiEditorControl)
-        {
-          return multiEditorControl;
-        }
-
-        current = current is FrameworkElement frameworkElement && frameworkElement.Parent != null
-          ? frameworkElement.Parent
-          : VisualTreeHelper.GetParent(current);
-      }
-
-      return null;
-    }
-
-    public TranslatorEditor GetRightBox()
+    public TextEditorUI GetRightEditor()
     {
       if (RightBox == null) return null;
       return RightBox.Children[0] as TextEditorUI;
     }
 
-    public TranslatorTextEditor GetLeftBox()
+    public TextEditorUI GetLeftEditor()
     {
       if (LeftBox == null) return null;
       return LeftBox.Children[0] as TextEditorUI;
@@ -279,16 +171,6 @@ namespace UI.Controls
       }
     }
 
-    public void SetRightEditorName(string newText)
-    {
-      GetRightBox().TranslationFileName.Text = newText;
-    }
-
-    public void SetLeftEditorName(string newText)
-    {
-      GetLeftBox().FileName.Text = newText;
-    }
-
     private static void DetachFromParent(UIElement element)
     {
       switch (element)
@@ -320,8 +202,9 @@ namespace UI.Controls
 
       model.HasBreakpoint = true;
 
-      var left = GetLeftBox().GetTextEditor();
-      var right = GetRightBox().GetTextEditor();
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+      if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;
@@ -332,7 +215,7 @@ namespace UI.Controls
       ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: true);
 
       if (obj.LineNumber == leftLine - 1)
-        right.GoToLineWithoutSelection(rightLine);
+        right.ScrollToLine(rightLine);
     }
 
     /// <summary>
@@ -348,8 +231,9 @@ namespace UI.Controls
 
       model.HasBreakpoint = false;
 
-      var left = GetLeftBox().GetTextEditor();
-      var right = GetRightBox().GetTextEditor();
+      var left = GetLeftEditor();
+      var right = GetRightEditor();
+      if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;

@@ -16,11 +16,7 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.IO;
-using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
@@ -371,27 +367,6 @@ namespace UI.Controls.TextEditor
         //textEditor.Select(line.Offset, line.Length);
         textEditor.Focus();
       }
-      GoToLineCore(lineNumber, selectLine: true);
-    }
-
-    /// <summary>
-    /// Переходит к указанной строке без выделения текста.
-    /// </summary>
-    /// <param name="lineNumber">Номер строки (1-based).</param>
-    public void GoToLineWithoutSelection(int lineNumber)
-    {
-      GoToLineCore(lineNumber, selectLine: false);
-    }
-
-    private void GoToLineCore(int lineNumber, bool selectLine)
-    {
-      if (textEditor.Document == null || lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
-        return;
-
-      var line = textEditor.Document.GetLineByNumber(lineNumber);
-      textEditor.ScrollToLine(lineNumber);
-      textEditor.Select(line.Offset, selectLine ? line.Length : 0);
-      textEditor.Focus();
     }
 
 
@@ -484,8 +459,6 @@ namespace UI.Controls.TextEditor
         foldingManager = FoldingManager.Install(textEditor.TextArea);
 
       foldingStrategy.UpdateFoldings(foldingManager, textEditor.Document);
-      ReplaceLineNumberMargin();
-      ReplaceFoldingMargin();
     }
 
     /// <summary>
@@ -581,7 +554,6 @@ namespace UI.Controls.TextEditor
       FileType = fileType;
       TextEditorModel = textEditorModel;
       _defaultFontSize = textEditor.FontSize;
-      EnsureLineNumbersForeground();
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
 
@@ -589,8 +561,6 @@ namespace UI.Controls.TextEditor
       {
         _executionMargin = new ExecutionGlyphMargin(textEditor);
         textEditor.TextArea.LeftMargins.Insert(0, _executionMargin);
-        ReplaceLineNumberMargin();
-        ReplaceFoldingMargin();
       }
 
       if (_markerService == null)
@@ -629,127 +599,6 @@ namespace UI.Controls.TextEditor
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
-    }
-
-    /// <summary>
-    /// Заменяет стандартный марджин номеров строк на версию
-    /// с поддержкой фоновой заливки активного диапазона команды.
-    /// </summary>
-    private void ReplaceLineNumberMargin()
-    {
-      var leftMargins = textEditor.TextArea.LeftMargins;
-
-      for (int i = 0; i < leftMargins.Count; i++)
-      {
-        if (leftMargins[i].GetType().Name == "ActiveRangeLineNumberMargin")
-          return;
-
-        if (leftMargins[i] is not LineNumberMargin lineNumberMargin)
-          continue;
-
-        var rangeAwareMargin = _executionMargin.CreateRangeAwareLineNumberMargin();
-        CopyLineNumberMarginState(lineNumberMargin, rangeAwareMargin);
-        BindLineNumberForeground(rangeAwareMargin);
-        leftMargins.RemoveAt(i);
-        leftMargins.Insert(i, rangeAwareMargin);
-        return;
-      }
-    }
-
-    /// <summary>
-    /// Заменяет стандартный марджин сворачивания на версию
-    /// с поддержкой фоновой заливки активного диапазона команды.
-    /// </summary>
-    private void ReplaceFoldingMargin()
-    {
-      var leftMargins = textEditor.TextArea.LeftMargins;
-
-      for (int i = 0; i < leftMargins.Count; i++)
-      {
-        if (leftMargins[i].GetType().Name == "ActiveRangeFoldingMargin")
-          return;
-
-        if (leftMargins[i] is not FoldingMargin foldingMargin)
-          continue;
-
-        var rangeAwareMargin = _executionMargin.CreateRangeAwareFoldingMargin();
-        CopyFoldingMarginState(foldingMargin, rangeAwareMargin);
-
-        leftMargins.RemoveAt(i);
-        leftMargins.Insert(i, rangeAwareMargin);
-        return;
-      }
-    }
-
-    /// <summary>
-    /// Настраивает оттенок номеров строк под тему, если он не задан явно.
-    /// </summary>
-    private void EnsureLineNumbersForeground()
-    {
-      object localValue = textEditor.ReadLocalValue(ICSharpCode.AvalonEdit.TextEditor.LineNumbersForegroundProperty);
-      if (localValue != DependencyProperty.UnsetValue && textEditor.LineNumbersForeground != null)
-        return;
-
-      textEditor.SetResourceReference(
-        ICSharpCode.AvalonEdit.TextEditor.LineNumbersForegroundProperty,
-        "TextEditorLineNumberBrush");
-    }
-
-    /// <summary>
-    /// Привязывает foreground кастомного марджина к свойству редактора.
-    /// </summary>
-    private void BindLineNumberForeground(LineNumberMargin margin)
-    {
-      BindingOperations.SetBinding(
-        margin,
-        TextElement.ForegroundProperty,
-        new Binding(nameof(ICSharpCode.AvalonEdit.TextEditor.LineNumbersForeground))
-        {
-          Source = textEditor,
-          Mode = BindingMode.OneWay
-        });
-    }
-
-    /// <summary>
-    /// Копирует состояние штатного FoldingMargin в пользовательский,
-    /// чтобы сохранить работу glyph-иконок и взаимодействие с FoldingManager.
-    /// </summary>
-    private static void CopyFoldingMarginState(FoldingMargin source, AbstractMargin target)
-    {
-      CopyProperty(source, target, "FoldingManager");
-      CopyProperty(source, target, "FoldingMarkerBrush");
-      CopyProperty(source, target, "SelectedFoldingMarkerBrush");
-      CopyProperty(source, target, "SelectedFoldingMarkerBackgroundBrush");
-      CopyProperty(source, target, "FoldingControlPen");
-    }
-
-    /// <summary>
-    /// Копирует визуальное состояние штатного LineNumberMargin в пользовательский.
-    /// </summary>
-    private static void CopyLineNumberMarginState(LineNumberMargin source, LineNumberMargin target)
-    {
-      CopyProperty(source, target, "Style");
-    }
-
-    /// <summary>
-    /// Безопасно копирует свойство через reflection при совпадении типов.
-    /// </summary>
-    private static void CopyProperty(object source, object target, string propertyName)
-    {
-      var sourceProp = source.GetType().GetProperty(
-        propertyName,
-        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-      var targetProp = target.GetType().GetProperty(
-        propertyName,
-        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-      if (sourceProp?.CanRead != true || targetProp?.CanWrite != true)
-        return;
-
-      if (!targetProp.PropertyType.IsAssignableFrom(sourceProp.PropertyType))
-        return;
-
-      targetProp.SetValue(target, sourceProp.GetValue(source));
     }
 
     #endregion

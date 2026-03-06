@@ -40,16 +40,10 @@ namespace NewCore.Function.DeviceBusCommutation
     {
       _deviceBusCommutation = deviceBusCommutation;
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
-      InitializeDeviceBusStatus();
     }
 
     /// <inheritdoc />
     private void ConnectableManager_IsReset()
-    {
-      InitializeDeviceBusStatus();
-    }
-
-    private void InitializeDeviceBusStatus()
     {
       deviceBusStatus.Clear();
 
@@ -60,11 +54,6 @@ namespace NewCore.Function.DeviceBusCommutation
           deviceBusStatus[(device, bus)] = false;
         }
       }
-    }
-
-    private bool IsConnected(DeviceType deviceType, SwitchingBusNew bus)
-    {
-      return deviceBusStatus.TryGetValue((deviceType, bus), out var isConnected) && isConnected;
     }
 
     #region Мультиметр.
@@ -251,7 +240,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnected(DeviceType.BreakdownTester, BreakdownBus))
+      if (deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)])
         return true;
 
       var result = await SetBreakdownTesterState(true);
@@ -267,7 +256,7 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      if (!IsConnected(DeviceType.BreakdownTester, BreakdownBus))
+      if (!deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)])
         return true;
 
       var result = await SetBreakdownTesterState(false);
@@ -354,14 +343,8 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnected(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus))
+      if (deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)])
         return true;
-
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = true;
-        return true;
-      }
 
       var command = new DeviceCommand(5, 7, 0, 1);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
@@ -379,14 +362,8 @@ namespace NewCore.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (!IsConnected(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus))
+      if (!deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)])
         return true;
-
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
-        return true;
-      }
 
       var command = new DeviceCommand(5, 7, 0, 2);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);

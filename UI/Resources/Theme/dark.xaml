@@ -12,9 +12,6 @@
     <SolidColorBrush x:Key="MenuBackgroundBrushes" Color="#232932"/>
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#303843"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#1ca3e9"/>
-    <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#282E37"/>
-    <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#282E37"/>
-    <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="SettingsMainBackground" Color="#3a4655"/>
     <SolidColorBrush x:Key="DrawerBackdropBrush" Color="#6610151C"/>
     <SolidColorBrush x:Key="DrawerPanelBackgroundBrush" Color="#2A313D"/>
@@ -27,15 +24,6 @@
     <SolidColorBrush x:Key="DrawerAccentBrush" Color="#78A8E6"/>
     <SolidColorBrush x:Key="DrawerGlowBrush" Color="#4D6FA3"/>
     <SolidColorBrush x:Key="DrawerHighlightBrush" Color="#40FFFFFF"/>
-    <SolidColorBrush x:Key="NotificationCardBackgroundBrush" Color="#474A54"/>
-    <SolidColorBrush x:Key="NotificationCardBorderBrush" Color="#5B6070"/>
-    <SolidColorBrush x:Key="NotificationTitleBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="NotificationMessageBrush" Color="#F2F5FA"/>
-    <SolidColorBrush x:Key="NotificationInfoIconBrush" Color="#7FB3FF"/>
-    <SolidColorBrush x:Key="NotificationSuccessIconBrush" Color="#59C770"/>
-    <SolidColorBrush x:Key="NotificationWarningIconBrush" Color="#F3B24E"/>
-    <SolidColorBrush x:Key="NotificationErrorIconBrush" Color="#FF7A5D"/>
-    <Color x:Key="NotificationCardShadowColor">#66000000</Color>
     <SolidColorBrush x:Key="DeviceInputShellBackgroundBrush" Color="#2A313D"/>
     <SolidColorBrush x:Key="DeviceInputSectionBorderBrush" Color="#5A6A7D"/>
     <Color x:Key="DeviceInputSectionShadowColor">#000000</Color>
@@ -485,7 +473,6 @@
     <!--#region Общая панель с настройками -->
     <SolidColorBrush x:Key="SettingsPanelBackgroundSolidColorBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="SettingsPanelBorderSolidColorBrush" Color="#282E37"/>
-    <SolidColorBrush x:Key="SettingsNestedGroupBackgroundSolidColorBrush" Color="#2C343E"/>
 
     <Style x:Key="SettingPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"/>
@@ -522,11 +509,6 @@
         <Setter Property="Background" Value="#303843"/>
         <Setter Property="Foreground" Value="#f3f0f9"/>
     </Style>
-    <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#8CF3F0F9"/>
-    <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#B3F3F0F9"/>
-    <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#FFF3F0F9"/>
-    <SolidColorBrush x:Key="TextEditorActiveCommandStripeBrush" Color="#A98BFF"/>
-    <SolidColorBrush x:Key="TextEditorActiveCommandBackgroundBrush" Color="#3A4655"/>
     
     <!--#endregion-->
 

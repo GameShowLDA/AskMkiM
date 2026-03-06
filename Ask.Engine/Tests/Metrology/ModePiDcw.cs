@@ -109,7 +109,7 @@ namespace Ask.Engine.Tests.Metrology
         await messageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_DCW, param);
-        await meterDevice.DcwManger.Measure.MeasureAsync(param, LowerBound, UpperBound);
+        await meterDevice.DcwManger.Measure.MeasureAsync();
         var result = await MeasuredReferenceMeter(messageService, param);
 
         var answer = (result >= LowerBound && result <= UpperBound) ? false : true;

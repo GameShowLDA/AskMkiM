@@ -40,12 +40,5 @@ namespace Ask.Core.Shared.Entity.Settings
     /// Включает вывод значений, зафиксированных измерительными модулями.
     /// </summary>
     public bool ShowMeasurementResults { get; set; }
-
-    /// <summary>
-    /// Определяет, отображаются ли промежуточные результаты измерений,
-    /// полученные в ходе выполнения программы контроля до формирования
-    /// итогового результата.
-    /// </summary>
-    public bool ShowIntermediateMeasurementResults { get; set; }
   }
 }

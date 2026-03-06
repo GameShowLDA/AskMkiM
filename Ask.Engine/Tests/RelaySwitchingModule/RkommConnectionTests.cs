@@ -147,11 +147,13 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       double result = 0;
 
+      // Основной цикл теста
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
-        cancellationToken.ThrowIfCancellationRequested();
-        await _module.PointManager.ConnectRelayAsync(BusPoint.AB, i, _userInteractionService);
+        // Коммутируем точку
+        await RelayModuleHelper.PointConnectAsync(_module, BusPoint.AB, i, _userInteractionService, cancellationToken);
 
+        // Измеряем сопротивление ПОСЛЕ коммутации точки
         result = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
             _userInteractionService,
@@ -160,7 +162,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
             _module,
             data.Param);
 
-        await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, i, _userInteractionService);
+        // Отключаем точку
+        await RelayModuleHelper.PointDisconnectAsync(_module, BusPoint.AB, i, _userInteractionService, cancellationToken);
       }
     }
 
@@ -173,12 +176,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken)
     {
-      if (!needReset)
-      {
-        return;
-      }
-
-      await _module.ConnectableManager.ResetAsync();
+      if (!needReset) return;
+      await RelayModuleHelper.ResetModule(_userInteractionService, _userInteractionService, _module);
       await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);

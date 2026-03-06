@@ -67,7 +67,7 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 
       await Task.Delay(10);
 
-      double result = await GetMeasurementResult(messageService, voltage, firstNorm, lastNorm, delay, fastMeter);
+      double result = await GetMeasurementResult(messageService, voltage, delay, fastMeter);
       bool error = !(result >= firstNorm && result <= lastNorm);
 
       var status = error ? ShowMessageModel.MessageType.Error : ShowMessageModel.MessageType.Success;
@@ -85,10 +85,10 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
     /// <returns>Результат измерения.</returns>
-    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, double voltage, double rangeFrom, double rangeTo, int delay, IFastMeter meter)
+    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, double voltage, int delay, IFastMeter meter)
     {
       await Task.Delay(delay);
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage, rangeFrom, rangeTo, messageService);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage, messageService);
       LogInformation($"Измеренное напряжение: {result} В", isDeviceLog: true);
       return result;
     }

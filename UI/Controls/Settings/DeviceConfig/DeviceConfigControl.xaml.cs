@@ -36,7 +36,15 @@ namespace UI.Controls.Settings.DeviceConfig
       chassisManager.NewSystem += (s, a) => NewSystem();
       chassisManager.SystemSelected += (s, a) => SelectedChassis(a);
 
-      ReloadConfiguration();
+      try
+      {
+        var data = new ChassisManagerServices().GetAll().First();
+        AddSystem(data);
+      }
+      catch
+      {
+        return;
+      }
 
       MouseMove += (s, e) =>
       {
@@ -307,44 +315,6 @@ namespace UI.Controls.Settings.DeviceConfig
     public void AddRack(RackEntity data)
     {
       chassisManager.AddRack(data);
-    }
-
-    /// <summary>
-    /// Перечитывает конфигурацию устройств из БД и обновляет отображение.
-    /// </summary>
-    public void ReloadConfiguration()
-    {
-      deviceBorder.Child = null;
-      settingsBorder.Child = null;
-      ToggleThirdColumn(false);
-
-      chassisManager.Reset();
-
-      var chassisList = new ChassisManagerServices()
-        .GetAll()
-        .OrderBy(chassis => chassis.Number)
-        .ToList();
-
-      foreach (var chassis in chassisList)
-      {
-        AddSystem(chassis);
-      }
-
-      var racks = new RackServices()
-        .GetAllEntities()
-        .OrderBy(rack => rack.NumberChassis)
-        .ThenBy(rack => rack.Number)
-        .ToList();
-
-      foreach (var rack in racks)
-      {
-        AddRack(rack);
-      }
-
-      if (chassisList.Count > 0)
-      {
-        SelectedChassis(chassisList[0]);
-      }
     }
 
     /// <summary>

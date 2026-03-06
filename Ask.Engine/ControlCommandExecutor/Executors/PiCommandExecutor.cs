@@ -26,12 +26,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
-      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}/{command.CommandNumber} {command.Mnemonic}";
+      var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      message = message.Replace("ПИ", "ПИ/ПИ");
 
       SetActiveLine(context, command);
 
+      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
@@ -50,6 +50,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.SiCommand != null)
       {
+        await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 1", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
         command.SiCommand.FormattedStartLineNumber = command.FormattedStartLineNumber;
         command.SiCommand.CommandNumber = siCommanNumber + " " + 1;
 
@@ -60,7 +61,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
-       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 2", message: $"{nameCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 });
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
@@ -136,9 +137,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (command.SiCommand != null)
       {
+        nameSiCommand = $"ПИ/СИ2";
+        await context.Console.ShowMessageAsync(new ShowMessageModel($"\r\nВыполнение 3", message: $"{nameSiCommand}", headerColor: ShowMessageModel.SuccessMessage.TitleColor, type: ShowMessageModel.MessageType.CommandBlock) { IndentLevel = 2 }, IsBlockStart: true);
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
         var siCommandExecutor = new SiCommandExecutor();
-        commandExecutionContext.IsInvokedByAnotherCommand = true;
 
         command.SiCommand.CommandNumber = siCommanNumber + " " + 2;
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
@@ -202,12 +204,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (type == VoltageEnum.Type.ACW)
         {
-          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value, 0, amperhMaxACW);
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value);
           return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
         }
         else
         {
-          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value, 0, amperhMaxDCW);
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value);
           return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
         }
 
@@ -234,7 +236,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(10)).value;
+          answer = !ExecutionConfig.GetIsIdleModeEnabled() ?
+                   (await breadDown.AcwManger.Measure.MeasureAsync(10)).value :
+                   !await ExecutionConfig.GetIsErrorSimulationEnabled() ? 10 : new Random().Next(80, 150);
 
           var type = ShowMessageModel.MessageType.Success;
           if (answer >= value)

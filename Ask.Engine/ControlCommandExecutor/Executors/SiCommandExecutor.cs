@@ -25,7 +25,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<SiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = string.Empty;
+      var message = BuildSourceLinesMessage(command);
+
       SetActiveLine(context, command);
 
       if (context.IsInvokedByAnotherCommand)
@@ -38,11 +39,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           nameCommand = $"{command.CommandNumber} ПИ/{command.Mnemonic}";
         }
-
-        message = nameCommand;
       }
 
-      message += BuildSourceLinesMessage(command);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
@@ -119,7 +117,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var answer = (await breadDown.IrManger.Measure.MeasureAsync(value, firstValue)).value;
+        var answer = (await breadDown.IrManger.Measure.MeasureAsync(value)).value;
         var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer);
 
         return result;

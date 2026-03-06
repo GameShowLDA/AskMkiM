@@ -56,6 +56,17 @@ namespace NewCore.Function.Keysight3466new
     /// <inheritdoc />
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
+      if (rangeTo == -1)
+      {
+        rangeTo = double.MaxValue;
+      }
+
+      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo);
+      if (random != -1)
+      {
+        return random;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");

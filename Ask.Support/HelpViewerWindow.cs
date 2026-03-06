@@ -34,7 +34,7 @@ namespace Ask.Support
     /// </remarks>
     public static void Load(string page) 
     { 
-      _helpWindow?.Load(HelpServer.BaseUrl + page);
+      _helpWindow?.Load($"http://localhost:{HelpServer.Port}" + page);
       _helpWindow?.SetTopMost(true);
       _helpWindow?.SetTopMost(false);
     }

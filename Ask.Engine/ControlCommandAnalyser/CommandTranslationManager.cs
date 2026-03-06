@@ -407,24 +407,17 @@ namespace Ask.Engine.ControlCommandAnalyser
           if (algorithmKey != null)
           {
             var algorithmKeysList = algorithmKey.ToList();
-            foreach(var key in algorithmKeysList)
+            for (int i = 0; i < algorithmKeysList.Count; i++)
             {
-              if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
+              if (!string.IsNullOrEmpty(algorithmKeysList[i]) && !string.IsNullOrWhiteSpace(algorithmKeysList[i]) && i < algorithmKeysList.Count - 1)
               {
-                newSourseLines.Append($"{key}, ");
+                newSourseLines.Append($"{algorithmKeysList[i]}, ");
+              }
+              else
+              {
+                newSourseLines.Append($"{algorithmKeysList[i]} ");
               }
             }
-            //for (int i = 0; i < algorithmKeysList.Count; i++)
-            //{
-            //  if (!string.IsNullOrEmpty(algorithmKeysList[i]) && !string.IsNullOrWhiteSpace(algorithmKeysList[i]) && i < algorithmKeysList.Count - 1)
-            //  {
-            //    newSourseLines.Append($"{algorithmKeysList[i]}, ");
-            //  }
-            //  else
-            //  {
-            //    newSourseLines.Append($"{algorithmKeysList[i]} ");
-            //  }
-            //}
           }
         }
         var pointsLine = new StringBuilder();

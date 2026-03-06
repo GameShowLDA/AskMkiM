@@ -270,15 +270,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       model.HigherLimitResistance = higherFinal;
       model.HigherLimitResistanceSource = $"{higherFinal} {parsed.Unit}";
 
-      model.ResistanceUnit = parsed.Unit;
-
       if (parsed.Cabel.HasValue)
       {
         model.CabelResistance = parsed.Cabel.Value;
         model.CabelResistanceSource =
             $"{parsed.Cabel.Value} {parsed.CabelUnit}";
-
-        model.CabelResistanceUnit = parsed.CabelUnit;
       }
     }
 

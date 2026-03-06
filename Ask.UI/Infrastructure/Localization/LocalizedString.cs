@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace Ask.UI.Infrastructure.Localization
 {
@@ -76,22 +75,9 @@ namespace Ask.UI.Infrastructure.Localization
 
     public static void RefreshAll()
     {
-      void Refresh()
+      foreach (var instance in _instances)
       {
-        foreach (var instance in _instances)
-        {
-          instance.OnPropertyChanged(nameof(Value));
-        }
-      }
-
-      var dispatcher = Application.Current?.Dispatcher;
-      if (dispatcher != null && !dispatcher.CheckAccess())
-      {
-        dispatcher.Invoke(Refresh);
-      }
-      else
-      {
-        Refresh();
+        instance.OnPropertyChanged(nameof(Value));
       }
     }
   }

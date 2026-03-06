@@ -102,7 +102,7 @@ namespace NewCore.Function.GPT.SelfCheck
           await breakdownTester.AcwManger.Measure.ApplyVoltageAsync(userMessageService);
           await Task.Delay(150);
 
-          var resultMeter = await meter.AcVoltageManager.MeasureACVoltageAsync(i, userMessageService: userMessageService);
+          var resultMeter = await meter.AcVoltageManager.MeasureACVoltageAsync(i, userMessageService);
 
           await breakdownTester.AcwManger.Measure.StopMeasure();
         }
@@ -149,7 +149,7 @@ namespace NewCore.Function.GPT.SelfCheck
         await breakdownTester.DcwManger.Measure.ApplyVoltageAsync(userMessageService);
         await Task.Delay(200);
 
-        var resultMeter = await meter.DcVoltageManager.MeasureDCVoltageAsync(i, userMessageService: userMessageService);
+        var resultMeter = await meter.DcVoltageManager.MeasureDCVoltageAsync(i, userMessageService);
 
         await breakdownTester.DcwManger.Measure.StopMeasure();
       }

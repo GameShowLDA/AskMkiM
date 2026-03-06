@@ -52,22 +52,11 @@ namespace NewCore.FunctionAdapters.Keysight3466new
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureCapacitanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    public async Task<double> MeasureCapacitanceAsync(double param = 0, IUserInteractionService? userMessageService = null)
     {
-      if (rangeTo == -1)
-      {
-        rangeTo = double.MaxValue;
-      }
-
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.Capacitance);
-      if (random != -1)
-      {
-        return random;
-      }
-
       try
       {
-        double result = await _measurement.MeasureCapacitanceAsync(param, rangeFrom, rangeTo);
+        double result = await _measurement.MeasureCapacitanceAsync(param);
         return result;
       }
       catch (Exception ex)

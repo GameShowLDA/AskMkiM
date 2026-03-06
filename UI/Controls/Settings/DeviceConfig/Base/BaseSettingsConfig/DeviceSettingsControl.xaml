@@ -34,7 +34,46 @@
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
         </Style>
 
-        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}" />
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Track Name="PART_Track" IsDirectionReversed="true">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineUpCommand" 
+                                          Background="Transparent" 
+                                          BorderThickness="0" 
+                                          Height="10"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Name="Thumb" 
+                                   Background="{DynamicResource SettingsInfoTabloBackgroundSolidColorBrush}" 
+                                   BorderThickness="0"
+                                   Cursor="ScrollNS">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="Transparent" 
+                                                BorderThickness="0"
+                                                CornerRadius="10"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineDownCommand" 
+                                          Background="Transparent" 
+                                          BorderThickness="0" 
+                                          Height="10"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <DropShadowEffect x:Key="ShadowEffect" 
                          BlurRadius="20" 

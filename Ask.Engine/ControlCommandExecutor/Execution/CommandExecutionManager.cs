@@ -5,7 +5,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
@@ -112,8 +111,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     public async Task ExecuteAllAsync()
     {
       int index = 0;
-      CommandExecutionState.LastCuResult = null;
-      CommandExecutionState.LastRejectFlag = false;
 
       while (index < _commands.Count)
       {
@@ -144,12 +141,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           var context = new CommandExecutionContext(
               this, command, _console, _textEditor, _opkFilePath);
 
-          int? jumpToIndex = null;
-          context.JumpToCommandNumber = targetLabel =>
-          {
-            jumpToIndex = ResolveJumpIndex(targetLabel);
-          };
-
           if (_executorRegistry.TryGet(command.Mnemonic, out var executor))
           {
             await executor.ExecuteAsync(context, _protocolModel);
@@ -161,17 +152,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
                     message: command.Mnemonic,
                     type: ShowMessageModel.MessageType.Error));
           }
-
-          if (command is not UpCommandModel and not CuCommandModel)
-          {
-            CommandExecutionState.LastRejectFlag = HasExecutionErrors(command);
-          }
-
-          if (jumpToIndex.HasValue)
-          {
-            index = jumpToIndex.Value;
-            continue;
-          }
         }
         catch (Exception ex)
         {
@@ -181,54 +161,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         index++;
       }
-    }
-
-    private int? ResolveJumpIndex(string targetLabel)
-    {
-      if (string.IsNullOrWhiteSpace(targetLabel))
-      {
-        return null;
-      }
-
-      if (!int.TryParse(targetLabel, out var targetNumber))
-      {
-        return null;
-      }
-
-      var targetCommand = _commands.FindByNumber(targetNumber);
-      if (targetCommand == null)
-      {
-        return null;
-      }
-
-      var targetIndex = _commands.IndexOf(targetCommand);
-      return targetIndex >= 0 ? targetIndex : null;
-    }
-
-    private bool HasExecutionErrors(BaseCommandModel command)
-    {
-      var exactKey = $"{command.CommandNumber} {command.Mnemonic}";
-      if (_protocolModel.Errors.TryGetValue(exactKey, out var exactErrors) &&
-          exactErrors is { Count: > 0 })
-      {
-        return true;
-      }
-
-      var commandPrefix = $"{command.CommandNumber} ";
-      return _protocolModel.Errors.Any(kvp =>
-        kvp.Key.StartsWith(commandPrefix, StringComparison.OrdinalIgnoreCase) &&
-        kvp.Value is { Count: > 0 });
-    }
-
-    public BaseCommandModel? GetNextCommand(BaseCommandModel currentCommand)
-    {
-      var index = _commands.IndexOf(currentCommand);
-      if (index < 0 || index + 1 >= _commands.Count)
-      {
-        return null;
-      }
-
-      return _commands[index + 1];
     }
 
     private async Task ExecuteKscOnExceptionAsync(BaseCommandModel failedCommand, Exception ex)

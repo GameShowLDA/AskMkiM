@@ -48,14 +48,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errors, infos);
       }
 
-      if (context.TypeCommand != MeasurementTypeCommand.KC)
-      {
-        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
-      }
-      else
-      { 
-        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.ResistanceRelativeToFirstPoint, context.IsPolarityReversed));
-      }
+      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
 
       var newGroups = new List<GroupModel>();
 
@@ -86,34 +79,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           errors.AddRange(result.Errors);
           infos.AddRange(result.Infos);
 
-          if (context.TypeCommand == MeasurementTypeCommand.KC)
-          {
-            foreach (var failedMeasurement in result.FailedMeasurements)
-            {
-              var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
-                MeasurementTypeCommand.KC,
-                context.LowerLimit,
-                context.HigherLimit,
-                failedMeasurement.Value,
-                chains: $"{failedMeasurement.Chain} ");
-              error.Status = ShowMessageModel.MessageType.Error;
-              error.IndentLevel = 2;
-
-              errors.Add(error);
-
-              context.CommandManager.AddErrorMethod(
-                context.CommandModel.PointErrors.DisconnectChainError(
-                  $"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
-                  error.Header,
-                  error.Message,
-                  context.CommandModel.StartLineNumber,
-                  context.CommandModel.FormattedStartLineNumber));
-
-              await context.MessageService.ShowMessageAsync(error);
-            }
-          }
           // Добавляем одну запись об ошибке на исходную цепь, если есть разрывы (фрагментов > 1).
-          else if (result.Fragments.Count > 1)
+          if (result.Fragments.Count > 1)
           {
             var chainStr = BuildDisconnectionDisplayString(result.Fragments);
 
@@ -156,6 +123,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
+      if (errors.Count > 0)
+      {
+        await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результаты проверки") { IndentLevel = 1 });
+        foreach (var error in errors)
+        {
+          await context.MessageService.ShowMessageAsync(error);
+        }
+      }
+
+      // Формируем новый ССИРТ с учётом разрывов и сохраняем в контекст (не затираем исходный).
       var updatedScheme = new SchemeModel(newGroups);
       context.NewScheme = updatedScheme;
 
@@ -221,11 +198,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               brokenPoints.Add(point);
               firstFailureValue ??= measured.Value;
-
-              if (context.TypeCommand == MeasurementTypeCommand.KC)
-              {
-                result.FailedMeasurements.Add(new FailedMeasurement(chainStr, measured.Value));
-              }
             }
             else
             {
@@ -262,7 +234,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       result.FirstFailureValue ??= firstFailureValue;
 
       // Если найдены разрывы, формируем новую цепь из точек с разрывами и повторяем проверку.
-      if (brokenPoints.Count > 0 && context.TypeCommand != MeasurementTypeCommand.KC)
+      if (brokenPoints.Count > 0)
       {
         var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1);
         result.Append(nextFragment);
@@ -301,28 +273,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fragmentStrings = fragments.Select(fragment =>
       {
-        var points = fragment.PointModels.Select(p =>
-        {
-          var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
-          return $"{p.Mnemonic}{address}";
-        });
+          var points = fragment.PointModels.Select(p =>
+          {
+            var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
+            return $"{p.Mnemonic}{address}";
+          });
 
-        return string.Join(",", points);
+          return string.Join(",", points);
       });
 
       return $"*{string.Join("**", fragmentStrings)}*";
-    }
-
-    private sealed class FailedMeasurement
-    {
-      public FailedMeasurement(string chain, double value)
-      {
-        Chain = chain;
-        Value = value;
-      }
-
-      public string Chain { get; }
-      public double Value { get; }
     }
 
     private sealed class ChainProcessingResult
@@ -330,7 +290,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       public List<ChainModel> Fragments { get; } = new();
       public List<ShowMessageModel> Errors { get; } = new();
       public List<ShowMessageModel> Infos { get; } = new();
-      public List<FailedMeasurement> FailedMeasurements { get; } = new();
       public double? FirstFailureValue { get; set; }
 
       public void Append(ChainProcessingResult other)
@@ -341,7 +300,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         Fragments.AddRange(other.Fragments);
         Errors.AddRange(other.Errors);
         Infos.AddRange(other.Infos);
-        FailedMeasurements.AddRange(other.FailedMeasurements);
         FirstFailureValue ??= other.FirstFailureValue;
       }
     }
