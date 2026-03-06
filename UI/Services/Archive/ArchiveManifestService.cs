@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
@@ -119,7 +120,9 @@ namespace UI.Services.Archive
 
       if (string.IsNullOrWhiteSpace(archiveEntryName))
       {
-        throw new ArgumentException("Archive entry name is required.", nameof(archiveEntryName));
+        var message = $"Требуется указать имя записи в архиве.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveEntryName));
       }
 
       var normalizedEntryName = NormalizeEntryName(archiveEntryName);

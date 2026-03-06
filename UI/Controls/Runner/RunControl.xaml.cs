@@ -215,10 +215,10 @@ namespace UI.Controls.Runner
       rightEditor.BackRequested += TranslatorEditor_BackRequested;
       rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
-      rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(textEditorUI.TextEditorModel.FileName) ?
-        Path.GetFileName(textEditorUI.TextEditorModel.FilePath) : textEditorUI.TextEditorModel.FileName; ;
       var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
+      rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
+        Path.GetFileName(filePath) : fileName;
       var dockItemPk = new DockItem
       {
         Title = fileName,

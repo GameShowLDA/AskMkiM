@@ -30,9 +30,11 @@ namespace UI.Controls.Archive
     /// <summary>
     /// Файл ОПК.
     /// </summary>
-    public List<string>? OpkFileName { get; }
-    public string OpkFileNameDisplay =>
-    OpkFileName == null ? string.Empty : string.Join(Environment.NewLine, OpkFileName);
+    public string OpkFileName { get; }
+    
+    public List<string>? KD { get; }
+    public string KDDisplay =>
+    KD == null ? string.Empty : string.Join(Environment.NewLine, KD);
     /// <summary>
     /// Цех.
     /// </summary>
@@ -43,7 +45,7 @@ namespace UI.Controls.Archive
     public string? Comment { get; }
     public DateTime CreationDate { get; }
 
-    public ArchiveEntryInfo(string archivePath, string entryName, string name, string nameOK, string order, List<string> opkfileName,
+    public ArchiveEntryInfo(string archivePath, string entryName, string name, string nameOK, string order, string opkFileName, List<string> kd,
       string department, string comment, string opk, string ik, DateTime creationDate)
     {
       ArchivePath = archivePath;
@@ -51,7 +53,8 @@ namespace UI.Controls.Archive
       Name = name;
       NameOK = nameOK;
       Order = order;
-      OpkFileName = opkfileName;
+      OpkFileName = opkFileName;
+      KD = kd;
       Department = department;
       Comment = comment;
       OPK = opk;  

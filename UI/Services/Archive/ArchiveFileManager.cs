@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Text;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
@@ -12,12 +13,16 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archivePath))
       {
+        var message = $"Требуется указать путь к архиву.";
+        LogError(message);
         throw new ArgumentException("Archive path is required.", nameof(archivePath));
       }
 
       if (string.IsNullOrWhiteSpace(filePath))
       {
-        throw new ArgumentException("File path is required.", nameof(filePath));
+        var message = $"Требуется указать путь к файлу.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(filePath));
       }
 
       var fullArchivePath = Path.GetFullPath(archivePath);
@@ -25,27 +30,33 @@ namespace UI.Services.Archive
 
       if (!File.Exists(fullArchivePath))
       {
-        throw new FileNotFoundException($"Archive was not found: {fullArchivePath}", fullArchivePath);
+        var message = $"Архив не был найден: {fullArchivePath}.";
+        LogError(message);
+        throw new FileNotFoundException(message, fullArchivePath);
       }
 
       if (!string.Equals(Path.GetExtension(fullArchivePath), ArchiveExtension, StringComparison.OrdinalIgnoreCase))
       {
-        throw new InvalidDataException($"Unsupported archive extension. Expected: {ArchiveExtension}");
+        var message = $"Расширение архива не поддерживается. Ожидалось: {ArchiveExtension}";
+        LogError(message);
+        throw new InvalidDataException(message);
       }
 
       if (!File.Exists(fullFilePath))
       {
-        throw new FileNotFoundException($"File was not found: {fullFilePath}", fullFilePath);
+        var message = $"Файл не был найден: {fullFilePath}";
+        LogError(message);
+        throw new FileNotFoundException(message, fullFilePath);
       }
 
       var normalizedArchiveEntryName = ResolveArchiveEntryNameFromFilePath(fullFilePath);
       if (normalizedArchiveEntryName.Equals(ArchiveManifestService.ManifestEntryName, StringComparison.OrdinalIgnoreCase))
       {
-        throw new InvalidOperationException(
-          $"'{ArchiveManifestService.ManifestEntryName}' is reserved for archive metadata.");
+        var message = $"'{ArchiveManifestService.ManifestEntryName}' зарезервирован для архивных метаданных.";
+        LogError(message);
+        throw new InvalidOperationException(message);
       }
 
-      // Allow write access even when another component keeps the archive open for reading.
       using (var archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
       using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Update, leaveOpen: false))
       {
@@ -56,8 +67,9 @@ namespace UI.Services.Archive
 
         if (fileAlreadyExists)
         {
-          throw new InvalidOperationException(
-            $"File '{normalizedArchiveEntryName}' already exists in archive '{fullArchivePath}'.");
+          var message = $"Файл '{normalizedArchiveEntryName}' уже существует в архиве '{fullArchivePath}'.";
+          LogError(message);
+          throw new InvalidOperationException(message);
         }
 
         var archiveEntry = archive.CreateEntry(normalizedArchiveEntryName, CompressionLevel.Optimal);
@@ -76,7 +88,9 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archivePath))
       {
-        throw new ArgumentException("Archive path is required.", nameof(archivePath));
+        var message = "Требуется указать путь к архиву";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archivePath));
       }
 
       var fullArchivePath = Path.GetFullPath(archivePath);
@@ -84,19 +98,24 @@ namespace UI.Services.Archive
 
       if (!File.Exists(fullArchivePath))
       {
-        throw new FileNotFoundException($"Archive was not found: {fullArchivePath}", fullArchivePath);
+        var message = $"Архив не был найден: {fullArchivePath}";
+        LogError(message);
+        throw new FileNotFoundException(message, fullArchivePath);
       }
 
       if (!string.Equals(Path.GetExtension(fullArchivePath), ArchiveExtension, StringComparison.OrdinalIgnoreCase))
       {
-        throw new InvalidDataException($"Unsupported archive extension. Expected: {ArchiveExtension}");
+        var message = $"Неподдерживаемое расширение архива. Ожидаемый:{ArchiveExtension}";
+        LogError(message);
+        throw new InvalidDataException(message);
       }
 
       var normalizedArchiveEntryName = ResolveArchiveEntryNameFromFilePath(fullFilePathArchive);
       if (normalizedArchiveEntryName.Equals(ArchiveManifestService.ManifestEntryName, StringComparison.OrdinalIgnoreCase))
       {
-        throw new InvalidOperationException(
-          $"'{ArchiveManifestService.ManifestEntryName}' is reserved for archive metadata.");
+        var message = $"'{ArchiveManifestService.ManifestEntryName}' зарезервирован для архивных метаданных.";
+        LogError(message);
+        throw new InvalidOperationException(message);
       }
 
       using (var archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
@@ -109,6 +128,8 @@ namespace UI.Services.Archive
 
         if (fileAlreadyExists)
         {
+          var message = $"Файл '{normalizedArchiveEntryName}' уже существует в архиве '{fullArchivePath}'.";
+          LogError(message);
           throw new InvalidOperationException(
               $"File '{normalizedArchiveEntryName}' already exists in archive '{fullArchivePath}'.");
         }
@@ -152,6 +173,8 @@ namespace UI.Services.Archive
 
         if (entryToDelete == null)
         {
+          var message = $"Файл '{normalizedArchiveEntryName}' уже существует в архиве '{fullArchivePath}'.";
+          LogError(message);
           throw new FileNotFoundException(
             $"File '{normalizedArchiveEntryName}' was not found in archive '{fullArchivePath}'.",
             normalizedArchiveEntryName);
@@ -174,12 +197,16 @@ namespace UI.Services.Archive
       var normalizedName = ArchiveManifestService.NormalizeEntryName(fileName);
       if (string.IsNullOrWhiteSpace(normalizedName))
       {
-        throw new ArgumentException("File name cannot be empty.", nameof(filePath));
+        var message = "Имя файла не может быть пустым";
+        LogError(message);
+        throw new ArgumentException(message, nameof(filePath));
       }
 
       if (normalizedName.EndsWith("/", StringComparison.Ordinal))
       {
-        throw new ArgumentException("File name must point to a file, not a directory.", nameof(filePath));
+        var message = "Имя файла должно указывать на файл, а не на каталог";
+        LogError(message);
+        throw new ArgumentException(message, nameof(filePath));
       }
 
       return normalizedName;
@@ -189,18 +216,24 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archiveEntryName))
       {
-        throw new ArgumentException("Archive entry name is required.", nameof(archiveEntryName));
+        var message = "Требуется указать имя записи в архиве".;
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveEntryName));
       }
 
       var normalizedName = ArchiveManifestService.NormalizeEntryName(archiveEntryName.Trim());
       if (string.IsNullOrWhiteSpace(normalizedName))
       {
-        throw new ArgumentException("Archive entry name cannot be empty.", nameof(archiveEntryName));
+        var message = "Имя записи в архиве не может быть пустым".;
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveEntryName));
       }
 
       if (normalizedName.EndsWith("/", StringComparison.Ordinal))
       {
-        throw new ArgumentException("Archive entry name must point to a file, not a directory.", nameof(archiveEntryName));
+        var message = "Имя записи в архиве должно указывать на файл, а не на каталог.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveEntryName));
       }
 
       return normalizedName;
@@ -210,19 +243,25 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archivePath))
       {
-        throw new ArgumentException("Archive path is required.", nameof(archivePath));
+        var message = $"Требуется указать путь к архиву.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archivePath));
       }
 
       var fullArchivePath = Path.GetFullPath(archivePath);
 
       if (!File.Exists(fullArchivePath))
       {
-        throw new FileNotFoundException($"Archive was not found: {fullArchivePath}", fullArchivePath);
+        var message = $"Архив не был найден: {fullArchivePath}";
+        LogError(message);
+        throw new FileNotFoundException(message, fullArchivePath);
       }
 
       if (!string.Equals(Path.GetExtension(fullArchivePath), ArchiveExtension, StringComparison.OrdinalIgnoreCase))
       {
-        throw new InvalidDataException($"Unsupported archive extension. Expected: {ArchiveExtension}");
+        var message = $"Расширение архива не поддерживается. Ожидалось: {ArchiveExtension}";
+        LogError(message);
+        throw new InvalidDataException(message);
       }
 
       return fullArchivePath;

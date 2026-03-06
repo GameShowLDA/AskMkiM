@@ -432,11 +432,12 @@ namespace UI.Controls.Archive
       string? name = null;
       string? nameOk = null;
       string? opk = null;
+      string? opkFileName = null;
       string? ik = null;
       string? order = null;
       string? department = null;
       string? comment = null;
-      List<string> opkFileName = new();
+      List<string> kd = new();
 
       if (starIndex >= 0)
       {
@@ -467,7 +468,7 @@ namespace UI.Controls.Archive
         } 
         else if (temp.StartsWith("кд"))
         {
-          opkFileName.Add(value);
+          kd.Add(value);
         }
         else if (temp.StartsWith("заказ"))
         {
@@ -481,6 +482,7 @@ namespace UI.Controls.Archive
         {
           comment = value;
         }
+        opkFileName = entry.Name;
       }
       return new ArchiveEntryInfo(
         archivePath,
@@ -489,6 +491,7 @@ namespace UI.Controls.Archive
         nameOk,
         order,
         opkFileName,
+        kd,
         department,
         comment,
         opk,

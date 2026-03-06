@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Text;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
@@ -25,24 +26,26 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archivePath))
       {
-        throw new ArgumentException("Archive path is required.", nameof(archivePath));
+        LogError($"Требуется указать путь к архиву");
+        throw new ArgumentException("Требуется указать путь к архиву.", nameof(archivePath));
       }
 
       var fullArchivePath = Path.GetFullPath(archivePath);
 
       if (!File.Exists(fullArchivePath))
       {
-        throw new FileNotFoundException($"Archive was not found: {fullArchivePath}", fullArchivePath);
+        LogError($"Архив не был найден: {fullArchivePath}");
+        throw new FileNotFoundException($"Архив не был найден: {fullArchivePath}", fullArchivePath);
       }
 
       if (!string.Equals(Path.GetExtension(fullArchivePath), ArchiveExtension, StringComparison.OrdinalIgnoreCase))
       {
-        throw new InvalidDataException($"Unsupported archive extension. Expected: {ArchiveExtension}");
+        LogError($"Расширение архива не поддерживается. Ожидалось: {ArchiveExtension}");
+        throw new InvalidDataException($"Расширение архива не поддерживается. Ожидалось: {ArchiveExtension}");
       }
 
       Close();
 
-      // Keep the archive readable while allowing parallel update operations.
       _archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
       _archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read, leaveOpen: false);
       OpenedArchivePath = fullArchivePath;
@@ -50,7 +53,7 @@ namespace UI.Services.Archive
       IntegrityNotifications = ArchiveManifestService.ValidateArchive(_archive);
       foreach (var notification in IntegrityNotifications)
       {
-        Console.WriteLine($"[Archive Integrity] {notification}");
+        LogError($"[Уведомление о целостности архива] {notification}");
       }
     }
 
@@ -77,9 +80,11 @@ namespace UI.Services.Archive
 
       if (archiveEntry == null)
       {
+        LogError($"File '{normalizedEntryName}' was not found in archive '{OpenedArchivePath}'.");
         throw new FileNotFoundException(
             $"File '{normalizedEntryName}' was not found in archive '{OpenedArchivePath}'.",
             normalizedEntryName);
+
       }
 
       try
@@ -121,6 +126,7 @@ namespace UI.Services.Archive
     {
       if (_archive == null)
       {
+        LogError($"Archive is not open. Call Open() first.");
         throw new InvalidOperationException("Archive is not open. Call Open() first.");
       }
     }
@@ -129,17 +135,20 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archiveEntryName))
       {
-        throw new ArgumentException("Archive entry name is required.", parameterName);
+        LogError($"Требуется указать имя записи в архиве.");
+        throw new ArgumentException("Требуется указать имя записи в архиве.", parameterName);
       }
 
       var normalizedName = ArchiveManifestService.NormalizeEntryName(archiveEntryName.Trim());
       if (string.IsNullOrWhiteSpace(normalizedName))
       {
-        throw new ArgumentException("Archive entry name cannot be empty.", parameterName);
+        LogError($"Название архива не может быть пустым.");
+        throw new ArgumentException("Название архива не может быть пустым.", parameterName);
       }
 
       if (normalizedName.EndsWith("/", StringComparison.Ordinal))
       {
+        LogError($"Имя записи в архиве должно указывать на файл, а не на каталог.");
         throw new ArgumentException("Archive entry name must point to a file, not a directory.", parameterName);
       }
 

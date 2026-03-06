@@ -274,7 +274,7 @@
                                 Binding="{Binding Order}"
                                 Width="*" />
                             <DataGridTextColumn Header="Файл ОПК"
-                                Binding="{Binding OpkFileNameDisplay}"
+                                Binding="{Binding OpkFileName}"
                                 Width="*" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"

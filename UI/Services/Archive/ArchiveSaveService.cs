@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
@@ -16,7 +17,6 @@ namespace UI.Services.Archive
   {
     private static readonly string[] ArchiveSaveFolderCandidates = new[]
     {
-      Path.Combine(@"D:\AskMkiM\Bin", FileLocations.ArchiveDirectory),
       Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory),
       Path.Combine(Directory.GetCurrentDirectory(), FileLocations.ArchiveDirectory),
     };
@@ -32,15 +32,18 @@ namespace UI.Services.Archive
       {
         if (models == null || models.Count == 0)
         {
+          LogWarning($"Нет данных для сохранения в архив.");
           ShowArchiveNotification(
             "Сохранение в архив",
             "Нет данных для сохранения в архив.",
             NotificationType.Warning);
+
           return false;
         }
 
         if (string.IsNullOrWhiteSpace(sourceFilePath))
         {
+          LogError($"Не удалось определить имя файла для сохранения.");
           ShowArchiveNotification(
             "Сохранение в архив",
             "Не удалось определить имя файла для сохранения.",
@@ -50,7 +53,6 @@ namespace UI.Services.Archive
 
         var manager = new CommandTranslationManager();
         var modelList = models.ToList();
-        manager.SetSourseLines(modelList);
 
         var sourceLines = new List<List<string>>(modelList.Count);
         foreach (var model in modelList)
@@ -70,15 +72,18 @@ namespace UI.Services.Archive
         archiveManager.OpenArchive(archivePath);
         archiveManager.AddFileToArchive(sourceLines, archivePath, fileName);
 
+        LogInformation($"Файл {fileName} добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.");
         ShowArchiveNotification(
           "Сохранение в архив",
           $"Файл {fileName} добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.",
           NotificationType.Success);
 
+
         return true;
       }
       catch (Exception ex)
       {
+        LogError($"{GetUserFriendlySaveErrorMessage(ex)}");
         ShowArchiveNotification(
           "Сохранение в архив",
           GetUserFriendlySaveErrorMessage(ex),
@@ -241,9 +246,11 @@ namespace UI.Services.Archive
           }
           catch (Exception ex)
           {
+            var message = GetUserFriendlyCreateArchiveErrorMessage(ex);
+            LogError(message);
             ShowArchiveNotification(
               "Создание архива",
-              GetUserFriendlyCreateArchiveErrorMessage(ex),
+              message,
               NotificationType.Error);
           }
         }
@@ -265,9 +272,11 @@ namespace UI.Services.Archive
           return;
         }
 
+        var message = "Выберите архив из списка или создайте новый.";
+        LogWarning(message);
         ShowArchiveNotification(
           "Сохранение в архив",
-          "Выберите архив из списка или создайте новый.",
+          message,
           NotificationType.Warning);
       };
 
@@ -436,7 +445,9 @@ namespace UI.Services.Archive
         }
       }
 
-      throw new DirectoryNotFoundException("Не удалось открыть папку архивов.");
+      var message = "Не удалось открыть папку архивов.";
+      LogError(message);
+      throw new DirectoryNotFoundException(message);
     }
 
     private static string CreateArchiveInFolder(string archivesFolderPath, string archiveName)
@@ -446,7 +457,9 @@ namespace UI.Services.Archive
 
       if (File.Exists(archivePath))
       {
-        throw new InvalidOperationException($"Архив '{Path.GetFileName(archivePath)}' уже существует.");
+        var message = $"Архив '{Path.GetFileName(archivePath)}' уже существует.";
+        LogError(message);
+        throw new InvalidOperationException(message);
       }
 
       using (var archiveStream = new FileStream(archivePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
@@ -462,7 +475,9 @@ namespace UI.Services.Archive
     {
       if (string.IsNullOrWhiteSpace(archiveName))
       {
-        throw new ArgumentException("Название архива обязательно.", nameof(archiveName));
+        var message = "Название архива обязательно.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveName));
       }
 
       var normalizedName = Path.GetFileNameWithoutExtension(archiveName.Trim());
@@ -473,7 +488,9 @@ namespace UI.Services.Archive
 
       if (string.IsNullOrWhiteSpace(normalizedName))
       {
-        throw new ArgumentException("Название архива содержит только недопустимые символы.", nameof(archiveName));
+        var message = "Название архива содержит только недопустимые символы.";
+        LogError(message);
+        throw new ArgumentException(message, nameof(archiveName));
       }
 
       return normalizedName;
