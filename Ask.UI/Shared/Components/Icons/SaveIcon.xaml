@@ -1,0 +1,15 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.SaveIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24"
+          Height="24">
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="M2 4v16c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V8.41a1 1 0 0 0-.3-.7l-5.4-5.42a1 1 0 0 0-.71-.29H4a2 2 0 0 0-2 2Zm8 0v3h2V4h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3ZM7 19a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H7Z" />
+    </Grid>
+  </Viewbox>
+</UserControl>

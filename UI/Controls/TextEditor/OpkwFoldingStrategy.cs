@@ -6,9 +6,11 @@ namespace UI.Controls.TextEditor
 {
   public class OpkwFoldingStrategy
   {
-    // Только номер команды + допустимая мнемоника
+    // Заголовок команды: номер + мнемоника.
+    // Используем общее правило (как в парсере), чтобы не пропускать
+    // валидные команды при расширении набора мнемоник.
     private static readonly Regex CommandHeaderRegex = new(
-      @"^[ \t]*(\d+)[ \t]+(СИ|ОК|ВШ|ЭТ|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС)\b",
+      @"^[ \t]*(\d+)[ \t]+([А-ЯЁA-Z]{2,})\b",
       RegexOptions.Compiled | RegexOptions.Multiline);
 
     public void UpdateFoldings(FoldingManager manager, TextDocument document)
@@ -22,18 +24,25 @@ namespace UI.Controls.TextEditor
         var startLine = document.GetLineByOffset(digitsIndex);
         int startOffset = startLine.Offset;
 
-        int endOffset;
+        DocumentLine? endLine;
         if (i + 1 < matches.Count)
         {
           int nextDigitsIndex = matches[i + 1].Groups[1].Index;
           var nextLine = document.GetLineByOffset(nextDigitsIndex);
-          endOffset = nextLine.Offset - 1;
+          endLine = nextLine.PreviousLine;
         }
         else
         {
-          endOffset = document.TextLength;
+          endLine = document.LineCount > 0
+            ? document.GetLineByNumber(document.LineCount)
+            : null;
         }
 
+        // Сворачиваем только тело команды (хотя бы одна строка после заголовка).
+        if (endLine == null || endLine.LineNumber <= startLine.LineNumber)
+          continue;
+
+        int endOffset = endLine.EndOffset;
         if (endOffset > startOffset)
         {
           string header = $"{matches[i].Groups[1].Value} {matches[i].Groups[2].Value}";

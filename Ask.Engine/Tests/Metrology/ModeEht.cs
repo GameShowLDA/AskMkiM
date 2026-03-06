@@ -95,26 +95,38 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI)
       {
         var points = GetPoints();
-
-        var Rt1 = await StepFirst(protocolUI, metrologicalModeRole, points.Point1, param);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{Rt1:F5} Ом") { IndentLevel = 1 });
-
-        var Rt2 = await StepSecond(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{Rt2:F5} Ом") { IndentLevel = 1 });
-
-        var Rt = await StepThird(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"{Rt:F5} Ом") { IndentLevel = 1 });
-
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.EHT, param);
-        var result = Rt - ((Rt1 + Rt2) / 2);
+
+        var Rt1 = await StepFirst(protocolUI, metrologicalModeRole, points.Point1, param, LowerBound, UpperBound);
+        if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt1 > 100)
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: $"{Rt1:F5} Ом") { IndentLevel = 1 });
+        }
+
+        var Rt2 = await StepSecond(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param, LowerBound, UpperBound);
+        if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt2 > 100)
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: $"{Rt2:F5} Ом") { IndentLevel = 1 });
+        }
+
+        var Rt = await StepThird(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param, LowerBound, UpperBound);
+        if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt > 100)
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: $"{Rt:F5} Ом") { IndentLevel = 1 });
+        }
+
+        var result = ExecutionConfig.GetIsIdleModeEnabled() ? param : Rt - ((Rt1 + Rt2) / 2);
 
         var err = result - param;
         Measurements.Add(err);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат сопротивления", message: $"{result:F5} Ом", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"Rизм= {result:F5} Ом", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error), skipPause: true);
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: $"{err:F5} Ом", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
 
-        await StepReset(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param);
+        await StepReset(protocolUI, metrologicalModeRole, points.Point1, points.Point2);
         return true;
       }
 
@@ -128,9 +140,12 @@ namespace Ask.Engine.Tests.Metrology
       }
 
 
-      private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, double param)
+      private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, double param, double rangeFrom, double rangeTo)
       {
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {point1}"), IsBlockStart: true);
+        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {point1}"), IsBlockStart: true);
+        }
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
@@ -139,51 +154,58 @@ namespace Ask.Engine.Tests.Metrology
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-
-        var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ResistanceManager.MeasureResistanceAsync() : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
       }
 
 
-      private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param)
+      private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param, double rangeFrom, double rangeTo)
       {
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point1}"), IsBlockStart: true);
+        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point1}"), IsBlockStart: true);
+        }
+
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService);
         relayModule = GetRelayModules(metrologicalModeRole).Last();
 
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подлючение точки {point2}"), IsBlockStart: true);
+        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подлючение точки {point2}"), IsBlockStart: true);
+        }
 
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService);
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-
-        var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ResistanceManager.MeasureResistanceAsync() : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param / 2 : new Random().Next((int)param - 100, (int)param + 100);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
       }
 
-      private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param)
+      private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param, double rangeFrom, double rangeTo)
       {
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point2}"), IsBlockStart: true);
+        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point2}"), IsBlockStart: true);
+        }
 
         var relayModule = GetRelayModules(metrologicalModeRole).Last();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
-
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-        var result = !ExecutionConfig.GetIsIdleModeEnabled() ? await fastMeter.ResistanceManager.MeasureResistanceAsync() : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? param * 1.5 : new Random().Next((int)param - 100, (int)param + 100);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
       }
 
-      private async Task StepReset(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param)
+      private async Task StepReset(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2)
       {
-        await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точек"), IsBlockStart: true);
+        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точек"), IsBlockStart: true);
+        }
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService);

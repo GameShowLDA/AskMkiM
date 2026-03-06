@@ -351,6 +351,15 @@
   <data name="protocol.tooltip.stepinto" xml:space="preserve">
     <value>Step Into (F11)</value>
   </data>
+  <data name="translator.editor.tooltip.back" xml:space="preserve">
+    <value>Return to the source file</value>
+  </data>
+  <data name="translator.editor.tooltip.save.archive" xml:space="preserve">
+    <value>Save translated file to archive</value>
+  </data>
+  <data name="translator.editor.tooltip.save.source" xml:space="preserve">
+    <value>Save source file</value>
+  </data>
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>ЭТ Mode</value>
   </data>
@@ -377,5 +386,167 @@
   </data>
   <data name="menu.test.tests.relay.contact.resist.rkomm" xml:space="preserve">
     <value>Switchboard resistance</value>
+  </data>
+  <data name="settings.userinterface.commandBodyBackground.title" xml:space="preserve">
+    <value>Command background highlight</value>
+  </data>
+  <data name="settings.userinterface.commandBodyBackground.description" xml:space="preserve">
+    <value>Enables or disables background highlighting for command lines in the execution protocol.</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.title" xml:space="preserve">
+    <value>Protocol highlights and colors</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.description" xml:space="preserve">
+    <value>Settings for syntax highlighting and line background highlighting in the execution protocol.</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.title" xml:space="preserve">
+    <value>Chain and point background highlight</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.description" xml:space="preserve">
+    <value>Enables or disables background highlighting for chain and point check lines in the execution protocol.</value>
+  </data>
+  <data name="settings.userinterface.language.title" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="settings.userinterface.language.description" xml:space="preserve">
+    <value>Select the interface language used for labels and messages.</value>
+  </data>
+  <data name="settings.userinterface.theme.title" xml:space="preserve">
+    <value>Application theme</value>
+  </data>
+  <data name="settings.userinterface.theme.description" xml:space="preserve">
+    <value>Select the interface theme used in the application.</value>
+  </data>
+  <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
+    <value>Syntax highlighting</value>
+  </data>
+  <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
+    <value>Enables or disables syntax highlighting in the protocol editor.</value>
+  </data>
+  <data name="settings.execution.stopOnError.title" xml:space="preserve">
+    <value>Stop on error</value>
+  </data>
+  <data name="settings.execution.stopOnError.description" xml:space="preserve">
+    <value>Pauses execution when an error occurs so the operator can choose the next action deliberately.</value>
+  </data>
+  <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
+    <value>Step-by-step mode</value>
+  </data>
+  <data name="settings.execution.stepByStepMode.description" xml:space="preserve">
+    <value>Enables debug execution: F10 executes the whole block (Step Over); F11 enters the block and stops at each step (Step Into).</value>
+  </data>
+  <data name="settings.execution.idleMode.title" xml:space="preserve">
+    <value>Idle execution mode</value>
+  </data>
+  <data name="settings.execution.idleMode.description" xml:space="preserve">
+    <value>Enables idle execution mode where no interaction with hardware is performed.</value>
+  </data>
+  <data name="settings.execution.errorSimulation.title" xml:space="preserve">
+    <value>Run with errors</value>
+  </data>
+  <data name="settings.execution.errorSimulation.description" xml:space="preserve">
+    <value>Adds random errors in idle mode to verify error handling.</value>
+  </data>
+  <data name="settings.protocol.operationTime.title" xml:space="preserve">
+    <value>Operation time output</value>
+  </data>
+  <data name="settings.protocol.operationTime.description" xml:space="preserve">
+    <value>Shows elapsed time since start at each execution step.</value>
+  </data>
+  <data name="settings.protocol.showActionHeaders.title" xml:space="preserve">
+    <value>Show action headers</value>
+  </data>
+  <data name="settings.protocol.showActionHeaders.description" xml:space="preserve">
+    <value>Shows a short description of the current execution step as a header.</value>
+  </data>
+  <data name="settings.protocol.autoSave.title" xml:space="preserve">
+    <value>Protocol auto-save</value>
+  </data>
+  <data name="settings.protocol.autoSave.description" xml:space="preserve">
+    <value>Automatically saves the protocol for each run. The file name includes date, time, and executed actions.</value>
+  </data>
+  <data name="settings.protocol.autoPrint.title" xml:space="preserve">
+    <value>Protocol printing</value>
+  </data>
+  <data name="settings.protocol.autoPrint.description" xml:space="preserve">
+    <value>Shows the printer selection dialog after execution to print the final protocol.</value>
+  </data>
+  <data name="settings.protocol.showInSoftware.title" xml:space="preserve">
+    <value>Show protocol in software</value>
+  </data>
+  <data name="settings.protocol.showInSoftware.description" xml:space="preserve">
+    <value>Shows the protocol in the software after execution, by default as a PDF file.</value>
+  </data>
+  <data name="settings.protocol.generate.title" xml:space="preserve">
+    <value>Protocol generation</value>
+  </data>
+  <data name="settings.protocol.generate.description" xml:space="preserve">
+    <value>The protocol will be generated after completion of test programs.</value>
+  </data>
+  <data name="settings.protocol.cleanTextCard.title" xml:space="preserve">
+    <value>Protocol text without errors</value>
+  </data>
+  <data name="settings.protocol.cleanTextCard.description" xml:space="preserve">
+    <value>Configure protocol text for no-error scenarios.</value>
+  </data>
+  <data name="settings.protocol.errorTextCard.title" xml:space="preserve">
+    <value>Protocol text with errors</value>
+  </data>
+  <data name="settings.protocol.errorTextCard.description" xml:space="preserve">
+    <value>Configure protocol text for error scenarios.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.group.title" xml:space="preserve">
+    <value>Equipment information</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.group.description" xml:space="preserve">
+    <value>Configure how equipment information is shown in the execution protocol.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.machineAddresses.title" xml:space="preserve">
+    <value>Machine addresses</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.machineAddresses.description" xml:space="preserve">
+    <value>Shows machine addresses of points in the ASK-MKI-M system.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.connectionInfo.title" xml:space="preserve">
+    <value>Point and bus connections</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.connectionInfo.description" xml:space="preserve">
+    <value>Shows information about point and bus connections on devices.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.deviceExecutionParameters.title" xml:space="preserve">
+    <value>Device parameters</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.deviceExecutionParameters.description" xml:space="preserve">
+    <value>Shows parameters that are applied to devices during execution.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.measurementResults.title" xml:space="preserve">
+    <value>Measurement results</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.measurementResults.description" xml:space="preserve">
+    <value>Shows measurement results obtained during test program execution.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.title" xml:space="preserve">
+    <value>Intermediate measurement results</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
+    <value>Shows intermediate measurement results obtained during test program execution.</value>
+  </data>
+  <data name="settings.main.title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="settings.config.title" xml:space="preserve">
+    <value>ASK configuration</value>
+  </data>
+  <data name="settings.config.printButton" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="settings.execution.section.title" xml:space="preserve">
+    <value>Execution</value>
+  </data>
+  <data name="settings.protocol.section.title" xml:space="preserve">
+    <value>Protocol</value>
+  </data>
+  <data name="settings.userinterface.section.title" xml:space="preserve">
+    <value>Interface</value>
   </data>
 </root>

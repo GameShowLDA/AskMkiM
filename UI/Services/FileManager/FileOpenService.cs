@@ -199,6 +199,7 @@ namespace UI.Services.FileManager
       {
         ".pk" => FileType.PK,
         ".pkw" => FileType.PKW,
+        ".acs" => FileType.PK,
         ".opk" => FileType.OPK,
         ".opkw" => FileType.OPKW,
         ".lst" => FileType.Protocol,

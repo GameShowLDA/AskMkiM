@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="Ask.UI.Shared.Components.Icons.StopIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ask.UI.Shared.Components.Icons"
+             mc:Ignorable="d" 
+             Cursor="Hand"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}">
+    <Viewbox Stretch="Fill">
+        <Canvas Width="100" Height="100">
+            <Rectangle Width="60" Height="60"
+                 Canvas.Left="20" Canvas.Top="20"
+                 RadiusX="4" RadiusY="4"
+                 Fill="#e73355"/>
+        </Canvas>
+    </Viewbox>
+</UserControl>
+

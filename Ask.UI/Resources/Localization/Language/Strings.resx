@@ -351,6 +351,15 @@
   <data name="protocol.tooltip.stepinto" xml:space="preserve">
     <value>Шаг с заходом (F11)</value>
   </data>
+  <data name="translator.editor.tooltip.back" xml:space="preserve">
+    <value>Вернуться к исходному файлу</value>
+  </data>
+  <data name="translator.editor.tooltip.save.archive" xml:space="preserve">
+    <value>Сохранить переведенный файл в архив</value>
+  </data>
+  <data name="translator.editor.tooltip.save.source" xml:space="preserve">
+    <value>Сохранить исходный файл</value>
+  </data>
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>Режим ЭТ</value>
   </data>
@@ -377,5 +386,167 @@
   </data>
   <data name="menu.test.tests.relay.contact.resist.rkomm" xml:space="preserve">
     <value>Сопротивление коммутатора</value>
+  </data>
+  <data name="settings.userinterface.commandBodyBackground.title" xml:space="preserve">
+    <value>Фоновое выделение команд</value>
+  </data>
+  <data name="settings.userinterface.commandBodyBackground.description" xml:space="preserve">
+    <value>Включает или отключает фоновое выделение строк команд в протоколе выполнения.</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.title" xml:space="preserve">
+    <value>Подсветка и цвета протокола</value>
+  </data>
+  <data name="settings.userinterface.highlightsGroup.description" xml:space="preserve">
+    <value>Настройки подсветки синтаксиса и фонового выделения строк в протоколе выполнения.</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.title" xml:space="preserve">
+    <value>Фоновое выделение цепей и точек</value>
+  </data>
+  <data name="settings.userinterface.chainPointBodyBackground.description" xml:space="preserve">
+    <value>Включает или отключает фоновое выделение строк проверки цепей и точек в протоколе выполнения.</value>
+  </data>
+  <data name="settings.userinterface.language.title" xml:space="preserve">
+    <value>Язык</value>
+  </data>
+  <data name="settings.userinterface.language.description" xml:space="preserve">
+    <value>Выберите язык интерфейса, на котором будут отображаться надписи и сообщения.</value>
+  </data>
+  <data name="settings.userinterface.theme.title" xml:space="preserve">
+    <value>Тема приложения</value>
+  </data>
+  <data name="settings.userinterface.theme.description" xml:space="preserve">
+    <value>Выберите тему оформления интерфейса, которая будет использоваться в приложении.</value>
+  </data>
+  <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
+    <value>Подсветка синтаксиса</value>
+  </data>
+  <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
+    <value>Включает или отключает подсветку синтаксиса в редакторе протокола.</value>
+  </data>
+  <data name="settings.execution.stopOnError.title" xml:space="preserve">
+    <value>Остановка по ошибке</value>
+  </data>
+  <data name="settings.execution.stopOnError.description" xml:space="preserve">
+    <value>При возникновении ошибки выполнение приостанавливается, чтобы оператор мог осознанно выбрать дальнейшее действие и управлять ходом работы.</value>
+  </data>
+  <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
+    <value>Пошаговый режим</value>
+  </data>
+  <data name="settings.execution.stepByStepMode.description" xml:space="preserve">
+    <value>Включает отладочное выполнение: F10 — выполнить блок целиком (поверх); F11 — заходить в блок и останавливаться на каждом шаге (вглубь).</value>
+  </data>
+  <data name="settings.execution.idleMode.title" xml:space="preserve">
+    <value>Холостой режим выполнения</value>
+  </data>
+  <data name="settings.execution.idleMode.description" xml:space="preserve">
+    <value>Включает холостой режим выполнения программы, при котором не происходит взаимодействия с оборудованием.</value>
+  </data>
+  <data name="settings.execution.errorSimulation.title" xml:space="preserve">
+    <value>Выполнение с ошибками</value>
+  </data>
+  <data name="settings.execution.errorSimulation.description" xml:space="preserve">
+    <value>Добавляет случайные ошибки при холостом режиме для проверки обработки ошибок.</value>
+  </data>
+  <data name="settings.protocol.operationTime.title" xml:space="preserve">
+    <value>Вывод времени операции</value>
+  </data>
+  <data name="settings.protocol.operationTime.description" xml:space="preserve">
+    <value>Показывает, сколько времени прошло с момента запуска на каждом шаге выполнения.</value>
+  </data>
+  <data name="settings.protocol.showActionHeaders.title" xml:space="preserve">
+    <value>Отображение заголовков действий</value>
+  </data>
+  <data name="settings.protocol.showActionHeaders.description" xml:space="preserve">
+    <value>Отображает краткое описание текущего шага выполнения в виде заголовка.</value>
+  </data>
+  <data name="settings.protocol.autoSave.title" xml:space="preserve">
+    <value>Сохранение протокола</value>
+  </data>
+  <data name="settings.protocol.autoSave.description" xml:space="preserve">
+    <value>Автоматически сохраняет протокол каждого запуска. Имя файла содержит дату, время и название выполняемых действий.</value>
+  </data>
+  <data name="settings.protocol.autoPrint.title" xml:space="preserve">
+    <value>Печать протокола</value>
+  </data>
+  <data name="settings.protocol.autoPrint.description" xml:space="preserve">
+    <value>По завершении выполнения отображает диалог выбора принтера для печати итогового протокола.</value>
+  </data>
+  <data name="settings.protocol.showInSoftware.title" xml:space="preserve">
+    <value>Вывод протокола в ПО</value>
+  </data>
+  <data name="settings.protocol.showInSoftware.description" xml:space="preserve">
+    <value>По завершении выполнения протокол отображается в программном обеспечении, по умолчанию открывается как PDF-файл.</value>
+  </data>
+  <data name="settings.protocol.generate.title" xml:space="preserve">
+    <value>Формирование протокола</value>
+  </data>
+  <data name="settings.protocol.generate.description" xml:space="preserve">
+    <value>Протокол будет формироваться после выполнения программ контроля.</value>
+  </data>
+  <data name="settings.protocol.cleanTextCard.title" xml:space="preserve">
+    <value>Текст протокола без ошибок</value>
+  </data>
+  <data name="settings.protocol.cleanTextCard.description" xml:space="preserve">
+    <value>Настройка текста протокола для сценариев без ошибок.</value>
+  </data>
+  <data name="settings.protocol.errorTextCard.title" xml:space="preserve">
+    <value>Текст протокола с ошибками</value>
+  </data>
+  <data name="settings.protocol.errorTextCard.description" xml:space="preserve">
+    <value>Настройка текста протокола для сценариев с ошибками.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.group.title" xml:space="preserve">
+    <value>Информация об оборудовании</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.group.description" xml:space="preserve">
+    <value>Настройка отображения информации об оборудовании в протоколе выполнения.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.machineAddresses.title" xml:space="preserve">
+    <value>Машинные адреса</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.machineAddresses.description" xml:space="preserve">
+    <value>Отображение машинных адресов точек системы АСК-МКИ-М.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.connectionInfo.title" xml:space="preserve">
+    <value>Подключение точек и шин</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.connectionInfo.description" xml:space="preserve">
+    <value>Отображает информацию о подключении точек и шин на устройствах.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.deviceExecutionParameters.title" xml:space="preserve">
+    <value>Параметры устройств</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.deviceExecutionParameters.description" xml:space="preserve">
+    <value>Отображает параметры, которые устанавливаются на устройства в ходе выполнения.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.measurementResults.title" xml:space="preserve">
+    <value>Результаты измерений</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.measurementResults.description" xml:space="preserve">
+    <value>Отображает результаты измерений, полученные в ходе выполнения программ контроля.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.title" xml:space="preserve">
+    <value>Промежуточные результаты измерений</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
+    <value>Отображает промежуточные результаты измерений, полученные в ходе выполнения программ контроля.</value>
+  </data>
+  <data name="settings.main.title" xml:space="preserve">
+    <value>Параметры</value>
+  </data>
+  <data name="settings.config.title" xml:space="preserve">
+    <value>Конфигурация АСК</value>
+  </data>
+  <data name="settings.config.printButton" xml:space="preserve">
+    <value>Печать</value>
+  </data>
+  <data name="settings.execution.section.title" xml:space="preserve">
+    <value>Выполнение</value>
+  </data>
+  <data name="settings.protocol.section.title" xml:space="preserve">
+    <value>Протокол</value>
+  </data>
+  <data name="settings.userinterface.section.title" xml:space="preserve">
+    <value>Интерфейс</value>
   </data>
 </root>

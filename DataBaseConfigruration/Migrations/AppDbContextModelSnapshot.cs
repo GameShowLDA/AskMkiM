@@ -332,6 +332,9 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<bool>("ShowDeviceExecutionParameters")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShowIntermediateMeasurementResults")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("ShowMachineAddresses")
                         .HasColumnType("INTEGER");
 
@@ -424,6 +427,12 @@ namespace DataBaseConfiguration.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Theme")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseChainPointBodyBackgroundHighlighting")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseCommandBodyBackgroundHighlighting")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseSyntaxHighlighting")

@@ -21,7 +21,7 @@ namespace UI.Components.ProtocolListBox
       {
         if (UserInterfaceConfig.GetSyntaxHighlighting())
         {
-          return SuccessBrush;
+          return headerColor ?? SuccessBrush;
         }
 
         return (SolidColorBrush)Application.Current.Resources["TestsProtocolHeaderForeground"];
