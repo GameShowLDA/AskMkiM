@@ -14,7 +14,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using UI.Controls.ErrorList;
-using UI.Controls.ProtocolNew;
 using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using UI.Services;

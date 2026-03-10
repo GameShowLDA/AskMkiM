@@ -237,65 +237,55 @@ namespace UI.Controls
       return LeftBox.Children[0] as TranslatorTextEditor;
     }
 
-    public string GetLeftEditorName() => FirstFileName.Text;
-    public string GetRightEditorName() => SecondFileName.Text;
+    public string GetLeftEditorName() => GetLeftBox().FileName.Text;
+    public string GetRightEditorName() => GetRightBox().TranslationFileName.Text;
 
-    public void SetRightEditorName(string newText) => SecondFileName.Text = newText;
-    public void SetLeftEditorName(string newText) => FirstFileName.Text = newText;
+    public void SetRightEditorName(string newText) => GetRightBox().TranslationFileName.Text = newText;
+    public void SetLeftEditorName(string newText) => GetLeftBox().FileName.Text = newText;
 
     private void ErrorListBoxVertical_BreakpointItemDoubleClicked(BreakpointListItem bp)
-	{
-	  var model = GetCommandByNumber(bp.CommandNumber);
-	  if (model == null) return;
+	  {
+      var model = GetCommandByNumber(bp.CommandNumber);
+      if (model == null) return;
 
-	  var left = GetLeftBox().GetTextEditor();
-	  var right = GetRightBox().GetTextEditor();
-	  if (left == null || right == null) return;
+      var left = GetLeftBox().GetTextEditor();
+      var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
 
-	  int leftLine = model.StartLineNumber + 1;
-	  int rightLine = model.FormattedStartLineNumber + 1;
+	    int leftLine = model.StartLineNumber + 1;
+	    int rightLine = model.FormattedStartLineNumber + 1;
 
-	  left.GoToLine(leftLine);
-	  right.GoToLine(rightLine);
-	}
+	    left.GoToLine(leftLine);
+	    right.GoToLine(rightLine);
+	  }
 
     private void ErrorListBoxVertical_BreakpointEnabledChanged(BreakpointListItem bp, bool enabled)
-	{
-	  var left = GetLeftBox().GetTextEditor();
-	  var right = GetRightBox().GetTextEditor();
-	  if (left == null || right == null) return;
-
-	  if (!left.HasBreakpointCommand(bp.CommandNumber) && !right.HasBreakpointCommand(bp.CommandNumber))
-		return;
-
-	  bool current = left.HasBreakpointCommand(bp.CommandNumber)
-		? left.IsBreakpointEnabled(bp.CommandNumber)
-		: right.IsBreakpointEnabled(bp.CommandNumber);
-
-	  if (current == enabled)
-		return;
-
-	  if (enabled)
 	  {
-		left.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
-		right.EnableBreakpoint(bp.CommandNumber, raiseEvents: false);
-	  }
-	  else
-	  {
-		left.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
-		right.DisableBreakpoint(bp.CommandNumber, raiseEvents: false);
-	  }
-	}
+	    var left = GetLeftBox().GetTextEditor();
+	    var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
 
-    public void SetRightEditorName(string newText)
-    {
-      GetRightBox().TranslationFileName.Text = newText;
-    }
+	    if (!left.HasBreakpointCommand(bp.CommandNumber) && !right.HasBreakpointCommand(bp.CommandNumber))
+		    return;
 
-    public void SetLeftEditorName(string newText)
-    {
-      GetLeftBox().FileName.Text = newText;
-    }
+	    bool current = left.HasBreakpointCommand(bp.CommandNumber)
+		    ? left.IsBreakpointEnabled(bp.CommandNumber)
+		    : right.IsBreakpointEnabled(bp.CommandNumber);
+
+	    if (current == enabled)
+		    return;
+
+	    if (enabled)
+	    {
+		    left.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
+		    right.EnableBreakpoint(bp.CommandNumber, raiseEvents: false);
+	    }
+	    else
+	    {
+		    left.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
+		    right.DisableBreakpoint(bp.CommandNumber, raiseEvents: false);
+	    }
+	  }
 
     private static void DetachFromParent(UIElement element)
     {
