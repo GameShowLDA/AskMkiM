@@ -38,5 +38,15 @@ namespace Ask.Core.Shared.Metadata.Static
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
     public delegate Task<bool> ReturnDelegate(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Делегат предварительного измерения оборудования после коммутации шин
+    /// и установки первой точки.
+    /// Используется для стабилизации, автонуля, измерения фона и т.п.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// Токен отмены.
+    /// </param>
+    public delegate Task PreMeasurementDelegate(CancellationToken cancellationToken);
   }
 }

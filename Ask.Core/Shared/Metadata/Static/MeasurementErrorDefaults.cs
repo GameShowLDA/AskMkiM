@@ -33,7 +33,7 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         Ranges = new List<MeasurementErrorRangeEntity>
         {
-          new MeasurementErrorRangeEntity { MinValue = 0.2, MaxValue = 100000, NumericError = 200, PercentageError = 5  },
+          new MeasurementErrorRangeEntity { MinValue = 0.2, MaxValue = 100000, NumericError = 0, PercentageError = 5  },
         }
       },
 

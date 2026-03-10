@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
+using Newtonsoft.Json.Linq;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.Metrology
@@ -93,12 +94,18 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения ёмкости"));
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.IE, param);
 
-        var result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(param, LowerBound, UpperBound, protocolUI);
+        double result = 0;
+        List<double> measuremend = new List<double>();
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        for (int i = 0; i < 5; i++)
         {
-          result -= intrinsicValue;
+          result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(param, LowerBound, UpperBound, protocolUI);
+          if (result > 0)
+          {
+            measuremend.Add(result);
+          }
         }
+        result = measuremend.Average();
 
         var err = result - param;
         Measurements.Add(err);

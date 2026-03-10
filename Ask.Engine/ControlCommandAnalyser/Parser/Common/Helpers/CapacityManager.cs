@@ -180,7 +180,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     private static IeCommandModel ApplyCapacityToModel(IeCommandModel model, double lower, double? higher, string unit, double maxCapacity, int numberLine, string commandNumber, string mnemonic)
     {
-      var lowerValue = UnitsConvertor.TryConvertBack(lower, unit);
+      var lowerValue = UnitsConvertor.FormatNanoFarads(lower);
       model.CapacityUnit = lowerValue.Item2 ?? string.Empty;
       model.LowerLimitCapacity = lowerValue.Item1;
       model.LowerLimitCapacitySource = $"{lowerValue.Item1} {lowerValue.Item2}";
@@ -202,7 +202,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         finalHigher = higher.Value;
       }
 
-      var higherValue = UnitsConvertor.TryConvertBack(finalHigher, unit);
+      var higherValue = UnitsConvertor.FormatNanoFarads(finalHigher);
       model.HigherLimitCapacity = higherValue.Item1;
       model.HigherLimitCapacitySource = $"{higherValue.Item1} {higherValue.Item2}";
     
