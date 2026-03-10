@@ -82,7 +82,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         rangeTo = double.MaxValue;
       }
 
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo);
+      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.Continuity);
       if (random != -1)
       {
         return random;
@@ -90,7 +90,7 @@ namespace NewCore.FunctionAdapters.Keysight3466new
 
       try
       {
-        double result = await _measurement.CheckContinuityAsync(param);
+        double result = await _measurement.CheckContinuityAsync(param, rangeFrom, rangeTo);
 
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат прозвонки", result.ToString(), true, 2, userMessageService);
         return result;

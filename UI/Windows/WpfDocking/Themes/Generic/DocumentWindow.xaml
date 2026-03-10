@@ -121,6 +121,10 @@
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedItem.(primitives:DocumentTab.HideCloseButton)}" Value="True">
+                            <Setter TargetName="dropDownButton" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="performCloseButton" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding ElementName=tabStrip, Path=IsTabTrimmed}" Value="True">
                             <Setter TargetName="dropDownButton" Property="ContentTemplate" Value="{StaticResource OverflowDropDownButtonTemplate}" />
                         </DataTrigger>

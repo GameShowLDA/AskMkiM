@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.ExecutorControls.SelfControl"
              mc:Ignorable="d" 
              
-             xmlns:Protocol="clr-namespace:UI.Controls.ProtocolNew"
+             xmlns:Protocol="clr-namespace:Ask.UI.Controls.ProtocolNew;assembly=Ask.UI"
              xmlns:Custom="clr-namespace:UI.Components"
              
              d:DesignHeight="450" d:DesignWidth="800">
@@ -18,3 +18,4 @@
     </Protocol:ProtocolUI>
     
 </UserControl>
+

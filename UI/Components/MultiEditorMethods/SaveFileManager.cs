@@ -1,4 +1,7 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.Metadata.Static;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Message;
 using System.IO;
 using System.Reflection.Metadata;
@@ -21,6 +24,10 @@ namespace UI.Components.MultiEditorMethods
   /// </summary>
   public class SaveFileManager
   {
+    private static readonly TimeSpan SaveSuccessNotificationWindow = TimeSpan.FromSeconds(4);
+    private static readonly object SaveNotificationSync = new();
+    private static readonly Dictionary<string, DateTime> LastSaveNotificationByFile = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
     /// Экзмепляр класса FileManager.
     /// </summary>
@@ -94,6 +101,11 @@ namespace UI.Components.MultiEditorMethods
           }
           else
           {
+            if (!fileManager.FileService.Comparison.HasFileChanged(control))
+            {
+              return true;
+            }
+
             var filePath = fileManager.EditorWorkspaceModel.FilePaths[fileName];
             if (control.Content is TextEditorUI)
             {
@@ -106,7 +118,7 @@ namespace UI.Components.MultiEditorMethods
         {
           if (control.Content is TranslatorItem translator)
           {
-            var textEditor = translator.GetLeftEditor();
+            var textEditor = translator.GetLeftBox().GetTextEditor();
             if (textEditor.TextEditorModel.FilePath.Contains(FileLocations.BackupDirectory))
             {
               return SaveFileAs();
@@ -140,10 +152,10 @@ namespace UI.Components.MultiEditorMethods
         {
           if (control.Content is TranslatorItem translator)
           {
-            var leftTextEditor = translator.GetLeftEditor();
-            var rightTextEditor = translator.GetRightEditor();
-            var fullPath = SetBackup(leftTextEditor.TextEditorModel.FileName, leftTextEditor.Text);
-            rightTextEditor.TextEditorModel.FilePath = fullPath;
+            var leftTextEditor = translator.GetLeftBox();
+            var rightTextEditor = translator.GetRightBox();
+            var fullPath = SetBackup(leftTextEditor.GetTextEditor().TextEditorModel.FileName, leftTextEditor.Text);
+            rightTextEditor.GetTextEditor().TextEditorModel.FilePath = fullPath;
             return true;
           }
         }
@@ -192,7 +204,7 @@ namespace UI.Components.MultiEditorMethods
               var textEditor = new TextEditorUI();
               if (activeDockItem.Content is TranslatorItem translatorItem)
               {
-                textEditor = translatorItem.GetLeftEditor();
+                textEditor = translatorItem.GetLeftBox().GetTextEditor();
               }
               if (activeDockItem.Content is TextEditorUI activeTextEditor)
               {
@@ -293,21 +305,71 @@ namespace UI.Components.MultiEditorMethods
     /// <returns><c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
     private bool SaveDataFromTextEditor(TextEditorUI textEditor, string filePath)
     {
-      var fileData = textEditor.Text;
-      if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt"))
+      try
       {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        File.WriteAllText(filePath, fileData, Encoding.UTF8);
+        var fileData = textEditor.Text;
+        if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt"))
+        {
+          Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+          File.WriteAllText(filePath, fileData, Encoding.UTF8);
+        }
+        else
+        {
+          var encoding = textEditor.TextEditorModel.Encoding;
+          Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+          File.WriteAllText(filePath, fileData, encoding == null ? Encoding.GetEncoding(866) : encoding);
+        }
+
+        LogInformation($"Файл {filePath} сохранен");
+        if (ShouldShowSaveSuccessNotification(filePath))
+        {
+          NotificationHostService.Instance.Show(
+            "Сохранение файла",
+            $"Файл {Path.GetFileName(filePath)} сохранён",
+            NotificationType.Success);
+        }
+        return true;
       }
-      else
+      catch (Exception ex)
       {
-        var encoding = textEditor.TextEditorModel.Encoding;
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        File.WriteAllText(filePath, fileData, encoding == null ? Encoding.GetEncoding(866) : encoding);
+        LogException(ex, $"Ошибка при сохранении файла: {filePath}");
+        NotificationHostService.Instance.Show(
+          "Ошибка сохранения файла",
+          ex.Message,
+          NotificationType.Error);
+        return false;
       }
-      LogInformation($"Файл {filePath} сохранен");
-      MessageBoxCustom.Show($"Файл {filePath} сохранен", image: MessageBoxImage.Information);
-      return true;
+    }
+
+    private static bool ShouldShowSaveSuccessNotification(string filePath)
+    {
+      var now = DateTime.UtcNow;
+      var fullPath = Path.GetFullPath(filePath);
+
+      lock (SaveNotificationSync)
+      {
+        if (LastSaveNotificationByFile.Count > 256)
+        {
+          var staleKeys = LastSaveNotificationByFile
+            .Where(pair => now - pair.Value > SaveSuccessNotificationWindow)
+            .Select(pair => pair.Key)
+            .ToList();
+
+          foreach (var staleKey in staleKeys)
+          {
+            LastSaveNotificationByFile.Remove(staleKey);
+          }
+        }
+
+        if (LastSaveNotificationByFile.TryGetValue(fullPath, out var lastShownAt) &&
+            now - lastShownAt < SaveSuccessNotificationWindow)
+        {
+          return false;
+        }
+
+        LastSaveNotificationByFile[fullPath] = now;
+        return true;
+      }
     }
 
     /// <summary>

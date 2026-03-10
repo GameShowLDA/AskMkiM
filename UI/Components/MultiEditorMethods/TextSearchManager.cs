@@ -158,8 +158,8 @@ namespace UI.Components.MultiEditorMethods
         }
         else if (key is TranslatorItem item)
         {
-          var leftTextEditor = item.GetLeftEditor();
-          var rightTranslator = item.GetRightEditor();
+          var leftTextEditor = item.GetLeftBox().GetTextEditor();
+          var rightTranslator = item.GetRightBox().GetTextEditor();
           ClearHighlights(leftTextEditor, foundResults, ref currentIndex);
           ClearHighlights(rightTranslator, foundTranslatorResults, ref currentTranslatorIndex);
         }
@@ -202,7 +202,7 @@ namespace UI.Components.MultiEditorMethods
               }
               else if (foundDockItem.Content is TranslatorItem translatorItem)
               {
-                textEditor = translatorItem.GetLeftEditor();
+                textEditor = translatorItem.GetLeftBox().GetTextEditor();
               }
               else
               {
@@ -249,7 +249,7 @@ namespace UI.Components.MultiEditorMethods
             }
             else if (foundDockItem.Content is TranslatorItem translatorItem)
             {
-              textEditor = translatorItem.GetLeftEditor();
+              textEditor = translatorItem.GetLeftBox().GetTextEditor();
             }
             else
             {
@@ -370,7 +370,7 @@ namespace UI.Components.MultiEditorMethods
         }
         else if (page.Dispatcher.Invoke(() => page.Content) is TranslatorItem translatorItem)
         {
-          pageText = translatorItem.Dispatcher.Invoke(() => translatorItem.GetLeftEditor().Document.Text);
+          pageText = translatorItem.Dispatcher.Invoke(() => translatorItem.GetLeftBox().GetTextEditor().Document.Text);
         }
         else
         {
@@ -503,7 +503,7 @@ namespace UI.Components.MultiEditorMethods
             }
             else if (activeDockItem.Content is TranslatorItem translatorItem)
             {
-              var foundTextEditor = translatorItem.GetLeftEditor();
+              var foundTextEditor = translatorItem.GetLeftBox();
               fullText.Add(translatorItem, foundTextEditor.Text);
             }
           }
@@ -536,7 +536,7 @@ namespace UI.Components.MultiEditorMethods
           }
           else if (item.Content is TranslatorItem translatorItem)
           {
-            var translator = translatorItem.GetLeftEditor();
+            var translator = translatorItem.GetLeftBox();
             if (!fullText.ContainsKey(translatorItem))
             {
               fullText.Add(translatorItem, translator.Text);
@@ -706,8 +706,8 @@ namespace UI.Components.MultiEditorMethods
             }
             else if (item.Content is TranslatorItem translatorItem)
             {
-              ClearHighlights(translatorItem.GetLeftEditor());
-              ClearHighlights(translatorItem.GetRightEditor());
+              ClearHighlights(translatorItem.GetLeftBox().GetTextEditor());
+              ClearHighlights(translatorItem.GetRightBox().GetTextEditor());
             }
           }
         }
@@ -1027,7 +1027,7 @@ namespace UI.Components.MultiEditorMethods
 
       if (dockItem?.Content is TranslatorItem translatorItem)
       {
-        return translatorItem.GetLeftEditor()?.Text;
+        return translatorItem.GetLeftBox()?.Text;
       }
 
       return null;
@@ -1065,7 +1065,7 @@ namespace UI.Components.MultiEditorMethods
       else if (activeDockItem.Content is TranslatorItem activeTranslatorItem)
       {
         translatorItem = activeTranslatorItem;
-        textEditor = activeTranslatorItem.GetLeftEditor();
+        textEditor = activeTranslatorItem.GetLeftBox().GetTextEditor();
       }
       else
       {
@@ -1107,13 +1107,13 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      var leftEditor = translatorItem.GetLeftEditor();
+      var leftEditor = translatorItem.GetLeftBox().GetTextEditor();
       if (leftEditor == null)
       {
         return;
       }
 
-      var rightEditor = translatorItem.GetRightEditor();
+      var rightEditor = translatorItem.GetRightBox().GetTextEditor();
       if (rightEditor == null)
       {
         return;
@@ -1375,8 +1375,8 @@ namespace UI.Components.MultiEditorMethods
             }
             else if (control.Content is TranslatorItem item)
             {
-              ClearHighlights(item.GetLeftEditor());
-              ClearHighlights(item.GetRightEditor());
+              ClearHighlights(item.GetLeftBox().GetTextEditor());
+              ClearHighlights(item.GetRightBox().GetTextEditor());
             }
           }
 
@@ -1437,7 +1437,7 @@ namespace UI.Components.MultiEditorMethods
       else if (foundDockItem.Content is TranslatorItem translatorItem)
       {
         translatorItemForHighlight = translatorItem;
-        textEditor = translatorItem.GetLeftEditor();
+        textEditor = translatorItem.GetLeftBox().GetTextEditor();
       }
       else
       {

@@ -7,6 +7,7 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -124,7 +125,7 @@ namespace MainWindowProgram.Services
           Merge(result, cmd, model.IsBreakpointEnabled);
       }
 
-      var leftEditor = item.GetLeftEditor();
+      var leftEditor = item.GetLeftBox().GetTextEditor();
       if (leftEditor != null)
       {
         for (int i = 0; i < leftEditor.BreakpointCommandsNumbers.Count; i++)
@@ -134,7 +135,7 @@ namespace MainWindowProgram.Services
         }
       }
 
-      var rightEditor = item.GetRightEditor();
+      var rightEditor = item.GetRightBox().GetTextEditor();
       if (rightEditor != null)
       {
         for (int i = 0; i < rightEditor.BreakpointCommandsNumbers.Count; i++)
@@ -347,7 +348,7 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _actualTextEditor = translator.GetRightEditor();
+        _actualTextEditor = translator.GetRightBox().GetTextEditor();
         if (_actualTextEditor == null)
         {
           ShowEditorNotFoundError();
@@ -383,8 +384,6 @@ namespace MainWindowProgram.Services
       {
         runControl.FileName = okCommandModel.ObjectCode;
       }
-      runControl.HeaderFile = string.IsNullOrEmpty(editor.TextEditorModel.FileName) ?
-        Path.GetFileName(editor.TextEditorModel.FilePath) : editor.TextEditorModel.FileName;
 
       if (runContainer == null)
       {
@@ -431,7 +430,7 @@ namespace MainWindowProgram.Services
       var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
       if (foundDockItem?.Content is not TranslatorItem translator) return;
 
-      var editor = translator.GetLeftEditor();
+      var editor = translator.GetLeftBox().GetTextEditor();
       if (editor == null)
       {
         ShowEditorNotFoundError();
@@ -516,7 +515,7 @@ namespace MainWindowProgram.Services
             await Task.Delay(80, token);
             if (!token.IsCancellationRequested)
             {
-              Application.Current.Dispatcher.Invoke(() =>
+              System.Windows.Application.Current.Dispatcher.Invoke(() =>
               {
                 editor.TextArea.TextView.Redraw();
               });

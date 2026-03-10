@@ -72,6 +72,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     public Color? HeaderColor { get; set; }
 
     /// <summary>
+    /// Получает или задает цвет фона заголовка сообщения.
+    /// </summary>
+    public Color? HeaderBackgroundColor { get; set; }
+
+    /// <summary>
     /// Получает или задает цвет текста сообщения.
     /// </summary>
     public Color? MessageColor { get; set; }

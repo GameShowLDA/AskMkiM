@@ -16,6 +16,27 @@ namespace UI.Components.ProtocolListBox
   /// </summary>
   public partial class ProtocolListBoxUI : UserControl, IMessageOutputService
   {
+    private const double MinFontSize = 12.0;
+    private const double MaxFontSize = 48.0;
+    private const double ZoomStep = 1.0;
+    private const double DefaultFontSize = 20.0;
+
+    /// <summary>
+    /// Размер шрифта строк протокола.
+    /// </summary>
+    public static readonly DependencyProperty ProtocolFontSizeProperty =
+      DependencyProperty.Register(
+        nameof(ProtocolFontSize),
+        typeof(double),
+        typeof(ProtocolListBoxUI),
+        new PropertyMetadata(DefaultFontSize));
+
+    public double ProtocolFontSize
+    {
+      get => (double)GetValue(ProtocolFontSizeProperty);
+      set => SetValue(ProtocolFontSizeProperty, value);
+    }
+
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
     public string Header { get; set; }
 
@@ -30,8 +51,13 @@ namespace UI.Components.ProtocolListBox
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
     }
 
-    private async void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
+    private void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+      if (HandleZoomShortcuts(e))
+      {
+        return;
+      }
+
       if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
       {
         e.Handled = true;
@@ -47,6 +73,84 @@ namespace UI.Components.ProtocolListBox
         }
       }
     }
+
+    /// <summary>
+    /// Масштабирование текста протокола по Ctrl+колесо мыши.
+    /// </summary>
+    private void ProtocolListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+      if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+      {
+        return;
+      }
+
+      if (e.Delta > 0)
+      {
+        Zoom(true);
+      }
+      else if (e.Delta < 0)
+      {
+        Zoom(false);
+      }
+
+      e.Handled = true;
+    }
+
+    /// <summary>
+    /// Обрабатывает Ctrl + '+', Ctrl + '-', Ctrl + '0' для масштаба.
+    /// </summary>
+    private bool HandleZoomShortcuts(KeyEventArgs e)
+    {
+      if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+      {
+        return false;
+      }
+
+      switch (e.Key)
+      {
+        case Key.OemPlus:
+        case Key.Add:
+          Zoom(true);
+          e.Handled = true;
+          return true;
+
+        case Key.OemMinus:
+        case Key.Subtract:
+          Zoom(false);
+          e.Handled = true;
+          return true;
+
+        case Key.D0:
+        case Key.NumPad0:
+          ResetZoom();
+          e.Handled = true;
+          return true;
+      }
+
+      return false;
+    }
+
+    private void Zoom(bool zoomIn)
+    {
+      var candidate = zoomIn
+        ? ProtocolFontSize + ZoomStep
+        : ProtocolFontSize - ZoomStep;
+
+      SetProtocolFontSize(Clamp(candidate, MinFontSize, MaxFontSize));
+    }
+
+    private void ResetZoom()
+    {
+      SetProtocolFontSize(DefaultFontSize);
+    }
+
+    private void SetProtocolFontSize(double size)
+    {
+      ProtocolFontSize = size;
+    }
+
+    private static double Clamp(double value, double min, double max)
+      => Math.Max(min, Math.Min(max, value));
 
     public ObservableCollection<ShowMessageModel> GetShowMessageModels()
     {
@@ -116,9 +220,91 @@ namespace UI.Components.ProtocolListBox
     {
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
-        Messages.Add(showMessageModel);
-        ProtocolListBox.ScrollIntoView(showMessageModel);
+        var displayLines = ExpandMessageForDisplay(showMessageModel);
+
+        foreach (var line in displayLines)
+        {
+          Messages.Add(line);
+        }
+
+        ProtocolListBox.ScrollIntoView(displayLines.LastOrDefault() ?? showMessageModel);
       });
+    }
+
+    /// <summary>
+    /// Разбивает многострочный заголовок на отдельные строки для корректной заливки фона.
+    /// Пустые строки сохраняются, но отображаются без подсветки.
+    /// </summary>
+    private static IReadOnlyList<ShowMessageModel> ExpandMessageForDisplay(ShowMessageModel source)
+    {
+      if (!source.HeaderBackgroundColor.HasValue || string.IsNullOrEmpty(source.Header))
+      {
+        return new[] { source };
+      }
+
+      string normalized = source.Header.Replace("\r\n", "\n").Replace('\r', '\n');
+      if (!normalized.Contains('\n'))
+      {
+        return new[] { source };
+      }
+
+      string[] headerLines = normalized.Split('\n');
+      var result = new List<ShowMessageModel>(headerLines.Length);
+
+      for (int i = 0; i < headerLines.Length; i++)
+      {
+        string line = headerLines[i];
+        bool hasText = !string.IsNullOrWhiteSpace(line);
+
+        var model = CloneForDisplay(source);
+        model.Header = hasText ? line : " ";
+        model.Message = string.Empty;
+        model.Time = string.Empty;
+        model.Debug = string.Empty;
+        model.HeaderBackgroundColor = hasText ? source.HeaderBackgroundColor : null;
+
+        if (!hasText)
+        {
+          model.HeaderColor = Colors.Transparent;
+          model.MessageColor = Colors.Transparent;
+        }
+
+        result.Add(model);
+      }
+
+      // Хвост сообщения (message/time/debug) привязываем к последней строке.
+      var last = result[^1];
+      last.Message = source.Message;
+      last.Time = source.Time;
+      last.Debug = source.Debug;
+
+      return result;
+    }
+
+    /// <summary>
+    /// Создаёт копию сообщения для построчного отображения в списке.
+    /// </summary>
+    private static ShowMessageModel CloneForDisplay(ShowMessageModel source)
+    {
+      var clone = new ShowMessageModel
+      {
+        Status = source.Status,
+        Header = source.Header,
+        Message = source.Message,
+        Time = source.Time,
+        Debug = source.Debug,
+        HeaderColor = source.HeaderColor,
+        HeaderBackgroundColor = source.HeaderBackgroundColor,
+        MessageColor = source.MessageColor,
+        TimeColor = source.TimeColor,
+        ExecutionError = source.ExecutionError,
+        CanBeDeleted = source.CanBeDeleted,
+        IsDeviceMessage = source.IsDeviceMessage,
+        IsControlProgramCommandHeader = source.IsControlProgramCommandHeader,
+        IndentLevel = source.IndentLevel
+      };
+
+      return clone;
     }
 
     public Task AppendEmptyLineAsync(int indentLevel = 0)

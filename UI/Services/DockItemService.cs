@@ -188,6 +188,11 @@ namespace UI.Services
         Content = textEditor
       };
 
+      if (dockItem.Content is RunControl && editorType == EditorType.Run)
+      {
+        DocumentTab.SetHideCloseButton(dockItem, true);
+      }
+
       if ((dockItem.Content is TextEditorUI && editorType == EditorType.Archive) || (dockItem.Content is RunControl && editorType == EditorType.Run))
       {
         InitializeWithoutSave(dockItem, editorType);
@@ -231,6 +236,8 @@ namespace UI.Services
         TabText = nameFile,
         Content = runControl,
       };
+
+      DocumentTab.SetHideCloseButton(dockItem, true);
 
       InitializeWithoutSave(dockItem, editorType);
 
