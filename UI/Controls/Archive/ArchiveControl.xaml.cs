@@ -1,17 +1,24 @@
-﻿using Ask.Core.Shared.Metadata.Static;
-using System.Collections.ObjectModel;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using System.Windows.Threading;
+using UI.Components.MultiEditorMethods;
+using UI.Components.SearchControls;
+using UI.Controls.TextEditor;
 using UI.Services.Archive;
 using Button = System.Windows.Controls.Button;
 using MessageBox = System.Windows.MessageBox;
@@ -407,7 +414,7 @@ namespace UI.Controls.Archive
         creationDate = entry.LastWriteTime.LocalDateTime;
       }
 
-      Regex CommandStartRegex = new (@"^\s*\d+\s+\S+", RegexOptions.Compiled);
+      Regex CommandStartRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, NormalizeEntryName(entry.FullName)));
       if (string.IsNullOrWhiteSpace(text))
         return null;
@@ -423,7 +430,7 @@ namespace UI.Controls.Archive
       var startIndex = lines.FindIndex(l => CommandStartRegex.IsMatch(l));
 
       if (startIndex < 0)
-        return null; 
+        return null;
 
       var firstLine = Regex.Replace(lines[startIndex], @"^\s*\d+\s+\S+\s*", string.Empty);
       var starIndex = firstLine.IndexOf('*');
@@ -464,7 +471,7 @@ namespace UI.Controls.Archive
         else if (temp.StartsWith("ик"))
         {
           ik = value;
-        } 
+        }
         else if (temp.StartsWith("кд"))
         {
           kd.Add(value);
@@ -585,7 +592,7 @@ namespace UI.Controls.Archive
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
 
       var selectedRow = _currentGridEntries.FirstOrDefault(item =>
-        string.Equals(item.EntryName, NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase));
+          string.Equals(item.EntryName, NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase));
 
       if (selectedRow != null)
       {
@@ -596,8 +603,10 @@ namespace UI.Controls.Archive
       }
 
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
+
       FileContentTextBox.Text = text;
       EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
+
       UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
     }
 
@@ -1060,7 +1069,28 @@ namespace UI.Controls.Archive
         _lastSelectedEntryName = selected.EntryName;
 
         var text = await Task.Run(() => ReadArchiveEntryTextWithManager(selected.ArchivePath, selected.EntryName));
-        FileContentTextBox.Text = text;
+
+        var textEditor = new TextEditorUI(FileType.OPKW);
+        textEditor.Text = text;
+
+
+        // Добавляем подсветку только один раз
+        if (!textEditor.TextArea.TextView.LineTransformers
+            .OfType<BracesCommentColorizer>()
+            .Any())
+        {
+          textEditor.TextArea.TextView.LineTransformers
+              .Add(new BracesCommentColorizer());
+        }
+
+        EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
+
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
+
+        FileContentTextBox.Content = textEditor;
+        textEditor.IsReadOnly = true;
+        textEditor.TextArea.TextView.Redraw();
+
         EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
         UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
       }

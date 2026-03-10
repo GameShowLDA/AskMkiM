@@ -308,7 +308,7 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         var fileData = textEditor.Text;
-        if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt"))
+        if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt") || filePath.ToLower().EndsWith(".lst") || filePath.ToLower().EndsWith(".lstw"))
         {
           Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
           File.WriteAllText(filePath, fileData, Encoding.UTF8);

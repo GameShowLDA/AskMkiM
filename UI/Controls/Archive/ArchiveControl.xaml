@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:UI.Controls.Archive"
+             xmlns:TextEditor="clr-namespace:UI.Controls.TextEditor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="12">
@@ -25,6 +26,7 @@
                 Foreground="{DynamicResource ForegrounfBrushes}"
                           BorderThickness="0"
                           FontSize="16"
+                          Cursor="Hand"
                 SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
                     <TreeView.ContextMenu>
                         <ContextMenu x:Name="ArchivesTreeContextMenu"
@@ -341,7 +343,7 @@
                    FontWeight="SemiBold"
                    FontSize="14"
                                Foreground="{DynamicResource ForegrounfBrushes}"/>
-                    <TextBox x:Name="FileContentTextBox"
+                    <TextEditor:TextEditorUI x:Name="FileContentTextBox"
                  Grid.Row="1"
                  Margin="0,8,0,0"
                  FontFamily="Consolas"
@@ -349,12 +351,7 @@
                  Background="{DynamicResource SecondarySolidColorBrush}"
                  Foreground="{DynamicResource ForegrounfBrushes}"
                  BorderBrush="{DynamicResource ForegrounfBrushes35}"
-                 AcceptsReturn="True"
-                 AcceptsTab="True"
-                 TextWrapping="NoWrap"
-                 IsReadOnly="True"
-                 VerticalScrollBarVisibility="Auto"
-                 HorizontalScrollBarVisibility="Auto" />
+                 IsReadOnly="True" />
                     <TextBlock x:Name="EditorHintTextBlock"
                    Grid.Row="2"
                    Margin="0,8,0,0"
