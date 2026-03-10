@@ -10,7 +10,8 @@
              xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    
+    <Grid Background="Transparent">
         <!-- Вертикальный режим -->
         <Grid x:Name="VerticalPanel" Grid.Column="1" Visibility="Visible" Grid.Row="2" Cursor="">
             <Grid.RowDefinitions>
@@ -18,14 +19,14 @@
                 <!-- Заголовок -->
                 <RowDefinition Height="0.7*" MinHeight="30"/>
                 <!-- Редакторы (split) -->
-                <RowDefinition Height="5"/>
+                <RowDefinition Height="Auto"/>
                 <!-- Сплиттер -->
                 <RowDefinition Height="Auto" MinHeight="50"/>
                 <!-- Окно ошибок -->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="30"/>
-                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" MinWidth="30" />
             </Grid.ColumnDefinitions>
 
@@ -37,8 +38,17 @@
             </Grid>
 
 
-            <GridSplitter Grid.Column="1" Grid.RowSpan="2" Background="{StaticResource RedColorSolidColorBrush}" 
-               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
+            <GridSplitter 
+                Grid.Column="1" 
+                Grid.RowSpan="2" 
+                Width="5"
+                Background="Transparent" 
+               HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch" 
+                ResizeDirection="Columns"
+                 BorderThickness="2,0,0,0"
+ BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
+                />
 
 
             <Grid Grid.Column="2" Grid.RowSpan="2"  x:Name="RightBox" >
@@ -47,10 +57,13 @@
 
             <GridSplitter  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                Height="5"
-               Background="{StaticResource RedColorSolidColorBrush}"
+               Background="Transparent"
                HorizontalAlignment="Stretch"
                VerticalAlignment="Stretch"
-               ResizeDirection="Rows"/>
+               ResizeDirection="Rows"
+                           BorderThickness="0,2,0,0"
+                           BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
+                           />
 
             <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
                 <Grid.RowDefinitions>

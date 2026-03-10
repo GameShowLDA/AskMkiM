@@ -11,6 +11,7 @@
     
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#dedddf"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#90465945"/>
+    <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#dedddf"/>
     <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#EBEBEB"/>
     <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#EBEBEB"/>
     <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#EBEBEB"/>

@@ -362,7 +362,7 @@
                         x:Name="SeparatorError"
                         Grid.Row="1" 
                         Height="5"
-                        Background="{StaticResource RedColorSolidColorBrush}"
+                        Background="{StaticResource VioletColorSolidColorBrush}"
                         HorizontalAlignment="Stretch"
                         ResizeDirection="Rows"/>
 
