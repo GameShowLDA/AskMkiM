@@ -763,6 +763,69 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Продолжить (P/F5).
+        /// </summary>
+        internal static string protocol_tooltip_continue {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.continue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Пауза (P/F5).
+        /// </summary>
+        internal static string protocol_tooltip_pause {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.pause", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Повторить (R).
+        /// </summary>
+        internal static string protocol_tooltip_repeat {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.repeat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Запустить (Enter/F5).
+        /// </summary>
+        internal static string protocol_tooltip_start {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Шаг с заходом (F11).
+        /// </summary>
+        internal static string protocol_tooltip_stepinto {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.stepinto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Шаг с обходом (F10).
+        /// </summary>
+        internal static string protocol_tooltip_stepover {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.stepover", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Остановить (Esc).
+        /// </summary>
+        internal static string protocol_tooltip_stop {
+            get {
+                return ResourceManager.GetString("protocol.tooltip.stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на ,сек..
         /// </summary>
         internal static string unit_seconds_suffix {
