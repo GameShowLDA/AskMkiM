@@ -53,7 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
       }
       else
-      { 
+      {
         await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.ResistanceRelativeToFirstPoint, context.IsPolarityReversed));
       }
 
@@ -210,7 +210,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           try
           {
             var module = EquipmentService.GetModuleByPoint(point);
-            var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
+
+            (bool Result, double Value) measured;
+
+            if (context.TypeCommand == MeasurementTypeCommand.IE)
+            {
+              measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchCapacitance);
+            }
+            else
+            {
+              measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
+            }
+
 
             var chain = new ChainModel(new List<PointModel> { basePoint, point });
             var chainStr = context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);

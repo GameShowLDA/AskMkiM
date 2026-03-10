@@ -106,6 +106,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, firstValue, secondValue, userMessageService: messageService);
+
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          answer -= errorResistance;
+        }
+
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, answer, answer);
 
       }, messageService);

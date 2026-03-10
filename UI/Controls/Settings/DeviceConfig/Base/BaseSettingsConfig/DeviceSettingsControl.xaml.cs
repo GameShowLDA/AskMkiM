@@ -91,6 +91,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       DeviceNumberContainer.Visibility = Visibility.Visible;
       BusTypeContainer.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
+      CapacitanceContainer.Visibility = Visibility.Collapsed;
       ConnectionTypeContainer.Visibility = Visibility.Visible;
       IPAddressContainer.Visibility = Visibility.Collapsed;
       COMContainer.Visibility = Visibility.Collapsed;
@@ -284,6 +285,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.IRelaySwitchModule relayDevice)
       {
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
       }
 

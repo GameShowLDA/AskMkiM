@@ -38,6 +38,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
     /// </summary>
     double SwitchResistance { get; set; }
 
+    /// <summary>
+    /// Собственная ёмкость коммутатора.
+    /// </summary>
+    double SwitchCapacitance { get; set; }
+
     ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
   }
 }
