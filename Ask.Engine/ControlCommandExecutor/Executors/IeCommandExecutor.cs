@@ -23,7 +23,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
     private double firstValue = 0;
     private double secondValue = 1000;
-
+    private double fixtureCapacitance = 0;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<IeCommandModel>(context);
@@ -31,7 +31,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       List<ShowMessageModel> errorMessage = new();
       List<ShowMessageModel> infoMessage = new();
-      
+
       SetActiveLine(context, command);
 
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
@@ -105,9 +105,20 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, firstValue, secondValue, userMessageService: messageService);
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, answer, answer);
 
+        List<double> measuremend = new List<double>();
+
+        for (int i = 0; i < 5; i++)
+        {
+          answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, firstValue, secondValue, userMessageService: messageService) - fixtureCapacitance;
+          if (answer > 0)
+          {
+            measuremend.Add(answer);
+          }
+        }
+        answer = measuremend.Average();
+
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, secondValue, answer);
       }, messageService);
 
       return result;

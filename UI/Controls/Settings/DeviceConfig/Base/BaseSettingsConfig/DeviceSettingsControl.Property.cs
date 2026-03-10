@@ -151,5 +151,29 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         CultureInfo.InvariantCulture
       );
     }
+
+    public double GetCapacitance()
+    {
+      if (CapacitanceTextBox == null)
+        return 0;
+
+      var text = CapacitanceTextBox.Text?.Trim();
+
+      if (string.IsNullOrEmpty(text))
+        return 0;
+
+      text = text.Replace(',', '.');
+
+      if (text.EndsWith("."))
+      {
+        text += "0";
+        CapacitanceTextBox.Text = text;
+      }
+
+      return double.Parse(
+        text,
+        CultureInfo.InvariantCulture
+      );
+    }
   }
 }

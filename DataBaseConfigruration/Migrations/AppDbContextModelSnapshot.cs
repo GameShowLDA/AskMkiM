@@ -282,6 +282,9 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<double>("SwitchResistance")
                         .HasColumnType("REAL");
 
+                    b.Property<double>("SwitchCapacitance")
+                        .HasColumnType("REAL");
+
                     b.HasKey("Id");
 
                     b.ToTable("RelaySwitchModules");

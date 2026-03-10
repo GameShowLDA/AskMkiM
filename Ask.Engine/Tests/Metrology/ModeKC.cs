@@ -89,7 +89,7 @@ namespace Ask.Engine.Tests.Metrology
       }
 
       /// <inheritdoc />
-      public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI)
+      public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0)
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
@@ -97,6 +97,11 @@ namespace Ask.Engine.Tests.Metrology
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KC, param);
 
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, LowerBound, UpperBound);
+
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          result -= intrinsicValue;
+        }
 
         var err = result - param;
         Measurements.Add(err);

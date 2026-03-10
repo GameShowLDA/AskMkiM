@@ -215,7 +215,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="metrologicalModeRole">Метрологический режим.</param>
     /// <param name="param">Электрическое значение.</param>
     /// <param name="protocolUI">Пользовательский элемент для вывода в протокол.</param>
-    public abstract Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI);
+    public abstract Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0);
 
     /// <summary>
     /// Завершает измерение, размыкает реле и отключает прибор.
