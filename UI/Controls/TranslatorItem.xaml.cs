@@ -9,7 +9,7 @@ using ICSharpCode.AvalonEdit;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using UI.Controls.ErrorList;
+using Ask.UI.Controls.ErrorList;
 using System.Windows.Media;
 using UI.Components;
 using UI.Controls.TextEditor;
@@ -317,10 +317,11 @@ namespace UI.Controls
       if (model == null) return;
 
       model.HasBreakpoint = true;
+      model.IsBreakpointEnabled = true;
 
       var left = GetLeftBox().GetTextEditor();
       var right = GetRightBox().GetTextEditor();
-	  if (left == null || right == null) return;
+	    if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;
@@ -346,10 +347,11 @@ namespace UI.Controls
       if (model == null) return;
 
       model.HasBreakpoint = false;
+      model.IsBreakpointEnabled = true;
 
       var left = GetLeftBox().GetTextEditor();
       var right = GetRightBox().GetTextEditor();
-	  if (left == null || right == null) return;
+	    if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;
@@ -368,9 +370,12 @@ namespace UI.Controls
       var model = GetCommandByNumber(obj.CommandNumber);
       if (model == null) return;
 
+      model.HasBreakpoint = true;
+      model.IsBreakpointEnabled = true;
+
       var left = GetLeftBox().GetTextEditor();
       var right = GetRightBox().GetTextEditor();
-	  if (left == null || right == null) return;
+	    if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;
@@ -386,9 +391,12 @@ namespace UI.Controls
       var model = GetCommandByNumber(obj.CommandNumber);
       if (model == null) return;
 
+      model.HasBreakpoint = true;
+      model.IsBreakpointEnabled = false;
+
       var left = GetLeftBox().GetTextEditor();
       var right = GetRightBox().GetTextEditor();
-	  if (left == null || right == null) return;
+	    if (left == null || right == null) return;
 
       int leftLine = model.StartLineNumber + 1;
       int rightLine = model.FormattedStartLineNumber + 1;

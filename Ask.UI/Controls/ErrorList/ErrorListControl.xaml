@@ -8,49 +8,63 @@
              xmlns:help="clr-namespace:Ask.Support;assembly=Ask.Support"
              x:Name="root">
     <UserControl.Resources>
-        <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
-        <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
-        <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
-        <DataTemplate x:Key="ErrorIconTemplate">
-            <Icon:CrossIcon Size="13"/>
-        </DataTemplate>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/TabControl.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <DataTemplate x:Key="WarningIconTemplate">
-            <Icon:TiangleWarningIcon Size="17"/>
-        </DataTemplate>
-        <local:IssueIconSelector x:Key="IssueIconSelector"
-                         ErrorTemplate="{StaticResource ErrorIconTemplate}"
-                         WarningTemplate="{StaticResource WarningIconTemplate}" />
+            <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
+            <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
+            <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
+
+            <DataTemplate x:Key="ErrorIconTemplate">
+                <Icon:CrossIcon Size="13"/>
+            </DataTemplate>
+
+            <DataTemplate x:Key="WarningIconTemplate">
+                <Icon:TiangleWarningIcon Size="17"/>
+            </DataTemplate>
+
+            <local:IssueIconSelector x:Key="IssueIconSelector"
+                            ErrorTemplate="{StaticResource ErrorIconTemplate}"
+                            WarningTemplate="{StaticResource WarningIconTemplate}" />
+        </ResourceDictionary>
     </UserControl.Resources>
 
-
     <Grid Background="{DynamicResource ErrorListBackground}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <TabControl x:Name="MainTabControl"
+            TabStripPlacement="Bottom"
+            Style="{StaticResource BottomTabControlStyle}"
+            ItemContainerStyle="{StaticResource BottomTabItemStyle}"
+            Background="{DynamicResource ErrorListBackground}"
+            BorderThickness="0">
 
-            <StackPanel Grid.Row="0"
-                Orientation="Horizontal"
-                Margin="5"
-                HorizontalAlignment="Left">
-                
-                <ToggleButton 
-                    x:Name="WarningButton"
-                    Style="{StaticResource VsFilterButtonStyle}"
-                    Content="0 из 0 предупреждений"
-                    PreviewMouseDown="WarningButton_PreviewMouseDown"
-                    Margin="0,0,6,0"/>
+            <TabItem x:Name="ErrorsTab" Header="Ошибки">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <ToggleButton 
-                    x:Name="ErrorsButton"
-                    Style="{StaticResource VsFilterButtonStyle}"
-                    Content="0 из 0 ошибок"
-                    PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
-            </StackPanel>
+                    <StackPanel Grid.Row="0"
+                  Orientation="Horizontal"
+                  Margin="5"
+                  HorizontalAlignment="Left">
 
-            <DataGrid ItemsSource="{Binding Items, ElementName=root}"
+                        <ToggleButton x:Name="WarningButton"
+                      Style="{StaticResource VsFilterButtonStyle}"
+                      Content="0 из 0 предупреждений"
+                      PreviewMouseDown="WarningButton_PreviewMouseDown"
+                      Margin="0,0,6,0"/>
+
+                        <ToggleButton x:Name="ErrorsButton"
+                      Style="{StaticResource VsFilterButtonStyle}"
+                      Content="0 из 0 ошибок"
+                      PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                ItemsSource="{Binding Items, ElementName=root}"
                 AutoGenerateColumns="False"
                 HeadersVisibility="Column"
                 CanUserAddRows="False"
@@ -64,90 +78,181 @@
                 BorderThickness="0"
                 ColumnHeaderHeight="28"
                 MouseDoubleClick="DataGrid_MouseDoubleClick"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                Grid.Row="1"
-                >
-            <DataGrid.Resources>
-                <Style x:Key="CellTextTrim" TargetType="TextBlock">
-                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                    <Setter Property="TextWrapping" Value="NoWrap"/>
-                </Style>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                </Style>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                    <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
-                    <Setter Property="Margin" Value="5,0"/>
-                </Style>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="FontWeight" Value="Normal"/>
-                    <Setter Property="help:HelpProvider.HelpKey" 
-                            Value="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <!-- Крестик -->
-                <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
-                    <DataGridTemplateColumn.Header>
-                        <TextBlock Text="{Binding Items.Count}" 
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10"/>
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ContentControl Content="{Binding}"
-                            ContentTemplateSelector="{StaticResource IssueIconSelector}"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <!-- Код ошибки -->
-                <DataGridTextColumn Header="Код"
-                    Width="80"
-                    Binding="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"
-                    FontFamily="{DynamicResource WinstonLight}"
-                    FontSize="14"/>
-                <!-- Номер строки -->
-                <DataGridTextColumn Header="Строка" x:Name="StringsNumber" Binding="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"  Width="60" FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
-                <!-- Номер команды -->
-                <DataGridTextColumn Header="Команда" Width="Auto"
-                    Binding="{Binding Command}"
-                    ElementStyle="{StaticResource CellTextTrim}"
-                    FontFamily="{DynamicResource WinstonLight}" 
-                    FontSize="14"/>
-                <!--Результат измерения-->
-                <DataGridTextColumn x:Name="MeasureResult" Header="Результат измерения" Binding="{Binding MeasureResult}" Width="150" FontFamily="{DynamicResource WinstonLight}" FontSize="14" Visibility="Collapsed"/>
-                <!-- Описание ошибки -->
-                <DataGridTextColumn Header="Описание" Width="Auto"
-                    Binding="{Binding Description}"
-                    ElementStyle="{StaticResource CellTextTrim}"
-                    FontFamily="{DynamicResource WinstonLight}" FontSize="14"/>
+                ScrollViewer.VerticalScrollBarVisibility="Auto">
 
-                <DataGridTextColumn Header="DEBUG" Width="*"
-                                    x:Name="DebugColumn"
-                    Binding="{Binding DebugInfo}"
-                    ElementStyle="{StaticResource CellTextTrim}"
-                    FontFamily="{DynamicResource WinstonLight}" FontSize="14"
-                    Visibility="Collapsed"
-                                    />
-            </DataGrid.Columns>
-        </DataGrid>
-            </Grid>
+                        <DataGrid.Resources>
+                            <Style x:Key="CellTextTrim" TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                <Setter Property="TextWrapping" Value="NoWrap"/>
+                            </Style>
+
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Margin" Value="5,0"/>
+                            </Style>
+
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="FontWeight" Value="Normal"/>
+                                <Setter Property="help:HelpProvider.HelpKey"
+                    Value="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="{Binding Items.Count, ElementName=root}"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Padding="10"/>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ContentControl Content="{Binding}"
+                                ContentTemplateSelector="{StaticResource IssueIconSelector}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Код"
+                              Width="80"
+                              Binding="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"
+                              FontFamily="{DynamicResource WinstonLight}"
+                              FontSize="14"/>
+                            <DataGridTextColumn Header="Строка"
+                              x:Name="StringsNumber"
+                              Binding="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"
+                              Width="60"
+                              FontFamily="{DynamicResource WinstonLight}"
+                              FontSize="14"/>
+                            <DataGridTextColumn Header="Команда"
+                              Width="Auto"
+                              Binding="{Binding Command}"
+                              ElementStyle="{StaticResource CellTextTrim}"
+                              FontFamily="{DynamicResource WinstonLight}"
+                              FontSize="14"/>
+                            <DataGridTextColumn x:Name="MeasureResult"
+                              Header="Результат измерения"
+                              Binding="{Binding MeasureResult}"
+                              Width="150"
+                              FontFamily="{DynamicResource WinstonLight}"
+                              FontSize="14"
+                              Visibility="Collapsed"/>
+                            <DataGridTextColumn Header="Описание"
+                              Width="Auto"
+                              Binding="{Binding Description}"
+                              ElementStyle="{StaticResource CellTextTrim}"
+                              FontFamily="{DynamicResource WinstonLight}"
+                              FontSize="14"/>
+
+                            <DataGridTextColumn Header="DEBUG"
+                              Width="*"
+                              x:Name="DebugColumn"
+                              Binding="{Binding DebugInfo}"
+                              ElementStyle="{StaticResource CellTextTrim}"
+                              FontFamily="{DynamicResource WinstonLight}"
+                              FontSize="14"
+                              Visibility="Collapsed"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="BreakpointsTab" Header="Точки остановки">
+                <TabItem.Style>
+                    <Style TargetType="TabItem" BasedOn="{StaticResource BottomTabItemStyle}">
+                    </Style>
+                </TabItem.Style>
+
+                <DataGrid ItemsSource="{Binding Breakpoints, ElementName=root}"
+              AutoGenerateColumns="False"
+              HeadersVisibility="Column"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              IsReadOnly="True"
+              Background="{DynamicResource ErrorListBackground}"
+              Foreground="{DynamicResource ForegrounfBrushes}"
+              RowBackground="{DynamicResource ErrorListBackground}"
+              AlternatingRowBackground="{DynamicResource ErrorListBackground}"
+              GridLinesVisibility="None"
+              BorderThickness="0"
+              ColumnHeaderHeight="28"
+              RowHeight="25"
+              MouseDoubleClick="BreakpointsGrid_MouseDoubleClick"
+              ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="5,0"/>
+                        </Style>
+
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="80" MinWidth="80" MaxWidth="80" Header="Состояние">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MarkingCheckBox}"
+                        VerticalAlignment="Center"
+                        Click="BreakpointEnabled_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Строка"
+                        Width="80"
+                        MinWidth="25"
+                        Binding="{Binding RightLine}"
+                        FontFamily="{DynamicResource WinstonLight}"
+                        FontSize="14"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+        </TabControl>
     </Grid>
 
 </UserControl>
