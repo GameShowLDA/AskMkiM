@@ -30,7 +30,7 @@ namespace Ask.Core.Services.Config.Base
     /// <summary>
     /// Устанавливает тему оформления интерфейса программы.
     /// </summary>
-    /// <param name="theme">Название темы: "Light" или "Dark".</param>
+    /// <param name="theme">Название темы интерфейса.</param>
     public static async Task SetTheme(ThemeMode theme)
     {
       UserInterfaceModel.Theme = theme;

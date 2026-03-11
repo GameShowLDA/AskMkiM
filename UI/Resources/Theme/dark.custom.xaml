@@ -1,0 +1,201 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/UI;component/Resources/Theme/dark.xaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- Soft neutral palette for custom dark theme -->
+  <SolidColorBrush x:Key="ForegrounfBrushes" Color="#E7ECF4"/>
+  <SolidColorBrush x:Key="ForegrounfBrushes35" Color="#75839A"/>
+  <SolidColorBrush x:Key="ForegrounfBrushes45" Color="#8794A8"/>
+  <SolidColorBrush x:Key="ForegrounfBrushes85" Color="#C5CEDB"/>
+
+  <SolidColorBrush x:Key="MenuBackgroundBrushes" Color="#1D242F"/>
+  <LinearGradientBrush x:Key="BackgroundBrushes" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#1A212C" Offset="0.00"/>
+    <GradientStop Color="#131922" Offset="1.00"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ActiveColorBrushes" Color="#6E8EB8"/>
+  <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#252D39"/>
+
+  <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#2D3643"/>
+  <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#374355"/>
+  <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#45536A"/>
+
+  <SolidColorBrush x:Key="SettingsMainBackground" Color="#1B2028"/>
+
+  <SolidColorBrush x:Key="DrawerBackdropBrush" Color="#6610161F"/>
+  <SolidColorBrush x:Key="DrawerPanelBackgroundBrush" Color="#212A36"/>
+  <SolidColorBrush x:Key="DrawerSurfaceBackgroundBrush" Color="#1A232E"/>
+  <SolidColorBrush x:Key="DrawerBorderBrush" Color="#364356"/>
+  <SolidColorBrush x:Key="DrawerTextBrush" Color="#E8EEF7"/>
+  <SolidColorBrush x:Key="DrawerSecondaryTextBrush" Color="#A6B4C8"/>
+  <SolidColorBrush x:Key="DrawerItemHoverBrush" Color="#2E3A4C"/>
+  <SolidColorBrush x:Key="DrawerItemSelectedBrush" Color="#3A4A62"/>
+  <SolidColorBrush x:Key="DrawerAccentBrush" Color="#7898C2"/>
+  <SolidColorBrush x:Key="DrawerGlowBrush" Color="#506785"/>
+  <SolidColorBrush x:Key="DrawerHighlightBrush" Color="#30FFFFFF"/>
+
+  <SolidColorBrush x:Key="NotificationCardBackgroundBrush" Color="#252D39"/>
+  <SolidColorBrush x:Key="NotificationCardBorderBrush" Color="#3F4C5F"/>
+  <SolidColorBrush x:Key="NotificationTitleBrush" Color="#F2F6FD"/>
+  <SolidColorBrush x:Key="NotificationMessageBrush" Color="#D8E1EE"/>
+  <SolidColorBrush x:Key="NotificationInfoIconBrush" Color="#7FA4D6"/>
+  <SolidColorBrush x:Key="NotificationSuccessIconBrush" Color="#61B282"/>
+  <SolidColorBrush x:Key="NotificationWarningIconBrush" Color="#D2A35D"/>
+  <SolidColorBrush x:Key="NotificationErrorIconBrush" Color="#E07B72"/>
+  <Color x:Key="NotificationCardShadowColor">#66000000</Color>
+
+  <SolidColorBrush x:Key="DeviceInputShellBackgroundBrush" Color="#212A35"/>
+  <SolidColorBrush x:Key="DeviceInputSectionBorderBrush" Color="#55657A"/>
+  <Color x:Key="DeviceInputSectionShadowColor">#000000</Color>
+
+  <SolidColorBrush x:Key="DeviceListAddButtonBackgroundBrush" Color="#2A4A3A"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonBorderBrush" Color="#4F876B"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonForegroundBrush" Color="#C4EED3"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonHoverBackgroundBrush" Color="#315744"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonHoverBorderBrush" Color="#5C9A7A"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonHoverForegroundBrush" Color="#D7F7E2"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonPressedBackgroundBrush" Color="#3A654F"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonPressedBorderBrush" Color="#6AAD8A"/>
+  <SolidColorBrush x:Key="DeviceListAddButtonPressedForegroundBrush" Color="#E8FFF1"/>
+
+  <SolidColorBrush x:Key="DeviceListEditButtonBackgroundBrush" Color="#2A3F5F"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonBorderBrush" Color="#5E7FAE"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonForegroundBrush" Color="#CDE0FF"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonHoverBackgroundBrush" Color="#315079"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonHoverBorderBrush" Color="#6E93C6"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonHoverForegroundBrush" Color="#E1ECFF"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonPressedBackgroundBrush" Color="#3C6190"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonPressedBorderBrush" Color="#7FA7DE"/>
+  <SolidColorBrush x:Key="DeviceListEditButtonPressedForegroundBrush" Color="#F2F7FF"/>
+
+  <SolidColorBrush x:Key="DeviceListDeleteButtonBackgroundBrush" Color="#4A2F36"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonBorderBrush" Color="#8D5564"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonForegroundBrush" Color="#F0BDC6"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonHoverBackgroundBrush" Color="#5A3740"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonHoverBorderBrush" Color="#A66375"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonHoverForegroundBrush" Color="#FFD3DB"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonPressedBackgroundBrush" Color="#6A404A"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonPressedBorderBrush" Color="#BF7488"/>
+  <SolidColorBrush x:Key="DeviceListDeleteButtonPressedForegroundBrush" Color="#FFE7EC"/>
+
+  <SolidColorBrush x:Key="ComboBoxModernBackgroundBrush" Color="#212A35"/>
+  <SolidColorBrush x:Key="ComboBoxModernBorderBrush" Color="#425166"/>
+  <SolidColorBrush x:Key="ComboBoxModernHoverBorderBrush" Color="#596D88"/>
+  <SolidColorBrush x:Key="ComboBoxModernFocusBorderBrush" Color="#7A99C2"/>
+  <SolidColorBrush x:Key="ComboBoxModernGlyphBrush" Color="#B7C5D9"/>
+  <SolidColorBrush x:Key="ComboBoxModernPopupBackgroundBrush" Color="#1D2631"/>
+  <SolidColorBrush x:Key="ComboBoxModernPopupBorderBrush" Color="#3C4B60"/>
+  <SolidColorBrush x:Key="ComboBoxModernItemHoverBrush" Color="#2C3A4D"/>
+  <SolidColorBrush x:Key="ComboBoxModernItemSelectedBrush" Color="#3A4D66"/>
+  <Color x:Key="ComboBoxModernShadowColor">#000000</Color>
+
+  <SolidColorBrush x:Key="MainGreetingBackgroundBrush" Color="#202934"/>
+  <SolidColorBrush x:Key="MainGreetingBorderBrush" Color="#3E4F65"/>
+  <SolidColorBrush x:Key="MainTitleSolidColorBrush" Color="#E7ECF4"/>
+
+  <SolidColorBrush x:Key="SettingCardBackground" Color="#2A303A"/>
+  <SolidColorBrush x:Key="SettingCardBorderBrush" Color="#404A59"/>
+  <SolidColorBrush x:Key="SettingsTitleSolidColorBrush" Color="#F3F7FD"/>
+  <SolidColorBrush x:Key="SettingsDescriptionSolidColorBrush" Color="#AAB8CA"/>
+  <SolidColorBrush x:Key="SettingsHeaderSolidColorBrush" Color="#E8EEF7"/>
+
+  <SolidColorBrush x:Key="SettingsInteractiveBackgroundSolidColorBrush" Color="#252C36"/>
+  <SolidColorBrush x:Key="SettingsInteractiveBorderSolidColorBrush" Color="#3D4A5D"/>
+  <SolidColorBrush x:Key="SettingsInteractiveHoverSolidColorBrush" Color="#6D8CB7"/>
+  <SolidColorBrush x:Key="SettingsInteractiveActiveSolidColorBrush" Color="#5F7FAE"/>
+  <SolidColorBrush x:Key="SettingsInteractivePressedSolidColorBrush" Color="#7A99C2"/>
+
+  <SolidColorBrush x:Key="SettingsMainBackgroundSolidColorBrush" Color="#1B2028"/>
+  <SolidColorBrush x:Key="SettingsPanelBackgroundSolidColorBrush" Color="#222832"/>
+  <SolidColorBrush x:Key="SettingsPanelBorderSolidColorBrush" Color="#2F3846"/>
+  <SolidColorBrush x:Key="SettingsNestedGroupBackgroundSolidColorBrush" Color="#282F3A"/>
+
+  <SolidColorBrush x:Key="SettingsSliderBackgroundSolidColorBrush" Color="#2A313B"/>
+  <SolidColorBrush x:Key="SettingsSelectorBackgroundSolidColorBrush" Color="#2A313B"/>
+  <SolidColorBrush x:Key="SettingsSelectorHoverSolidColorBrush" Color="#6F8FB9"/>
+  <SolidColorBrush x:Key="SettingsSelectorSelectedSolidColorBrush" Color="#5F7FAE"/>
+  <SolidColorBrush x:Key="SettingsSliderBorderSolidColorBrush" Color="#3D4A5D"/>
+
+  <SolidColorBrush x:Key="SettingsCongifButtonBackgroundSolidColorBrush" Color="#805F7FAE"/>
+  <SolidColorBrush x:Key="SettingsCongifButtonHoverBackgroundSolidColorBrush" Color="#7A99C2"/>
+  <SolidColorBrush x:Key="SettingsCongifButtonBorderSolidColorBrush" Color="#2E3949"/>
+  <SolidColorBrush x:Key="SettingsInfoTabloBackgroundSolidColorBrush" Color="#5F7FAE"/>
+  <SolidColorBrush x:Key="SettingsConfigDataInputTabloBackgroundSolidColorBrush" Color="#4B5566"/>
+
+  <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
+    <Setter Property="Background" Value="#161D27"/>
+    <Setter Property="Foreground" Value="#E6ECF5"/>
+  </Style>
+  <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#90A1B8"/>
+  <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#AAB8CA"/>
+  <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#D2DBE8"/>
+  <SolidColorBrush x:Key="TextEditorActiveCommandStripeBrush" Color="#7D9BC3"/>
+  <SolidColorBrush x:Key="TextEditorActiveCommandBackgroundBrush" Color="#243243"/>
+
+  <SolidColorBrush x:Key="TestsInputBackgroundInputPanelBrush" Color="#5A6678"/>
+  <SolidColorBrush x:Key="TestsInputBackgroundHeaderPanelBrush" Color="#1D2530"/>
+  <SolidColorBrush x:Key="TestsMainPanelBackgroundBrush" Color="#171D26"/>
+  <SolidColorBrush x:Key="TestsMainButtonBackgroundBrush" Color="#212A35"/>
+  <SolidColorBrush x:Key="TestsMainButtonForegroundBrush" Color="#E7ECF4"/>
+
+  <SolidColorBrush x:Key="TestsInputHeaderSolidColorBrush" Color="#E7ECF4"/>
+  <SolidColorBrush x:Key="TestsInputDescriptionSolidColorBrush" Color="#B0BED0"/>
+
+  <SolidColorBrush x:Key="TestsMainButtonOrangeStartBrush" Color="#E9B26A"/>
+  <SolidColorBrush x:Key="TestsMainButtonOrangeEndBrush" Color="#D98958"/>
+  <SolidColorBrush x:Key="TestsMainButtonGreenStartBrush" Color="#6EB887"/>
+  <SolidColorBrush x:Key="TestsMainButtonGreenEndBrush" Color="#4F9B70"/>
+
+  <SolidColorBrush x:Key="TestsInteractiveBackgroundSolidColorBrush" Color="#1F2733"/>
+  <SolidColorBrush x:Key="TestsInteractiveBorderSolidColorBrush" Color="#3D4A5D"/>
+  <SolidColorBrush x:Key="TestsInteractivePressedSolidColorBrush" Color="#7A99C2"/>
+
+  <SolidColorBrush x:Key="TestsProtocolBackgroundBrush" Color="#1A212C"/>
+  <SolidColorBrush x:Key="TestsProtocolMessageSuccesForeground" Color="#61B282"/>
+  <SolidColorBrush x:Key="TestsProtocolMessageErrorForeground" Color="#E07B72"/>
+  <SolidColorBrush x:Key="TestsProtocolMessageSucces" Color="#61B282"/>
+  <SolidColorBrush x:Key="TestsProtocolMessageError" Color="#E07B72"/>
+  <SolidColorBrush x:Key="TestsProtocolHeaderForeground" Color="#E8EEF7"/>
+  <SolidColorBrush x:Key="TestsProtocolMessageForeground" Color="#DCE4F0"/>
+  <SolidColorBrush x:Key="TestsProtocolTimeForeground" Color="#B8C66E"/>
+
+  <SolidColorBrush x:Key="ErrorListBackground" Color="#141A22"/>
+  <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#1D2530"/>
+  <SolidColorBrush x:Key="ErrorListSelection" Color="#2D435B"/>
+
+  <RadialGradientBrush x:Key="CenterGlowBrush"
+                       ColorInterpolationMode="ScRgbLinearInterpolation"
+                       RadiusX="0.62"
+                       RadiusY="0.62"
+                       Center="0.45,0.45"
+                       GradientOrigin="0.45,0.45">
+    <GradientStop Color="#2A6F8FD0" Offset="0.00"/>
+    <GradientStop Color="#22628BB8" Offset="0.42"/>
+    <GradientStop Color="#00000000" Offset="1.00"/>
+  </RadialGradientBrush>
+
+  <RadialGradientBrush x:Key="VignetteBrush"
+                       ColorInterpolationMode="ScRgbLinearInterpolation"
+                       RadiusX="0.95"
+                       RadiusY="0.95"
+                       Center="0.5,0.5"
+                       GradientOrigin="0.5,0.5">
+    <GradientStop Color="#00000000" Offset="0.64"/>
+    <GradientStop Color="#3A000000" Offset="0.84"/>
+    <GradientStop Color="#8A000000" Offset="1.00"/>
+  </RadialGradientBrush>
+
+  <RadialGradientBrush x:Key="EmptyBackgroundBrush"
+                       ColorInterpolationMode="ScRgbLinearInterpolation"
+                       GradientOrigin="0.52,0.42"
+                       Center="0.52,0.42"
+                       RadiusX="1.25"
+                       RadiusY="1.25">
+    <GradientStop Color="#1A212C" Offset="0.00"/>
+    <GradientStop Color="#161C25" Offset="0.52"/>
+    <GradientStop Color="#111720" Offset="1.00"/>
+  </RadialGradientBrush>
+</ResourceDictionary>

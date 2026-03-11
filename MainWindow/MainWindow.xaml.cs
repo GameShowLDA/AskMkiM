@@ -193,11 +193,11 @@ namespace MainWindowProgram
         return;
       }
 
-      DarkThemeButton.Visibility = theme == ThemeMode.Dark
+      DarkThemeButton.Visibility = IsDarkTheme(theme)
         ? Visibility.Visible
         : Visibility.Collapsed;
 
-      LightThemeButton.Visibility = theme == ThemeMode.Light
+      LightThemeButton.Visibility = IsLightTheme(theme)
         ? Visibility.Visible
         : Visibility.Collapsed;
     }
@@ -211,9 +211,7 @@ namespace MainWindowProgram
         return;
       }
 
-      var nextTheme = ThemeSettings.CurrentTheme == ThemeMode.Dark
-        ? ThemeMode.Light
-        : ThemeMode.Dark;
+      var nextTheme = GetOppositeTheme(ThemeSettings.CurrentTheme);
 
       try
       {
@@ -233,6 +231,22 @@ namespace MainWindowProgram
         _isThemeToggleInProgress = false;
       }
     }
+
+    private static bool IsDarkTheme(ThemeMode theme) =>
+      theme == ThemeMode.Dark || theme == ThemeMode.DarkCustom;
+
+    private static bool IsLightTheme(ThemeMode theme) =>
+      theme == ThemeMode.Light || theme == ThemeMode.LightCustom;
+
+    private static ThemeMode GetOppositeTheme(ThemeMode theme) =>
+      theme switch
+      {
+        ThemeMode.Dark => ThemeMode.Light,
+        ThemeMode.Light => ThemeMode.Dark,
+        ThemeMode.DarkCustom => ThemeMode.LightCustom,
+        ThemeMode.LightCustom => ThemeMode.DarkCustom,
+        _ => ThemeMode.Dark,
+      };
 
     /// <summary>
     /// Глобальные хоткеи для навигации по результатам поиска (F3/Shift+F3), даже когда окно SearchWindow не в фокусе.
