@@ -10,6 +10,16 @@
     <SolidColorBrush x:Key="ForegrounfBrushes85" Color="#000000" Opacity="0.85"/>
     
     <SolidColorBrush x:Key="BackgroundBrushes" Color="#dedddf"/>
+    <LinearGradientBrush x:Key="SystemPowerWarningPanelBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#D08E96" Offset="0.00"/>
+        <GradientStop Color="#BD6F79" Offset="1.00"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="PowerButtonOnBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#C95F6B" Offset="0.00"/>
+        <GradientStop Color="#AE4C57" Offset="1.00"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="PowerButtonOnForegroundBrush" Color="#FCF8F9"/>
+    <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#F8FBFF"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#90465945"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#dedddf"/>
     <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#EBEBEB"/>
