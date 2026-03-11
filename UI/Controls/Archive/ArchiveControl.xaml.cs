@@ -897,6 +897,40 @@ namespace UI.Controls.Archive
       }
     }
 
+    private void ConvertToPkwButton_Click(object sender, RoutedEventArgs e)
+    {
+      var fileText = GetFileContentText();
+      if (string.IsNullOrWhiteSpace(fileText))
+      {
+        ShowArchiveNotification("Конвертация в PKW", "Нет данных для сохранения.", NotificationType.Warning);
+        return;
+      }
+
+      var suggestedFileName = GetSuggestedPkwFileName();
+      SaveFileManager.SaveFileAs(fileText, suggestedFileName);
+    }
+
+    private string GetFileContentText()
+    {
+      if (FileContentTextBox.Content is TextEditorUI contentTextEditor)
+      {
+        return contentTextEditor.Text ?? string.Empty;
+      }
+
+      return FileContentTextBox.Text ?? string.Empty;
+    }
+
+    private string GetSuggestedPkwFileName()
+    {
+      var rawName = string.IsNullOrWhiteSpace(_lastSelectedEntryName)
+        ? "converted_from_archive"
+        : Path.GetFileNameWithoutExtension(_lastSelectedEntryName);
+
+      return string.IsNullOrWhiteSpace(rawName)
+        ? "converted_from_archive"
+        : rawName;
+    }
+
     private string PromptForArchiveName(string suggestedArchiveName)
     {
       var dialog = new Window
