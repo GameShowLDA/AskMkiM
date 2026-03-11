@@ -68,7 +68,8 @@ namespace Ask.Engine.Tests.Metrology
       await _userInteractionService.AppendEmptyLineAsync();
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {firstNorm} до {lastNorm} Ом"));
 
-      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
+      var realyModule = testMeasurement.GetRelayModuleWithMaxNumber(metrologicalModeRole);
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService, realyModule.SwitchResistance), _userInteractionService, true);
     }
 
     public ITextAdapter GetControl()

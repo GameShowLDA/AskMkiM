@@ -48,6 +48,11 @@ namespace NewCore.Function.GPT.Managment
       var time = await _getTestTime();
       var timeRamp = await _getRampTime();
 
+      if (_gptModel.Mode != Ask.Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
+      {
+        waitFullTime = true;
+      }
+
       return await MeasureHelper.MeasureAsync(
         _gptModel,
         time,
