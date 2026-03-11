@@ -291,8 +291,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       string unit = info?.Unit ?? "";
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Результаты режима {displayName}"), skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: $"{min:F5} {unit}", type: min >= LowerBound && min <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: $"{max:F5} {unit}", type: max >= LowerBound && max <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: $"{min:F5} {unit}", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: $"{max:F5} {unit}", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
 
       Measurements = new();
     }
@@ -330,6 +330,22 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     public List<IRelaySwitchModule>? GetRelayModules(MeasurementTypeCommand mode)
     {
       return Devices.TryGetValue(mode, out var modules) ? modules.OfType<IRelaySwitchModule>().ToList() : null;
+    }
+
+    /// <summary>
+    /// Возвращает модуль коммутации реле (МКР) с наибольшим номером,
+    /// связанный с заданным режимом.
+    /// </summary>
+    /// <param name="mode">Метрологическая роль устройства.</param>
+    /// <returns>Модуль с максимальным номером или null, если не найден.</returns>
+    public IRelaySwitchModule? GetRelayModuleWithMaxNumber(MeasurementTypeCommand mode)
+    {
+      if (!Devices.TryGetValue(mode, out var modules))
+        return null;
+
+      return modules
+          .OfType<IRelaySwitchModule>()
+          .MaxBy(x => x.Number);
     }
 
     /// <summary>
