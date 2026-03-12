@@ -173,63 +173,120 @@ namespace MainWindowProgram
 
     private void ApplyFileMenuTopIconMode(bool useTopMenuIcons)
     {
-      if (File == null)
+      if (File != null)
+      {
+        var menuFileResource = TryFindResource("LS_Menu_File");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(File, HeaderedItemsControl.HeaderProperty);
+          File.Header = string.Empty;
+          BindingOperations.ClearBinding(File, ToolTipProperty);
+          File.Margin = new Thickness(6, 0, 0, 0);
+
+          var icon = new FileDocumentIcon
+          {
+            Size = 19,
+          };
+          File.Icon = icon;
+
+          if (menuFileResource != null)
+          {
+            BindingOperations.SetBinding(
+              File,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuFileResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            File.ToolTip = "File";
+          }
+        }
+        else
+        {
+          File.Icon = null;
+          BindingOperations.ClearBinding(File, ToolTipProperty);
+          File.ToolTip = null;
+          File.Margin = new Thickness(0);
+
+          if (menuFileResource != null)
+          {
+            BindingOperations.SetBinding(
+              File,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuFileResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            File.Header = "File";
+          }
+        }
+      }
+
+      if (Settings == null)
       {
         return;
       }
 
-      var menuFileResource = TryFindResource("LS_Menu_File");
+      var menuSettingsResource = TryFindResource("LS_Menu_Settings");
       if (useTopMenuIcons)
       {
-        BindingOperations.ClearBinding(File, HeaderedItemsControl.HeaderProperty);
-        File.Header = string.Empty;
-        BindingOperations.ClearBinding(File, ToolTipProperty);
-        File.Margin = new Thickness(6, 0, 0, 0);
+        BindingOperations.ClearBinding(Settings, HeaderedItemsControl.HeaderProperty);
+        Settings.Header = string.Empty;
+        BindingOperations.ClearBinding(Settings, ToolTipProperty);
+        Settings.Margin = new Thickness(0);
 
-        var icon = new FileDocumentIcon
+        var settingsIcon = new SettingsGearIcon
         {
           Size = 19,
         };
-        File.Icon = icon;
+        Settings.Icon = settingsIcon;
 
-        if (menuFileResource != null)
+        if (menuSettingsResource != null)
         {
           BindingOperations.SetBinding(
-            File,
+            Settings,
             ToolTipProperty,
             new Binding("Value")
             {
-              Source = menuFileResource,
+              Source = menuSettingsResource,
               Mode = BindingMode.OneWay,
             });
         }
         else
         {
-          File.ToolTip = "File";
+          Settings.ToolTip = "Settings";
         }
 
         return;
       }
 
-      File.Icon = null;
-      BindingOperations.ClearBinding(File, ToolTipProperty);
-      File.ToolTip = null;
-      File.Margin = new Thickness(0);
+      Settings.Icon = null;
+      BindingOperations.ClearBinding(Settings, ToolTipProperty);
+      Settings.ToolTip = null;
+      Settings.Margin = new Thickness(0);
 
-      if (menuFileResource != null)
+      if (menuSettingsResource != null)
       {
         BindingOperations.SetBinding(
-          File,
+          Settings,
           HeaderedItemsControl.HeaderProperty,
           new Binding("Value")
           {
-            Source = menuFileResource,
+            Source = menuSettingsResource,
             Mode = BindingMode.OneWay,
           });
       }
       else
       {
-        File.Header = "File";
+        Settings.Header = "Settings";
       }
     }
 
