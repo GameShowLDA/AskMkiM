@@ -187,6 +187,14 @@ namespace MainWindowProgram
           {
             Size = 22,
           };
+          BindingOperations.SetBinding(
+            icon,
+            FileDocumentIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = File,
+              Mode = BindingMode.OneWay,
+            });
           File.Icon = icon;
 
           if (menuFileResource != null)
@@ -244,6 +252,14 @@ namespace MainWindowProgram
           {
             Size = 22,
           };
+          BindingOperations.SetBinding(
+            testIcon,
+            TestFlaskIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = TestMenu,
+              Mode = BindingMode.OneWay,
+            });
           TestMenu.Icon = testIcon;
 
           if (menuTestResource != null)
@@ -301,6 +317,14 @@ namespace MainWindowProgram
           {
             Size = 22,
           };
+          BindingOperations.SetBinding(
+            executionIcon,
+            ExecutionPlayCircleIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = Translation,
+              Mode = BindingMode.OneWay,
+            });
           Translation.Icon = executionIcon;
 
           if (menuExecutionResource != null)
@@ -358,6 +382,14 @@ namespace MainWindowProgram
           {
             Size = 22,
           };
+          BindingOperations.SetBinding(
+            settingsIcon,
+            SettingsGearIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = Settings,
+              Mode = BindingMode.OneWay,
+            });
           Settings.Icon = settingsIcon;
 
           if (menuSettingsResource != null)
@@ -418,6 +450,14 @@ namespace MainWindowProgram
         {
           Size = 22,
         };
+        BindingOperations.SetBinding(
+          helpIcon,
+          HelpCircleIcon.IsHoveringProperty,
+          new Binding("IsMouseOver")
+          {
+            Source = HelpText,
+            Mode = BindingMode.OneWay,
+          });
         HelpText.Icon = helpIcon;
 
         if (menuHelpResource != null)

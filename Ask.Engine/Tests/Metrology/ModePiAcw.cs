@@ -98,7 +98,7 @@ namespace Ask.Engine.Tests.Metrology
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);
         await breakDown.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);
-        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(40, messageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
       }
 
