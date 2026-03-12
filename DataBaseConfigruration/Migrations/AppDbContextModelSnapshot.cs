@@ -441,6 +441,9 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<bool>("UseSyntaxHighlighting")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("UseTopMenuIcons")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("UserInterface");

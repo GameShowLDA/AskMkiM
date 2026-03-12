@@ -2,9 +2,11 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.UI.Shared.Components.Icons;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
@@ -14,6 +16,7 @@ using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.Search;
@@ -56,6 +59,7 @@ namespace MainWindowProgram
     /// </summary>
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
+    private Action<UserInterfaceModel>? _onUserInterfaceSaved;
 
     /// <summary>
     /// Показывает, активен ли в данный момент текстовый редактор.
@@ -101,12 +105,29 @@ namespace MainWindowProgram
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
 
+      Loaded += MainWindow_Loaded;
+      _onUserInterfaceSaved = model =>
+      {
+        if (!Dispatcher.CheckAccess())
+        {
+          Dispatcher.BeginInvoke(() => ApplyFileMenuTopIconMode(model.UseTopMenuIcons));
+          return;
+        }
+
+        ApplyFileMenuTopIconMode(model.UseTopMenuIcons);
+      };
+      UserInterfaceConfig.SaveUserInterfaceEvent += _onUserInterfaceSaved;
+
       ThemeSettings.ThemeChanged += OnThemeChanged;
       UpdateThemeToggleButtons(ThemeSettings.CurrentTheme);
 
       this.Closed += (_, _) =>
       {
         ThemeSettings.ThemeChanged -= OnThemeChanged;
+        if (_onUserInterfaceSaved != null)
+        {
+          UserInterfaceConfig.SaveUserInterfaceEvent -= _onUserInterfaceSaved;
+        }
       };
     }
 
@@ -141,6 +162,74 @@ namespace MainWindowProgram
       {
         LogException($"Ошибка выполнения программы", ex);
         MessageBoxCustom.Show($"Ошибка: {ex.Message}", image: MessageBoxImage.Error);
+      }
+    }
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+      var uiConfig = await UserInterfaceConfig.GetParameterModel();
+      ApplyFileMenuTopIconMode(uiConfig.UseTopMenuIcons);
+    }
+
+    private void ApplyFileMenuTopIconMode(bool useTopMenuIcons)
+    {
+      if (File == null)
+      {
+        return;
+      }
+
+      var menuFileResource = TryFindResource("LS_Menu_File");
+      if (useTopMenuIcons)
+      {
+        BindingOperations.ClearBinding(File, HeaderedItemsControl.HeaderProperty);
+        File.Header = string.Empty;
+        BindingOperations.ClearBinding(File, ToolTipProperty);
+        File.Margin = new Thickness(6, 0, 0, 0);
+
+        var icon = new FileDocumentIcon
+        {
+          Size = 19,
+        };
+        File.Icon = icon;
+
+        if (menuFileResource != null)
+        {
+          BindingOperations.SetBinding(
+            File,
+            ToolTipProperty,
+            new Binding("Value")
+            {
+              Source = menuFileResource,
+              Mode = BindingMode.OneWay,
+            });
+        }
+        else
+        {
+          File.ToolTip = "File";
+        }
+
+        return;
+      }
+
+      File.Icon = null;
+      BindingOperations.ClearBinding(File, ToolTipProperty);
+      File.ToolTip = null;
+      File.Margin = new Thickness(0);
+
+      if (menuFileResource != null)
+      {
+        BindingOperations.SetBinding(
+          File,
+          HeaderedItemsControl.HeaderProperty,
+          new Binding("Value")
+          {
+            Source = menuFileResource,
+            Mode = BindingMode.OneWay,
+          });
+      }
+      else
+      {
+        File.Header = "File";
       }
     }
 

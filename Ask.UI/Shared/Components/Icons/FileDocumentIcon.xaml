@@ -1,0 +1,21 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.FileDocumentIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <UserControl.Resources>
+    <StreamGeometry x:Key="SemiIconFileDocument">
+      M12 2a1 1 0 0 0-1-1H6a2 2 0 0 0-2 2v18c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V10a1 1 0 0 0-1-1h-5a2 2 0 0 1-2-2V2ZM7 8a1 1 0 0 1 1-1h1a1 1 0 0 1 0 2H8a1 1 0 0 1-1-1Zm0 5a1 1 0 0 1 1-1h8a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Zm1 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm11.07-9.5H14.5a1 1 0 0 1-1-1V1.93a.8.8 0 0 1 1.37-.56l4.76 4.76a.8.8 0 0 1-.56 1.37Z
+    </StreamGeometry>
+  </UserControl.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24"
+          Height="24">
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="{StaticResource SemiIconFileDocument}" />
+    </Grid>
+  </Viewbox>
+</UserControl>

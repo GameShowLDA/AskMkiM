@@ -23,6 +23,8 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Description" Key="settings.userinterface.commandBodyBackground.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Title" Key="settings.userinterface.chainPointBodyBackground.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Description" Key="settings.userinterface.chainPointBodyBackground.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Title" Key="settings.userinterface.topMenuIcons.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Description" Key="settings.userinterface.topMenuIcons.description" />
     </UserControl.Resources>
 
     <Border 
@@ -121,6 +123,14 @@
                         DisplayMemberPath="Title"
                         Visibility="Visible"
                         SelectedValuePath="Key"/>
+
+                    <Components:SettingsCard
+                        Title="{Binding Source={StaticResource Settings_UserInterface_TopMenuIcons_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_UserInterface_TopMenuIcons_Description}, Path=Value}"
+                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                        Margin="10,10"
+                        VerticalAlignment="Top"
+                        x:Name="TopMenuIcons"/>
                 </WrapPanel>
 
                 <Border Margin="10,0,10,10"
