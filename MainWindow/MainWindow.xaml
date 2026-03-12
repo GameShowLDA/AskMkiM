@@ -176,7 +176,7 @@
 
                 </MenuItem>
 
-                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" >
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}">
 

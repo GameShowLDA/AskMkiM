@@ -230,6 +230,63 @@ namespace MainWindowProgram
         }
       }
 
+      if (TestMenu != null)
+      {
+        var menuTestResource = TryFindResource("LS_Menu_Test");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(TestMenu, HeaderedItemsControl.HeaderProperty);
+          TestMenu.Header = string.Empty;
+          BindingOperations.ClearBinding(TestMenu, ToolTipProperty);
+          TestMenu.Margin = new Thickness(0);
+
+          var testIcon = new TestFlaskIcon
+          {
+            Size = 19,
+          };
+          TestMenu.Icon = testIcon;
+
+          if (menuTestResource != null)
+          {
+            BindingOperations.SetBinding(
+              TestMenu,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuTestResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            TestMenu.ToolTip = "Tests";
+          }
+        }
+        else
+        {
+          TestMenu.Icon = null;
+          BindingOperations.ClearBinding(TestMenu, ToolTipProperty);
+          TestMenu.ToolTip = null;
+          TestMenu.Margin = new Thickness(0);
+
+          if (menuTestResource != null)
+          {
+            BindingOperations.SetBinding(
+              TestMenu,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuTestResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            TestMenu.Header = "Tests";
+          }
+        }
+      }
+
       if (Settings != null)
       {
         var menuSettingsResource = TryFindResource("LS_Menu_Settings");
