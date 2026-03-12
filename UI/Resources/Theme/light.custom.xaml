@@ -16,6 +16,16 @@
     <GradientStop Color="#ECF1F8" Offset="0.00"/>
     <GradientStop Color="#E0E8F3" Offset="1.00"/>
   </LinearGradientBrush>
+  <LinearGradientBrush x:Key="SystemPowerWarningPanelBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#D7979F" Offset="0.00"/>
+    <GradientStop Color="#C37882" Offset="1.00"/>
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="PowerButtonOnBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#CF6571" Offset="0.00"/>
+    <GradientStop Color="#B2535F" Offset="1.00"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="PowerButtonOnForegroundBrush" Color="#FCF8F9"/>
+  <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#F8FBFF"/>
   <SolidColorBrush x:Key="ActiveColorBrushes" Color="#7E99BF"/>
   <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#E4EBF5"/>
 

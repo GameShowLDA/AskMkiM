@@ -5,7 +5,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using DataBaseConfiguration.Services.Device;
 using Message;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -62,12 +61,9 @@ namespace UI.Components
     /// </summary>
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-      UpdateToolTipVisibility();
+      SetButtonToolTip("Подключить систему");
+      SetDisconnectedState("Подключить систему");
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(OnPowerChanged);
-
-      this.MouseEnter += OnMouseEnter;
-      this.MouseLeave += OnMouseLeave;
-      this.PreviewMouseDown += OnPowerButtonClick;
     }
 
     /// <summary>
@@ -86,34 +82,20 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Анимация для плавного увеличения непрозрачности кнопки при наведении курсора.
-    /// </summary>
-    private async void OnMouseEnter(object sender, MouseEventArgs e)
-    {
-      if (!taskInProgress || hasError)
-      {
-        await AnimateOpacityAsync(1);
-      }
-    }
-
-    /// <summary>
-    /// Анимация для плавного уменьшения непрозрачности кнопки при уходе курсора.
-    /// </summary>
-    private async void OnMouseLeave(object sender, MouseEventArgs e)
-    {
-      if (!taskInProgress || hasError)
-      {
-        await AnimateOpacityAsync(0.5);
-      }
-    }
-
-    /// <summary>
     /// Обработчик события клика по кнопке питания.
     /// Запускает процесс включения/выключения питания в зависимости от текущего состояния.
     /// </summary>
     /// <param name="sender">Источник события (кнопка питания).</param>
     /// <param name="e">Аргументы события мыши.</param>
     public async void OnPowerButtonClick(object sender, MouseButtonEventArgs e)
+    {
+      await PowerButtonClick();
+    }
+
+    /// <summary>
+    /// Обработчик нажатия кнопки питания.
+    /// </summary>
+    private async void OnPowerActionButtonClick(object sender, RoutedEventArgs e)
     {
       await PowerButtonClick();
     }
@@ -264,47 +246,17 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Анимация плавного изменения непрозрачности кнопки до заданного уровня.
-    /// </summary>
-    private async Task AnimateOpacityAsync(double targetOpacity)
-    {
-      while (Math.Abs(GridBlock.Opacity - targetOpacity) > 0.1)
-      {
-        GridBlock.Opacity += (targetOpacity - GridBlock.Opacity) * 0.1;
-        await Task.Delay(10);
-      }
-
-      GridBlock.Opacity = targetOpacity;
-    }
-
-    /// <summary>
-    /// Обновление видимости всплывающей подсказки, если текст не помещается.
-    /// </summary>
-    private void UpdateToolTipVisibility()
-    {
-      var pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-      var formattedText = new FormattedText(
-          nameTextBlock.Text,
-          CultureInfo.CurrentCulture,
-          FlowDirection.LeftToRight,
-          new Typeface(nameTextBlock.FontFamily, nameTextBlock.FontStyle, nameTextBlock.FontWeight, nameTextBlock.FontStretch),
-          nameTextBlock.FontSize,
-          nameTextBlock.Foreground,
-          pixelsPerDip);
-
-      nameTextBlock.ToolTip = formattedText.Width > nameTextBlock.ActualWidth ? nameTextBlock.Text : null;
-    }
-
-    /// <summary>
     /// Установка состояния загрузки с изменением текста и цвета кнопки.
     /// </summary>
     private void SetLoadingState(string text, Color color)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, color);
-        GridBlock.Opacity = 1;
+        _ = color;
+        SetButtonToolTip(text);
+        SetIconForegroundResource("PowerButtonOnForegroundBrush");
+        SetIconsState(true);
+        PowerActionButton.Opacity = 1;
       });
     }
 
@@ -315,9 +267,10 @@ namespace UI.Components
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, "FadedRedSolidColorBrush");
-        GridBlock.Opacity = 0.5;
+        SetButtonToolTip(text);
+        SetIconForegroundResource("PowerButtonOnForegroundBrush");
+        SetIconsState(true);
+        PowerActionButton.Opacity = 0.92;
         active = true;
       });
     }
@@ -329,11 +282,61 @@ namespace UI.Components
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, "GreenColorSolidColorBrush");
-        GridBlock.Opacity = 0.5;
+        SetButtonToolTip(text);
+        SetIconForegroundResource("PowerButtonOffForegroundBrush");
+        SetIconsState(false);
+        PowerActionButton.Opacity = 0.86;
         active = false;
       });
+    }
+
+    /// <summary>
+    /// Переключает видимость иконок питания в зависимости от состояния.
+    /// </summary>
+    private void SetIconsState(bool isPowerOn)
+    {
+      if (FindButtonTemplateElement("PowerOnStateIcon") is UIElement powerOnIcon)
+      {
+        powerOnIcon.Visibility = isPowerOn ? Visibility.Visible : Visibility.Collapsed;
+      }
+
+      if (FindButtonTemplateElement("PowerOffStateIcon") is UIElement powerOffIcon)
+      {
+        powerOffIcon.Visibility = isPowerOn ? Visibility.Collapsed : Visibility.Visible;
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает цвет иконки через ресурс темы.
+    /// </summary>
+    private void SetIconForegroundResource(string resourceKey)
+    {
+      if (FindButtonTemplateElement("PowerOnStateIcon") is FrameworkElement powerOnIcon)
+      {
+        powerOnIcon.SetResourceReference(ForegroundProperty, resourceKey);
+      }
+
+      if (FindButtonTemplateElement("PowerOffStateIcon") is FrameworkElement powerOffIcon)
+      {
+        powerOffIcon.SetResourceReference(ForegroundProperty, resourceKey);
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает текст подсказки кнопки питания.
+    /// </summary>
+    private void SetButtonToolTip(string text)
+    {
+      PowerActionButton.ToolTip = text;
+    }
+
+    /// <summary>
+    /// Возвращает элемент шаблона кнопки по имени.
+    /// </summary>
+    private FrameworkElement FindButtonTemplateElement(string elementName)
+    {
+      PowerActionButton.ApplyTemplate();
+      return PowerActionButton.Template?.FindName(elementName, PowerActionButton) as FrameworkElement;
     }
   }
 }

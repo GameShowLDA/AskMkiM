@@ -153,7 +153,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Menu Name="mainMenu" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
+            <Menu Name="mainMenu" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
                 Foreground="{DynamicResource MainTitleSolidColorBrush}" Grid.Column="0" BorderThickness="0">
 
                 <MenuItem Header="{Binding Source={StaticResource LS_Menu_File}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="File" Uid="1" Tag="menuHeader_1">
@@ -176,7 +176,7 @@
 
                 </MenuItem>
 
-                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" >
+                <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}">
 
@@ -283,7 +283,7 @@
             <StackPanel Name="ButtonsPanel"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
-                    VerticalAlignment="Top" 
+                    VerticalAlignment="Center" 
                     Grid.Column="2" 
                     Background="Transparent"
                     >
@@ -346,7 +346,7 @@
         <Grid 
             Name="BottomPanel"
             Grid.Row="2" 
-            Height="30" 
+            Height="38" 
             Background="{DynamicResource BackgroundBrushes}"
             >
 
@@ -439,7 +439,10 @@
 
             <DefaultGUI:PowerButton
                 Grid.Column="6" 
-                Width="200"
+                Width="38"
+                Height="34"
+                Margin="0,-1,8,1"
+                VerticalAlignment="Center"
                 Name="PowerButton"
                 Tag="Power"
                 />

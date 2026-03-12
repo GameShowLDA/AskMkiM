@@ -97,7 +97,7 @@ namespace Ask.Engine.Tests.Metrology
         double result = 0;
         List<double> measuremend = new List<double>();
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
         {
           result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(param, LowerBound, UpperBound, protocolUI);
           if (result > 0)
@@ -106,6 +106,11 @@ namespace Ask.Engine.Tests.Metrology
           }
         }
         result = measuremend.Average();
+
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          result -= intrinsicValue;
+        }
 
         var err = result - param;
         Measurements.Add(err);

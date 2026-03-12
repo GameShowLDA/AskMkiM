@@ -2,9 +2,11 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.UI.Shared.Components.Icons;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
@@ -14,6 +16,7 @@ using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.Search;
@@ -56,6 +59,7 @@ namespace MainWindowProgram
     /// </summary>
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
+    private Action<UserInterfaceModel>? _onUserInterfaceSaved;
 
     /// <summary>
     /// Показывает, активен ли в данный момент текстовый редактор.
@@ -101,12 +105,29 @@ namespace MainWindowProgram
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
 
+      Loaded += MainWindow_Loaded;
+      _onUserInterfaceSaved = model =>
+      {
+        if (!Dispatcher.CheckAccess())
+        {
+          Dispatcher.BeginInvoke(() => ApplyFileMenuTopIconMode(model.UseTopMenuIcons));
+          return;
+        }
+
+        ApplyFileMenuTopIconMode(model.UseTopMenuIcons);
+      };
+      UserInterfaceConfig.SaveUserInterfaceEvent += _onUserInterfaceSaved;
+
       ThemeSettings.ThemeChanged += OnThemeChanged;
       UpdateThemeToggleButtons(ThemeSettings.CurrentTheme);
 
       this.Closed += (_, _) =>
       {
         ThemeSettings.ThemeChanged -= OnThemeChanged;
+        if (_onUserInterfaceSaved != null)
+        {
+          UserInterfaceConfig.SaveUserInterfaceEvent -= _onUserInterfaceSaved;
+        }
       };
     }
 
@@ -141,6 +162,342 @@ namespace MainWindowProgram
       {
         LogException($"Ошибка выполнения программы", ex);
         MessageBoxCustom.Show($"Ошибка: {ex.Message}", image: MessageBoxImage.Error);
+      }
+    }
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+      var uiConfig = await UserInterfaceConfig.GetParameterModel();
+      ApplyFileMenuTopIconMode(uiConfig.UseTopMenuIcons);
+    }
+
+    private void ApplyFileMenuTopIconMode(bool useTopMenuIcons)
+    {
+      if (File != null)
+      {
+        var menuFileResource = TryFindResource("LS_Menu_File");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(File, HeaderedItemsControl.HeaderProperty);
+          File.Header = string.Empty;
+          BindingOperations.ClearBinding(File, ToolTipProperty);
+          File.Margin = new Thickness(6, 0, 0, 0);
+
+          var icon = new FileDocumentIcon
+          {
+            Size = 22,
+          };
+          BindingOperations.SetBinding(
+            icon,
+            FileDocumentIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = File,
+              Mode = BindingMode.OneWay,
+            });
+          File.Icon = icon;
+
+          if (menuFileResource != null)
+          {
+            BindingOperations.SetBinding(
+              File,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuFileResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            File.ToolTip = "File";
+          }
+        }
+        else
+        {
+          File.Icon = null;
+          BindingOperations.ClearBinding(File, ToolTipProperty);
+          File.ToolTip = null;
+          File.Margin = new Thickness(0);
+
+          if (menuFileResource != null)
+          {
+            BindingOperations.SetBinding(
+              File,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuFileResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            File.Header = "File";
+          }
+        }
+      }
+
+      if (TestMenu != null)
+      {
+        var menuTestResource = TryFindResource("LS_Menu_Test");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(TestMenu, HeaderedItemsControl.HeaderProperty);
+          TestMenu.Header = string.Empty;
+          BindingOperations.ClearBinding(TestMenu, ToolTipProperty);
+          TestMenu.Margin = new Thickness(0);
+
+          var testIcon = new TestFlaskIcon
+          {
+            Size = 22,
+          };
+          BindingOperations.SetBinding(
+            testIcon,
+            TestFlaskIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = TestMenu,
+              Mode = BindingMode.OneWay,
+            });
+          TestMenu.Icon = testIcon;
+
+          if (menuTestResource != null)
+          {
+            BindingOperations.SetBinding(
+              TestMenu,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuTestResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            TestMenu.ToolTip = "Tests";
+          }
+        }
+        else
+        {
+          TestMenu.Icon = null;
+          BindingOperations.ClearBinding(TestMenu, ToolTipProperty);
+          TestMenu.ToolTip = null;
+          TestMenu.Margin = new Thickness(0);
+
+          if (menuTestResource != null)
+          {
+            BindingOperations.SetBinding(
+              TestMenu,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuTestResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            TestMenu.Header = "Tests";
+          }
+        }
+      }
+
+      if (Translation != null)
+      {
+        var menuExecutionResource = TryFindResource("LS_Menu_Execution");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(Translation, HeaderedItemsControl.HeaderProperty);
+          Translation.Header = string.Empty;
+          BindingOperations.ClearBinding(Translation, ToolTipProperty);
+          Translation.Margin = new Thickness(0);
+
+          var executionIcon = new ExecutionPlayCircleIcon
+          {
+            Size = 22,
+          };
+          BindingOperations.SetBinding(
+            executionIcon,
+            ExecutionPlayCircleIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = Translation,
+              Mode = BindingMode.OneWay,
+            });
+          Translation.Icon = executionIcon;
+
+          if (menuExecutionResource != null)
+          {
+            BindingOperations.SetBinding(
+              Translation,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuExecutionResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Translation.ToolTip = "Execution";
+          }
+        }
+        else
+        {
+          Translation.Icon = null;
+          BindingOperations.ClearBinding(Translation, ToolTipProperty);
+          Translation.ToolTip = null;
+          Translation.Margin = new Thickness(0);
+
+          if (menuExecutionResource != null)
+          {
+            BindingOperations.SetBinding(
+              Translation,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuExecutionResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Translation.Header = "Execution";
+          }
+        }
+      }
+
+      if (Settings != null)
+      {
+        var menuSettingsResource = TryFindResource("LS_Menu_Settings");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(Settings, HeaderedItemsControl.HeaderProperty);
+          Settings.Header = string.Empty;
+          BindingOperations.ClearBinding(Settings, ToolTipProperty);
+          Settings.Margin = new Thickness(0);
+
+          var settingsIcon = new SettingsGearIcon
+          {
+            Size = 22,
+          };
+          BindingOperations.SetBinding(
+            settingsIcon,
+            SettingsGearIcon.IsHoveringProperty,
+            new Binding("IsMouseOver")
+            {
+              Source = Settings,
+              Mode = BindingMode.OneWay,
+            });
+          Settings.Icon = settingsIcon;
+
+          if (menuSettingsResource != null)
+          {
+            BindingOperations.SetBinding(
+              Settings,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuSettingsResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Settings.ToolTip = "Settings";
+          }
+        }
+        else
+        {
+          Settings.Icon = null;
+          BindingOperations.ClearBinding(Settings, ToolTipProperty);
+          Settings.ToolTip = null;
+          Settings.Margin = new Thickness(0);
+
+          if (menuSettingsResource != null)
+          {
+            BindingOperations.SetBinding(
+              Settings,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuSettingsResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Settings.Header = "Settings";
+          }
+        }
+      }
+
+      if (HelpText == null)
+      {
+        return;
+      }
+
+      var menuHelpResource = TryFindResource("LS_Menu_Help");
+      if (useTopMenuIcons)
+      {
+        BindingOperations.ClearBinding(HelpText, HeaderedItemsControl.HeaderProperty);
+        HelpText.Header = string.Empty;
+        BindingOperations.ClearBinding(HelpText, ToolTipProperty);
+        HelpText.Margin = new Thickness(0);
+
+        var helpIcon = new HelpCircleIcon
+        {
+          Size = 22,
+        };
+        BindingOperations.SetBinding(
+          helpIcon,
+          HelpCircleIcon.IsHoveringProperty,
+          new Binding("IsMouseOver")
+          {
+            Source = HelpText,
+            Mode = BindingMode.OneWay,
+          });
+        HelpText.Icon = helpIcon;
+
+        if (menuHelpResource != null)
+        {
+          BindingOperations.SetBinding(
+            HelpText,
+            ToolTipProperty,
+            new Binding("Value")
+            {
+              Source = menuHelpResource,
+              Mode = BindingMode.OneWay,
+            });
+        }
+        else
+        {
+          HelpText.ToolTip = "Help";
+        }
+
+        return;
+      }
+
+      HelpText.Icon = null;
+      BindingOperations.ClearBinding(HelpText, ToolTipProperty);
+      HelpText.ToolTip = null;
+      HelpText.Margin = new Thickness(0);
+
+      if (menuHelpResource != null)
+      {
+        BindingOperations.SetBinding(
+          HelpText,
+          HeaderedItemsControl.HeaderProperty,
+          new Binding("Value")
+          {
+            Source = menuHelpResource,
+            Mode = BindingMode.OneWay,
+          });
+      }
+      else
+      {
+        HelpText.Header = "Help";
       }
     }
 
