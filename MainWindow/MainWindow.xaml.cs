@@ -287,6 +287,63 @@ namespace MainWindowProgram
         }
       }
 
+      if (Translation != null)
+      {
+        var menuExecutionResource = TryFindResource("LS_Menu_Execution");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(Translation, HeaderedItemsControl.HeaderProperty);
+          Translation.Header = string.Empty;
+          BindingOperations.ClearBinding(Translation, ToolTipProperty);
+          Translation.Margin = new Thickness(0);
+
+          var executionIcon = new ExecutionPlayCircleIcon
+          {
+            Size = 19,
+          };
+          Translation.Icon = executionIcon;
+
+          if (menuExecutionResource != null)
+          {
+            BindingOperations.SetBinding(
+              Translation,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuExecutionResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Translation.ToolTip = "Execution";
+          }
+        }
+        else
+        {
+          Translation.Icon = null;
+          BindingOperations.ClearBinding(Translation, ToolTipProperty);
+          Translation.ToolTip = null;
+          Translation.Margin = new Thickness(0);
+
+          if (menuExecutionResource != null)
+          {
+            BindingOperations.SetBinding(
+              Translation,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuExecutionResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Translation.Header = "Execution";
+          }
+        }
+      }
+
       if (Settings != null)
       {
         var menuSettingsResource = TryFindResource("LS_Menu_Settings");
