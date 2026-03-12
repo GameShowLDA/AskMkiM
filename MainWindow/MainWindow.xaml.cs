@@ -230,63 +230,120 @@ namespace MainWindowProgram
         }
       }
 
-      if (Settings == null)
+      if (Settings != null)
+      {
+        var menuSettingsResource = TryFindResource("LS_Menu_Settings");
+        if (useTopMenuIcons)
+        {
+          BindingOperations.ClearBinding(Settings, HeaderedItemsControl.HeaderProperty);
+          Settings.Header = string.Empty;
+          BindingOperations.ClearBinding(Settings, ToolTipProperty);
+          Settings.Margin = new Thickness(0);
+
+          var settingsIcon = new SettingsGearIcon
+          {
+            Size = 19,
+          };
+          Settings.Icon = settingsIcon;
+
+          if (menuSettingsResource != null)
+          {
+            BindingOperations.SetBinding(
+              Settings,
+              ToolTipProperty,
+              new Binding("Value")
+              {
+                Source = menuSettingsResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Settings.ToolTip = "Settings";
+          }
+        }
+        else
+        {
+          Settings.Icon = null;
+          BindingOperations.ClearBinding(Settings, ToolTipProperty);
+          Settings.ToolTip = null;
+          Settings.Margin = new Thickness(0);
+
+          if (menuSettingsResource != null)
+          {
+            BindingOperations.SetBinding(
+              Settings,
+              HeaderedItemsControl.HeaderProperty,
+              new Binding("Value")
+              {
+                Source = menuSettingsResource,
+                Mode = BindingMode.OneWay,
+              });
+          }
+          else
+          {
+            Settings.Header = "Settings";
+          }
+        }
+      }
+
+      if (HelpText == null)
       {
         return;
       }
 
-      var menuSettingsResource = TryFindResource("LS_Menu_Settings");
+      var menuHelpResource = TryFindResource("LS_Menu_Help");
       if (useTopMenuIcons)
       {
-        BindingOperations.ClearBinding(Settings, HeaderedItemsControl.HeaderProperty);
-        Settings.Header = string.Empty;
-        BindingOperations.ClearBinding(Settings, ToolTipProperty);
-        Settings.Margin = new Thickness(0);
+        BindingOperations.ClearBinding(HelpText, HeaderedItemsControl.HeaderProperty);
+        HelpText.Header = string.Empty;
+        BindingOperations.ClearBinding(HelpText, ToolTipProperty);
+        HelpText.Margin = new Thickness(0);
 
-        var settingsIcon = new SettingsGearIcon
+        var helpIcon = new HelpCircleIcon
         {
           Size = 19,
         };
-        Settings.Icon = settingsIcon;
+        HelpText.Icon = helpIcon;
 
-        if (menuSettingsResource != null)
+        if (menuHelpResource != null)
         {
           BindingOperations.SetBinding(
-            Settings,
+            HelpText,
             ToolTipProperty,
             new Binding("Value")
             {
-              Source = menuSettingsResource,
+              Source = menuHelpResource,
               Mode = BindingMode.OneWay,
             });
         }
         else
         {
-          Settings.ToolTip = "Settings";
+          HelpText.ToolTip = "Help";
         }
 
         return;
       }
 
-      Settings.Icon = null;
-      BindingOperations.ClearBinding(Settings, ToolTipProperty);
-      Settings.ToolTip = null;
-      Settings.Margin = new Thickness(0);
+      HelpText.Icon = null;
+      BindingOperations.ClearBinding(HelpText, ToolTipProperty);
+      HelpText.ToolTip = null;
+      HelpText.Margin = new Thickness(0);
 
-      if (menuSettingsResource != null)
+      if (menuHelpResource != null)
       {
         BindingOperations.SetBinding(
-          Settings,
+          HelpText,
           HeaderedItemsControl.HeaderProperty,
           new Binding("Value")
           {
-            Source = menuSettingsResource,
+            Source = menuHelpResource,
             Mode = BindingMode.OneWay,
           });
       }
       else
       {
-        Settings.Header = "Settings";
+        HelpText.Header = "Help";
       }
     }
 
