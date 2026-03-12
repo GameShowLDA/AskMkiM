@@ -185,7 +185,7 @@ namespace MainWindowProgram
 
           var icon = new FileDocumentIcon
           {
-            Size = 19,
+            Size = 22,
           };
           File.Icon = icon;
 
@@ -242,7 +242,7 @@ namespace MainWindowProgram
 
           var testIcon = new TestFlaskIcon
           {
-            Size = 19,
+            Size = 22,
           };
           TestMenu.Icon = testIcon;
 
@@ -299,7 +299,7 @@ namespace MainWindowProgram
 
           var executionIcon = new ExecutionPlayCircleIcon
           {
-            Size = 19,
+            Size = 22,
           };
           Translation.Icon = executionIcon;
 
@@ -356,7 +356,7 @@ namespace MainWindowProgram
 
           var settingsIcon = new SettingsGearIcon
           {
-            Size = 19,
+            Size = 22,
           };
           Settings.Icon = settingsIcon;
 
@@ -416,7 +416,7 @@ namespace MainWindowProgram
 
         var helpIcon = new HelpCircleIcon
         {
-          Size = 19,
+          Size = 22,
         };
         HelpText.Icon = helpIcon;
 
