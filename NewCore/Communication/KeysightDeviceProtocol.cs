@@ -69,7 +69,9 @@ namespace NewCore.Communication
           try
           {
             int bytesRead = await Stream.ReadAsync(buffer, 0, buffer.Length, cts.Token);
-            return Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+            var answer = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+            LogInformation($"{_device.Name} Получен ответ ({command}) - {answer}");
+            return answer;
           }
           catch (OperationCanceledException)
           {
@@ -113,6 +115,7 @@ namespace NewCore.Communication
     {
       byte[] data = Encoding.ASCII.GetBytes(command + "\n");
       await Stream.WriteAsync(data, 0, data.Length);
+      LogInformation($"{_device.Name} Отправка команды - {command}");
     }
   }
 }

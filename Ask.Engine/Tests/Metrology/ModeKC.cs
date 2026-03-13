@@ -66,7 +66,8 @@ namespace Ask.Engine.Tests.Metrology
       await _userInteractionService.AppendEmptyLineAsync();
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} Ом"));
 
-      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
+      var realyModule = testMeasurement.GetRelayModuleWithMaxNumber(metrologicalModeRole);
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService, realyModule.SwitchResistance), _userInteractionService, true);
     }
 
     public ITextAdapter GetControl()
@@ -89,7 +90,7 @@ namespace Ask.Engine.Tests.Metrology
       }
 
       /// <inheritdoc />
-      public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI)
+      public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0)
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
 
@@ -97,6 +98,11 @@ namespace Ask.Engine.Tests.Metrology
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KC, param);
 
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, LowerBound, UpperBound);
+
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          result -= intrinsicValue;
+        }
 
         var err = result - param;
         Measurements.Add(err);

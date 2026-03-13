@@ -282,6 +282,9 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<double>("SwitchResistance")
                         .HasColumnType("REAL");
 
+                    b.Property<double>("SwitchCapacitance")
+                        .HasColumnType("REAL");
+
                     b.HasKey("Id");
 
                     b.ToTable("RelaySwitchModules");
@@ -436,6 +439,9 @@ namespace DataBaseConfiguration.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseSyntaxHighlighting")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseTopMenuIcons")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

@@ -267,6 +267,7 @@ namespace UI.Controls.Settings
             ConnectionDetails = device.ConnectionDetails,
             DeviceClass = device.DeviceClass,
             SwitchResistance = device.SwitchResistance,
+            SwitchCapacitance = device.SwitchCapacitance,
             BusType = device.BusType,
           })
           .ToList(),
@@ -518,6 +519,7 @@ namespace UI.Controls.Settings
         ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
         DeviceClass = NormalizeRequired(item.DeviceClass),
         SwitchResistance = item.SwitchResistance,
+        SwitchCapacitance = item.SwitchCapacitance,
         BusType = item.BusType,
       };
     }
@@ -621,6 +623,7 @@ namespace UI.Controls.Settings
           {
             AppendField(builder, "Тип структурной шины", device.BusType.ToString(), 4);
             AppendField(builder, "Сопротивление коммутатора, Ом", device.SwitchResistance, 4);
+            AppendField(builder, "Ёмкость коммутатора, нФ", device.SwitchCapacitance, 4);
           });
 
         devicesPrinted += AppendDeviceSection(
@@ -932,6 +935,8 @@ namespace UI.Controls.Settings
       public string? DeviceClass { get; set; }
 
       public double SwitchResistance { get; set; }
+
+      public double SwitchCapacitance { get; set; }
 
       public SwitchingBusNew BusType { get; set; }
     }

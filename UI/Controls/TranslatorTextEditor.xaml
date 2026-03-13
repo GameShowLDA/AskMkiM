@@ -72,6 +72,7 @@
                        VerticalAlignment="Center"
                        TextWrapping="NoWrap"
                        TextTrimming="CharacterEllipsis"
+                           Foreground="{DynamicResource ForegrounfBrushes}"
                        />
             </Grid>
         </Border>

@@ -76,11 +76,13 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           BusTypeContainer.Visibility = Visibility.Visible;
           ResistanceContainer.Visibility = Visibility.Visible;
+          CapacitanceContainer.Visibility = Visibility.Visible;
         }
         else
         {
           BusTypeContainer.Visibility = Visibility.Collapsed;
           ResistanceContainer.Visibility = Visibility.Collapsed;
+          CapacitanceContainer.Visibility = Visibility.Collapsed;
         }
 
         if (baseClass == typeof(DeviceWithCOM))

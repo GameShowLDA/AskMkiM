@@ -21,7 +21,7 @@ namespace Ask.Core.Services.EventCore.Events
       /// <summary>
       /// Инициализирует событие смены темы интерфейса.
       /// </summary>
-      /// <param name="newTheme">Тема, которую требуется применить (Light или Dark).</param>
+      /// <param name="newTheme">Тема, которую требуется применить.</param>
       public Change(ThemeMode newTheme)
       {
         NewTheme = newTheme;

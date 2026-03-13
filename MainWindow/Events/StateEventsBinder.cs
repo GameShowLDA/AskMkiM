@@ -58,6 +58,7 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
       EventAggregator.Subscribe<SystemStateEvents.AdminRightsChanged>(e => OnAdminRightsChanged(e.IsAdmin));
       EventAggregator.Subscribe<SystemStateEvents.ControlProgramActiveChanged>(e => OnControlProgramActiveRightsChanged(e.IsControlProgramActive));
+      EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(OnPowerChanged);
 
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
 
@@ -93,17 +94,9 @@ namespace MainWindowProgram.Events
     /// <summary>
     /// Обработчик события смены темы. Вызывается, когда тема меняется глобально.
     /// </summary>
-    private async void OnThemeChanged(ThemeEvent.Change e)
+    private void OnThemeChanged(ThemeEvent.Change e)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return;
-      }
-      else
-      {
-        _mainWindow.BottomPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-        _mainWindow.TopPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-      }
+      Application.Current.Dispatcher.BeginInvoke(ApplyMainPanelBackground);
     }
 
     /// <summary>
@@ -135,19 +128,26 @@ namespace MainWindowProgram.Events
     {
       Application.Current.Dispatcher.BeginInvoke(() =>
       {
-        if (e)
-        {
-          _mainWindow.BottomPanel.Background = (Brush)Application.Current.FindResource("GreenColorSolidColorBrush");
-          _mainWindow.TopPanel.Background = (Brush)Application.Current.FindResource("GreenColorSolidColorBrush");
-          _mainWindow.PowerButton.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-          _mainWindow.BottomPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-          _mainWindow.TopPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-          _mainWindow.PowerButton.Visibility = Visibility.Visible;
-        }
+        _mainWindow.PowerButton.Visibility = e ? Visibility.Collapsed : Visibility.Visible;
+        ApplyMainPanelBackground();
       });
+    }
+
+    private void OnPowerChanged(SystemStateEvents.PowerChanged _)
+    {
+      Application.Current.Dispatcher.BeginInvoke(ApplyMainPanelBackground);
+    }
+
+    private void ApplyMainPanelBackground()
+    {
+      var topBrush = (Brush)Application.Current.FindResource("BackgroundBrushes");
+      var bottomBrushKey = SystemStateManager.GetIsActivePower()
+        ? "SystemPowerWarningPanelBrush"
+        : "BackgroundBrushes";
+
+      var bottomBrush = (Brush)Application.Current.FindResource(bottomBrushKey);
+      _mainWindow.BottomPanel.Background = bottomBrush;
+      _mainWindow.TopPanel.Background = topBrush;
     }
 
     /// <summary>
