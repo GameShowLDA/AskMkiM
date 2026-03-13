@@ -1,8 +1,9 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using DataBaseConfiguration.Services.Device;
 using Message;
 using System.Windows;
@@ -53,7 +54,7 @@ namespace UI.Components
     public PowerButton()
     {
       InitializeComponent();
-      this.Loaded += OnLoaded;
+      Loaded += OnLoaded;
     }
 
     /// <summary>
@@ -71,22 +72,21 @@ namespace UI.Components
     /// </summary>
     private void OnPowerChanged(SystemStateEvents.PowerChanged e)
     {
-      // Получаем новое состояние питания
       bool isPowered = e.IsPowered;
 
-      // Реакция на изменение состояния
       if (isPowered)
+      {
         Console.WriteLine("⚡ Питание включено");
+      }
       else
+      {
         Console.WriteLine("❌ Питание отключено");
+      }
     }
 
     /// <summary>
     /// Обработчик события клика по кнопке питания.
-    /// Запускает процесс включения/выключения питания в зависимости от текущего состояния.
     /// </summary>
-    /// <param name="sender">Источник события (кнопка питания).</param>
-    /// <param name="e">Аргументы события мыши.</param>
     public async void OnPowerButtonClick(object sender, MouseButtonEventArgs e)
     {
       await PowerButtonClick();
@@ -101,24 +101,12 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Обрабатывает нажатие кнопки питания. Выполняет последовательность включения или выключения питания системы.
-    /// Если система не задана в конфигурации или включен холостой режим, выводит сообщение об ошибке.
-    /// Если задача уже выполняется, отменяет выполнение текущей задачи.
+    /// Переключает состояние питания через UI-кнопку.
     /// </summary>
-    /// <returns>Асинхронная задача.</returns>
     public async Task PowerButtonClick()
     {
-      model = new ChassisManagerServices().GetAll().FirstOrDefault();
-
-      if (model == null)
+      if (!TryResolveChassisManager() || !ValidatePowerActionAvailability())
       {
-        MessageBoxCustom.Show("Система не задана в конфигурации! Добавьте менеджер шасси в конфигурацию и повторите попытку.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-        return;
-      }
-
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
         return;
       }
 
@@ -135,24 +123,100 @@ namespace UI.Components
 
       SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
 
-      if (!active)
+      try
       {
-        await StartPowerSequenceAsync();
+        if (!active)
+        {
+          await StartPowerSequenceAsync();
+        }
+        else
+        {
+          await StopPowerSequenceAsync();
+        }
       }
-      else
+      finally
       {
-        await StopPowerSequenceAsync();
+        taskInProgress = false;
+        SystemStateManager.SetIsActivePower(active);
       }
-
-      taskInProgress = false;
-      SystemStateManager.SetIsActivePower(active);
     }
 
     /// <summary>
-    /// Начальный процесс включения питания, включая ожидание загрузки и попытку подключения.
+    /// Явно включает питание из внешнего источника, например из админской консоли.
+    /// </summary>
+    public async Task StartPowerAsync()
+    {
+      if (!TryResolveChassisManager() || !ValidatePowerActionAvailability() || taskInProgress)
+      {
+        return;
+      }
+
+      cancellationToken = new CancellationTokenSource();
+      taskInProgress = true;
+      hasError = false;
+
+      SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
+
+      try
+      {
+        if (!active)
+        {
+          await StartPowerSequenceAsync();
+        }
+        else
+        {
+          SetConnectedState("Отключить систему");
+        }
+      }
+      finally
+      {
+        taskInProgress = false;
+        SystemStateManager.SetIsActivePower(active);
+      }
+    }
+
+    /// <summary>
+    /// Явно отключает питание из внешнего источника, например из админской консоли.
+    /// </summary>
+    public async Task StopPowerAsync()
+    {
+      if (!TryResolveChassisManager() || !ValidatePowerActionAvailability() || taskInProgress)
+      {
+        return;
+      }
+
+      cancellationToken = new CancellationTokenSource();
+      taskInProgress = true;
+      hasError = false;
+
+      SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
+
+      try
+      {
+        bool hasPower = active || await model.PowerManager.VerifyPowerAsync(null);
+        if (hasPower)
+        {
+          await StopPowerSequenceAsync();
+        }
+        else
+        {
+          SetDisconnectedState("Подключить систему");
+        }
+      }
+      finally
+      {
+        taskInProgress = false;
+        SystemStateManager.SetIsActivePower(active);
+      }
+    }
+
+    /// <summary>
+    /// Начальный процесс включения питания, включая проверку UPS, ожидание загрузки и попытку подключения.
     /// </summary>
     private async Task StartPowerSequenceAsync()
     {
+      await EnsureConfiguredUpsPowerAsync();
+
       if (!await model.PowerManager.VerifyPowerAsync(null))
       {
         await model.PowerManager.StartPowerAsync();
@@ -173,7 +237,7 @@ namespace UI.Components
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       await Task.Delay(500);
 
-      var power = true;
+      bool power = true;
       while (power)
       {
         await model.PowerManager.StopPowerAsync();
@@ -186,11 +250,38 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Возвращает configured UPS для текущего шасси и при необходимости включает его.
+    /// </summary>
+    private async Task EnsureConfiguredUpsPowerAsync()
+    {
+      IUninterruptiblePowerSupply? ups = GetConfiguredUps();
+      if (ups == null)
+      {
+        return;
+      }
+
+      if (!await ups.VerifyPowerAsync())
+      {
+        await ups.StartPowerAsync();
+      }
+    }
+
+    /// <summary>
+    /// Возвращает настроенный UPS для текущего шасси.
+    /// </summary>
+    private IUninterruptiblePowerSupply? GetConfiguredUps()
+    {
+      return new UninterruptiblePowerSupplyServices()
+        .GetAll()
+        .FirstOrDefault(device => device.NumberChassis == model.Number);
+    }
+
+    /// <summary>
     /// Попытка подключения к системе. При успехе обновляет статус, иначе - вызывает ошибку.
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await model.PowerManager.VerifyPowerAsync(null);
+      bool result = await model.PowerManager.VerifyPowerAsync(null);
 
       if (result)
       {
@@ -241,8 +332,8 @@ namespace UI.Components
         MessageEventAdapter.RaiseInfoMessage($"{message} {i} сек.");
         await Task.Delay(1000);
       }
-      MessageEventAdapter.RaiseClearMessage();
 
+      MessageEventAdapter.RaiseClearMessage();
     }
 
     /// <summary>
@@ -328,6 +419,35 @@ namespace UI.Components
     private void SetButtonToolTip(string text)
     {
       PowerActionButton.ToolTip = text;
+    }
+
+    /// <summary>
+    /// Загружает менеджер шасси из конфигурации.
+    /// </summary>
+    private bool TryResolveChassisManager()
+    {
+      model = new ChassisManagerServices().GetAll().FirstOrDefault();
+      if (model != null)
+      {
+        return true;
+      }
+
+      MessageBoxCustom.Show("Система не задана в конфигурации! Добавьте менеджер шасси в конфигурацию и повторите попытку.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+      return false;
+    }
+
+    /// <summary>
+    /// Проверяет доступность реального управления питанием.
+    /// </summary>
+    private static bool ValidatePowerActionAvailability()
+    {
+      if (!ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
+      return false;
     }
 
     /// <summary>

@@ -18,11 +18,7 @@ namespace DataBaseConfiguration.Context
     {
       if (optionsBuilder.IsConfigured == false)
       {
-        string basePath = Path.Combine(
-            Path.GetDirectoryName(AppContext.BaseDirectory), DataBaseConfig.ConfigFilePath
-        );
-
-        optionsBuilder.UseSqlite($"Data Source={basePath}");
+        optionsBuilder.UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
       }
     }
 

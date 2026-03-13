@@ -1,6 +1,6 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using System.ComponentModel.DataAnnotations;
@@ -37,7 +37,7 @@ namespace Ask.Core.Shared.Entity.Devices
 
     /// <inheritdoc />
     [NotMapped]
-    public IPowerManagerChassis PowerManager { get; set; }
+    public IPower PowerManager { get; set; }
 
     /// <inheritdoc />
     [NotMapped]

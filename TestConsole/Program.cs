@@ -30,11 +30,12 @@ namespace TestConsole
         Console.WriteLine("10. Тест списка точек");
         Console.WriteLine("11. Тест темы");
         Console.WriteLine("12. Скан папки");
+        Console.WriteLine("13. Отладка UPS");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 12)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 13)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -98,6 +99,10 @@ namespace TestConsole
 
           case 12:
             FolderTreePrinter.Run();
+            break;
+
+          case 13:
+            await UninterruptiblePowerSupplyTest.RunAsync();
             break;
 
           case 0:
