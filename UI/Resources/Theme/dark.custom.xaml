@@ -102,9 +102,11 @@
   <SolidColorBrush x:Key="ComboBoxModernItemSelectedBrush" Color="#3A4D66"/>
   <Color x:Key="ComboBoxModernShadowColor">#000000</Color>
 
-  <SolidColorBrush x:Key="MainGreetingBackgroundBrush" Color="#202934"/>
-  <SolidColorBrush x:Key="MainGreetingBorderBrush" Color="#3E4F65"/>
+  <SolidColorBrush x:Key="MainGreetingBackgroundBrush" Color="#24243A"/>
+  <SolidColorBrush x:Key="MainGreetingBorderBrush" Color="#544A72"/>
   <SolidColorBrush x:Key="MainTitleSolidColorBrush" Color="#E7ECF4"/>
+  <Color x:Key="EmptyWorkspaceBlockShadowColor">#4A000000</Color>
+  <Color x:Key="EmptyWorkspaceTimeGlowColor">#506B58B8</Color>
 
   <SolidColorBrush x:Key="SettingCardBackground" Color="#2A303A"/>
   <SolidColorBrush x:Key="SettingCardBorderBrush" Color="#404A59"/>
@@ -182,8 +184,8 @@
                        RadiusY="0.62"
                        Center="0.45,0.45"
                        GradientOrigin="0.45,0.45">
-    <GradientStop Color="#2A6F8FD0" Offset="0.00"/>
-    <GradientStop Color="#22628BB8" Offset="0.42"/>
+    <GradientStop Color="#32705CD4" Offset="0.00"/>
+    <GradientStop Color="#225648A6" Offset="0.42"/>
     <GradientStop Color="#00000000" Offset="1.00"/>
   </RadialGradientBrush>
 
@@ -204,8 +206,8 @@
                        Center="0.52,0.42"
                        RadiusX="1.25"
                        RadiusY="1.25">
-    <GradientStop Color="#1A212C" Offset="0.00"/>
-    <GradientStop Color="#161C25" Offset="0.52"/>
-    <GradientStop Color="#111720" Offset="1.00"/>
+    <GradientStop Color="#211D36" Offset="0.00"/>
+    <GradientStop Color="#171B2A" Offset="0.52"/>
+    <GradientStop Color="#10151E" Offset="1.00"/>
   </RadialGradientBrush>
 </ResourceDictionary>

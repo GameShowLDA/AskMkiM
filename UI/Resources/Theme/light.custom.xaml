@@ -105,6 +105,8 @@
   <SolidColorBrush x:Key="MainGreetingBackgroundBrush" Color="#ECF2FA"/>
   <SolidColorBrush x:Key="MainGreetingBorderBrush" Color="#1F4A5C74"/>
   <SolidColorBrush x:Key="MainTitleSolidColorBrush" Color="#253246"/>
+  <Color x:Key="EmptyWorkspaceBlockShadowColor">#080C1622</Color>
+  <Color x:Key="EmptyWorkspaceTimeGlowColor">#38D6E2F0</Color>
 
   <SolidColorBrush x:Key="SettingCardBackground" Color="#F3F5F8"/>
   <SolidColorBrush x:Key="SettingCardBorderBrush" Color="#D3D8E1"/>

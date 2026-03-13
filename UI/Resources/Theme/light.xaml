@@ -460,6 +460,8 @@
     <SolidColorBrush x:Key="MainGreetingBackgroundBrush" Color="#DEDDDF" />
     <SolidColorBrush x:Key="MainGreetingBorderBrush" Color="#000000" />
     <SolidColorBrush x:Key="MainTitleSolidColorBrush" Color="#000000" />
+    <Color x:Key="EmptyWorkspaceBlockShadowColor">#14000000</Color>
+    <Color x:Key="EmptyWorkspaceTimeGlowColor">#30E4EDF8</Color>
 
     <!--#endregion-->
 
