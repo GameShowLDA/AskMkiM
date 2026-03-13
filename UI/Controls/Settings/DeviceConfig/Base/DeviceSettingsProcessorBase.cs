@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
 
@@ -64,6 +65,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         ISwitchingDevice => new SwitchingDeviceEntity(),
         IChassisManager => new ChassisManagerEntity(),
         IFastMeter => new FastMeterEntity(),
+        IUninterruptiblePowerSupply => new UninterruptiblePowerSupplyEntity(),
         IRack => new RackEntity(),
 
         _ => throw new ArgumentException("Неизвестный тип устройства", nameof(device))

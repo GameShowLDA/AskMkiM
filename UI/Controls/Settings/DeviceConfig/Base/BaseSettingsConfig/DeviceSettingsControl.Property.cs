@@ -124,6 +124,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public string PortName => COMPortSelectionBox.Text;
 
     /// <summary>
+    /// Gets USB connection details selected or resolved by UI.
+    /// </summary>
+    public string UsbConnectionDetails => _usbConnectionDetails;
+
+    /// <summary>
     /// Получает номер устройства.
     /// </summary>
     public int NumberDevice => int.TryParse(DeviceNumberTextBox.Text, out int number) ? number : -1;

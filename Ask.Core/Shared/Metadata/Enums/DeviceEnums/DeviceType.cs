@@ -45,6 +45,11 @@
     /// </summary>
     BreakdownTester,
 
+    /// <summary>
+    /// Бесперебойник
+    /// </summary>
+    UninterruptiblePowerSupply,
+
     Unknown,
   }
 }

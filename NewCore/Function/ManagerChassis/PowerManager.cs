@@ -1,6 +1,6 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Communication;
 
@@ -9,18 +9,18 @@ namespace NewCore.Function.ManagerChassis
   /// <summary>
   /// Класс для управления питанием шасси.
   /// </summary>
-  public class PowerManager : IPowerManagerChassis
+  public class PowerManager : IPower
   {
     /// <summary>
     /// Интерфейс управления шасси.
     /// </summary>
-    private IChassisManager _chassisModel { get; set; }
+    private IChassisManager ChassisModel { get; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="PowerManager"/>.
     /// </summary>
     /// <param name="managerChassis">Экземпляр менеджера шасси.</param>
-    public PowerManager(IChassisManager managerChassis) => _chassisModel = managerChassis;
+    public PowerManager(IChassisManager managerChassis) => ChassisModel = managerChassis;
 
     /// <inheritdoc />
     public async Task StartPowerAsync(IUserInteractionService? userMessageService = null)
@@ -31,7 +31,7 @@ namespace NewCore.Function.ManagerChassis
       }
 
       var cmd = new DeviceCommand(2, 1, 1);
-      await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
+      await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }
 
     /// <inheritdoc />
@@ -43,9 +43,10 @@ namespace NewCore.Function.ManagerChassis
       }
 
       var cmd = new DeviceCommand(2, 2, 1);
-      await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
+      await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
     }
 
+    /// <inheritdoc />
     public async Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -54,7 +55,7 @@ namespace NewCore.Function.ManagerChassis
       }
 
       var cmd = new DeviceCommand(7);
-      var result = await _chassisModel.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      var result = await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 
       return result.Contains("1");
     }

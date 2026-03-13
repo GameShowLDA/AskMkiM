@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using DataBaseConfiguration.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -34,6 +35,7 @@ namespace DataBaseConfiguration.Services.Device
     { typeof(IPowerSourceModule), typeof(PowerSourceModuleEntity) },
     { typeof(IRelaySwitchModule), typeof(RelaySwitchModuleEntity) },
     { typeof(ISwitchingDevice), typeof(SwitchingDeviceEntity) },
+    { typeof(IUninterruptiblePowerSupply), typeof(UninterruptiblePowerSupplyEntity) },
     { typeof(IChassisManager), typeof(ChassisManagerEntity) },
     { typeof(IRack), typeof(RackEntity) },
   };
