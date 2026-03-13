@@ -1044,9 +1044,6 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\DescriptionWorkTranslatorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\drex_part16.1_custom.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1201,6 +1198,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\image_TranslatorWindow.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionPart.html">
