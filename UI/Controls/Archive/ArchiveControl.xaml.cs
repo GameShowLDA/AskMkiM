@@ -84,6 +84,7 @@ namespace UI.Controls.Archive
 
       var result = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
+      using var encryptionSession = ArchiveEncryptionSession.Acquire(archivePath);
       using var archive = ZipFile.OpenRead(archivePath);
       var manifestEntry = archive.GetEntry("__apkw_manifest.json");
 
@@ -146,6 +147,12 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherChanged(object sender, FileSystemEventArgs e)
     {
+      if (e.ChangeType == WatcherChangeTypes.Changed &&
+          ArchiveEncryptionSession.WasRecentlyMutatedBySession(e.FullPath))
+      {
+        return;
+      }
+
       ScheduleAutoRefresh();
     }
 
@@ -242,6 +249,40 @@ namespace UI.Controls.Archive
       }
 
       await ShowArchiveInGridAsync(_lastSelectedArchivePath, clearEditor: true);
+    }
+
+    private async Task RefreshArchiveViewsAfterMutationAsync(string archivePath)
+    {
+      if (string.IsNullOrWhiteSpace(archivePath))
+      {
+        return;
+      }
+
+      var normalizedArchivePath = Path.GetFullPath(archivePath);
+      InvalidateArchiveCaches(archivePath);
+
+      _lastSelectedArchivePath = normalizedArchivePath;
+      _lastSelectedEntryName = null;
+
+      await RefreshTreePreservingStateAsync(preservePanels: true);
+    }
+
+    private void InvalidateArchiveCaches(string archivePath)
+    {
+      if (string.IsNullOrWhiteSpace(archivePath))
+      {
+        return;
+      }
+
+      _archiveEntriesCache.Remove(archivePath);
+      _manifestCache.Remove(archivePath);
+
+      var normalizedArchivePath = Path.GetFullPath(archivePath);
+      if (!string.Equals(normalizedArchivePath, archivePath, StringComparison.OrdinalIgnoreCase))
+      {
+        _archiveEntriesCache.Remove(normalizedArchivePath);
+        _manifestCache.Remove(normalizedArchivePath);
+      }
     }
 
     private void ResetTree()
@@ -351,7 +392,14 @@ namespace UI.Controls.Archive
       lock (_archiveManagerSync)
       {
         _archiveManager.OpenArchive(archivePath);
-        return _archiveManager.IntegrityNotifications?.ToList() ?? new List<string>();
+        try
+        {
+          return _archiveManager.IntegrityNotifications?.ToList() ?? new List<string>();
+        }
+        finally
+        {
+          _archiveManager.CloseArchive();
+        }
       }
     }
 
@@ -360,7 +408,14 @@ namespace UI.Controls.Archive
       lock (_archiveManagerSync)
       {
         EnsureArchiveOpenedInManagerCore(archivePath);
-        return _archiveManager.GetFileText(entryName);
+        try
+        {
+          return _archiveManager.GetFileText(entryName);
+        }
+        finally
+        {
+          _archiveManager.CloseArchive();
+        }
       }
     }
 
@@ -377,6 +432,7 @@ namespace UI.Controls.Archive
     {
       var items = new List<ArchiveEntryInfo>();
 
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(archivePath))
       using (var archiveStream = new FileStream(archivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
       using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, leaveOpen: false))
       {
@@ -779,9 +835,7 @@ namespace UI.Controls.Archive
           _archiveManager.AddFileToOpenedArchive(openFileDialog.FileName);
         }
 
-        _archiveEntriesCache.Remove(node.ArchivePath);
-        _manifestCache.Remove(node.ArchivePath);
-        await RefreshTreePreservingStateAsync(preservePanels: true);
+        await RefreshArchiveViewsAfterMutationAsync(node.ArchivePath);
       }
       catch (Exception ex)
       {
@@ -887,9 +941,7 @@ namespace UI.Controls.Archive
           _archiveManager.DeleteFileFromOpenedArchive(node.EntryName);
         }
 
-        _archiveEntriesCache.Remove(node.ArchivePath);
-        _manifestCache.Remove(node.ArchivePath);
-        await RefreshTreePreservingStateAsync(preservePanels: true);
+        await RefreshArchiveViewsAfterMutationAsync(node.ArchivePath);
       }
       catch (Exception ex)
       {
@@ -1055,6 +1107,11 @@ namespace UI.Controls.Archive
       {
         if (node.Kind == ArchiveTreeNodeKind.Root)
         {
+          lock (_archiveManagerSync)
+          {
+            _archiveManager.CloseArchive();
+          }
+
           _lastSelectedArchivePath = null;
           _lastSelectedEntryName = null;
           ClearFilePanels();

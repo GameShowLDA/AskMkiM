@@ -43,54 +43,45 @@ namespace UI.Services.Archive
     public void AddFileToOpenedArchive(string filePath)
     {
       var openedArchivePath = EnsureArchiveIsOpen();
-      _archiveOpening.Close();
 
       try
       {
+        _archiveOpening.Close();
         _archiveFileAdder.AddFile(openedArchivePath, filePath);
       }
       finally
       {
-        if (System.IO.File.Exists(openedArchivePath))
-        {
-          _archiveOpening.Open(openedArchivePath);
-        }
+        _archiveOpening.Close();
       }
     }
 
     public void AddFileToArchive(List<List<string>> sourceLines, string archivePath, string fileName)
     {
-      var openedArchivePath = EnsureArchiveIsOpen();
-      _archiveOpening.Close();
+      EnsureArchiveIsOpen();
 
       try
       {
+        _archiveOpening.Close();
         _archiveFileAdder.AddFile(sourceLines, archivePath, fileName);
       }
       finally
       {
-        if (System.IO.File.Exists(openedArchivePath))
-        {
-          _archiveOpening.Open(openedArchivePath);
-        }
+        _archiveOpening.Close();
       }
     }
 
     public void DeleteFileFromOpenedArchive(string archiveEntryName)
     {
       var openedArchivePath = EnsureArchiveIsOpen();
-      _archiveOpening.Close();
 
       try
       {
+        _archiveOpening.Close();
         _archiveFileAdder.DeleteFile(openedArchivePath, archiveEntryName);
       }
       finally
       {
-        if (System.IO.File.Exists(openedArchivePath))
-        {
-          _archiveOpening.Open(openedArchivePath);
-        }
+        _archiveOpening.Close();
       }
     }
 

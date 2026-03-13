@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
@@ -467,6 +468,8 @@ namespace UI.Services.Archive
       {
         ArchiveManifestService.WriteManifest(archive, new List<ArchiveManifestFileRecord>());
       }
+
+      FileEncryptionManager.EncryptFile(archivePath);
 
       return archivePath;
     }

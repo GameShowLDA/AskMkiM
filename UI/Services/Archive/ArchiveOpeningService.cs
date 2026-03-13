@@ -12,6 +12,7 @@ namespace UI.Services.Archive
 
     private FileStream _archiveStream;
     private ZipArchive _archive;
+    private IDisposable _encryptionSession;
 
     public string OpenedArchivePath { get; private set; }
     public IReadOnlyList<string> IntegrityNotifications { get; private set; } = Array.Empty<string>();
@@ -46,14 +47,38 @@ namespace UI.Services.Archive
 
       Close();
 
-      _archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-      _archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read, leaveOpen: false);
-      OpenedArchivePath = fullArchivePath;
-
-      IntegrityNotifications = ArchiveManifestService.ValidateArchive(_archive);
-      foreach (var notification in IntegrityNotifications)
+      IDisposable openedEncryptionSession = null;
+      try
       {
-        LogError($"[Уведомление о целостности архива] {notification}");
+        openedEncryptionSession = ArchiveEncryptionSession.Acquire(fullArchivePath);
+
+        _archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        _archive = new ZipArchive(_archiveStream, ZipArchiveMode.Read, leaveOpen: false);
+        OpenedArchivePath = fullArchivePath;
+        _encryptionSession = openedEncryptionSession;
+        openedEncryptionSession = null;
+
+        IntegrityNotifications = ArchiveManifestService.ValidateArchive(_archive);
+        foreach (var notification in IntegrityNotifications)
+        {
+          LogError($"[Уведомление о целостности архива] {notification}");
+        }
+      }
+      catch
+      {
+        _archive?.Dispose();
+        _archive = null;
+
+        _archiveStream?.Dispose();
+        _archiveStream = null;
+
+        _encryptionSession?.Dispose();
+        _encryptionSession = null;
+        openedEncryptionSession?.Dispose();
+
+        OpenedArchivePath = null;
+        IntegrityNotifications = Array.Empty<string>();
+        throw;
       }
     }
 
@@ -112,6 +137,9 @@ namespace UI.Services.Archive
 
       _archiveStream?.Dispose();
       _archiveStream = null;
+
+      _encryptionSession?.Dispose();
+      _encryptionSession = null;
 
       OpenedArchivePath = null;
       IntegrityNotifications = Array.Empty<string>();

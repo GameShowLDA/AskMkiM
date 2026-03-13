@@ -57,6 +57,7 @@ namespace UI.Services.Archive
         throw new InvalidOperationException(message);
       }
 
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(fullArchivePath))
       using (var archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
       using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Update, leaveOpen: false))
       {
@@ -118,6 +119,7 @@ namespace UI.Services.Archive
         throw new InvalidOperationException(message);
       }
 
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(fullArchivePath))
       using (var archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
       using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Update, leaveOpen: false))
       {
@@ -163,6 +165,7 @@ namespace UI.Services.Archive
       var fullArchivePath = ValidateArchivePath(archivePath);
       var normalizedArchiveEntryName = ResolveArchiveEntryName(archiveEntryName);
 
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(fullArchivePath))
       using (var archiveStream = new FileStream(fullArchivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
       using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Update, leaveOpen: false))
       {

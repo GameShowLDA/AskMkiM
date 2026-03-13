@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+﻿using Ask.Core.Services.FilesUtility;
+using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using System.IO.Compression;
 using static Ask.LogLib.LoggerUtility;
@@ -27,6 +28,8 @@ namespace UI.Services.Archive
       {
         ArchiveManifestService.WriteManifest(archive, new List<ArchiveManifestFileRecord>());
       }
+
+      FileEncryptionManager.EncryptFile(archivePath);
 
       return archivePath;
     }
