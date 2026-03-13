@@ -1035,7 +1035,7 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_9.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\HotKeysTextEditorPart.html">
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\HotKeysPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\SearchWindowTextEditorPart.html">
