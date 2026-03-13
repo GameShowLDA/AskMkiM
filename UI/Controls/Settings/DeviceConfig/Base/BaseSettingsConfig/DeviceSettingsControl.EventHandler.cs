@@ -64,12 +64,14 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
         ConnectionTypeIPItem.Visibility = baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
         ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeUSBItem.Visibility = baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
         ConnectionTypeContainer.Visibility = Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;
         IPAddressContainer.Visibility = Visibility.Collapsed;
         COMContainer.Visibility = Visibility.Collapsed;
+        USBContainer.Visibility = Visibility.Collapsed;
         ConnectionTypeSelectionBox.SelectedIndex = 0;
 
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
@@ -113,6 +115,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       {
         IPAddressContainer.Visibility = Visibility.Collapsed;
         COMContainer.Visibility = Visibility.Collapsed;
+        USBContainer.Visibility = Visibility.Collapsed;
 
         string? selectedType = selectedItem.Content?.ToString()?.ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(selectedType))
@@ -128,6 +131,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           COMContainer.Visibility = Visibility.Visible;
           PopulateCOMPorts();
+        }
+        else if (selectedType.Contains("usb"))
+        {
+          ShowUSB();
         }
       }
     }

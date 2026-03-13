@@ -34,6 +34,10 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
           SwitchingDeviceControl.AddDevice(switchingDevice);
           break;
 
+        case UninterruptiblePowerSupplyEntity uninterruptiblePowerSupply:
+          UninterruptiblePowerSupplyControl.AddDevice(uninterruptiblePowerSupply);
+          break;
+
         default:
           Console.WriteLine("Неизвестный тип устройства.");
           break;
@@ -67,6 +71,10 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
         case SwitchingDeviceEntity switchingDevice:
           SwitchingDeviceControl.ClearItems();
+          break;
+
+        case UninterruptiblePowerSupplyEntity uninterruptiblePowerSupply:
+          UninterruptiblePowerSupplyControl.ClearItems();
           break;
 
         default:
