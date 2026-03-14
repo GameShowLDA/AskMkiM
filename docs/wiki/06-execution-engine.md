@@ -20,6 +20,12 @@
 - `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs`
 - `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionContext.cs`
 
+## Где смотреть алгоритмы конкретных команд
+
+Общая механика движка описана на этой странице, а подробные алгоритмы работы каждого `executor` вынесены отдельно:
+
+- [Алгоритмы исполнителей команд](./12-command-executor-algorithms.md)
+
 ## Как runner запускает движок
 
 ```mermaid

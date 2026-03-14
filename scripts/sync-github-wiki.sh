@@ -60,6 +60,7 @@ PAGES=(
   "09-database-and-settings.md"
   "10-support-systems.md"
   "11-extension-points.md"
+  "12-command-executor-algorithms.md"
 )
 
 convert_markdown() {
@@ -103,6 +104,7 @@ cat > "$TARGET_DIR/_Sidebar.md" <<'EOF'
 - [База данных и настройки](09-database-and-settings)
 - [Служебные подсистемы](10-support-systems)
 - [Точки расширения](11-extension-points)
+- [Алгоритмы исполнителей команд](12-command-executor-algorithms)
 EOF
 
 git -C "$TARGET_DIR" add Home.md _Sidebar.md "${PAGES[@]}"

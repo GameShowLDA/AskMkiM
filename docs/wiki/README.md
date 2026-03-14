@@ -40,6 +40,7 @@
 9. [База данных и настройки](./09-database-and-settings.md)
 10. [Служебные подсистемы](./10-support-systems.md)
 11. [Точки расширения](./11-extension-points.md)
+12. [Алгоритмы исполнителей команд](./12-command-executor-algorithms.md)
 
 ## Карта системы
 
