@@ -332,7 +332,7 @@ namespace UI.Controls
       ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: true);
 
       if (obj.LineNumber == leftLine - 1)
-        right.GoToLineWithoutSelection(rightLine);
+        right.ScrollToLine(rightLine);
     }
 
     /// <summary>
@@ -362,7 +362,7 @@ namespace UI.Controls
       ErrorListBoxVertical.RemoveBreakpoint(obj.CommandNumber);
 
       if (obj.LineNumber == leftLine - 1)
-		  right.GoToLineWithoutSelection(rightLine);
+		    right.ScrollToLine(rightLine);
     }
 
     private void BreakpointOn(BreakpointEvents.BreakpointOn obj)

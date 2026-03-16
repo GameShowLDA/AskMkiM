@@ -441,7 +441,7 @@ namespace UI.Controls.Runner
         return;
 
       if (bp.RightLine.HasValue && bp.RightLine.Value > 0)
-        editor.GoToLine(bp.RightLine.Value);
+        editor.ScrollToLine(bp.RightLine.Value);
     }
 
     /// <summary>
