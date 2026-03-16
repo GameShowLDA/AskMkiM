@@ -41,7 +41,7 @@ namespace UI.Services.Archive
 
       if (!string.Equals(Path.GetExtension(fullArchivePath), ArchiveExtension, StringComparison.OrdinalIgnoreCase))
       {
-        LogError($"Расширение архива не поддерживается. Ожидалось: {ArchiveExtension}");
+        LogError($"Расширение архива не поддерживается.   Ожидалось: {ArchiveExtension}");
         throw new InvalidDataException($"Расширение архива не поддерживается. Ожидалось: {ArchiveExtension}");
       }
 

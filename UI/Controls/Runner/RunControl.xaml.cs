@@ -70,6 +70,7 @@ namespace UI.Controls.Runner
             SetError(model.Errors);
           }
         }
+        
       }
     }
 
@@ -278,6 +279,32 @@ namespace UI.Controls.Runner
         dockItemDeviceState.Show(dockManager, DockPosition.Document);
         dockItemPk.Show(dockManager, DockPosition.Document);
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
+      }
+      if (ErrorCount > 0)
+      {
+        var container = this.LeftBox.Children[0] as TextEditorContainer;
+        if (container.Content is DockPanel dockItem)
+        {
+          var editor = dockItem.Children[0] as DockControl;
+          var foundItem = editor.DockItems.FirstOrDefault(item => item.Content is TranslatorEditor);
+          if (foundItem.Content is TranslatorEditor translator)
+          {
+            translator.SaveButton.Visibility = Visibility.Collapsed;
+          }
+        }
+      }
+      else
+      {
+        var container = this.LeftBox.Children[0] as TextEditorContainer;
+        if (container.Content is DockPanel dockItem)
+        {
+          var editor = dockItem.Children[0] as DockControl;
+          var foundItem = editor.DockItems.FirstOrDefault(item => item.Content is TranslatorEditor);
+          if (foundItem.Content is TranslatorEditor translator)
+          {
+            translator.SaveButton.Visibility = Visibility.Visible;
+          }
+        }
       }
     }
 

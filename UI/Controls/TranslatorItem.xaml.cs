@@ -60,6 +60,18 @@ namespace UI.Controls
             WarningCount += model.Warnings.Count;
           }
         }
+
+        if (ErrorCount > 0)
+        {
+          var transalatorEditor = this.RightBox.Children[0] as TranslatorEditor;
+          transalatorEditor.SaveButton.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+          var transalatorEditor = this.RightBox.Children[0] as TranslatorEditor;
+          transalatorEditor.SaveButton.Visibility = Visibility.Visible;
+        }
+
         MessageEventAdapter.RaiseInfoMessage(
                $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
       }
