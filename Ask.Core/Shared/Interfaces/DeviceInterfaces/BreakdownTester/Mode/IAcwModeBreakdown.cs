@@ -19,6 +19,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode
     /// </summary>
     IArcCurrentConfigurable ArcCurrent { get; set; }
 
+    /// <summary>
+    /// Управление включением и выключением земли.
+    /// </summary>
+    IGroundModeConfigurable GroundMode { get; set; }
+
     IFrequencyConfigurable FrequencyConfigurable { get; set; }
   }
 }

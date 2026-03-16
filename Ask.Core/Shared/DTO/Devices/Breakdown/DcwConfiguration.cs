@@ -39,5 +39,10 @@
     /// Ток дугового пробоя DCW (в мА).
     /// </summary>
     public double ArcCurrent { get; set; }
+
+    /// <summary>
+    /// Состояние земли для режима DCW.
+    /// </summary>
+    public bool GroundMode { get; set; }
   }
 }
