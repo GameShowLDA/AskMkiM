@@ -56,6 +56,9 @@ namespace NewCore.Function.GPT
     public IArcCurrentConfigurable ArcCurrent { get; set; }
 
     /// <inheritdoc />
+    public IGroundModeConfigurable GroundMode { get; set; }
+
+    /// <inheritdoc />
     public IMeasurable Measure { get; set; }
     /// <inheritdoc />
     public IConfigurationProvider<DcwConfiguration> Config { get; set; }
@@ -78,8 +81,9 @@ namespace NewCore.Function.GPT
       Time = new TimeManagment(_gptModel, BreakdownTypeMode.DCW, delay, getTestTime: () => _config.TestTime, setTestTime: v => _config.TestTime = v, getRampTime: () => _config.RampTime, setRampTime: v => _config.RampTime = v);
       Offset = new OffsetManagment(_gptModel, BreakdownTypeMode.DCW, delay, getOffset: () => _config.Offset, setOffset: v => _config.Offset = v);
       ArcCurrent = new ArcCurrentManagment(_gptModel, BreakdownTypeMode.DCW, delay, getArcCurrent: () => _config.ArcCurrent, setArcCurrent: v => _config.ArcCurrent = v);
+      GroundMode = new GroundModeManagment(_gptModel, delay, getGroundMode: () => _config.GroundMode, setGroundMode: v => _config.GroundMode = v);
       Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: ExecutionConfig.GetIsIdleModeEnabled());
-      Config = new DcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent);
+      Config = new DcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent, GroundMode);
       Mode = new ModeManagment(_gptModel, BreakdownTypeMode.DCW, delay, async () => _config = await Config.ReadConfigurationAsync());
     }
   }

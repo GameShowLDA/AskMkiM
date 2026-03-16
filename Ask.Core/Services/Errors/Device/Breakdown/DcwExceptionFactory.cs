@@ -29,6 +29,9 @@
     public static DeviceException SetArcCurrentFailed(string name, int chassis, int number, string reason = null) =>
         new($"Ошибка установки дугового тока DCW {name}({chassis}.{number}){Format(reason)}");
 
+    public static DeviceException SetGroundModeFailed(string name, int chassis, int number, string reason = null) =>
+        new($"Ошибка переключения земли DCW {name}({chassis}.{number}){Format(reason)}");
+
     private static string Format(string reason) =>
         string.IsNullOrWhiteSpace(reason) ? string.Empty : $": {reason}";
   }

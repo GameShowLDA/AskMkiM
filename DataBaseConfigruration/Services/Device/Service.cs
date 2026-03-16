@@ -325,18 +325,100 @@ namespace DataBaseConfiguration.Services.Device
     {
       LogInformation($"Создание объекта класса: {className}");
 
-      Type type = Type.GetType(className)
-                  ?? AppDomain.CurrentDomain.GetAssemblies()
-                       .Select(a => a.GetType(className))
-                       .FirstOrDefault(t => t != null);
-
-      if (type == null)
+      if (string.IsNullOrWhiteSpace(className))
       {
-        LogError($"Ошибка: Класс {className} не найден.");
+        LogError("Ошибка: имя класса устройства пустое.");
         return null;
       }
 
-      return Activator.CreateInstance(type);
+      try
+      {
+        var type = ResolveDeviceType(className);
+        if (type == null)
+        {
+          LogError($"Ошибка: Класс {className} не найден.");
+          return null;
+        }
+
+        return Activator.CreateInstance(type);
+      }
+      catch (ReflectionTypeLoadException ex)
+      {
+        LogException(ex, $"Ошибка загрузки класса устройства {className}");
+
+        foreach (var loaderException in ex.LoaderExceptions.Where(x => x != null))
+        {
+          LogError($"[{className}] LoaderException: {loaderException.Message}");
+        }
+
+        return null;
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, $"Ошибка создания экземпляра класса устройства {className}");
+        return null;
+      }
+    }
+
+    private static Type ResolveDeviceType(string className)
+    {
+      var type = Type.GetType(className, throwOnError: false);
+      if (type != null)
+      {
+        return type;
+      }
+
+      var assemblyName = GetAssemblyNameFromClassName(className);
+      if (!string.IsNullOrWhiteSpace(assemblyName))
+      {
+        var assemblyQualifiedName = $"{className}, {assemblyName}";
+        type = Type.GetType(assemblyQualifiedName, throwOnError: false);
+        if (type != null)
+        {
+          return type;
+        }
+
+        try
+        {
+          var assembly = AppDomain.CurrentDomain.GetAssemblies()
+            .FirstOrDefault(a => string.Equals(a.GetName().Name, assemblyName, StringComparison.Ordinal))
+            ?? Assembly.Load(new AssemblyName(assemblyName));
+
+          type = assembly.GetType(className, throwOnError: false, ignoreCase: false);
+          if (type != null)
+          {
+            return type;
+          }
+        }
+        catch (Exception ex)
+        {
+          LogWarning($"Не удалось загрузить сборку {assemblyName} для класса {className}: {ex.Message}");
+        }
+      }
+
+      foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+      {
+        try
+        {
+          type = assembly.GetType(className, throwOnError: false, ignoreCase: false);
+          if (type != null)
+          {
+            return type;
+          }
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+          LogException(ex, $"Ошибка при поиске класса {className} в сборке {assembly.FullName}");
+        }
+      }
+
+      return null;
+    }
+
+    private static string GetAssemblyNameFromClassName(string className)
+    {
+      var split = className.Split('.', StringSplitOptions.RemoveEmptyEntries);
+      return split.Length == 0 ? string.Empty : split[0];
     }
     private static void CopyProperties(object source, object target)
     {

@@ -16,6 +16,7 @@ namespace NewCore.Function.GPT.Managment
     private readonly IOffsetConfigurable _offset;
     private readonly IArcCurrentConfigurable _arcCurrent;
     private readonly IFrequencyConfigurable _frequency;
+    private readonly IGroundModeConfigurable _groundMode;
 
     private AcwConfiguration _config = new AcwConfiguration();
 
@@ -28,7 +29,8 @@ namespace NewCore.Function.GPT.Managment
       ITimeConfigurable time,
       IOffsetConfigurable offset,
       IArcCurrentConfigurable arcCurrent,
-      IFrequencyConfigurable frequency)
+      IFrequencyConfigurable frequency,
+      IGroundModeConfigurable groundMode)
     {
       _voltage = voltage;
       _currentLimits = currentLimits;
@@ -36,6 +38,7 @@ namespace NewCore.Function.GPT.Managment
       _offset = offset;
       _arcCurrent = arcCurrent;
       _frequency = frequency;
+      _groundMode = groundMode;
     }
 
     public async Task<string> GetConfigurationAsTextAsync()
@@ -53,6 +56,7 @@ namespace NewCore.Function.GPT.Managment
       sb.AppendLine($"Частота: {config.Frequency} Гц");
       sb.AppendLine($"Смещение (Offset): {config.Offset} мА");
       sb.AppendLine($"Ток дугового пробоя: {config.ArcCurrent} мА");
+      sb.AppendLine($"Земля: {(config.GroundMode ? "ON" : "OFF")}");
 
       return sb.ToString();
     }
@@ -69,7 +73,8 @@ namespace NewCore.Function.GPT.Managment
         Frequency = await _frequency.GetFrequencyAsync(),
         Offset = await _offset.GetOffsetAsync(),
         ArcCurrent = await _arcCurrent.GetArcCurrentAsync(),
-        RampTime = await _time.GetRampTimeAsync()
+        RampTime = await _time.GetRampTimeAsync(),
+        GroundMode = await _groundMode.GetGroundModeAsync()
       };
 
       return _config;

@@ -51,6 +51,8 @@ namespace NewCore.Function.GPT.Managment
         }
       }
 
+      await _gptModel.AcwManger.GroundMode.SetGroundModeAsync(false);
+      await _gptModel.DcwManger.GroundMode.SetGroundModeAsync(false);
       return result;
     }
 
