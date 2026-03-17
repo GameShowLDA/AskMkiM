@@ -107,7 +107,7 @@ namespace Ask.Engine.Tests.Metrology
         }
         result = measuremend.Average();
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        if (!ExecutionConfig.GetIsIdleModeEnabled() && result != 9.8999999999999969E+46)
         {
           result -= intrinsicValue;
         }
@@ -115,8 +115,15 @@ namespace Ask.Engine.Tests.Metrology
         var err = result - param;
         Measurements.Add(err);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения ёмкости", message: $"{result} нФ", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: $"{err} нФ", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        if (result != 9.8999999999999969E+46)
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения ёмкости", message: $"{result} нФ", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: $"{err} нФ", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        }
+        else
+        {
+          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения ёмкости", message: $"Overload", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+        }
         return true;
       }
 
