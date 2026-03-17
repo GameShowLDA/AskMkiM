@@ -275,7 +275,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
-        if (value.ToString() == "9,9E+37" && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR))
+        if ((value.ToString() == "9,9E+37" || value.ToString() == "9.8999999999999969E+46") && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR))
         {
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
