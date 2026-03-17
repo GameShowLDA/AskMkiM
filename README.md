@@ -18,6 +18,7 @@
 
 Подробная техническая Wiki лежит в [docs/wiki/README.md](./docs/wiki/README.md).
 
+
 Если нам нужна именно вкладка `Wiki` на GitHub, мы публикуем эти страницы в отдельный wiki-репозиторий `AskMkiM.wiki.git`. Для подготовки и отправки туда есть скрипт [scripts/sync-github-wiki.sh](./scripts/sync-github-wiki.sh).
 
 ## Состав репозитория
