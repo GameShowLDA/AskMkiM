@@ -18,7 +18,6 @@
         <ResourceDictionary Source="/UI;component/Resources/Font/Font.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/AppColors.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/StyleApp/DeviceConfigStyle.xaml"/>
-        <ResourceDictionary Source="/UI;component/Resources/StyleApp/DataGridStyle.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/StyleApp/MetrologyStyle.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/ColorsStyle/SettingsStyle.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/ColorsStyle/MainStyle.xaml"/>

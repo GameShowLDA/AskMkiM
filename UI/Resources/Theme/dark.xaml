@@ -3,6 +3,39 @@
                     xmlns:Controls ="clr-namespace:UI.Controls"
                     xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
                     xmlns:Components="clr-namespace:UI.Components">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/DataGridStyle.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Color x:Key="ModernDataGridBackgroundColor">#1A2029</Color>
+    <Color x:Key="ModernDataGridSurfaceColor">#141B24</Color>
+    <Color x:Key="ModernDataGridSurfaceSecondaryColor">#1C2530</Color>
+    <Color x:Key="ModernDataGridTextPrimaryColor">#EAF0F7</Color>
+    <Color x:Key="ModernDataGridTextSecondaryColor">#A7B3C2</Color>
+    <Color x:Key="ModernDataGridBorderColor">#2E3947</Color>
+    <Color x:Key="ModernDataGridSeparatorColor">#25303C</Color>
+    <Color x:Key="ModernDataGridRowBaseColor">#00000000</Color>
+    <Color x:Key="ModernDataGridRowAlternateColor">#19222D</Color>
+    <Color x:Key="ModernDataGridRowHoverColor">#1E2935</Color>
+    <Color x:Key="ModernDataGridRowSelectedColor">#273443</Color>
+    <Color x:Key="ModernDataGridAccentColor">#8CA6C9</Color>
+    <Color x:Key="ModernDataGridFocusColor">#2D8CA6C9</Color>
+    <Color x:Key="ModernDataGridShadowColor">#28000000</Color>
+
+    <SolidColorBrush x:Key="ModernDataGridBackgroundBrush" Color="{DynamicResource ModernDataGridBackgroundColor}" />
+    <SolidColorBrush x:Key="ModernDataGridSurfaceBrush" Color="{DynamicResource ModernDataGridSurfaceColor}" />
+    <SolidColorBrush x:Key="ModernDataGridSurfaceSecondaryBrush" Color="{DynamicResource ModernDataGridSurfaceSecondaryColor}" />
+    <SolidColorBrush x:Key="ModernDataGridTextPrimaryBrush" Color="{DynamicResource ModernDataGridTextPrimaryColor}" />
+    <SolidColorBrush x:Key="ModernDataGridTextSecondaryBrush" Color="{DynamicResource ModernDataGridTextSecondaryColor}" />
+    <SolidColorBrush x:Key="ModernDataGridBorderBrush" Color="{DynamicResource ModernDataGridBorderColor}" />
+    <SolidColorBrush x:Key="ModernDataGridSeparatorBrush" Color="{DynamicResource ModernDataGridSeparatorColor}" />
+    <SolidColorBrush x:Key="ModernDataGridRowBaseBrush" Color="{DynamicResource ModernDataGridRowBaseColor}" />
+    <SolidColorBrush x:Key="ModernDataGridRowAlternateBrush" Color="{DynamicResource ModernDataGridRowAlternateColor}" />
+    <SolidColorBrush x:Key="ModernDataGridRowHoverBrush" Color="{DynamicResource ModernDataGridRowHoverColor}" />
+    <SolidColorBrush x:Key="ModernDataGridRowSelectedBrush" Color="{DynamicResource ModernDataGridRowSelectedColor}" />
+    <SolidColorBrush x:Key="ModernDataGridAccentBrush" Color="{DynamicResource ModernDataGridAccentColor}" />
+    <SolidColorBrush x:Key="ModernDataGridFocusBrush" Color="{DynamicResource ModernDataGridFocusColor}" />
+
     <!--#region Базовые стили -->
     <SolidColorBrush x:Key="ForegrounfBrushes" Color="#f3f0f9"/>
     <SolidColorBrush x:Key="ForegrounfBrushes35" Color="#f3f0f9" Opacity="0.35"/>

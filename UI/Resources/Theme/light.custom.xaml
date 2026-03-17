@@ -5,6 +5,35 @@
     <ResourceDictionary Source="/UI;component/Resources/Theme/light.xaml"/>
   </ResourceDictionary.MergedDictionaries>
 
+  <Color x:Key="ModernDataGridBackgroundColor">#FAFCFF</Color>
+  <Color x:Key="ModernDataGridSurfaceColor">#F2F6FC</Color>
+  <Color x:Key="ModernDataGridSurfaceSecondaryColor">#E9EFF7</Color>
+  <Color x:Key="ModernDataGridTextPrimaryColor">#223246</Color>
+  <Color x:Key="ModernDataGridTextSecondaryColor">#67788D</Color>
+  <Color x:Key="ModernDataGridBorderColor">#D4DEEA</Color>
+  <Color x:Key="ModernDataGridSeparatorColor">#E3EAF3</Color>
+  <Color x:Key="ModernDataGridRowBaseColor">#00FFFFFF</Color>
+  <Color x:Key="ModernDataGridRowAlternateColor">#F5F8FD</Color>
+  <Color x:Key="ModernDataGridRowHoverColor">#EAF0F8</Color>
+  <Color x:Key="ModernDataGridRowSelectedColor">#DCE6F4</Color>
+  <Color x:Key="ModernDataGridAccentColor">#7E99C2</Color>
+  <Color x:Key="ModernDataGridFocusColor">#287E99C2</Color>
+  <Color x:Key="ModernDataGridShadowColor">#1813243A</Color>
+
+  <SolidColorBrush x:Key="ModernDataGridBackgroundBrush" Color="{DynamicResource ModernDataGridBackgroundColor}" />
+  <SolidColorBrush x:Key="ModernDataGridSurfaceBrush" Color="{DynamicResource ModernDataGridSurfaceColor}" />
+  <SolidColorBrush x:Key="ModernDataGridSurfaceSecondaryBrush" Color="{DynamicResource ModernDataGridSurfaceSecondaryColor}" />
+  <SolidColorBrush x:Key="ModernDataGridTextPrimaryBrush" Color="{DynamicResource ModernDataGridTextPrimaryColor}" />
+  <SolidColorBrush x:Key="ModernDataGridTextSecondaryBrush" Color="{DynamicResource ModernDataGridTextSecondaryColor}" />
+  <SolidColorBrush x:Key="ModernDataGridBorderBrush" Color="{DynamicResource ModernDataGridBorderColor}" />
+  <SolidColorBrush x:Key="ModernDataGridSeparatorBrush" Color="{DynamicResource ModernDataGridSeparatorColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowBaseBrush" Color="{DynamicResource ModernDataGridRowBaseColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowAlternateBrush" Color="{DynamicResource ModernDataGridRowAlternateColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowHoverBrush" Color="{DynamicResource ModernDataGridRowHoverColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowSelectedBrush" Color="{DynamicResource ModernDataGridRowSelectedColor}" />
+  <SolidColorBrush x:Key="ModernDataGridAccentBrush" Color="{DynamicResource ModernDataGridAccentColor}" />
+  <SolidColorBrush x:Key="ModernDataGridFocusBrush" Color="{DynamicResource ModernDataGridFocusColor}" />
+
   <!-- Soft neutral palette for custom light theme -->
   <SolidColorBrush x:Key="ForegrounfBrushes" Color="#1F2937"/>
   <SolidColorBrush x:Key="ForegrounfBrushes35" Color="#7A8698"/>
