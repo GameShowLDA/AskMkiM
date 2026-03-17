@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 
 <SyntaxDefinition name="MKI" extensions=".pk;.pkw;" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
 	<Color name="Comment" foreground="#4CAF50" />
@@ -88,4 +88,3 @@
 
 	</RuleSet>
 </SyntaxDefinition>
-
