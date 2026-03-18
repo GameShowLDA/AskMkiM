@@ -1,11 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using DataBaseConfiguration.Services.Device;
 using Message;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -54,7 +54,7 @@ namespace UI.Components
     public PowerButton()
     {
       InitializeComponent();
-      this.Loaded += OnLoaded;
+      Loaded += OnLoaded;
     }
 
     /// <summary>
@@ -62,12 +62,9 @@ namespace UI.Components
     /// </summary>
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-      UpdateToolTipVisibility();
+      SetButtonToolTip("Подключить систему");
+      SetDisconnectedState("Подключить систему");
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(OnPowerChanged);
-
-      this.MouseEnter += OnMouseEnter;
-      this.MouseLeave += OnMouseLeave;
-      this.PreviewMouseDown += OnPowerButtonClick;
     }
 
     /// <summary>
@@ -75,68 +72,41 @@ namespace UI.Components
     /// </summary>
     private void OnPowerChanged(SystemStateEvents.PowerChanged e)
     {
-      // Получаем новое состояние питания
       bool isPowered = e.IsPowered;
 
-      // Реакция на изменение состояния
       if (isPowered)
+      {
         Console.WriteLine("⚡ Питание включено");
-      else
-        Console.WriteLine("❌ Питание отключено");
-    }
-
-    /// <summary>
-    /// Анимация для плавного увеличения непрозрачности кнопки при наведении курсора.
-    /// </summary>
-    private async void OnMouseEnter(object sender, MouseEventArgs e)
-    {
-      if (!taskInProgress || hasError)
-      {
-        await AnimateOpacityAsync(1);
       }
-    }
-
-    /// <summary>
-    /// Анимация для плавного уменьшения непрозрачности кнопки при уходе курсора.
-    /// </summary>
-    private async void OnMouseLeave(object sender, MouseEventArgs e)
-    {
-      if (!taskInProgress || hasError)
+      else
       {
-        await AnimateOpacityAsync(0.5);
+        Console.WriteLine("❌ Питание отключено");
       }
     }
 
     /// <summary>
     /// Обработчик события клика по кнопке питания.
-    /// Запускает процесс включения/выключения питания в зависимости от текущего состояния.
     /// </summary>
-    /// <param name="sender">Источник события (кнопка питания).</param>
-    /// <param name="e">Аргументы события мыши.</param>
     public async void OnPowerButtonClick(object sender, MouseButtonEventArgs e)
     {
       await PowerButtonClick();
     }
 
     /// <summary>
-    /// Обрабатывает нажатие кнопки питания. Выполняет последовательность включения или выключения питания системы.
-    /// Если система не задана в конфигурации или включен холостой режим, выводит сообщение об ошибке.
-    /// Если задача уже выполняется, отменяет выполнение текущей задачи.
+    /// Обработчик нажатия кнопки питания.
     /// </summary>
-    /// <returns>Асинхронная задача.</returns>
+    private async void OnPowerActionButtonClick(object sender, RoutedEventArgs e)
+    {
+      await PowerButtonClick();
+    }
+
+    /// <summary>
+    /// Переключает состояние питания через UI-кнопку.
+    /// </summary>
     public async Task PowerButtonClick()
     {
-      model = new ChassisManagerServices().GetAll().FirstOrDefault();
-
-      if (model == null)
+      if (!TryResolveChassisManager() || !ValidatePowerActionAvailability())
       {
-        MessageBoxCustom.Show("Система не задана в конфигурации! Добавьте менеджер шасси в конфигурацию и повторите попытку.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
-        return;
-      }
-
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
         return;
       }
 
@@ -153,24 +123,100 @@ namespace UI.Components
 
       SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
 
-      if (!active)
+      try
       {
-        await StartPowerSequenceAsync();
+        if (!active)
+        {
+          await StartPowerSequenceAsync();
+        }
+        else
+        {
+          await StopPowerSequenceAsync();
+        }
       }
-      else
+      finally
       {
-        await StopPowerSequenceAsync();
+        taskInProgress = false;
+        SystemStateManager.SetIsActivePower(active);
       }
-
-      taskInProgress = false;
-      SystemStateManager.SetIsActivePower(active);
     }
 
     /// <summary>
-    /// Начальный процесс включения питания, включая ожидание загрузки и попытку подключения.
+    /// Явно включает питание из внешнего источника, например из админской консоли.
+    /// </summary>
+    public async Task StartPowerAsync()
+    {
+      if (!TryResolveChassisManager() || !ValidatePowerActionAvailability() || taskInProgress)
+      {
+        return;
+      }
+
+      cancellationToken = new CancellationTokenSource();
+      taskInProgress = true;
+      hasError = false;
+
+      SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
+
+      try
+      {
+        if (!active)
+        {
+          await StartPowerSequenceAsync();
+        }
+        else
+        {
+          SetConnectedState("Отключить систему");
+        }
+      }
+      finally
+      {
+        taskInProgress = false;
+        SystemStateManager.SetIsActivePower(active);
+      }
+    }
+
+    /// <summary>
+    /// Явно отключает питание из внешнего источника, например из админской консоли.
+    /// </summary>
+    public async Task StopPowerAsync()
+    {
+      if (!TryResolveChassisManager() || !ValidatePowerActionAvailability() || taskInProgress)
+      {
+        return;
+      }
+
+      cancellationToken = new CancellationTokenSource();
+      taskInProgress = true;
+      hasError = false;
+
+      SetLoadingState("Загрузка...", (Color)FindResource("ActiveColor"));
+
+      try
+      {
+        bool hasPower = active || await model.PowerManager.VerifyPowerAsync(null);
+        if (hasPower)
+        {
+          await StopPowerSequenceAsync();
+        }
+        else
+        {
+          SetDisconnectedState("Подключить систему");
+        }
+      }
+      finally
+      {
+        taskInProgress = false;
+        SystemStateManager.SetIsActivePower(active);
+      }
+    }
+
+    /// <summary>
+    /// Начальный процесс включения питания, включая проверку UPS, ожидание загрузки и попытку подключения.
     /// </summary>
     private async Task StartPowerSequenceAsync()
     {
+      await EnsureConfiguredUpsPowerAsync();
+
       if (!await model.PowerManager.VerifyPowerAsync(null))
       {
         await model.PowerManager.StartPowerAsync();
@@ -191,7 +237,7 @@ namespace UI.Components
       await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
       await Task.Delay(500);
 
-      var power = true;
+      bool power = true;
       while (power)
       {
         await model.PowerManager.StopPowerAsync();
@@ -204,11 +250,38 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Возвращает configured UPS для текущего шасси и при необходимости включает его.
+    /// </summary>
+    private async Task EnsureConfiguredUpsPowerAsync()
+    {
+      IUninterruptiblePowerSupply? ups = GetConfiguredUps();
+      if (ups == null)
+      {
+        return;
+      }
+
+      if (!await ups.VerifyPowerAsync())
+      {
+        await ups.StartPowerAsync();
+      }
+    }
+
+    /// <summary>
+    /// Возвращает настроенный UPS для текущего шасси.
+    /// </summary>
+    private IUninterruptiblePowerSupply? GetConfiguredUps()
+    {
+      return new UninterruptiblePowerSupplyServices()
+        .GetAll()
+        .FirstOrDefault(device => device.NumberChassis == model.Number);
+    }
+
+    /// <summary>
     /// Попытка подключения к системе. При успехе обновляет статус, иначе - вызывает ошибку.
     /// </summary>
     private async Task<bool> TryConnectAsync()
     {
-      var result = await model.PowerManager.VerifyPowerAsync(null);
+      bool result = await model.PowerManager.VerifyPowerAsync(null);
 
       if (result)
       {
@@ -259,40 +332,8 @@ namespace UI.Components
         MessageEventAdapter.RaiseInfoMessage($"{message} {i} сек.");
         await Task.Delay(1000);
       }
+
       MessageEventAdapter.RaiseClearMessage();
-
-    }
-
-    /// <summary>
-    /// Анимация плавного изменения непрозрачности кнопки до заданного уровня.
-    /// </summary>
-    private async Task AnimateOpacityAsync(double targetOpacity)
-    {
-      while (Math.Abs(GridBlock.Opacity - targetOpacity) > 0.1)
-      {
-        GridBlock.Opacity += (targetOpacity - GridBlock.Opacity) * 0.1;
-        await Task.Delay(10);
-      }
-
-      GridBlock.Opacity = targetOpacity;
-    }
-
-    /// <summary>
-    /// Обновление видимости всплывающей подсказки, если текст не помещается.
-    /// </summary>
-    private void UpdateToolTipVisibility()
-    {
-      var pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-      var formattedText = new FormattedText(
-          nameTextBlock.Text,
-          CultureInfo.CurrentCulture,
-          FlowDirection.LeftToRight,
-          new Typeface(nameTextBlock.FontFamily, nameTextBlock.FontStyle, nameTextBlock.FontWeight, nameTextBlock.FontStretch),
-          nameTextBlock.FontSize,
-          nameTextBlock.Foreground,
-          pixelsPerDip);
-
-      nameTextBlock.ToolTip = formattedText.Width > nameTextBlock.ActualWidth ? nameTextBlock.Text : null;
     }
 
     /// <summary>
@@ -302,9 +343,11 @@ namespace UI.Components
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, color);
-        GridBlock.Opacity = 1;
+        _ = color;
+        SetButtonToolTip(text);
+        SetIconForegroundResource("PowerButtonOnForegroundBrush");
+        SetIconsState(true);
+        PowerActionButton.Opacity = 1;
       });
     }
 
@@ -315,9 +358,10 @@ namespace UI.Components
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, "FadedRedSolidColorBrush");
-        GridBlock.Opacity = 0.5;
+        SetButtonToolTip(text);
+        SetIconForegroundResource("PowerButtonOnForegroundBrush");
+        SetIconsState(true);
+        PowerActionButton.Opacity = 0.92;
         active = true;
       });
     }
@@ -329,11 +373,90 @@ namespace UI.Components
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        nameTextBlock.Text = text;
-        GridBlock.SetResourceReference(BackgroundProperty, "GreenColorSolidColorBrush");
-        GridBlock.Opacity = 0.5;
+        SetButtonToolTip(text);
+        SetIconForegroundResource("PowerButtonOffForegroundBrush");
+        SetIconsState(false);
+        PowerActionButton.Opacity = 0.86;
         active = false;
       });
+    }
+
+    /// <summary>
+    /// Переключает видимость иконок питания в зависимости от состояния.
+    /// </summary>
+    private void SetIconsState(bool isPowerOn)
+    {
+      if (FindButtonTemplateElement("PowerOnStateIcon") is UIElement powerOnIcon)
+      {
+        powerOnIcon.Visibility = isPowerOn ? Visibility.Visible : Visibility.Collapsed;
+      }
+
+      if (FindButtonTemplateElement("PowerOffStateIcon") is UIElement powerOffIcon)
+      {
+        powerOffIcon.Visibility = isPowerOn ? Visibility.Collapsed : Visibility.Visible;
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает цвет иконки через ресурс темы.
+    /// </summary>
+    private void SetIconForegroundResource(string resourceKey)
+    {
+      if (FindButtonTemplateElement("PowerOnStateIcon") is FrameworkElement powerOnIcon)
+      {
+        powerOnIcon.SetResourceReference(ForegroundProperty, resourceKey);
+      }
+
+      if (FindButtonTemplateElement("PowerOffStateIcon") is FrameworkElement powerOffIcon)
+      {
+        powerOffIcon.SetResourceReference(ForegroundProperty, resourceKey);
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает текст подсказки кнопки питания.
+    /// </summary>
+    private void SetButtonToolTip(string text)
+    {
+      PowerActionButton.ToolTip = text;
+    }
+
+    /// <summary>
+    /// Загружает менеджер шасси из конфигурации.
+    /// </summary>
+    private bool TryResolveChassisManager()
+    {
+      model = new ChassisManagerServices().GetAll().FirstOrDefault();
+      if (model != null)
+      {
+        return true;
+      }
+
+      MessageBoxCustom.Show("Система не задана в конфигурации! Добавьте менеджер шасси в конфигурацию и повторите попытку.", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+      return false;
+    }
+
+    /// <summary>
+    /// Проверяет доступность реального управления питанием.
+    /// </summary>
+    private static bool ValidatePowerActionAvailability()
+    {
+      if (!ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
+      return false;
+    }
+
+    /// <summary>
+    /// Возвращает элемент шаблона кнопки по имени.
+    /// </summary>
+    private FrameworkElement FindButtonTemplateElement(string elementName)
+    {
+      PowerActionButton.ApplyTemplate();
+      return PowerActionButton.Template?.FindName(elementName, PowerActionButton) as FrameworkElement;
     }
   }
 }

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
@@ -11,6 +11,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
     /// <summary>
     /// Управление питанием шасси.
     /// </summary>
-    IPowerManagerChassis PowerManager { get; set; }
+    IPower PowerManager { get; set; }
   }
 }

@@ -417,6 +417,12 @@
   <data name="settings.userinterface.theme.description" xml:space="preserve">
     <value>Выберите тему оформления интерфейса, которая будет использоваться в приложении.</value>
   </data>
+  <data name="settings.userinterface.topMenuIcons.title" xml:space="preserve">
+    <value>Иконки в верхнем меню</value>
+  </data>
+  <data name="settings.userinterface.topMenuIcons.description" xml:space="preserve">
+    <value>Заменяет текстовые пункты верхнего меню на иконки.</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Подсветка синтаксиса</value>
   </data>

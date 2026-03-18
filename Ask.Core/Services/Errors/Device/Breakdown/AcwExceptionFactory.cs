@@ -59,6 +59,12 @@
     public static DeviceException SetArcCurrentFailed(string name, int chassis, int number, string reason = null) =>
         new($"Ошибка установки дугового тока ACW {name}({chassis}.{number}){Format(reason)}");
 
+    /// <summary>
+    /// Исключение при ошибке переключения земли ACW.
+    /// </summary>
+    public static DeviceException SetGroundModeFailed(string name, int chassis, int number, string reason = null) =>
+        new($"Ошибка переключения земли ACW {name}({chassis}.{number}){Format(reason)}");
+
     private static string Format(string reason) =>
         string.IsNullOrWhiteSpace(reason) ? string.Empty : $": {reason}";
   }

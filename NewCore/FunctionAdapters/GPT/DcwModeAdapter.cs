@@ -67,6 +67,11 @@ namespace NewCore.FunctionAdapters.GPT
     public IArcCurrentConfigurable ArcCurrent { get; set; }
 
     /// <summary>
+    /// Управление включением и выключением земли в режиме DCW.
+    /// </summary>
+    public IGroundModeConfigurable GroundMode { get; set; }
+
+    /// <summary>
     /// Выполнение измерений тока утечки или сопротивления в режиме DCW.
     /// </summary>
     public IMeasurable Measure { get; set; }
@@ -94,6 +99,7 @@ namespace NewCore.FunctionAdapters.GPT
       Time = new TimeAdapterMode(_dcwMode, _device);
       Offset = new OffsetAdapterMode(_dcwMode, _device);
       ArcCurrent = new ArcCurrentAdapterMode(_dcwMode, _device);
+      GroundMode = new GroundModeAdapterMode(_dcwMode, _device);
       Measure = new MeasureAdapterMode(_dcwMode, _device);
       Config = new ConfigAdapterMode(_dcwMode, device);
     }
@@ -680,7 +686,7 @@ namespace NewCore.FunctionAdapters.GPT
       /// </exception>
       public async Task<(bool, string)> SetArcCurrentAsync(double value, IUserInteractionService? userMessageService = null)
       {
-        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
         {
           var succes = await _dcwMode.ArcCurrent.SetArcCurrentAsync(value);
 
@@ -709,6 +715,50 @@ namespace NewCore.FunctionAdapters.GPT
       /// </summary>
       /// <returns>Значение дугового тока в миллиамперах (мА).</returns>
       public Task<double> GetArcCurrentAsync() => _dcwMode.ArcCurrent.GetArcCurrentAsync();
+    }
+
+    /// <summary>
+    /// Адаптер для управления состоянием земли в режиме DCW
+    /// устройства GPT-79904.
+    /// </summary>
+    public class GroundModeAdapterMode : IGroundModeConfigurable
+    {
+      private readonly DcwMode _dcwMode;
+      private readonly GPT79904 _device;
+
+      public GroundModeAdapterMode(DcwMode dcwMode, GPT79904 device)
+      {
+        _dcwMode = dcwMode;
+        _device = device;
+      }
+
+      public async Task<(bool Success, string Message)> SetGroundModeAsync(bool state, IUserInteractionService? userMessageService = null)
+      {
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+        {
+          var succes = await _dcwMode.GroundMode.SetGroundModeAsync(state);
+
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка земли DCW",
+            succes.Success ? (state ? "ON" : "OFF") : succes.Message,
+            succes.Success,
+            1,
+            userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw DcwExceptionFactory.SetGroundModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
+
+        return result;
+      }
+
+      public Task<bool> GetGroundModeAsync() => _dcwMode.GroundMode.GetGroundModeAsync();
     }
 
     /// <summary>
@@ -813,6 +863,11 @@ namespace NewCore.FunctionAdapters.GPT
       /// </summary>
       public async Task StopMeasure()
       {
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return;
+        }
+
         await _dcwMode.Measure.StopMeasure();
       }
     }

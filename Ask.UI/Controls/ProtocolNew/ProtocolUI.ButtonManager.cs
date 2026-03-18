@@ -367,6 +367,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       SetupEventHandlers();
       ShowOnlyStartButton();
+      HideProtocolManager();
     }
 
     /// <summary>
@@ -573,6 +574,16 @@ namespace Ask.UI.Controls.ProtocolNew
       NextButtonPreviewMouseDown?.Invoke(this, e);
       KeyboardManager.TriggerStep();
       ShowOnlyStopAndFinishButtons(isStepInto);
+    }
+
+    public void ShowProtocolManager()
+    {
+      Application.Current.Dispatcher.Invoke(() => ProtocolManager.Visibility = Visibility.Visible);
+    }
+
+    public void HideProtocolManager()
+    {
+      Application.Current.Dispatcher.Invoke(() => ProtocolManager.Visibility = Visibility.Collapsed);
     }
 
     public void StartTask()

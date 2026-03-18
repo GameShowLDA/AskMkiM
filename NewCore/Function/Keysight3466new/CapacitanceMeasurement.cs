@@ -68,7 +68,7 @@ namespace NewCore.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _device.DeviceProtocol.QueryAsync("MEAS:CAP?", timeout: 1000);
+      string response = await _device.DeviceProtocol.QueryAsync("MEAS:CAP?", responseDelay: 1500, timeout: 1000);
       response = response.Trim().Replace("+", "");
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float,

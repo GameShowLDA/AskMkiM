@@ -429,4 +429,71 @@
         <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
     </Style>
 
+    <Style x:Key="TopMenuLikeIconButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="MinWidth" Value="30"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="ButtonChrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BackButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonBorderBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonForegroundBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonHoverBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonHoverBorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonHoverForegroundBrush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonPressedBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonPressedBorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonPressedForegroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}"/>
+
+    <Style x:Key="SaveButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+        <Setter Property="Background" Value="{DynamicResource DeviceListAddButtonBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource DeviceListAddButtonBorderBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource DeviceListAddButtonForegroundBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DeviceListAddButtonHoverBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource DeviceListAddButtonHoverBorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource DeviceListAddButtonHoverForegroundBrush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource DeviceListAddButtonPressedBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource DeviceListAddButtonPressedBorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource DeviceListAddButtonPressedForegroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

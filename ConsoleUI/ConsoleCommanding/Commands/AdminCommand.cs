@@ -8,6 +8,7 @@ namespace ConsoleUI.ConsoleCommanding.Commands
     public static event EventHandler<bool> AdminModeChanged;
     public static event EventHandler<bool> PauseInStopChanged;
     public static event EventHandler<bool> PowerChanged;
+    public static event EventHandler<bool> UpsPowerChanged;
 
     public string Name => "admin";
 
@@ -17,7 +18,6 @@ namespace ConsoleUI.ConsoleCommanding.Commands
 
       ConsoleVisibilityController.SetPasswordMode(true);
       string password = await ConsoleVisibilityController.ReadLineAsync();
-
 
       if (password.ToLower() != "admin")
       {
@@ -30,12 +30,14 @@ namespace ConsoleUI.ConsoleCommanding.Commands
       context.Console.WriteLine("2. Выключить");
       context.Console.WriteLine("3. Включить останов по ошибке");
       context.Console.WriteLine("4. Выключить останов по ошибке");
-      context.Console.WriteLine("5. Подлкючить питание(холостой для тестов)");
+      context.Console.WriteLine("5. Подключить питание(холостой для тестов)");
       context.Console.WriteLine("6. Отключить питание(холостой для тестов)");
+      context.Console.WriteLine("7. Включить бесперебойник");
+      context.Console.WriteLine("8. Отключить бесперебойник");
       context.Console.WriteLine("0. Выход");
 
       string input = await context.Console.ReadLineAsync();
-      if (!int.TryParse(input, out int choice) || choice < 0 || choice > 6)
+      if (!int.TryParse(input, out int choice) || choice < 0 || choice > 8)
       {
         context.Console.WriteLine("Неверный выбор.");
         return;
@@ -60,6 +62,12 @@ namespace ConsoleUI.ConsoleCommanding.Commands
           break;
         case 6:
           SetPower(false, context);
+          break;
+        case 7:
+          SetUpsPower(true, context);
+          break;
+        case 8:
+          SetUpsPower(false, context);
           break;
         default:
           context.Console.WriteLine("Выход без изменений.");
@@ -92,6 +100,15 @@ namespace ConsoleUI.ConsoleCommanding.Commands
       context.Console.WriteLine(enable
         ? "Включен режим питания для тестов."
         : "Выключен режим питания для тестов.");
+    }
+
+    private void SetUpsPower(bool enable, CommandContext context)
+    {
+      UpsPowerChanged?.Invoke(null, enable);
+
+      context.Console.WriteLine(enable
+        ? "Отправлена команда на включение бесперебойника."
+        : "Отправлена команда на отключение бесперебойника.");
     }
   }
 }

@@ -1,14 +1,21 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -20,6 +27,9 @@ namespace Ask.UI.Controls.ProtocolNew
   {
     static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     private bool loaded = false;
+    public event EventHandler? OpenFileRequested;
+    public event EventHandler? OpenFolderRequested;
+    public event EventHandler? PrintRequested;
 
     /// <summary>
     /// Свойство зависимости для заголовка.
@@ -37,7 +47,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public string Header
     {
-      get => (string)GetValue(HeaderProperty);
+      get => (string)GetValue(HeaderProperty); 
       set => SetValue(HeaderProperty, value);
     }
 
@@ -50,6 +60,7 @@ namespace Ask.UI.Controls.ProtocolNew
       {
         control.header.Text = e.NewValue as string;
         control.headerFile.Text = e.NewValue as string;
+        control.FileName.Text = e.NewValue as string;
       }
     }
 
@@ -400,6 +411,111 @@ namespace Ask.UI.Controls.ProtocolNew
           TopLayer_PreviewMouseDown(StepOverButtonElement, CreateMouseArgs());
         }
       }
+    }
+
+    private void OpenFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (OpenFileRequested != null)
+      {
+        OpenFileRequested.Invoke(this, EventArgs.Empty);
+        return;
+      }
+
+      OpenLatestProtocolInEditor();
+    }
+
+    private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (OpenFolderRequested != null)
+      {
+        OpenFolderRequested.Invoke(this, EventArgs.Empty);
+        return;
+      }
+
+      OpenLatestProtocolFolder();
+    }
+
+    private void PrintButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (PrintRequested != null)
+      {
+        PrintRequested.Invoke(this, EventArgs.Empty);
+        return;
+      }
+
+      try
+      {
+        PrintUtility.PrintProtocol(GetShowMessageModels());
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка печати протокола", ex);
+      }
+    }
+
+    private void OpenLatestProtocolInEditor()
+    {
+      try
+      {
+        var latestProtocolPath = ResolveLatestProtocolPath();
+        if (string.IsNullOrWhiteSpace(latestProtocolPath))
+        {
+          return;
+        }
+
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(latestProtocolPath);
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка при открытии протокола в редакторе", ex);
+      }
+    }
+
+    private void OpenLatestProtocolFolder()
+    {
+      try
+      {
+        var latestProtocolPath = ResolveLatestProtocolPath();
+        if (!string.IsNullOrWhiteSpace(latestProtocolPath) && File.Exists(latestProtocolPath))
+        {
+          Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{Path.GetFullPath(latestProtocolPath)}\"")
+          {
+            UseShellExecute = true
+          });
+          return;
+        }
+
+        var historyDirectory = Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
+        Directory.CreateDirectory(historyDirectory);
+
+        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
+        {
+          UseShellExecute = true
+        });
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка при открытии папки протоколов", ex);
+      }
+    }
+
+    private string? ResolveLatestProtocolPath()
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSavedProtocolPath) && File.Exists(_lastSavedProtocolPath))
+      {
+        return Path.GetFullPath(_lastSavedProtocolPath);
+      }
+
+      var historyDirectory = Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
+      if (!Directory.Exists(historyDirectory))
+      {
+        return null;
+      }
+
+      return Directory
+        .EnumerateFiles(historyDirectory, "*.lstw", SearchOption.AllDirectories)
+        .OrderByDescending(File.GetLastWriteTimeUtc)
+        .FirstOrDefault();
     }
   }
 }

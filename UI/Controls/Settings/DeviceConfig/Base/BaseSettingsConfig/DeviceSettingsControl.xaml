@@ -75,6 +75,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <!--Модель устройства-->
@@ -180,8 +182,33 @@
                         </Grid>
                     </Border>
 
+                    <Border Grid.Row="4" Style="{StaticResource DeviceInputSectionCardStyle}"
+                            Name="CapacitanceContainer"
+                            >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Style="{StaticResource DeviceInputSectionTitleBarStyle}">
+                                <TextBlock Text="Ёмкость коммутатора, нФ" Foreground="{DynamicResource ForegrounfBrushes}"
+                                           FontSize="20" FontWeight="Bold" Margin="7,0"/>
+                            </Border>
+
+                            <Border Grid.Row="1" Style="{StaticResource DeviceSettingsUnifiedInputBorderStyle}">
+                                <TextBox
+                                    Style="{StaticResource DeviceSettingsUnifiedTextBoxStyle}"
+                                    PreviewTextInput="ResistanceDevice_PreviewTextInput"
+                                    TextChanged="ResistanceDevice_TextChanged"
+                                    Name="CapacitanceTextBox"
+                                    />
+                            </Border>
+                        </Grid>
+                    </Border>
+
                     <!--Тип подлючения устройства-->
-                    <Border Grid.Row="4" 
+                    <Border Grid.Row="5" 
                         Style="{StaticResource DeviceInputSectionCardStyle}"
                         Name="ConnectionTypeContainer"
                         >
@@ -206,6 +233,7 @@
                                 <ComboBoxItem IsEnabled="False" Content="Выбор типа подключения:" IsSelected="True" Foreground="Gray"/>
                                 <ComboBoxItem Content="IP" Name="ConnectionTypeIPItem"/>
                                 <ComboBoxItem Content="COM" Name="ConnectionTypeCOMItem"/>
+                                <ComboBoxItem Content="USB" Name="ConnectionTypeUSBItem"/>
 
                             </ComboBox>
 
@@ -213,7 +241,7 @@
                     </Border>
 
                     <!--IP address устройства-->
-                    <Border Grid.Row="5" Style="{StaticResource DeviceInputSectionCardStyle}"
+                    <Border Grid.Row="6" Style="{StaticResource DeviceInputSectionCardStyle}"
                         Name="IPAddressContainer"
                         >
                         <Grid >
@@ -287,7 +315,7 @@
                     </Border>
 
                     <!--COM устройства-->
-                    <Border Grid.Row="6" Background="{DynamicResource PrimarySolidColorBrush}" 
+                    <Border Grid.Row="7" Background="{DynamicResource PrimarySolidColorBrush}" 
                         CornerRadius="10" Margin="0,10"
                         Name="COMContainer"
                         >
@@ -531,7 +559,90 @@
                         </Grid>
                     </Border>
 
-                    <ContentControl x:Name="AdditionalSettingsContainer" Grid.Row="7" Margin="0,10,0,10"/>
+                    <Border Grid.Row="8"
+                        Style="{StaticResource DeviceInputSectionCardStyle}"
+                        Name="USBContainer">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Style="{StaticResource DeviceInputSectionTitleBarStyle}">
+                                <TextBlock Text="USB устройство" Foreground="{DynamicResource ForegrounfBrushes}"
+                                           FontSize="20" FontWeight="Bold" Margin="7,0"/>
+                            </Border>
+
+                            <Border Grid.Row="1" Style="{StaticResource DeviceSettingsUnifiedInputBorderStyle}" Height="Auto" MinHeight="40" Padding="0,6">
+                                <TextBlock x:Name="USBStatusData"
+                                           Foreground="{DynamicResource ForegrounfBrushes}"
+                                           FontSize="16"
+                                           VerticalAlignment="Center"
+                                           Margin="12,0"
+                                           TextWrapping="Wrap"
+                                           Text="Ожидание поиска..." />
+                            </Border>
+
+                            <Grid Grid.Row="2" Margin="14,8,14,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Порт:" Foreground="{DynamicResource ForegroundSolidColorBrush}" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Border Grid.Column="1" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5">
+                                    <TextBox x:Name="USBPortData" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                             VerticalAlignment="Center" FontSize="14" Foreground="{DynamicResource ForegroundSolidColorBrush}" Padding="8,4"/>
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.Row="3" Margin="14,0,14,8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="ID:" Foreground="{DynamicResource ForegroundSolidColorBrush}" FontSize="16" VerticalAlignment="Top" Margin="0,6,8,0"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5">
+                                        <TextBox x:Name="USBDeviceIdData" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                                 VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource ForegroundSolidColorBrush}" Padding="8,6"
+                                                 TextWrapping="Wrap" AcceptsReturn="True" MinHeight="52"/>
+                                    </Border>
+                                </Grid>
+
+                                <Grid Grid.Row="1" Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" Text="VID:" Foreground="{DynamicResource ForegroundSolidColorBrush}" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Border Grid.Column="1" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5" Margin="0,0,12,0">
+                                        <TextBox x:Name="USBVIDData" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                                 VerticalAlignment="Center" FontSize="14" Foreground="{DynamicResource ForegroundSolidColorBrush}" Padding="8,4"/>
+                                    </Border>
+
+                                    <TextBlock Grid.Column="2" Text="PID:" Foreground="{DynamicResource ForegroundSolidColorBrush}" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Border Grid.Column="3" Background="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}" CornerRadius="5">
+                                        <TextBox x:Name="USBPIDData" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                                 VerticalAlignment="Center" FontSize="14" Foreground="{DynamicResource ForegroundSolidColorBrush}" Padding="8,4"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <ContentControl x:Name="AdditionalSettingsContainer" Grid.Row="9" Margin="0,10,0,10"/>
                 </Grid>
 
             </ScrollViewer>

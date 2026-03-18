@@ -58,6 +58,11 @@ namespace NewCore.FunctionAdapters.GPT
     public IArcCurrentConfigurable ArcCurrent { get; set; }
 
     /// <summary>
+    /// Адаптер, обеспечивающий управление включением и выключением земли в режиме ACW.
+    /// </summary>
+    public IGroundModeConfigurable GroundMode { get; set; }
+
+    /// <summary>
     /// Адаптер, обеспечивающий управление параметром частоты (Frequency) в режиме ACW.
     /// </summary>
     public IFrequencyConfigurable FrequencyConfigurable { get; set; }
@@ -115,6 +120,7 @@ namespace NewCore.FunctionAdapters.GPT
       Time = new TimeAdapterMode(_acwMode, _device);
       Offset = new OffsetAdapterMode(_acwMode, _device);
       ArcCurrent = new ArcCurrentAdapterMode(_acwMode, _device);
+      GroundMode = new GroundModeAdapterMode(_acwMode, _device);
       FrequencyConfigurable = new FrequencyAdapterMode(_acwMode, _device);
       Measure = new MeasureAdapterMode(_acwMode, _device);
       Config = new ConfigAdapterMode(_acwMode, device);
@@ -790,6 +796,44 @@ namespace NewCore.FunctionAdapters.GPT
     }
 
     /// <summary>
+    /// Представляет адаптер для управления состоянием земли в режиме ACW
+    /// на устройстве GPT-79904.
+    /// </summary>
+    public class GroundModeAdapterMode : IGroundModeConfigurable
+    {
+      private readonly AcwMode _acwMode;
+      private readonly GPT79904 _device;
+
+      public GroundModeAdapterMode(AcwMode acwMode, GPT79904 device)
+      {
+        _acwMode = acwMode;
+        _device = device;
+      }
+
+      public async Task<(bool Success, string Message)> SetGroundModeAsync(bool state, IUserInteractionService? userMessageService = null)
+      {
+        var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+        {
+          var succes = await _acwMode.GroundMode.SetGroundModeAsync(state);
+
+          if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка земли ACW", succes.Success ? (state ? "ON" : "OFF") : succes.Message, succes.Success, 1, userMessageService);
+          }
+
+          return succes;
+        }, userMessageService, deviceTask: true);
+
+        if (!result.Connect)
+          throw AcwExceptionFactory.SetGroundModeFailed(_device.Name, _device.NumberChassis, _device.Number, result.Answer);
+
+        return result;
+      }
+
+      public Task<bool> GetGroundModeAsync() => _acwMode.GroundMode.GetGroundModeAsync();
+    }
+
+    /// <summary>
     /// Представляет адаптер для выполнения измерений в режиме ACW
     /// (тест прочности изоляции) на устройстве GPT-79904.
     /// </summary>
@@ -857,7 +901,7 @@ namespace NewCore.FunctionAdapters.GPT
             _device,
             "Измерение тока ACW",
             $"{result} мА",
-            result >= 0,
+            result < param,
             2,
             userMessageService);
 
@@ -883,6 +927,11 @@ namespace NewCore.FunctionAdapters.GPT
       /// <returns>Задача, представляющая завершение операции остановки измерения.</returns>
       public async Task StopMeasure()
       {
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return;
+        }
+
         await _acwMode.Measure.StopMeasure();
       }
 

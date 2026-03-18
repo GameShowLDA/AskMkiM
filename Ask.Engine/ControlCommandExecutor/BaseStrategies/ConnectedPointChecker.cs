@@ -3,16 +3,13 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using static Ask.LogLib.LoggerUtility;
-using System.Linq;
 using System.Text;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using static Ask.Core.Shared.Metadata.Static.DelegateManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
@@ -38,7 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронно выполняет проверку соединённых точек в схеме, формируя новый список цепей (ССИРТ)
     /// с учётом обнаруженных разрывов.
     /// </summary>
-    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context)
+    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context, PreMeasurementDelegate preMeasurementDelegate = null)
     {
       var errors = new List<ShowMessageModel>();
       var infos = new List<ShowMessageModel>();
@@ -48,7 +45,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errors, infos);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
+      if (context.TypeCommand != MeasurementTypeCommand.KC)
+      {
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.MessageRelativeToFirstPoint, context.IsPolarityReversed));
+      }
+      else
+      {
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.ResistanceRelativeToFirstPoint, context.IsPolarityReversed));
+      }
 
       var newGroups = new List<GroupModel>();
 
@@ -71,7 +75,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             ExecutorMessageBuilder.BuildChainCheckBlock(BuildChainDisplayString(chainCopy)),
             IsBlockStart: true);
 
-          var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1);
+          var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1, preMeasurementDelegate);
 
           LogDebug($"[ConnectedPointChecker] Chain checked. Fragments={result.Fragments.Count}. Display={BuildDisconnectionDisplayString(result.Fragments)}");
 
@@ -79,8 +83,34 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           errors.AddRange(result.Errors);
           infos.AddRange(result.Infos);
 
+          if (context.TypeCommand == MeasurementTypeCommand.KC)
+          {
+            foreach (var failedMeasurement in result.FailedMeasurements)
+            {
+              var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
+                MeasurementTypeCommand.KC,
+                context.LowerLimit,
+                context.HigherLimit,
+                failedMeasurement.Value,
+                chains: $"{failedMeasurement.Chain} ");
+              error.Status = ShowMessageModel.MessageType.Error;
+              error.IndentLevel = 2;
+
+              errors.Add(error);
+
+              context.CommandManager.AddErrorMethod(
+                context.CommandModel.PointErrors.DisconnectChainError(
+                  $"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+                  error.Header,
+                  error.Message,
+                  context.CommandModel.StartLineNumber,
+                  context.CommandModel.FormattedStartLineNumber));
+
+              await context.MessageService.ShowMessageAsync(error);
+            }
+          }
           // Добавляем одну запись об ошибке на исходную цепь, если есть разрывы (фрагментов > 1).
-          if (result.Fragments.Count > 1)
+          else if (result.Fragments.Count > 1)
           {
             var chainStr = BuildDisconnectionDisplayString(result.Fragments);
 
@@ -123,16 +153,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      if (errors.Count > 0)
-      {
-        await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результаты проверки") { IndentLevel = 1 });
-        foreach (var error in errors)
-        {
-          await context.MessageService.ShowMessageAsync(error);
-        }
-      }
-
-      // Формируем новый ССИРТ с учётом разрывов и сохраняем в контекст (не затираем исходный).
       var updatedScheme = new SchemeModel(newGroups);
       context.NewScheme = updatedScheme;
 
@@ -143,7 +163,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Рекурсивная проверка цепи: первая точка подключается к нижней шине,
     /// остальные по очереди к верхней шине с тестом на связь.
     /// </summary>
-    private static async Task<ChainProcessingResult> ProcessChainAsync(List<PointModel> points, ConnectedPointContext context, int indentLevel)
+    private static async Task<ChainProcessingResult> ProcessChainAsync(List<PointModel> points, ConnectedPointContext context, int indentLevel, PreMeasurementDelegate preMeasurementDelegate = null)
     {
       var result = new ChainProcessingResult();
 
@@ -172,6 +192,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(basePoint, messageService, false);
       baseConnected = true;
 
+      if (preMeasurementDelegate != null)
+      {
+        await preMeasurementDelegate(messageService.GetCancellationToken());
+      }
+
       try
       {
         foreach (var point in points.Skip(1))
@@ -187,7 +212,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           try
           {
             var module = EquipmentService.GetModuleByPoint(point);
-            var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
+
+            (bool Result, double Value) measured;
+
+            if (context.TypeCommand == MeasurementTypeCommand.IE)
+            {
+              measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchCapacitance);
+            }
+            else
+            {
+              measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance);
+            }
+
 
             var chain = new ChainModel(new List<PointModel> { basePoint, point });
             var chainStr = context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
@@ -198,6 +234,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               brokenPoints.Add(point);
               firstFailureValue ??= measured.Value;
+
+              if (context.TypeCommand == MeasurementTypeCommand.KC)
+              {
+                result.FailedMeasurements.Add(new FailedMeasurement(chainStr, measured.Value));
+              }
             }
             else
             {
@@ -234,9 +275,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       result.FirstFailureValue ??= firstFailureValue;
 
       // Если найдены разрывы, формируем новую цепь из точек с разрывами и повторяем проверку.
-      if (brokenPoints.Count > 0)
+      if (brokenPoints.Count > 0 && context.TypeCommand != MeasurementTypeCommand.KC)
       {
-        var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1);
+        var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1, preMeasurementDelegate);
         result.Append(nextFragment);
       }
       else
@@ -273,16 +314,28 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var fragmentStrings = fragments.Select(fragment =>
       {
-          var points = fragment.PointModels.Select(p =>
-          {
-            var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
-            return $"{p.Mnemonic}{address}";
-          });
+        var points = fragment.PointModels.Select(p =>
+        {
+          var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
+          return $"{p.Mnemonic}{address}";
+        });
 
-          return string.Join(",", points);
+        return string.Join(",", points);
       });
 
       return $"*{string.Join("**", fragmentStrings)}*";
+    }
+
+    private sealed class FailedMeasurement
+    {
+      public FailedMeasurement(string chain, double value)
+      {
+        Chain = chain;
+        Value = value;
+      }
+
+      public string Chain { get; }
+      public double Value { get; }
     }
 
     private sealed class ChainProcessingResult
@@ -290,6 +343,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       public List<ChainModel> Fragments { get; } = new();
       public List<ShowMessageModel> Errors { get; } = new();
       public List<ShowMessageModel> Infos { get; } = new();
+      public List<FailedMeasurement> FailedMeasurements { get; } = new();
       public double? FirstFailureValue { get; set; }
 
       public void Append(ChainProcessingResult other)
@@ -300,6 +354,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         Fragments.AddRange(other.Fragments);
         Errors.AddRange(other.Errors);
         Infos.AddRange(other.Infos);
+        FailedMeasurements.AddRange(other.FailedMeasurements);
         FirstFailureValue ??= other.FirstFailureValue;
       }
     }

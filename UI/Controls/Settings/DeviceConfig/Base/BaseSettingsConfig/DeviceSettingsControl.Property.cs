@@ -124,6 +124,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public string PortName => COMPortSelectionBox.Text;
 
     /// <summary>
+    /// Gets USB connection details selected or resolved by UI.
+    /// </summary>
+    public string UsbConnectionDetails => _usbConnectionDetails;
+
+    /// <summary>
     /// Получает номер устройства.
     /// </summary>
     public int NumberDevice => int.TryParse(DeviceNumberTextBox.Text, out int number) ? number : -1;
@@ -144,6 +149,30 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       {
         text += "0";
         ResistanceTextBox.Text = text;
+      }
+
+      return double.Parse(
+        text,
+        CultureInfo.InvariantCulture
+      );
+    }
+
+    public double GetCapacitance()
+    {
+      if (CapacitanceTextBox == null)
+        return 0;
+
+      var text = CapacitanceTextBox.Text?.Trim();
+
+      if (string.IsNullOrEmpty(text))
+        return 0;
+
+      text = text.Replace(',', '.');
+
+      if (text.EndsWith("."))
+      {
+        text += "0";
+        CapacitanceTextBox.Text = text;
       }
 
       return double.Parse(

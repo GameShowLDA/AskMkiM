@@ -13,9 +13,7 @@ namespace UI.Theme
     {
       LogInformation($"[ThemeManager] Вызван ApplyThemeAsync. Тема = {theme}");
 
-      var uri = theme == ThemeMode.Dark
-          ? new Uri("/UI;component/Resources/Theme/dark.xaml", UriKind.Relative)
-          : new Uri("/UI;component/Resources/Theme/light.xaml", UriKind.Relative);
+      var uri = GetThemeUri(theme);
 
       var newThemeDict = (ResourceDictionary)Application.LoadComponent(uri);
       LogInformation($"[ThemeManager] Словарь успешно загружен: {uri}");
@@ -24,6 +22,15 @@ namespace UI.Theme
       Application.Current.Resources.MergedDictionaries.Add(newThemeDict);
     }
 
+    private static Uri GetThemeUri(ThemeMode theme) =>
+      theme switch
+      {
+        ThemeMode.Dark => new Uri("/UI;component/Resources/Theme/dark.xaml", UriKind.Relative),
+        ThemeMode.Light => new Uri("/UI;component/Resources/Theme/light.xaml", UriKind.Relative),
+        ThemeMode.DarkCustom => new Uri("/UI;component/Resources/Theme/dark.custom.xaml", UriKind.Relative),
+        ThemeMode.LightCustom => new Uri("/UI;component/Resources/Theme/light.custom.xaml", UriKind.Relative),
+        _ => new Uri("/UI;component/Resources/Theme/dark.xaml", UriKind.Relative),
+      };
 
     private static bool _initialized;
 

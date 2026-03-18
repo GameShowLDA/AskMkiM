@@ -10,5 +10,11 @@ namespace Ask.Engine.ControlCommandAnalyser
   {
     static public MessageBoxResult? LastCuResult { get; set; }
 
+    /// <summary>
+    /// Признак "Брак" от предыдущей выполненной команды.
+    /// Используется командой УП для условного перехода.
+    /// </summary>
+    public static bool LastRejectFlag { get; set; }
+
   }
 }

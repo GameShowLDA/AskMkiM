@@ -41,9 +41,9 @@
     <SolidColorBrush x:Key="ActiveForegroundSolidColorBrush80" Color="{DynamicResource ActiveColor80}"/>
     <SolidColorBrush x:Key="ActiveForegroundSolidColorBrush" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ActiveBorderSolidColorBrush" Color="{DynamicResource ActiveColor}"/>
-    <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="{DynamicResource IsCheckedColor}"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush80" Color="{DynamicResource IsCheckedColor80}"/>
     <SolidColorBrush x:Key="RedColorSolidColorBrush" Color="{DynamicResource RedColor}"/>
+    <SolidColorBrush x:Key="VioletColorSolidColorBrush" Color="{DynamicResource VioletColor}"/>
     <SolidColorBrush x:Key="GreenColorSolidColorBrush" Color="{DynamicResource GreenColor}"/>
     <SolidColorBrush x:Key="YellowColorSolidColorBrush" Color="{DynamicResource YellowColor}"/>
     <SolidColorBrush x:Key="LightBlueColorSolidColorBrush" Color="{DynamicResource LightBlueColor}"/>

@@ -1,0 +1,69 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.ExecutionPlayCircleIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <UserControl.Resources>
+    <StreamGeometry x:Key="SemiIconExecutionHammer">
+      M9.972 2.508a.5.5 0 0 0-.16-.556l-.178-.129a5 5 0 0 0-2.076-.783C6.215.862 4.504 1.229 2.84 3.133H1.786a.5.5 0 0 0-.354.147L.146 4.567a.5.5 0 0 0 0 .706l2.571 2.579a.5.5 0 0 0 .708 0l1.286-1.29a.5.5 0 0 0 .146-.353V5.57l8.387 8.873A.5.5 0 0 0 14 14.5l1.5-1.5a.5.5 0 0 0 .017-.689l-9.129-8.63c.747-.456 1.772-.839 3.112-.839a.5.5 0 0 0 .472-.334z
+    </StreamGeometry>
+
+    <Storyboard x:Key="HoverInStoryboard">
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="HammerRotate"
+                                     Storyboard.TargetProperty="Angle">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="-22" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="10" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.24" Value="-12" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimation Storyboard.TargetName="HammerScale"
+                       Storyboard.TargetProperty="ScaleX"
+                       To="1.07"
+                       Duration="0:0:0.12" />
+      <DoubleAnimation Storyboard.TargetName="HammerScale"
+                       Storyboard.TargetProperty="ScaleY"
+                       To="1.07"
+                       Duration="0:0:0.12" />
+    </Storyboard>
+
+    <Storyboard x:Key="HoverOutStoryboard">
+      <DoubleAnimation Storyboard.TargetName="HammerRotate"
+                       Storyboard.TargetProperty="Angle"
+                       To="0"
+                       Duration="0:0:0.18" />
+      <DoubleAnimation Storyboard.TargetName="HammerScale"
+                       Storyboard.TargetProperty="ScaleX"
+                       To="1"
+                       Duration="0:0:0.18" />
+      <DoubleAnimation Storyboard.TargetName="HammerScale"
+                       Storyboard.TargetProperty="ScaleY"
+                       To="1"
+                       Duration="0:0:0.18" />
+      <DoubleAnimation Storyboard.TargetName="HammerTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="0"
+                       Duration="0:0:0.18" />
+    </Storyboard>
+  </UserControl.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid Width="16"
+          Height="16"
+          RenderTransformOrigin="0.2,0.2">
+      <Grid.RenderTransform>
+        <TransformGroup>
+          <ScaleTransform x:Name="HammerScale"
+                          ScaleX="1"
+                          ScaleY="1" />
+          <RotateTransform x:Name="HammerRotate"
+                           Angle="0" />
+          <TranslateTransform x:Name="HammerTranslate"
+                              Y="0" />
+        </TransformGroup>
+      </Grid.RenderTransform>
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="{StaticResource SemiIconExecutionHammer}" />
+    </Grid>
+  </Viewbox>
+</UserControl>

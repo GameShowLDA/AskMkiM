@@ -187,7 +187,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <item><description>наличие метки;</description></item>
     /// <item><description>существование команды с указанным номером;</description></item>
     /// <item><description>числовой формат метки;</description></item>
-    /// <item><description>что переход осуществляется вперёд по сценарию.</description></item>
+    /// <item><description>числовой формат метки.</description></item>
     /// </list>
     /// </remarks>
     private static void CheckUpLabels(List<BaseCommandModel> models)
@@ -208,21 +208,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           continue;
         }
 
-        if (!int.TryParse(up.TargetLabel, out int targetNumber))
+        if (!int.TryParse(up.TargetLabel, out _))
         {
           up.Errors.Add(UpErrors.LabelIsNotNumber(up.TargetLabel, up.StartLineNumber, $"{up.CommandNumber} {up.Mnemonic}"));
           continue;
         }
 
-        if (!int.TryParse(up.CommandNumber, out int currentNumber))
-        {
-          continue;
-        }
-
-        if (targetNumber <= currentNumber)
-        {
-          up.Errors.Add(UpErrors.LabelLessOrEqual(up.TargetLabel, up.CommandNumber, up.StartLineNumber, $"{up.CommandNumber} {up.Mnemonic}"));
-        }
       }
     }
   }

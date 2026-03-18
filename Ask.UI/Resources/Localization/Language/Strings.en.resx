@@ -417,6 +417,12 @@
   <data name="settings.userinterface.theme.description" xml:space="preserve">
     <value>Select the interface theme used in the application.</value>
   </data>
+  <data name="settings.userinterface.topMenuIcons.title" xml:space="preserve">
+    <value>Icons in top menu</value>
+  </data>
+  <data name="settings.userinterface.topMenuIcons.description" xml:space="preserve">
+    <value>Replaces text items in the top menu with icons.</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Syntax highlighting</value>
   </data>

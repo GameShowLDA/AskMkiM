@@ -122,7 +122,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue) - errorResistance;
+        answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue);
+
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        { 
+          answer -= errorResistance;
+        }
 
         if (answer < 0)
         {

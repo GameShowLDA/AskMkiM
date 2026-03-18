@@ -32,6 +32,7 @@
     <!-- Основные цвета -->
     <Color x:Key="PrimaryColor">#3a4655</Color>
     <Color x:Key="RedColor">#b23a48</Color>
+    <Color x:Key="VioletColor">#9184EE</Color>
     <Color x:Key="SecondaryColor">#303843</Color>
 
     <!-- Настройки -->
