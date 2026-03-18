@@ -174,12 +174,13 @@
     </Style>
 
     <Style x:Key="VsFilterButtonStyle" TargetType="ToggleButton">
-        <Setter Property="Padding" Value="8,2"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="12,4"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource LightPrimarySolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -191,26 +192,96 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="2"
+                        CornerRadius="4"
                         Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"/>
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center"
+                                   Text="{TemplateBinding Content}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   TextTrimming="CharacterEllipsis"/>
                     </Border>
                     <ControlTemplate.Triggers>
-
-                        
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border"
-                                Property="BorderBrush"
-                                Value="{DynamicResource ActiveForegroundSolidColorBrush}"/>
-                        </Trigger>
-
-
-                        <!-- Checked (активно) -->
-                        <Trigger Property="IsChecked" Value="True">
+                        <Trigger Property="Tag" Value="Warning">
                             <Setter TargetName="border"
                                 Property="Background"
-                                Value="{DynamicResource LightPrimarySolidColorBrush}"/>                          
+                                Value="{DynamicResource ErrorListWarningFilterButtonBackgroundBrush}"/>
+                            <Setter TargetName="border"
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListWarningFilterButtonBorderBrush}"/>
+                            <Setter Property="Foreground"
+                                Value="{DynamicResource ErrorListWarningFilterButtonForegroundBrush}"/>
+                        </Trigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Tag" Value="Warning"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="{DynamicResource ErrorListWarningFilterButtonHoverBackgroundBrush}"/>
+                            <Setter TargetName="border"
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListWarningFilterButtonHoverBorderBrush}"/>
+                        </MultiTrigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Tag" Value="Warning"/>
+                                <Condition Property="IsChecked" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="{DynamicResource ErrorListWarningFilterButtonCheckedBackgroundBrush}"/>
+                            <Setter TargetName="border"
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListWarningFilterButtonCheckedBorderBrush}"/>
+                            <Setter Property="Foreground"
+                                Value="{DynamicResource ErrorListWarningFilterButtonCheckedForegroundBrush}"/>
+                        </MultiTrigger>
+
+                        <Trigger Property="Tag" Value="Error">
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="{DynamicResource ErrorListErrorFilterButtonBackgroundBrush}"/>
+                            <Setter TargetName="border"
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListErrorFilterButtonBorderBrush}"/>
+                            <Setter Property="Foreground"
+                                Value="{DynamicResource ErrorListErrorFilterButtonForegroundBrush}"/>
+                        </Trigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Tag" Value="Error"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="{DynamicResource ErrorListErrorFilterButtonHoverBackgroundBrush}"/>
+                            <Setter TargetName="border"
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListErrorFilterButtonHoverBorderBrush}"/>
+                        </MultiTrigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Tag" Value="Error"/>
+                                <Condition Property="IsChecked" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="{DynamicResource ErrorListErrorFilterButtonCheckedBackgroundBrush}"/>
+                            <Setter TargetName="border"
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListErrorFilterButtonCheckedBorderBrush}"/>
+                            <Setter Property="Foreground"
+                                Value="{DynamicResource ErrorListErrorFilterButtonCheckedForegroundBrush}"/>
+                        </MultiTrigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.55"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

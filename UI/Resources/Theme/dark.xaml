@@ -630,9 +630,50 @@
     <SolidColorBrush x:Key="TestsProtocolMessageForeground" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TestsProtocolTimeForeground" Color="YellowGreen"/>
 
-    <SolidColorBrush x:Key="ErrorListBackground" Color="#1E1E1E"/>
-    <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#2D2D2D"/>
-    <SolidColorBrush x:Key="ErrorListSelection" Color="#264F78"/>
+    <SolidColorBrush x:Key="ErrorListBackground" Color="#1A2028"/>
+    <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#202A35"/>
+    <SolidColorBrush x:Key="ErrorListSelection" Color="#314255"/>
+
+    <LinearGradientBrush x:Key="ErrorListWarningFilterButtonBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#6A4510" Offset="0"/>
+        <GradientStop Color="#4A2F09" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ErrorListWarningFilterButtonBorderBrush" Color="#00FFFFFF"/>
+    <SolidColorBrush x:Key="ErrorListWarningFilterButtonForegroundBrush" Color="#FFF1D6"/>
+    <LinearGradientBrush x:Key="ErrorListWarningFilterButtonHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#875714" Offset="0"/>
+        <GradientStop Color="#5E3B0B" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ErrorListWarningFilterButtonHoverBorderBrush" Color="#00FFFFFF"/>
+    <LinearGradientBrush x:Key="ErrorListWarningFilterButtonCheckedBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FCA61F" Offset="0"/>
+        <GradientStop Color="#D98509" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ErrorListWarningFilterButtonCheckedBorderBrush" Color="#00FFFFFF"/>
+    <SolidColorBrush x:Key="ErrorListWarningFilterButtonCheckedForegroundBrush" Color="#FFFFFF"/>
+
+    <LinearGradientBrush x:Key="ErrorListErrorFilterButtonBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#661A20" Offset="0"/>
+        <GradientStop Color="#431015" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ErrorListErrorFilterButtonBorderBrush" Color="#00FFFFFF"/>
+    <SolidColorBrush x:Key="ErrorListErrorFilterButtonForegroundBrush" Color="#FFDDE0"/>
+    <LinearGradientBrush x:Key="ErrorListErrorFilterButtonHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#812028" Offset="0"/>
+        <GradientStop Color="#59141B" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ErrorListErrorFilterButtonHoverBorderBrush" Color="#00FFFFFF"/>
+    <LinearGradientBrush x:Key="ErrorListErrorFilterButtonCheckedBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#D61B23" Offset="0"/>
+        <GradientStop Color="#B80F16" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ErrorListErrorFilterButtonCheckedBorderBrush" Color="#00FFFFFF"/>
+    <SolidColorBrush x:Key="ErrorListErrorFilterButtonCheckedForegroundBrush" Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="ErrorListWarningIconBrush" Color="#F0A526"/>
+    <SolidColorBrush x:Key="ErrorListWarningIconForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ErrorListErrorIconBrush" Color="#C8161D"/>
+    <SolidColorBrush x:Key="ErrorListErrorIconForegroundBrush" Color="#FFFFFF"/>
     
     
     <!--#endregion-->

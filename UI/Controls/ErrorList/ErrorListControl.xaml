@@ -13,11 +13,15 @@
         <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
         <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
         <DataTemplate x:Key="ErrorIconTemplate">
-            <Icon:CrossIcon Size="13"/>
+            <Icon:CrossIcon Size="13"
+                            CircleColor="{DynamicResource ErrorListErrorIconBrush}"
+                            IconStrokeColor="{DynamicResource ErrorListErrorIconForegroundBrush}"/>
         </DataTemplate>
 
         <DataTemplate x:Key="WarningIconTemplate">
-            <Icon:TiangleWarningIcon Size="17"/>
+            <Icon:TiangleWarningIcon Size="17"
+                                     TriangleColor="{DynamicResource ErrorListWarningIconBrush}"
+                                     IconStrokeColor="{DynamicResource ErrorListWarningIconForegroundBrush}"/>
         </DataTemplate>
         <local:IssueIconSelector x:Key="IssueIconSelector"
                          ErrorTemplate="{StaticResource ErrorIconTemplate}"
@@ -39,6 +43,7 @@
                 
                 <ToggleButton 
                     x:Name="WarningButton"
+                    Tag="Warning"
                     Style="{StaticResource VsFilterButtonStyle}"
                     Content="0 из 0 предупреждений"
                     PreviewMouseDown="WarningButton_PreviewMouseDown"
@@ -46,6 +51,7 @@
 
                 <ToggleButton 
                     x:Name="ErrorsButton"
+                    Tag="Error"
                     Style="{StaticResource VsFilterButtonStyle}"
                     Content="0 из 0 ошибок"
                     PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
