@@ -23,8 +23,8 @@
     </UserControl.Style>
 
     <Border x:Name="ButtonPage"
-            Margin="4,3,4,0"
-            Padding="10,3,8,3"
+            Margin="10,3,4,1"
+            Padding="10,1,8,1"
             CornerRadius="8,8,0,0"
             SnapsToDevicePixels="True">
         <Border.Style>

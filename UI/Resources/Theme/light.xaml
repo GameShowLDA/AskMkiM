@@ -55,27 +55,39 @@
     <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#F8FBFF"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#90465945"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#dedddf"/>
-    <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#E6EBF2"/>
-    <SolidColorBrush x:Key="TopPanelTabBackgroundBrush" Color="#D3DBE6"/>
-    <SolidColorBrush x:Key="TopPanelTabForegroundBrush" Color="#5A6A7E"/>
-    <SolidColorBrush x:Key="TopPanelTabHoverBackgroundBrush" Color="#E6EDF6"/>
-    <SolidColorBrush x:Key="TopPanelTabHoverForegroundBrush" Color="#223246"/>
+    <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#EDE6EE"/>
+    <SolidColorBrush x:Key="TopPanelTabBackgroundBrush" Color="#D8CFE0"/>
+    <SolidColorBrush x:Key="TopPanelTabForegroundBrush" Color="#66596F"/>
+    <SolidColorBrush x:Key="TopPanelTabHoverBackgroundBrush" Color="#E7DFF0"/>
+    <SolidColorBrush x:Key="TopPanelTabHoverForegroundBrush" Color="#33263A"/>
     <LinearGradientBrush x:Key="TopPanelTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#FCFEFF" Offset="0"/>
-        <GradientStop Color="#ECF4FC" Offset="1"/>
+        <GradientStop Color="#FDF8FF" Offset="0"/>
+        <GradientStop Color="#F2EAF7" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="TopPanelTabActiveForegroundBrush" Color="#172536"/>
-    <SolidColorBrush x:Key="TopPanelTabDisabledBackgroundBrush" Color="#D8DDE5"/>
-    <SolidColorBrush x:Key="TopPanelTabDisabledForegroundBrush" Color="#98A4B2"/>
+    <SolidColorBrush x:Key="TopPanelTabActiveForegroundBrush" Color="#241C2A"/>
+    <SolidColorBrush x:Key="TopPanelTabDisabledBackgroundBrush" Color="#DED6E3"/>
+    <SolidColorBrush x:Key="TopPanelTabDisabledForegroundBrush" Color="#A092AA"/>
     <LinearGradientBrush x:Key="TopPanelTabActiveDisabledBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#F4F7FA" Offset="0"/>
-        <GradientStop Color="#E6EDF5" Offset="1"/>
+        <GradientStop Color="#F4EFF6" Offset="0"/>
+        <GradientStop Color="#E8E0ED" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="TopPanelTabActiveDisabledForegroundBrush" Color="#6C7A8C"/>
-    <SolidColorBrush x:Key="TopPanelTabCloseButtonForegroundBrush" Color="#66778C"/>
+    <SolidColorBrush x:Key="TopPanelTabActiveDisabledForegroundBrush" Color="#776A82"/>
+    <SolidColorBrush x:Key="TopPanelTabCloseButtonForegroundBrush" Color="#756A81"/>
     <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverBackgroundBrush" Color="#D96E65"/>
     <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverForegroundBrush" Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="TopPanelTabCloseButtonDisabledForegroundBrush" Color="#B0BAC7"/>
+    <SolidColorBrush x:Key="TopPanelTabCloseButtonDisabledForegroundBrush" Color="#B5ACBF"/>
+    <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#73849A" Offset="0"/>
+        <GradientStop Color="#64758A" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DocumentTabHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#8699B1" Offset="0"/>
+        <GradientStop Color="#7389A2" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DocumentTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#5D7A9E" Offset="0"/>
+        <GradientStop Color="#496788" Offset="1"/>
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#EBEBEB"/>
     <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#EBEBEB"/>
     <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#EBEBEB"/>

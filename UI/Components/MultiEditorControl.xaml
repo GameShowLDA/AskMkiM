@@ -15,8 +15,7 @@
         <StackPanel x:Name="TopPanel" 
                     Grid.Row="0" 
                     Background="{DynamicResource TopPanelTabsHostBackgroundBrush}"  
-                    Orientation="Horizontal" 
-                    MouseLeftButtonDown="TopPanel_MouseLeftButtonDown"/>
+                    Orientation="Horizontal"/>
         <Grid 
             x:Name="ContentPanel" 
             Grid.Row="1" 
