@@ -243,7 +243,7 @@ namespace UI.Controls.Archive
 
         if (hasFile)
         {
-          await ShowFileAsync(_lastSelectedArchivePath, _lastSelectedEntryName);
+          await ShowFileAsync(_lastSelectedArchivePath, _lastSelectedEntryName, false);
           return;
         }
       }
@@ -643,27 +643,62 @@ namespace UI.Controls.Archive
       }
     }
 
-    private async Task ShowFileAsync(string archivePath, string entryName)
+    private async Task ShowFileAsync(string archivePath, string entryName, bool fromGrid)
     {
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
+      var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
 
-      var selectedRow = _currentGridEntries.FirstOrDefault(item =>
-          string.Equals(item.EntryName, NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase));
+      var textEditor = new TextEditorUI(FileType.OPKW);
+      textEditor.Text = text;
+      textEditor.IsReadOnly = true;
 
-      if (selectedRow != null)
+      // подсветка
+      if (!textEditor.TextArea.TextView.LineTransformers
+          .OfType<BracesCommentColorizer>()
+          .Any())
       {
-        _suppressGridSelection = true;
-        ArchiveFilesDataGrid.SelectedItem = selectedRow;
-        ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
-        _suppressGridSelection = false;
+        textEditor.TextArea.TextView.LineTransformers
+            .Add(new BracesCommentColorizer());
       }
 
-      var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
+      FileContentTextBox.Content = textEditor;
+
+      EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
+      UpdateRightPanels(true, true);
+      if (!fromGrid)
+      {
+        var normalized = NormalizeEntryName(entryName);
+
+        var selectedRow = ArchiveFilesDataGrid.Items
+            .Cast<ArchiveEntryInfo>()
+            .FirstOrDefault(x =>
+                string.Equals(x.EntryName, normalized, StringComparison.OrdinalIgnoreCase));
+
+        await SelectGridRow(selectedRow);
+      }
+    }
+
+    private async Task LoadFileAsync(string archivePath, string entryName)
+    {
+      var text = await Task.Run(() =>
+          ReadArchiveEntryTextWithManager(archivePath, entryName));
 
       FileContentTextBox.Text = text;
       EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
 
-      UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
+      UpdateRightPanels(true, true);
+    }
+
+    private async Task SelectGridRow(object selectedRow)
+    {
+      _suppressGridSelection = true;
+
+      ArchiveFilesDataGrid.SelectedItem = selectedRow;
+      ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+
+      await Task.Yield();
+
+      _suppressGridSelection = false;
     }
 
     private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
@@ -903,7 +938,7 @@ namespace UI.Controls.Archive
       {
         _lastSelectedArchivePath = node.ArchivePath;
         _lastSelectedEntryName = node.EntryName;
-        await ShowFileAsync(node.ArchivePath, node.EntryName);
+        await ShowFileAsync(node.ArchivePath, node.EntryName, false);
       }
       catch (Exception ex)
       {
@@ -1132,7 +1167,7 @@ namespace UI.Controls.Archive
         {
           _lastSelectedArchivePath = node.ArchivePath;
           _lastSelectedEntryName = node.EntryName;
-          await ShowFileAsync(node.ArchivePath, node.EntryName);
+          await ShowFileAsync(node.ArchivePath, node.EntryName, false);
         }
       }
       catch (Exception ex)
@@ -1173,10 +1208,6 @@ namespace UI.Controls.Archive
           textEditor.TextArea.TextView.LineTransformers
               .Add(new BracesCommentColorizer());
         }
-
-        EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
-
-        UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
 
         FileContentTextBox.Content = textEditor;
         textEditor.IsReadOnly = true;
