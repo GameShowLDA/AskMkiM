@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using System.IO;
 using System.Reflection.Metadata;
 
@@ -17,7 +19,9 @@ namespace UI.Services.Archive
 
     public string CreateArchive(string archiveName)
     {
-      return _archiveCreation.Create(archiveName);
+      var createdArchivePath = _archiveCreation.Create(archiveName);
+      EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveCreated, createdArchivePath));
+      return createdArchivePath;
     }
 
     public void OpenArchive(string archivePath)
@@ -48,6 +52,7 @@ namespace UI.Services.Archive
       {
         _archiveOpening.Close();
         _archiveFileAdder.AddFile(openedArchivePath, filePath);
+        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
       }
       finally
       {
@@ -57,12 +62,13 @@ namespace UI.Services.Archive
 
     public void AddFileToArchive(List<List<string>> sourceLines, string archivePath, string fileName)
     {
-      EnsureArchiveIsOpen();
+      var openedArchivePath = EnsureArchiveIsOpen();
 
       try
       {
         _archiveOpening.Close();
-        _archiveFileAdder.AddFile(sourceLines, archivePath, fileName);
+        _archiveFileAdder.AddFile(sourceLines, openedArchivePath, fileName);
+        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
       }
       finally
       {
@@ -78,6 +84,7 @@ namespace UI.Services.Archive
       {
         _archiveOpening.Close();
         _archiveFileAdder.DeleteFile(openedArchivePath, archiveEntryName);
+        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
       }
       finally
       {
@@ -101,6 +108,7 @@ namespace UI.Services.Archive
       }
 
       _archiveFileAdder.DeleteArchive(pathToDelete);
+      EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveDeleted, pathToDelete));
     }
 
     public void CloseArchive()

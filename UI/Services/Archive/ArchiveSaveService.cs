@@ -1,3 +1,5 @@
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Executor;
@@ -470,6 +472,7 @@ namespace UI.Services.Archive
       }
 
       FileEncryptionManager.EncryptFile(archivePath);
+      EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveCreated, archivePath));
 
       return archivePath;
     }

@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Features.Notifications.Models;
@@ -64,6 +66,7 @@ namespace UI.Controls.Archive
     public ArchiveControl()
     {
       InitializeComponent();
+      EventAggregator.Subscribe<ArchiveEvents.Changed>(OnArchiveChanged);
       _archivesFolderPath = ResolveArchivesFolderPath();
 
       _autoRefreshTimer = new DispatcherTimer
@@ -76,6 +79,53 @@ namespace UI.Controls.Archive
 
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
       ResetTree();
+    }
+
+    private void OnArchiveChanged(ArchiveEvents.Changed change)
+    {
+      if (change == null || string.IsNullOrWhiteSpace(change.ArchivePath))
+      {
+        return;
+      }
+
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(new Action(() => OnArchiveChanged(change)));
+        return;
+      }
+
+      _ = HandleArchiveChangedAsync(change);
+    }
+
+    private async Task HandleArchiveChangedAsync(ArchiveEvents.Changed change)
+    {
+      try
+      {
+        InvalidateArchiveCaches(change.ArchivePath);
+
+        switch (change.ChangeKind)
+        {
+          case ArchiveEvents.ArchiveChangeKind.ArchiveCreated:
+          case ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged:
+            await RefreshTreePreservingStateAsync(preservePanels: true);
+            break;
+
+          case ArchiveEvents.ArchiveChangeKind.ArchiveDeleted:
+            var selectedArchiveDeleted = IsSameArchivePath(_lastSelectedArchivePath, change.ArchivePath);
+            if (selectedArchiveDeleted)
+            {
+              _lastSelectedArchivePath = null;
+              _lastSelectedEntryName = null;
+            }
+
+            await RefreshTreePreservingStateAsync(preservePanels: !selectedArchiveDeleted);
+            break;
+        }
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
     }
     private async Task<Dictionary<string, DateTime>> GetManifestCacheAsync(string archivePath)
     {
@@ -283,6 +333,16 @@ namespace UI.Controls.Archive
         _archiveEntriesCache.Remove(normalizedArchivePath);
         _manifestCache.Remove(normalizedArchivePath);
       }
+    }
+
+    private static bool IsSameArchivePath(string firstPath, string secondPath)
+    {
+      if (string.IsNullOrWhiteSpace(firstPath) || string.IsNullOrWhiteSpace(secondPath))
+      {
+        return false;
+      }
+
+      return string.Equals(Path.GetFullPath(firstPath), Path.GetFullPath(secondPath), StringComparison.OrdinalIgnoreCase);
     }
 
     private void ResetTree()
@@ -779,7 +839,7 @@ namespace UI.Controls.Archive
       _contextMenuNode = null;
     }
 
-    private async void CreateArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    private void CreateArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var suggestedArchiveName = "new_archive";
       while (true)
@@ -799,10 +859,6 @@ namespace UI.Controls.Archive
           {
             createdArchivePath = _archiveManager.CreateArchive(archiveName);
           }
-
-          _archiveEntriesCache.Clear();
-          _manifestCache.Clear();
-          await RefreshTreePreservingStateAsync(preservePanels: true);
 
           var archiveDisplayName = Path.GetFileNameWithoutExtension(createdArchivePath);
           ShowArchiveNotification(
@@ -841,7 +897,7 @@ namespace UI.Controls.Archive
       }
     }
 
-    private async void AddFileToArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    private void AddFileToArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
       if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
@@ -869,8 +925,6 @@ namespace UI.Controls.Archive
           EnsureArchiveOpenedInManagerCore(node.ArchivePath);
           _archiveManager.AddFileToOpenedArchive(openFileDialog.FileName);
         }
-
-        await RefreshArchiveViewsAfterMutationAsync(node.ArchivePath);
       }
       catch (Exception ex)
       {
@@ -878,7 +932,7 @@ namespace UI.Controls.Archive
       }
     }
 
-    private async void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    private void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
       if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
@@ -900,23 +954,10 @@ namespace UI.Controls.Archive
 
       try
       {
-        var activeArchiveDeleted = false;
-
         lock (_archiveManagerSync)
         {
           _archiveManager.DeleteArchive(node.ArchivePath);
         }
-
-        if (string.Equals(_lastSelectedArchivePath, node.ArchivePath, StringComparison.OrdinalIgnoreCase))
-        {
-          activeArchiveDeleted = true;
-          _lastSelectedArchivePath = null;
-          _lastSelectedEntryName = null;
-        }
-
-        _archiveEntriesCache.Clear();
-        _manifestCache.Clear();
-        await RefreshTreePreservingStateAsync(preservePanels: !activeArchiveDeleted);
       }
       catch (Exception ex)
       {
@@ -946,7 +987,7 @@ namespace UI.Controls.Archive
       }
     }
 
-    private async void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    private void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
       if (node?.Kind != ArchiveTreeNodeKind.File ||
@@ -975,8 +1016,6 @@ namespace UI.Controls.Archive
           EnsureArchiveOpenedInManagerCore(node.ArchivePath);
           _archiveManager.DeleteFileFromOpenedArchive(node.EntryName);
         }
-
-        await RefreshArchiveViewsAfterMutationAsync(node.ArchivePath);
       }
       catch (Exception ex)
       {
