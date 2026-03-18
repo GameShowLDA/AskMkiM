@@ -167,12 +167,12 @@
   <SolidColorBrush x:Key="SettingsConfigDataInputTabloBackgroundSolidColorBrush" Color="#F2F5FA"/>
 
   <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
-    <Setter Property="Background" Value="#FDFEFF"/>
-    <Setter Property="Foreground" Value="#1E2735"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#000000"/>
   </Style>
-  <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#7A8AA0"/>
-  <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#8A9AB0"/>
-  <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#5F7595"/>
+  <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#8A1B1B1B"/>
+  <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#A61B1B1B"/>
+  <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#FF000000"/>
   <SolidColorBrush x:Key="TextEditorActiveCommandStripeBrush" Color="#7E9BC3"/>
   <SolidColorBrush x:Key="TextEditorActiveCommandBackgroundBrush" Color="#EEF3FA"/>
 
