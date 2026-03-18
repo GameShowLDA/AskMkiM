@@ -1,8 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
-using System.Windows;
-using System.Windows.Media;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.TextEditor;
@@ -84,9 +82,7 @@ namespace UI.Services
     /// <returns>Активный <see cref="TextEditorUI"/> или <c>null</c>, если активный редактор не найден.</returns>
     public TextEditorUI GetActiveTextEditor(EditorType editorType)
     {
-      var activeTab = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
-        page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]
-      );
+      var activeTab = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
 
       if (activeTab == null) return null;
 
@@ -107,9 +103,7 @@ namespace UI.Services
     /// <returns>Активный экземпляр <see cref="TextEditorUI"/> или <c>null</c>, если активный редактор не найден.</returns>
     public TextEditorUI GetActiveTextEditor()
     {
-      var activeTab = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
-        page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]
-      );
+      var activeTab = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
 
       if (activeTab == null) return null;
 

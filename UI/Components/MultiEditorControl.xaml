@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
         <StackPanel x:Name="TopPanel" 
                     Grid.Row="0" 
-                    Background="{DynamicResource BackgroundBrushes}"  
+                    Background="{DynamicResource TopPanelTabsHostBackgroundBrush}"  
                     Orientation="Horizontal" 
                     MouseLeftButtonDown="TopPanel_MouseLeftButtonDown"/>
         <Grid 

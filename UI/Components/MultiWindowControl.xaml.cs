@@ -498,14 +498,7 @@ namespace UI.Components
     {
       foreach (OpenFileButton child in SearchResultsTopPanel.Children)
       {
-        if (control == child)
-        {
-          child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
-        }
-        else
-        {
-          child.Background = (Brush)Application.Current.Resources["SecondarySolidColorBrush"];
-        }
+        child.IsActive = control == child;
       }
     }
 

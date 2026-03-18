@@ -56,6 +56,36 @@
     <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#EAF0FA"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#1ca3e9"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#1f242b"/>
+    <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#131A23"/>
+    <LinearGradientBrush x:Key="TopPanelTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#283547" Offset="0"/>
+        <GradientStop Color="#202C3A" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="TopPanelTabForegroundBrush" Color="#9AAEC6"/>
+    <LinearGradientBrush x:Key="TopPanelTabHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#34495F" Offset="0"/>
+        <GradientStop Color="#293B4E" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="TopPanelTabHoverForegroundBrush" Color="#EEF4FA"/>
+    <LinearGradientBrush x:Key="TopPanelTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#6183AD" Offset="0"/>
+        <GradientStop Color="#416081" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="TopPanelTabActiveForegroundBrush" Color="#FFFFFF"/>
+    <LinearGradientBrush x:Key="TopPanelTabDisabledBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#202A35" Offset="0"/>
+        <GradientStop Color="#1A222D" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="TopPanelTabDisabledForegroundBrush" Color="#607186"/>
+    <LinearGradientBrush x:Key="TopPanelTabActiveDisabledBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#465B75" Offset="0"/>
+        <GradientStop Color="#35495F" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="TopPanelTabActiveDisabledForegroundBrush" Color="#C9D7E7"/>
+    <SolidColorBrush x:Key="TopPanelTabCloseButtonForegroundBrush" Color="#A4B7CE"/>
+    <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverBackgroundBrush" Color="#B80F16"/>
+    <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TopPanelTabCloseButtonDisabledForegroundBrush" Color="#5B6C81"/>
     <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#282E37"/>
     <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#282E37"/>

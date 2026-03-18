@@ -228,8 +228,7 @@ namespace UI.Components
 
     private bool TryGetActiveTab(out OpenFileButton activeTab, out int index)
     {
-      activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
       index = activeTab == null ? -1 : fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
 
       if (activeTab == null || index < 0 || index >= fileManager.EditorWorkspaceModel.UserControls.Count)
@@ -367,8 +366,7 @@ namespace UI.Components
     {
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
-          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
 
         if (activeTab != null)
         {
