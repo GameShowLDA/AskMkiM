@@ -258,7 +258,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     {
       LogWarning($"Во всём теле команды не найден блок точек '*...*' (строка {numberLine}): {model.CommandNumber} {model.Mnemonic}");
 
-      model.Errors.Add(EhtErrors.EmptyPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+      model.Errors.Add(GeneralErrors.NoPointsBody(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
     }
 
     /// <summary>
@@ -329,7 +329,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           $"Не найдено ни одной точки (строка {numberLine}): {model.CommandNumber} {model.Mnemonic}");
 
       model.Errors.Add(
-          EhtErrors.EmptyPoints(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+          GeneralErrors.EmptyPointsBody(numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
     }
 
     /// <summary>
