@@ -62,6 +62,8 @@
                 HeadersVisibility="Column"
                 CanUserAddRows="False"
                 CanUserDeleteRows="False"
+                CanUserResizeRows="False"
+                CanUserSortColumns="False"
                 IsReadOnly="True"
                 FontFamily="{DynamicResource WinstonRegular}"
                 FontSize="13"
@@ -73,6 +75,15 @@
                 BorderThickness="0"
                 ColumnHeaderHeight="30"
                 MouseDoubleClick="DataGrid_MouseDoubleClick"
+                EnableRowVirtualization="True"
+                EnableColumnVirtualization="True"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                VirtualizingPanel.ScrollUnit="Pixel"
+                VirtualizingPanel.CacheLength="2"
+                VirtualizingPanel.CacheLengthUnit="Page"
+                ScrollViewer.CanContentScroll="True"
+                ScrollViewer.IsDeferredScrollingEnabled="True"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 Grid.Row="1"
                 >
@@ -139,8 +150,8 @@
                 </DataGridTemplateColumn>
                 <!-- Код ошибки -->
                 <DataGridTextColumn Header="Код"
-                    Width="SizeToCells"
-                    MinWidth="110"
+                    Width="120"
+                    MinWidth="120"
                     Binding="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"
                     ElementStyle="{StaticResource CellTextBase}"
                     FontFamily="{DynamicResource WinstonRegular}"
@@ -149,12 +160,12 @@
                 <DataGridTextColumn Header="Строка"
                     x:Name="StringsNumber"
                     Binding="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"
-                    Width="60"
+                    Width="86"
                     ElementStyle="{StaticResource CellTextBase}"
                     FontFamily="{DynamicResource WinstonRegular}"
                     FontSize="14"/>
                 <!-- Номер команды -->
-                <DataGridTextColumn Header="Команда" Width="Auto"
+                <DataGridTextColumn Header="Команда" Width="135"
                     Binding="{Binding Command}"
                     ElementStyle="{StaticResource CellTextTrim}"
                     FontFamily="{DynamicResource WinstonRegular}" 
@@ -162,7 +173,7 @@
                 <!--Результат измерения-->
                 <DataGridTextColumn x:Name="MeasureResult" Header="Результат измерения" Binding="{Binding MeasureResult}" Width="150" FontFamily="{DynamicResource WinstonRegular}" FontSize="14" Visibility="Collapsed"/>
                 <!-- Описание ошибки -->
-                <DataGridTextColumn Header="Описание" Width="Auto"
+                <DataGridTextColumn Header="Описание" Width="*"
                     Binding="{Binding Description}"
                     ElementStyle="{StaticResource CellTextTrim}"
                     FontFamily="{DynamicResource WinstonRegular}" FontSize="14"/>
