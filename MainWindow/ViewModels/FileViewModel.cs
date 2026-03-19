@@ -55,6 +55,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private async Task CompareFile() => await _fileService.CompareFileAsync();
 
+    /// <summary>Команда открытия экрана архива.</summary>
+    [RelayCommand]
+    private void OpenArchive() => _fileService.OpenArchive();
+
     /// <summary>Команда создания нового файла.</summary>
     [RelayCommand]
     private void CreateNewFile() => _fileService.CreateNewFileAsync();

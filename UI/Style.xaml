@@ -786,4 +786,130 @@
         </Setter>
     </Style>
 
+    <!-- Стиль для архива -->
+    <Style x:Key="ArchiveDataGridHeaderStyle"
+       TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="Foreground"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="BorderBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="BorderThickness"
+          Value="0,0,1,1" />
+        <Setter Property="FontWeight"
+          Value="SemiBold" />
+        <Setter Property="Padding"
+          Value="12,6,8,6" />
+        <Setter Property="HorizontalContentAlignment"
+          Value="Left" />
+        <Setter Property="VerticalContentAlignment"
+          Value="Center" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource GridHeaderHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ArchiveDataGridRowStyle"
+       TargetType="{x:Type DataGridRow}">
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="BorderBrush"
+          Value="Transparent" />
+        <Setter Property="BorderThickness"
+          Value="0" />
+        <Setter Property="Margin"
+          Value="2,1,2,1" />
+        <Setter Property="MinHeight"
+          Value="30" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
+            </Trigger>
+            <Trigger Property="IsSelected"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsSelected"
+                   Value="True" />
+                    <Condition Property="IsMouseOver"
+                   Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonActiveForegroundColor}" />
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ArchiveDataGridCellStyle"
+       TargetType="{x:Type DataGridCell}">
+        <Setter Property="Padding"
+          Value="12,0,8,0" />
+        <Setter Property="BorderThickness"
+          Value="0" />
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="FocusVisualStyle"
+          Value="{x:Null}" />
+        <Style.Triggers>
+            <Trigger Property="IsSelected"
+             Value="True">
+                <Setter Property="Background"
+              Value="Transparent" />
+                <Setter Property="BorderBrush"
+              Value="Transparent" />
+                <Setter Property="Foreground"
+              Value="#1F2A38" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ArchiveDataGridStyle"
+       TargetType="{x:Type DataGrid}">
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="BorderBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="BorderThickness"
+          Value="1" />
+        <Setter Property="GridLinesVisibility"
+          Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="VerticalGridLinesBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="HeadersVisibility"
+          Value="Column" />
+        <Setter Property="RowHeaderWidth"
+          Value="0" />
+        <Setter Property="ColumnHeaderStyle"
+          Value="{DynamicResource ArchiveDataGridHeaderStyle}" />
+        <Setter Property="RowStyle"
+          Value="{DynamicResource ArchiveDataGridRowStyle}" />
+        <Setter Property="CellStyle"
+          Value="{DynamicResource ArchiveDataGridCellStyle}" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+          Value="Auto" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+          Value="Auto" />
+        <Setter Property="CanUserAddRows"
+          Value="False" />
+        <Setter Property="CanUserDeleteRows"
+          Value="False" />
+    </Style>
+
 </ResourceDictionary>

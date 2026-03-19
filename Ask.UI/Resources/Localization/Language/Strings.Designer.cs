@@ -826,6 +826,519 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Печать.
+        /// </summary>
+        internal static string settings_config_printButton {
+            get {
+                return ResourceManager.GetString("settings.config.printButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конфигурация АСК.
+        /// </summary>
+        internal static string settings_config_title {
+            get {
+                return ResourceManager.GetString("settings.config.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Добавляет случайные ошибки при холостом режиме для проверки обработки ошибок..
+        /// </summary>
+        internal static string settings_execution_errorSimulation_description {
+            get {
+                return ResourceManager.GetString("settings.execution.errorSimulation.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение с ошибками.
+        /// </summary>
+        internal static string settings_execution_errorSimulation_title {
+            get {
+                return ResourceManager.GetString("settings.execution.errorSimulation.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает холостой режим выполнения программы, при котором не происходит взаимодействия с оборудованием..
+        /// </summary>
+        internal static string settings_execution_idleMode_description {
+            get {
+                return ResourceManager.GetString("settings.execution.idleMode.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Холостой режим выполнения.
+        /// </summary>
+        internal static string settings_execution_idleMode_title {
+            get {
+                return ResourceManager.GetString("settings.execution.idleMode.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение.
+        /// </summary>
+        internal static string settings_execution_section_title {
+            get {
+                return ResourceManager.GetString("settings.execution.section.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает отладочное выполнение: F10 — выполнить блок целиком (поверх); F11 — заходить в блок и останавливаться на каждом шаге (вглубь)..
+        /// </summary>
+        internal static string settings_execution_stepByStepMode_description {
+            get {
+                return ResourceManager.GetString("settings.execution.stepByStepMode.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Пошаговый режим.
+        /// </summary>
+        internal static string settings_execution_stepByStepMode_title {
+            get {
+                return ResourceManager.GetString("settings.execution.stepByStepMode.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на При возникновении ошибки выполнение приостанавливается, чтобы оператор мог осознанно выбрать дальнейшее действие и управлять ходом работы..
+        /// </summary>
+        internal static string settings_execution_stopOnError_description {
+            get {
+                return ResourceManager.GetString("settings.execution.stopOnError.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Остановка по ошибке.
+        /// </summary>
+        internal static string settings_execution_stopOnError_title {
+            get {
+                return ResourceManager.GetString("settings.execution.stopOnError.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Параметры.
+        /// </summary>
+        internal static string settings_main_title {
+            get {
+                return ResourceManager.GetString("settings.main.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на По завершении выполнения отображает диалог выбора принтера для печати итогового протокола..
+        /// </summary>
+        internal static string settings_protocol_autoPrint_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.autoPrint.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Печать протокола.
+        /// </summary>
+        internal static string settings_protocol_autoPrint_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.autoPrint.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Автоматически сохраняет протокол каждого запуска. Имя файла содержит дату, время и название выполняемых действий..
+        /// </summary>
+        internal static string settings_protocol_autoSave_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.autoSave.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сохранение протокола.
+        /// </summary>
+        internal static string settings_protocol_autoSave_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.autoSave.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Настройка текста протокола для сценариев без ошибок..
+        /// </summary>
+        internal static string settings_protocol_cleanTextCard_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.cleanTextCard.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Текст протокола без ошибок.
+        /// </summary>
+        internal static string settings_protocol_cleanTextCard_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.cleanTextCard.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает информацию о подключении точек и шин на устройствах..
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_connectionInfo_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.connectionInfo.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Подключение точек и шин.
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_connectionInfo_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.connectionInfo.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает параметры, которые устанавливаются на устройства в ходе выполнения..
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_deviceExecutionParameters_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.deviceExecutionParameters.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Параметры устройств.
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_deviceExecutionParameters_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.deviceExecutionParameters.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Настройка отображения информации об оборудовании в протоколе выполнения..
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_group_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.group.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Информация об оборудовании.
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_group_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.group.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает промежуточные результаты измерений, полученные в ходе выполнения программ контроля..
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_intermediateMeasurementResults_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.intermediateMeasurementResults.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Промежуточные результаты измерений.
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_intermediateMeasurementResults_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.intermediateMeasurementResults.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображение машинных адресов точек системы АСК-МКИ-М..
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_machineAddresses_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.machineAddresses.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Машинные адреса.
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_machineAddresses_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.machineAddresses.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает результаты измерений, полученные в ходе выполнения программ контроля..
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_measurementResults_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.measurementResults.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Результаты измерений.
+        /// </summary>
+        internal static string settings_protocol_deviceInfo_measurementResults_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.deviceInfo.measurementResults.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Настройка текста протокола для сценариев с ошибками..
+        /// </summary>
+        internal static string settings_protocol_errorTextCard_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.errorTextCard.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Текст протокола с ошибками.
+        /// </summary>
+        internal static string settings_protocol_errorTextCard_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.errorTextCard.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Протокол будет формироваться после выполнения программ контроля..
+        /// </summary>
+        internal static string settings_protocol_generate_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.generate.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Формирование протокола.
+        /// </summary>
+        internal static string settings_protocol_generate_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.generate.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Показывает, сколько времени прошло с момента запуска на каждом шаге выполнения..
+        /// </summary>
+        internal static string settings_protocol_operationTime_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.operationTime.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Вывод времени операции.
+        /// </summary>
+        internal static string settings_protocol_operationTime_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.operationTime.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Протокол.
+        /// </summary>
+        internal static string settings_protocol_section_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.section.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает краткое описание текущего шага выполнения в виде заголовка..
+        /// </summary>
+        internal static string settings_protocol_showActionHeaders_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.showActionHeaders.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображение заголовков действий.
+        /// </summary>
+        internal static string settings_protocol_showActionHeaders_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.showActionHeaders.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на По завершении выполнения протокол отображается в программном обеспечении, по умолчанию открывается как PDF-файл..
+        /// </summary>
+        internal static string settings_protocol_showInSoftware_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.showInSoftware.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Вывод протокола в ПО.
+        /// </summary>
+        internal static string settings_protocol_showInSoftware_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.showInSoftware.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает или отключает фоновое выделение строк проверки цепей и точек в протоколе выполнения..
+        /// </summary>
+        internal static string settings_userinterface_chainPointBodyBackground_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.chainPointBodyBackground.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Фоновое выделение цепей и точек.
+        /// </summary>
+        internal static string settings_userinterface_chainPointBodyBackground_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.chainPointBodyBackground.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает или отключает фоновое выделение строк команд в протоколе выполнения..
+        /// </summary>
+        internal static string settings_userinterface_commandBodyBackground_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.commandBodyBackground.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Фоновое выделение команд.
+        /// </summary>
+        internal static string settings_userinterface_commandBodyBackground_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.commandBodyBackground.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Настройки подсветки синтаксиса и фонового выделения строк в протоколе выполнения..
+        /// </summary>
+        internal static string settings_userinterface_highlightsGroup_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.highlightsGroup.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Подсветка и цвета протокола.
+        /// </summary>
+        internal static string settings_userinterface_highlightsGroup_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.highlightsGroup.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выберите язык интерфейса, на котором будут отображаться надписи и сообщения..
+        /// </summary>
+        internal static string settings_userinterface_language_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.language.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Язык.
+        /// </summary>
+        internal static string settings_userinterface_language_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.language.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Интерфейс.
+        /// </summary>
+        internal static string settings_userinterface_section_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.section.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает или отключает подсветку синтаксиса в редакторе протокола..
+        /// </summary>
+        internal static string settings_userinterface_syntaxHighlighting_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.syntaxHighlighting.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Подсветка синтаксиса.
+        /// </summary>
+        internal static string settings_userinterface_syntaxHighlighting_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.syntaxHighlighting.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выберите тему оформления интерфейса, которая будет использоваться в приложении..
+        /// </summary>
+        internal static string settings_userinterface_theme_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.theme.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Тема приложения.
+        /// </summary>
+        internal static string settings_userinterface_theme_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.theme.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Вернуться к исходному файлу.
+        /// </summary>
+        internal static string translator_editor_tooltip_back {
+            get {
+                return ResourceManager.GetString("translator.editor.tooltip.back", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сохранить странслированный файл в архив.
+        /// </summary>
+        internal static string translator_editor_tooltip_save_archive {
+            get {
+                return ResourceManager.GetString("translator.editor.tooltip.save.archive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сохранить исходный файл.
+        /// </summary>
+        internal static string translator_editor_tooltip_save_source {
+            get {
+                return ResourceManager.GetString("translator.editor.tooltip.save.source", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на ,сек..
         /// </summary>
         internal static string unit_seconds_suffix {

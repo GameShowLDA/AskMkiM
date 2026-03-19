@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Microsoft.Win32;
 using System.Windows;
@@ -10,6 +11,7 @@ using UI.Components.FileComparerControls;
 using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.Search;
 using UI.Controls.TextEditor;
+using UI.Controls.Archive;
 
 
 namespace MainWindowProgram.Services
@@ -140,6 +142,21 @@ namespace MainWindowProgram.Services
       else
       {
         _multiWindow.EditorDocumentService.CreateNewFile();
+      }
+    }
+
+    /// <summary>
+    /// Открывает экран работы с архивами.
+    /// </summary>
+    public void OpenArchive()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+      }
+      else
+      {
+        _multiWindow.WorkspaceService.AddControl("Архив", new ArchiveControl(), TypeWindow.Files);
       }
     }
 

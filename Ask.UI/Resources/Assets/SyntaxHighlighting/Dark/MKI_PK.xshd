@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<SyntaxDefinition name="MKI" extensions=".pk;.pkw;.opk;.opkw;.acs" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+<SyntaxDefinition name="MKI" extensions=".pk;.pkw;.opk;.opkw;.acs;" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
 	<Color name="Comment" foreground="#4CAF50" />
 	<Color name="Mnemonic" foreground="#90EE90" />
 	<Color name="CommandNumber" foreground="#00BFFF" />

@@ -233,6 +233,47 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Сохраняет переданный текст как новый PKW-файл через диалоговое окно "Сохранить как".
+    /// </summary>
+    /// <param name="fileData">Содержимое файла для сохранения.</param>
+    /// <param name="suggestedFileNameWithoutExtension">Предлагаемое имя файла без расширения.</param>
+    /// <returns><c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
+    public static bool SaveFileAs(string fileData, string suggestedFileNameWithoutExtension)
+    {
+      var saveFileDialog = CreateSaveFileDialogForPkw(suggestedFileNameWithoutExtension);
+      if (saveFileDialog.ShowDialog() != DialogResult.OK)
+      {
+        return false;
+      }
+
+      var filePath = EnsurePkwExtension(saveFileDialog.FileName);
+      try
+      {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        File.WriteAllText(filePath, fileData ?? string.Empty, Encoding.UTF8);
+
+        LogInformation($"Файл {filePath} сохранен");
+        if (ShouldShowSaveSuccessNotification(filePath))
+        {
+          NotificationHostService.Instance.Show(
+            "Сохранение файла",
+            $"Файл {Path.GetFileName(filePath)} сохранён",
+            NotificationType.Success);
+        }
+        return true;
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, $"Ошибка при сохранении файла: {filePath}");
+        NotificationHostService.Instance.Show(
+          "Ошибка сохранения файла",
+          ex.Message,
+          NotificationType.Error);
+        return false;
+      }
+    }
+
+    /// <summary>
     /// Создает диалоговое окно для сохранения файла.
     /// </summary>
     /// <returns>Объект диалогового окна SaveFileDialog.</returns>
@@ -246,6 +287,40 @@ namespace UI.Components.MultiEditorMethods
       };
 
       return saveFileDialog;
+    }
+
+    private static SaveFileDialog CreateSaveFileDialogForPkw(string suggestedFileNameWithoutExtension)
+    {
+      var fileName = Path.GetFileNameWithoutExtension(suggestedFileNameWithoutExtension);
+      if (string.IsNullOrWhiteSpace(fileName))
+      {
+        fileName = "converted";
+      }
+
+      return new SaveFileDialog
+      {
+        Filter = "Файлы программ контроля (*.pkw)|*.pkw",
+        Title = "Сохранить файл как",
+        FileName = $"{fileName}.pkw",
+        DefaultExt = "pkw",
+        AddExtension = true,
+      };
+    }
+
+    private static string EnsurePkwExtension(string filePath)
+    {
+      if (string.IsNullOrWhiteSpace(filePath))
+      {
+        return string.Empty;
+      }
+
+      var extension = Path.GetExtension(filePath);
+      if (string.Equals(extension, ".pkw", StringComparison.OrdinalIgnoreCase))
+      {
+        return filePath;
+      }
+
+      return Path.ChangeExtension(filePath, ".pkw");
     }
 
     /// <summary>
@@ -311,7 +386,7 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         var fileData = textEditor.Text;
-        if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt"))
+        if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt") || filePath.ToLower().EndsWith(".lst") || filePath.ToLower().EndsWith(".lstw"))
         {
           Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
           File.WriteAllText(filePath, fileData, Encoding.UTF8);

@@ -196,6 +196,17 @@
 
     <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource ModernDataGridRowStyle}" />
 
+    <Style x:Key="ModernDataGridTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+    </Style>
+
     <Style x:Key="ModernDataGridStyle" TargetType="{x:Type DataGrid}">
         <Setter Property="Background" Value="{DynamicResource ModernDataGridBackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
@@ -227,12 +238,7 @@
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
         <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
         <Style.Resources>
-            <Style TargetType="{x:Type TextBlock}">
-                <Setter Property="TextAlignment" Value="Center" />
-                <Setter Property="HorizontalAlignment" Value="Center" />
-                <Setter Property="VerticalAlignment" Value="Center" />
-                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-            </Style>
+            <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource ModernDataGridTextStyle}" />
 
             <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource ModernDataGridCheckBoxStyle}" />
         </Style.Resources>
@@ -240,15 +246,10 @@
 
     <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource ModernDataGridStyle}" />
 
-    <Style x:Key="AdminDbDataGridTextStyle" TargetType="{x:Type TextBlock}">
-        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        <Setter Property="TextWrapping" Value="NoWrap" />
-        <Setter Property="TextAlignment" Value="Center" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+    <Style x:Key="AdminDbDataGridTextStyle"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource ModernDataGridTextStyle}">
         <Setter Property="FontSize" Value="12.5" />
-        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
         <Setter Property="ToolTip" Value="{Binding}" />
     </Style>
 

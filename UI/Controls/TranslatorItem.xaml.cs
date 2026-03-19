@@ -3,8 +3,9 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
 using System;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using UI.Components;
 using UI.Controls.TextEditor;
 using UI.Services;
+using UI.Services.Archive;
 
 namespace UI.Controls
 {
@@ -46,6 +48,8 @@ namespace UI.Controls
     public int GeneralCount => ErrorCount + WarningCount;
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
+    private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
+
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -169,6 +173,8 @@ namespace UI.Controls
       rightEditor.SetEditor(textEditorUI);
       rightEditor.BackRequested -= RightEditor_BackRequestedAsync;
       rightEditor.BackRequested += RightEditor_BackRequestedAsync;
+      rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
+      rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
@@ -177,6 +183,31 @@ namespace UI.Controls
       {
         CloseTranslatorTab();
       }
+    }
+
+    private void RightEditor_SaveRequestedAsync(object? sender, EventArgs e)
+    {
+      bool flowControl = SaveFileToArchive();
+      if (!flowControl)
+      {
+        return;
+      }
+    }
+
+    private bool SaveFileToArchive()
+    {
+      var rightBox = GetRightBox();
+      var rightTextEditor = rightBox?.GetTextEditor();
+      if (rightTextEditor?.TextEditorModel == null)
+      {
+        NotificationHostService.Instance.Show(
+          "Сохранение в архив",
+          "Редактор не готов к сохранению в архив.",
+          NotificationType.Error);
+        return false;
+      }
+
+      return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void LeftEditor_SaveRequested(object? sender, EventArgs e)
