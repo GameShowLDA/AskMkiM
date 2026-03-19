@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -29,7 +30,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       firstValue = 0;
       secondValue = 10000000;
 
-      var command = GetRequiredCommand<KsCommandModel>(context);
+      var command = GetRequiredCommand<NeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
@@ -53,14 +54,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingMeter(meter, context.Console);
 
-      if (command.LowerLimitResistance.HasValue)
+      if (command.LowerLimitVoltage.HasValue)
       {
-        firstValue = command.LowerLimitResistance.Value;
+        firstValue = command.LowerLimitVoltage.Value;
       }
 
-      if (command.HigherLimitResistance.HasValue)
+      if (command.HigherLimitVoltage.HasValue)
       {
-        secondValue = command.HigherLimitResistance.Value;
+        secondValue = command.HigherLimitVoltage.Value;
       }
 
       ConnectedPointChecker.PerformMeasurementAsync measure;

@@ -1,23 +1,29 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
-  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т, 
+  [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Т,
     //Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б,
     Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Н)]
-  public class NeCommandModel : BaseCommandModel, IHasScheme
+  [MeasurementDevice(MeasurementDevice.Multimeter)]
+  public class NeCommandModel : BaseCommandModel, IError, IHasScheme
   {
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
 
+    public override MeasurementTypeCommand TypeCommand => MeasurementTypeCommand.NE;
+
     /// <summary>
-    /// Единицы измерения напряжения 
+    /// Единицы измерения напряжения
     /// </summary>
     public string? VoltageUnit { get; set; }
 
@@ -40,6 +46,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Верхняя граница значеня напряжения при протекании тока через диод в прямом направлении
     /// </summary>
     public double? HigherLimitVoltage { get; set; }
+
     /// <summary>
     /// Значение напряжения (например, "100В", "1кВ").
     /// </summary>
@@ -61,5 +68,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Остаток строки с нераспознанными параметрами.
     /// </summary>
     public string? UnparsedParameters { get; set; }
+
+    /// <summary>
+    /// Ошибки связанные с замыканием точек.
+    /// </summary>
+    public override IPointError PointErrors => new NeErrors();
+
+    /// <summary>
+    /// Сбор данных в сообщение.
+    /// </summary>
+    public override IDislpayInfo BuildDislpayInfo => new NeMessageBuild();
   }
 }

@@ -335,18 +335,22 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)
     {
+      // Эти события публикуются только в breakpoint-flow.
+      // Здесь нельзя повторно звать обычные обработчики F5/F10/F11,
+      // потому что они снова публикуют те же ControlButtonPressed
+      // и приводят к рекурсии/ложной паузе.
       switch (e.Button)
       {
         case ExecutionControlButton.Run:
-          HandleRunOrPause();
+          ShowOnlyStopAndFinishButtons(false);
           break;
 
         case ExecutionControlButton.StepOver:
-          HandleStepModeStart(isStepInto: false);
+          ShowOnlyStopAndFinishButtons(false);
           break;
 
         case ExecutionControlButton.StepInto:
-          HandleStepModeStart(isStepInto: true);
+          ShowOnlyStopAndFinishButtons(true);
           break;
       }
     }

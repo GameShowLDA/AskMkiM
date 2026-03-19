@@ -10,17 +10,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
   {
     public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value, string? chains = null)
     {
-
+      var random = new Random();
 
       if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
         if (upperLimit != -1)
         {
-          value = new Random().Next(0, (int)upperLimit * 2);
+          value = random.NextDouble() * ((upperLimit + 1) * 2);
         }
         else
         {
-          value = new Random().Next();
+          value = random.NextDouble();
         }
       }
 
