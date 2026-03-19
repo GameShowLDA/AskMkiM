@@ -211,8 +211,9 @@
         <GridSplitter Grid.Column="1"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
-                Background="{DynamicResource ForegrounfBrushes35}" 
-                Width="4"/>
+                Background="{DynamicResource VioletColorSolidColorBrush}" 
+                BorderThickness="0"
+                Width="2"/>
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
@@ -251,39 +252,45 @@
                    Foreground="{DynamicResource ForegrounfBrushes}"/>
 
                     <DataGrid x:Name="ArchiveFilesDataGrid"
-                  Grid.Row="1"
-                  Margin="0,8,0,0"
-                  Style="{StaticResource ArchiveDataGridStyle}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  FontSize="13"
-                  CanUserReorderColumns="True"
-                  CanUserResizeColumns="True"
-                  CanUserSortColumns="True"
-                  HeadersVisibility="Column"
-                  SelectionMode="Single"
-                  SelectionUnit="FullRow"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
+                        Grid.Row="1"
+                        Margin="0,8,0,0"
+                        Style="{StaticResource ModernDataGridStyle}"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        FontSize="13"
+                        CanUserReorderColumns="True"
+                        CanUserResizeColumns="True"
+                        CanUserSortColumns="True"
+                        HeadersVisibility="Column"
+                        SelectionMode="Single"
+                        SelectionUnit="FullRow"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Обозначение"
                                 Binding="{Binding Name}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*"/>
                             <DataGridTextColumn Header="Наименование ОК"
                                 Binding="{Binding NameOK}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="*" />
                             <DataGridTextColumn Header="ОПК"
                                 Binding="{Binding OPK}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="*" />
                             <DataGridTextColumn Header="ИК"
                                 Binding="{Binding IK}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="*" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="*" />
                             <DataGridTextColumn Header="Файл ОПК"
                                 Binding="{Binding OpkFileName}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="*" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"
@@ -298,9 +305,11 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Цех"
                                 Binding="{Binding Department}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="90" />
                             <DataGridTextColumn Header="Примечание"
                                 Binding="{Binding Comment}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
                                 Width="130" />
 
                         </DataGrid.Columns>
@@ -317,12 +326,13 @@
             <GridSplitter
                   x:Name="RightSplitter"
                   Grid.Row="1"
-                  Height="6"
+                  Height="2"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Center"
                   ResizeDirection="Rows"
                   ResizeBehavior="PreviousAndNext"
-                  Background="{DynamicResource ForegrounfBrushes35}"/>
+                BorderThickness="0"
+                  Background="{DynamicResource VioletColorSolidColorBrush}"/>
             
             <Border x:Name="EditorPanel"
             Grid.Row="2"
