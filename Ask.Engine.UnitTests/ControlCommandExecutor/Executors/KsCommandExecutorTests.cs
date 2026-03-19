@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
@@ -17,15 +18,22 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
+using Ask.Engine.ControlCommandAnalyser.Parser.Kc;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors;
+using Ask.Engine.UnitTests.Fixtures;
 using Moq;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.Executors;
 
-public class KsCommandExecutorTests
+public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDisposable
 {
+  public KsCommandExecutorTests(FastMeterDbFixture fixture)
+  {
+  }
+
   /// <summary>
   /// Проверяет, что команда КС с ключом Д при успешном измерении пишет одно информационное сообщение в протокол
   /// и использует обычный режим измерения сопротивления.
@@ -44,6 +52,7 @@ public class KsCommandExecutorTests
 
     Assert.Empty(protocol.Errors);
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2(5-15 Ом)", "Rизм= 10 Ом");
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ResistanceManagerMock.Verify(x => x.MeasureResistanceAsync(10, 5, 15, It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ContinuityManagerMock.Verify(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()), Times.Never);
@@ -113,10 +122,12 @@ public class KsCommandExecutorTests
     var protocol = await harness.ExecuteAsync(command);
 
     AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
+    AssertMessage(protocol.Errors[GetCommandKey(command)][0], "X1, X2 (5-15 Ом)", "Rизм= 20 Ом");
     Assert.Empty(protocol.Info);
     Assert.Single(harness.PublishedErrors);
     Assert.Contains("X1", harness.PublishedErrors[0].Description);
     Assert.Contains("X2", harness.PublishedErrors[0].Description);
+    Assert.Equal("Rизм= 20 Ом", harness.PublishedErrors[0].MeasureResult);
   }
 
   /// <summary>
@@ -198,8 +209,31 @@ public class KsCommandExecutorTests
     var protocol = await harness.ExecuteAsync(command);
     var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
-    Assert.Contains("0", error.Message);
+    AssertMessage(error, "X1, X2 (0,5-5 Ом)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
+    Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
+  }
+
+  /// <summary>
+  /// Проверяет такую же защиту от отрицательного результата в режиме прозвонки по ключу Б.
+  /// </summary>
+  [Fact(DisplayName = "КС: в режиме Б отрицательный результат после вычитания тоже прижимается к нулю")]
+  public async Task ExecuteAsync_WithContinuityKey_WhenSwitchResistanceMakesValueNegative_ClampsMeasurementToZero()
+  {
+    using var harness = new KsExecutionHarness(switchResistance: 10);
+    var command = CreateCommand(0.5, 5, "Б");
+
+    harness.ContinuityManagerMock
+      .Setup(x => x.CheckContinuityAsync(2.75, 0.5, 5, It.IsAny<IUserInteractionService>()))
+      .ReturnsAsync(5);
+
+    var protocol = await harness.ExecuteAsync(command);
+    var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
+
+    AssertMessage(error, "X1, X2 (0,5-5 Ом)", "Rизм= 0 Ом");
+    Assert.Single(harness.PublishedErrors);
+    Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
+    harness.ContinuityManagerMock.Verify(x => x.CheckContinuityAsync(2.75, 0.5, 5, It.IsAny<IUserInteractionService>()), Times.Once);
   }
 
   /// <summary>
@@ -230,17 +264,177 @@ public class KsCommandExecutorTests
   public async Task ExecuteAsync_InIdleModeWithErrorSimulationAndOpenUpperLimit_ForcesFailure()
   {
     using var harness = new KsExecutionHarness(idleMode: true, errorSimulation: true);
-    var command = CreateCommand(5, null);
+    var command = CreateCommand(3_000_000_000, null);
 
     harness.ResistanceManagerMock
-      .Setup(x => x.MeasureResistanceAsync(15, 5, -1, It.IsAny<IUserInteractionService>()))
-      .ReturnsAsync(15);
+      .Setup(x => x.MeasureResistanceAsync(3_000_000_010, 3_000_000_000, -1, It.IsAny<IUserInteractionService>()))
+      .ReturnsAsync(3_000_000_010);
 
     var protocol = await harness.ExecuteAsync(command);
 
     AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
     Assert.Empty(protocol.Info);
     Assert.Single(harness.PublishedErrors);
+  }
+
+  /// <summary>
+  /// Проверяет сквозной сценарий: текст команды КС проходит через парсер, а затем корректно исполняется executor-ом.
+  /// </summary>
+  [Fact(DisplayName = "КС: parsed command корректно проходит путь parser -> executor")]
+  public async Task ExecuteAsync_WithParsedCommand_RunsEndToEnd()
+  {
+    using var harness = new KsExecutionHarness();
+    var command = ParseCommand("Д 5<Ом<15 *X1,X2*");
+
+    harness.ResistanceManagerMock
+      .Setup(x => x.MeasureResistanceAsync(10, 5, 15, It.IsAny<IUserInteractionService>()))
+      .ReturnsAsync(10);
+
+    var protocol = await harness.ExecuteAsync(command);
+
+    Assert.Empty(protocol.Errors);
+    AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2(5-15 Ом)", "Rизм= 10 Ом");
+  }
+
+  /// <summary>
+  /// Проверяет, что при схеме из трёх точек КС формирует отдельные записи для каждой проверки от первой точки.
+  /// </summary>
+  [Fact(DisplayName = "КС: для нескольких точек документирование создаётся по каждой проверяемой паре")]
+  public async Task ExecuteAsync_WithThreePointsAndDocumentationKey_WritesInfoForEachPair()
+  {
+    var points = CreatePoints("X1", "X2", "X3");
+    using var harness = new KsExecutionHarness(analyzedPoints: ClonePoints(points));
+    var command = CreateCommand(5, 15, points, "Д");
+
+    harness.ResistanceManagerMock
+      .SetupSequence(x => x.MeasureResistanceAsync(10, 5, 15, It.IsAny<IUserInteractionService>()))
+      .ReturnsAsync(10)
+      .ReturnsAsync(10);
+
+    var protocol = await harness.ExecuteAsync(command);
+    var messages = protocol.Info[GetCommandKey(command)];
+
+    Assert.Empty(protocol.Errors);
+    Assert.Equal(2, messages.Count);
+    Assert.Contains(messages, item => item.Header == "X1, X2(5-15 Ом)" && item.Message == "Rизм= 10 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X3(5-15 Ом)" && item.Message == "Rизм= 10 Ом");
+  }
+
+  /// <summary>
+  /// Проверяет, что в КС каждая неуспешная проверка отдельной пары формирует отдельное сообщение об ошибке.
+  /// </summary>
+  [Fact(DisplayName = "КС: несколько неуспешных измерений формируют несколько сообщений об ошибке")]
+  public async Task ExecuteAsync_WithSeveralFailedPairs_WritesErrorForEachFailedMeasurement()
+  {
+    var points = CreatePoints("X1", "X2", "X3");
+    using var harness = new KsExecutionHarness(analyzedPoints: ClonePoints(points));
+    var command = CreateCommand(5, 15, points);
+
+    harness.ResistanceManagerMock
+      .SetupSequence(x => x.MeasureResistanceAsync(10, 5, 15, It.IsAny<IUserInteractionService>()))
+      .ReturnsAsync(20)
+      .ReturnsAsync(25);
+
+    var protocol = await harness.ExecuteAsync(command);
+    var messages = protocol.Errors[GetCommandKey(command)];
+
+    Assert.Equal(2, messages.Count);
+    Assert.Contains(messages, item => item.Header == "X1, X2 (5-15 Ом)" && item.Message == "Rизм= 20 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X3 (5-15 Ом)" && item.Message == "Rизм= 25 Ом");
+    Assert.Equal(2, harness.PublishedErrors.Count);
+  }
+
+  /// <summary>
+  /// Проверяет ветку пустой схемы: исполнитель должен пройти подготовку, но не делать ни одного измерения.
+  /// </summary>
+  [Fact(DisplayName = "КС: пустая схема не запускает измерения и не пишет протокол")]
+  public async Task ExecuteAsync_WithEmptyScheme_DoesNotMeasureAndLeavesProtocolEmpty()
+  {
+    using var harness = new KsExecutionHarness();
+    var command = CreateCommand(5, 15);
+    command.Scheme = new SchemeModel(new List<GroupModel>());
+
+    var protocol = await harness.ExecuteAsync(command);
+
+    Assert.Empty(protocol.Errors);
+    Assert.Empty(protocol.Info);
+    harness.ResistanceManagerMock.Verify(
+      x => x.MeasureResistanceAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
+      Times.Never);
+    harness.ContinuityManagerMock.Verify(
+      x => x.CheckContinuityAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
+      Times.Never);
+  }
+
+  /// <summary>
+  /// Проверяет, что отсутствие устройства коммутации останавливает выполнение КС до начала измерений.
+  /// </summary>
+  [Fact(DisplayName = "КС: отсутствие switching device даёт ошибку конфигурации")]
+  public async Task ExecuteAsync_WithoutSwitchingDevice_ThrowsConfigurationException()
+  {
+    using var harness = new KsExecutionHarness(includeSwitchingDevice: false);
+    var command = CreateCommand(5, 15);
+
+    var exception = await Assert.ThrowsAsync<Exception>(() => harness.ExecuteAsync(command));
+
+    Assert.Contains("Устройство коммутации не инициализировано", exception.Message);
+    harness.ResistanceManagerMock.Verify(
+      x => x.MeasureResistanceAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
+      Times.Never);
+  }
+
+  /// <summary>
+  /// Проверяет, что отсутствие быстрого измерителя останавливает выполнение КС с ошибкой конфигурации.
+  /// </summary>
+  [Fact(DisplayName = "КС: отсутствие fast meter даёт ошибку конфигурации")]
+  public async Task ExecuteAsync_WithoutFastMeter_ThrowsConfigurationException()
+  {
+    const int missingMeterChassis = 987654;
+    using var harness = new KsExecutionHarness(chassisNumber: missingMeterChassis, includeFastMeter: false);
+    var command = CreateCommand(5, 15, CreatePointsForChassis(missingMeterChassis, "X1", "X2"));
+
+    var exception = await Assert.ThrowsAsync<Exception>(() => harness.ExecuteAsync(command));
+
+    Assert.Contains("не найдено устройство быстрого измерителя", exception.Message);
+  }
+
+  /// <summary>
+  /// Проверяет, что при отсутствии модулей МКР исполнитель КС не может получить измеритель и останавливается.
+  /// </summary>
+  [Fact(DisplayName = "КС: отсутствие relay modules даёт ошибку неинициализированных МКР")]
+  public async Task ExecuteAsync_WithoutRelayModules_ThrowsInitializationException()
+  {
+    using var harness = new KsExecutionHarness(includeRelayModules: false, includeFastMeter: false);
+    var command = CreateCommand(5, 15);
+    command.Scheme = new SchemeModel(new List<GroupModel>());
+
+    var exception = await Assert.ThrowsAsync<Exception>(() => harness.ExecuteAsync(command));
+
+    Assert.Contains("Модули МКР не инициализированы", exception.Message);
+  }
+
+  /// <summary>
+  /// Проверяет, что точка, отсутствующая в заранее проанализированном наборе, вызывает системную ошибку трансляции.
+  /// </summary>
+  [Fact(DisplayName = "КС: точка вне analyzed points даёт системную ошибку трансляции")]
+  public async Task ExecuteAsync_WithPointOutsideAnalyzedPoints_ThrowsTranslationException()
+  {
+    var commandPoints = CreatePoints("X1", "X2");
+    using var harness = new KsExecutionHarness(analyzedPoints: new List<PointModel> { ClonePoint(commandPoints[0]) });
+    var command = CreateCommand(5, 15, commandPoints);
+
+    var exception = await Assert.ThrowsAsync<Exception>(() => harness.ExecuteAsync(command));
+
+    Assert.Contains("1.1.2", exception.Message);
+    harness.ResistanceManagerMock.Verify(
+      x => x.MeasureResistanceAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
+      Times.Never);
+  }
+
+  public void Dispose()
+  {
+    CommandsModel.Clear();
   }
 
   private static Mock<IUserInteractionService> CreateUserInteractionService()
@@ -268,9 +462,11 @@ public class KsCommandExecutorTests
 
   private static KsCommandModel CreateCommand(double lowerLimit, double? higherLimit, params string[] keys)
   {
-    var pointA = CreatePoint("X1", pointNumber: 1);
-    var pointB = CreatePoint("X2", pointNumber: 2, pointType: PointType.Comma);
+    return CreateCommand(lowerLimit, higherLimit, CreatePoints("X1", "X2"), keys);
+  }
 
+  private static KsCommandModel CreateCommand(double lowerLimit, double? higherLimit, IReadOnlyList<PointModel> points, params string[] keys)
+  {
     return new KsCommandModel
     {
       CommandNumber = "10",
@@ -287,7 +483,7 @@ public class KsCommandExecutorTests
       {
         new(new List<ChainModel>
         {
-          new(new List<PointModel> { pointA, pointB })
+          new(points.Select(ClonePoint).ToList())
         })
       })
     };
@@ -305,6 +501,12 @@ public class KsCommandExecutorTests
     Assert.Equal(expectedCount, bucket[commandKey].Count);
   }
 
+  private static void AssertMessage(ShowMessageModel message, string expectedHeader, string expectedBody)
+  {
+    Assert.Equal(expectedHeader, message.Header);
+    Assert.Equal(expectedBody, message.Message);
+  }
+
   private static PointModel CreatePoint(string mnemonic, int pointNumber, PointType pointType = PointType.Star)
   {
     return new PointModel
@@ -317,13 +519,84 @@ public class KsCommandExecutorTests
     };
   }
 
+  private static List<PointModel> CreatePoints(params string[] mnemonics)
+  {
+    return CreatePointsForChassis(1, mnemonics);
+  }
+
+  private static List<PointModel> CreatePointsForChassis(int chassisNumber, params string[] mnemonics)
+  {
+    return mnemonics
+      .Select((mnemonic, index) => CreatePoint(
+        mnemonic,
+        pointNumber: index + 1,
+        pointType: index == 0 ? PointType.Star : PointType.Comma,
+        chassisNumber: chassisNumber))
+      .ToList();
+  }
+
+  private static PointModel ClonePoint(PointModel source)
+  {
+    return new PointModel
+    {
+      DeviceNumber = source.DeviceNumber,
+      ModuleNumber = source.ModuleNumber,
+      PointNumber = source.PointNumber,
+      Mnemonic = source.Mnemonic,
+      PointType = source.PointType
+    };
+  }
+
+  private static List<PointModel> ClonePoints(IEnumerable<PointModel> source)
+  {
+    return source.Select(ClonePoint).ToList();
+  }
+
+  private static PointModel CreatePoint(string mnemonic, int pointNumber, PointType pointType, int chassisNumber)
+  {
+    return new PointModel
+    {
+      DeviceNumber = chassisNumber,
+      ModuleNumber = 1,
+      PointNumber = pointNumber,
+      Mnemonic = mnemonic,
+      PointType = pointType
+    };
+  }
+
+  private static KsCommandModel ParseCommand(string body)
+  {
+    CommandsModel.Clear();
+    CommandsModel.CommandModels.Add(CreateRmCommand());
+
+    var parser = new KcCommandParser();
+    string line = $"10 КС {body}";
+
+    return Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, new List<string> { line }));
+  }
+
+  private static RmCommandModel CreateRmCommand()
+  {
+    return new RmCommandModel
+    {
+      CommandNumber = "1",
+      StartLineNumber = 1,
+      PointsMap = new Dictionary<string, string>
+      {
+        ["X1"] = "1.1.1",
+        ["X2"] = "1.1.2",
+        ["X3"] = "1.1.3"
+      }
+    };
+  }
+
   private sealed class EquipmentServiceScope : IDisposable
   {
     public EquipmentServiceScope(
-      List<PointModel> analyzedPoints,
-      List<IRelaySwitchModule> relayModules,
-      ISwitchingDevice switchingDevice,
-      IFastMeter fastMeter)
+      List<PointModel>? analyzedPoints,
+      List<IRelaySwitchModule>? relayModules,
+      ISwitchingDevice? switchingDevice,
+      IFastMeter? fastMeter)
     {
       SetProperty("AnalyzedPoints", analyzedPoints);
       SetProperty("ValidRelayModules", relayModules);
@@ -356,7 +629,15 @@ public class KsCommandExecutorTests
   {
     private readonly EquipmentServiceScope _scope;
 
-    public KsExecutionHarness(double switchResistance = 0, bool idleMode = false, bool errorSimulation = false)
+    public KsExecutionHarness(
+      double switchResistance = 0,
+      bool idleMode = false,
+      bool errorSimulation = false,
+      int chassisNumber = 1,
+      List<PointModel>? analyzedPoints = null,
+      bool includeSwitchingDevice = true,
+      bool includeFastMeter = true,
+      bool includeRelayModules = true)
     {
       ExecutionConfig.SetIdleMode(idleMode);
       ExecutionConfig.SetStepByStepMode(false);
@@ -404,20 +685,19 @@ public class KsCommandExecutorTests
         .ReturnsAsync(true);
 
       var relayModuleMock = new Mock<IRelaySwitchModule>();
-      relayModuleMock.SetupGet(x => x.NumberChassis).Returns(1);
+      relayModuleMock.SetupGet(x => x.NumberChassis).Returns(chassisNumber);
       relayModuleMock.SetupGet(x => x.Number).Returns(1);
       relayModuleMock.SetupGet(x => x.BusType).Returns(SwitchingBusNew.AB1);
       relayModuleMock.SetupGet(x => x.SwitchResistance).Returns(switchResistance);
       relayModuleMock.SetupGet(x => x.PointManager).Returns(pointManagerMock.Object);
       relayModuleMock.SetupGet(x => x.BusManager).Returns(busManagerMock.Object);
 
-      var pointA = CreatePoint("X1", pointNumber: 1);
-      var pointB = CreatePoint("X2", pointNumber: 2, pointType: PointType.Comma);
+      var defaultPoints = CreatePointsForChassis(chassisNumber, "X1", "X2");
       _scope = new EquipmentServiceScope(
-        analyzedPoints: new List<PointModel> { pointA, pointB },
-        relayModules: new List<IRelaySwitchModule> { relayModuleMock.Object },
-        switchingDevice: switchingDeviceMock.Object,
-        fastMeter: meterMock.Object);
+        analyzedPoints: analyzedPoints ?? ClonePoints(defaultPoints),
+        relayModules: includeRelayModules ? new List<IRelaySwitchModule> { relayModuleMock.Object } : new List<IRelaySwitchModule>(),
+        switchingDevice: includeSwitchingDevice ? switchingDeviceMock.Object : null,
+        fastMeter: includeFastMeter ? meterMock.Object : null);
     }
 
     public Mock<IUserInteractionService> ConsoleMock { get; }

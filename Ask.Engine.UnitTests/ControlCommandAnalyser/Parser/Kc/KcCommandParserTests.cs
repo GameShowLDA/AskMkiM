@@ -1,73 +1,89 @@
+using System.Reflection;
 using Ask.Core.Services.Errors.Models;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Services.Translator;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Kc;
-using DataBaseConfiguration;
-using DataBaseConfiguration.Services.Device;
+using Ask.Engine.UnitTests.Fixtures;
 
 namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Kc;
 
-public sealed class KcCommandParserFixture : IDisposable
-{
-  private readonly int? createdFastMeterId;
-
-  public KcCommandParserFixture()
-  {
-    DataBaseConfig.InitializeDB().GetAwaiter().GetResult();
-
-    var fastMeterServices = new FastMeterServices();
-    fastMeterServices.ReloadCache();
-
-    if (fastMeterServices.GetAll().Any())
-    {
-      return;
-    }
-
-    var entity = new FastMeterEntity
-    {
-      Name = "Unit test fast meter",
-      Description = "Temporary fast meter for KS parser tests",
-      NumberChassis = 9999,
-      Number = 1,
-      ConnectionDetails = "UNIT-TEST",
-      DeviceClass = typeof(FastMeterEntity).AssemblyQualifiedName ?? typeof(FastMeterEntity).FullName ?? nameof(FastMeterEntity),
-      MaxContinuityResistance = 100
-    };
-
-    fastMeterServices.Create(entity);
-    createdFastMeterId = entity.Id;
-  }
-
-  public void Dispose()
-  {
-    if (!createdFastMeterId.HasValue)
-    {
-      return;
-    }
-
-    var fastMeterServices = new FastMeterServices();
-    var entity = fastMeterServices
-      .GetAllEntities()
-      .FirstOrDefault(item => item.Id == createdFastMeterId.Value);
-
-    if (entity is not null)
-    {
-      fastMeterServices.Delete(entity);
-    }
-  }
-}
-
-public class KcCommandParserTests : IClassFixture<KcCommandParserFixture>, IDisposable
+public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposable
 {
   private readonly KcCommandParser parser = new();
 
-  public KcCommandParserTests(KcCommandParserFixture fixture)
+  public KcCommandParserTests(FastMeterDbFixture fixture)
   {
     CommandsModel.Clear();
     CommandsModel.CommandModels.Add(CreateRmCommand());
+  }
+
+  /// <summary>
+  /// Проверяет, что парсер КС распознаёт только свою мнемонику.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: CanParse принимает только мнемонику КС")]
+  public void CanParse_ReturnsTrueOnlyForKsMnemonic()
+  {
+    Assert.True(parser.CanParse(new MnemonicIdentifier("КС")));
+    Assert.False(parser.CanParse(new MnemonicIdentifier(Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands.MeasurementTypeCommand.KC)));
+    Assert.False(parser.CanParse(new MnemonicIdentifier("ПР")));
+  }
+
+  /// <summary>
+  /// Проверяет, что null-набор строк в парсере КС не валит разбор, а корректно превращается в KS004.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: null lines дают KS004, а не исключение")]
+  public void Parse_WithNullLines_ReturnsKs004()
+  {
+    var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, null!));
+
+    AssertErrorCodes(model, ErrorCode.Ks_EmptyCommandBody);
+  }
+
+  /// <summary>
+  /// Проверяет, что строки из одних пробелов в КС считаются пустым телом команды.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: строки из пробелов дают KS004")]
+  public void Parse_WithWhitespaceLines_ReturnsKs004()
+  {
+    var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, new List<string> { "   " }));
+
+    AssertErrorCodes(model, ErrorCode.Ks_EmptyCommandBody);
+  }
+
+  /// <summary>
+  /// Проверяет, что ошибка отступа в строке продолжения останавливает разбор КС до парсинга диапазона и точек.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: ошибка отступа в строке продолжения прерывает дальнейший разбор")]
+  public void Parse_WithInvalidContinuationIndentation_StopsBeforeRangeAndSchemeParsing()
+  {
+    var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, new List<string>
+    {
+      "10 КС 10<Ом<15",
+      "*X1,X2*"
+    }));
+
+    var error = Assert.Single(model.Errors);
+
+    Assert.Contains("отступ", error.Description);
+    Assert.Null(model.LowerLimitResistance);
+    Assert.Null(model.HigherLimitResistance);
+    Assert.Null(model.Scheme);
+  }
+
+  /// <summary>
+  /// Проверяет защитную ветку анализа порядка параметров, когда remainder пустой и не должен считаться перестановкой.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: пустой remainder не считается нарушением порядка параметров")]
+  public void HasPointsBeforeResistance_WithWhitespaceRemainder_ReturnsFalse()
+  {
+    var method = typeof(KcCommandParser).GetMethod("HasPointsBeforeResistance", BindingFlags.NonPublic | BindingFlags.Static);
+
+    Assert.NotNull(method);
+    var result = Assert.IsType<bool>(method!.Invoke(null, new object?[] { "   " }));
+    Assert.False(result);
   }
 
   /// <summary>
@@ -177,6 +193,33 @@ public class KcCommandParserTests : IClassFixture<KcCommandParserFixture>, IDisp
     Assert.Equal(10, model.LowerLimitResistance);
     Assert.Equal(15, model.HigherLimitResistance);
     Assert.NotNull(model.Scheme);
+  }
+
+  /// <summary>
+  /// Проверяет, что допустимые ключи КС корректно попадают в модель команды.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: допустимые ключи Б и Д сохраняются в модели")]
+  public void Parse_WithAllowedKeys_StoresThemInAlgorithmKey()
+  {
+    var model = ParseBody("Б, Д 10<Ом<15 *X1,X2*");
+
+    AssertErrorCodes(model);
+    Assert.Equal(new[] { "Б", "Д" }, model.AlgorithmKey.OrderBy(key => key).ToArray());
+  }
+
+  /// <summary>
+  /// Проверяет, что дублирующийся ключ КС не дублируется в модели и уходит в предупреждения.
+  /// </summary>
+  [Fact(DisplayName = "КС parser: дублирующийся ключ даёт предупреждение и не дублируется в модели")]
+  public void Parse_WithDuplicateAllowedKey_AddsWarningAndStoresSingleKey()
+  {
+    var model = ParseBody("Д, Д 10<Ом<15 *X1,X2*");
+
+    AssertErrorCodes(model);
+    Assert.Single(model.AlgorithmKey);
+    Assert.Equal("Д", model.AlgorithmKey[0]);
+    Assert.Single(model.Warnings);
+    Assert.Equal(WarningCode.Gen_DuplicateKey, model.Warnings[0].Code);
   }
 
   /// <summary>
