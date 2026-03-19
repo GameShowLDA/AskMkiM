@@ -20,8 +20,7 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="userControls">Список пользовательских контролов, ассоциированных с открытыми страницами.</param>
     public static void PrintFile(ObservableCollection<OpenFileButton> openPages, ObservableCollection<UserControl> userControls)
     {
-      var activeTab = openPages.FirstOrDefault(page =>
-        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      var activeTab = openPages.FirstOrDefault(page => page.IsActive);
 
       if (activeTab == null)
         return;

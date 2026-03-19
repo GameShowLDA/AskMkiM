@@ -170,11 +170,11 @@ namespace UI.Controls.Runner
 
     private void SetError(List<ErrorItem> errorItems)
     {
-      foreach (ErrorItem errorItem in errorItems)
-      {
-        ErrorListBoxVertical.Items.Add(errorItem);
-        ErrorCount++;
-      }
+      if (errorItems == null || errorItems.Count == 0)
+        return;
+
+      ErrorListBoxVertical.AddErrors(errorItems);
+      ErrorCount += errorItems.Count;
 
       if (ErrorCount > 0)
       {
@@ -326,7 +326,7 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        ErrorListBoxVertical.Items.Add(errorItem);
+        ErrorListBoxVertical.AddError(errorItem);
         ErrorCount++;
 
         if (ErrorCount > 0)
@@ -340,7 +340,7 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        ErrorListBoxVertical.Items.Clear();
+        ErrorListBoxVertical.ClearAll();
         ErrorCount = 0;
       });
     }

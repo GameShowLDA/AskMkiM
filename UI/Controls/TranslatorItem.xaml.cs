@@ -24,6 +24,22 @@ namespace UI.Controls
   /// </summary>
   public partial class TranslatorItem : UserControl
   {
+    public sealed class TranslationIssuesSnapshot
+    {
+      public TranslationIssuesSnapshot(List<IDisplayIssue> issues, int errorCount, int warningCount)
+      {
+        Issues = issues;
+        ErrorCount = errorCount;
+        WarningCount = warningCount;
+      }
+
+      public List<IDisplayIssue> Issues { get; }
+
+      public int ErrorCount { get; }
+
+      public int WarningCount { get; }
+    }
+
     public string FirstFilePath { get; set; }
     public string SecondFilePath { get; set; }
 
@@ -42,26 +58,7 @@ namespace UI.Controls
       }
       set
       {
-        translationModels = value;
-        ErrorClear();
-        ErrorListBoxVertical.ClearAll();
-
-        foreach (var model in value)
-        {
-          if (model.Errors.Count > 0)
-          {
-            ErrorListBoxVertical.AddErrors(model.Errors);
-            ErrorCount += model.Errors.Count;
-          }
-
-          if (model.Warnings.Count > 0)
-          {
-            ErrorListBoxVertical.AddWarnings(model.Warnings);
-            WarningCount += model.Warnings.Count;
-          }
-        }
-        MessageEventAdapter.RaiseInfoMessage(
-               $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+        ApplyTranslationModels(value, BuildIssuesSnapshot(value));
       }
     }
 
@@ -87,6 +84,43 @@ namespace UI.Controls
     {
       ErrorCount = 0;
       WarningCount = 0;
+    }
+
+    public static TranslationIssuesSnapshot BuildIssuesSnapshot(IEnumerable<BaseCommandModel> models)
+    {
+      var issues = new List<IDisplayIssue>();
+      int errorCount = 0;
+      int warningCount = 0;
+
+      foreach (var model in models)
+      {
+        if (model.Errors.Count > 0)
+        {
+          issues.AddRange(model.Errors);
+          errorCount += model.Errors.Count;
+        }
+
+        if (model.Warnings.Count > 0)
+        {
+          issues.AddRange(model.Warnings);
+          warningCount += model.Warnings.Count;
+        }
+      }
+
+      return new TranslationIssuesSnapshot(issues, errorCount, warningCount);
+    }
+
+    public void ApplyTranslationModels(List<BaseCommandModel> models, TranslationIssuesSnapshot issuesSnapshot)
+    {
+      translationModels = models;
+      ErrorClear();
+      ErrorCount = issuesSnapshot.ErrorCount;
+      WarningCount = issuesSnapshot.WarningCount;
+
+      ErrorListBoxVertical.SetIssues(issuesSnapshot.Issues);
+
+      MessageEventAdapter.RaiseInfoMessage(
+             $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
     }
 
     public void SetLeftEditor(ITextEditorView editor)

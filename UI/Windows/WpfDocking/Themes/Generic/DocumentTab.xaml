@@ -13,18 +13,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="primitives:DocumentTab">
-                    <ControlTemplate.Resources>
-                        <SolidColorBrush x:Key="BorderBrush" Color="#4D4D4D" />
-                        <SolidColorBrush x:Key="UnselectedBrush" Color="#2E2E2E" />
-                        <SolidColorBrush x:Key="SelectedBrush" Color="#4b7765" />
-                        <SolidColorBrush x:Key="MouseOverBrush" Color="#3A3A3A" />
-                    </ControlTemplate.Resources>
-
                     <Border x:Name="border"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderBrush="#4D4D4D"
                             BorderThickness="0"
                             CornerRadius="10,10,0,0"
-                            Background="{StaticResource UnselectedBrush}"
+                            Background="{DynamicResource DocumentTabBackgroundBrush}"
                             Padding="5,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -63,11 +56,11 @@
                     <ControlTemplate.Triggers>
 
                         <Trigger Property="UIElement.IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource MouseOverBrush}" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource DocumentTabHoverBackgroundBrush}" />
                         </Trigger>
                         
                         <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource SelectedBrush}" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource DocumentTabActiveBackgroundBrush}" />
                         </DataTrigger>
                         
                     </ControlTemplate.Triggers>

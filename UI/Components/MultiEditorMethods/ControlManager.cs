@@ -104,7 +104,7 @@ namespace UI.Components.MultiEditorMethods
         {
           ShowNextTab(index);
         }
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
         if (fileManager.EditorWorkspaceModel.UserControls.OfType<TextEditorContainer>().Count() == 0 || activeTab == null
           || !(fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer))
         {
@@ -535,9 +535,10 @@ namespace UI.Components.MultiEditorMethods
     {
       foreach (OpenFileButton child in multiEditorControl.TopPanel.Children)
       {
-        if (control.Text == child.Text)
+        child.IsActive = control.Text == child.Text;
+
+        if (child.IsActive)
         {
-          child.Background = (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"];
           if (control.Text == EditorType.TextEditor.ToString())
           {
             EditorEventAdapter.RaiseTranslatorActive(true);
@@ -546,10 +547,6 @@ namespace UI.Components.MultiEditorMethods
           {
             EditorEventAdapter.RaiseTranslatorActive(false);
           }
-        }
-        else
-        {
-          child.Background = (Brush)Application.Current.Resources["SecondarySolidColorBrush"];
         }
       }
     }

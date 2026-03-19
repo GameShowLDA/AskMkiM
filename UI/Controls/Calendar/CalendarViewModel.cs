@@ -1,102 +1,147 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 namespace UI.Controls.Calendar
 {
   public class CalendarDay : INotifyPropertyChanged
   {
-    public int DayNumber { get; set; }
-    public bool IsCurrentMonth { get; set; }
-    public bool IsToday { get; set; }
+    private bool _isSelected;
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public DateTime Date { get; set; }
+
+    public int DayNumber => Date.Day;
+
+    public bool IsCurrentMonth { get; set; }
+
+    public bool IsToday => Date.Date == DateTime.Today;
+
+    public bool IsSelected
+    {
+      get => _isSelected;
+      set
+      {
+        if (_isSelected == value)
+        {
+          return;
+        }
+
+        _isSelected = value;
+        OnPropertyChanged();
+      }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
   }
 
   public class CalendarViewModel : INotifyPropertyChanged
   {
-    private DateTime _displayDate;
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    public ObservableCollection<CalendarDay> Days { get; } = new();
-
-    public string MonthYear => _displayDate.ToString("MMMM yyyy", CultureInfo.GetCultureInfo("ru-RU"));
-
-    public ICommand PrevMonthCommand { get; }
-    public ICommand NextMonthCommand { get; }
+    private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("ru-RU");
+    private DateTime _displayMonth;
+    private DateTime _selectedDate;
 
     public CalendarViewModel()
     {
-      _displayDate = DateTime.Today;
+      _selectedDate = DateTime.Today;
+      _displayMonth = new DateTime(_selectedDate.Year, _selectedDate.Month, 1);
+
       PrevMonthCommand = new RelayCommand(_ => ChangeMonth(-1));
       NextMonthCommand = new RelayCommand(_ => ChangeMonth(1));
+      TodayCommand = new RelayCommand(_ => GoToToday());
+      SelectDateCommand = new RelayCommand(SelectDate);
+
       BuildCalendar();
     }
 
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public ObservableCollection<CalendarDay> Days { get; } = new();
+
+    public string MonthYear => ToTitleCase(_displayMonth.ToString("MMMM yyyy", _culture));
+
+    public string SelectionCaption => ToTitleCase(_selectedDate.ToString("dddd, d MMMM", _culture));
+
+    public ICommand PrevMonthCommand { get; }
+
+    public ICommand NextMonthCommand { get; }
+
+    public ICommand TodayCommand { get; }
+
+    public ICommand SelectDateCommand { get; }
+
     private void ChangeMonth(int offset)
     {
-      _displayDate = _displayDate.AddMonths(offset);
+      _displayMonth = _displayMonth.AddMonths(offset);
       BuildCalendar();
-      NotifyPropertyChanged(nameof(MonthYear));
+      NotifyHeaderChanged();
+    }
+
+    private void GoToToday()
+    {
+      _selectedDate = DateTime.Today;
+      _displayMonth = new DateTime(_selectedDate.Year, _selectedDate.Month, 1);
+      BuildCalendar();
+      NotifyHeaderChanged();
+    }
+
+    private void SelectDate(object? parameter)
+    {
+      if (parameter is not CalendarDay day)
+      {
+        return;
+      }
+
+      _selectedDate = day.Date.Date;
+      _displayMonth = new DateTime(day.Date.Year, day.Date.Month, 1);
+      BuildCalendar();
+      NotifyHeaderChanged();
     }
 
     private void BuildCalendar()
     {
       Days.Clear();
 
-      var firstDayOfMonth = new DateTime(_displayDate.Year, _displayDate.Month, 1);
-      int startOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7; // Понедельник = 0
+      var firstDayOfMonth = new DateTime(_displayMonth.Year, _displayMonth.Month, 1);
+      var firstVisibleDay = firstDayOfMonth.AddDays(-((int)firstDayOfMonth.DayOfWeek + 6) % 7);
 
-      int daysInPrevMonth = DateTime.DaysInMonth(_displayDate.AddMonths(-1).Year, _displayDate.AddMonths(-1).Month);
-      int daysInMonth = DateTime.DaysInMonth(_displayDate.Year, _displayDate.Month);
-      var today = DateTime.Today;
-
-      // Заполняем дни предыдущего месяца (если есть)
-      for (int i = startOffset - 1; i >= 0; i--)
+      for (var index = 0; index < 42; index++)
       {
+        var date = firstVisibleDay.AddDays(index);
         Days.Add(new CalendarDay
         {
-          DayNumber = daysInPrevMonth - i,
-          IsCurrentMonth = false,
-          IsToday = false
+          Date = date,
+          IsCurrentMonth = date.Month == _displayMonth.Month && date.Year == _displayMonth.Year,
+          IsSelected = date.Date == _selectedDate.Date,
         });
       }
 
-      // Заполняем дни текущего месяца
-      for (int day = 1; day <= daysInMonth; day++)
-      {
-        Days.Add(new CalendarDay
-        {
-          DayNumber = day,
-          IsCurrentMonth = true,
-          IsToday = today.Day == day && today.Month == _displayDate.Month && today.Year == _displayDate.Year
-        });
-      }
-
-      // Заполняем дни следующего месяца чтобы заполнить сетку до 42 дней
-      while (Days.Count < 42)
-      {
-        int nextDay = Days.Count - startOffset - daysInMonth + 1;
-        Days.Add(new CalendarDay
-        {
-          DayNumber = nextDay,
-          IsCurrentMonth = false,
-          IsToday = false
-        });
-      }
-
-      NotifyPropertyChanged(nameof(Days));
+      OnPropertyChanged(nameof(Days));
     }
 
-    private void NotifyPropertyChanged(string propName)
+    private void NotifyHeaderChanged()
     {
-      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+      OnPropertyChanged(nameof(MonthYear));
+      OnPropertyChanged(nameof(SelectionCaption));
+    }
+
+    private string ToTitleCase(string value)
+    {
+      return _culture.TextInfo.ToTitleCase(value);
+    }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
   }
 
-  // RelayCommand для простых команд
   public class RelayCommand : ICommand
   {
     private readonly Action<object?> _execute;
@@ -110,10 +155,19 @@ namespace UI.Controls.Calendar
 
     public event EventHandler? CanExecuteChanged;
 
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+    public bool CanExecute(object? parameter)
+    {
+      return _canExecute?.Invoke(parameter) ?? true;
+    }
 
-    public void Execute(object? parameter) => _execute(parameter);
+    public void Execute(object? parameter)
+    {
+      _execute(parameter);
+    }
 
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public void RaiseCanExecuteChanged()
+    {
+      CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
   }
 }

@@ -8,7 +8,6 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Media;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.TextEditor;
@@ -66,8 +65,12 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Результат сохранения файла. <c>true</c>, если файл был успешно сохранен, иначе <c>false</c>.</returns>
     public bool SaveFile()
     {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
+      if (activeTab == null)
+      {
+        return false;
+      }
+
       int index = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
       if (fileManager.EditorWorkspaceModel.UserControls[index] is TextEditorContainer)
       {
@@ -326,7 +329,7 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Активная вкладка типа <see cref="OpenFileButton"/>.</returns>
     private OpenFileButton GetActiveTab()
     {
-      return fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      return fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
     }
 
     /// <summary>

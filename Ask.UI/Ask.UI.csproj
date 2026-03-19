@@ -14,6 +14,7 @@
 		<Folder Include="Infrastructure\Messaging\" />
 		<Folder Include="Resources\Assets\Image\" />
 		<Folder Include="Resources\Assets\Fonts\" />
+		<Folder Include="Resources\Assets\SyntaxHighlighting\Light\" />
 		<Folder Include="Resources\Theme\" />
 		<Folder Include="Shared\Validation\" />
 	</ItemGroup>
@@ -42,6 +43,11 @@
 	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
 	    <Generator>ResXFileCodeGenerator</Generator>
 	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Resources\Assets\SyntaxHighlighting\Dark\*.xshd" />
+	  <Resource Include="Resources\Assets\SyntaxHighlighting\Light\*.xshd" />
 	</ItemGroup>
 
 	<ItemGroup>

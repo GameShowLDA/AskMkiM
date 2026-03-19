@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Support;
@@ -451,17 +453,16 @@ namespace UI.Controls.TextEditor
         return;
       }
 
-      var xshdPath = ResolveHighlightingPath(xshdFile);
-      if (xshdPath == null)
+      using var stream = OpenHighlightingStream(xshdFile);
+      if (stream == null)
       {
         textEditor.SyntaxHighlighting = null;
-        LogWarning($"Файл подсветки не найден: {xshdFile}");
+        LogWarning($"Ресурс подсветки не найден: {xshdFile}");
         return;
       }
 
       try
       {
-        using var stream = File.OpenRead(xshdPath);
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
@@ -473,25 +474,38 @@ namespace UI.Controls.TextEditor
       }
     }
 
-    private static string? ResolveHighlightingPath(string fileName)
+    private static Stream? OpenHighlightingStream(string fileName)
     {
-      var candidates = new[]
+      foreach (var resourceUri in GetHighlightingResourceCandidates(fileName))
       {
-        Path.Combine(AppContext.BaseDirectory, fileName),
-        Path.Combine(AppContext.BaseDirectory, "UI", fileName),
-        Path.GetFullPath(fileName),
-      };
-
-      foreach (var candidate in candidates)
-      {
-        if (File.Exists(candidate))
+        var resourceInfo = Application.GetResourceStream(resourceUri);
+        if (resourceInfo?.Stream != null)
         {
-          return candidate;
+          return resourceInfo.Stream;
         }
       }
 
       return null;
     }
+
+    private static IEnumerable<Uri> GetHighlightingResourceCandidates(string fileName)
+    {
+      var preferredThemeFolder = ThemeSettings.CurrentTheme is ThemeMode.Light or ThemeMode.LightCustom
+        ? "Light"
+        : "Dark";
+
+      yield return BuildHighlightingResourceUri(preferredThemeFolder, fileName);
+
+      if (!string.Equals(preferredThemeFolder, "Dark", StringComparison.Ordinal))
+      {
+        yield return BuildHighlightingResourceUri("Dark", fileName);
+      }
+    }
+
+    private static Uri BuildHighlightingResourceUri(string themeFolder, string fileName) =>
+      new(
+        $"pack://application:,,,/Ask.UI;component/Resources/Assets/SyntaxHighlighting/{themeFolder}/{fileName}",
+        UriKind.Absolute);
 
     #region Конструкторы
 
@@ -555,6 +569,10 @@ namespace UI.Controls.TextEditor
 
       EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(
         e => ApplySyntaxHighlighting(e.IsEnabled)
+      );
+
+      EventAggregator.Subscribe<ThemeEvent.Change>(
+        _ => ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting())
       );
 
       if (textEditor.Document == null)

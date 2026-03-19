@@ -5,6 +5,35 @@
     <ResourceDictionary Source="/UI;component/Resources/Theme/light.xaml"/>
   </ResourceDictionary.MergedDictionaries>
 
+  <Color x:Key="ModernDataGridBackgroundColor">#FAFCFF</Color>
+  <Color x:Key="ModernDataGridSurfaceColor">#F2F6FC</Color>
+  <Color x:Key="ModernDataGridSurfaceSecondaryColor">#E9EFF7</Color>
+  <Color x:Key="ModernDataGridTextPrimaryColor">#223246</Color>
+  <Color x:Key="ModernDataGridTextSecondaryColor">#67788D</Color>
+  <Color x:Key="ModernDataGridBorderColor">#D4DEEA</Color>
+  <Color x:Key="ModernDataGridSeparatorColor">#E3EAF3</Color>
+  <Color x:Key="ModernDataGridRowBaseColor">#00FFFFFF</Color>
+  <Color x:Key="ModernDataGridRowAlternateColor">#F5F8FD</Color>
+  <Color x:Key="ModernDataGridRowHoverColor">#EAF0F8</Color>
+  <Color x:Key="ModernDataGridRowSelectedColor">#DCE6F4</Color>
+  <Color x:Key="ModernDataGridAccentColor">#7E99C2</Color>
+  <Color x:Key="ModernDataGridFocusColor">#287E99C2</Color>
+  <Color x:Key="ModernDataGridShadowColor">#1813243A</Color>
+
+  <SolidColorBrush x:Key="ModernDataGridBackgroundBrush" Color="{DynamicResource ModernDataGridBackgroundColor}" />
+  <SolidColorBrush x:Key="ModernDataGridSurfaceBrush" Color="{DynamicResource ModernDataGridSurfaceColor}" />
+  <SolidColorBrush x:Key="ModernDataGridSurfaceSecondaryBrush" Color="{DynamicResource ModernDataGridSurfaceSecondaryColor}" />
+  <SolidColorBrush x:Key="ModernDataGridTextPrimaryBrush" Color="{DynamicResource ModernDataGridTextPrimaryColor}" />
+  <SolidColorBrush x:Key="ModernDataGridTextSecondaryBrush" Color="{DynamicResource ModernDataGridTextSecondaryColor}" />
+  <SolidColorBrush x:Key="ModernDataGridBorderBrush" Color="{DynamicResource ModernDataGridBorderColor}" />
+  <SolidColorBrush x:Key="ModernDataGridSeparatorBrush" Color="{DynamicResource ModernDataGridSeparatorColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowBaseBrush" Color="{DynamicResource ModernDataGridRowBaseColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowAlternateBrush" Color="{DynamicResource ModernDataGridRowAlternateColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowHoverBrush" Color="{DynamicResource ModernDataGridRowHoverColor}" />
+  <SolidColorBrush x:Key="ModernDataGridRowSelectedBrush" Color="{DynamicResource ModernDataGridRowSelectedColor}" />
+  <SolidColorBrush x:Key="ModernDataGridAccentBrush" Color="{DynamicResource ModernDataGridAccentColor}" />
+  <SolidColorBrush x:Key="ModernDataGridFocusBrush" Color="{DynamicResource ModernDataGridFocusColor}" />
+
   <!-- Soft neutral palette for custom light theme -->
   <SolidColorBrush x:Key="ForegrounfBrushes" Color="#1F2937"/>
   <SolidColorBrush x:Key="ForegrounfBrushes35" Color="#7A8698"/>
@@ -28,6 +57,39 @@
   <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#F8FBFF"/>
   <SolidColorBrush x:Key="ActiveColorBrushes" Color="#7E99BF"/>
   <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#E4EBF5"/>
+  <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#ECE6F1"/>
+  <SolidColorBrush x:Key="TopPanelTabBackgroundBrush" Color="#D9D0E3"/>
+  <SolidColorBrush x:Key="TopPanelTabForegroundBrush" Color="#655A75"/>
+  <SolidColorBrush x:Key="TopPanelTabHoverBackgroundBrush" Color="#E8E0F2"/>
+  <SolidColorBrush x:Key="TopPanelTabHoverForegroundBrush" Color="#352944"/>
+  <LinearGradientBrush x:Key="TopPanelTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#FDF8FF" Offset="0"/>
+    <GradientStop Color="#F0E8F8" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="TopPanelTabActiveForegroundBrush" Color="#261F31"/>
+  <SolidColorBrush x:Key="TopPanelTabDisabledBackgroundBrush" Color="#DFD7E7"/>
+  <SolidColorBrush x:Key="TopPanelTabDisabledForegroundBrush" Color="#9C90AC"/>
+  <LinearGradientBrush x:Key="TopPanelTabActiveDisabledBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#F2ECF7" Offset="0"/>
+    <GradientStop Color="#E6DEEF" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="TopPanelTabActiveDisabledForegroundBrush" Color="#7B718A"/>
+  <SolidColorBrush x:Key="TopPanelTabCloseButtonForegroundBrush" Color="#786E87"/>
+  <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverBackgroundBrush" Color="#D77B73"/>
+  <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverForegroundBrush" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="TopPanelTabCloseButtonDisabledForegroundBrush" Color="#B7AECA"/>
+  <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#768AA0" Offset="0"/>
+    <GradientStop Color="#677B92" Offset="1"/>
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="DocumentTabHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#889DB5" Offset="0"/>
+    <GradientStop Color="#7690A8" Offset="1"/>
+  </LinearGradientBrush>
+  <LinearGradientBrush x:Key="DocumentTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#607CA1" Offset="0"/>
+    <GradientStop Color="#4B688C" Offset="1"/>
+  </LinearGradientBrush>
 
   <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#D7E0EC"/>
   <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#C8D4E4"/>
@@ -105,6 +167,8 @@
   <SolidColorBrush x:Key="MainGreetingBackgroundBrush" Color="#ECF2FA"/>
   <SolidColorBrush x:Key="MainGreetingBorderBrush" Color="#1F4A5C74"/>
   <SolidColorBrush x:Key="MainTitleSolidColorBrush" Color="#253246"/>
+  <Color x:Key="EmptyWorkspaceBlockShadowColor">#080C1622</Color>
+  <Color x:Key="EmptyWorkspaceTimeGlowColor">#38D6E2F0</Color>
 
   <SolidColorBrush x:Key="SettingCardBackground" Color="#F3F5F8"/>
   <SolidColorBrush x:Key="SettingCardBorderBrush" Color="#D3D8E1"/>
@@ -136,12 +200,12 @@
   <SolidColorBrush x:Key="SettingsConfigDataInputTabloBackgroundSolidColorBrush" Color="#F2F5FA"/>
 
   <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
-    <Setter Property="Background" Value="#FDFEFF"/>
-    <Setter Property="Foreground" Value="#1E2735"/>
+    <Setter Property="Background" Value="#FFFFFF"/>
+    <Setter Property="Foreground" Value="#000000"/>
   </Style>
-  <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#7A8AA0"/>
-  <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#8A9AB0"/>
-  <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#5F7595"/>
+  <SolidColorBrush x:Key="TextEditorLineNumberBrush" Color="#8A1B1B1B"/>
+  <SolidColorBrush x:Key="TextEditorFoldingChevronBrush" Color="#A61B1B1B"/>
+  <SolidColorBrush x:Key="TextEditorFoldingChevronHoverBrush" Color="#FF000000"/>
   <SolidColorBrush x:Key="TextEditorActiveCommandStripeBrush" Color="#7E9BC3"/>
   <SolidColorBrush x:Key="TextEditorActiveCommandBackgroundBrush" Color="#EEF3FA"/>
 
@@ -173,8 +237,49 @@
   <SolidColorBrush x:Key="TestsProtocolTimeForeground" Color="#6C8351"/>
 
   <SolidColorBrush x:Key="ErrorListBackground" Color="#F8FAFE"/>
-  <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#E8EEF7"/>
-  <SolidColorBrush x:Key="ErrorListSelection" Color="#C7D6EB"/>
+  <SolidColorBrush x:Key="ErrorListHeaderBackground" Color="#EBF0F7"/>
+  <SolidColorBrush x:Key="ErrorListSelection" Color="#D6E2F0"/>
+
+  <LinearGradientBrush x:Key="ErrorListWarningFilterButtonBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#FBE6D6" Offset="0"/>
+    <GradientStop Color="#F7CCAE" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ErrorListWarningFilterButtonBorderBrush" Color="#00FFFFFF"/>
+  <SolidColorBrush x:Key="ErrorListWarningFilterButtonForegroundBrush" Color="#7E4B20"/>
+  <LinearGradientBrush x:Key="ErrorListWarningFilterButtonHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#F9D2B1" Offset="0"/>
+    <GradientStop Color="#F7BA8B" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ErrorListWarningFilterButtonHoverBorderBrush" Color="#00FFFFFF"/>
+  <LinearGradientBrush x:Key="ErrorListWarningFilterButtonCheckedBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#F8BC8F" Offset="0"/>
+    <GradientStop Color="#F6AD78" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ErrorListWarningFilterButtonCheckedBorderBrush" Color="#00FFFFFF"/>
+  <SolidColorBrush x:Key="ErrorListWarningFilterButtonCheckedForegroundBrush" Color="#563114"/>
+
+  <LinearGradientBrush x:Key="ErrorListErrorFilterButtonBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#FCE0DC" Offset="0"/>
+    <GradientStop Color="#F8C1BA" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ErrorListErrorFilterButtonBorderBrush" Color="#00FFFFFF"/>
+  <SolidColorBrush x:Key="ErrorListErrorFilterButtonForegroundBrush" Color="#843232"/>
+  <LinearGradientBrush x:Key="ErrorListErrorFilterButtonHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#F8C3BC" Offset="0"/>
+    <GradientStop Color="#F59E93" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ErrorListErrorFilterButtonHoverBorderBrush" Color="#00FFFFFF"/>
+  <LinearGradientBrush x:Key="ErrorListErrorFilterButtonCheckedBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#F79C92" Offset="0"/>
+    <GradientStop Color="#F47C71" Offset="1"/>
+  </LinearGradientBrush>
+  <SolidColorBrush x:Key="ErrorListErrorFilterButtonCheckedBorderBrush" Color="#00FFFFFF"/>
+  <SolidColorBrush x:Key="ErrorListErrorFilterButtonCheckedForegroundBrush" Color="#4A1F1F"/>
+
+  <SolidColorBrush x:Key="ErrorListWarningIconBrush" Color="#F6AD78"/>
+  <SolidColorBrush x:Key="ErrorListWarningIconForegroundBrush" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="ErrorListErrorIconBrush" Color="#F47C71"/>
+  <SolidColorBrush x:Key="ErrorListErrorIconForegroundBrush" Color="#FFFFFF"/>
 
   <RadialGradientBrush x:Key="CenterGlowBrush"
                        ColorInterpolationMode="ScRgbLinearInterpolation"

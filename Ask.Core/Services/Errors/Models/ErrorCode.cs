@@ -104,6 +104,18 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("GEN021")]
     Gen_WrongKey,
 
+    /// <summary> В команде ИЕ пустое тело метода. </summary>
+    [ErrorCodeTag("GEN022")]
+    Gen_EmptyCommandBody,
+
+    /// <summary> В команде ИЕ пустое тело метода. </summary>
+    [ErrorCodeTag("GEN023")]
+    Gen_EmptyPointsBody,
+
+    /// <summary> В команде ИЕ пустое тело метода. </summary>
+    [ErrorCodeTag("GEN024")]
+    Gen_NoPointsBody,
+
     #endregion
 
     #region Режим УМ
@@ -343,10 +355,6 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> В команде ИЕ отсутствует список точек. </summary>
     [ErrorCodeTag("IE003")]
     Ie_EmptyPoints,
-
-    /// <summary> В команде ИЕ пустое тело метода. </summary>
-    [ErrorCodeTag("IE004")]
-    Ie_EmptyCommandBody,
 
     /// <summary> Ошибка при проверке точки про методе полного узла в команде ИЕ. </summary>
     [ErrorCodeTag("IE006")]

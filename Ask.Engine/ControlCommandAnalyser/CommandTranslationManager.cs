@@ -67,21 +67,35 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </summary>
     public List<BaseCommandModel> ParseAllAndDisplay(string text, ITextEditorView adapter)
     {
-      MessageEventAdapter.RaiseInfoMessage("Начало трансляции");
+      var result = BuildTranslation(text);
+      adapter.Text = result.FormattedText;
+      return result.Models;
+    }
+
+    /// <summary>
+    /// Строит результат трансляции без прямой записи в UI-редактор.
+    /// Это позволяет безопасно выполнять тяжёлую часть трансляции в фоновом потоке.
+    /// </summary>
+    /// <param name="text">Исходный текст программы контроля.</param>
+    /// <param name="progress">Необязательный канал для передачи этапов трансляции в UI.</param>
+    /// <returns>Скомпилированные модели и итоговый текст трансляции.</returns>
+    public TranslationBuildResult BuildTranslation(string text, IProgress<string>? progress = null)
+    {
+      ReportProgress(progress, "Начало трансляции");
       var models = ParseAll(text);
       CheckVshModel(models);
 
-      MessageEventAdapter.RaiseInfoMessage("Формирование данных");
-      FormatAndDisplay(models, adapter);
+      ReportProgress(progress, "Формирование данных");
+      _ = BuildFormattedText(models);
 
-      MessageEventAdapter.RaiseInfoMessage("Проверка взаимосвязей");
+      ReportProgress(progress, "Проверка взаимосвязей");
       Analyze(models);
 
-      MessageEventAdapter.RaiseInfoMessage("Формирование данных");
-      FormatAndDisplay(models, adapter);
+      ReportProgress(progress, "Формирование данных");
+      string formattedText = BuildFormattedText(models);
 
-      MessageEventAdapter.RaiseInfoMessage("Готово");
-      return models;
+      ReportProgress(progress, "Готово");
+      return new TranslationBuildResult(models, formattedText);
     }
 
     private static void CheckVshModel(List<BaseCommandModel> models)
@@ -132,17 +146,20 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </summary>
     private void FormatAndDisplay(List<BaseCommandModel> models, ITextEditorView adapter)
     {
+      adapter.Text = BuildFormattedText(models);
+    }
+
+    /// <summary>
+    /// Формирует итоговый текст трансляции и синхронизирует mapping строк.
+    /// </summary>
+    private string BuildFormattedText(List<BaseCommandModel> models)
+    {
       var formattedLines = new List<string>();
 
-      // 1. Формируем текст справа и строим mapping
       var lineMapping = BuildFormattedTextAndMapping(models, formattedLines);
-
-      // 2. Заполняем номера строк для ошибок
       AssignFormattedLineNumbers(models, lineMapping);
 
-      // 3. Отправляем текст в адаптер
-      string outText = string.Join("\n", formattedLines);
-      adapter.Text = outText;
+      return string.Join("\n", formattedLines);
     }
 
     /// <summary>
@@ -259,6 +276,12 @@ namespace Ask.Engine.ControlCommandAnalyser
       {
         MessageEventAdapter.RaiseInfoMessage("Готово");
       }
+    }
+
+    private static void ReportProgress(IProgress<string>? progress, string message)
+    {
+      MessageEventAdapter.RaiseInfoMessage(message);
+      progress?.Report(message);
     }
 
     /// <summary>
@@ -485,6 +508,19 @@ namespace Ask.Engine.ControlCommandAnalyser
         }
       }
     }
+  }
+
+  public sealed class TranslationBuildResult
+  {
+    public TranslationBuildResult(List<BaseCommandModel> models, string formattedText)
+    {
+      Models = models;
+      FormattedText = formattedText;
+    }
+
+    public List<BaseCommandModel> Models { get; }
+
+    public string FormattedText { get; }
   }
 
   public class UnknownCommandModel : BaseCommandModel { }

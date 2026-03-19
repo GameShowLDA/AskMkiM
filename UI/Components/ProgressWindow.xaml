@@ -1,27 +1,99 @@
-﻿<Window x:Class="UI.Components.ProgressWindow"
+<Window x:Class="UI.Components.ProgressWindow"
         x:Name="progressWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Загрузка" 
-        Height="100" 
-        Width="300"
+        Title="Загрузка"
+        Width="430"
+        Height="220"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Background="white"
+        Background="Transparent"
         AllowsTransparency="True"
+        ShowInTaskbar="False"
         Topmost="True">
-    <Border BorderBrush="Gray" 
-            BorderThickness="1" 
-            CornerRadius="5"
-            Padding="20">
-        <StackPanel>
-            <TextBlock Text="Выполняется поиск..." 
-                       HorizontalAlignment="Center" 
-                       Margin="0,0,0,10"/>
-            <ProgressBar x:Name="progressBar" 
-                        Height="20" 
-                        IsIndeterminate="True"/>
-        </StackPanel>
+    <Border CornerRadius="18"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}">
+        <Border.Background>
+            <SolidColorBrush Color="#01000000" />
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="26"
+                              ShadowDepth="0"
+                              Opacity="0.35"
+                              Color="#A0000000" />
+        </Border.Effect>
+        <Grid ClipToBounds="True">
+            <Border CornerRadius="17"
+                    Background="{DynamicResource SecondarySolidColorBrush}" />
+            <Border CornerRadius="17"
+                    Opacity="0.8">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#1FFFFFFF" Offset="0" />
+                        <GradientStop Color="#08FFFFFF" Offset="0.35" />
+                        <GradientStop Color="#14000000" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <Grid Margin="24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal">
+                    <Grid Width="44" Height="44">
+                        <Ellipse Fill="{DynamicResource ActiveBorderSolidColorBrush}"
+                                 Opacity="0.18" />
+                        <Ellipse Width="22"
+                                 Height="22"
+                                 Fill="{DynamicResource ActiveBorderSolidColorBrush}"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                    </Grid>
+
+                    <StackPanel Margin="14,0,0,0"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="TitleTextBlock"
+                                   Text="Трансляция программы контроля"
+                                   FontSize="19"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource MainTitleSolidColorBrush}" />
+                        <TextBlock Text="Подготавливаем результат трансляции"
+                                   Margin="0,4,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource ForegroundSolidColorBrush60}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock x:Name="StatusTextBlock"
+                           Grid.Row="1"
+                           Margin="0,22,0,0"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                           Text="Подготовка..." />
+
+                <TextBlock x:Name="HintTextBlock"
+                           Grid.Row="2"
+                           Margin="0,10,0,0"
+                           FontSize="13"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource ForegroundSolidColorBrush60}"
+                           Text="Собираем данные для трансляции." />
+
+                <ProgressBar x:Name="progressBar"
+                             Grid.Row="3"
+                             Height="8"
+                             Margin="0,18,0,0"
+                             Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                             IsIndeterminate="True" />
+            </Grid>
+        </Grid>
     </Border>
 </Window>

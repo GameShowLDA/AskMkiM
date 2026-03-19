@@ -39,7 +39,10 @@
             Padding="0">
             <Border.Effect>
                 <!-- деликатная подсветка блока -->
-                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Opacity="0.25"/>
+                <DropShadowEffect BlurRadius="12"
+                                  ShadowDepth="0"
+                                  Opacity="0.18"
+                                  Color="{DynamicResource EmptyWorkspaceBlockShadowColor}"/>
             </Border.Effect>
 
             <Grid TextOptions.TextFormattingMode="Display" SnapsToDevicePixels="True">
@@ -50,18 +53,43 @@
                 </Grid.RowDefinitions>
 
                 <!-- Время -->
-                <TextBlock x:Name="TimeText"
-                   Grid.Row="0"
-                   Text="{Binding CurrentDateTime,
-                                  RelativeSource={RelativeSource AncestorType=UserControl},
-                                  Converter={StaticResource DateTimeToString},
-                                  ConverterParameter=HH:mm:ss}"
-                   Foreground="{DynamicResource ForegrounfBrushes}"
-                   FontFamily="{DynamicResource WinstonBold}"
-                   FontSize="60"
-                   TextAlignment="Center"
-                   HorizontalAlignment="Center"
-                   />
+                <Grid Grid.Row="0"
+                      HorizontalAlignment="Center">
+                    <TextBlock x:Name="TimeGhostText"
+                       Text=""
+                       Opacity="0"
+                       IsHitTestVisible="False"
+                       Foreground="{DynamicResource ForegrounfBrushes}"
+                       FontFamily="{DynamicResource WinstonBold}"
+                       FontSize="60"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="18"
+                                              ShadowDepth="0"
+                                              Opacity="0.55"
+                                              Color="{DynamicResource EmptyWorkspaceTimeGlowColor}"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+
+                    <TextBlock x:Name="TimeText"
+                       Text="{Binding CurrentDateTime,
+                                      RelativeSource={RelativeSource AncestorType=UserControl},
+                                      Converter={StaticResource DateTimeToString},
+                                      ConverterParameter=HH:mm:ss}"
+                       Foreground="{DynamicResource ForegrounfBrushes}"
+                       FontFamily="{DynamicResource WinstonBold}"
+                       FontSize="60"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="18"
+                                              ShadowDepth="0"
+                                              Opacity="0.75"
+                                              Color="{DynamicResource EmptyWorkspaceTimeGlowColor}"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </Grid>
 
                 <!-- День недели | Дата -->
                 <TextBlock x:Name="DateText"
