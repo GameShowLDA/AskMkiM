@@ -30,6 +30,7 @@ namespace NewCore.Function.Helpers
             case ElectricalTestFunction.Resistance:
             case ElectricalTestFunction.Capacitance:
             case ElectricalTestFunction.Continuity:
+            case ElectricalTestFunction.Diode:
               return (rangeFrom + rangeTo) / 2;
           }
         }

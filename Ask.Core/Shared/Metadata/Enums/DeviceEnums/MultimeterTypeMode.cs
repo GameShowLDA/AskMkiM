@@ -40,6 +40,11 @@ namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums
     /// Измерение электрического сопротивления.
     /// </summary>
     Resistance = 5,
+
+    /// <summary>
+    /// Проверка диода.
+    /// </summary>
+    Diode = 6,
   }
 
 }
