@@ -124,6 +124,8 @@ namespace UI.Services
       try
       {
         var translatorItem = new TranslatorItem();
+        translatorItem.Opacity = 0;
+        translatorItem.IsHitTestVisible = false;
         translatorItem.SetLeftEditor(textEditor);
         translatorItem.SetRightEditor(translatorEditor);
         translatorItem.SetRightEditorName(translatorEditor.TextEditorModel.FileName);

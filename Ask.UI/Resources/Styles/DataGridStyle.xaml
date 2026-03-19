@@ -1,0 +1,503 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="ModernDataGridCardStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+    </Style>
+
+    <Style x:Key="ModernDataGridRowHeaderStyle" TargetType="{x:Type DataGridRowHeader}">
+        <Setter Property="Width" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource ModernDataGridRowHeaderStyle}" />
+
+    <Style x:Key="ModernDataGridColumnHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridSurfaceSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="SeparatorBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+            </Trigger>
+
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridSurfaceBrush}" />
+            </Trigger>
+
+            <Trigger Property="SortDirection" Value="Ascending">
+                <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+            </Trigger>
+
+            <Trigger Property="SortDirection" Value="Descending">
+                <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource ModernDataGridColumnHeaderStyle}" />
+
+    <Style x:Key="ModernDataGridCellStyle" TargetType="{x:Type DataGridCell}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextBlock.TextWrapping" Value="NoWrap" />
+        <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        <Setter Property="TextElement.FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="TextElement.FontSize" Value="13" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridFocusBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+            </Trigger>
+
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,0,2" />
+            </Trigger>
+
+            <Trigger Property="IsEditing" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Trigger>
+
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.55" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ModernDataGridCellStyle}" />
+
+    <Style x:Key="ModernDataGridCheckBoxStyle" TargetType="{x:Type CheckBox}">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid Width="{TemplateBinding Width}"
+                          Height="{TemplateBinding Height}"
+                          Background="Transparent"
+                          SnapsToDevicePixels="True">
+                        <Border x:Name="Box"
+                                Background="{DynamicResource ModernDataGridSurfaceSecondaryBrush}"
+                                BorderBrush="{DynamicResource ModernDataGridBorderBrush}"
+                                BorderThickness="1" />
+                        <Path x:Name="CheckMark"
+                              Width="9"
+                              Height="7"
+                              Stroke="{DynamicResource ModernDataGridBackgroundBrush}"
+                              StrokeThickness="1.7"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              StrokeLineJoin="Round"
+                              Data="M 0 3.5 L 3 6.5 L 9 0.5"
+                              Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Box" Property="Opacity" Value="0.82" />
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Box" Property="Opacity" Value="0.5" />
+                            <Setter TargetName="CheckMark" Property="Opacity" Value="0.65" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernDataGridRowStyle" TargetType="{x:Type DataGridRow}">
+        <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridSeparatorBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Validation.ErrorTemplate" Value="{x:Null}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridRowHoverBrush}" />
+            </Trigger>
+
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridRowSelectedBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridBorderBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+            </Trigger>
+
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.55" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type DataGridRow}" BasedOn="{StaticResource ModernDataGridRowStyle}" />
+
+    <Style x:Key="ModernDataGridStyle" TargetType="{x:Type DataGrid}">
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="RowBackground" Value="{DynamicResource ModernDataGridRowBaseBrush}" />
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource ModernDataGridRowAlternateBrush}" />
+        <Setter Property="AlternationCount" Value="2" />
+        <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="HorizontalGridLinesBrush" Value="Transparent" />
+        <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="RowHeaderWidth" Value="0" />
+        <Setter Property="CanUserResizeRows" Value="False" />
+        <Setter Property="EnableRowVirtualization" Value="True" />
+        <Setter Property="EnableColumnVirtualization" Value="True" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="ColumnHeaderHeight" Value="42" />
+        <Setter Property="MinRowHeight" Value="44" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+        <Style.Resources>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="TextAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            </Style>
+
+            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource ModernDataGridCheckBoxStyle}" />
+        </Style.Resources>
+    </Style>
+
+    <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource ModernDataGridStyle}" />
+
+    <Style x:Key="AdminDbDataGridTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="ToolTip" Value="{Binding}" />
+    </Style>
+
+    <Style x:Key="AdminDbDataGridColumnHeaderStyle"
+           TargetType="{x:Type DataGridColumnHeader}"
+           BasedOn="{StaticResource ModernDataGridColumnHeaderStyle}">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="14,9" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}" />
+        <Setter Property="FontSize" Value="12.5" />
+    </Style>
+
+    <Style x:Key="AdminDbDataGridCellStyle"
+           TargetType="{x:Type DataGridCell}"
+           BasedOn="{StaticResource ModernDataGridCellStyle}">
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="12.5" />
+    </Style>
+
+    <Style x:Key="AdminDbDataGridComboBoxItemStyle" TargetType="{x:Type ComboBoxItem}">
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                    <Border x:Name="ItemBorder"
+                            Background="Transparent"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ModernDataGridRowHoverBrush}" />
+                        </Trigger>
+
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ModernDataGridRowSelectedBrush}" />
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.55" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AdminDbDataGridComboBoxStyle" TargetType="{x:Type ComboBox}">
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridSurfaceSecondaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Padding" Value="10,4,26,4" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridBorderBrush}" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="MinWidth" Value="110" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource AdminDbDataGridComboBoxItemStyle}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBox}">
+                    <Grid>
+                        <Border x:Name="ControlBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <ContentPresenter x:Name="ContentSite"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  IsHitTestVisible="False" />
+                                <TextBox x:Name="PART_EditableTextBox"
+                                         Margin="{TemplateBinding Padding}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         HorizontalContentAlignment="Center"
+                                         VerticalContentAlignment="Center"
+                                         Visibility="Hidden"
+                                         IsReadOnly="{TemplateBinding IsReadOnly}" />
+                                <Path x:Name="Arrow"
+                                      Data="M 0 0 L 4 4 L 8 0"
+                                      Stroke="{DynamicResource ModernDataGridTextSecondaryBrush}"
+                                      StrokeThickness="1.5"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,10,0" />
+                            </Grid>
+                        </Border>
+
+                        <ToggleButton x:Name="ToggleButton"
+                                      Focusable="False"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                      ClickMode="Press">
+                            <Border Background="Transparent" />
+                        </ToggleButton>
+
+                        <Popup x:Name="PART_Popup"
+                               Placement="Bottom"
+                               VerticalOffset="4"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               PopupAnimation="Fade">
+                            <Border MinWidth="{TemplateBinding ActualWidth}"
+                                    Background="{DynamicResource ModernDataGridBackgroundBrush}"
+                                    BorderBrush="{DynamicResource ModernDataGridBorderBrush}"
+                                    BorderThickness="1">
+                                <ScrollViewer MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                              SnapsToDevicePixels="True"
+                                              CanContentScroll="True">
+                                    <StackPanel IsItemsHost="True"
+                                                KeyboardNavigation.DirectionalNavigation="Contained" />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ControlBorder" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                        </Trigger>
+
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="ControlBorder" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                        </Trigger>
+
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="ControlBorder" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
+                        </Trigger>
+
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden" />
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ControlBorder" Property="Opacity" Value="0.55" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AdminDbDataGridRowStyle"
+           TargetType="{x:Type DataGridRow}"
+           BasedOn="{StaticResource ModernDataGridRowStyle}">
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="12.5" />
+    </Style>
+
+    <Style x:Key="AdminDbScrollBarThumbStyle" TargetType="{x:Type Thumb}">
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridTextSecondaryBrush}" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="MinWidth" Value="12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border Background="{TemplateBinding Background}" Margin="2,1" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridTextPrimaryBrush}" />
+            </Trigger>
+
+            <Trigger Property="IsDragging" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ModernDataGridAccentBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="AdminDbScrollBarStyle" TargetType="{x:Type ScrollBar}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextSecondaryBrush}" />
+        <Setter Property="Width" Value="7" />
+        <Setter Property="Height" Value="7" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" IsTabStop="False" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource AdminDbScrollBarThumbStyle}" />
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" IsTabStop="False" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AdminDbDataGridStyle"
+           TargetType="{x:Type DataGrid}"
+           BasedOn="{StaticResource ModernDataGridStyle}">
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridBackgroundBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="ColumnHeaderHeight" Value="40" />
+        <Setter Property="MinRowHeight" Value="40" />
+        <Setter Property="CanUserSortColumns" Value="True" />
+        <Setter Property="SelectionMode" Value="Extended" />
+        <Setter Property="SelectionUnit" Value="FullRow" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserDeleteRows" Value="False" />
+        <Setter Property="CanUserResizeRows" Value="False" />
+        <Setter Property="ColumnHeaderStyle" Value="{StaticResource AdminDbDataGridColumnHeaderStyle}" />
+        <Setter Property="CellStyle" Value="{StaticResource AdminDbDataGridCellStyle}" />
+        <Setter Property="RowStyle" Value="{StaticResource AdminDbDataGridRowStyle}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+        <Style.Resources>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="TextAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            </Style>
+
+            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource ModernDataGridCheckBoxStyle}" />
+        </Style.Resources>
+    </Style>
+
+</ResourceDictionary>

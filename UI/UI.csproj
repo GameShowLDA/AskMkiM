@@ -58,18 +58,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="MKI_OPKW.xshd">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="MKI_PK.xshd">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="MKI_PROTOCOL.xshd">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<Compile Update="Windows\WpfDocking\Windows\Docking\SR.Designer.cs">
 			<DesignTime>True</DesignTime>
 			<AutoGen>True</AutoGen>

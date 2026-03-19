@@ -6,10 +6,17 @@
              xmlns:local="clr-namespace:UI.Components"
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="80" >
-    <TextBlock
-        Text="00:00:00"
-        FontFamily="{DynamicResource WinstonMedium}"
-        Name ="Clock"
-        />
+    <Grid>
+        <TextBlock
+            x:Name="ClockGhost"
+            Text=""
+            Opacity="0"
+            IsHitTestVisible="False"
+            FontFamily="{DynamicResource WinstonMedium}"/>
+        <TextBlock
+            Text="00:00:00"
+            FontFamily="{DynamicResource WinstonMedium}"
+            Name ="Clock"/>
+    </Grid>
 
 </UserControl>

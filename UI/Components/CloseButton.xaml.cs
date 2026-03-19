@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
+using System.Windows.Controls;
 
 namespace UI.Components
 {
@@ -12,24 +10,9 @@ namespace UI.Components
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="CloseButton"/>.
     /// </summary>
-    /// <remarks>
-    /// Конструктор инициализирует компонент кнопки и устанавливает фон области вокруг кнопки как прозрачный,
-    /// используя свойство <see cref="BackgroundBorder"/>.
-    /// </remarks>
     public CloseButton()
     {
       InitializeComponent();
-      BackgroundBorder.Background = Brushes.Transparent;
-    }
-
-    private void BackgroundBorder_MouseEnter(object sender, MouseEventArgs e)
-    {
-      BackgroundBorder.Background = Brushes.Red;
-    }
-
-    private void BackgroundBorder_MouseLeave(object sender, MouseEventArgs e)
-    {
-      BackgroundBorder.Background = Brushes.Transparent;
     }
   }
 }

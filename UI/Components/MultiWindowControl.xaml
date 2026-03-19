@@ -25,7 +25,7 @@
         </Grid.RowDefinitions>
 
         <!-- Верхняя панель -->
-        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Transparent" Orientation="Horizontal"/>
+        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="{DynamicResource TopPanelTabsHostBackgroundBrush}" Orientation="Horizontal"/>
 
         <Grid Grid.Row="1">
             <!-- Редактор -->
@@ -126,7 +126,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel x:Name="SearchResultsTopPanel" 
                                 Grid.Row="0" 
-                                Background="{StaticResource SecondarySolidColorBrush}"  
+                                Background="{DynamicResource TopPanelTabsHostBackgroundBrush}"  
                                 Orientation="Horizontal"/>
                     <DockPanel x:Name="ContentPanel" Grid.Row="1" Background="{StaticResource PrimarySolidColorBrush}"/>
                 

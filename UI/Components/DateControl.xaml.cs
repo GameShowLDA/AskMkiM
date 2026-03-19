@@ -1,4 +1,5 @@
-﻿using System.Windows;
+using Ask.Core.Services.App;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace UI.Components
@@ -16,7 +17,7 @@ namespace UI.Components
 
     private void DateControl_Loaded(object sender, RoutedEventArgs e)
     {
-      Text = DateTime.Now.ToShortDateString();
+      Text = ApplicationClockService.CurrentDateTime.ToShortDateString();
     }
 
     public string Text
@@ -24,6 +25,5 @@ namespace UI.Components
       get => Date.Text;
       set => Date.Text = value;
     }
-
   }
 }
