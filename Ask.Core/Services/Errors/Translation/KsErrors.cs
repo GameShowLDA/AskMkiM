@@ -85,6 +85,21 @@ namespace Ask.Core.Services.Errors.Translation
         Description = "Команда КС должна содержать хотя бы один параметр. Тело команды не может быть пустым."
       };
 
+    /// <summary>
+    /// Ошибка: в команде КС список точек указан раньше диапазона сопротивления.
+    /// </summary>
+    public static ErrorItem InvalidParameterOrder(int startLineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = startLineNumber,
+        Command = command,
+        Code = ErrorCode.Ks_InvalidParameterOrder,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = "Список точек в команде КС указан до диапазона сопротивления."
+      };
+
     public ErrorItem PairError(string command, string pointFirst, string pointLast, int sourceLineNumber, int formaterLineNumber,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
