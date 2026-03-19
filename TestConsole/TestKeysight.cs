@@ -23,6 +23,7 @@ namespace TestConsole
         await Capacitance(keysight3466);
         await Resistance(keysight3466);
         await Voltage(keysight3466);
+        await Diode(keysight3466);
 
         await keysight3466.ConnectableManager.DisconnectAsync();
       }
@@ -58,6 +59,13 @@ namespace TestConsole
       await keysight3466.DcVoltageManager.SetDCVoltageModeAsync();
       var data = await keysight3466.DcVoltageManager.MeasureDCVoltageAsync();
       Console.WriteLine($"Результат напяжения(постоянное): {data}");
+    }
+
+    static private async Task Diode(IFastMeter keysight3466)
+    {
+      await keysight3466.DiodeManager.SetDiodeModeAsync();
+      var data = await keysight3466.DiodeManager.CheckDiodeAsync();
+      Console.WriteLine($"Результат проверки диода: {data}");
     }
   }
 }

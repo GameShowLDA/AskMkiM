@@ -62,6 +62,10 @@ namespace Ask.Core.Shared.Entity.Devices
 
     /// <inheritdoc />
     [NotMapped]
+    public IDiodeMeasurement DiodeManager { get; set; }
+
+    /// <inheritdoc />
+    [NotMapped]
     public IResistanceMeasurement ResistanceManager { get; set; }
 
     /// <inheritdoc />

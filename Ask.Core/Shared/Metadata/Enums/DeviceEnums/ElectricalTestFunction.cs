@@ -56,6 +56,11 @@ namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums
     /// <summary>
     /// Прозвонка (проверка целостности цепи).
     /// </summary>
-    Continuity = 14
+    Continuity = 14,
+
+    /// <summary>
+    /// Проверка диода.
+    /// </summary>
+    Diode = 15
   }
 }

@@ -56,6 +56,9 @@ namespace NewCore.Device
     public IDcVoltageMeasurement DcVoltageManager { get; set; }
 
     /// <inheritdoc />
+    public IDiodeMeasurement DiodeManager { get; set; }
+
+    /// <inheritdoc />
     public IResistanceMeasurement ResistanceManager { get; set; }
 
     /// <inheritdoc />
@@ -87,6 +90,7 @@ namespace NewCore.Device
       ResistanceManager = new ResistanceMeasurementAdapter(this);
       AcVoltageManager = new AcVoltageMeasurementAdapter(this);
       DcVoltageManager = new DcVoltageMeasurementAdapter(this);
+      DiodeManager = new DiodeMeasurementAdapter(this);
       DeviceProtocol = new KeysightDeviceProtocol(this, Port);
       MaxContinuityResistance = 100000;
     }

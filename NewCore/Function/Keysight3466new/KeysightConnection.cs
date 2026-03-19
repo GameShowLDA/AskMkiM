@@ -158,6 +158,9 @@ namespace NewCore.Function.Keysight3466new
         case MultimeterTypeMode.Resistance:
           mode += "Измерение электрического сопротивления.";
           break;
+        case MultimeterTypeMode.Diode:
+          mode += "Проверка диода.";
+          break;
       }
 
       return mode;
