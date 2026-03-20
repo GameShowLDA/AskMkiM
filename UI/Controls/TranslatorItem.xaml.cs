@@ -252,7 +252,7 @@ namespace UI.Controls
       var right = GetRightBox().GetTextEditor();
 	    if (left == null || right == null) return;
 
-	    int leftLine = model.StartLineNumber + 1;
+	    int leftLine = model.StartLineNumber;
 	    int rightLine = model.FormattedStartLineNumber + 1;
 
 	    left.GoToLine(leftLine);
@@ -323,7 +323,7 @@ namespace UI.Controls
       var right = GetRightBox().GetTextEditor();
 	    if (left == null || right == null) return;
 
-      int leftLine = model.StartLineNumber + 1;
+      int leftLine = model.StartLineNumber;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: true, raiseEvents: false);
@@ -353,7 +353,7 @@ namespace UI.Controls
       var right = GetRightBox().GetTextEditor();
 	    if (left == null || right == null) return;
 
-      int leftLine = model.StartLineNumber + 1;
+      int leftLine = model.StartLineNumber;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: false, raiseEvents: false);
@@ -377,7 +377,7 @@ namespace UI.Controls
       var right = GetRightBox().GetTextEditor();
 	    if (left == null || right == null) return;
 
-      int leftLine = model.StartLineNumber + 1;
+      int leftLine = model.StartLineNumber;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
@@ -400,7 +400,7 @@ namespace UI.Controls
       var right = GetRightBox().GetTextEditor();
 	    if (left == null || right == null) return;
 
-      int leftLine = model.StartLineNumber + 1;
+      int leftLine = model.StartLineNumber;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
