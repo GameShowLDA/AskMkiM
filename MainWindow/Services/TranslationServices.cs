@@ -61,6 +61,25 @@ namespace MainWindowProgram.Services
                 .ToList();
 
     /// <summary>
+    /// Строит словарь соответствия между номерами команд и их наименованиями (мнемониками) для быстрого доступа при работе с точками остановки.
+    /// </summary>
+    /// <param name="models">Команды, на которые разрешены точки.</param>
+    /// <returns>Словарь </returns>
+    private static Dictionary<int, string> BuildNumCommandWithMnemonic(IEnumerable<BaseCommandModel> models)
+    {
+      var result = new Dictionary<int, string>();
+      int commandNumber;
+      foreach (var model in models)
+      {
+        commandNumber = int.Parse(model.CommandNumber);
+        if (result.ContainsKey(commandNumber)) continue;
+        result.Add(commandNumber, model.Mnemonic);
+      }
+      return result;
+    }
+
+    //TODO: Сделать что-ниюудь с этим методом, а то довольно громадный и не надёжный.
+    /// <summary>
     /// Строит список строк документа трансляции, на которые можно ставить точку остановки.
     /// </summary>
     /// <param name="doc">Документ правого редактора (текст трансляции).</param>
@@ -194,7 +213,7 @@ namespace MainWindowProgram.Services
         if (!isAllowed)
           continue;
 
-        leftLineByCommand[cmd] = model.StartLineNumber + 1;
+        leftLineByCommand[cmd] = model.StartLineNumber;
         rightLineByCommand[cmd] = model.FormattedStartLineNumber + 1; // FormattedStartLineNumber 0-based
 
         if (hasBreakpoint)
@@ -468,6 +487,7 @@ namespace MainWindowProgram.Services
 
       editor.ConfigureBreakpoints(interactive: true, visible: false);
       editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+      editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
       if (foundDockItem.Content is TranslatorItem item)
       {
@@ -479,6 +499,7 @@ namespace MainWindowProgram.Services
 
         translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
         translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+        translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(models);
 
         RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
       }
@@ -535,6 +556,7 @@ namespace MainWindowProgram.Services
 
         editor.ConfigureBreakpoints(interactive: true, visible: false);
         editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+        editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
         EditorEventAdapter.RaiseCloseRunItem(editor);
 
@@ -543,6 +565,7 @@ namespace MainWindowProgram.Services
 
         translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
         translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+        translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(models);
       }
       catch (Exception ex)
       {

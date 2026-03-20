@@ -418,10 +418,10 @@ namespace UI.Controls.Runner
       for (int i = 0; i < count; i++)
       {
         int cmd = cmdNumbers[i];
-        int line1 = doc.GetLineByOffset(anchors[i].Offset).LineNumber; // 1-based
+        int line1 = doc.GetLineByOffset(anchors[i].Offset).LineNumber;
         bool enabled = editor.IsBreakpointEnabled(cmd);
 
-        ErrorListBoxVertical.UpsertBreakpoint(cmd, line1, enabled);
+        ErrorListBoxVertical.UpsertBreakpoint(cmd, line1, editor.NumCommandWithMnemonic[cmd], enabled);
         SetModelBreakpoint(cmd, has: true, enabled: enabled);
       }
     }
@@ -480,7 +480,7 @@ namespace UI.Controls.Runner
         return;
 
       int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
-      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, isEnabled: true);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, editor.NumCommandWithMnemonic[e.CommandNumber], isEnabled: true);
 
       SetModelBreakpoint(e.CommandNumber, has: true, enabled: true);
     }
@@ -506,7 +506,7 @@ namespace UI.Controls.Runner
         return;
 
       int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
-      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, isEnabled: true);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, editor.NumCommandWithMnemonic[e.CommandNumber], isEnabled: true);
 
       SetModelBreakpoint(e.CommandNumber, has: true, enabled: true);
     }
@@ -522,7 +522,7 @@ namespace UI.Controls.Runner
         return;
 
       int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
-      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, isEnabled: false);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, editor.NumCommandWithMnemonic[e.CommandNumber], isEnabled: false);
 
       SetModelBreakpoint(e.CommandNumber, has: true, enabled: false);
     }

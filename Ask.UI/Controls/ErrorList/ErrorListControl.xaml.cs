@@ -315,23 +315,22 @@ namespace Ask.UI.Controls.ErrorList
     /// <summary>
     /// Добавляет точку остановки в список или обновляет существующий по номеру команды.
     /// </summary>
-    public void UpsertBreakpoint(int commandNumber, int? lineNumber, bool isEnabled)
+    public void UpsertBreakpoint(int commandNumber, int rightLine, string Mnemonic, bool isEnabled)
     {
       if (Dispatcher.CheckAccess())
       {
-        UpsertBreakpointCore(commandNumber, lineNumber, isEnabled);
+        UpsertBreakpointCore(commandNumber, rightLine, Mnemonic, isEnabled);
         return;
       }
 
-      Dispatcher.Invoke(() => UpsertBreakpointCore(commandNumber, lineNumber, isEnabled));
+      Dispatcher.Invoke(() => UpsertBreakpointCore(commandNumber, rightLine, Mnemonic, isEnabled));
     }
 
-    private void UpsertBreakpointCore(int commandNumber, int? lineNumber, bool isEnabled)
+    private void UpsertBreakpointCore(int commandNumber, int rightLine, string mnemonic, bool isEnabled)
     {
       var existing = Breakpoints.FirstOrDefault(b => b.CommandNumber == commandNumber);
       if (existing != null)
       {
-        existing.RightLine = lineNumber;
         existing.IsEnabled = isEnabled;
         return;
       }
@@ -339,8 +338,9 @@ namespace Ask.UI.Controls.ErrorList
       Breakpoints.Add(new BreakpointListItem(
         commandNumber: commandNumber,
         leftLine: null,
-        rightLine: lineNumber,
-        isEnabled: isEnabled
+        rightLine: rightLine,
+        isEnabled: isEnabled,
+        mnemonic: mnemonic
       ));
     }
 
@@ -401,6 +401,14 @@ namespace Ask.UI.Controls.ErrorList
         bool enabled = cb.IsChecked == true;
         BreakpointEnabledChanged?.Invoke(bp, enabled);
         e.Handled = true;
+      }
+    }
+
+    private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      if (MainTabControl.SelectedItem == BreakpointsTab)
+      {
+        BreakpointsGrid.UnselectAll();
       }
     }
 

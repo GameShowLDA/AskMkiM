@@ -184,7 +184,8 @@
                     </Style>
                 </TabItem.Style>
 
-                <DataGrid ItemsSource="{Binding Breakpoints, ElementName=root}"
+                <DataGrid x:Name="BreakpointsGrid"
+              ItemsSource="{Binding Breakpoints, ElementName=root}"
               AutoGenerateColumns="False"
               HeadersVisibility="Column"
               CanUserAddRows="False"
@@ -242,10 +243,17 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="Строка"
+                        <DataGridTextColumn Header="Номер"
                         Width="80"
                         MinWidth="25"
-                        Binding="{Binding RightLine}"
+                        Binding="{Binding CommandNumber}"
+                        FontFamily="{DynamicResource WinstonLight}"
+                        FontSize="14"/>
+
+                        <DataGridTextColumn Header="Мнемоника"
+                        Width="80"
+                        MinWidth="25"
+                        Binding="{Binding Mnemonic}"
                         FontFamily="{DynamicResource WinstonLight}"
                         FontSize="14"/>
                     </DataGrid.Columns>

@@ -175,6 +175,8 @@ public class ExecutionGlyphMargin : AbstractMargin
     set => SetRightBreakpoints(value);
   }
 
+  public Dictionary<int, string> NumCommandWithMnemonic;
+
   /// <summary>
   /// Создаёт марджин номеров строк с заливкой активного диапазона команды.
   /// </summary>

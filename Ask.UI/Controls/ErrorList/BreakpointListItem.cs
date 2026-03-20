@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Ask.UI.Controls.ErrorList
 {
+  //TODO: сделать этот класс более красивым и аккуратным
   public sealed class BreakpointListItem : INotifyPropertyChanged
   {
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -50,40 +51,47 @@ namespace Ask.UI.Controls.ErrorList
       set => SetField(ref _isEnabled, value);
     }
 
-    private string? _leftFile;
+    private string _mnemonic;
+    public string Mnemonic
+    {
+      get => _mnemonic;
+      set => SetField(ref _mnemonic, value);
+    }
+
+    //private string? _leftFile;
     /// <summary>
     /// Имя/путь файла левого редактора.
     /// </summary>
-    public string? LeftFile
-    {
-      get => _leftFile;
-      set => SetField(ref _leftFile, value);
-    }
+    //public string? LeftFile
+    //{
+    //  get => _leftFile;
+    //  set => SetField(ref _leftFile, value);
+    //}
 
-    private string? _rightFile;
+    //private string? _rightFile;
     /// <summary>
     /// Имя/путь файла правого редактора.
     /// </summary>
-    public string? RightFile
-    {
-      get => _rightFile;
-      set => SetField(ref _rightFile, value);
-    }
+    //public string? RightFile
+    //{
+    //  get => _rightFile;
+    //  set => SetField(ref _rightFile, value);
+    //}
 
     public BreakpointListItem(
       int commandNumber,
       int? leftLine,
       int? rightLine,
-      bool isEnabled = true,
-      string? leftFile = null,
-      string? rightFile = null)
+      string mnemonic,
+      bool isEnabled = true)
     {
       CommandNumber = commandNumber;
       _leftLine = leftLine;
       _rightLine = rightLine;
+      _mnemonic = mnemonic;
       _isEnabled = isEnabled;
-      _leftFile = leftFile;
-      _rightFile = rightFile;
+      //_leftFile = leftFile;
+      //_rightFile = rightFile;
     }
 
     /// <summary>

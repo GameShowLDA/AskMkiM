@@ -329,9 +329,9 @@ namespace UI.Controls
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: true, raiseEvents: false);
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: true, raiseEvents: false);
 
-      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: true);
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: true);
 
-      if (obj.LineNumber == leftLine - 1)
+      //if (obj.LineNumber == leftLine - 1)
         right.ScrollToLine(rightLine);
     }
 
@@ -361,7 +361,7 @@ namespace UI.Controls
 
       ErrorListBoxVertical.RemoveBreakpoint(obj.CommandNumber);
 
-      if (obj.LineNumber == leftLine - 1)
+      //if (obj.LineNumber == leftLine - 1)
 		    right.ScrollToLine(rightLine);
     }
 
@@ -383,7 +383,9 @@ namespace UI.Controls
       left.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
       right.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
 
-      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: true);
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: true);
+
+      right.ScrollToLine(rightLine);
     }
 
     private void BreakpointOff(BreakpointEvents.BreakpointOff obj)
@@ -404,7 +406,9 @@ namespace UI.Controls
       left.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
       right.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
 
-      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, isEnabled: false);
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: false);
+
+      right.ScrollToLine(rightLine);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)

@@ -187,6 +187,7 @@ namespace UI.Controls.TextEditor
       }
     }
 
+    //TODO: Перевести всё на NumCommandWithMnemonic, чтоб не дублировать!
     /// <summary>
     /// Установка разрешенных строк, где можно ставить точки остановки, и вытаскивание данных об этом.
     /// </summary>
@@ -194,6 +195,15 @@ namespace UI.Controls.TextEditor
     {
       get => _executionMargin.RightBreakpoints;
       set => _executionMargin.RightBreakpoints = value;
+    }
+
+    /// <summary>
+    /// Словарь, где ключ - номер команды, а значение - название команды (мнемоника).
+    /// </summary>
+    public Dictionary<int, string> NumCommandWithMnemonic
+    {
+      get => _executionMargin.NumCommandWithMnemonic;
+      set => _executionMargin.NumCommandWithMnemonic = value;
     }
 
     /// <summary>

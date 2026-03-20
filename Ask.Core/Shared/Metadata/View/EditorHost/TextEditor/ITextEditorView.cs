@@ -77,6 +77,11 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     public List<int> RightBreakpoint { get; set; }
 
     /// <summary>
+    /// Словарь, где ключ - номер команды, а значение - название команды (мнемоника).
+    /// </summary>
+    public Dictionary<int, string> NumCommandWithMnemonic { get; set; }
+
+    /// <summary>
     /// Лист номеров команд, на которых установлены точки остановки.
     /// </summary>
     public List<int> BreakpointCommandsNumbers { get; }
