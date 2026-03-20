@@ -5,9 +5,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
-using System.IO;
 using System.Windows;
-using System.Windows.Forms;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -52,15 +50,6 @@ namespace MainWindowProgram.Services
       ;
 
     /// <summary>
-    /// Строит список строк исходного текста, на которые можно ставить точку остановки в левом редакторе.
-    /// </summary>
-    /// <param name="allowed">Команды, на которые разрешены точки.</param>
-    /// <returns>Список номеров строк исходного текста.</returns>
-    private static List<int> BuildLeftBreakpointLines(IEnumerable<BaseCommandModel> allowed)
-      => allowed.Select(m => m.StartLineNumber)
-                .ToList();
-
-    /// <summary>
     /// Строит словарь соответствия между номерами команд и их наименованиями (мнемониками) для быстрого доступа при работе с точками остановки.
     /// </summary>
     /// <param name="models">Команды, на которые разрешены точки.</param>
@@ -76,103 +65,6 @@ namespace MainWindowProgram.Services
         result.Add(commandNumber, model.Mnemonic);
       }
       return result;
-    }
-
-    //TODO: Сделать что-ниюудь с этим методом, а то довольно громадный и не надёжный.
-    /// <summary>
-    /// Строит список строк документа трансляции, на которые можно ставить точку остановки.
-    /// </summary>
-    /// <param name="doc">Документ правого редактора (текст трансляции).</param>
-    /// <param name="models">Список моделей команд (результат разбора/трансляции).</param>
-    /// <returns>
-    /// Список номеров строк в документе трансляции, на которые разрешено ставить точку остановки.
-    /// </returns>
-    private static List<int> BuildRightBreakpointLinesFromDocument(ITextDocumentView doc, List<BaseCommandModel> models)
-    {
-      var allowedCommands = new HashSet<int>(models.Count);
-      for (int i = 0; i < models.Count; i++)
-      {
-        if (IsBreakpointAllowed(models[i]) && int.TryParse(models[i].CommandNumber, out var commandNumber))
-          allowedCommands.Add(commandNumber);
-      }
-
-      var result = new List<int>(allowedCommands.Count);
-
-      for (int lineNumber = 1; lineNumber <= doc.LineCount; lineNumber++)
-      {
-        var line = doc.GetLine(lineNumber);
-        var text = doc.GetText(line);
-        if (string.IsNullOrWhiteSpace(text))
-          continue;
-
-        int i = 0;
-        while (i < text.Length && (text[i] == ' ' || text[i] == '\t')) i++;
-        if (i >= text.Length)
-          continue;
-
-        int value = 0;
-        bool hasDigits = false;
-
-        while (i < text.Length)
-        {
-          char c = text[i];
-          if (c < '0' || c > '9') break;
-          hasDigits = true;
-          value = value * 10 + (c - '0');
-          i++;
-        }
-
-        if (hasDigits && allowedCommands.Contains(value))
-          result.Add(lineNumber);
-      }
-
-      return result;
-    }
-
-    /// <summary>
-    /// Собирает номера команд, для которых установлены точки останова,
-    /// и их состояние (включена/выключена).
-    /// </summary>
-    private static Dictionary<int, bool> CollectBreakpoints(TranslatorItem item)
-    {
-      var result = new Dictionary<int, bool>();
-
-      for (int i = 0; i < item.TranslationModels.Count; i++)
-      {
-        var model = item.TranslationModels[i];
-        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out var cmd))
-          Merge(result, cmd, model.IsBreakpointEnabled);
-      }
-
-      var leftEditor = item.GetLeftBox().GetTextEditor();
-      if (leftEditor != null)
-      {
-        for (int i = 0; i < leftEditor.BreakpointCommandsNumbers.Count; i++)
-        {
-          int cmd = leftEditor.BreakpointCommandsNumbers[i];
-          Merge(result, cmd, leftEditor.IsBreakpointEnabled(cmd));
-        }
-      }
-
-      var rightEditor = item.GetRightBox().GetTextEditor();
-      if (rightEditor != null)
-      {
-        for (int i = 0; i < rightEditor.BreakpointCommandsNumbers.Count; i++)
-        {
-          int cmd = rightEditor.BreakpointCommandsNumbers[i];
-          Merge(result, cmd, rightEditor.IsBreakpointEnabled(cmd));
-        }
-      }
-
-      return result;
-
-      static void Merge(Dictionary<int, bool> map, int cmd, bool enabled)
-      {
-        if (map.TryGetValue(cmd, out bool prev))
-          map[cmd] = prev && enabled;
-        else
-          map[cmd] = enabled;
-      }
     }
 
     /// <summary>
@@ -214,7 +106,7 @@ namespace MainWindowProgram.Services
           continue;
 
         leftLineByCommand[cmd] = model.StartLineNumber;
-        rightLineByCommand[cmd] = model.FormattedStartLineNumber + 1; // FormattedStartLineNumber 0-based
+        rightLineByCommand[cmd] = model.FormattedStartLineNumber + 1;
 
         if (hasBreakpoint)
         {
@@ -486,19 +378,26 @@ namespace MainWindowProgram.Services
       var allowed = models.Where(IsBreakpointAllowed).ToList();
 
       editor.ConfigureBreakpoints(interactive: true, visible: false);
-      editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+      editor.RightBreakpoint = allowed
+        .Select(m => m.StartLineNumber)
+        .ToList();
       editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
       if (foundDockItem.Content is TranslatorItem item)
       {
-        var preservedBreakpoints = CollectBreakpoints(item);
+        var preservedBreakpoints = item.TranslationModels
+          .Where(x => x.HasBreakpoint)
+          .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled);
 
         item.SetRightEditor(translateEditor);
         item.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
         item.TranslationModels = models;
 
         translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-        translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+        translateEditor.RightBreakpoint = models
+          .Where(IsBreakpointAllowed)
+          .Select(m => m.FormattedStartLineNumber + 1)
+          .ToList();
         translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(models);
 
         RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
@@ -555,7 +454,9 @@ namespace MainWindowProgram.Services
         var allowed = models.Where(IsBreakpointAllowed).ToList();
 
         editor.ConfigureBreakpoints(interactive: true, visible: false);
-        editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+        editor.RightBreakpoint = allowed
+        .Select(m => m.StartLineNumber)
+        .ToList();
         editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
         EditorEventAdapter.RaiseCloseRunItem(editor);
@@ -564,7 +465,10 @@ namespace MainWindowProgram.Services
         item.TranslationModels = models;
 
         translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-        translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+        translateEditor.RightBreakpoint = models
+          .Where(IsBreakpointAllowed)
+          .Select(m => m.FormattedStartLineNumber + 1)
+          .ToList();
         translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(models);
       }
       catch (Exception ex)

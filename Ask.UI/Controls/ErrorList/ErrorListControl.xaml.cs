@@ -404,14 +404,6 @@ namespace Ask.UI.Controls.ErrorList
       }
     }
 
-    private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-      if (MainTabControl.SelectedItem == BreakpointsTab)
-      {
-        BreakpointsGrid.UnselectAll();
-      }
-    }
-
     #endregion
   }
 }

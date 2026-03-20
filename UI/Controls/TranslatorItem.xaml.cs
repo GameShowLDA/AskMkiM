@@ -2,11 +2,8 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
-using ICSharpCode.AvalonEdit;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using Ask.UI.Controls.ErrorList;
@@ -331,7 +328,7 @@ namespace UI.Controls
 
       ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: true);
 
-      //if (obj.LineNumber == leftLine - 1)
+      if (obj.LineNumber == leftLine)
         right.ScrollToLine(rightLine);
     }
 
@@ -361,7 +358,7 @@ namespace UI.Controls
 
       ErrorListBoxVertical.RemoveBreakpoint(obj.CommandNumber);
 
-      //if (obj.LineNumber == leftLine - 1)
+      if (obj.LineNumber == leftLine)
 		    right.ScrollToLine(rightLine);
     }
 
