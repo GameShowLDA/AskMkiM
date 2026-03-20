@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Support;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,7 +22,7 @@ namespace Ask.UI.Controls.ErrorList
     /// <summary>
     /// Коллекция элементов (ошибки + предупреждения), отображаемая в DataGrid.
     /// </summary>
-    public ObservableCollection<IDisplayIssue> Items { get; } = new();
+    public RangeObservableCollection<IDisplayIssue> Items { get; } = new();
 
     /// <summary>
     /// Коллекция точек остановки для вкладки "Точки остановки".
@@ -183,6 +184,22 @@ namespace Ask.UI.Controls.ErrorList
       UpdateTabsVisibilityAndSelection();
     }
 
+    /// <summary>
+    /// Полностью заменяет набор отображаемых диагностик.
+    /// Используется для пакетной загрузки без множества перерисовок UI.
+    /// </summary>
+    public void SetIssues(IEnumerable<IDisplayIssue> issues)
+    {
+      var issueList = issues?.ToList() ?? new List<IDisplayIssue>();
+
+      _allIssues.Clear();
+      _allIssues.AddRange(issueList);
+
+      RecalculateTotals();
+      ReplaceVisibleItems();
+      ApplyInitialButtonState();
+    }
+
     public void ClearAll()
     {
       _allIssues.Clear();
@@ -267,6 +284,34 @@ namespace Ask.UI.Controls.ErrorList
     {
       ApplyInitialButtonState();
     }
+
+    private void RecalculateTotals()
+    {
+      _warningTotal = 0;
+      _errorTotal = 0;
+
+      foreach (var issue in _allIssues)
+      {
+        if (issue.IsWarning)
+          _warningTotal++;
+        else
+          _errorTotal++;
+      }
+    }
+
+    private bool ShouldDisplay(IDisplayIssue issue)
+    {
+      if (issue.IsWarning)
+        return !_warningsHidden;
+
+      return !_errorsHidden;
+    }
+
+    private void ReplaceVisibleItems()
+    {
+      Items.ReplaceRange(_allIssues.Where(ShouldDisplay));
+    }
+
 
     private void ApplyInitialButtonState()
     {
@@ -405,5 +450,48 @@ namespace Ask.UI.Controls.ErrorList
     }
 
     #endregion
+  }
+
+  public sealed class RangeObservableCollection<T> : ObservableCollection<T>
+  {
+    public void AddRange(IEnumerable<T> items)
+    {
+      var bufferedItems = items?.ToList() ?? new List<T>();
+      if (bufferedItems.Count == 0)
+        return;
+
+      CheckReentrancy();
+
+      foreach (var item in bufferedItems)
+      {
+        Items.Add(item);
+      }
+
+      RaiseReset();
+    }
+
+    public void ReplaceRange(IEnumerable<T> items)
+    {
+      CheckReentrancy();
+
+      Items.Clear();
+
+      if (items != null)
+      {
+        foreach (var item in items)
+        {
+          Items.Add(item);
+        }
+      }
+
+      RaiseReset();
+    }
+
+    private void RaiseReset()
+    {
+      OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+      OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+      OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+    }
   }
 }

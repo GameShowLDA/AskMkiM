@@ -609,8 +609,10 @@ namespace MainWindowProgram.Services
 
 	  var currentItem = foundDockItem.Content as TranslatorItem;
 	  Dictionary<int, bool> preservedBreakpoints = currentItem != null
-		? CollectBreakpoints(currentItem)
-		: new Dictionary<int, bool>();
+		? currentItem.TranslationModels
+          .Where(x => x.HasBreakpoint)
+          .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled)
+    : new Dictionary<int, bool>();
 
 	  SetDeferredVisibility(currentItem, false);
 	  SetDeferredVisibility(translateEditor.View, false);
@@ -646,8 +648,10 @@ namespace MainWindowProgram.Services
 		  translateEditor.Text = translationResult.FormattedText;
 
 		  editor.ConfigureBreakpoints(interactive: true, visible: false);
-		  editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
-		  editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+		  editor.RightBreakpoint = allowed
+        .Select(m => m.StartLineNumber)
+        .ToList();
+      editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
 		  if (currentItem != null)
 		  {
@@ -675,8 +679,11 @@ namespace MainWindowProgram.Services
 			  94d);
 
 			translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-			translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
-			translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+			translateEditor.RightBreakpoint = models
+          .Where(IsBreakpointAllowed)
+          .Select(m => m.FormattedStartLineNumber + 1)
+          .ToList();
+        translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
 			RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
 
@@ -710,7 +717,7 @@ namespace MainWindowProgram.Services
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
 	{
 	  TranslatorItem? createdItem = null;
-	  TextEditorUI? translateEditor = null;
+      ITextEditorView? translateEditor = null;
 
 	  try
 	  {
@@ -779,8 +786,10 @@ namespace MainWindowProgram.Services
 		  translateEditor.Text = translationResult.FormattedText;
 
 		  editor.ConfigureBreakpoints(interactive: true, visible: false);
-		  editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
-		  editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+		  editor.RightBreakpoint = allowed
+        .Select(m => m.StartLineNumber)
+        .ToList();
+      editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
 		  EditorEventAdapter.RaiseCloseRunItem(editor);
 
@@ -811,8 +820,11 @@ namespace MainWindowProgram.Services
 			94d);
 
 		  translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-		  translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
-		  translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+		  translateEditor.RightBreakpoint = models
+          .Where(IsBreakpointAllowed)
+          .Select(m => m.FormattedStartLineNumber + 1)
+          .ToList();
+      translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
 		  await SetTranslationStageAsync(
 			progressWindow,
