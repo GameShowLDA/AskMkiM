@@ -1,13 +1,17 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Metadata.View;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
+using DataBaseConfiguration.Services.Device;
 using MainWindowProgram.Services;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -58,6 +62,7 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
       EventAggregator.Subscribe<SystemStateEvents.AdminRightsChanged>(e => OnAdminRightsChanged(e.IsAdmin));
       EventAggregator.Subscribe<SystemStateEvents.ControlProgramActiveChanged>(e => OnControlProgramActiveRightsChanged(e.IsControlProgramActive));
+      EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(OnPowerChanged);
 
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
 
@@ -65,11 +70,12 @@ namespace MainWindowProgram.Events
       DebugCommand.DebugModeChanged += DebugModeChanged;
       AdminCommand.PauseInStopChanged += AdminCommand_PauseInStopChanged;
       AdminCommand.PowerChanged += AdminCommand_PowerChanged;
+      AdminCommand.UpsPowerChanged += AdminCommand_UpsPowerChanged;
 
       _usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
 
-      var idleMode = ExecutionConfig.GetIsIdleModeEnabled();
+      bool idleMode = ExecutionConfig.GetIsIdleModeEnabled();
       EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
 
       OnIdleModeChange(null, idleMode);
@@ -85,6 +91,53 @@ namespace MainWindowProgram.Events
       SystemStateManager.SetIsActivePower(e);
     }
 
+    private void AdminCommand_UpsPowerChanged(object? sender, bool e)
+    {
+      Application.Current.Dispatcher.BeginInvoke(async () =>
+      {
+        try
+        {
+          IUninterruptiblePowerSupply? ups = GetConfiguredUps();
+          if (ups == null)
+          {
+            MessageEventAdapter.RaiseErrorMessage("Бесперебойник не найден в конфигурации.", true);
+            return;
+          }
+
+          if (e)
+          {
+            await ups.StartPowerAsync();
+          }
+          else
+          {
+            await ups.StopPowerAsync();
+          }
+        }
+        catch (Exception ex)
+        {
+          MessageEventAdapter.RaiseErrorMessage(ex.Message, true);
+        }
+      });
+    }
+
+    private static IUninterruptiblePowerSupply? GetConfiguredUps()
+    {
+      int? chassisNumber = new ChassisManagerServices()
+        .GetAll()
+        .FirstOrDefault()
+        ?.Number;
+
+      IEnumerable<IUninterruptiblePowerSupply> devices = new UninterruptiblePowerSupplyServices().GetAll();
+
+      if (chassisNumber.HasValue)
+      {
+        return devices.FirstOrDefault(device => device.NumberChassis == chassisNumber.Value)
+          ?? devices.FirstOrDefault();
+      }
+
+      return devices.FirstOrDefault();
+    }
+
     private void AdminCommand_PauseInStopChanged(object? sender, bool e)
     {
       ExecutionConfig.SetStopOnError(e);
@@ -93,17 +146,9 @@ namespace MainWindowProgram.Events
     /// <summary>
     /// Обработчик события смены темы. Вызывается, когда тема меняется глобально.
     /// </summary>
-    private async void OnThemeChanged(ThemeEvent.Change e)
+    private void OnThemeChanged(ThemeEvent.Change e)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return;
-      }
-      else
-      {
-        _mainWindow.BottomPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-        _mainWindow.TopPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-      }
+      Application.Current.Dispatcher.BeginInvoke(ApplyMainPanelBackground);
     }
 
     /// <summary>
@@ -135,19 +180,26 @@ namespace MainWindowProgram.Events
     {
       Application.Current.Dispatcher.BeginInvoke(() =>
       {
-        if (e)
-        {
-          _mainWindow.BottomPanel.Background = (Brush)Application.Current.FindResource("GreenColorSolidColorBrush");
-          _mainWindow.TopPanel.Background = (Brush)Application.Current.FindResource("GreenColorSolidColorBrush");
-          _mainWindow.PowerButton.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-          _mainWindow.BottomPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-          _mainWindow.TopPanel.Background = (Brush)Application.Current.FindResource("BackgroundBrushes");
-          _mainWindow.PowerButton.Visibility = Visibility.Visible;
-        }
+        _mainWindow.PowerButton.Visibility = e ? Visibility.Collapsed : Visibility.Visible;
+        ApplyMainPanelBackground();
       });
+    }
+
+    private void OnPowerChanged(SystemStateEvents.PowerChanged _)
+    {
+      Application.Current.Dispatcher.BeginInvoke(ApplyMainPanelBackground);
+    }
+
+    private void ApplyMainPanelBackground()
+    {
+      Brush topBrush = (Brush)Application.Current.FindResource("BackgroundBrushes");
+      string bottomBrushKey = SystemStateManager.GetIsActivePower()
+        ? "SystemPowerWarningPanelBrush"
+        : "BackgroundBrushes";
+
+      Brush bottomBrush = (Brush)Application.Current.FindResource(bottomBrushKey);
+      _mainWindow.BottomPanel.Background = bottomBrush;
+      _mainWindow.TopPanel.Background = topBrush;
     }
 
     /// <summary>
@@ -211,8 +263,8 @@ namespace MainWindowProgram.Events
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        var visibility = isControlProgramActive ? Visibility.Visible : Visibility.Collapsed;
-        var enabled = isControlProgramActive;
+        Visibility visibility = isControlProgramActive ? Visibility.Visible : Visibility.Collapsed;
+        bool enabled = isControlProgramActive;
 
         _mainWindow.Translation.Visibility = visibility;
         _mainWindow.Translation.IsEnabled = enabled;
@@ -222,7 +274,6 @@ namespace MainWindowProgram.Events
         _mainWindow.Run.IsEnabled = enabled;
         _mainWindow.RunStepByStepMode.Visibility = visibility;
         _mainWindow.RunStepByStepMode.IsEnabled = enabled;
-
       });
     }
 

@@ -53,21 +53,6 @@ namespace Ask.Core.Services.Errors.Translation
       };
 
 
-    /// <summary>
-    /// Ошибка: команда ИЕ не содержит ни одного параметра.
-    /// </summary>
-    public static ErrorItem EmptyCommandBody(int startLineNumber, string command,
-      [CallerMemberName] string callerName = "",
-      [CallerFilePath] string callerFile = "",
-      [CallerLineNumber] int callerLine = 0) => new()
-      {
-        SourceLineNumber = startLineNumber,
-        Command = command,
-        Code = ErrorCode.Ie_EmptyCommandBody,
-        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = "Команда ИЕ должна содержать хотя бы один параметр. Тело команды не может быть пустым."
-      };
-
     public ErrorItem PairError(string command, string pointFirst, string pointLast, int sourceLineNumber, int formaterLineNumber,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",

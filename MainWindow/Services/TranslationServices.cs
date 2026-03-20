@@ -6,6 +6,9 @@ using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.Windows;
+using System.Windows.Media.Effects;
+using System.Windows.Threading;
+using UI.Components;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -160,6 +163,225 @@ namespace MainWindowProgram.Services
     {
       _multiWindow = multiWindow;
       _fileService = fileService;
+    }
+
+    private async Task RunWithTranslationProgressAsync(Func<ProgressWindow, Task> action)
+    {
+      var owner = System.Windows.Application.Current?.MainWindow;
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
+
+      try
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+
+        progressWindow.Configure(
+          "Трансляция программы контроля",
+          "Подготовка окна",
+          "Готовим отображение этапов и интерфейс транслятора.");
+
+        if (owner != null)
+          owner.Effect = new BlurEffect { Radius = 8 };
+
+        progressWindow.Show();
+
+        await WaitForUiReadyAsync(progressWindow);
+        await action(progressWindow);
+      }
+      finally
+      {
+        progressWindow?.Close();
+
+        if (owner != null)
+          owner.Effect = previousEffect;
+      }
+    }
+
+    private async Task<TranslationBuildResult> BuildTranslationAsync(string text, ProgressWindow progressWindow)
+    {
+      SetTranslationStage(
+        progressWindow,
+        "Подготовка фоновой трансляции",
+        "Запускаем разбор программы контроля вне UI-потока.",
+        8d);
+
+      if (System.Windows.Application.Current != null)
+      {
+        await System.Windows.Application.Current.Dispatcher.InvokeAsync(
+          () => { },
+          DispatcherPriority.ContextIdle);
+      }
+
+      bool buildStageUpdatesEnabled = true;
+
+      var progress = new Progress<string>(stage =>
+      {
+        if (!buildStageUpdatesEnabled)
+          return;
+
+        var (status, hint, progressValue) = MapBuildStage(stage);
+        SetTranslationStage(progressWindow, status, hint, progressValue);
+      });
+
+      var result = await Task.Run(() =>
+      {
+        var manager = new CommandTranslationManager();
+        var result = manager.BuildTranslation(text, progress);
+        manager.SetSourseLines(result.Models);
+        return result;
+      });
+
+      buildStageUpdatesEnabled = false;
+      return result;
+    }
+
+    private static (string Status, string Hint, double Progress) MapBuildStage(string stage) => stage switch
+    {
+      "Начало трансляции" => (
+        "Подготовка трансляции",
+        "Инициализируем парсеры, форматтеры и служебные структуры.",
+        18d),
+      "Формирование данных" => (
+        "Формирование текста трансляции",
+        "Строим строки результата и связываем их с исходными командами.",
+        42d),
+      "Проверка взаимосвязей" => (
+        "Проверка взаимосвязей",
+        "Проверяем обязательные команды, переходы и связи между точками.",
+        62d),
+      "Готово" => (
+        "Фоновая сборка завершена",
+        "Результат готов. Подключаем его к интерфейсу.",
+        70d),
+      _ => (stage, stage, 0d),
+    };
+
+    private static void SetTranslationStage(
+      ProgressWindow progressWindow,
+      string status,
+      string hint,
+      double? progress = null)
+    {
+      if (progress.HasValue)
+        progressWindow.SetProgress(progress.Value);
+
+      progressWindow.SetStage(status, hint);
+    }
+
+    private static async Task SetTranslationStageAsync(
+      ProgressWindow progressWindow,
+      string status,
+      string hint,
+      double? progress = null)
+    {
+      SetTranslationStage(progressWindow, status, hint, progress);
+      await FlushProgressWindowAsync(progressWindow);
+    }
+
+    private static async Task FlushProgressWindowAsync(ProgressWindow progressWindow)
+    {
+      var dispatcher = progressWindow.Dispatcher;
+      if (dispatcher == null)
+        return;
+
+      await dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Background);
+
+      await dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Render);
+
+      await dispatcher.InvokeAsync(
+        () => { },
+        DispatcherPriority.ContextIdle);
+    }
+
+    private static void SetDeferredVisibility(FrameworkElement? element, bool isVisible)
+    {
+      if (element == null)
+        return;
+
+      element.Opacity = isVisible ? 1d : 0d;
+      element.IsHitTestVisible = isVisible;
+    }
+
+    private static async Task RevealDeferredElementsAsync(params FrameworkElement?[] elements)
+    {
+      var visibleElements = elements
+        .Where(element => element != null)
+        .Cast<FrameworkElement>()
+        .Distinct()
+        .ToArray();
+
+      if (visibleElements.Length == 0)
+        return;
+
+      foreach (var element in visibleElements)
+      {
+        SetDeferredVisibility(element, true);
+      }
+
+      await WaitForUiReadyAsync(visibleElements);
+    }
+
+    private static async Task WaitForUiReadyAsync(params FrameworkElement?[] elements)
+    {
+      var readyElements = elements
+        .Where(element => element != null)
+        .Cast<FrameworkElement>()
+        .Distinct()
+        .ToArray();
+
+      foreach (var element in readyElements)
+      {
+        await WaitForLoadedAsync(element);
+      }
+
+      var dispatcher = readyElements.FirstOrDefault()?.Dispatcher ?? System.Windows.Application.Current?.Dispatcher;
+      if (dispatcher == null)
+        return;
+
+      await dispatcher.InvokeAsync(() =>
+      {
+        foreach (var element in readyElements)
+        {
+          element.UpdateLayout();
+        }
+      }, DispatcherPriority.Loaded);
+
+      await dispatcher.InvokeAsync(() =>
+      {
+        foreach (var element in readyElements)
+        {
+          element.UpdateLayout();
+        }
+      }, DispatcherPriority.Render);
+
+      await dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+    }
+
+    private static Task WaitForLoadedAsync(FrameworkElement element)
+    {
+      if (element.IsLoaded)
+        return Task.CompletedTask;
+
+      var source = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+      RoutedEventHandler? handler = null;
+      handler = (_, _) =>
+      {
+        element.Loaded -= handler;
+        source.TrySetResult(null);
+      };
+
+      element.Loaded += handler;
+      return source.Task;
     }
 
     /// <summary>
@@ -348,7 +570,7 @@ namespace MainWindowProgram.Services
         return;
       }
 
-      EditExistingTranslator(editor, foundDockItem);
+      await EditExistingTranslator(editor, foundDockItem);
     }
 
     /// <summary>
@@ -359,50 +581,124 @@ namespace MainWindowProgram.Services
       MessageBoxCustom.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
     }
 
+    private void ShowTranslationError(Exception ex)
+    {
+      MessageBoxCustom.Show(
+        "Не удалось выполнить трансляцию программы контроля.",
+        "Ошибка запуска программы контроля",
+        image: MessageBoxImage.Error);
+
+      LogError($"Не удалось выполнить трансляцию программы контроля: {ex}.");
+    }
+
     /// <summary>
     /// Обновляет существующий компонент транслятора на основе текста из заданного редактора.
     /// Выполняет трансляцию команд и выводит результат во второй (правый) редактор.
     /// </summary>
     /// <param name="editor">Редактор с исходным текстом.</param>
     /// <param name="foundDockItem">Док-элемент, содержащий компонент транслятора.</param>
-    private void EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
-    {
-      string text = editor.Text;
+    private async Task EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
+	{
+	  string text = editor.Text;
+	  var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
+	  if (translateEditor == null)
+		return;
 
-      var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
+	  if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
+		translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
 
-      var manager = new CommandTranslationManager();
-      var models = manager.ParseAllAndDisplay(text, translateEditor);
-      manager.SetSourseLines(models);
+	  var currentItem = foundDockItem.Content as TranslatorItem;
+	  Dictionary<int, bool> preservedBreakpoints = currentItem != null
+		? CollectBreakpoints(currentItem)
+		: new Dictionary<int, bool>();
 
-      var allowed = models.Where(IsBreakpointAllowed).ToList();
+	  SetDeferredVisibility(currentItem, false);
+	  SetDeferredVisibility(translateEditor.View, false);
 
-      editor.ConfigureBreakpoints(interactive: true, visible: false);
-      editor.RightBreakpoint = allowed
-        .Select(m => m.StartLineNumber)
-        .ToList();
-      editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+	  try
+	  {
+		await RunWithTranslationProgressAsync(async progressWindow =>
+		{
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Подготовка редактора результата",
+			"Создаём новый экземпляр редактора для обновлённого текста трансляции.",
+			8d);
 
-      if (foundDockItem.Content is TranslatorItem item)
-      {
-        var preservedBreakpoints = item.TranslationModels
-          .Where(x => x.HasBreakpoint)
-          .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled);
+		  var translationResult = await BuildTranslationAsync(text, progressWindow);
+		  var models = translationResult.Models;
+		  var allowed = models.Where(IsBreakpointAllowed).ToList();
 
-        item.SetRightEditor(translateEditor);
-        item.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
-        item.TranslationModels = models;
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Подготовка диагностики",
+			"Собираем ошибки и предупреждения в пакет до обновления интерфейса.",
+			76d);
 
-        translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-        translateEditor.RightBreakpoint = models
-          .Where(IsBreakpointAllowed)
-          .Select(m => m.FormattedStartLineNumber + 1)
-          .ToList();
-        translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(models);
+		  var issuesSnapshot = await Task.Run(() => TranslatorItem.BuildIssuesSnapshot(models));
 
-        RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
-      }
-    }
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Передача текста результата",
+			"Загружаем сформированный текст в правый редактор.",
+			82d);
+
+		  translateEditor.Text = translationResult.FormattedText;
+
+		  editor.ConfigureBreakpoints(interactive: true, visible: false);
+		  editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+		  editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+
+		  if (currentItem != null)
+		  {
+			await SetTranslationStageAsync(
+			  progressWindow,
+			  "Подключение редактора",
+			  "Меняем экземпляр правого редактора и подготавливаем его к отображению.",
+			  86d);
+
+			currentItem.SetRightEditor(translateEditor);
+			currentItem.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
+
+			await SetTranslationStageAsync(
+			  progressWindow,
+			  "Обновление диагностики",
+			  "Применяем подготовленный список ошибок и предупреждений к таблице.",
+			  90d);
+
+			currentItem.ApplyTranslationModels(models, issuesSnapshot);
+
+			await SetTranslationStageAsync(
+			  progressWindow,
+			  "Синхронизация точек останова",
+			  "Обновляем разрешённые строки и восстанавливаем сохранённые точки останова.",
+			  94d);
+
+			translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
+			translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+			translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+
+			RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
+
+			await SetTranslationStageAsync(
+			  progressWindow,
+			  "Загрузка интерфейса",
+			  "Подготавливаем обновлённую вкладку к показу без промежуточного мерцания.",
+			  98d);
+
+			await WaitForUiReadyAsync(currentItem, translateEditor.View);
+		  }
+		});
+	  }
+	  catch (Exception ex)
+	  {
+		ShowTranslationError(ex);
+	  }
+	  finally
+	  {
+		await RevealDeferredElementsAsync(currentItem, translateEditor.View);
+	  }
+	}
 
     /// <summary>
     /// Создаёт новый компонент транслятора, содержащий редактор исходного текста и редактор результата трансляции.
@@ -412,77 +708,132 @@ namespace MainWindowProgram.Services
     /// <param name="text">Текст, подлежащий трансляции.</param>
     /// <returns>Асинхронная задача создания компонента транслятора.</returns>
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
-    {
-      try
-      {
-        var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
+	{
+	  TranslatorItem? createdItem = null;
+	  TextEditorUI? translateEditor = null;
 
-        editor.TextArea.Document.Text = text;
+	  try
+	  {
+		translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
+		if (translateEditor == null)
+		  return;
 
-        if (!editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
-          editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
+		editor.TextArea.Document.Text = text;
 
-        CancellationTokenSource redrawToken = null;
+		if (!editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
+		  editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
 
-        editor.TextChanged += async (_, __) =>
-        {
-          redrawToken?.Cancel();
-          redrawToken = new CancellationTokenSource();
-          var token = redrawToken.Token;
+		CancellationTokenSource redrawToken = null;
 
-          try
-          {
-            await Task.Delay(80, token);
-            if (!token.IsCancellationRequested)
-            {
-              System.Windows.Application.Current.Dispatcher.Invoke(() =>
-              {
-                editor.TextArea.TextView.Redraw();
-              });
-            }
-          }
-          catch (TaskCanceledException) { }
-        };
+		editor.TextChanged += async (_, __) =>
+		{
+		  redrawToken?.Cancel();
+		  redrawToken = new CancellationTokenSource();
+		  var token = redrawToken.Token;
 
-        if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
-          translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
+		  try
+		  {
+			await Task.Delay(80, token);
+			if (!token.IsCancellationRequested)
+			{
+			  System.Windows.Application.Current.Dispatcher.Invoke(() =>
+			  {
+				editor.TextArea.TextView.Redraw();
+			  });
+			}
+		  }
+		  catch (TaskCanceledException) { }
+		};
 
-        var manager = new CommandTranslationManager();
-        var models = manager.ParseAllAndDisplay(text, translateEditor);
-        manager.SetSourseLines(models);
+		if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
+		  translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
 
-        var allowed = models.Where(IsBreakpointAllowed).ToList();
+		SetDeferredVisibility(translateEditor.View, false);
 
-        editor.ConfigureBreakpoints(interactive: true, visible: false);
-        editor.RightBreakpoint = allowed
-        .Select(m => m.StartLineNumber)
-        .ToList();
-        editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+		await RunWithTranslationProgressAsync(async progressWindow =>
+		{
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Подготовка редактора результата",
+			"Создаём редактор для новой вкладки транслятора.",
+			8d);
 
-        EditorEventAdapter.RaiseCloseRunItem(editor);
+		  var translationResult = await BuildTranslationAsync(text, progressWindow);
+		  var models = translationResult.Models;
+		  var allowed = models.Where(IsBreakpointAllowed).ToList();
 
-        var item = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
-        item.TranslationModels = models;
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Подготовка диагностики",
+			"Собираем ошибки и предупреждения до открытия новой вкладки.",
+			76d);
 
-        translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-        translateEditor.RightBreakpoint = models
-          .Where(IsBreakpointAllowed)
-          .Select(m => m.FormattedStartLineNumber + 1)
-          .ToList();
-        translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(models);
-      }
-      catch (Exception ex)
-      {
-        MessageBoxCustom.Show(
-          $"Не удалось запустить трансляцию программы контроля.",
-          "Ошибка запуска программы контроля",
-          image: MessageBoxImage.Error);
+		  var issuesSnapshot = await Task.Run(() => TranslatorItem.BuildIssuesSnapshot(models));
 
-        LogError($"Не удалось запустить трансляцию программы контроля: {ex}.");
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Передача текста результата",
+			"Передаём итоговый текст в редактор результата.",
+			82d);
 
-        EditorEventAdapter.RaiseTextEditorActivated(editor);
-        _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
-      }
-    }
+		  translateEditor.Text = translationResult.FormattedText;
+
+		  editor.ConfigureBreakpoints(interactive: true, visible: false);
+		  editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+		  editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+
+		  EditorEventAdapter.RaiseCloseRunItem(editor);
+
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Открытие вкладки трансляции",
+			"Создаём контейнер и подключаем исходный и результирующий редакторы.",
+			86d);
+
+		  createdItem = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
+		  if (createdItem == null)
+			return;
+
+		  SetDeferredVisibility(createdItem, false);
+
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Обновление диагностики",
+			"Применяем подготовленный список ошибок и предупреждений к новой вкладке.",
+			90d);
+
+		  createdItem.ApplyTranslationModels(models, issuesSnapshot);
+
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Синхронизация точек останова",
+			"Готовим правый редактор к навигации и установке точек останова.",
+			94d);
+
+		  translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
+		  translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+		  translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+
+		  await SetTranslationStageAsync(
+			progressWindow,
+			"Загрузка интерфейса",
+			"Подготавливаем новую вкладку к показу без преждевременного отображения.",
+			98d);
+
+		  await WaitForUiReadyAsync(createdItem, translateEditor.View);
+		});
+	  }
+	  catch (Exception ex)
+	  {
+		ShowTranslationError(ex);
+
+		EditorEventAdapter.RaiseTextEditorActivated(editor);
+		_multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
+	  }
+	  finally
+	  {
+		await RevealDeferredElementsAsync(createdItem, translateEditor?.View);
+	  }
+	}
   }
 }

@@ -47,6 +47,9 @@ namespace Ask.Core.Shared.Entity.Devices
     public double SwitchResistance { get; set; }
 
     /// <inheritdoc />
+    public double SwitchCapacitance { get; set; }
+
+    /// <inheritdoc />
     public SwitchingBusNew BusType { get; set; }
 
     /// <inheritdoc />

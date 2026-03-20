@@ -32,5 +32,10 @@ namespace Ask.Core.Shared.Entity.Settings
     /// Флаг, указывающий, нужно ли выделять строки цепей и точек фоновым цветом в протоколе выполнения.
     /// </summary>
     public bool UseChainPointBodyBackgroundHighlighting { get; set; } = true;
+
+    /// <summary>
+    /// Флаг, указывающий, нужно ли заменять текст верхнего меню на иконки.
+    /// </summary>
+    public bool UseTopMenuIcons { get; set; }
   }
 }

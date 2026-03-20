@@ -1,4 +1,5 @@
-﻿using System.Windows;
+using Ask.Core.Services.App;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -14,21 +15,19 @@ namespace UI.Controls
       InitializeComponent();
       Time.ChangeDate += Time_ChangeDate;
       Application.Current.Deactivated += App_Deactivated;
-      this.MouseLeftButtonUp += DateTimeControl_MouseLeftButtonUp;
+      MouseLeftButtonUp += DateTimeControl_MouseLeftButtonUp;
     }
 
     private void DateTimeControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
       CalendarPopup.IsOpen = !CalendarPopup.IsOpen;
-
     }
 
     private void Time_ChangeDate()
     {
-      Date.Text = DateTime.Now.ToShortDateString();
+      Date.Text = ApplicationClockService.CurrentDateTime.ToShortDateString();
     }
 
-    // Закрытие при потере фокуса всего приложения
     private void App_Deactivated(object? sender, EventArgs e)
     {
       CalendarPopup.IsOpen = false;

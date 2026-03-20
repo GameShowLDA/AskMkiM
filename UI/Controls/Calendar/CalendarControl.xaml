@@ -1,123 +1,265 @@
-﻿<UserControl x:Class="UI.Controls.Calendar.CalendarControl"
+<UserControl x:Class="UI.Controls.Calendar.CalendarControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:UI.Controls.Calendar"
-             mc:Ignorable="d" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Clock="clr-namespace:UI.Components"
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d"
+             d:DesignHeight="440"
+             d:DesignWidth="352"
+             Width="352">
     <UserControl.Resources>
-        <local:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
-        <local:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
-        <local:BoolToFontWeightConverter x:Key="BoolToFontWeightConverter"/>
+        <Style x:Key="CalendarActionButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="#F7FAFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="#F7FAFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CalendarNavButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource CalendarActionButtonStyle}">
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+        </Style>
+
+        <Style x:Key="CalendarWeekdayTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="CalendarDayButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="DaySurface"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                <Ellipse x:Name="TodayDot"
+                                         Width="4"
+                                         Height="4"
+                                         Fill="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"
+                                         VerticalAlignment="Bottom"
+                                         Margin="0,0,0,6"
+                                         Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                                <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
+                                <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="#F7FAFF"/>
+                            </Trigger>
+
+                            <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
+                                <Setter TargetName="DaySurface" Property="BorderThickness" Value="1.5"/>
+                                <Setter TargetName="TodayDot" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
+                                <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
+                                <Setter TargetName="TodayDot" Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="Foreground" Value="#F7FAFF"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
-    <Border Background="#252526" CornerRadius="10" Padding="10">
+    <Border Margin="8"
+            Padding="18"
+            Background="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"
+            BorderBrush="{DynamicResource SettingsPanelBorderSolidColorBrush}"
+            BorderThickness="1"
+            CornerRadius="22"
+            SnapsToDevicePixels="True">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="26"
+                              ShadowDepth="0"
+                              Opacity="0.24"
+                              Color="#B3000000"/>
+        </Border.Effect>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Clock:TimeControl FontSize="30" Margin="10" x:Name="ClockControl" FullTime="True" />
-            <DockPanel Grid.Row="1">
-                <!-- Заголовок с месяцем и стрелками -->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0 0 0 10">
-                    <Button Command="{Binding PrevMonthCommand}" Width="30" Height="30" Margin="0 0 10 0" Background="Transparent" BorderThickness="0" Cursor="Hand">
-                        <Path Data="M 10 20 L 20 10 L 0 10 Z" Fill="#888" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
-                            <Path.RenderTransform>
-                                <RotateTransform Angle="180"/>
-                            </Path.RenderTransform>
-                        </Path>
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Cursor" Value="Hand"/>
-                                        <Setter Property="Opacity" Value="0.7"/>
-                                        <Setter Property="Foreground" Value="#333"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed" Value="True">
-                                        <Setter Property="Opacity" Value="0.4"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
 
-                    <TextBlock Text="{Binding MonthYear}" Foreground="White" FontWeight="Bold" FontSize="20" VerticalAlignment="Center" />
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <Button Command="{Binding NextMonthCommand}" Width="30" Height="30" Margin="10 0 0 0" Background="Transparent" BorderThickness="0" Cursor="Hand">
-                        <Path Data="M 10 20 L 20 10 L 0 10 Z" Fill="#888" Stretch="Uniform" RenderTransformOrigin="0.5,0.5"/>
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Cursor" Value="Hand"/>
-                                        <Setter Property="Opacity" Value="0.7"/>
-                                        <Setter Property="Foreground" Value="#333"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed" Value="True">
-                                        <Setter Property="Opacity" Value="0.4"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
+                <StackPanel>
+                    <TextBlock Text="Календарь"
+                               FontFamily="{DynamicResource WinstonLight}"
+                               FontSize="12"
+                               Foreground="{DynamicResource ForegrounfBrushes35}"/>
+                    <Clock:TimeControl FontSize="30"
+                                       Foreground="{DynamicResource ForegrounfBrushes}"
+                                       Margin="0,4,0,0"
+                                       FullTime="True"/>
+                    <TextBlock Text="{Binding SelectionCaption}"
+                               Margin="0,4,0,0"
+                               FontFamily="{DynamicResource WinstonMedium}"
+                               FontSize="14"
+                               Foreground="{DynamicResource ForegrounfBrushes85}"/>
                 </StackPanel>
 
-                <!-- Дни недели -->
-                <UniformGrid Rows="1" Columns="7" DockPanel.Dock="Top" Margin="0 0 0 5">
-                    <TextBlock Text="Пн" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Вт" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Ср" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Чт" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Пт" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Сб" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Вс" Foreground="#aaa" FontWeight="Bold" HorizontalAlignment="Center"/>
-                </UniformGrid>
+                <Button Grid.Column="1"
+                        Style="{StaticResource CalendarActionButtonStyle}"
+                        VerticalAlignment="Top"
+                        Command="{Binding TodayCommand}"
+                        Content="Сегодня"/>
+            </Grid>
 
-                <!-- Сетка дней -->
-                <ItemsControl ItemsSource="{Binding Days}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Rows="6" Columns="7"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Padding="4" Margin="3" CornerRadius="6"
-                                Background="{Binding IsToday, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Highlight'}"
-                                Opacity="{Binding IsCurrentMonth, Converter={StaticResource BoolToOpacityConverter}}">
-                                <TextBlock Text="{Binding DayNumber}" 
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="{Binding IsToday, Converter={StaticResource BoolToBrushConverter}, ConverterParameter='Foreground'}"
-                                       FontWeight="{Binding IsToday, Converter={StaticResource BoolToFontWeightConverter}}" />
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </DockPanel>
+            <Border Grid.Row="1"
+                    Margin="0,18,0,14"
+                    Padding="10"
+                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Style="{StaticResource CalendarNavButtonStyle}"
+                            Command="{Binding PrevMonthCommand}">
+                        <Path Data="M 15 5 L 8 12 L 15 19"
+                              Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                              StrokeThickness="1.8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Stretch="Uniform"
+                              Width="10"
+                              Height="14"/>
+                    </Button>
+
+                    <TextBlock Grid.Column="1"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Text="{Binding MonthYear}"
+                               FontFamily="{DynamicResource WinstonBold}"
+                               FontSize="18"
+                               Foreground="{DynamicResource MainTitleSolidColorBrush}"/>
+
+                    <Button Grid.Column="2"
+                            Style="{StaticResource CalendarNavButtonStyle}"
+                            Command="{Binding NextMonthCommand}">
+                        <Path Data="M 9 5 L 16 12 L 9 19"
+                              Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                              StrokeThickness="1.8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Stretch="Uniform"
+                              Width="10"
+                              Height="14"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <UniformGrid Grid.Row="2"
+                         Rows="1"
+                         Columns="7"
+                         Margin="0,0,0,8">
+                <TextBlock Text="Пн" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+                <TextBlock Text="Вт" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+                <TextBlock Text="Ср" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+                <TextBlock Text="Чт" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+                <TextBlock Text="Пт" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+                <TextBlock Text="Сб" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+                <TextBlock Text="Вс" Style="{StaticResource CalendarWeekdayTextStyle}"/>
+            </UniformGrid>
+
+            <ItemsControl Grid.Row="3"
+                          ItemsSource="{Binding Days}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="6" Columns="7"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Style="{StaticResource CalendarDayButtonStyle}"
+                                Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Content="{Binding DayNumber}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
     </Border>
 </UserControl>

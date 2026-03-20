@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Message;
 using NewCore.Base;
 using NewCore.Base.Device;
@@ -61,6 +62,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         [typeof(PowerSourceModuleEntity)] = typeof(IPowerSourceModule),
         [typeof(RelaySwitchModuleEntity)] = typeof(IRelaySwitchModule),
         [typeof(SwitchingDeviceEntity)] = typeof(ISwitchingDevice),
+        [typeof(UninterruptiblePowerSupplyEntity)] = typeof(IUninterruptiblePowerSupply),
         [typeof(RackEntity)] = typeof(IRack),
       };
 
@@ -91,6 +93,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         [typeof(IPowerSourceModule)] = nameof(IPowerSourceModule),
         [typeof(IRelaySwitchModule)] = nameof(IRelaySwitchModule),
         [typeof(ISwitchingDevice)] = nameof(ISwitchingDevice),
+        [typeof(IUninterruptiblePowerSupply)] = nameof(IUninterruptiblePowerSupply),
         [typeof(IRack)] = nameof(IRack),
       };
 
@@ -124,7 +127,12 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         return GetSerialPort(defaultSettingControl).ToString();
       }
 
-      MessageBoxCustom.Show("Устройство не принадлежит к известным типам (DeviceWithIP или DeviceWithCOM).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+      if (instance is DeviceWithUSB)
+      {
+        return GetUsbConnection(defaultSettingControl);
+      }
+
+      MessageBoxCustom.Show("Устройство не принадлежит к известным типам (DeviceWithIP, DeviceWithCOM или DeviceWithUSB).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       return null;
     }
 
@@ -173,6 +181,19 @@ namespace UI.Controls.Settings.DeviceConfig.Base
       }
 
       return new SerialPortCustom(portName, baudRate, parity, dataBits, stopBits);
+    }
+
+    /// <summary>
+    /// Returns USB connection details selected or resolved by the UI.
+    /// </summary>
+    private static string GetUsbConnection(DeviceSettingsControl defaultSettingControl)
+    {
+      if (string.IsNullOrWhiteSpace(defaultSettingControl.UsbConnectionDetails))
+      {
+        throw new ArgumentException("USB устройство не найдено.");
+      }
+
+      return defaultSettingControl.UsbConnectionDetails;
     }
 
     /// <summary>

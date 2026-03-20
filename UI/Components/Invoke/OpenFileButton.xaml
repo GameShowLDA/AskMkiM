@@ -1,38 +1,124 @@
-﻿<UserControl x:Class="UI.Components.Invoke.OpenFileButton"
+<UserControl x:Class="UI.Components.Invoke.OpenFileButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UI.Components.Invoke"
              xmlns:Components="clr-namespace:UI.Components"
-             mc:Ignorable="d" 
-             d:DesignHeight="20" d:DesignWidth="100"
+             x:Name="Root"
+             mc:Ignorable="d"
+             d:DesignHeight="20"
+             d:DesignWidth="100"
              MinWidth="50"
              MaxWidth="300">
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+
     <Border x:Name="ButtonPage"
-            Background="{StaticResource ActiveColorBrushes}"
-            CornerRadius="10,10,0,0"
-            Padding="5,0">
+            Margin="10,3,4,1"
+            Padding="10,1,8,1"
+            CornerRadius="8,8,0,0"
+            SnapsToDevicePixels="True">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource TopPanelTabBackgroundBrush}"/>
+                <Style.Triggers>
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsActive, ElementName=Root}" Value="False"/>
+                            <Condition Binding="{Binding IsMouseOver, ElementName=Root}" Value="True"/>
+                            <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="True"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabHoverBackgroundBrush}"/>
+                    </MultiDataTrigger>
+
+                    <DataTrigger Binding="{Binding IsActive, ElementName=Root}" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabActiveBackgroundBrush}"/>
+                    </DataTrigger>
+
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsActive, ElementName=Root}" Value="False"/>
+                            <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="False"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabDisabledBackgroundBrush}"/>
+                    </MultiDataTrigger>
+
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsActive, ElementName=Root}" Value="True"/>
+                            <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="False"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabActiveDisabledBackgroundBrush}"/>
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="20"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="Header" 
-                       Foreground="{StaticResource ForegroundSolidColorBrush}" 
-                       FontSize="15" 
-                       VerticalAlignment="Center" 
+            <TextBlock x:Name="Header"
+                       Margin="0,0,6,0"
                        HorizontalAlignment="Left"
-                       Margin="0,0,0,3"
+                       VerticalAlignment="Center"
+                       FontFamily="{DynamicResource WinstonMedium}"
+                       FontSize="12.5"
+                       Text="Ваш текст тут..."
                        TextTrimming="CharacterEllipsis"
-                       TextWrapping="NoWrap"
-                       Text="Ваш текст тут..."/>
+                       TextWrapping="NoWrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource TopPanelTabForegroundBrush}"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsActive, ElementName=Root}" Value="False"/>
+                                    <Condition Binding="{Binding IsMouseOver, ElementName=Root}" Value="True"/>
+                                    <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelTabHoverForegroundBrush}"/>
+                            </MultiDataTrigger>
 
-            <Components:CloseButton Grid.Column="1" 
-                               VerticalAlignment="Center" 
-                               HorizontalAlignment="Center"
-                               x:Name="CloseButton"/>
+                            <DataTrigger Binding="{Binding IsActive, ElementName=Root}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelTabActiveForegroundBrush}"/>
+                            </DataTrigger>
+
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsActive, ElementName=Root}" Value="False"/>
+                                    <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelTabDisabledForegroundBrush}"/>
+                            </MultiDataTrigger>
+
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsActive, ElementName=Root}" Value="True"/>
+                                    <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelTabActiveDisabledForegroundBrush}"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <Components:CloseButton Grid.Column="1"
+                                    x:Name="CloseButton"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
         </Grid>
     </Border>
 </UserControl>

@@ -1,0 +1,393 @@
+﻿<UserControl x:Class="UI.Controls.Archive.ArchiveControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:UI.Controls.Archive"
+             xmlns:TextEditor="clr-namespace:UI.Controls.TextEditor"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="40" Width="320" MaxWidth="800" />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="*"  />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+          Background="{DynamicResource BackgroundBrushes}"
+          BorderBrush="{DynamicResource ForegrounfBrushes35}"
+          BorderThickness="1"
+          CornerRadius="6"
+          Padding="10">
+            <Grid>
+                <TreeView x:Name="ArchivesTreeView"
+                Background="Transparent"
+                Foreground="{DynamicResource ForegrounfBrushes}"
+                          BorderThickness="0"
+                          FontSize="16"
+                          Cursor="Hand"
+                SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
+                    <TreeView.ContextMenu>
+                        <ContextMenu x:Name="ArchivesTreeContextMenu"
+                       Style="{DynamicResource AppContextMenuStyle}"
+                       Opened="ArchivesTreeContextMenu_Opened"
+                       Closed="ArchivesTreeContextMenu_Closed">
+                            <MenuItem x:Name="CreateArchiveMenuItem"
+                      Header="Создать архив"
+                      Click="CreateArchiveMenuItem_Click" />
+                            <MenuItem x:Name="OpenArchiveMenuItem"
+                      Header="Открыть"
+                      Click="OpenArchiveMenuItem_Click" />
+                            <MenuItem x:Name="DeleteArchiveMenuItem"
+                      Header="Удалить"
+                      Click="DeleteArchiveMenuItem_Click" />
+                            <!--MenuItem x:Name="AddFileToArchiveMenuItem"
+                      Header="Добавить файл"
+                      Click="AddFileToArchiveMenuItem_Click" /-->
+                            <MenuItem x:Name="OpenArchiveFileMenuItem"
+                      Header="Открыть"
+                      Click="OpenArchiveFileMenuItem_Click" />
+                            <MenuItem x:Name="DeleteArchiveFileMenuItem"
+                      Header="Удалить"
+                      Click="DeleteArchiveFileMenuItem_Click" />
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+                    <TreeView.Resources>
+                        <Style x:Key="ArchiveTreeExpandToggleStyle"
+                               TargetType="{x:Type ToggleButton}">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Width" Value="16" />
+                            <Setter Property="Height" Value="16" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Border Width="16"
+                                                Height="16"
+                                                Background="Transparent">
+                                            <Path x:Name="ExpandPath"
+                                                  Data="M 2 2 L 2 10 L 8 6 Z"
+                                                  Fill="White"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="ExpandPath"
+                                                        Property="Data"
+                                                        Value="M 1 3 L 11 3 L 6 9 Z" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ExpandPath"
+                                                        Property="Fill"
+                                                        Value="White" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="ExpandPath"
+                                                        Property="Opacity"
+                                                        Value="0.45" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+
+                        <HierarchicalDataTemplate DataType="{x:Type local:ArchiveTreeNode}"
+                                    ItemsSource="{Binding Children}">
+                            <Grid Margin="2,1">
+                                <TextBlock x:Name="NodeTextNormal"
+                                           Text="{Binding DisplayName}"
+                                           Foreground="{DynamicResource ForegrounfBrushes}" />
+                                <TextBlock x:Name="NodeTextAccent"
+                                           Text="{Binding DisplayName}"
+                                           Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                                           Opacity="0" />
+                            </Grid>
+                            <HierarchicalDataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="True">
+                                    <Setter TargetName="NodeTextAccent" Property="Opacity" Value="1" />
+                                </DataTrigger>
+
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="False" />
+                                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsMouseOver}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="NodeTextAccent"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1"
+                                                                 Duration="0:0:0.16" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </MultiDataTrigger.EnterActions>
+                                    <MultiDataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="NodeTextAccent"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0"
+                                                                 Duration="0:0:0.16" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </MultiDataTrigger.ExitActions>
+                                </MultiDataTrigger>
+                            </HierarchicalDataTemplate.Triggers>
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="IsExpanded"
+                    Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" MinWidth="16" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition />
+                                            </Grid.RowDefinitions>
+
+                                            <ToggleButton x:Name="Expander"
+                                                          Grid.Row="0"
+                                                          Grid.Column="0"
+                                                          Margin="0,0,4,0"
+                                                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                                          ClickMode="Press"
+                                                          Style="{StaticResource ArchiveTreeExpandToggleStyle}" />
+
+                                            <Border Grid.Row="0"
+                                                    Grid.Column="1"
+                                                    Background="{TemplateBinding Background}"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter x:Name="PART_Header"
+                                                                  ContentSource="Header"
+                                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                                            </Border>
+
+                                            <ItemsPresenter x:Name="ItemsHost"
+                                                            Grid.Row="1"
+                                                            Grid.Column="1"
+                                                            Visibility="Collapsed" />
+                                        </Grid>
+
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsExpanded" Value="True">
+                                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible" />
+                                            </Trigger>
+                                            <Trigger Property="HasItems" Value="False">
+                                                <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.6" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <EventSetter Event="Expanded"
+                         Handler="TreeViewItem_Expanded" />
+                            <EventSetter Event="PreviewMouseRightButtonDown"
+                         Handler="TreeViewItem_PreviewMouseRightButtonDown" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+            </Grid>
+        </Border>
+
+        <GridSplitter Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="{DynamicResource VioletColorSolidColorBrush}" 
+                BorderThickness="0"
+                Width="2"/>
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="FilesRowDefinition"
+               Height="*" 
+               MinHeight="120"/>
+
+                <RowDefinition x:Name="SplitterRowDefinition" Height="0"/>
+
+                <RowDefinition x:Name="EditorRowDefinition"
+               Height="*"
+               MinHeight="120"/>
+            </Grid.RowDefinitions>
+
+            <Border x:Name="FilesPanel"
+            Grid.Row="0"
+            Background="{DynamicResource BackgroundBrushes}"
+            BorderBrush="{DynamicResource ForegrounfBrushes35}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="10"
+                    >
+                <Grid>
+                    
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*"  MinHeight="0"/>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock 
+                        x:Name="ArchiveFilesTextBlock"
+                        Text="Файлы архива"
+                   FontWeight="SemiBold"
+                   FontSize="14"
+                   Foreground="{DynamicResource ForegrounfBrushes}"/>
+
+                    <DataGrid x:Name="ArchiveFilesDataGrid"
+                        Grid.Row="1"
+                        Margin="0,8,0,0"
+                        Style="{StaticResource ModernDataGridStyle}"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        FontSize="13"
+                        CanUserReorderColumns="True"
+                        CanUserResizeColumns="True"
+                        CanUserSortColumns="True"
+                        HeadersVisibility="Column"
+                        SelectionMode="Single"
+                        SelectionUnit="FullRow"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Обозначение"
+                                Binding="{Binding Name}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*"/>
+                            <DataGridTextColumn Header="Наименование ОК"
+                                Binding="{Binding NameOK}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*" />
+                            <DataGridTextColumn Header="ОПК"
+                                Binding="{Binding OPK}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*" />
+                            <DataGridTextColumn Header="ИК"
+                                Binding="{Binding IK}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*" />
+                            <DataGridTextColumn Header="Заказ"
+                                Binding="{Binding Order}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*" />
+                            <DataGridTextColumn Header="Файл ОПК"
+                                Binding="{Binding OpkFileName}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="*" />
+                            <DataGridTemplateColumn Header="Создан"
+                                SortMemberPath="CreationDate"
+                                Width="190">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding CreationDate, StringFormat={}{0:dd.MM.yyyy}}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Цех"
+                                Binding="{Binding Department}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="90" />
+                            <DataGridTextColumn Header="Примечание"
+                                Binding="{Binding Comment}"
+                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
+                                Width="130" />
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock x:Name="FilesHintTextBlock"
+                   Grid.Row="2"
+                   Margin="0,8,0,0"
+                   Foreground="{DynamicResource ForegrounfBrushes45}"
+                   TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+
+            <GridSplitter
+                  x:Name="RightSplitter"
+                  Grid.Row="1"
+                  Height="2"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Center"
+                  ResizeDirection="Rows"
+                  ResizeBehavior="PreviousAndNext"
+                BorderThickness="0"
+                  Background="{DynamicResource VioletColorSolidColorBrush}"/>
+            
+            <Border x:Name="EditorPanel"
+            Grid.Row="2"
+            Background="{DynamicResource BackgroundBrushes}"
+            BorderBrush="{DynamicResource ForegrounfBrushes35}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="10" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock 
+                            x:Name="SelectFileContentTextBlock"
+                            Text="Содержимое выбранного файла"
+                            FontWeight="SemiBold"
+                            FontSize="14"
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource ForegrounfBrushes}"/>
+                        <Button x:Name="ConvertToPkwButton"
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Padding="10,4"
+                                MinWidth="220"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Cursor="Hand"
+                                FontSize="16"
+                                Style="{DynamicResource ButtonStyleV8}"
+                                Content="Конвертировать в pkw"
+                                Click="ConvertToPkwButton_Click" />
+                    </Grid>
+                    <TextEditor:TextEditorUI x:Name="FileContentTextBox"
+                 Grid.Row="1"
+                 Margin="0,8,0,0"
+                 FontFamily="Consolas"
+                 FontSize="13"
+                 Background="{DynamicResource SecondarySolidColorBrush}"
+                 Foreground="{DynamicResource ForegrounfBrushes}"
+                 BorderBrush="{DynamicResource ForegrounfBrushes35}"
+                 IsReadOnly="True" />
+                    <TextBlock x:Name="EditorHintTextBlock"
+                   Grid.Row="2"
+                   Margin="0,8,0,0"
+                   Foreground="{DynamicResource ForegrounfBrushes45}"
+                   TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

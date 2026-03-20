@@ -279,6 +279,9 @@ namespace DataBaseConfiguration.Migrations
                     b.Property<int>("PointCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<double>("SwitchCapacitance")
+                        .HasColumnType("REAL");
+
                     b.Property<double>("SwitchResistance")
                         .HasColumnType("REAL");
 
@@ -318,6 +321,43 @@ namespace DataBaseConfiguration.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SwitchingDevices");
+                });
+
+            modelBuilder.Entity("Ask.Core.Shared.Entity.Devices.UninterruptiblePowerSupplyEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConnectionDetails")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeviceClass")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastResolvedDevicePath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UninterruptiblePowerSupplies");
                 });
 
             modelBuilder.Entity("Ask.Core.Shared.Entity.Settings.DeviceDisplaySettingsModel", b =>
@@ -436,6 +476,9 @@ namespace DataBaseConfiguration.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseSyntaxHighlighting")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseTopMenuIcons")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

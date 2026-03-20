@@ -56,6 +56,9 @@ namespace NewCore.Function.GPT
     public IArcCurrentConfigurable ArcCurrent { get; set; }
 
     /// <inheritdoc />
+    public IGroundModeConfigurable GroundMode { get; set; }
+
+    /// <inheritdoc />
     public IFrequencyConfigurable FrequencyConfigurable { get; set; }
 
     /// <inheritdoc />
@@ -79,9 +82,10 @@ namespace NewCore.Function.GPT
       Time = new TimeManagment(_gptModel, BreakdownTypeMode.ACW, delay, getTestTime: () => _config.TestTime, setTestTime: v => _config.TestTime = v, getRampTime: () => _config.RampTime, setRampTime: v => _config.RampTime = v);
       Offset = new OffsetManagment(_gptModel, BreakdownTypeMode.ACW, delay, getOffset: () => _config.Offset, setOffset: v => _config.Offset = v);
       ArcCurrent = new ArcCurrentManagment(_gptModel, BreakdownTypeMode.ACW, delay, getArcCurrent: () => _config.ArcCurrent, setArcCurrent: v => _config.ArcCurrent = v);
+      GroundMode = new GroundModeManagment(_gptModel, delay, getGroundMode: () => _config.GroundMode, setGroundMode: v => _config.GroundMode = v);
       FrequencyConfigurable = new FrequencyManagment(_gptModel, BreakdownTypeMode.ACW, delay, getFrequency: () => _config.Frequency, setFrequency: v => _config.Frequency = v);
       Measure = new MeasureManagment(_gptModel, delayBeforeCall, getTestTime: async () => await Time.GetTestTimeAsync(), getRampTime: async () => await Time.GetRampTimeAsync(), getIsIdleMode: ExecutionConfig.GetIsIdleModeEnabled());
-      Config = new AcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent, FrequencyConfigurable);
+      Config = new AcwConfigManager(Voltage, CurrentLimits, Time, Offset, ArcCurrent, FrequencyConfigurable, GroundMode);
       Mode = new ModeManagment(_gptModel, BreakdownTypeMode.ACW, delay, async () => _config = await Config.ReadConfigurationAsync());
     }
   }

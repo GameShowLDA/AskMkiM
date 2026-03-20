@@ -30,7 +30,7 @@ namespace Ask.Core.Services.Config.Base
     /// <summary>
     /// Устанавливает тему оформления интерфейса программы.
     /// </summary>
-    /// <param name="theme">Название темы: "Light" или "Dark".</param>
+    /// <param name="theme">Название темы интерфейса.</param>
     public static async Task SetTheme(ThemeMode theme)
     {
       UserInterfaceModel.Theme = theme;
@@ -51,6 +51,11 @@ namespace Ask.Core.Services.Config.Base
       UserInterfaceModel.UseChainPointBodyBackgroundHighlighting = enable;
     }
 
+    public static async Task SetTopMenuIcons(bool enable)
+    {
+      UserInterfaceModel.UseTopMenuIcons = enable;
+    }
+
     public static async Task SetUserInterfaceModel(UserInterfaceModel user)
     {
       await Task.Run(async () =>
@@ -60,6 +65,7 @@ namespace Ask.Core.Services.Config.Base
         await SetSyntaxHighlighting(user.UseSyntaxHighlighting);
         await SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
         await SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
+        await SetTopMenuIcons(user.UseTopMenuIcons);
       });
     }
 
@@ -76,6 +82,7 @@ namespace Ask.Core.Services.Config.Base
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
     public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
     public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
+    public static bool GetTopMenuIcons() => UserInterfaceModel.UseTopMenuIcons;
 
 
     public static async Task<UserInterfaceModel> GetParameterModel()
@@ -86,6 +93,7 @@ namespace Ask.Core.Services.Config.Base
       parametrModel.UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting;
       parametrModel.UseCommandBodyBackgroundHighlighting = UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
       parametrModel.UseChainPointBodyBackgroundHighlighting = UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
+      parametrModel.UseTopMenuIcons = UserInterfaceModel.UseTopMenuIcons;
       return parametrModel;
     }
 
@@ -96,6 +104,7 @@ namespace Ask.Core.Services.Config.Base
       await SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
       await SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
       await SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
+      await SetTopMenuIcons(parametrModel.UseTopMenuIcons);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
 
 

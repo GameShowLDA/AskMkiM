@@ -19,9 +19,11 @@
 
         <Popup x:Name="CalendarPopup"
          Placement="Bottom"
+         VerticalOffset="8"
+         PopupAnimation="Fade"
          StaysOpen="False"
          AllowsTransparency="True">
-            <Border>
+            <Border Background="Transparent">
                 <Calendar:CalendarControl x:Name="CalendarControl" />
             </Border>
         </Popup>

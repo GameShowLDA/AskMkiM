@@ -172,6 +172,14 @@
     }
 
     /// <summary>
+    /// Переводит ёмкость из фарад в удобную запись (например: 0.00000022 → 220 нФ).
+    /// </summary>
+    public static (double value, string unit) FormatNanoFarads(double farads)
+    {
+      return (Math.Round(farads * 1e9, 3), "нФ");
+    }
+
+    /// <summary>
     /// Переводит напряжение из вольт в удобную запись (например: 5000 → 5 кВ).
     /// </summary>
     public static (double value, string unit) FormatVolts(double volts)

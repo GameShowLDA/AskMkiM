@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using DataBaseConfiguration.Services.Device;
+using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
@@ -28,15 +29,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     public static (SchemeModel?, List<ErrorItem>) ParsePoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
     {
-      if (!HasPointsMap(rmCommandModel))
-        return (null, null);
-
       var errors = new List<ErrorItem>();
+      if (!HasPointsMap(rmCommandModel))
+      {
+        errors.Add(GeneralErrors.MissingPointsMap(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+        return (null, errors);
+      }
+
       var chainModels = new List<GroupModel>();
 
       expr = NormalizeExpression(expr);
       if (string.IsNullOrEmpty(expr))
+      {
+        errors.Add(GeneralErrors.EmptyPointsBody(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
         return (null, errors);
+      }
 
       var chainSegments = SplitChainSegments(expr);
 
@@ -46,7 +53,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         if (string.IsNullOrWhiteSpace(seg))
           continue;
 
-        if (TryHandleCrossSegmentRange(seg, chainSegments, ref i,
+        if (TryHandleCrossSegmentRange(seg, model, chainSegments, ref i,
             rmCommandModel, chainModels, errors))
           continue;
 
@@ -93,7 +100,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <summary>
     /// Обрабатывает диапазон, который продолжается в следующем сегменте.
     /// </summary>
-    private static bool TryHandleCrossSegmentRange(string segment, List<string> allSegments, ref int index, RmCommandModel rm, List<GroupModel> chainModels, List<ErrorItem> errors)
+    private static bool TryHandleCrossSegmentRange(string segment, BaseCommandModel model, List<string> allSegments, ref int index, RmCommandModel rm, List<GroupModel> chainModels, List<ErrorItem> errors)
     {
       var parts = SplitParts(segment);
       if (parts.Count != 1)
@@ -112,7 +119,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return false;
 
       foreach (var t in expanded)
-        chainModels.Add(CreateSinglePointGroup(t, rm));
+      {
+        var (error, models) = CreateSinglePointGroup(t, model, rm);
+        if (error.Count > 0)
+        {
+          errors.AddRange(error);
+        }
+        else
+        {
+          chainModels.Add(models);
+        }
+      }
 
       index++;
       return true;
@@ -134,11 +151,29 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
         ValidateSinglePoint(model, connected, part, errors);
 
-        var chain = CreateChain(connected, rm);
-        chainParts.Add(chain);
+        var (chainErrors, chain) = CreateChain(connected, model, rm);
+        if (chainErrors.Count > 0)
+        {
+          errors.AddRange(chainErrors);
+        }
+        else
+        {
+          chainParts.Add(chain);
+        }
 
         foreach (var d in disconnected)
-          result.Add(CreateSinglePointGroup(d, rm));
+        {
+          var (dErrors, group) = CreateSinglePointGroup(d, model, rm);
+          if (dErrors.Count > 0)
+          {
+            errors.AddRange(dErrors);
+            continue;
+          }
+          else
+          {
+            result.Add(group);
+          }
+        }
 
         result.Add(new GroupModel(chainParts));
       }
@@ -162,22 +197,36 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <summary>
     /// Создаёт цепь из токенов.
     /// </summary>
-    private static ChainModel CreateChain(List<string> tokens, RmCommandModel rm)
+    private static (List<ErrorItem>, ChainModel) CreateChain(List<string> tokens, BaseCommandModel model, RmCommandModel rm)
     {
-      var (_, pts) = CommandPostAnalyzer.GetPointsModel(tokens, rm.PointsMap);
-      return new ChainModel(pts?.ToList() ?? new List<PointModel>());
+      var (errors, pts) = CommandPostAnalyzer.GetPointsModel(tokens, model, rm.PointsMap);
+      if (errors.Count > 0)
+      {
+        return (errors, null);
+      }
+      else
+      {
+        return (errors, new ChainModel(pts?.ToList() ?? new List<PointModel>()));
+      }
     }
 
     /// <summary>
     /// Создаёт группу из одной точки.
     /// </summary>
-    private static GroupModel CreateSinglePointGroup(string token, RmCommandModel rm)
+    private static (List<ErrorItem>, GroupModel) CreateSinglePointGroup(string token, BaseCommandModel model, RmCommandModel rm)
     {
-      var (_, pts) = CommandPostAnalyzer.GetPointsModel(new List<string> { token }, rm.PointsMap);
-      return new GroupModel(new List<ChainModel>
+      var (errors, pts) = CommandPostAnalyzer.GetPointsModel(new List<string> { token }, model, rm.PointsMap);
+      if (errors.Count > 0)
+      {
+        return (errors, null);
+      }
+      else
+      {
+        return (errors, new GroupModel(new List<ChainModel>
         {
           new ChainModel(pts?.ToList() ?? new List<PointModel>())
-        });
+        }));
+      }
     }
 
     /// <summary>

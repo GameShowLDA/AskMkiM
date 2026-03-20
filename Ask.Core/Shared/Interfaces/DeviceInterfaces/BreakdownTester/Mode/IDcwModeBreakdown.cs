@@ -19,5 +19,10 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode
     /// Управление параметром тока дуги (Arc Current).
     /// </summary>
     IArcCurrentConfigurable ArcCurrent { get; set; }
+
+    /// <summary>
+    /// Управление включением и выключением земли.
+    /// </summary>
+    IGroundModeConfigurable GroundMode { get; set; }
   }
 }

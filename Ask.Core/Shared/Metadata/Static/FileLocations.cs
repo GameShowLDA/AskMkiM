@@ -16,6 +16,7 @@
     /// </summary>
     static public string DataSaveDirectory => ".\\History";
     static public string BackupDirectory => ".\\Backup";
+    static public string ArchiveDirectory => "Archives";
 
     /// <summary>
     /// Директория для сохранения текста из консоли.

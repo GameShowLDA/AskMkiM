@@ -1,27 +1,26 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 
-namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities
-
+namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities
 {
   /// <summary>
-  /// Интерфейс для управления питанием шасси.
+  /// Универсальный интерфейс управления питанием.
   /// </summary>
-  public interface IPowerManagerChassis
+  public interface IPower
   {
     /// <summary>
-    /// Отключает питание шасси.
+    /// Отключает питание.
     /// </summary>
     /// <returns>Асинхронная задача.</returns>
     Task StopPowerAsync(IUserInteractionService? userMessageService = null);
 
     /// <summary>
-    /// Включает питание шасси.
+    /// Включает питание.
     /// </summary>
     /// <returns>Асинхронная задача.</returns>
     Task StartPowerAsync(IUserInteractionService? userMessageService = null);
 
     /// <summary>
-    /// Асинхронно проверяет наличие и корректность питания системы.
+    /// Асинхронно проверяет наличие и корректность питания.
     /// </summary>
     /// <param name="userMessageService">
     /// Сервис пользовательского взаимодействия, используемый для отображения сообщений (опционально).

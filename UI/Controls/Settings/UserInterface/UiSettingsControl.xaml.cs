@@ -88,6 +88,7 @@ namespace UI.Controls.Settings.UserInterface
       SyntaxHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
       CommandBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
       ChainPointBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
+      TopMenuIcons.CheckedChanged += (s, ev) => ValueChanged(s, ev);
 
       Success.PreviewMouseDown += Success_PreviewMouseDown;
       Error.PreviewMouseDown += Error_PreviewMouseDown;
@@ -156,6 +157,7 @@ namespace UI.Controls.Settings.UserInterface
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
+      TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
     }
 
     /// <summary>
@@ -177,7 +179,8 @@ namespace UI.Controls.Settings.UserInterface
         Theme = parsedTheme,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
         UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
-        UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked
+        UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked,
+        UseTopMenuIcons = TopMenuIcons.IsChecked
       };
     }
 
@@ -189,6 +192,7 @@ namespace UI.Controls.Settings.UserInterface
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
       a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
+      a.UseTopMenuIcons == b.UseTopMenuIcons &&
       b.Theme == a.Theme;
 
     /// <summary>

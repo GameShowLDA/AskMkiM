@@ -17,6 +17,7 @@ using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
 using UI.Controls.TextEditor;
 using UI.Services;
+using UI.Services.Archive;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -51,6 +52,7 @@ namespace UI.Controls.Runner
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
 
     private TextEditorContainer _leftEditor;
+    private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -179,11 +181,11 @@ namespace UI.Controls.Runner
 
     private void SetError(List<ErrorItem> errorItems)
     {
-      foreach (ErrorItem errorItem in errorItems)
-      {
-        ErrorListBoxVertical.Items.Add(errorItem);
-        ErrorCount++;
-      }
+      if (errorItems == null || errorItems.Count == 0)
+        return;
+
+      ErrorListBoxVertical.AddErrors(errorItems);
+      ErrorCount += errorItems.Count;
 
       if (ErrorCount > 0)
       {
@@ -222,10 +224,12 @@ namespace UI.Controls.Runner
       var rightEditor = new TranslatorEditor();
       rightEditor.SetEditor(textEditorUI);
       rightEditor.BackRequested += TranslatorEditor_BackRequested;
-      rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(textEditorUI.TextEditorModel.FileName) ?
-        Path.GetFileName(textEditorUI.TextEditorModel.FilePath) : textEditorUI.TextEditorModel.FileName; ;
+      rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
+      rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
       var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
+      rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
+        Path.GetFileName(filePath) : fileName;
       var dockItemPk = new DockItem
       {
         Title = fileName,
@@ -339,7 +343,7 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        ErrorListBoxVertical.Items.Add(errorItem);
+        ErrorListBoxVertical.AddError(errorItem);
         ErrorCount++;
 
         if (ErrorCount > 0)
@@ -353,7 +357,7 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        ErrorListBoxVertical.Items.Clear();
+        ErrorListBoxVertical.ClearAll();
         ErrorCount = 0;
       });
     }
@@ -364,6 +368,18 @@ namespace UI.Controls.Runner
       TranslatorNavigationService.TryOpenSourceFileFromTranslator(
         textEditorContainer,
         onSourceOpened: () => EditorEventAdapter.RaiseCloseRunItem(this));
+    }
+
+    private void RightEditor_SaveRequestedAsync(object? sender, EventArgs e)
+    {
+      var rightEditor = sender as TranslatorEditor;
+      var sourceFilePath = rightEditor?.GetTextEditor()?.TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(sourceFilePath))
+      {
+        sourceFilePath = OpkFilePath;
+      }
+
+      _archiveSaveService.SaveFileToArchive(this, this.TranslationModels, sourceFilePath);
     }
 
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)

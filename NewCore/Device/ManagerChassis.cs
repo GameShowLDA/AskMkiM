@@ -1,5 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using NewCore.Base.Device;
 using NewCore.Function.ManagerChassis;
@@ -27,7 +27,7 @@ namespace NewCore.Device
     }
 
     /// <inheritdoc />
-    public IPowerManagerChassis PowerManager { get; set; }
+    public IPower PowerManager { get; set; }
     public BusStructureEnum.Type BusType { get; set; }
   }
 }

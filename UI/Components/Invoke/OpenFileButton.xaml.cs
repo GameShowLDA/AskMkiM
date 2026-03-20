@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Windows;
@@ -13,10 +14,23 @@ namespace UI.Components.Invoke
   /// </summary>
   public partial class OpenFileButton : UserControl
   {
+    public static readonly DependencyProperty IsActiveProperty =
+      DependencyProperty.Register(
+        nameof(IsActive),
+        typeof(bool),
+        typeof(OpenFileButton),
+        new FrameworkPropertyMetadata(false));
+
     /// <summary>
     /// Тип вкладки.
     /// </summary>
     public TypeWindow? TabType { get; set; }
+
+    public bool IsActive
+    {
+      get => (bool)GetValue(IsActiveProperty);
+      set => SetValue(IsActiveProperty, value);
+    }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="OpenFileButton"/>.
@@ -25,6 +39,7 @@ namespace UI.Components.Invoke
     {
       InitializeComponent();
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => ApplicationDataHandler_LockedChanged(e.IsLocked));
+      ApplyLockState(SystemStateManager.GetIsLocked());
     }
 
     /// <summary>
@@ -73,14 +88,15 @@ namespace UI.Components.Invoke
     /// </summary>
     private void AdjustWidth()
     {
+      const double tabChromeWidth = 52;
       double width = MeasureTextWidth(Text, Header.FontSize);
-      if (width > 300 - 20)
+      if (width > 300 - tabChromeWidth)
       {
         Width = 300; // Максимальная ширина 300
       }
       else
       {
-        Width = width + 30; // Подстраивает ширину с небольшим запасом
+        Width = width + tabChromeWidth; // Подстраивает ширину с учетом отступов и кнопки закрытия
       }
     }
 
@@ -102,26 +118,18 @@ namespace UI.Components.Invoke
     }
 
     /// <summary>
-    /// Обработчик изменения состояния LockedChanged. Меняет доступность кнопки и фон в зависимости от состояния.
+    /// Обработчик изменения состояния LockedChanged. Меняет доступность кнопки.
     /// </summary>
     private void ApplicationDataHandler_LockedChanged(bool newValue)
     {
+      ApplyLockState(newValue);
+    }
+
+    private void ApplyLockState(bool isLocked)
+    {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        this.IsEnabled = !newValue; // Кнопка отключается, если состояние "locked" активно
-
-        // Если фон не равен активному цвету, меняем фон в зависимости от состояния кнопки
-        if (this.Background != (SolidColorBrush)Application.Current.Resources["ActiveColorBrushes"])
-        {
-          if (!this.IsEnabled)
-          {
-            this.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#b23a48"));
-          }
-          else if (this.IsEnabled)
-          {
-            this.Background = (SolidColorBrush)Application.Current.Resources["ActiveColorBrushes"];
-          }
-        }
+        IsEnabled = !isLocked;
       });
     }
   }

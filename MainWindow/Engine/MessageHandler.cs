@@ -34,7 +34,7 @@ namespace MainWindowProgram
     /// <param name="clearMessage">Если true, сообщение будет автоматически очищено.</param>
     public void SetErrorMessage(string message, bool clearMessage = false)
     {
-      SetMessage(message, Brushes.Red, clearMessage);
+      SetMessage(message, () => Brushes.Red, clearMessage);
       LogError($"Ошибка: {message}");
     }
 
@@ -45,7 +45,7 @@ namespace MainWindowProgram
     /// <param name="clearMessage">Если true, сообщение будет автоматически очищено.</param>
     public void SetWarningMessage(string message, bool clearMessage = false)
     {
-      SetMessage(message, Brushes.Yellow, clearMessage);
+      SetMessage(message, () => Brushes.Yellow, clearMessage);
       LogWarning($"Предупреждение: {message}");
     }
 
@@ -56,7 +56,13 @@ namespace MainWindowProgram
     /// <param name="clearMessage">Если true, сообщение будет автоматически очищено.</param>
     public void SetInfoMessage(string message, bool clearMessage = false)
     {
-      SetMessage(message, (SolidColorBrush)Application.Current.Resources["MainTitleSolidColorBrush"], clearMessage);
+      SetMessage(message, () =>
+      {
+        if (Application.Current?.Resources["MainTitleSolidColorBrush"] is Brush brush)
+          return brush;
+
+        return Brushes.White;
+      }, clearMessage);
       LogInformation($"Информация: {message}");
     }
 
@@ -67,7 +73,13 @@ namespace MainWindowProgram
     /// <param name="clearMessage">Если true, сообщение будет автоматически очищено.</param>
     public void ClearMessage()
     {
-      SetMessage(string.Empty, (SolidColorBrush)Application.Current.Resources["MainTitleSolidColorBrush"], false);
+      SetMessage(string.Empty, () =>
+      {
+        if (Application.Current?.Resources["MainTitleSolidColorBrush"] is Brush brush)
+          return brush;
+
+        return Brushes.White;
+      }, false);
     }
 
     /// <summary>
@@ -77,17 +89,34 @@ namespace MainWindowProgram
     /// <param name="message">Текст сообщения.</param>
     /// <param name="color">Цвет текста сообщения.</param>
     /// <param name="clearMessage">Если true, сообщение будет автоматически очищено.</param>
-    private void SetMessage(string message, Brush color, bool clearMessage)
+    private void SetMessage(string message, Func<Brush> colorFactory, bool clearMessage)
     {
-      if (_infoBlock != null)
+      if (_infoBlock == null)
       {
-        timer.Stop();
-        _infoBlock.Text = message;
-        _infoBlock.Foreground = color;
-        if (clearMessage)
-        {
-          timer.Start();
-        }
+        return;
+      }
+
+      var dispatcher = Application.Current?.Dispatcher ?? _infoBlock.Dispatcher;
+      if (dispatcher == null)
+        return;
+
+      if (dispatcher.CheckAccess())
+      {
+        ApplyMessage(message, colorFactory(), clearMessage);
+        return;
+      }
+
+      _ = dispatcher.InvokeAsync(() => ApplyMessage(message, colorFactory(), clearMessage));
+    }
+
+    private void ApplyMessage(string message, Brush color, bool clearMessage)
+    {
+      timer.Stop();
+      _infoBlock.Text = message;
+      _infoBlock.Foreground = color;
+      if (clearMessage)
+      {
+        timer.Start();
       }
     }
 

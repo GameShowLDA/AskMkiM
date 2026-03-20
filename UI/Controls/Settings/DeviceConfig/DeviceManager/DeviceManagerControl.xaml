@@ -29,6 +29,7 @@
                             <DeviceList:DeviceListControl x:Name="PrecisionMeterControl" DeviceTitle="Измеритель (точный)" Margin="5,5,5,0"/>
                             <DeviceList:DeviceListControl x:Name="FastMeterControl" DeviceTitle="Измеритель (быстрый)" Margin="5,5,5,0"/>
                             <DeviceList:DeviceListControl x:Name="BreakdownTesterControl" DeviceTitle="Пробойная установка" Margin="5,5,5,0"/>
+                            <DeviceList:DeviceListControl x:Name="UninterruptiblePowerSupplyControl" DeviceTitle="Бесперебойник" Margin="5,5,5,0"/>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>

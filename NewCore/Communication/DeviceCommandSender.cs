@@ -65,17 +65,10 @@ namespace NewCore.Communication
     {
       try
       {
-        // Широковещательный адрес для локальной сети
-        IPAddress broadcastAddress = IPAddress.Parse("255.255.255.255");
-        IPEndPoint ep = new IPEndPoint(broadcastAddress, _portOutput);
-
-        // Делаем сокет способным отправлять широковещательные сообщения
-        socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-
-        byte[] sendBuf = Encoding.UTF8.GetBytes(command.ToString());
-
-        // Отправляем широковещательное сообщение
-        await socket.SendToAsync(new ArraySegment<byte>(sendBuf), SocketFlags.None, ep).ConfigureAwait(false);
+        IPAddress broadcastAddress = IPAddress.Parse("192.168.1.255");
+        IPEndPoint ep = new IPEndPoint(broadcastAddress, 8888);       
+        byte[] sendBuf = Encoding.ASCII.GetBytes(command.ToString());
+        await socket.SendToAsync(new ArraySegment<byte>(sendBuf), SocketFlags.None, ep);
 
         LogInformation("Команда отправлена широковещательно.", isDeviceLog: true);
       }
