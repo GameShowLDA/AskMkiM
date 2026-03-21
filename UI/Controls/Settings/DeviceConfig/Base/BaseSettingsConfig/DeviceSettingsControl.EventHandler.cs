@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Device.Communication.Com;
+using Ask.Device.Communication.Usb;
 using Message;
 using NewCore.Base.Device;
 using System.Globalization;

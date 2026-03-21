@@ -1,11 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Usb
 {
   /// <summary>
   /// Поиск USB-устройств в системе по шаблону имени.
   /// </summary>
-  internal static class UsbDeviceLocator
+  public static class UsbDeviceLocator
   {
     /// <summary>
     /// Ищет USB-устройство по имени.
@@ -115,5 +120,5 @@ namespace NewCore.Communication
   /// <param name="DeviceId">DeviceID в системе.</param>
   /// <param name="PnpDeviceId">PNPDeviceID в системе.</param>
   /// <param name="Service">Связанный драйверный сервис.</param>
-  internal readonly record struct UsbDeviceDescriptor(string Name, string DeviceId, string PnpDeviceId, string Service);
+  public readonly record struct UsbDeviceDescriptor(string Name, string DeviceId, string PnpDeviceId, string Service);
 }

@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Ethernet\Tcp\" />
     <Folder Include="Ethernet\Udp\" />
-    <Folder Include="Usb\" />
   </ItemGroup>
 
 	<ItemGroup>

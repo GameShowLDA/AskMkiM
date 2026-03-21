@@ -1,7 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace NewCore.Base.Device
+namespace Ask.Device.Communication.Usb
 {
   /// <summary>
   /// Абстрактный класс, представляющий устройство с USB-подключением.

@@ -8,6 +8,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.Device.Communication.Com;
+using Ask.Device.Communication.Usb;
 using Message;
 using NewCore.Base;
 using NewCore.Base.Device;

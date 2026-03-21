@@ -1,11 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Usb
 {
   internal sealed class ViewPowerClient : IDisposable
   {
@@ -258,3 +261,4 @@ namespace NewCore.Communication
     string OutputVoltage,
     string InputVoltage);
 }
+

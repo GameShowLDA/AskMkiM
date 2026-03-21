@@ -5,6 +5,7 @@ using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Device.Communication.Com;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;

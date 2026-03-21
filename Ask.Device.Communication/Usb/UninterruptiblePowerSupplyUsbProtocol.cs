@@ -1,11 +1,10 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Device.Communication.Common;
-using NewCore.Base.Device;
 using System.Text.Json;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Usb
 {
   /// <summary>
   /// Общая USB-заглушка протокола обмена для бесперебойников.

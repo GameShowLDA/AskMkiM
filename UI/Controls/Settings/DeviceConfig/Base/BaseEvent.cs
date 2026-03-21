@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Device.Communication.Com;
 using Message;
 using NewCore.Base.Device;
 using NewCore.Device;
