@@ -2,7 +2,6 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Communication;
 using System.Text.Json;
 using static Ask.LogLib.LoggerUtility;
 

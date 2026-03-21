@@ -4,7 +4,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Ethernet.Tcp;
 using NewCore.Base.Device;
-using NewCore.Communication;
 using NewCore.FunctionAdapters.Keysight3466new;
 using System.Net;
 using System.Net.Sockets;

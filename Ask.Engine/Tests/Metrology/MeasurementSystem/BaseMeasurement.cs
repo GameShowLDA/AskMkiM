@@ -223,7 +223,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeMeasurement(IUserInteractionService messageService)
     {
-      await DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
     }
 
     /// <summary>

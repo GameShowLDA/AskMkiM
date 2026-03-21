@@ -235,7 +235,7 @@ namespace UI.Components
     /// </summary>
     private async Task StopPowerSequenceAsync()
     {
-      await DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
       await Task.Delay(500);
 
       bool power = true;

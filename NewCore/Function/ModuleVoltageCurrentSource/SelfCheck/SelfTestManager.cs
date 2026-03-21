@@ -8,7 +8,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Communication.Ethernet.Udp;
-using NewCore.Communication;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
 {
@@ -39,17 +38,17 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
       {
 
         case PowerSourceModuleTypeConnector.FullCheck:
-          await DeviceCommandSender.ResetAllSystem();
+          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
           await SettingsMeter(meter, messageService);
           await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2, messageService);
           await powerDevice.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B2, messageService);
           await dbc.DeviceProtocol.QueryAsync(new DeviceCommand(5, 2, 2, 1).ToString());
           await VoltageCheckService.GenerateDiscreteVoltageCheck(cancellationToken, messageService, meter, powerDevice);
 
-          await DeviceCommandSender.ResetAllSystem();
+          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
           await SwitchingSelfControl.CheckSwitching(cancellationToken, messageService, meter, powerDevice, dbc);
 
-          await DeviceCommandSender.ResetAllSystem();
+          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
           await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
 
@@ -63,12 +62,12 @@ namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
           break;
 
         case PowerSourceModuleTypeConnector.CommutationCheck:
-          await DeviceCommandSender.ResetAllSystem();
+          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
           await SwitchingSelfControl.CheckSwitching(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
 
         case PowerSourceModuleTypeConnector.OutputCurrentCheck:
-          await DeviceCommandSender.ResetAllSystem();
+          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
           await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
       }

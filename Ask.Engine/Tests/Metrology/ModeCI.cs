@@ -58,7 +58,7 @@ namespace Ask.Engine.Tests.Metrology
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, timeCheck: true, voltageCheck: true);
 
-      await DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
 
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, messageService);
       await testMeasurement.SetupCommutation(messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);

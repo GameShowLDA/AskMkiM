@@ -3,7 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
-using NewCore.Communication;
 
 namespace NewCore.Function.ModuleRelayControl
 {

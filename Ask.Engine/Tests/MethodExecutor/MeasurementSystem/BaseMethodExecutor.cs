@@ -129,7 +129,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
     }
 
     /// <summary>

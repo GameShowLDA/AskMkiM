@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      await DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
       context.CommandExecutionManager.ClearErrorsMethod();
 
       var command = GetRequiredCommand<OkCommandModel>(context);

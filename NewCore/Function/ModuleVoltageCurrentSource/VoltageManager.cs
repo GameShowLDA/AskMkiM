@@ -4,7 +4,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
-using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.ModuleVoltageCurrentSource

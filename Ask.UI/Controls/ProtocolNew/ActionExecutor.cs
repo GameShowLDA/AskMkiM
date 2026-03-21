@@ -712,7 +712,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       await Application.Current.Dispatcher.Invoke(async () =>
       {
-        await DeviceCommandSender.ResetAllSystem();
+        await UdpBroadcastCommandSender.ResetAllDevicesAsync();
 
         SystemStateManager.SetIsLocked(false);
 

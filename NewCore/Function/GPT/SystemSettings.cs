@@ -189,7 +189,7 @@ namespace NewCore.Function.GPT
         return true;
       }
 
-      return ComPortResetNative.Restart(_gptModel.COMPort.PortName);
+      return ComPortResetNative.RestartDevice(_gptModel.COMPort.PortName);
     }
 
   }

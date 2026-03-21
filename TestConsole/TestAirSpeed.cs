@@ -1,7 +1,7 @@
-﻿using Ask.Device.Communication.Ethernet;
+using Ask.Device.Communication.Ethernet;
+using Ask.Device.Communication.Ethernet.Udp;
 using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
-using NewCore.Communication;
 
 namespace TestConsole
 {

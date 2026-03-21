@@ -4,7 +4,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Usb;
 using NewCore.Base.Device;
-using NewCore.Communication;
 using NewCore.FunctionAdapters.MikUps1101rRm;
 
 namespace NewCore.Device

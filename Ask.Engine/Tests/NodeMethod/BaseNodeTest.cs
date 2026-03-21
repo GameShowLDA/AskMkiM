@@ -193,7 +193,7 @@ namespace Ask.Engine.Tests.NodeMethod
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
     }
 
     /// <summary>

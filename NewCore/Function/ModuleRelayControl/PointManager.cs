@@ -8,7 +8,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
 using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
-using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.ModuleRelayControl

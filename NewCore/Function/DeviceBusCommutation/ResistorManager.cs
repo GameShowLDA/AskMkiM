@@ -2,7 +2,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
-using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;
 
 namespace NewCore.Function.DeviceBusCommutation

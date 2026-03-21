@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Common;
 using System.Diagnostics;
 using System.IO.Ports;
@@ -8,21 +8,30 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.Device.Communication.Com
 {
   /// <summary>
-  /// Реализация <see cref="IDeviceProtocol"/> для работы с устройствами по COM-порту.
+  /// Реализует транспортный протокол обмена с устройствами по COM-порту.
   /// </summary>
   public class SerialDeviceProtocol : IDeviceProtocol
   {
+    /// <summary>
+    /// Настроенный последовательный порт устройства.
+    /// </summary>
     private readonly SerialPort _serialPort;
+
+    /// <summary>
+    /// Устройство, к которому относится текущий COM-протокол.
+    /// </summary>
     private readonly DeviceWithCOM _device;
 
+    /// <summary>
+    /// Семафор, запрещающий параллельный доступ к одному COM-порту.
+    /// </summary>
     public SemaphoreSlim OperationLock { get; set; }
-
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="SerialDeviceProtocol"/>.
     /// </summary>
     /// <param name="device">Устройство с COM-подключением.</param>
-    /// <param name="serialPort">Объект SerialPort, уже настроенный.</param>
+    /// <param name="serialPort">Настроенный объект последовательного порта.</param>
     public SerialDeviceProtocol(DeviceWithCOM device, SerialPort serialPort)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
@@ -30,7 +39,16 @@ namespace Ask.Device.Communication.Com
       OperationLock = new SemaphoreSlim(1, 1);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Отправляет команду в COM-порт и при необходимости ожидает ответ от устройства.
+    /// </summary>
+    /// <param name="command">Текст команды для отправки.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа в миллисекундах.</param>
+    /// <param name="timeout">Таймаут ожидания ответа в миллисекундах.</param>
+    /// <param name="port">Параметр интерфейса, не используемый COM-протоколом.</param>
+    /// <param name="delayBeforeCall">Задержка перед отправкой команды в миллисекундах.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Строка ответа устройства или пустая строка при ошибке либо отсутствии ответа.</returns>
     public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
     {
       using (await OperationLock.LockAsync(cancellationToken))
@@ -62,7 +80,7 @@ namespace Ask.Device.Communication.Com
     }
 
     /// <summary>
-    /// Логирует текущее состояние COM-порта.
+    /// Проверяет текущее состояние COM-порта и пишет его в лог.
     /// </summary>
     private void CheckComPort()
     {
@@ -83,9 +101,9 @@ namespace Ask.Device.Communication.Com
     }
 
     /// <summary>
-    /// Асинхронное ожидание указанной задержки.
+    /// Асинхронно ожидает указанную задержку.
     /// </summary>
-    /// <param name="milliseconds">Время задержки в миллисекундах.</param>
+    /// <param name="delay">Время задержки в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task WaitAsync(int delay, CancellationToken cancellationToken)
     {
@@ -93,24 +111,22 @@ namespace Ask.Device.Communication.Com
     }
 
     /// <summary>
-    /// Отправка команды.
+    /// Отправляет команду в COM-порт.
     /// </summary>
-    /// <param name="cmd">Строка команды.</param>
-    private void SendCommand(string cmd)
+    /// <param name="command">Строка команды.</param>
+    private void SendCommand(string command)
     {
-      LogInformation($"[{_device.Name}] Отправка команды: \"{cmd}\" в порт {_serialPort.PortName}", isDeviceLog: true);
+      LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}", isDeviceLog: true);
       _serialPort.DiscardInBuffer();
       _serialPort.DiscardOutBuffer();
-      _serialPort.Write(cmd + "\n");
+      _serialPort.Write(command + "\n");
     }
 
     /// <summary>
     /// Асинхронно ожидает ответ от устройства в течение указанного таймаута.
-    /// Проверка входящего буфера выполняется каждые 100 мс.
-    /// Как только получен ответ — метод немедленно возвращает его.
     /// </summary>
-    /// <param name="timeout">Максимальное время ожидания (мс).</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <param name="timeout">Максимальное время ожидания ответа в миллисекундах.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Ответ устройства или пустая строка при таймауте.</returns>
     private async Task<string> ReadResponseAsync(int timeout, CancellationToken cancellationToken)
     {
@@ -127,7 +143,9 @@ namespace Ask.Device.Communication.Com
           responseBuilder.Append(chunk);
 
           if (responseBuilder.ToString().Contains("\n"))
+          {
             break;
+          }
         }
 
         await Task.Delay(20, cancellationToken);
@@ -136,9 +154,13 @@ namespace Ask.Device.Communication.Com
       string response = responseBuilder.ToString().Trim();
 
       if (string.IsNullOrWhiteSpace(response))
+      {
         LogWarning($"[{_device.Name}] Таймаут: данных от устройства нет за {timeout} мс", isDeviceLog: true);
+      }
       else
+      {
         LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
+      }
 
       return response;
     }

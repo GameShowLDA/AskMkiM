@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Device.Communication.Usb
 {
   /// <summary>
-  /// Поиск USB-устройств в системе по шаблону имени.
+  /// Выполняет поиск USB-устройств в системе по имени или идентификатору.
   /// </summary>
   public static class UsbDeviceLocator
   {
     /// <summary>
-    /// Ищет USB-устройство по имени.
+    /// Ищет USB-устройство по шаблону имени.
     /// </summary>
-    /// <param name="namePattern">Шаблон имени устройства (часть строки).</param>
-    /// <param name="descriptor">Найденный дескриптор устройства.</param>
-    /// <returns><c>true</c>, если устройство найдено; иначе <c>false</c>.</returns>
+    /// <param name="namePattern">Шаблон имени устройства или его идентификатора.</param>
+    /// <param name="descriptor">Дескриптор найденного устройства.</param>
+    /// <returns><see langword="true"/>, если устройство найдено; иначе <see langword="false"/>.</returns>
     public static bool TryFindByName(string namePattern, out UsbDeviceDescriptor descriptor)
     {
       descriptor = default;
@@ -28,7 +23,6 @@ namespace Ask.Device.Communication.Usb
       }
 
       const string query = "SELECT Name, DeviceID, PNPDeviceID, Service FROM Win32_PnPEntity WHERE PNPDeviceID LIKE 'USB%' OR PNPDeviceID LIKE 'HID%'";
-
       using var searcher = new ManagementObjectSearcher(query);
       int bestScore = int.MinValue;
 
@@ -69,6 +63,13 @@ namespace Ask.Device.Communication.Usb
       return bestScore != int.MinValue;
     }
 
+    /// <summary>
+    /// Вычисляет приоритет совпадения для найденного USB-устройства.
+    /// </summary>
+    /// <param name="deviceId">DeviceID устройства.</param>
+    /// <param name="pnpDeviceId">PnP DeviceID устройства.</param>
+    /// <param name="service">Имя драйверного сервиса.</param>
+    /// <returns>Числовой вес совпадения.</returns>
     private static int GetMatchScore(string? deviceId, string? pnpDeviceId, string? service)
     {
       int score = 0;
@@ -97,6 +98,13 @@ namespace Ask.Device.Communication.Usb
       return score;
     }
 
+    /// <summary>
+    /// Формирует отображаемое имя USB-устройства.
+    /// </summary>
+    /// <param name="name">Человекочитаемое имя устройства.</param>
+    /// <param name="deviceId">DeviceID устройства.</param>
+    /// <param name="pnpDeviceId">PnP DeviceID устройства.</param>
+    /// <returns>Лучшая доступная строка для отображения устройства.</returns>
     private static string BuildDisplayName(string? name, string? deviceId, string? pnpDeviceId)
     {
       if (!string.IsNullOrWhiteSpace(name))
@@ -114,11 +122,43 @@ namespace Ask.Device.Communication.Usb
   }
 
   /// <summary>
-  /// Описание USB-устройства, найденного в системе.
+  /// Описывает USB-устройство, найденное в системе.
   /// </summary>
-  /// <param name="Name">Имя устройства.</param>
-  /// <param name="DeviceId">DeviceID в системе.</param>
-  /// <param name="PnpDeviceId">PNPDeviceID в системе.</param>
-  /// <param name="Service">Связанный драйверный сервис.</param>
-  public readonly record struct UsbDeviceDescriptor(string Name, string DeviceId, string PnpDeviceId, string Service);
+  public readonly record struct UsbDeviceDescriptor
+  {
+    /// <summary>
+    /// Инициализирует новый экземпляр <see cref="UsbDeviceDescriptor"/>.
+    /// </summary>
+    /// <param name="name">Имя устройства.</param>
+    /// <param name="deviceId">Системный DeviceID.</param>
+    /// <param name="pnpDeviceId">Системный PnP DeviceID.</param>
+    /// <param name="service">Имя драйверного сервиса.</param>
+    public UsbDeviceDescriptor(string name, string deviceId, string pnpDeviceId, string service)
+    {
+      Name = name;
+      DeviceId = deviceId;
+      PnpDeviceId = pnpDeviceId;
+      Service = service;
+    }
+
+    /// <summary>
+    /// Получает имя устройства.
+    /// </summary>
+    public string Name { get; init; }
+
+    /// <summary>
+    /// Получает системный идентификатор DeviceID.
+    /// </summary>
+    public string DeviceId { get; init; }
+
+    /// <summary>
+    /// Получает системный идентификатор PnP DeviceID.
+    /// </summary>
+    public string PnpDeviceId { get; init; }
+
+    /// <summary>
+    /// Получает имя драйверного сервиса устройства.
+    /// </summary>
+    public string Service { get; init; }
+  }
 }

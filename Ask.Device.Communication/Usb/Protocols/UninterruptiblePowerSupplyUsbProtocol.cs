@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Device.Communication.Common;
 using System.Text.Json;
@@ -7,17 +7,48 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.Device.Communication.Usb
 {
   /// <summary>
-  /// Общая USB-заглушка протокола обмена для бесперебойников.
+  /// Реализует USB-протокол обмена для источников бесперебойного питания через ViewPower.
   /// </summary>
   public class UninterruptiblePowerSupplyUsbProtocol : IDeviceProtocol
   {
+    /// <summary>
+    /// Команда проверки доступности UPS.
+    /// </summary>
     private const string ConnectCommand = "UPS:CONNECT";
+
+    /// <summary>
+    /// Команда включения выходного питания UPS.
+    /// </summary>
     private const string StartPowerCommand = "UPS:POWER:START";
+
+    /// <summary>
+    /// Команда отключения выходного питания UPS.
+    /// </summary>
     private const string StopPowerCommand = "UPS:POWER:STOP";
+
+    /// <summary>
+    /// Команда проверки состояния выходного питания UPS.
+    /// </summary>
     private const string VerifyPowerCommand = "UPS:POWER:VERIFY";
+
+    /// <summary>
+    /// Задержка выполнения команды ViewPower в минутах.
+    /// </summary>
     private const string ControlDelayMinutes = "0.2";
+
+    /// <summary>
+    /// Таймаут ожидания подтверждения включения питания UPS.
+    /// </summary>
     private static readonly TimeSpan StartStateConfirmationTimeout = TimeSpan.FromSeconds(8);
+
+    /// <summary>
+    /// Таймаут ожидания подтверждения отключения питания UPS.
+    /// </summary>
     private static readonly TimeSpan StopStateConfirmationTimeout = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Набор режимов работы, означающих включенное выходное питание.
+    /// </summary>
     private static readonly string[] ActiveWorkModes =
     {
       "Line mode",
@@ -30,6 +61,9 @@ namespace Ask.Device.Communication.Usb
       "Power on mode",
     };
 
+    /// <summary>
+    /// USB-устройство, для которого выполняется обмен.
+    /// </summary>
     private readonly DeviceWithUSB _device;
 
     /// <summary>
@@ -42,10 +76,21 @@ namespace Ask.Device.Communication.Usb
       OperationLock = new SemaphoreSlim(1, 1);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Семафор, запрещающий параллельные операции с одним UPS.
+    /// </summary>
     public SemaphoreSlim OperationLock { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Выполняет USB-команду для UPS и возвращает сериализованный JSON-ответ.
+    /// </summary>
+    /// <param name="command">Команда транспорта.</param>
+    /// <param name="responseDelay">Задержка перед возвратом ответа в миллисекундах.</param>
+    /// <param name="timeout">Пользовательский таймаут операции, попадающий в JSON-ответ.</param>
+    /// <param name="port">Пользовательский порт операции, попадающий в JSON-ответ.</param>
+    /// <param name="delayBeforeCall">Задержка перед выполнением команды в миллисекундах.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>JSON-строка с результатом выполнения команды.</returns>
     public async Task<string> QueryAsync(
       string command,
       double responseDelay = 0,
@@ -88,6 +133,14 @@ namespace Ask.Device.Communication.Usb
       }
     }
 
+    /// <summary>
+    /// Выполняет бизнес-логику конкретной команды UPS.
+    /// </summary>
+    /// <param name="command">Команда транспорта.</param>
+    /// <param name="found">Признак обнаружения USB-устройства.</param>
+    /// <param name="descriptor">Дескриптор найденного устройства.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     private async Task<UpsProtocolResponse> ExecuteCommandAsync(
       string command,
       bool found,
@@ -164,6 +217,17 @@ namespace Ask.Device.Communication.Usb
       }
     }
 
+    /// <summary>
+    /// Выполняет команду управления питанием UPS через ViewPower и ждёт подтверждения состояния.
+    /// </summary>
+    /// <param name="client">Клиент ViewPower.</param>
+    /// <param name="response">Объект ответа, который требуется дополнить.</param>
+    /// <param name="snapshot">Исходный снимок состояния UPS.</param>
+    /// <param name="expectedState">Ожидаемое конечное состояние питания.</param>
+    /// <param name="controlType">Тип команды управления в ViewPower.</param>
+    /// <param name="confirmationTimeout">Таймаут подтверждения нового состояния.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <returns>Обновлённый результат выполнения команды.</returns>
     private static async Task<UpsProtocolResponse> ExecuteRealtimeControlAsync(
       ViewPowerClient client,
       UpsProtocolResponse response,
@@ -224,6 +288,11 @@ namespace Ask.Device.Communication.Usb
       return response;
     }
 
+    /// <summary>
+    /// Определяет, включено ли выходное питание UPS по данным ViewPower.
+    /// </summary>
+    /// <param name="snapshot">Снимок состояния UPS.</param>
+    /// <returns><see langword="true"/>, если питание включено.</returns>
     private static bool IsPowerEnabled(ViewPowerMonitorSnapshot snapshot)
     {
       if (snapshot.OutputOn)
@@ -234,6 +303,13 @@ namespace Ask.Device.Communication.Usb
       return ActiveWorkModes.Any(mode => string.Equals(mode, snapshot.WorkMode, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Создаёт базовый объект ответа UPS до выполнения конкретной команды.
+    /// </summary>
+    /// <param name="command">Команда транспорта.</param>
+    /// <param name="found">Признак обнаружения устройства.</param>
+    /// <param name="descriptor">Дескриптор найденного устройства.</param>
+    /// <returns>Базовый объект ответа UPS.</returns>
     private UpsProtocolResponse CreateBaseResponse(string command, bool found, UsbDeviceDescriptor descriptor)
     {
       return new UpsProtocolResponse
@@ -249,46 +325,109 @@ namespace Ask.Device.Communication.Usb
       };
     }
 
+    /// <summary>
+    /// Описывает сериализуемый ответ UPS-протокола.
+    /// </summary>
     private sealed class UpsProtocolResponse
     {
+      /// <summary>
+      /// Получает или задаёт имя транспорта, обработавшего команду.
+      /// </summary>
       public string Transport { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт строковый тип устройства.
+      /// </summary>
       public string DeviceType { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт исходную команду транспорта.
+      /// </summary>
       public string Command { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт признак обнаружения устройства.
+      /// </summary>
       public bool Found { get; set; }
 
+      /// <summary>
+      /// Получает или задаёт признак успешного выполнения команды.
+      /// </summary>
       public bool Success { get; set; }
 
+      /// <summary>
+      /// Получает или задаёт признак доступности ViewPower.
+      /// </summary>
       public bool ViewPowerAvailable { get; set; }
 
+      /// <summary>
+      /// Получает или задаёт признак включенного выходного питания.
+      /// </summary>
       public bool OutputOn { get; set; }
 
+      /// <summary>
+      /// Получает или задаёт имя найденного USB-устройства.
+      /// </summary>
       public string DeviceName { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт системный DeviceID USB-устройства.
+      /// </summary>
       public string DeviceId { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт системный PnP DeviceID USB-устройства.
+      /// </summary>
       public string PnpDeviceId { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт имя драйверного сервиса USB-устройства.
+      /// </summary>
       public string Service { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт имя порта UPS в ViewPower.
+      /// </summary>
       public string PortName { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт тип протокола UPS в ViewPower.
+      /// </summary>
       public string ProtocolType { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт идентификатор UPS в ViewPower.
+      /// </summary>
       public string ViewPowerDeviceId { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт текущий режим работы UPS.
+      /// </summary>
       public string WorkMode { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт служебное сообщение об успешном результате.
+      /// </summary>
       public string Message { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт текст ошибки.
+      /// </summary>
       public string Error { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт сырой ответ ViewPower.
+      /// </summary>
       public string RawResponse { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Получает или задаёт пользовательский таймаут операции.
+      /// </summary>
       public int Timeout { get; set; }
 
+      /// <summary>
+      /// Получает или задаёт пользовательский порт операции.
+      /// </summary>
       public int Port { get; set; }
     }
   }
