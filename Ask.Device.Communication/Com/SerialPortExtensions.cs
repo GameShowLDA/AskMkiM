@@ -1,11 +1,10 @@
 ﻿using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Com
 {
   /// <summary>
   /// Расширения для управления SerialPort.

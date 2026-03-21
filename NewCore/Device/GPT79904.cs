@@ -2,7 +2,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Base.Device;
+using Ask.Device.Communication.Com;
 using NewCore.FunctionAdapters.GPT;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
@@ -14,7 +14,6 @@ namespace NewCore.Device
   /// </summary>
   public class GPT79904 : DeviceWithCOM, IBreakdownTester
   {
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="GPT79904"/>.
     /// </summary>
@@ -38,7 +37,6 @@ namespace NewCore.Device
       ConnectableManager = new ConnectableManagerAdapter(this);
       SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
       LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
-
       Mode = BreakdownTypeMode.None;
     }
 
@@ -98,7 +96,7 @@ namespace NewCore.Device
         _mode = value;
       }
     }
-
+    
     private BreakdownTypeMode _mode { get; set; }
   }
 }

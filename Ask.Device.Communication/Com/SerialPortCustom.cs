@@ -1,7 +1,7 @@
 ﻿using System.IO.Ports;
 using System.Text.Json;
 
-namespace NewCore.Base
+namespace Ask.Device.Communication.Com
 {
   /// <summary>
   /// Кастомный класс для работы с последовательным портом, расширяющий функциональность <see cref="SerialPort"/>.

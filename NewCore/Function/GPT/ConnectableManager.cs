@@ -2,8 +2,9 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Com;
+using Ask.Device.Communication.Common;
 using Microsoft.Win32.SafeHandles;
-using NewCore.Communication;
 using NewCore.Device;
 using System.IO.Ports;
 using System.Reflection;
@@ -54,7 +55,6 @@ public class ConnectableManager : IConnectable
     {
       return true;
     }
-
 
     using (await OperationLock.LockAsync())
     {

@@ -1,4 +1,4 @@
-﻿namespace NewCore.Communication
+﻿namespace Ask.Device.Communication.Common
 {
   /// <summary>
   /// Набор расширений для SemaphoreSlim для удобного использования в стиле using.

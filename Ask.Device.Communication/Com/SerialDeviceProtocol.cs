@@ -1,11 +1,11 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using NewCore.Base.Device;
+using Ask.Device.Communication.Common;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Com
 {
   /// <summary>
   /// Реализация <see cref="IDeviceProtocol"/> для работы с устройствами по COM-порту.
@@ -142,7 +142,5 @@ namespace NewCore.Communication
 
       return response;
     }
-
-
   }
 }

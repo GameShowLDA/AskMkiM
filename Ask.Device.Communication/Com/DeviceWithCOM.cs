@@ -1,10 +1,9 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Communication;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Base.Device
+namespace Ask.Device.Communication.Com
 {
   /// <summary>
   /// Абстрактный класс <see cref="DeviceWithCOM"/> представляет базовый функционал устройства, 
