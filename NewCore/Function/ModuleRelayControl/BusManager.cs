@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Ethernet.Udp;
 using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;

@@ -2,6 +2,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Device.Communication.Com;
+using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Usb;
 using NewCore.Base;
 using NewCore.Base.Device;

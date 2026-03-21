@@ -1,12 +1,10 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Communication.Ethernet;
-using NewCore.Base.Device;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Ethernet.Udp
 {
   /// <summary>
   /// Реализация <see cref="IDeviceProtocol"/> для общения с устройствами по UDP-протоколу.

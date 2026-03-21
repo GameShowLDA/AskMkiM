@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.Communication.Ethernet.Udp;
 using NewCore.Communication;
 
 namespace NewCore.Function.ManagerChassis

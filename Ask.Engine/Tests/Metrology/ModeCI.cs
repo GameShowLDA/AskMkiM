@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -57,7 +58,7 @@ namespace Ask.Engine.Tests.Metrology
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, timeCheck: true, voltageCheck: true);
 
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await DeviceCommandSender.ResetAllSystem();
 
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, messageService);
       await testMeasurement.SetupCommutation(messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);

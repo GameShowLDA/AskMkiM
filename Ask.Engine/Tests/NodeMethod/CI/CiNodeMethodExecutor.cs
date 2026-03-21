@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Ethernet.Udp;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.CI
@@ -27,7 +28,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, voltageCheck: true);
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await DeviceCommandSender.ResetAllSystem();
 
       CiNodeMethod testMeasurement = new CiNodeMethod();
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);

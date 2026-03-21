@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Ethernet.Tcp
 {
   /// <summary>
   /// Реализация <see cref="IDeviceProtocol"/> для общения с мультиметрами Keysight.

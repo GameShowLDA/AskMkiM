@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Function.ManagerChassis;
 

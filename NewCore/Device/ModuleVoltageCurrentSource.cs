@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
+using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Function.ModuleVoltageCurrentSource.SelfCheck;

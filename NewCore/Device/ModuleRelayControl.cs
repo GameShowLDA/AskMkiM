@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Function.ModuleRelayControl.SelfCheck;
 using NewCore.FunctionAdapters.ModuleRelayControl;

@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation.SelfCheck;
 using NewCore.FunctionAdapters.DeviceBusCommutation;

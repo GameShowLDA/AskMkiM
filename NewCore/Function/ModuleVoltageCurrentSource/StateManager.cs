@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.Communication.Ethernet.Udp;
 using NewCore.Base.DeviceResponses;
 using NewCore.Communication;
 

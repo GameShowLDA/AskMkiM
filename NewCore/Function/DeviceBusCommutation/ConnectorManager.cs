@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Ethernet.Udp;
 using NewCore.Base.Device;
 using NewCore.Communication;
 using static Ask.LogLib.LoggerUtility;

@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Services.Device;
+﻿using Ask.Device.Communication.Ethernet;
+using DataBaseConfiguration.Services.Device;
 using NewCore.Base.Device;
 using NewCore.Communication;
 

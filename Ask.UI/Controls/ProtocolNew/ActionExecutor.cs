@@ -7,6 +7,7 @@ using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Device.Communication.Ethernet.Udp;
 using Message;
 using System.Windows;
 using System.Windows.Input;
@@ -711,7 +712,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       await Application.Current.Dispatcher.Invoke(async () =>
       {
-        await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+        await DeviceCommandSender.ResetAllSystem();
 
         SystemStateManager.SetIsLocked(false);
 

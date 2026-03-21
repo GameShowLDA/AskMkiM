@@ -1,10 +1,10 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Communication;
+using Ask.Device.Communication.Ethernet.Udp;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Base.Device
+namespace Ask.Device.Communication.Ethernet
 {
   /// <summary>
   /// Абстрактный класс, представляющий устройство с подключением по IP-адресу.

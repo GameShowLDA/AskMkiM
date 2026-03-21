@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Communication
+namespace Ask.Device.Communication.Ethernet.Udp
 {
   /// <summary>
   /// Статический класс для отправки команд устройствам.
@@ -66,7 +66,7 @@ namespace NewCore.Communication
       try
       {
         IPAddress broadcastAddress = IPAddress.Parse("192.168.1.255");
-        IPEndPoint ep = new IPEndPoint(broadcastAddress, 8888);       
+        IPEndPoint ep = new IPEndPoint(broadcastAddress, 8888);
         byte[] sendBuf = Encoding.ASCII.GetBytes(command.ToString());
         await socket.SendToAsync(new ArraySegment<byte>(sendBuf), SocketFlags.None, ep);
 

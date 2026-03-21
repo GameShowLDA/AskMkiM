@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.Communication.Ethernet.Udp;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.PI
@@ -31,7 +32,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await DeviceCommandSender.ResetAllSystem();
 
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
       if (!connect.Connect)
