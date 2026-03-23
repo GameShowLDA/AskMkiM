@@ -8,31 +8,31 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.Device.Communication.Com
 {
   /// <summary>
-  /// Реализует транспортный протокол обмена с устройствами по COM-порту.
+  /// Реализует универсальный транспортный протокол обмена с устройствами по COM-порту.
   /// </summary>
-  public class SerialDeviceProtocol : IDeviceProtocol
+  public class ComProtocol : IDeviceProtocol
   {
     /// <summary>
-    /// Настроенный последовательный порт устройства.
+    /// Последовательный порт, через который выполняется обмен с устройством.
     /// </summary>
     private readonly SerialPort _serialPort;
 
     /// <summary>
-    /// Устройство, к которому относится текущий COM-протокол.
+    /// Устройство, для которого выполняется обмен по COM-порту.
     /// </summary>
-    private readonly DeviceWithCOM _device;
+    private readonly IDevice _device;
 
     /// <summary>
-    /// Семафор, запрещающий параллельный доступ к одному COM-порту.
+    /// Получает или задаёт семафор, запрещающий параллельный доступ к одному COM-порту.
     /// </summary>
     public SemaphoreSlim OperationLock { get; set; }
 
     /// <summary>
-    /// Инициализирует новый экземпляр <see cref="SerialDeviceProtocol"/>.
+    /// Инициализирует новый экземпляр класса <see cref="ComProtocol"/>.
     /// </summary>
-    /// <param name="device">Устройство с COM-подключением.</param>
-    /// <param name="serialPort">Настроенный объект последовательного порта.</param>
-    public SerialDeviceProtocol(DeviceWithCOM device, SerialPort serialPort)
+    /// <param name="device">Устройство, использующее протокол.</param>
+    /// <param name="serialPort">Настроенный последовательный порт.</param>
+    public ComProtocol(IDevice device, SerialPort serialPort)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _serialPort = serialPort ?? throw new ArgumentNullException(nameof(serialPort));
@@ -42,18 +42,24 @@ namespace Ask.Device.Communication.Com
     /// <summary>
     /// Отправляет команду в COM-порт и при необходимости ожидает ответ от устройства.
     /// </summary>
-    /// <param name="command">Текст команды для отправки.</param>
+    /// <param name="command">Команда для отправки.</param>
     /// <param name="responseDelay">Задержка перед чтением ответа в миллисекундах.</param>
     /// <param name="timeout">Таймаут ожидания ответа в миллисекундах.</param>
     /// <param name="port">Параметр интерфейса, не используемый COM-протоколом.</param>
     /// <param name="delayBeforeCall">Задержка перед отправкой команды в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Строка ответа устройства или пустая строка при ошибке либо отсутствии ответа.</returns>
-    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
+    public async Task<string> QueryAsync(
+      string command,
+      double responseDelay = 0,
+      int timeout = 0,
+      int port = 0,
+      int delayBeforeCall = 0,
+      CancellationToken cancellationToken = default)
     {
       using (await OperationLock.LockAsync(cancellationToken))
       {
-        using (await _serialPort.UsePort())
+        using (await _serialPort.UsePort(_device.Name))
         {
           try
           {
@@ -67,8 +73,7 @@ namespace Ask.Device.Communication.Com
             await WaitAsync((int)Math.Ceiling(responseDelay), cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            var answer = await ReadResponseAsync(timeout, cancellationToken);
-            return answer;
+            return await ReadResponseAsync(timeout, cancellationToken);
           }
           catch (Exception ex)
           {
@@ -84,12 +89,6 @@ namespace Ask.Device.Communication.Com
     /// </summary>
     private void CheckComPort()
     {
-      if (_serialPort == null)
-      {
-        LogError($"[{_device.Name}] COM-порт не инициализирован.", isDeviceLog: true);
-        return;
-      }
-
       if (_serialPort.IsOpen)
       {
         LogInformation($"[{_device.Name}] COM-порт {_serialPort.PortName} открыт и доступен.", isDeviceLog: true);
@@ -105,15 +104,17 @@ namespace Ask.Device.Communication.Com
     /// </summary>
     /// <param name="delay">Время задержки в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
-    private async Task WaitAsync(int delay, CancellationToken cancellationToken)
+    private static Task WaitAsync(int delay, CancellationToken cancellationToken)
     {
-      await Task.Delay(delay, cancellationToken);
+      return delay > 0
+        ? Task.Delay(delay, cancellationToken)
+        : Task.CompletedTask;
     }
 
     /// <summary>
     /// Отправляет команду в COM-порт.
     /// </summary>
-    /// <param name="command">Строка команды.</param>
+    /// <param name="command">Команда для отправки.</param>
     private void SendCommand(string command)
     {
       LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}", isDeviceLog: true);
@@ -123,13 +124,18 @@ namespace Ask.Device.Communication.Com
     }
 
     /// <summary>
-    /// Асинхронно ожидает ответ от устройства в течение указанного таймаута.
+    /// Ожидает ответ от устройства в течение указанного таймаута.
     /// </summary>
     /// <param name="timeout">Максимальное время ожидания ответа в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Ответ устройства или пустая строка при таймауте.</returns>
     private async Task<string> ReadResponseAsync(int timeout, CancellationToken cancellationToken)
     {
+      if (timeout <= 0)
+      {
+        return string.Empty;
+      }
+
       var responseBuilder = new StringBuilder();
       var stopwatch = Stopwatch.StartNew();
 
@@ -142,7 +148,7 @@ namespace Ask.Device.Communication.Com
           string chunk = _serialPort.ReadExisting();
           responseBuilder.Append(chunk);
 
-          if (responseBuilder.ToString().Contains("\n"))
+          if (responseBuilder.ToString().Contains('\n'))
           {
             break;
           }

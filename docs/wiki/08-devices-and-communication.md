@@ -2,14 +2,14 @@
 
 ## Общая модель
 
-В проекте устройства описываются в `NewCore` и конфигурируются через `DataBaseConfigruration`.
+В проекте устройства описываются в `Ask.Device.Runtime` и конфигурируются через `DataBaseConfigruration`.
 
 Схема по слоям такая:
 
 - `Ask.Core` задает интерфейсы устройств;
-- `NewCore/Device` задает конкретные классы;
-- `NewCore/Communication` задает протоколы;
-- `NewCore/Function` задает менеджеры и прикладные действия;
+- `Ask.Device.Runtime/Device` задает конкретные классы;
+- `Ask.Device.Communication` задает универсальные transport-протоколы;
+- `Ask.Device.Runtime/Function` задает менеджеры и прикладные действия;
 - `DataBaseConfigruration/Services/Device` загружает и сохраняет конфигурацию устройств.
 
 ## Иерархия устройств
@@ -44,12 +44,12 @@ flowchart TD
 
 ## Протоколы связи
 
-В `NewCore/Communication` используются:
+В `Ask.Device.Communication` используются:
 
-- `SerialDeviceProtocol`
-- `UdpDeviceProtocol`
-- `KeysightDeviceProtocol`
-- `UninterruptiblePowerSupplyUsbProtocol`
+- `ComProtocol`
+- `UdpProtocol`
+- `TcpProtocol`
+- `UsbProtocol`
 
 ## Как связываются устройство и протокол
 
@@ -59,21 +59,23 @@ flowchart TD
 
 - хранит `SerialPort`;
 - умеет восстанавливать порт из `ConnectionDetails`;
-- автоматически создает `SerialDeviceProtocol`.
+- автоматически создает `ComProtocol`.
 
 ### IP-устройства
 
 `DeviceWithIP`:
 
 - хранит `IPAddress`;
-- создает `UdpDeviceProtocol`.
+- по умолчанию создает `UdpProtocol`;
+- конкретное устройство может назначить `TcpProtocol`, если общается по TCP.
 
 ### USB-устройства
 
 `DeviceWithUSB`:
 
 - хранит строку подключения;
-- использует отдельный USB-протокол в конкретной реализации.
+- использует `UsbProtocol`;
+- бизнес-логика конкретного USB-устройства выносится в `IUsbCommandHandler` уже в runtime-слое.
 
 ## Менеджеры функций
 
@@ -105,12 +107,12 @@ flowchart TD
 
 ## Адаптеры
 
-В `NewCore/FunctionAdapters` есть адаптеры для приведения внутренних менеджеров к интерфейсам из `Ask.Core`.
+В `Ask.Device.Runtime/FunctionAdapters` есть адаптеры для приведения внутренних менеджеров к интерфейсам из `Ask.Core`.
 
 Это полезно, потому что:
 
 - UI и Engine работают через интерфейсы;
-- concrete-логика устройства остается в `NewCore`.
+- concrete-логика устройства остается в `Ask.Device.Runtime`.
 
 ## Где хранится конфигурация устройств
 

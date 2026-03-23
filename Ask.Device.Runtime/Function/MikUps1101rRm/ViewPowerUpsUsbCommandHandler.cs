@@ -1,15 +1,16 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using Ask.Device.Communication.Common;
+using Ask.Device.Communication.Usb;
+using NewCore.Function.MikUps1101rRm.ViewPower;
 using System.Text.Json;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Usb
+namespace NewCore.Function.MikUps1101rRm
 {
   /// <summary>
-  /// Реализует USB-протокол обмена для источников бесперебойного питания через ViewPower.
+  /// Обрабатывает UPS-команды поверх общего <see cref="UsbProtocol"/> через локальный интерфейс ViewPower.
   /// </summary>
-  public class UninterruptiblePowerSupplyUsbProtocol : IDeviceProtocol
+  public class ViewPowerUpsUsbCommandHandler : IUsbCommandHandler
   {
     /// <summary>
     /// Команда проверки доступности UPS.
@@ -47,7 +48,7 @@ namespace Ask.Device.Communication.Usb
     private static readonly TimeSpan StopStateConfirmationTimeout = TimeSpan.FromSeconds(5);
 
     /// <summary>
-    /// Набор режимов работы, означающих включенное выходное питание.
+    /// Набор режимов работы, означающих включённое выходное питание.
     /// </summary>
     private static readonly string[] ActiveWorkModes =
     {
@@ -62,36 +63,18 @@ namespace Ask.Device.Communication.Usb
     };
 
     /// <summary>
-    /// USB-устройство, для которого выполняется обмен.
+    /// Выполняет UPS-команду через ViewPower и возвращает сериализованный JSON-ответ.
     /// </summary>
-    private readonly DeviceWithUSB _device;
-
-    /// <summary>
-    /// Инициализирует новый экземпляр <see cref="UninterruptiblePowerSupplyUsbProtocol"/>.
-    /// </summary>
-    /// <param name="device">USB-устройство.</param>
-    public UninterruptiblePowerSupplyUsbProtocol(DeviceWithUSB device)
-    {
-      _device = device ?? throw new ArgumentNullException(nameof(device));
-      OperationLock = new SemaphoreSlim(1, 1);
-    }
-
-    /// <summary>
-    /// Семафор, запрещающий параллельные операции с одним UPS.
-    /// </summary>
-    public SemaphoreSlim OperationLock { get; set; }
-
-    /// <summary>
-    /// Выполняет USB-команду для UPS и возвращает сериализованный JSON-ответ.
-    /// </summary>
+    /// <param name="device">Устройство UPS.</param>
     /// <param name="command">Команда транспорта.</param>
     /// <param name="responseDelay">Задержка перед возвратом ответа в миллисекундах.</param>
-    /// <param name="timeout">Пользовательский таймаут операции, попадающий в JSON-ответ.</param>
-    /// <param name="port">Пользовательский порт операции, попадающий в JSON-ответ.</param>
+    /// <param name="timeout">Пользовательский таймаут операции.</param>
+    /// <param name="port">Пользовательский порт операции.</param>
     /// <param name="delayBeforeCall">Задержка перед выполнением команды в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>JSON-строка с результатом выполнения команды.</returns>
-    public async Task<string> QueryAsync(
+    public async Task<string> ExecuteAsync(
+      IDevice device,
       string command,
       double responseDelay = 0,
       int timeout = 0,
@@ -99,49 +82,51 @@ namespace Ask.Device.Communication.Usb
       int delayBeforeCall = 0,
       CancellationToken cancellationToken = default)
     {
-      using (await OperationLock.LockAsync(cancellationToken))
+      ArgumentNullException.ThrowIfNull(device);
+
+      if (device is not IUninterruptiblePowerSupply ups)
       {
-        if (delayBeforeCall > 0)
-        {
-          await Task.Delay(delayBeforeCall, cancellationToken);
-        }
-
-        string pattern = string.IsNullOrWhiteSpace(_device.ConnectionDetails)
-          ? _device.Name
-          : _device.ConnectionDetails;
-
-        bool found = UsbDeviceLocator.TryFindByName(pattern, out var descriptor);
-
-        if (_device is IUninterruptiblePowerSupply ups)
-        {
-          ups.LastResolvedDevicePath = found ? descriptor.DeviceId : string.Empty;
-        }
-
-        UpsProtocolResponse payload = await ExecuteCommandAsync(command, found, descriptor, cancellationToken);
-
-        if (responseDelay > 0)
-        {
-          await Task.Delay((int)Math.Ceiling(responseDelay), cancellationToken);
-        }
-
-        payload.Timeout = timeout;
-        payload.Port = port;
-
-        string response = JsonSerializer.Serialize(payload);
-        LogInformation($"[{_device.Name}] UPS Query: {response}", isDeviceLog: true);
-        return response;
+        throw new InvalidOperationException("ViewPowerUpsUsbCommandHandler поддерживает только IUninterruptiblePowerSupply.");
       }
+
+      if (delayBeforeCall > 0)
+      {
+        await Task.Delay(delayBeforeCall, cancellationToken);
+      }
+
+      string pattern = string.IsNullOrWhiteSpace(device.ConnectionDetails)
+        ? device.Name
+        : device.ConnectionDetails;
+
+      bool found = UsbDeviceLocator.TryFindByName(pattern, out var descriptor);
+      ups.LastResolvedDevicePath = found ? descriptor.DeviceId : string.Empty;
+
+      UpsProtocolResponse payload = await ExecuteCommandAsync(device, command, found, descriptor, cancellationToken);
+
+      if (responseDelay > 0)
+      {
+        await Task.Delay((int)Math.Ceiling(responseDelay), cancellationToken);
+      }
+
+      payload.Timeout = timeout;
+      payload.Port = port;
+
+      string response = JsonSerializer.Serialize(payload);
+      LogInformation($"[{device.Name}] UPS Query: {response}", isDeviceLog: true);
+      return response;
     }
 
     /// <summary>
-    /// Выполняет бизнес-логику конкретной команды UPS.
+    /// Выполняет бизнес-логику конкретной UPS-команды.
     /// </summary>
+    /// <param name="device">Устройство UPS.</param>
     /// <param name="command">Команда транспорта.</param>
     /// <param name="found">Признак обнаружения USB-устройства.</param>
     /// <param name="descriptor">Дескриптор найденного устройства.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Результат выполнения команды.</returns>
     private async Task<UpsProtocolResponse> ExecuteCommandAsync(
+      IDevice device,
       string command,
       bool found,
       UsbDeviceDescriptor descriptor,
@@ -152,7 +137,7 @@ namespace Ask.Device.Communication.Usb
       if (!found)
       {
         response.Success = false;
-        response.Error = $"UPS \"{_device.ConnectionDetails}\" was not found in the system USB devices.";
+        response.Error = $"UPS \"{device.ConnectionDetails}\" was not found in the system USB devices.";
         return response;
       }
 
@@ -310,7 +295,7 @@ namespace Ask.Device.Communication.Usb
     /// <param name="found">Признак обнаружения устройства.</param>
     /// <param name="descriptor">Дескриптор найденного устройства.</param>
     /// <returns>Базовый объект ответа UPS.</returns>
-    private UpsProtocolResponse CreateBaseResponse(string command, bool found, UsbDeviceDescriptor descriptor)
+    private static UpsProtocolResponse CreateBaseResponse(string command, bool found, UsbDeviceDescriptor descriptor)
     {
       return new UpsProtocolResponse
       {
@@ -361,7 +346,7 @@ namespace Ask.Device.Communication.Usb
       public bool ViewPowerAvailable { get; set; }
 
       /// <summary>
-      /// Получает или задаёт признак включенного выходного питания.
+      /// Получает или задаёт признак включённого выходного питания.
       /// </summary>
       public bool OutputOn { get; set; }
 

@@ -8,9 +8,9 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.Device.Communication.Ethernet.Udp
 {
   /// <summary>
-  /// Реализует транспортный протокол обмена с устройствами по UDP.
+  /// Реализует универсальный транспортный протокол обмена с устройствами по UDP.
   /// </summary>
-  public class UdpDeviceProtocol : IDeviceProtocol
+  public class UdpProtocol : IDeviceProtocol
   {
     /// <summary>
     /// Базовый порт отправки команд.
@@ -23,20 +23,20 @@ namespace Ask.Device.Communication.Ethernet.Udp
     private const int BaseInputPort = 8800;
 
     /// <summary>
-    /// Устройство, к которому относится текущий UDP-протокол.
+    /// Устройство, для которого выполняется обмен.
     /// </summary>
-    private readonly DeviceWithIP _device;
+    private readonly IDevice _device;
 
     /// <summary>
-    /// Семафор, запрещающий параллельную отправку команд в одно устройство.
+    /// Получает или задаёт семафор, запрещающий параллельную отправку команд в одно устройство.
     /// </summary>
     public SemaphoreSlim OperationLock { get; set; }
 
     /// <summary>
-    /// Инициализирует новый экземпляр <see cref="UdpDeviceProtocol"/>.
+    /// Инициализирует новый экземпляр класса <see cref="UdpProtocol"/>.
     /// </summary>
-    /// <param name="device">Устройство с IP-подключением.</param>
-    public UdpDeviceProtocol(DeviceWithIP device)
+    /// <param name="device">Устройство, использующее протокол.</param>
+    public UdpProtocol(IDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       OperationLock = new SemaphoreSlim(1, 1);
@@ -52,7 +52,13 @@ namespace Ask.Device.Communication.Ethernet.Udp
     /// <param name="delayBeforeCall">Задержка перед отправкой команды в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <returns>Ответ устройства либо пустая строка при отсутствии ответа.</returns>
-    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0, int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = new CancellationToken())
+    public async Task<string> QueryAsync(
+      string command,
+      double responseDelay = 0,
+      int timeout = 0,
+      int port = 0,
+      int delayBeforeCall = 0,
+      CancellationToken cancellationToken = default)
     {
       using (await OperationLock.LockAsync(cancellationToken))
       {
@@ -63,11 +69,12 @@ namespace Ask.Device.Communication.Ethernet.Udp
             await Task.Delay(delayBeforeCall, cancellationToken).ConfigureAwait(false);
           }
 
-          int lastOctet = GetLastOctet(_device.IPAddress);
+          IPAddress ipAddress = ResolveIpAddress();
+          int lastOctet = GetLastOctet(ipAddress);
           int inputPort = port == 0 ? BaseInputPort + lastOctet : port;
           int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
 
-          var deviceEndpoint = new IPEndPoint(_device.IPAddress, outputPort);
+          var deviceEndpoint = new IPEndPoint(ipAddress, outputPort);
           using var udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort));
           byte[] buffer = Encoding.UTF8.GetBytes(command);
 
@@ -105,19 +112,35 @@ namespace Ask.Device.Communication.Ethernet.Udp
     }
 
     /// <summary>
+    /// Возвращает IP-адрес устройства из параметров подключения.
+    /// </summary>
+    /// <returns>IP-адрес устройства.</returns>
+    /// <exception cref="InvalidOperationException">Выбрасывается, если строка подключения не содержит корректный IP-адрес.</exception>
+    private IPAddress ResolveIpAddress()
+    {
+      if (IPAddress.TryParse(_device.ConnectionDetails, out IPAddress? ipAddress))
+      {
+        return ipAddress;
+      }
+
+      throw new InvalidOperationException($"[{_device.Name}] Не удалось получить корректный IP-адрес из ConnectionDetails.");
+    }
+
+    /// <summary>
     /// Получает последний октет IP-адреса.
     /// </summary>
-    /// <param name="ip">IP-адрес.</param>
+    /// <param name="ipAddress">IP-адрес.</param>
     /// <returns>Целое значение последнего октета.</returns>
-    private int GetLastOctet(IPAddress ip)
+    /// <exception cref="ArgumentException">Выбрасывается, если IP-адрес имеет некорректный формат.</exception>
+    private static int GetLastOctet(IPAddress ipAddress)
     {
-      string[] parts = ip.ToString().Split('.');
-      if (parts.Length != 4 || !int.TryParse(parts[3], out int last))
+      string[] parts = ipAddress.ToString().Split('.');
+      if (parts.Length != 4 || !int.TryParse(parts[3], out int lastOctet))
       {
         throw new ArgumentException("Некорректный IP-адрес для определения порта.");
       }
 
-      return last;
+      return lastOctet;
     }
   }
 }

@@ -83,7 +83,7 @@ namespace Ask.Device.Communication.Com
         if (port != null)
         {
           COMPort = port;
-          DeviceProtocol = new SerialDeviceProtocol(this, port);
+          DeviceProtocol = new ComProtocol(this, port);
           LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.", isDeviceLog: true);
         }
         else

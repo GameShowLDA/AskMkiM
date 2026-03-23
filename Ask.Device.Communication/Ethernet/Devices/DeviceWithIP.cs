@@ -105,7 +105,7 @@ namespace Ask.Device.Communication.Ethernet
       if (IPAddress.TryParse(ipString, out IPAddress? ipAddress))
       {
         IPAddress = ipAddress;
-        DeviceProtocol ??= new UdpDeviceProtocol(this);
+        DeviceProtocol ??= new UdpProtocol(this);
       }
       else
       {

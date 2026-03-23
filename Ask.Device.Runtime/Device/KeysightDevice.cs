@@ -92,7 +92,7 @@ namespace NewCore.Device
       AcVoltageManager = new AcVoltageMeasurementAdapter(this);
       DcVoltageManager = new DcVoltageMeasurementAdapter(this);
       DiodeManager = new DiodeMeasurementAdapter(this);
-      DeviceProtocol = new KeysightDeviceProtocol(this, Port);
+      DeviceProtocol = new TcpProtocol(this, Port);
       MaxContinuityResistance = 100000;
     }
   }

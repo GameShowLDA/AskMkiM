@@ -24,7 +24,7 @@ namespace NewCore.Device
 
       ConnectionDetails = "VID_0665&PID_5161";
       ConnectableManager = new ConnectableManagerAdapter(this);
-      DeviceProtocol = new UninterruptiblePowerSupplyUsbProtocol(this);
+      DeviceProtocol = new UsbProtocol(this, new Function.MikUps1101rRm.ViewPowerUpsUsbCommandHandler());
 
       _powerManager = new PowerManagerAdapter(this);
     }

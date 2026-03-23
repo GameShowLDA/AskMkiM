@@ -1,10 +1,11 @@
 using System.Globalization;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Ask.Device.Communication.Usb
+namespace NewCore.Function.MikUps1101rRm.ViewPower
 {
   /// <summary>
   /// Предоставляет клиент для взаимодействия с локальным HTTP-интерфейсом ViewPower.
