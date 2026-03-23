@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using DataBaseConfiguration.Services.Device;
 using System.Diagnostics;
 
@@ -16,10 +17,11 @@ namespace TestConsole.GPT
         Console.WriteLine("2. Проверка времени нарастания");
         Console.WriteLine("3. Проверка скорости изменений параметров");
         Console.WriteLine("4. Тест завершения измерения");
+        Console.WriteLine("5. Управление землей ACW/DCW");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 8)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 5)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -43,6 +45,10 @@ namespace TestConsole.GPT
             await TestStop();
             break;
 
+          case 5:
+            await ConfigureGroundModeAsync();
+            break;
+
           case 0:
             return;
 
@@ -53,9 +59,124 @@ namespace TestConsole.GPT
       }
     }
 
+    private static async Task ConfigureGroundModeAsync()
+    {
+      var device = SelectBreakdownTester();
+      if (device == null)
+      {
+        return;
+      }
+
+      if (!await EnsureDeviceReadyAsync(device))
+      {
+        return;
+      }
+
+      Console.WriteLine("Выберите режим:");
+      Console.WriteLine("1. ACW");
+      Console.WriteLine("2. DCW");
+      Console.WriteLine("0. Отмена");
+      Console.Write("Введите номер режима: ");
+
+      if (!int.TryParse(Console.ReadLine(), out int modeChoice) || modeChoice < 0 || modeChoice > 2)
+      {
+        Console.WriteLine("Неверный выбор режима.");
+        return;
+      }
+
+      switch (modeChoice)
+      {
+        case 1:
+          await ConfigureGroundModeForSelectedModeAsync(device.AcwManger.Mode, device.AcwManger.GroundMode, "ACW");
+          break;
+
+        case 2:
+          await ConfigureGroundModeForSelectedModeAsync(device.DcwManger.Mode, device.DcwManger.GroundMode, "DCW");
+          break;
+
+        case 0:
+          return;
+      }
+    }
+
+    private static async Task ConfigureGroundModeForSelectedModeAsync(
+      IModeConfigurable modeConfigurable,
+      IGroundModeConfigurable groundModeConfigurable,
+      string modeName)
+    {
+      try
+      {
+        var modeResult = await modeConfigurable.SetModeAsync();
+        if (!modeResult.Success)
+        {
+          Console.WriteLine($"Не удалось установить режим {modeName}: {modeResult.Message}");
+          return;
+        }
+
+        var currentState = await groundModeConfigurable.GetGroundModeAsync();
+        Console.WriteLine($"Текущее состояние земли {modeName}: {(currentState ? "ON" : "OFF")}");
+        Console.WriteLine("1. Включить землю");
+        Console.WriteLine("2. Выключить землю");
+        Console.WriteLine("3. Только показать текущее состояние");
+        Console.WriteLine("0. Отмена");
+        Console.Write("Введите номер действия: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int actionChoice) || actionChoice < 0 || actionChoice > 3)
+        {
+          Console.WriteLine("Неверный выбор действия.");
+          return;
+        }
+
+        if (actionChoice == 0 || actionChoice == 3)
+        {
+          return;
+        }
+
+        var targetState = actionChoice == 1;
+        var result = await groundModeConfigurable.SetGroundModeAsync(targetState);
+        if (!result.Success)
+        {
+          Console.WriteLine($"Не удалось переключить землю {modeName}: {result.Message}");
+          return;
+        }
+
+        var updatedState = await groundModeConfigurable.GetGroundModeAsync();
+        Console.WriteLine($"Новое состояние земли {modeName}: {(updatedState ? "ON" : "OFF")}");
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Ошибка при работе с землей режима {modeName}: {ex.Message}");
+      }
+    }
+
+    private static async Task<bool> EnsureDeviceReadyAsync(IBreakdownTester device)
+    {
+      try
+      {
+        var connectResult = await device.ConnectableManager.ConnectAsync();
+        if (!connectResult.Connect)
+        {
+          Console.WriteLine($"Не удалось подключиться к {device.Name}: {connectResult.Answer}");
+          return false;
+        }
+
+        return true;
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Ошибка подключения к {device.Name}: {ex.Message}");
+        return false;
+      }
+    }
+
     private static async Task CheckConnection()
     {
       var device = SelectBreakdownTester();
+      if (device == null)
+      {
+        return;
+      }
+
       for (int i = 0; i < 1000; i++)
       {
         await device.ConnectableManager.ConnectAsync();
@@ -75,12 +196,16 @@ namespace TestConsole.GPT
         await device.DcwManger.Mode.SetModeAsync();
         await device.DcwManger.Time.SetRampTimeAsync(0.1);
       }
-
     }
 
     private static async Task CheckTime()
     {
       var breakDown = SelectBreakdownTester();
+      if (breakDown == null)
+      {
+        return;
+      }
+
       Stopwatch stopwatch = new Stopwatch();
       stopwatch.Start();
       await breakDown.ConnectableManager.ConnectAsync();
@@ -125,11 +250,8 @@ namespace TestConsole.GPT
         Console.WriteLine($"Выбрано устройство: {selectedDevice.Name} (ID: {selectedDevice.Id})");
         return selectedDevice;
       }
-      else
-      {
-        Console.WriteLine("Некорректный выбор.");
-      }
 
+      Console.WriteLine("Некорректный выбор.");
       return null;
     }
 

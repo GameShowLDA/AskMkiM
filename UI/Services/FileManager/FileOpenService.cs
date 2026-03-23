@@ -170,7 +170,7 @@ namespace UI.Services.FileManager
       //var encoding = EncodingService.DetectEncodingFromFile(path);
       var extention = Path.GetExtension(path).ToLowerInvariant();
       Encoding encoding;
-      if (extention == ".pkw" || extention == ".txt")
+      if (extention == ".pkw" || extention == ".txt" || extention == ".lstw"|| extention == ".lst")
       {
         encoding = Encoding.UTF8;
       }

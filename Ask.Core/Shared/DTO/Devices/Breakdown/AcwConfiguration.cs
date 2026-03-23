@@ -44,5 +44,10 @@
     /// Ток дугового пробоя ACW (в мА).
     /// </summary>
     public double ArcCurrent { get; set; }
+
+    /// <summary>
+    /// Состояние земли для режима ACW.
+    /// </summary>
+    public bool GroundMode { get; set; }
   }
 }

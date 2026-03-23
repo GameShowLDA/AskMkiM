@@ -355,7 +355,7 @@
     <value>Вернуться к исходному файлу</value>
   </data>
   <data name="translator.editor.tooltip.save.archive" xml:space="preserve">
-    <value>Сохранить переведенный файл в архив</value>
+    <value>Сохранить странслированный файл в архив</value>
   </data>
   <data name="translator.editor.tooltip.save.source" xml:space="preserve">
     <value>Сохранить исходный файл</value>

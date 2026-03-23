@@ -31,6 +31,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     IDcVoltageMeasurement DcVoltageManager { get; set; }
 
     /// <summary>
+    /// Управление проверкой диода.
+    /// </summary>
+    IDiodeMeasurement DiodeManager { get; set; }
+
+    /// <summary>
     /// Управление измерением сопротивления.
     /// </summary>
     IResistanceMeasurement ResistanceManager { get; set; }

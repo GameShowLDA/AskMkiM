@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Errors.Translation;
+﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -96,17 +97,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <item><description>список моделей точек.</description></item>
     /// </list>
     /// </returns>
-    public static (bool, List<PointModel>) GetPointsModel(List<string> points, Dictionary<string, string> pointsMap)
+    public static (List<ErrorItem>, List<PointModel>) GetPointsModel(List<string> points, BaseCommandModel model, Dictionary<string, string> pointsMap)
     {
       List<PointModel> pointModels = new List<PointModel>();
-      bool error = false;
+      List<ErrorItem> error = new();
 
       foreach (var point in points)
       {
         string pointPart = pointsMap.GetValueOrDefault(point, string.Empty);
         if (string.IsNullOrEmpty(pointPart))
         {
-          error = true;
+          error.Add(GeneralErrors.UnknownPoint(point, model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
           continue;
         }
 

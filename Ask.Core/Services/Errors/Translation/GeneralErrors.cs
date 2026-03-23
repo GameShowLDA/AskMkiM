@@ -383,5 +383,50 @@ namespace Ask.Core.Services.Errors.Translation
         Code = ErrorCode.Gen_InvalidParameterOrder
       };
 
+    /// <summary>
+    /// Ошибка: команда ИЕ не содержит ни одного параметра.
+    /// </summary>
+    public static ErrorItem EmptyCommandBody(int startLineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = startLineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_EmptyCommandBody,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = "Команда должна содержать хотя бы один параметр. Тело команды не может быть пустым."
+      };
+
+    /// <summary>
+    /// Ошибка: команда ИЕ не содержит ни одного параметра.
+    /// </summary>
+    public static ErrorItem EmptyPointsBody(int startLineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = startLineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_EmptyPointsBody,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = "Не найден блок с точками."
+      };
+
+    /// <summary>
+    /// Ошибка: команда ИЕ не содержит ни одного параметра.
+    /// </summary>
+    public static ErrorItem NoPointsBody(int startLineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = startLineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_NoPointsBody,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = "Команда должна содержать хотя бы одну точку."
+      };
+
   }
 }

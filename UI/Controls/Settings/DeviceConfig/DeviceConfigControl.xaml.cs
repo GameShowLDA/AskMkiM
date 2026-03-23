@@ -17,6 +17,7 @@ using UI.Controls.Settings.DeviceConfig.DeviceManager;
 using UI.Controls.Settings.DeviceConfig.FastMeter;
 using UI.Controls.Settings.DeviceConfig.ModuleRelayControl;
 using UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource;
+using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
@@ -67,6 +68,7 @@ namespace UI.Controls.Settings.DeviceConfig
       LoadPowerSources(system, devices);
       LoadRelaySwitchModules(system, devices);
       LoadSwitchingDevices(system, devices);
+      LoadUninterruptiblePowerSupplies(system, devices);
       deviceBorder.Child = devices;
 
       devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
@@ -79,6 +81,8 @@ namespace UI.Controls.Settings.DeviceConfig
       devices.EditPowerModuleEvent += (s, a) => Devices_EditPowerModuleEvent(system, devices, a);
       devices.EditModuleRelayEvent += (s, a) => Devices_EditRelayEvent(system, devices, a);
       devices.EditFastMeterEvent += (s, a) => Devices_EditFastMeterEvent(system, devices, a);
+      devices.UninterruptiblePowerSupplyEvent += (s, a) => Devices_UninterruptiblePowerSupplyEvent(s, a, system, devices);
+      devices.EditUninterruptiblePowerSupplyEvent += (s, a) => Devices_EditUninterruptiblePowerSupplyEvent(system, devices, a);
       devices.ExitEvent += Devices_ExitEvent;
     }
 
@@ -187,6 +191,22 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
+    private async void Devices_UninterruptiblePowerSupplyEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
+    {
+      UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
+      window.SetSettings(sender, e);
+      window.RequestSave += (s, a) => LoadUninterruptiblePowerSupplies(system, devices);
+      await OpenWindowInDrawerAsync(window, "Добавление устройства", "F4 - закрыть");
+    }
+
+    private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyEntity entity)
+    {
+      UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
+      window.SetSettings(this, system, entity);
+      window.RequestSave += (s, a) => LoadUninterruptiblePowerSupplies(system, devices);
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+    }
+
     /// <summary>
     /// Показывает или скрывает третью колонку в интерфейсе.
     /// </summary>
@@ -286,6 +306,21 @@ namespace UI.Controls.Settings.DeviceConfig
       var switchingDevices = new SwitchingDeviceServices().GetEntitiesByNumberChassis(chassis.Number);
 
       foreach (var device in switchingDevices)
+      {
+        devicesControl.AddDevice(device);
+      }
+    }
+
+    /// <summary>
+    /// Loads UPS devices bound to selected chassis.
+    /// </summary>
+    private void LoadUninterruptiblePowerSupplies(IChassisManager chassis, DeviceManagerControl devicesControl)
+    {
+      devicesControl.ClearDevice(new UninterruptiblePowerSupplyEntity());
+
+      var uninterruptiblePowerSupplies = new UninterruptiblePowerSupplyServices().GetEntitiesByNumberChassis(chassis.Number);
+
+      foreach (var device in uninterruptiblePowerSupplies)
       {
         devicesControl.AddDevice(device);
       }
@@ -419,6 +454,13 @@ namespace UI.Controls.Settings.DeviceConfig
     }
 
     private async Task OpenWindowInDrawerAsync(ChassisManagerWindow window, string title, string subtitle, Action? onClose = null)
+    {
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private async Task OpenWindowInDrawerAsync(UninterruptiblePowerSupplyWindow window, string title, string subtitle, Action? onClose = null)
     {
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();

@@ -10,15 +10,19 @@
     <UserControl.Resources>
         <local:SearchHighlightConverter x:Key="SearchHighlightConverter"/>
     </UserControl.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
+    <Border Background="{DynamicResource ModernDataGridBackgroundBrush}"
+            BorderBrush="{DynamicResource ModernDataGridBorderBrush}"
+            BorderThickness="1"
+            Padding="0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Фиксированная шапка DataGrid -->
+                <RowDefinition Height="Auto"/>
+                <!-- Прокручиваемая область DataGrid -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
             <!-- Фиксированная шапка DataGrid -->
-            <RowDefinition Height="Auto"/>
-            <!-- Прокручиваемая область DataGrid -->
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <!-- Фиксированная шапка DataGrid -->
-        <DataGrid x:Name="ResultsHeaderGrid"
+            <DataGrid x:Name="ResultsHeaderGrid"
     AutoGenerateColumns="False"
     CanUserAddRows="False"
     CanUserDeleteRows="False"
@@ -32,15 +36,14 @@
     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
     ScrollViewer.VerticalScrollBarVisibility="Hidden"
           CanUserResizeColumns="False"
-          CanUserReorderColumns="False"
-          >
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Строка" Width="100"/>
-                <DataGridTextColumn Header="Текст" Width="*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+          CanUserReorderColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Строка" Width="100"/>
+                    <DataGridTextColumn Header="Текст" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
-        <DataGrid x:Name="ResultsDataGrid"
+            <DataGrid x:Name="ResultsDataGrid"
           Grid.Row="1"
         AutoGenerateColumns="False"
         CanUserAddRows="False"
@@ -48,33 +51,36 @@
         IsReadOnly="True"
         HeadersVisibility="None"
         RowHeaderWidth="0"
-        Background="{StaticResource PrimarySolidColorBrush}"
+        Background="Transparent"
         BorderThickness="0"
         VerticalAlignment="Top"
         EnableRowVirtualization="False"
         PreviewMouseDoubleClick="ResultsDataGrid_PreviewMouseDoubleClick"
         ScrollViewer.CanContentScroll="True">
-            <DataGrid.Resources>
-                <Style TargetType="DataGridRow">
-                    <EventSetter Event="RequestBringIntoView" Handler="ResultsDataGrid_RequestBringIntoView"/>
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
-                <DataGridTemplateColumn Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <local:HighlightingTextBlock TextWrapping="Wrap"
-                                     TextTrimming="CharacterEllipsis"
-                                     MainText="{Binding SubstringFromWord}"
-                                     HighlightText="{Binding SearchText}"
-                                     HighlightBrush= "#b23a48"
-                                     IsCaseSensitive="{Binding IsCaseSensitive}"
-                                     IsWholeWord="{Binding IsWholeWord}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernDataGridRowStyle}">
+                        <EventSetter Event="RequestBringIntoView" Handler="ResultsDataGrid_RequestBringIntoView"/>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding LineNumber}" Width="100" />
+                    <DataGridTemplateColumn Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:HighlightingTextBlock TextWrapping="Wrap"
+                                         TextTrimming="CharacterEllipsis"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         MainText="{Binding SubstringFromWord}"
+                                         HighlightText="{Binding SearchText}"
+                                         HighlightBrush="#b23a48"
+                                         IsCaseSensitive="{Binding IsCaseSensitive}"
+                                         IsWholeWord="{Binding IsWholeWord}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
 </UserControl>

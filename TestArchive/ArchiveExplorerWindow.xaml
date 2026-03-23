@@ -1,0 +1,347 @@
+<Window x:Class="TestArchive.ArchiveExplorerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TestArchive"
+        Title="Archive Explorer"
+        Height="760"
+        Width="1280"
+        MinHeight="560"
+        MinWidth="900"
+        WindowStartupLocation="CenterScreen">
+  <Window.Resources>
+    <SolidColorBrush x:Key="GridLineBrush"
+                     Color="#E4EAF1" />
+    <SolidColorBrush x:Key="GridHeaderHoverBrush"
+                     Color="#F4F7FA" />
+    <SolidColorBrush x:Key="GridHeaderPressedBrush"
+                     Color="#EBEFF4" />
+    <SolidColorBrush x:Key="GridRowHoverBrush"
+                     Color="#F4F7FA" />
+    <SolidColorBrush x:Key="GridRowSelectedBrush"
+                     Color="#DBEAFE" />
+    <SolidColorBrush x:Key="GridRowSelectedHoverBrush"
+                     Color="#CFE3FD" />
+    <SolidColorBrush x:Key="GridHeaderForegroundBrush"
+                     Color="#3B4A5A" />
+
+    <Style x:Key="ArchiveDataGridHeaderStyle"
+           TargetType="{x:Type DataGridColumnHeader}">
+      <Setter Property="Background"
+              Value="Transparent" />
+      <Setter Property="Foreground"
+              Value="{StaticResource GridHeaderForegroundBrush}" />
+      <Setter Property="BorderBrush"
+              Value="{StaticResource GridLineBrush}" />
+      <Setter Property="BorderThickness"
+              Value="0,0,1,1" />
+      <Setter Property="FontWeight"
+              Value="SemiBold" />
+      <Setter Property="Padding"
+              Value="12,6,8,6" />
+      <Setter Property="HorizontalContentAlignment"
+              Value="Left" />
+      <Setter Property="VerticalContentAlignment"
+              Value="Center" />
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver"
+                 Value="True">
+          <Setter Property="Background"
+                  Value="{StaticResource GridHeaderHoverBrush}" />
+        </Trigger>
+        <Trigger Property="IsPressed"
+                 Value="True">
+          <Setter Property="Background"
+                  Value="{StaticResource GridHeaderPressedBrush}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ArchiveDataGridRowStyle"
+           TargetType="{x:Type DataGridRow}">
+      <Setter Property="Background"
+              Value="Transparent" />
+      <Setter Property="BorderBrush"
+              Value="Transparent" />
+      <Setter Property="BorderThickness"
+              Value="0" />
+      <Setter Property="Margin"
+              Value="2,1,2,1" />
+      <Setter Property="MinHeight"
+              Value="30" />
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver"
+                 Value="True">
+          <Setter Property="Background"
+                  Value="{StaticResource GridRowHoverBrush}" />
+        </Trigger>
+        <Trigger Property="IsSelected"
+                 Value="True">
+          <Setter Property="Background"
+                  Value="{StaticResource GridRowSelectedBrush}" />
+        </Trigger>
+        <MultiTrigger>
+          <MultiTrigger.Conditions>
+            <Condition Property="IsSelected"
+                       Value="True" />
+            <Condition Property="IsMouseOver"
+                       Value="True" />
+          </MultiTrigger.Conditions>
+          <Setter Property="Background"
+                  Value="{StaticResource GridRowSelectedHoverBrush}" />
+        </MultiTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ArchiveDataGridCellStyle"
+           TargetType="{x:Type DataGridCell}">
+      <Setter Property="Padding"
+              Value="12,0,8,0" />
+      <Setter Property="BorderThickness"
+              Value="0" />
+      <Setter Property="Background"
+              Value="Transparent" />
+      <Setter Property="FocusVisualStyle"
+              Value="{x:Null}" />
+      <Style.Triggers>
+        <Trigger Property="IsSelected"
+                 Value="True">
+          <Setter Property="Background"
+                  Value="Transparent" />
+          <Setter Property="BorderBrush"
+                  Value="Transparent" />
+          <Setter Property="Foreground"
+                  Value="#1F2A38" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ArchiveDataGridStyle"
+           TargetType="{x:Type DataGrid}">
+      <Setter Property="Background"
+              Value="Transparent" />
+      <Setter Property="BorderBrush"
+              Value="{StaticResource GridLineBrush}" />
+      <Setter Property="BorderThickness"
+              Value="1" />
+      <Setter Property="GridLinesVisibility"
+              Value="Horizontal" />
+      <Setter Property="HorizontalGridLinesBrush"
+              Value="{StaticResource GridLineBrush}" />
+      <Setter Property="VerticalGridLinesBrush"
+              Value="{StaticResource GridLineBrush}" />
+      <Setter Property="HeadersVisibility"
+              Value="Column" />
+      <Setter Property="RowHeaderWidth"
+              Value="0" />
+      <Setter Property="ColumnHeaderStyle"
+              Value="{StaticResource ArchiveDataGridHeaderStyle}" />
+      <Setter Property="RowStyle"
+              Value="{StaticResource ArchiveDataGridRowStyle}" />
+      <Setter Property="CellStyle"
+              Value="{StaticResource ArchiveDataGridCellStyle}" />
+      <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+              Value="Auto" />
+      <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+              Value="Auto" />
+      <Setter Property="CanUserAddRows"
+              Value="False" />
+      <Setter Property="CanUserDeleteRows"
+              Value="False" />
+    </Style>
+  </Window.Resources>
+  <Grid Margin="12">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="320" />
+      <ColumnDefinition Width="8" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <Border Grid.Column="0"
+            Background="White"
+            BorderBrush="#D0D7DE"
+            BorderThickness="1"
+            CornerRadius="6"
+            Padding="10">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="Archive Tree"
+                   FontWeight="SemiBold"
+                   FontSize="14" />
+        <TreeView x:Name="ArchivesTreeView"
+                  Grid.Row="1"
+                  Margin="0,8,0,0"
+                  SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
+          <TreeView.ContextMenu>
+            <ContextMenu x:Name="ArchivesTreeContextMenu"
+                         Opened="ArchivesTreeContextMenu_Opened"
+                         Closed="ArchivesTreeContextMenu_Closed">
+              <MenuItem x:Name="CreateArchiveMenuItem"
+                        Header="Create archive"
+                        Click="CreateArchiveMenuItem_Click" />
+              <MenuItem x:Name="OpenArchiveMenuItem"
+                        Header="Open"
+                        Click="OpenArchiveMenuItem_Click" />
+              <MenuItem x:Name="DeleteArchiveMenuItem"
+                        Header="Delete"
+                        Click="DeleteArchiveMenuItem_Click" />
+              <MenuItem x:Name="AddFileToArchiveMenuItem"
+                        Header="Add file"
+                        Click="AddFileToArchiveMenuItem_Click" />
+              <MenuItem x:Name="OpenArchiveFileMenuItem"
+                        Header="Open"
+                        Click="OpenArchiveFileMenuItem_Click" />
+              <MenuItem x:Name="DeleteArchiveFileMenuItem"
+                        Header="Delete"
+                        Click="DeleteArchiveFileMenuItem_Click" />
+            </ContextMenu>
+          </TreeView.ContextMenu>
+          <TreeView.Resources>
+            <HierarchicalDataTemplate DataType="{x:Type local:ArchiveTreeNode}"
+                                      ItemsSource="{Binding Children}">
+              <TextBlock Text="{Binding DisplayName}" />
+            </HierarchicalDataTemplate>
+          </TreeView.Resources>
+          <TreeView.ItemContainerStyle>
+            <Style TargetType="{x:Type TreeViewItem}">
+              <Setter Property="IsExpanded"
+                      Value="{Binding IsExpanded, Mode=TwoWay}" />
+              <EventSetter Event="Expanded"
+                           Handler="TreeViewItem_Expanded" />
+              <EventSetter Event="PreviewMouseRightButtonDown"
+                           Handler="TreeViewItem_PreviewMouseRightButtonDown" />
+            </Style>
+          </TreeView.ItemContainerStyle>
+        </TreeView>
+      </Grid>
+    </Border>
+
+    <GridSplitter Grid.Column="1"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="#D0D7DE" />
+
+    <Grid Grid.Column="2">
+      <Grid.RowDefinitions>
+        <RowDefinition x:Name="FilesRowDefinition"
+                       Height="*" />
+        <RowDefinition Height="8" />
+        <RowDefinition x:Name="EditorRowDefinition"
+                       Height="*" />
+      </Grid.RowDefinitions>
+
+      <Border x:Name="FilesPanel"
+              Grid.Row="0"
+              Background="White"
+              BorderBrush="#D0D7DE"
+              BorderThickness="1"
+              CornerRadius="6"
+              Padding="10">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <TextBlock Text="Archive Files"
+                     FontWeight="SemiBold"
+                     FontSize="14" />
+
+          <DataGrid x:Name="ArchiveFilesDataGrid"
+                    Grid.Row="1"
+                    Margin="0,8,0,0"
+                    Style="{StaticResource ArchiveDataGridStyle}"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    FontSize="13"
+                    CanUserReorderColumns="True"
+                    CanUserResizeColumns="True"
+                    CanUserSortColumns="True"
+                    HeadersVisibility="Column"
+                    SelectionMode="Single"
+                    SelectionUnit="FullRow"
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="File"
+                                  Binding="{Binding Name}"
+                                  Width="*" />
+              <DataGridTextColumn Header="Ext"
+                                  Binding="{Binding Extension}"
+                                  Width="90" />
+              <DataGridTextColumn Header="Size (bytes)"
+                                  Binding="{Binding SizeBytes}"
+                                  Width="130" />
+              <DataGridTextColumn Header="Packed (bytes)"
+                                  Binding="{Binding PackedBytes}"
+                                  Width="140" />
+              <DataGridTemplateColumn Header="Modified"
+                                      SortMemberPath="LastModified"
+                                      Width="190">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Margin="8,0,0,0"
+                               VerticalAlignment="Center"
+                               Text="{Binding LastModified, StringFormat={}{0:dd.MM.yyyy HH:mm:ss}}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+
+          <TextBlock x:Name="FilesHintTextBlock"
+                     Grid.Row="2"
+                     Margin="0,8,0,0"
+                     Foreground="#5F6368"
+                     TextWrapping="Wrap" />
+        </Grid>
+      </Border>
+
+      <GridSplitter x:Name="RightSplitter"
+                    Grid.Row="1"
+                    Height="8"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="#D0D7DE" />
+
+      <Border x:Name="EditorPanel"
+              Grid.Row="2"
+              Background="White"
+              BorderBrush="#D0D7DE"
+              BorderThickness="1"
+              CornerRadius="6"
+              Padding="10">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <TextBlock Text="Selected File Content"
+                     FontWeight="SemiBold"
+                     FontSize="14" />
+          <TextBox x:Name="FileContentTextBox"
+                   Grid.Row="1"
+                   Margin="0,8,0,0"
+                   FontFamily="Consolas"
+                   FontSize="13"
+                   AcceptsReturn="True"
+                   AcceptsTab="True"
+                   TextWrapping="NoWrap"
+                   IsReadOnly="True"
+                   VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto" />
+          <TextBlock x:Name="EditorHintTextBlock"
+                     Grid.Row="2"
+                     Margin="0,8,0,0"
+                     Foreground="#5F6368"
+                     TextWrapping="Wrap" />
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

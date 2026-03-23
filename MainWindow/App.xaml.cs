@@ -58,6 +58,7 @@ namespace MainWindowProgram
       RegisterGlobalExceptionHandlers();
       CommandLineArgs = e.Args;
       FileAssociationRegistrar.RegisterCurrentUserAssociations();
+      ApplicationClockService.Start();
 
       SplashScreenManager.ShowSplash();
 
@@ -193,6 +194,7 @@ namespace MainWindowProgram
     protected override async void OnExit(ExitEventArgs e)
     {
       base.OnExit(e);
+      ApplicationClockService.Stop();
 
       try
       {

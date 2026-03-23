@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.TextEditor;
@@ -31,7 +30,7 @@ namespace UI.Components.MultiEditorMethods
 
     internal void ReplaceWord(string fileName, SearchResult searchResult, int startOffset, string replaceText, string searchText)
     {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
       if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
       {
         if (textEditorContainer != null)

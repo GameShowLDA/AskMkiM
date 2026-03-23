@@ -142,32 +142,6 @@ namespace UI.Components
       textSearchManager.GetLineOccurrences(fileName, lineNumber, startOffset, lineText);
 
     /// <summary>
-    /// Обрабатывает событие нажатия левой кнопки мыши на верхней панели.
-    /// При двойном клике создаёт новый файл.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Данные события мыши.</param>
-    private void TopPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-      if (!SystemStateManager.GetIsLocked())
-      {
-        _clickCount++;
-
-        if (_clickCount == 1)
-        {
-          _clickTimer.Start();
-        }
-        else if (_clickCount == 2)
-        {
-          _clickTimer.Stop();
-          _clickCount = 0;
-
-          EditorDocumentService.CreateNewFile();
-        }
-      }
-    }
-
-    /// <summary>
     /// Обрабатывает событие нажатия клавиш.
     /// Позволяет закрыть активную вкладку при нажатии Ctrl+F4.
     /// </summary>
@@ -228,8 +202,7 @@ namespace UI.Components
 
     private bool TryGetActiveTab(out OpenFileButton activeTab, out int index)
     {
-      activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page =>
-        page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+      activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
       index = activeTab == null ? -1 : fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab);
 
       if (activeTab == null || index < 0 || index >= fileManager.EditorWorkspaceModel.UserControls.Count)
@@ -367,8 +340,7 @@ namespace UI.Components
     {
       if (textSearchManager.foundInOpenedFiles.Count > 0)
       {
-        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(
-          page => page.Background == (Brush)Application.Current.Resources["ActiveBorderSolidColorBrush"]);
+        var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
 
         if (activeTab != null)
         {

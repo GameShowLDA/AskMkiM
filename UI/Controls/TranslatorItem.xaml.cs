@@ -3,8 +3,9 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
 using System;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using UI.Components;
 using UI.Controls.TextEditor;
 using UI.Services;
+using UI.Services.Archive;
 
 namespace UI.Controls
 {
@@ -22,6 +24,22 @@ namespace UI.Controls
   /// </summary>
   public partial class TranslatorItem : UserControl
   {
+    public sealed class TranslationIssuesSnapshot
+    {
+      public TranslationIssuesSnapshot(List<IDisplayIssue> issues, int errorCount, int warningCount)
+      {
+        Issues = issues;
+        ErrorCount = errorCount;
+        WarningCount = warningCount;
+      }
+
+      public List<IDisplayIssue> Issues { get; }
+
+      public int ErrorCount { get; }
+
+      public int WarningCount { get; }
+    }
+
     public string FirstFilePath { get; set; }
     public string SecondFilePath { get; set; }
 
@@ -30,6 +48,8 @@ namespace UI.Controls
     public int GeneralCount => ErrorCount + WarningCount;
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
+    private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
+
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -38,26 +58,7 @@ namespace UI.Controls
       }
       set
       {
-        translationModels = value;
-        ErrorClear();
-        ErrorListBoxVertical.ClearAll();
-
-        foreach (var model in value)
-        {
-          if (model.Errors.Count > 0)
-          {
-            ErrorListBoxVertical.AddErrors(model.Errors);
-            ErrorCount += model.Errors.Count;
-          }
-
-          if (model.Warnings.Count > 0)
-          {
-            ErrorListBoxVertical.AddWarnings(model.Warnings);
-            WarningCount += model.Warnings.Count;
-          }
-        }
-        MessageEventAdapter.RaiseInfoMessage(
-               $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+        ApplyTranslationModels(value, BuildIssuesSnapshot(value));
       }
     }
 
@@ -83,6 +84,43 @@ namespace UI.Controls
     {
       ErrorCount = 0;
       WarningCount = 0;
+    }
+
+    public static TranslationIssuesSnapshot BuildIssuesSnapshot(IEnumerable<BaseCommandModel> models)
+    {
+      var issues = new List<IDisplayIssue>();
+      int errorCount = 0;
+      int warningCount = 0;
+
+      foreach (var model in models)
+      {
+        if (model.Errors.Count > 0)
+        {
+          issues.AddRange(model.Errors);
+          errorCount += model.Errors.Count;
+        }
+
+        if (model.Warnings.Count > 0)
+        {
+          issues.AddRange(model.Warnings);
+          warningCount += model.Warnings.Count;
+        }
+      }
+
+      return new TranslationIssuesSnapshot(issues, errorCount, warningCount);
+    }
+
+    public void ApplyTranslationModels(List<BaseCommandModel> models, TranslationIssuesSnapshot issuesSnapshot)
+    {
+      translationModels = models;
+      ErrorClear();
+      ErrorCount = issuesSnapshot.ErrorCount;
+      WarningCount = issuesSnapshot.WarningCount;
+
+      ErrorListBoxVertical.SetIssues(issuesSnapshot.Issues);
+
+      MessageEventAdapter.RaiseInfoMessage(
+             $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
     }
 
     public void SetLeftEditor(ITextEditorView editor)
@@ -135,6 +173,8 @@ namespace UI.Controls
       rightEditor.SetEditor(textEditorUI);
       rightEditor.BackRequested -= RightEditor_BackRequestedAsync;
       rightEditor.BackRequested += RightEditor_BackRequestedAsync;
+      rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
+      rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
@@ -143,6 +183,31 @@ namespace UI.Controls
       {
         CloseTranslatorTab();
       }
+    }
+
+    private void RightEditor_SaveRequestedAsync(object? sender, EventArgs e)
+    {
+      bool flowControl = SaveFileToArchive();
+      if (!flowControl)
+      {
+        return;
+      }
+    }
+
+    private bool SaveFileToArchive()
+    {
+      var rightBox = GetRightBox();
+      var rightTextEditor = rightBox?.GetTextEditor();
+      if (rightTextEditor?.TextEditorModel == null)
+      {
+        NotificationHostService.Instance.Show(
+          "Сохранение в архив",
+          "Редактор не готов к сохранению в архив.",
+          NotificationType.Error);
+        return false;
+      }
+
+      return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void LeftEditor_SaveRequested(object? sender, EventArgs e)

@@ -3,6 +3,8 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Support;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,7 +21,7 @@ namespace UI.Controls.ErrorList
     /// <summary>
     /// Коллекция элементов (ошибки + предупреждения), отображаемая в DataGrid.
     /// </summary>
-    public ObservableCollection<IDisplayIssue> Items { get; } = new();
+    public RangeObservableCollection<IDisplayIssue> Items { get; } = new();
 
     private readonly List<IDisplayIssue> _allIssues = new();
 
@@ -100,12 +102,7 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddError(ErrorItem error)
     {
-      _allIssues.Add(error);
-      _errorTotal++;
-      if (!_errorsHidden)
-        Items.Add(error);
-
-      ApplyInitialButtonState();
+      AppendIssues(new IDisplayIssue[] { error });
     }
 
     /// <summary>
@@ -113,12 +110,7 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddWarning(WarningItem warning)
     {
-      _allIssues.Add(warning);
-      _warningTotal++;
-      if (!_warningsHidden)
-        Items.Add(warning);
-
-      ApplyInitialButtonState();
+      AppendIssues(new IDisplayIssue[] { warning });
     }
 
     /// <summary>
@@ -126,15 +118,7 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddErrors(IEnumerable<ErrorItem> errors)
     {
-      foreach (var err in errors)
-      {
-        _allIssues.Add(err);
-        _errorTotal++;
-        if (!_errorsHidden)
-          Items.Add(err);
-      }
-
-      ApplyInitialButtonState();
+      AppendIssues(errors.Cast<IDisplayIssue>());
     }
 
     /// <summary>
@@ -142,14 +126,22 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddWarnings(IEnumerable<WarningItem> warnings)
     {
-      foreach (var warn in warnings)
-      {
-        _allIssues.Add(warn);
-        _warningTotal++;
-        if (!_warningsHidden)
-          Items.Add(warn);
-      }
+      AppendIssues(warnings.Cast<IDisplayIssue>());
+    }
 
+    /// <summary>
+    /// Полностью заменяет набор отображаемых диагностик.
+    /// Используется для пакетной загрузки без множества перерисовок UI.
+    /// </summary>
+    public void SetIssues(IEnumerable<IDisplayIssue> issues)
+    {
+      var issueList = issues?.ToList() ?? new List<IDisplayIssue>();
+
+      _allIssues.Clear();
+      _allIssues.AddRange(issueList);
+
+      RecalculateTotals();
+      ReplaceVisibleItems();
       ApplyInitialButtonState();
     }
 
@@ -172,19 +164,7 @@ namespace UI.Controls.ErrorList
 
     private void ApplyFilter()
     {
-      Items.Clear();
-
-      foreach (var issue in _allIssues)
-      {
-        if (issue.IsWarning && _warningsHidden)
-          continue;
-
-        if (!issue.IsWarning && _errorsHidden)
-          continue;
-
-        Items.Add(issue);
-      }
-
+      ReplaceVisibleItems();
       UpdateButtons();
     }
 
@@ -223,12 +203,64 @@ namespace UI.Controls.ErrorList
       ApplyInitialButtonState();
     }
 
+    private void AppendIssues(IEnumerable<IDisplayIssue> issues)
+    {
+      var issueList = issues?
+        .Where(issue => issue != null)
+        .ToList()
+        ?? new List<IDisplayIssue>();
+
+      if (issueList.Count == 0)
+      {
+        ApplyInitialButtonState();
+        return;
+      }
+
+      _allIssues.AddRange(issueList);
+
+      foreach (var issue in issueList)
+      {
+        if (issue.IsWarning)
+          _warningTotal++;
+        else
+          _errorTotal++;
+      }
+
+      var visibleIssues = issueList.Where(ShouldDisplay).ToList();
+      Items.AddRange(visibleIssues);
+
+      ApplyInitialButtonState();
+    }
+
+    private void ReplaceVisibleItems()
+    {
+      Items.ReplaceRange(_allIssues.Where(ShouldDisplay));
+    }
+
+    private bool ShouldDisplay(IDisplayIssue issue)
+    {
+      if (issue.IsWarning)
+        return !_warningsHidden;
+
+      return !_errorsHidden;
+    }
+
+    private void RecalculateTotals()
+    {
+      _warningTotal = 0;
+      _errorTotal = 0;
+
+      foreach (var issue in _allIssues)
+      {
+        if (issue.IsWarning)
+          _warningTotal++;
+        else
+          _errorTotal++;
+      }
+    }
+
     private void ApplyInitialButtonState()
     {
-      // Определяем количество
-      _warningTotal = _allIssues.Count(i => i.IsWarning);
-      _errorTotal = _allIssues.Count(i => !i.IsWarning);
-
       // Предупреждения
       if (_warningTotal == 0)
       {
@@ -267,6 +299,49 @@ namespace UI.Controls.ErrorList
       {
         ItemDoubleClicked?.Invoke(selectedError);
       }
+    }
+  }
+
+  public sealed class RangeObservableCollection<T> : ObservableCollection<T>
+  {
+    public void AddRange(IEnumerable<T> items)
+    {
+      var bufferedItems = items?.ToList() ?? new List<T>();
+      if (bufferedItems.Count == 0)
+        return;
+
+      CheckReentrancy();
+
+      foreach (var item in bufferedItems)
+      {
+        Items.Add(item);
+      }
+
+      RaiseReset();
+    }
+
+    public void ReplaceRange(IEnumerable<T> items)
+    {
+      CheckReentrancy();
+
+      Items.Clear();
+
+      if (items != null)
+      {
+        foreach (var item in items)
+        {
+          Items.Add(item);
+        }
+      }
+
+      RaiseReset();
+    }
+
+    private void RaiseReset()
+    {
+      OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+      OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+      OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
   }
 }

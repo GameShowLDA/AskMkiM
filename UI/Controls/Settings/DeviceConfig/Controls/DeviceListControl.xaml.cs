@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using DataBaseConfiguration.Services.Device;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -153,6 +154,11 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
         case IPowerSourceModule:
           new PowerSourceModuleServices().Delete((IPowerSourceModule)device);
           LogInformation("Удаляем устройство из ChassisManagerTable");
+          break;
+
+        case IUninterruptiblePowerSupply:
+          new UninterruptiblePowerSupplyServices().Delete((IUninterruptiblePowerSupply)device);
+          LogInformation("Удаляем устройство из UninterruptiblePowerSuppliesTable");
           break;
 
         default:
