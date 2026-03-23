@@ -75,7 +75,7 @@ namespace NewCore.Function.Keysight3466new
         return voltage;
       }
 
-      return -1;
+      throw new FormatException($"Неверный формат ответа прибора при измерении DC-напряжения: '{response}'.");
     }
   }
 }

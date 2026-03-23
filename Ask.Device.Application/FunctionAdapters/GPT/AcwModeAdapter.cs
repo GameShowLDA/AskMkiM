@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Application.Execution;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -893,32 +894,35 @@ namespace NewCore.FunctionAdapters.GPT
           return (random, "мА");
         }
 
-        try
-        {
-          var (result, unit) = await _acwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);
+        var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+          _device,
+          "Измерение тока ACW",
+          () => _acwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
 
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _device,
-            "Измерение тока ACW",
-            $"{result} мА",
-            result < param,
-            2,
-            userMessageService);
-
-          return (result, unit);
-        }
-        catch (Exception ex)
+        if (!execution.Success)
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
             "Ошибка измерения тока ACW",
-            ex.Message,
+            execution.ErrorMessage,
             false,
             2,
             userMessageService);
 
-          throw new Exception($"Ошибка при измерении тока ACW: {ex.Message}");
+          throw new Exception($"Ошибка при измерении тока ACW: {execution.ErrorMessage}");
         }
+
+        var (result, unit) = execution.Value;
+
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Измерение тока ACW",
+          $"{result} мА",
+          result < param,
+          2,
+          userMessageService);
+
+        return (result, unit);
       }
 
       /// <summary>

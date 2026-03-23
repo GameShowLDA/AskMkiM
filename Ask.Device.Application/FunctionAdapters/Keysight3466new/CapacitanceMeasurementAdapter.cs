@@ -4,6 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Application.Execution;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
@@ -65,16 +66,20 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         return random;
       }
 
-      try
+      var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+        _device,
+        "Измерение ёмкости",
+        () => _measurement.MeasureCapacitanceAsync(param, rangeFrom, rangeTo));
+
+      if (!execution.Success)
       {
-        double result = await _measurement.MeasureCapacitanceAsync(param, rangeFrom, rangeTo);
-        return result;
-      }
-      catch (Exception ex)
-      {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при измерении ёмкости", ex.Message, false, 2, userMessageService);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при измерении ёмкости", execution.ErrorMessage, false, 2, userMessageService);
         return -1;
       }
+
+      double result = execution.Value;
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения ёмкости", $"{result} нФ", true, 2, userMessageService);
+      return result;
     }
   }
 }

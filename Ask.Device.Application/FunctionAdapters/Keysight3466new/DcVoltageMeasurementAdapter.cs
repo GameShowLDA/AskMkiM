@@ -4,6 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Application.Execution;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
@@ -65,19 +66,21 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         return random;
       }
 
-      try
-      {
-        double result = await _measurement.MeasureDCVoltageAsync(param, rangeFrom , rangeTo);
+      var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+        _device,
+        "Измерение постоянного напряжения",
+        () => _measurement.MeasureDCVoltageAsync(param, rangeFrom, rangeTo));
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения постоянного напряжения", $"{result}В", result >= 0, 2, userMessageService);
-
-        return result;
-      }
-      catch (Exception ex)
+      if (!execution.Success)
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при измерении DC-напряжения", ex.Message, false, 2, userMessageService);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при измерении DC-напряжения", execution.ErrorMessage, false, 2, userMessageService);
         return -1;
       }
+
+      double result = execution.Value;
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения постоянного напряжения", $"{result}В", true, 2, userMessageService);
+
+      return result;
     }
   }
 }

@@ -69,7 +69,7 @@ namespace NewCore.Function.Keysight3466new
         return resistance;
       }
 
-      return -1;
+      throw new FormatException($"Неверный формат ответа прибора при измерении сопротивления: '{response}'.");
     }
   }
 }

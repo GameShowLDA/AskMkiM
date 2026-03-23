@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Converters;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Application.Execution;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -706,36 +707,38 @@ namespace NewCore.FunctionAdapters.GPT
           return (random, "МОм");
         }
 
-        try
-        {
-          var (result, unit) = await _irMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);
+        var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+          _device,
+          "Измерение сопротивления изоляции",
+          () => _irMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
 
-          var unitEnum = ResistanceConverter.ParseUnit(unit, "мом");
-          result = ResistanceConverter.ToMegaOhms(result, unitEnum);
-
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _device,
-            "Измерение сопротивления изоляции",
-            $"{result} МОм",
-            result >= rangeFrom && result <= rangeTo,
-            2,
-            userMessageService);
-
-
-          return (result, unit);
-        }
-        catch (Exception ex)
+        if (!execution.Success)
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
             "Ошибка измерения сопротивления изоляции",
-            ex.Message,
+            execution.ErrorMessage,
             false,
             2,
             userMessageService);
 
           return (-1, string.Empty);
         }
+
+        var (result, unit) = execution.Value;
+
+        var unitEnum = ResistanceConverter.ParseUnit(unit, "мом");
+        result = ResistanceConverter.ToMegaOhms(result, unitEnum);
+
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Измерение сопротивления изоляции",
+          $"{result} МОм",
+          result >= rangeFrom && result <= rangeTo,
+          2,
+          userMessageService);
+
+        return (result, unit);
       }
 
       /// <summary>

@@ -4,6 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Application.Execution;
 using NewCore.Device;
 using NewCore.Function.Helpers;
 using NewCore.Function.Keysight3466new;
@@ -39,7 +40,19 @@ namespace NewCore.FunctionAdapters.Keysight3466new
         return random;
       }
 
-      var resistance = await _resistanceMeasurement.MeasureResistanceAsync(param, rangeFrom, rangeTo);
+      var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+        _device,
+        "Измерение сопротивления",
+        () => _resistanceMeasurement.MeasureResistanceAsync(param, rangeFrom, rangeTo));
+
+      if (!execution.Success)
+      {
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при измерении сопротивления", execution.ErrorMessage, false, 2, userMessageService);
+        return -1;
+      }
+
+      double resistance = execution.Value;
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения сопротивления", $"{resistance} Ом", true, 2, userMessageService);
       return resistance;
     }
 

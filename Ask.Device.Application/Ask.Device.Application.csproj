@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.LogLib\Ask.LogLib.csproj" />
     <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
   </ItemGroup>
 

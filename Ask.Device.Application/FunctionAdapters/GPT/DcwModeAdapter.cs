@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Application.Execution;
 using NewCore.Device;
 using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
@@ -821,32 +822,35 @@ namespace NewCore.FunctionAdapters.GPT
           return (random, "мА");
         }
 
-        try
-        {
-          var (result, unit) = await _dcwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo);
+        var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+          _device,
+          "Измерение тока DCW",
+          () => _dcwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
 
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _device,
-            "Измерение тока DCW",
-            $"{result} мА",
-            result >= 0,
-            2,
-            userMessageService);
-
-          return (result, unit);
-        }
-        catch (Exception ex)
+        if (!execution.Success)
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _device,
             "Ошибка измерения тока DCW",
-            ex.Message,
+            execution.ErrorMessage,
             false,
             2,
             userMessageService);
 
           return (-1, string.Empty);
         }
+
+        var (result, unit) = execution.Value;
+
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Измерение тока DCW",
+          $"{result} мА",
+          result >= 0,
+          2,
+          userMessageService);
+
+        return (result, unit);
       }
 
       /// <summary>
