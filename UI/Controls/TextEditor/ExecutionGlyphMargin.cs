@@ -1227,6 +1227,14 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (!TryResolveCommandHeaderLine(lineNumber, out int commandHeaderLine))
       return;
 
+    var headerLine = doc.GetLineByNumber(commandHeaderLine);
+    int commandNumber = ParseLeadingInt(doc.GetText(headerLine).AsSpan());
+    if (commandNumber <= 0)
+      return;
+
+    if (NumCommandWithMnemonic == null || !NumCommandWithMnemonic.ContainsKey(commandNumber))
+      return;
+
     if (!IsBreakpointAllowedLine(commandHeaderLine))
       return;
 
@@ -1243,8 +1251,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (_rightBreakpoints.Count == 0)
       return true;
 
-    return _rightBreakpoints.Contains(commandHeaderLine)
-      || _rightBreakpoints.Contains(commandHeaderLine - 1);
+    return _rightBreakpoints.Contains(commandHeaderLine);
   }
 
   /// <summary>
