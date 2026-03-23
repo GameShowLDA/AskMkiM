@@ -9,6 +9,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.Device.Application.Composition;
 using DataBaseConfiguration.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -301,6 +302,7 @@ namespace DataBaseConfiguration.Services.Device
 
       // Применяем конфигурацию, по умолчанию через копирование свойств.
       ApplyConfiguration(device, instance);
+      DeviceApplicationComposer.Compose(instance);
 
       return instance;
     }

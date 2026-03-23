@@ -4,7 +4,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Usb;
 using NewCore.Base.Device;
-using NewCore.FunctionAdapters.MikUps1101rRm;
 
 namespace NewCore.Device
 {
@@ -13,8 +12,6 @@ namespace NewCore.Device
   /// </summary>
   public class MikUps1101rRmDevice : DeviceWithUSB, IUninterruptiblePowerSupply
   {
-    private readonly IPower _powerManager;
-
     public MikUps1101rRmDevice()
     {
       Name = "MIK-UPS-1101R-RM";
@@ -23,10 +20,9 @@ namespace NewCore.Device
       DeviceType = DeviceType.UninterruptiblePowerSupply;
 
       ConnectionDetails = "VID_0665&PID_5161";
-      ConnectableManager = new ConnectableManagerAdapter(this);
+      ConnectableManager = new Function.MikUps1101rRm.ConnectableManager(this);
       DeviceProtocol = new UsbProtocol(this, new Function.MikUps1101rRm.ViewPowerUpsUsbCommandHandler());
-
-      _powerManager = new PowerManagerAdapter(this);
+      PowerManager = new Function.MikUps1101rRm.PowerManager(this);
     }
 
     /// <inheritdoc />
@@ -35,22 +31,27 @@ namespace NewCore.Device
     /// <inheritdoc />
     public string LastResolvedDevicePath { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Получает или задаёт реализацию управления питанием UPS.
+    /// </summary>
+    public IPower PowerManager { get; set; }
+
     /// <inheritdoc />
     public Task StopPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      return _powerManager.StopPowerAsync(userMessageService);
+      return PowerManager.StopPowerAsync(userMessageService);
     }
 
     /// <inheritdoc />
     public Task StartPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      return _powerManager.StartPowerAsync(userMessageService);
+      return PowerManager.StartPowerAsync(userMessageService);
     }
 
     /// <inheritdoc />
     public Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      return _powerManager.VerifyPowerAsync(userMessageService);
+      return PowerManager.VerifyPowerAsync(userMessageService);
     }
   }
 }

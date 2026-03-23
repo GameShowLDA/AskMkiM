@@ -3,8 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Ethernet.Tcp;
-using NewCore.Base.Device;
-using NewCore.FunctionAdapters.Keysight3466new;
 using System.Net;
 using System.Net.Sockets;
 
@@ -85,13 +83,13 @@ namespace NewCore.Device
       DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.FastMeter;
       IsConnected = false;
 
-      CapacitanceManager = new CapacitanceMeasurementAdapter(this);
-      ConnectableManager = new KeysightConnectionAdapter(this);
-      ContinuityManager = new ContinuityMeasurementAdapter(this);
-      ResistanceManager = new ResistanceMeasurementAdapter(this);
-      AcVoltageManager = new AcVoltageMeasurementAdapter(this);
-      DcVoltageManager = new DcVoltageMeasurementAdapter(this);
-      DiodeManager = new DiodeMeasurementAdapter(this);
+      CapacitanceManager = new Function.Keysight3466new.CapacitanceMeasurement(this);
+      ConnectableManager = new Function.Keysight3466new.KeysightConnection(this);
+      ContinuityManager = new Function.Keysight3466new.ContinuityMeasurement(this);
+      ResistanceManager = new Function.Keysight3466new.ResistanceMeasurement(this);
+      AcVoltageManager = new Function.Keysight3466new.AcVoltageMeasurement(this);
+      DcVoltageManager = new Function.Keysight3466new.DcVoltageMeasurement(this);
+      DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
       DeviceProtocol = new TcpProtocol(this, Port);
       MaxContinuityResistance = 100000;
     }

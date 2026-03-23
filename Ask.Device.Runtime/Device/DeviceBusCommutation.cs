@@ -3,7 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Function.DeviceBusCommutation.SelfCheck;
-using NewCore.FunctionAdapters.DeviceBusCommutation;
 
 namespace NewCore.Device
 {
@@ -22,11 +21,11 @@ namespace NewCore.Device
       DeviceClass = GetType().FullName;
       DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.SwitchingDevice;
 
-      ConnectableManager = new StateManagerAdapter(this);
-      ConnectorManager = new ConnectorManagerAdapter(this);
-      CapacitorManager = new CapacitorManagerAdapter(this);
-      RelayManager = new RelayManagerAdapter(this);
-      ResistorManager = new ResistorManagerAdapter(this);
+      ConnectableManager = new Function.DeviceBusCommutation.StateManager(this);
+      ConnectorManager = new Function.DeviceBusCommutation.ConnectorManager(this);
+      CapacitorManager = new Function.DeviceBusCommutation.CapacitorManager(this);
+      RelayManager = new Function.DeviceBusCommutation.RelayManager(this);
+      ResistorManager = new Function.DeviceBusCommutation.ResistorManager(this);
       SelfTestManager = new SelfTestManager(this);
     }
 

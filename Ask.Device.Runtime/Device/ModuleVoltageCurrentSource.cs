@@ -4,7 +4,6 @@ using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Base.DeviceResponses;
 using NewCore.Function.ModuleVoltageCurrentSource.SelfCheck;
-using NewCore.FunctionAdapters.ModuleVoltageCurrent;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NewCore.Device
@@ -24,10 +23,10 @@ namespace NewCore.Device
 
       DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.PowerSourceModule;
 
-      BusManager = new BusManagerAdapter(this);
-      CurrentManager = new CurrentManagerAdapter(this);
-      ConnectableManager = new StateManagerAdapter(this);
-      VoltageManager = new VoltageManagerAdapter(this);
+      BusManager = new Function.ModuleVoltageCurrentSource.BusManager(this);
+      CurrentManager = new Function.ModuleVoltageCurrentSource.CurrentManager(this);
+      ConnectableManager = new Function.ModuleVoltageCurrentSource.StateManager(this);
+      VoltageManager = new Function.ModuleVoltageCurrentSource.VoltageManager(this);
       SelfTestManager = new SelfTestManager();
       DeviceClass = GetType().FullName;
     }

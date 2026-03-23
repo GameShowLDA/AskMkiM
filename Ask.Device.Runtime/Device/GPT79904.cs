@@ -3,7 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com;
-using NewCore.FunctionAdapters.GPT;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -30,11 +29,11 @@ namespace NewCore.Device
       SiMaxVoltage = 1000;
       IRMinVoltage = 50;
 
-      AcwManger = new AcwModeAdapter(this);
-      DcwManger = new DcwModeAdapter(this);
-      IrManger = new IrModeAdapter(this);
-      SystemManger = new SystemSettingsAdapter(this);
-      ConnectableManager = new ConnectableManagerAdapter(this);
+      AcwManger = new Function.GPT.AcwMode(this);
+      DcwManger = new Function.GPT.DcwMode(this);
+      IrManger = new Function.GPT.IrMode(this);
+      SystemManger = new Function.GPT.SystemSettings(this);
+      ConnectableManager = new Function.GPT.ConnectableManager(this);
       SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
       LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
       Mode = BreakdownTypeMode.None;

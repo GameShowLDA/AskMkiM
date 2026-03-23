@@ -4,6 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using NewCore.Device;
+using NewCore.Function.GPT;
 using NewCore.Function.Helpers;
 
 namespace NewCore.FunctionAdapters.GPT

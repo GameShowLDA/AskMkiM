@@ -4,7 +4,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet;
 using NewCore.Base.Device;
 using NewCore.Function.ModuleRelayControl.SelfCheck;
-using NewCore.FunctionAdapters.ModuleRelayControl;
 
 namespace NewCore.Device
 {
@@ -18,10 +17,10 @@ namespace NewCore.Device
     /// </summary>
     public ModuleRelayControl()
     {
-      ConnectableManager = new StateManagerAdapter(this);
-      BusManager = new BusManagerAdapter(this);
-      MeterManager = new MeterManagerAdapter(this);
-      PointManager = new PointManagerAdapter(this);
+      ConnectableManager = new Function.ModuleRelayControl.StateManager(this);
+      BusManager = new Function.ModuleRelayControl.BusManager(this);
+      MeterManager = new Function.ModuleRelayControl.MeterManager(this);
+      PointManager = new Function.ModuleRelayControl.PointManager(this);
       SelfTestManager = new SelfTestManager(this);
 
       DeviceType = DeviceType.RelaySwitchModule;

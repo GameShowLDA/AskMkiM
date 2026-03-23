@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.Device.Application\Ask.Device.Application.csproj" />
     <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
   </ItemGroup>
 
