@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Services;
@@ -28,7 +28,7 @@ using System.Windows.Media;
 using System.Xml;
 using static Ask.LogLib.LoggerUtility;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Логика взаимодействия для TextEditorUI.xaml.

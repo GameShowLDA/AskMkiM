@@ -1,9 +1,12 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Com.Configuration;
+using Ask.Device.Communication.Com.Interop;
+using Ask.Device.Communication.Com.Protocols;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Devices
 {
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого через COM-порт.

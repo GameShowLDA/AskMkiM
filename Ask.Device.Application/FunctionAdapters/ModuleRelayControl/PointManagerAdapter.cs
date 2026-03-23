@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -6,10 +6,10 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Function.Helpers;
-using NewCore.Function.ModuleRelayControl;
+using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.Function.ModuleRelayControl;
 
-namespace NewCore.FunctionAdapters.ModuleRelayControl
+namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {
   /// <summary>
   /// Адаптер для управления точками (реле) модуля МКР с отображением сообщений.

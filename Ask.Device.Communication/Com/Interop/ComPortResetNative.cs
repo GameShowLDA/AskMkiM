@@ -1,7 +1,7 @@
 using System.Management;
 using System.Runtime.InteropServices;
 
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Interop
 {
   /// <summary>
   /// Предоставляет низкоуровневые операции для перезапуска COM-устройства через Windows Configuration Manager.

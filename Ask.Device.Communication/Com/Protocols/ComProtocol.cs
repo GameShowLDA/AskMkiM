@@ -1,11 +1,12 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Communication.Common;
+using Ask.Device.Communication.Com.Extensions;
+using Ask.Device.Communication.Common.Threading;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Protocols
 {
   /// <summary>
   /// Реализует универсальный транспортный протокол обмена с устройствами по COM-порту.

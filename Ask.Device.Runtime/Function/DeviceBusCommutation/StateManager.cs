@@ -1,11 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
-using NewCore.Base.DeviceResponses;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
+using Ask.Device.Runtime.Base.DeviceResponses;
 using System.Text;
 
-namespace NewCore.Function.DeviceBusCommutation
+namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 {
   /// <summary>
   /// Класс для управления состоянием устройства коммутации шин.

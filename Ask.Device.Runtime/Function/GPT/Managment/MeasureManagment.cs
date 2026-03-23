@@ -1,12 +1,12 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Device;
-using NewCore.Function.GPT.Command;
-using NewCore.Function.GPT.Helper;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT.Command;
+using Ask.Device.Runtime.Function.GPT.Helper;
 using static Ask.LogLib.LoggerUtility;
-using static NewCore.Function.GPT.Command.FunctionCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Универсальный класс управления измерениями (Measure) и применением напряжения.

@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
-namespace NewCore.Function.ModuleRelayControl.SelfCheck
+namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 {
   /// <summary>
   /// Модель, описывающая параметры точки самоконтроля модуля реле.

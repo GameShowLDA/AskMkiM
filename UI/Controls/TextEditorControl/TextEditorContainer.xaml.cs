@@ -1,8 +1,8 @@
-﻿using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using System.Windows.Controls;
 using UI.Windows.WpfDocking.Windows.Docking;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Логика взаимодействия для TextEditorContainer.xaml

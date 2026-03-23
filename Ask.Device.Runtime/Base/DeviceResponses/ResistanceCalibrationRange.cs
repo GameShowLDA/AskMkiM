@@ -1,6 +1,6 @@
-﻿using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace NewCore.Base.DeviceResponses
+namespace Ask.Device.Runtime.Base.DeviceResponses
 {
   /// <summary>
   /// Диапазон сопротивления с калибровочными коэффициентами

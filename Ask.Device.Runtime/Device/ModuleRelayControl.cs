@@ -1,11 +1,12 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet;
-using NewCore.Base.Device;
-using NewCore.Function.ModuleRelayControl.SelfCheck;
+using Ask.Device.Communication.Ethernet.Devices;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Модуль коммутации реле, обеспечивающее подключение объектов контроля.

@@ -1,10 +1,11 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Protocols;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Ethernet
+namespace Ask.Device.Communication.Ethernet.Devices
 {
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого по IP-сети.

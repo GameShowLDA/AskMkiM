@@ -2,10 +2,11 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Device.Communication.Ethernet;
-using NewCore.Base.Device;
-using NewCore.Function.ManagerChassis;
+using Ask.Device.Communication.Ethernet.Devices;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.ManagerChassis;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Класс ManagerChassis представляет устройство с подключением по IP-адресу.

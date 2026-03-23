@@ -1,11 +1,12 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Device.Communication.Usb;
-using NewCore.Function.MikUps1101rRm.ViewPower;
+using Ask.Device.Communication.Usb.Discovery;
+using Ask.Device.Runtime.Function.MikUps1101rRm.ViewPower;
 using System.Text.Json;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.MikUps1101rRm
+namespace Ask.Device.Runtime.Function.MikUps1101rRm
 {
   /// <summary>
   /// Обрабатывает UPS-команды поверх общего <see cref="UsbProtocol"/> через локальный интерфейс ViewPower.

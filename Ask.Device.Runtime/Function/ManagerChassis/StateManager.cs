@@ -1,9 +1,10 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 
-namespace NewCore.Function.ManagerChassis
+namespace Ask.Device.Runtime.Function.ManagerChassis
 {
   /// <summary>
   /// Класс для управления состоянием шасси.

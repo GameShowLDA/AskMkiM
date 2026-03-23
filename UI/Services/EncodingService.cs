@@ -1,9 +1,9 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Text.Unicode;
 using Ude;
 
-namespace Utilities.Services
+namespace UI.Services
 {
   /// <summary>
   /// Предоставляет методы для автоматического определения кодировки текстовых файлов.

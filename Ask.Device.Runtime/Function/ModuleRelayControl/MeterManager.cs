@@ -1,10 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 
-namespace NewCore.Function.ModuleRelayControl
+namespace Ask.Device.Runtime.Function.ModuleRelayControl
 {
   /// <summary>
   /// Управляет измерителем модуля коммутации реле (МКР).

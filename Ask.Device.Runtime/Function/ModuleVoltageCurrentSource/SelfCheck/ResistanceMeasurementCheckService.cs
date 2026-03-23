@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -8,7 +8,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
-namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
+namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
   /// <summary>
   /// Сервис проверки резисторов по номерам и токам.

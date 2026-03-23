@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Extensions
 {
   /// <summary>
   /// Содержит расширения для работы с <see cref="SerialPort"/>.

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -6,11 +6,12 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
-using NewCore.Base.Device;
-using NewCore.Base.DeviceResponses;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Base.DeviceResponses;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.ModuleRelayControl
+namespace Ask.Device.Runtime.Function.ModuleRelayControl
 {
   /// <summary>
   /// Управляет точками (реле) модуля коммутации реле (МКР).

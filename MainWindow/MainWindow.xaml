@@ -8,7 +8,7 @@
         xmlns:utilities="clr-namespace:Ask.Support;assembly=Ask.Support"
         
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
-        xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditor;assembly=UI"
+        xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditorControl;assembly=UI"
         xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
         xmlns:askUi="clr-namespace:Ask.UI.Features.ExecutionSelection.Views;assembly=Ask.UI"

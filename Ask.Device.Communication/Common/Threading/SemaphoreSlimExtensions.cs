@@ -1,4 +1,4 @@
-namespace Ask.Device.Communication.Common
+namespace Ask.Device.Communication.Common.Threading
 {
   /// <summary>
   /// Содержит расширения для <see cref="SemaphoreSlim"/>, упрощающие захват семафора через <c>using</c>.

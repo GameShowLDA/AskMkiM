@@ -1,18 +1,18 @@
-﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.DeviceBusCommutation;
-using NewCore.Function.Helpers;
+using Ask.Device.Runtime.Function.DeviceBusCommutation;
+using Ask.Device.Runtime.Function.Helpers;
 
-namespace NewCore.FunctionAdapters.DeviceBusCommutation
+namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 {
   internal class CapacitorManagerAdapter : ICapacitorDeviceBusCommutation
   {
     /// <summary>
     /// Устройство коммутации шин.
     /// </summary>
-    private readonly Device.DeviceBusCommutation _deviceBusCommutation;
+    private readonly Runtime.Device.DeviceBusCommutation _deviceBusCommutation;
 
     private readonly CapacitorManager _capacitorManager;
 
@@ -22,7 +22,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public CapacitorManagerAdapter(Device.DeviceBusCommutation deviceBusCommutation)
+    public CapacitorManagerAdapter(Runtime.Device.DeviceBusCommutation deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation ?? throw new ArgumentNullException(nameof(deviceBusCommutation));
       _capacitorManager = new CapacitorManager(deviceBusCommutation);

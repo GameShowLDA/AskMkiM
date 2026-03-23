@@ -1,8 +1,8 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 
-namespace NewCore.Function.DeviceBusCommutation.SelfCheck
+namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
   /// <summary>
   /// Содержит вспомогательные методы для инициализации соединений и настройки измерительных приборов

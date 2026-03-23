@@ -1,4 +1,4 @@
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Configuration
 {
   /// <summary>
   /// Представляет DTO с настройками последовательного порта для сериализации в JSON.

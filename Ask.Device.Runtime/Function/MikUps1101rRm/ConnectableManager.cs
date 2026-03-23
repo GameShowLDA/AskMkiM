@@ -5,7 +5,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Text.Json;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.MikUps1101rRm
+namespace Ask.Device.Runtime.Function.MikUps1101rRm
 {
   /// <summary>
   /// Connection manager for MIK-UPS-1101R-RM.

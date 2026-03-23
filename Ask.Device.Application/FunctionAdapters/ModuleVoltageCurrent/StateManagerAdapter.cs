@@ -1,13 +1,13 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.Helpers;
-using NewCore.Function.ModuleVoltageCurrentSource;
+using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource;
 
-namespace NewCore.FunctionAdapters.ModuleVoltageCurrent
+namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
 {
   /// <summary>
   /// Адаптер для управления состоянием МИНТ с отображением сообщений.

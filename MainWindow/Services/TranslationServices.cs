@@ -5,7 +5,6 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
-using System.IO;
 using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
@@ -13,7 +12,7 @@ using UI.Components;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
@@ -101,7 +100,7 @@ namespace MainWindowProgram.Services
           char c = text[i];
           if (c < '0' || c > '9') break;
           hasDigits = true;
-          value = value * 10 + (c - '0');
+          value = (value * 10) + (c - '0');
           i++;
         }
 
@@ -711,7 +710,7 @@ namespace MainWindowProgram.Services
 
             currentItem.SetRightEditor(translateEditor);
             currentItem.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
-            
+
             await SetTranslationStageAsync(
               progressWindow,
               "Обновление диагностики",

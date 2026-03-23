@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NewCore.Base.Device
+namespace Ask.Device.Runtime.Base.Device
 {
   public class ObservableDictionary<TKey, TValue> : Dictionary<TKey, TValue>
   {

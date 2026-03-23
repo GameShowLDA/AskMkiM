@@ -1,8 +1,8 @@
-﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using System.Text;
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Менеджер конфигурации для режима ACW (переменный ток высокого напряжения).

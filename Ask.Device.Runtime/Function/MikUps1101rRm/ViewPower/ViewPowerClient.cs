@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace NewCore.Function.MikUps1101rRm.ViewPower
+namespace Ask.Device.Runtime.Function.MikUps1101rRm.ViewPower
 {
   /// <summary>
   /// Предоставляет клиент для взаимодействия с локальным HTTP-интерфейсом ViewPower.

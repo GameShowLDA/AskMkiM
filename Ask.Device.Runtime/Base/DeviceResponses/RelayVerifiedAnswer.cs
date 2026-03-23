@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace NewCore.Base.DeviceResponses
+namespace Ask.Device.Runtime.Base.DeviceResponses
 {
   internal class RelayVerifiedAnswer : BaseResponse
   {

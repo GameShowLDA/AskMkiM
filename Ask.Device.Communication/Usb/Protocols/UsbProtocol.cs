@@ -1,7 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Communication.Common;
+using Ask.Device.Communication.Common.Threading;
 
-namespace Ask.Device.Communication.Usb
+namespace Ask.Device.Communication.Usb.Protocols
 {
   /// <summary>
   /// Реализует универсальный транспортный протокол обмена с устройствами по USB.

@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Класс для поиска классов.

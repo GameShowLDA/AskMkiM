@@ -1,7 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace Ask.Device.Communication.Usb
+namespace Ask.Device.Communication.Usb.Devices
 {
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого по USB.

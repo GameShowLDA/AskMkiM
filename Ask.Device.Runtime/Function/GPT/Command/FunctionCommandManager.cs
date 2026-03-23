@@ -1,4 +1,4 @@
-﻿namespace NewCore.Function.GPT.Command
+namespace Ask.Device.Runtime.Function.GPT.Command
 {
   /// <summary>
   /// Функциональные команды ППУ.

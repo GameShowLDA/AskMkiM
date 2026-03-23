@@ -1,12 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Device;
-using NewCore.Function.Helpers;
-using NewCore.Function.Keysight3466new;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.Function.Keysight3466new;
 
-namespace NewCore.FunctionAdapters.Keysight3466new
+namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
 {
   /// <summary>
   /// Адаптер подключения к мультиметру Keysight с отображением сообщений.

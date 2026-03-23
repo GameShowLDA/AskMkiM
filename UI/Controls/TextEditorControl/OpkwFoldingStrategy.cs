@@ -1,8 +1,8 @@
-﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Folding;
 using System.Text.RegularExpressions;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   public class OpkwFoldingStrategy
   {

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -6,10 +6,10 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Function.DeviceBusCommutation;
-using NewCore.Function.Helpers;
+using Ask.Device.Runtime.Function.DeviceBusCommutation;
+using Ask.Device.Runtime.Function.Helpers;
 
-namespace NewCore.FunctionAdapters.DeviceBusCommutation
+namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 {
   /// <summary>
   /// Адаптер для управления подключением и отключением устройств к шине.
@@ -34,7 +34,7 @@ namespace NewCore.FunctionAdapters.DeviceBusCommutation
     public ConnectorManagerAdapter(ISwitchingDevice deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation ?? throw new ArgumentNullException(nameof(deviceBusCommutation));
-      _connectorManager = new ConnectorManager((Device.DeviceBusCommutation)deviceBusCommutation);
+      _connectorManager = new ConnectorManager((Runtime.Device.DeviceBusCommutation)deviceBusCommutation);
     }
 
     /// <inheritdoc />

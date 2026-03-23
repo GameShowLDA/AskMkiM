@@ -8,6 +8,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Broadcast;
 using Message;
 using System.Windows;
 using System.Windows.Input;

@@ -1,7 +1,7 @@
-﻿using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit.Document;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Реализация отслеживаемого текстового сегмента на основе anchor’ов AvalonEdit.

@@ -1,10 +1,10 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
+namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
   static internal class VoltageCheckService
   {

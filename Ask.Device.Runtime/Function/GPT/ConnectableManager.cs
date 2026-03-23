@@ -2,16 +2,16 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Com;
-using Ask.Device.Communication.Common;
+using Ask.Device.Communication.Com.Extensions;
+using Ask.Device.Communication.Common.Threading;
+using Ask.Device.Runtime.Device;
 using Microsoft.Win32.SafeHandles;
-using NewCore.Device;
 using System.IO.Ports;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.GPT
+namespace Ask.Device.Runtime.Function.GPT
 {
   /// <summary>
   /// Класс для управления подключением и состоянием пробойной установки GPT79904.

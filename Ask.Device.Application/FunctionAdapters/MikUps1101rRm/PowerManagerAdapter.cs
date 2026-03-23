@@ -4,9 +4,9 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.Helpers;
+using Ask.Device.Runtime.Function.Helpers;
 
-namespace NewCore.FunctionAdapters.MikUps1101rRm
+namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
 {
   /// <summary>
   /// Adapter for UPS power operations with retries and user messages.
@@ -14,12 +14,12 @@ namespace NewCore.FunctionAdapters.MikUps1101rRm
   internal class PowerManagerAdapter : IPower
   {
     private readonly IUninterruptiblePowerSupply _device;
-    private readonly NewCore.Function.MikUps1101rRm.PowerManager _manager;
+    private readonly Ask.Device.Runtime.Function.MikUps1101rRm.PowerManager _manager;
 
     public PowerManagerAdapter(IUninterruptiblePowerSupply device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _manager = new NewCore.Function.MikUps1101rRm.PowerManager(device);
+      _manager = new Ask.Device.Runtime.Function.MikUps1101rRm.PowerManager(device);
     }
 
     /// <inheritdoc />

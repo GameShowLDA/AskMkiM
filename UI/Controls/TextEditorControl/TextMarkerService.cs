@@ -1,9 +1,9 @@
-﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Media;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Интерфейс для текстового маркера, предоставляющий свойства для подсветки текста.

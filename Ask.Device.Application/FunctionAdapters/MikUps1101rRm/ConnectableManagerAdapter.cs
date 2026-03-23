@@ -4,9 +4,9 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.Helpers;
+using Ask.Device.Runtime.Function.Helpers;
 
-namespace NewCore.FunctionAdapters.MikUps1101rRm
+namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
 {
   /// <summary>
   /// Adapter for UPS connection workflow with retries and user messages.
@@ -14,12 +14,12 @@ namespace NewCore.FunctionAdapters.MikUps1101rRm
   internal class ConnectableManagerAdapter : IConnectable
   {
     private readonly IUninterruptiblePowerSupply _device;
-    private readonly NewCore.Function.MikUps1101rRm.ConnectableManager _manager;
+    private readonly Ask.Device.Runtime.Function.MikUps1101rRm.ConnectableManager _manager;
 
     public ConnectableManagerAdapter(IUninterruptiblePowerSupply device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _manager = new NewCore.Function.MikUps1101rRm.ConnectableManager(device);
+      _manager = new Ask.Device.Runtime.Function.MikUps1101rRm.ConnectableManager(device);
     }
 
     public event Action IsReset

@@ -1,9 +1,9 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.Helpers
+namespace Ask.Device.Runtime.Function.Helpers
 {
   /// <summary>
   /// Класс для формирования сообщений, связанных с устройством.

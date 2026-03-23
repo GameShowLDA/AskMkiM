@@ -1,10 +1,10 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Device;
-using NewCore.Function.GPT.Helper;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT.Helper;
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Управляет включением и выключением земли для режимов GPT-79904.

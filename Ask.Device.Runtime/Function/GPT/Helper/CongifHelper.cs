@@ -1,4 +1,4 @@
-﻿namespace NewCore.Function.GPT.Helper
+namespace Ask.Device.Runtime.Function.GPT.Helper
 {
   /// <summary>
   /// Вспомогательный класс для унифицированной установки параметров устройства.

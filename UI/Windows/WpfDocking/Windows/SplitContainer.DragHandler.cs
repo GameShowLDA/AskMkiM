@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using UI.Windows.WpfDocking.Internal.Windows;
 
 namespace UI.Windows.WpfDocking.Windows
 {

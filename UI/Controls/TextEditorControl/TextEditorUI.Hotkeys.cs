@@ -1,7 +1,7 @@
-﻿using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.FilesUtility;
 using System.Windows.Input;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Часть класса <see cref="TextEditorUI"/>, отвечающая за обработку

@@ -31,11 +31,12 @@ namespace TestConsole
         Console.WriteLine("11. Тест темы");
         Console.WriteLine("12. Скан папки");
         Console.WriteLine("13. Отладка UPS");
+        Console.WriteLine("14. Проверка namespace по папкам");
         Console.WriteLine("0. Выход");
 
         // Запрашиваем выбор пользователя
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 13)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 14)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -103,6 +104,10 @@ namespace TestConsole
 
           case 13:
             await UninterruptiblePowerSupplyTest.RunAsync();
+            break;
+
+          case 14:
+            NamespaceFolderScanner.Run();
             break;
 
           case 0:

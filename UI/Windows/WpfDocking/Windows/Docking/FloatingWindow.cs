@@ -2,6 +2,7 @@
 using System.Security;
 using System.Security.Permissions;
 using System.Windows;
+using UI.Windows.WpfDocking.Internal;
 
 namespace UI.Windows.WpfDocking.Windows.Docking
 {

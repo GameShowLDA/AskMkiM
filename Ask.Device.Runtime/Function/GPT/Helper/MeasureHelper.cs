@@ -1,13 +1,13 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.GPT.Command;
+using Ask.Device.Runtime.Function.GPT.Command;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
-using static NewCore.Function.GPT.Command.FunctionCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 
-namespace NewCore.Function.GPT.Helper
+namespace Ask.Device.Runtime.Function.GPT.Helper
 {
   static internal class MeasureHelper
   {

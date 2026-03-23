@@ -3,8 +3,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 
-namespace NewCore.Function.ManagerChassis
+namespace Ask.Device.Runtime.Function.ManagerChassis
 {
   /// <summary>
   /// Класс для управления питанием шасси.

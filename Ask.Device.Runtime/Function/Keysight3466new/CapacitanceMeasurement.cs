@@ -1,11 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Device;
+using Ask.Device.Runtime.Device;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.Keysight3466new
+namespace Ask.Device.Runtime.Function.Keysight3466new
 {
   /// <summary>
   /// Класс для измерения ёмкости с использованием прибора Keysight.

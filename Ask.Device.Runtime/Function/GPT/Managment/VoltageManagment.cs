@@ -1,11 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Device;
-using NewCore.Function.GPT.Helper;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT.Helper;
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Управляет установкой и чтением напряжения для различных режимов GPT-79904.

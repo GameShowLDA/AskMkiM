@@ -1,11 +1,11 @@
-﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Device;
-using NewCore.Function.GPT;
-using NewCore.Function.Helpers;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT;
+using Ask.Device.Runtime.Function.Helpers;
 
-namespace NewCore.FunctionAdapters.GPT
+namespace Ask.Device.Application.FunctionAdapters.GPT
 {
   /// <summary>
   /// Адаптер системных настроек устройства GPT-79904 с отображением сообщений.

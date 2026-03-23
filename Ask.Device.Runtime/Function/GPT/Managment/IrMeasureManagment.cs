@@ -1,14 +1,14 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Device;
-using NewCore.Function.GPT.Command;
-using NewCore.Function.GPT.Helper;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT.Command;
+using Ask.Device.Runtime.Function.GPT.Helper;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
-using static NewCore.Function.GPT.Command.FunctionCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Класс управления измерениями для режима IR (сопротивление изоляции).

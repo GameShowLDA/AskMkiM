@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
@@ -7,11 +7,12 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Application.Execution;
-using NewCore.Device;
-using NewCore.Function.GPT;
-using NewCore.Function.Helpers;
+using Ask.Device.Application.Function.Helpers;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT;
+using Ask.Device.Runtime.Function.Helpers;
 
-namespace NewCore.FunctionAdapters.GPT
+namespace Ask.Device.Application.FunctionAdapters.GPT
 {
   /// <summary>
   /// Адаптер режима ACW для устройства GPT-79904 с отображением сообщений.

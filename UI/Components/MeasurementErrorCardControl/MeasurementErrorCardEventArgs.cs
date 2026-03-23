@@ -1,6 +1,6 @@
-﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
-namespace UI.Components.MeasurementErrorCard
+namespace UI.Components.MeasurementErrorCardControl
 {
   public class MeasurementErrorCardEventArgs : EventArgs
   {

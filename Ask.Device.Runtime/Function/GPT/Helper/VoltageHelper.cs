@@ -1,12 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using System.Globalization;
 using static Ask.LogLib.LoggerUtility;
-using static NewCore.Function.GPT.Command.FunctionCommandManager;
-using static NewCore.Function.GPT.Command.ManualCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
-namespace NewCore.Function.GPT.Helper
+namespace Ask.Device.Runtime.Function.GPT.Helper
 {
   internal static class VoltageHelper
   {

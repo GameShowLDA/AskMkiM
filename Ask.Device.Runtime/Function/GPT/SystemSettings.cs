@@ -1,14 +1,15 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Com;
-using NewCore.Device;
-using static NewCore.Function.GPT.Command.FunctionCommandManager;
-using static NewCore.Function.GPT.Command.ManualCommandManager;
-using static NewCore.Function.GPT.Command.SystemCommandManager;
+using Ask.Device.Communication.Com.Interop;
+using Ask.Device.Runtime.Device;
+using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.SystemCommandManager;
 
-namespace NewCore.Function.GPT
+namespace Ask.Device.Runtime.Function.GPT
 {
   /// <summary>
   /// Класс для управления системными настройками устройства.

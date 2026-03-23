@@ -1,11 +1,11 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace NewCore.Function.ModuleVoltageCurrentSource.SelfCheck
+namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
   internal static class SwitchingSelfControl
   {

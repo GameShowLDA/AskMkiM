@@ -1,12 +1,13 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Device.Communication.Ethernet;
-using NewCore.Base.Device;
-using NewCore.Base.DeviceResponses;
-using NewCore.Function.ModuleVoltageCurrentSource.SelfCheck;
+using Ask.Device.Communication.Ethernet.Devices;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Класс, представляющий модуль источника напряжения и тока.

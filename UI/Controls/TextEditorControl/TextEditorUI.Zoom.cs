@@ -1,4 +1,4 @@
-﻿namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Часть класса <see cref="TextEditorUI"/>, отвечающая за управление масштабом текста

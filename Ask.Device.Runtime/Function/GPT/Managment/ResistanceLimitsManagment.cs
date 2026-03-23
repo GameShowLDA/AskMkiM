@@ -1,11 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Device;
+using Ask.Device.Runtime.Device;
 using static Ask.LogLib.LoggerUtility;
-using static NewCore.Function.GPT.Command.ManualCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Класс управления пределами сопротивления для режима IR.

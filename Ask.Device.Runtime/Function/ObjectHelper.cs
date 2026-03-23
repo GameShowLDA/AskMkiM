@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-namespace NewCore.Function
+namespace Ask.Device.Runtime.Function
 {
   /// <summary>
   /// Класс для помощи в копировании свойств между объектами.

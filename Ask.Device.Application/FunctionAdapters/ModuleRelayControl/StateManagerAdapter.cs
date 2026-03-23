@@ -1,27 +1,27 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.Helpers;
-using NewCore.Function.ModuleRelayControl;
+using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.Function.ModuleRelayControl;
 using System.Text;
 
-namespace NewCore.FunctionAdapters.ModuleRelayControl
+namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {
   /// <summary>
   /// Адаптер для управления состоянием модуля коммутации реле (МКР) с сообщениями.
   /// </summary>
   internal class StateManagerAdapter : IConnectable
   {
-    private readonly Device.ModuleRelayControl _moduleRelayControl;
+    private readonly Runtime.Device.ModuleRelayControl _moduleRelayControl;
     private readonly StateManager _stateManager;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateManagerAdapter"/>.
     /// </summary>
     /// <param name="moduleRelayControl">Модуль коммутации реле.</param>
-    public StateManagerAdapter(Device.ModuleRelayControl moduleRelayControl)
+    public StateManagerAdapter(Runtime.Device.ModuleRelayControl moduleRelayControl)
     {
       _moduleRelayControl = moduleRelayControl ?? throw new ArgumentNullException(nameof(moduleRelayControl));
       _stateManager = new StateManager(moduleRelayControl);

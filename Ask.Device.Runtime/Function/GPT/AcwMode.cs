@@ -1,12 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Device;
-using NewCore.Function.GPT.Managment;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT.Managment;
 
-namespace NewCore.Function.GPT
+namespace Ask.Device.Runtime.Function.GPT
 {
   /// <summary>
   /// Класс для работы с режимом ACW (переменный ток высокого напряжения).

@@ -1,11 +1,11 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Communication.Common;
+using Ask.Device.Communication.Common.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Ethernet.Udp
+namespace Ask.Device.Communication.Ethernet.Udp.Protocols
 {
   /// <summary>
   /// Реализует универсальный транспортный протокол обмена с устройствами по UDP.

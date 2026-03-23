@@ -1,10 +1,10 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace NewCore.Function.DeviceBusCommutation.SelfCheck
+namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
   public class SelfTestManager : ISelfTestCheckerDeviceBusCommutation
   {

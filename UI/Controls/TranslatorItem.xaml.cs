@@ -7,13 +7,11 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
-using ICSharpCode.AvalonEdit;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using UI.Components;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Services;
 using UI.Services.Archive;
 

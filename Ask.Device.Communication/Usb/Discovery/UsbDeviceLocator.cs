@@ -1,6 +1,6 @@
 using System.Management;
 
-namespace Ask.Device.Communication.Usb
+namespace Ask.Device.Communication.Usb.Discovery
 {
   /// <summary>
   /// Выполняет поиск USB-устройств в системе по имени или идентификатору.

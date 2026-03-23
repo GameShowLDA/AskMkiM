@@ -1,10 +1,11 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Device.Communication.Ethernet;
-using NewCore.Base.Device;
-using NewCore.Function.DeviceBusCommutation.SelfCheck;
+using Ask.Device.Communication.Ethernet.Devices;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Устройство коммутации шин, обеспечивающее подключение различных измерителей системы.
@@ -17,7 +18,7 @@ namespace NewCore.Device
     public DeviceBusCommutation()
     {
       Name = "Устройство УКШ";
-      Description = "Реализовать описание в NewCore.Device.DeviceBusCommutation";
+      Description = "Реализовать описание в Ask.Device.Runtime.Device.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
       DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.SwitchingDevice;
 

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Breakdown;
+using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -9,7 +9,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
 
-namespace NewCore.Function.GPT.SelfCheck
+namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 {
   public class SelfTestManager : ISelfTestCheckerBreakdownTester
   {

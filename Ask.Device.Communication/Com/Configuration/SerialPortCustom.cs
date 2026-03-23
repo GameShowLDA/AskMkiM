@@ -2,7 +2,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Text.Json;
 
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Configuration
 {
   /// <summary>
   /// Представляет последовательный порт, который умеет сериализовать и восстанавливать свои настройки.

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
@@ -9,9 +9,10 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 
-namespace NewCore.Function.ModuleRelayControl.SelfCheck
+namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 {
   public class SelfTestManager : ISelfTestCheckerModuleRelayControl
   {

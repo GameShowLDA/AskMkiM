@@ -3,7 +3,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Services
 {

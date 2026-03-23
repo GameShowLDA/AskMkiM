@@ -1,9 +1,10 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 
-namespace NewCore.Function.DeviceBusCommutation
+namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 {
   /// <summary>
   /// Менеджер управления реле коммутации.

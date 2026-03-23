@@ -1,10 +1,10 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace NewCore.Function.DeviceBusCommutation.SelfCheck
+namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
   /// <summary>
   /// Предоставляет вспомогательные методы с поддержкой повтора при неудачном выполнении операций самотестирования.

@@ -1,10 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 using static Ask.LogLib.LoggerUtility;
 
 
-namespace NewCore.Function.DeviceBusCommutation.SelfCheck
+namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
   internal static class SelfTestMetadataProvider
   {

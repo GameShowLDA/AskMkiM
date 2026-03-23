@@ -1,9 +1,9 @@
-﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit.Document;
 
-namespace UI.Controls.TextEditor
+namespace UI.Controls.TextEditorControl
 {
   /// <summary>
   /// Адаптер документа AvalonEdit к абстрактной модели текстового документа.

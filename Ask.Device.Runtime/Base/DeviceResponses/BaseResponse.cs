@@ -1,7 +1,7 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace NewCore.Base.DeviceResponses
+namespace Ask.Device.Runtime.Base.DeviceResponses
 {
   /// <summary>
   /// Базовый класс ответа от устройства.

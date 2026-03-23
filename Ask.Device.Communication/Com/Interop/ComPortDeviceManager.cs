@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Com
+namespace Ask.Device.Communication.Com.Interop
 {
   /// <summary>
   /// Управляет включением и отключением COM-устройств на уровне операционной системы.

@@ -1,12 +1,14 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet;
+using Ask.Device.Communication.Ethernet.Devices;
 using Ask.Device.Communication.Ethernet.Tcp;
+using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using System.Net;
 using System.Net.Sockets;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
@@ -78,7 +80,7 @@ namespace NewCore.Device
     public KeysightDevice()
     {
       Name = "Мультиметр 34465A";
-      Description = "Реализовать описание в NewCore.Device.KeysightDevice";
+      Description = "Реализовать описание в Ask.Device.Runtime.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
       DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.FastMeter;
       IsConnected = false;

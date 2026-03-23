@@ -1,12 +1,12 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Com;
+using Ask.Device.Communication.Com.Devices;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Device
+namespace Ask.Device.Runtime.Device
 {
   /// <summary>
   /// Класс, представляющий пробойную установку GPT79904, работающую через последовательный порт (COM).
@@ -43,7 +43,7 @@ namespace NewCore.Device
     public new string Name { get => "GPT79904"; }
 
     /// <inheritdoc />
-    public new string Description { get => "Реализовать описание в NewCore.Device.GPT79904"; }
+    public new string Description { get => "Реализовать описание в Ask.Device.Runtime.Device.GPT79904"; }
 
     /// <inheritdoc />
     public int NumberChassis { get; set; }
@@ -95,7 +95,7 @@ namespace NewCore.Device
         _mode = value;
       }
     }
-    
+
     private BreakdownTypeMode _mode { get; set; }
   }
 }

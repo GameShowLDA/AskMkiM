@@ -1,12 +1,13 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Communication.Ethernet.Udp.Commands;
 using static Ask.LogLib.LoggerUtility;
 
-namespace NewCore.Function.ModuleVoltageCurrentSource
+namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 {
   /// <summary>
   /// Класс для управления напряжением на модуле источника напряжения и тока (МИНТ).

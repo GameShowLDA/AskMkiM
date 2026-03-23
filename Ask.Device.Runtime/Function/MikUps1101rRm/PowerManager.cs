@@ -4,7 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Text.Json;
 
-namespace NewCore.Function.MikUps1101rRm
+namespace Ask.Device.Runtime.Function.MikUps1101rRm
 {
   /// <summary>
   /// Power control logic for MIK-UPS-1101R-RM.

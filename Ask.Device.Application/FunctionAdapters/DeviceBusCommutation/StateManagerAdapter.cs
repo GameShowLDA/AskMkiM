@@ -1,27 +1,27 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using NewCore.Function.DeviceBusCommutation;
-using NewCore.Function.Helpers;
+using Ask.Device.Runtime.Function.DeviceBusCommutation;
+using Ask.Device.Runtime.Function.Helpers;
 using System.Text;
 
-namespace NewCore.FunctionAdapters.DeviceBusCommutation
+namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 {
   /// <summary>
   /// Адаптер для управления состоянием устройства коммутации.
   /// </summary>
   internal class StateManagerAdapter : IConnectable
   {
-    private readonly Device.DeviceBusCommutation _deviceBusCommutation;
+    private readonly Runtime.Device.DeviceBusCommutation _deviceBusCommutation;
     private readonly StateManager _stateManager;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="StateManagerAdapter"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Устройство коммутации шин.</param>
-    public StateManagerAdapter(Device.DeviceBusCommutation deviceBusCommutation)
+    public StateManagerAdapter(Runtime.Device.DeviceBusCommutation deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation ?? throw new ArgumentNullException(nameof(deviceBusCommutation));
       _stateManager = new StateManager(deviceBusCommutation);

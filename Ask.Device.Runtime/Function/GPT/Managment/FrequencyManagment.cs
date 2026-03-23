@@ -1,14 +1,14 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using NewCore.Device;
-using NewCore.Function.GPT.Command;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT.Command;
 using static Ask.LogLib.LoggerUtility;
-using static NewCore.Function.GPT.Command.ManualCommandManager;
+using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
 
-namespace NewCore.Function.GPT.Managment
+namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Универсальный класс управления частотой испытаний
