@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
-    <ProjectReference Include="..\NewCore\NewCore.csproj" />
+    <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>

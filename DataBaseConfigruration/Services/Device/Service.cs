@@ -396,6 +396,26 @@ namespace DataBaseConfiguration.Services.Device
         }
       }
 
+      foreach (var runtimeAssemblyName in GetFallbackAssemblyNames(className))
+      {
+        try
+        {
+          var runtimeAssembly = AppDomain.CurrentDomain.GetAssemblies()
+            .FirstOrDefault(a => string.Equals(a.GetName().Name, runtimeAssemblyName, StringComparison.Ordinal))
+            ?? Assembly.Load(new AssemblyName(runtimeAssemblyName));
+
+          type = runtimeAssembly.GetType(className, throwOnError: false, ignoreCase: false);
+          if (type != null)
+          {
+            return type;
+          }
+        }
+        catch (Exception ex)
+        {
+          LogWarning($"Не удалось загрузить резервную сборку {runtimeAssemblyName} для класса {className}: {ex.Message}");
+        }
+      }
+
       foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
       {
         try
@@ -420,6 +440,15 @@ namespace DataBaseConfiguration.Services.Device
       var split = className.Split('.', StringSplitOptions.RemoveEmptyEntries);
       return split.Length == 0 ? string.Empty : split[0];
     }
+
+    private static IEnumerable<string> GetFallbackAssemblyNames(string className)
+    {
+      if (className.StartsWith("NewCore.", StringComparison.Ordinal))
+      {
+        yield return "Ask.Device.Runtime";
+      }
+    }
+
     private static void CopyProperties(object source, object target)
     {
       if (source == null || target == null)
