@@ -1,7 +1,6 @@
 ﻿using Ask.Core.Services.Translator;
 using DataBaseConfiguration.Context;
 using DataBaseConfiguration.Services.Hotkey.Defaults;
-using DataBaseConfiguration.Services.MeasurementError;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration
@@ -34,10 +33,7 @@ namespace DataBaseConfiguration
         using var context = new AppDbContext(OptionsBuilder.Options);
         await context.Database.MigrateAsync();
         context.Database.EnsureCreated();
-
         FileHotkeySeeder.Seed(context);
-        MeasurementErrorSeeder.Seed(context);
-        ErrorProviderLocator.Provider = new MeasurementErrorServices();
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"✅ База данных инициализирована, миграции применены. Path: {ConfigFilePath}");
