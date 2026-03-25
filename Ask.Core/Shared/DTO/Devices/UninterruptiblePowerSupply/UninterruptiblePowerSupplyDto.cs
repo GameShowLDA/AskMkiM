@@ -1,6 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Base;
 
-namespace Ask.DataBase.Provider.Contracts.DTO;
+namespace Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 
 /// <summary>
 /// DTO источника бесперебойного питания (UPS).

@@ -1,8 +1,11 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
+using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.DataBase.Provider.Contracts.DTO;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ask.DataBase.Provider.Context
@@ -44,9 +47,9 @@ namespace Ask.DataBase.Provider.Context
     /// </summary>
     public DbSet<RackDto> Rack { get; set; }
 
-    ///// <summary>
-    ///// Таблица бесперебойников.
-    ///// </summary>
+    /// <summary>
+    /// Таблица бесперебойников.
+    /// </summary>
     public DbSet<UninterruptiblePowerSupplyDto> UninterruptiblePowerSupplies { get; set; }
   }
 }
