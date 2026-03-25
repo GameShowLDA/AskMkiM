@@ -324,6 +324,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("KS004")]
     Ks_EmptyCommandBody,
 
+    /// <summary> В команде КС список точек указан до диапазона сопротивления. </summary>
+    [ErrorCodeTag("KS005")]
+    Ks_InvalidParameterOrder,
+
     /// <summary> Ошибка при проверке точки про методе полного узла в команде КС. </summary>
     [ErrorCodeTag("KS006")]
     Ks_NodeExecutePointError,

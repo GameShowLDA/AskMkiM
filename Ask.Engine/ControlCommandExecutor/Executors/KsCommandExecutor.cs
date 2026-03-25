@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       firstValue = 0;
-      secondValue = 10000000;
+      secondValue = -1;
 
       var command = GetRequiredCommand<KsCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
