@@ -2,9 +2,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Ethernet.Devices;
 using Ask.Device.Communication.Ethernet.Tcp;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
+using Ask.Device.Runtime.Base.Device;
 using System.Net;
 using System.Net.Sockets;
 

@@ -3,7 +3,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Usb;
-using Ask.Device.Communication.Usb.Devices;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
 

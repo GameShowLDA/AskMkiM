@@ -2,9 +2,8 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Communication.Ethernet.Udp;
-using Ask.Device.Communication.Ethernet.Udp.Commands;
 using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.Runtime.Commands;
 
 namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 {

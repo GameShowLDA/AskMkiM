@@ -1,11 +1,11 @@
-using Ask.Device.Communication.Ethernet.Udp.Commands;
+using Ask.Device.Runtime.Commands;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Ethernet.Udp.Broadcast
+namespace Ask.Device.Runtime.Ethernet.Udp.Broadcast
 {
   /// <summary>
   /// Отправляет широковещательные UDP-команды сетевым устройствам.

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -10,11 +10,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Com.Configuration;
-using Ask.Device.Communication.Com.Devices;
 using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Ethernet.Devices;
 using Ask.Device.Communication.Usb;
-using Ask.Device.Communication.Usb.Devices;
+using Ask.Device.Runtime.Base.Device;
 using Message;
 using System.IO.Ports;
 using System.Net;

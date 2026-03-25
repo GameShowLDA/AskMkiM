@@ -1,7 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Ethernet.Udp;
-using Ask.Device.Communication.Ethernet.Udp.Commands;
+using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
 
 

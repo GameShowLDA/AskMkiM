@@ -1,8 +1,7 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Com;
-using Ask.Device.Communication.Com.Devices;
 using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Ethernet.Devices;
+using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Device;
 using Message;
 using System.Text.RegularExpressions;

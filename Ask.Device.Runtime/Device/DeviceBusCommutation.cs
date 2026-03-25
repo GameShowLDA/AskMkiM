@@ -1,7 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Ethernet.Devices;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 

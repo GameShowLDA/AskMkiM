@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
@@ -7,8 +7,7 @@ using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.Device.Communication.Ethernet.Udp;
-using Ask.Device.Communication.Ethernet.Udp.Broadcast;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Message;
 using System.Windows;
 using System.Windows.Input;

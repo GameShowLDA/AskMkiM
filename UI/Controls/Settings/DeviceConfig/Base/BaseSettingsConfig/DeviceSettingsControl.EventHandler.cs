@@ -1,10 +1,8 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Device.Communication.Com;
-using Ask.Device.Communication.Com.Devices;
 using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Ethernet.Devices;
 using Ask.Device.Communication.Usb;
-using Ask.Device.Communication.Usb.Devices;
+using Ask.Device.Runtime.Base.Device;
 using Message;
 using System.Globalization;
 using System.Text.RegularExpressions;

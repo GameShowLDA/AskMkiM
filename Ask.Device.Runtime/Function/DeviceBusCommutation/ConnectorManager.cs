@@ -1,12 +1,10 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Ethernet.Udp;
-using Ask.Device.Communication.Ethernet.Udp.Commands;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation

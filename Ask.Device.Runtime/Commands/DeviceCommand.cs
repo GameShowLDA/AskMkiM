@@ -1,7 +1,7 @@
-namespace Ask.Device.Communication.Ethernet.Udp.Commands
+namespace Ask.Device.Runtime.Commands
 {
   /// <summary>
-  /// Представляет UDP-команду устройства с номером и тремя параметрами.
+  /// Представляет команду устройства с номером и тремя параметрами.
   /// </summary>
   public class DeviceCommand
   {

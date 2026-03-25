@@ -6,7 +6,7 @@ using Ask.Device.Communication.Com.Protocols;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Communication.Com.Devices
+namespace Ask.Device.Runtime.Base.Device
 {
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого через COM-порт.
