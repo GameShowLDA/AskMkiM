@@ -1,8 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
 using System.Xml.Linq;
+namespace MethodDependencyExplorer;
+
 
 internal static class Program
 {

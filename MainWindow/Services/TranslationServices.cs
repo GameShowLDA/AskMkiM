@@ -12,7 +12,7 @@ using UI.Components;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
@@ -107,7 +107,7 @@ namespace MainWindowProgram.Services
 
         bool hasBreakpoint = isAllowed && hasPreserved;
         model.HasBreakpoint = hasBreakpoint;
-        model.IsBreakpointEnabled = hasBreakpoint ? preservedEnabled : true;
+        model.IsBreakpointEnabled = !hasBreakpoint || preservedEnabled;
 
         if (!isAllowed)
         {

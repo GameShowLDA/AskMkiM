@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UI.Windows.WpfDocking.Internal;
 
 namespace UI.Windows.WpfDocking.Windows
 {

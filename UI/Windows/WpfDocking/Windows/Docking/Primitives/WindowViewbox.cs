@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UI.Windows.WpfDocking.Internal;
 
 namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
 {

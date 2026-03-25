@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using UI.Windows.WpfDocking.Internal;
 
 namespace UI.Windows.WpfDocking.Windows
 {

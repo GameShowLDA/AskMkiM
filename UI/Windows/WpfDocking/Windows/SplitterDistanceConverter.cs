@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
+using UI.Windows.WpfDocking.Internal;
 
 namespace UI.Windows.WpfDocking.Windows
 {

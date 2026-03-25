@@ -8,7 +8,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost;
 using Message;
 using System.IO;
 using System.Windows;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.ProtocolManager

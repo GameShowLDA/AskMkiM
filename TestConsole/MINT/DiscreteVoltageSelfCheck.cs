@@ -165,6 +165,18 @@ namespace TestConsole.MINT
       Console.WriteLine($"Создание объекта класса: {className}");
 
       Type type = Type.GetType(className);
+      if (type == null && className.StartsWith("NewCore.", StringComparison.Ordinal))
+      {
+        try
+        {
+          type = Assembly.Load(new AssemblyName("Ask.Device.Runtime")).GetType(className);
+        }
+        catch
+        {
+          // Игнорируем и переходим к поиску среди уже загруженных сборок.
+        }
+      }
+
       if (type == null)
       {
         type = AppDomain.CurrentDomain
