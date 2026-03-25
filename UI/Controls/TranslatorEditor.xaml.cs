@@ -52,6 +52,16 @@ namespace UI.Controls
       set => Editor.IsReadOnly = value;
     }
 
+    public void SetArchiveButtonVisibility(bool isVisible)
+    {
+      if (SaveButton == null)
+      {
+        return;
+      }
+
+      SaveButton.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void BackButton_Click(object sender, RoutedEventArgs e) =>
       BackRequested?.Invoke(this, EventArgs.Empty);
 
