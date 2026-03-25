@@ -6,7 +6,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis
   /// <summary>
   /// Интерфейс для менеджера шасси.
   /// </summary>
-  public interface IChassisManager : IDevice, IHeadUnit
+  public interface IChassisManager : IHeadUnit
   {
     /// <summary>
     /// Управление питанием шасси.

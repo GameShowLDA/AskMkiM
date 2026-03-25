@@ -10,7 +10,7 @@ namespace Ask.Core.Shared.Entity.Devices
   /// <summary>
   /// Класс, представляющий сущность стойка коммутационная.
   /// </summary>
-  public class RackEntity : IRack, IHeadUnit
+  public class RackEntity : IRack
   {
     [Key]
     /// <inheritdoc />
