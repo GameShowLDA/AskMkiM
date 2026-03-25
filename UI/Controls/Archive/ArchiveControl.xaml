@@ -237,6 +237,157 @@
             Padding="10"
                     >
                 <Grid>
+                    <Grid.Resources>
+                        <Style x:Key="ArchiveFilesDataGridCellStyle"
+                               TargetType="{x:Type DataGridCell}"
+                               BasedOn="{StaticResource ModernDataGridCellStyle}">
+                            <Setter Property="FontSize" Value="16" />
+                            <Setter Property="Padding" Value="16,8" />
+                            <Setter Property="ClipToBounds" Value="True" />
+                        </Style>
+
+                        <Style x:Key="ArchiveFilesDataGridTextStyle"
+                               TargetType="{x:Type TextBlock}"
+                               BasedOn="{StaticResource ModernDataGridTextStyle}">
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="TextWrapping" Value="NoWrap" />
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+
+                        <Style x:Key="ArchiveFilesScrollBarButtonStyle"
+                               TargetType="{x:Type RepeatButton}">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Width" Value="22" />
+                            <Setter Property="Height" Value="22" />
+                            <Setter Property="Cursor" Value="SizeWE" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                        <Border x:Name="ButtonBorder"
+                                                Margin="1"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{DynamicResource ForegrounfBrushes35}"
+                                                BorderThickness="1"
+                                                CornerRadius="7">
+                                            <Path x:Name="ArrowPath"
+                                                  Width="6"
+                                                  Height="10"
+                                                  Fill="{DynamicResource ForegrounfBrushes45}"
+                                                  Stretch="Fill"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Data="M 0 0 L 6 5 L 0 10 Z" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="Tag" Value="Left">
+                                                <Setter TargetName="ArrowPath"
+                                                        Property="Data"
+                                                        Value="M 6 0 L 0 5 L 6 10 Z" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="Background"
+                                                        Value="{DynamicResource SecondarySolidColorBrush}" />
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="BorderBrush"
+                                                        Value="{DynamicResource ForegrounfBrushes45}" />
+                                                <Setter TargetName="ArrowPath"
+                                                        Property="Fill"
+                                                        Value="{DynamicResource ForegrounfBrushes}" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="Background"
+                                                        Value="{DynamicResource PrimarySolidColorBrush}" />
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="BorderBrush"
+                                                        Value="{DynamicResource ActiveBorderSolidColorBrush}" />
+                                                <Setter TargetName="ArrowPath"
+                                                        Property="Fill"
+                                                        Value="{DynamicResource ForegrounfBrushes}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <Style x:Key="ArchiveFilesScrollBarThumbStyle"
+                               TargetType="{x:Type Thumb}">
+                            <Setter Property="Background" Value="{DynamicResource ScrollBarThumbBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="MinWidth" Value="42" />
+                            <Setter Property="Height" Value="16" />
+                            <Setter Property="Cursor" Value="SizeWE" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Thumb}">
+                                        <Border x:Name="ThumbBorder"
+                                                Margin="1"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                CornerRadius="8" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <ControlTemplate x:Key="ArchiveFilesHorizontalScrollBarTemplate"
+                                         TargetType="{x:Type ScrollBar}">
+                            <Border Margin="0,8,0,0"
+                                    Padding="0,1"
+                                    BorderThickness="1"
+                                    CornerRadius="9"
+                                    SnapsToDevicePixels="True">
+                                <Track x:Name="PART_Track"
+                                       Margin="0"
+                                       Focusable="False"
+                                       Orientation="Horizontal"
+                                       Minimum="{TemplateBinding Minimum}"
+                                       Maximum="{TemplateBinding Maximum}"
+                                       Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, Mode=TwoWay}"
+                                       ViewportSize="{TemplateBinding ViewportSize}"
+                                       IsDirectionReversed="False">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageLeftCommand"
+                                                      Focusable="False"
+                                                      IsTabStop="False"
+                                                      Opacity="0" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource ArchiveFilesScrollBarThumbStyle}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageRightCommand"
+                                                      Focusable="False"
+                                                      IsTabStop="False"
+                                                      Opacity="0" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Border>
+                        </ControlTemplate>
+
+                        <Style x:Key="ArchiveFilesDataGridScrollBarStyle"
+                               TargetType="{x:Type ScrollBar}"
+                               BasedOn="{StaticResource {x:Type ScrollBar}}">
+                            <Style.Triggers>
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter Property="Cursor" Value="SizeWE" />
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="Background" Value="Red" />
+                                    <Setter Property="Template"
+                                            Value="{StaticResource ArchiveFilesHorizontalScrollBarTemplate}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Resources>
                     
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -254,11 +405,15 @@
                     <DataGrid x:Name="ArchiveFilesDataGrid"
                         Grid.Row="1"
                         Margin="0,8,0,0"
+                        MinWidth="0"
+                        HorizontalAlignment="Stretch"
                         Style="{StaticResource ModernDataGridStyle}"
+                        CellStyle="{StaticResource ArchiveFilesDataGridCellStyle}"
                         AutoGenerateColumns="False"
                         IsReadOnly="True"
-                        FontSize="13"
-                        CanUserReorderColumns="True"
+                        FontSize="16"
+                        ColumnWidth="Auto"
+                        CanUserReorderColumns="False"
                         CanUserResizeColumns="True"
                         CanUserSortColumns="True"
                         HeadersVisibility="Column"
@@ -266,38 +421,66 @@
                         SelectionUnit="FullRow"
                         CanUserAddRows="False"
                         CanUserDeleteRows="False"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
                         SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type ScrollBar}"
+                                   BasedOn="{StaticResource ArchiveFilesDataGridScrollBarStyle}" >
+                                <Style.Triggers>
+
+                                <!-- ГОРИЗОНТАЛЬНЫЙ -->
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter Property="Cursor" Value="SizeWE" />
+                                    <Setter Property="Height" Value="Auto" />
+                                    <Setter Property="Width" Value="Auto" />
+                                        <Setter Property="Template"
+                        Value="{StaticResource ArchiveFilesHorizontalScrollBarTemplate}" />
+                                    </Trigger>
+
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Обозначение"
                                 Binding="{Binding Name}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*"/>
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="150"
+                                Width="Auto"
+                                />
                             <DataGridTextColumn Header="Наименование ОК"
                                 Binding="{Binding NameOK}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="190"
+                                Width="Auto" />
                             <DataGridTextColumn Header="ОПК"
                                 Binding="{Binding OPK}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="90"
+                                Width="Auto" />
                             <DataGridTextColumn Header="ИК"
                                 Binding="{Binding IK}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="90"
+                                Width="Auto" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="110"
+                                Width="Auto" />
                             <DataGridTextColumn Header="Файл ОПК"
                                 Binding="{Binding OpkFileName}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="180"
+                                Width="Auto" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"
-                                Width="190">
+                                MinWidth="120"
+                                Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Margin="8,0,0,0"
+                                        <TextBlock Style="{StaticResource ArchiveFilesDataGridTextStyle}"
                                             VerticalAlignment="Center"
                                             Text="{Binding CreationDate, StringFormat={}{0:dd.MM.yyyy}}" />
                                     </DataTemplate>
@@ -305,13 +488,14 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Цех"
                                 Binding="{Binding Department}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="90" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="80"
+                                Width="Auto" />
                             <DataGridTextColumn Header="Примечание"
                                 Binding="{Binding Comment}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="130" />
-
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="200"
+                                Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
 

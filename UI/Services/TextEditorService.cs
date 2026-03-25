@@ -41,22 +41,9 @@ namespace UI.Services
       if (container == null) return false;
 
       var activeDockItem = container.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem);
-      if (activeDockItem?.Content is not TextEditorUI textEditor) return false;
+      if (activeDockItem?.Content is not TextEditorUI) return false;
 
-      var controlManager = new ControlManager(_fileManager.EditorWorkspaceModel);
-      var foundPage = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Text == EditorType.TextEditor.ToString());
-
-      controlManager.RemoveControl(foundPage, textEditor, isTranslation);
-      _fileManager.EditorWorkspaceModel.FilePaths.Remove(activeDockItem.TabText);
-
-      bool closed = activeDockItem.Close();
-
-      if (container.DockManager.DockItems.Count == 0)
-      {
-        _fileManager.ContainerService.RemoveEditorContainer(container, EditorType.TextEditor);
-      }
-
-      return closed;
+      return activeDockItem.PerformClose();
     }
 
     /// <summary>

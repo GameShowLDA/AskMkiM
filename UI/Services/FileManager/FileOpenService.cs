@@ -111,6 +111,7 @@ namespace UI.Services.FileManager
       var uniqueName = _fileManager.FileService.Name.EnsureUniqueFileName(path, fileName);
       var textEditorModel = new TextEditorModel(path, uniqueName, encoding);
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, fileContent, fileType);
+      textEditor.ConfigureBreakpoints(interactive: false, visible: false);
       textEditor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
       CancellationTokenSource redrawToken = null;
 

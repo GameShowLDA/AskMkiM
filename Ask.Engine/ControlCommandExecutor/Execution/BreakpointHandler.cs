@@ -27,9 +27,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       IUserInteractionService userInteractionService)
     {
       if (!command.HasBreakpoint)
-      {
         return command;
-      }
+	
+      if (!command.IsBreakpointEnabled)
+        return command;
 
       await ShowBreakpointCommandHeaderAsync(command, userInteractionService).ConfigureAwait(false);
       StepControlManager.EnableStepModeByBreakpoint(command, true);

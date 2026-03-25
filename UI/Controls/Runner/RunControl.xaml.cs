@@ -15,6 +15,8 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using UI.Controls.TextEditorControl;
+using Ask.UI.Controls.ErrorList;
+using Ask.UI.Controls.ProtocolNew;
 using UI.Services;
 using UI.Services.Archive;
 using UI.Windows.WpfDocking.Windows.Docking;
@@ -92,6 +94,16 @@ namespace UI.Controls.Runner
 
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
+
+      // Вкладка "Точки остановки"
+      ErrorListBoxVertical.BreakpointItemDoubleClicked += BreakpointItemDoubleClicked;
+      ErrorListBoxVertical.BreakpointEnabledChanged += BreakpointEnabledChanged;
+
+      // События брейкпоинтов, чтобы вкладка обновлялась в Run
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => OnBreakpointSet(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => OnBreakpointRemoved(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => OnBreakpointOn(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => OnBreakpointOff(e));
     }
     /// <summary>
     /// Обрабатывает событие изменения состояния блокировки интерфейса.
@@ -239,12 +251,6 @@ namespace UI.Controls.Runner
       dockManager.DockItems.Add(dockItemPk);
       dockManager.DockItems.Add(dockItemDeviceState);
 
-      if (dockManager == null)
-      {
-        LogError("ChildTextEditorContainer.DockControl не найден (null). Невозможно отобразить вкладку.");
-        return;
-      }
-
       LogInformation($"Попытка показать ChildTextEditorContainer.DockItem. Title: {dockItemPk.Title}, IsLoaded: {dockManager.IsLoaded}, DockItems.Count: {dockManager.DockItems.Count}");
 
       if (!dockManager.IsLoaded)
@@ -263,6 +269,11 @@ namespace UI.Controls.Runner
             SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
             dockItemDeviceState.Show(dockManager, DockPosition.Document);
             capturedDockItem.Show(dockManager, DockPosition.Document);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+              SyncBreakpointsFromEditor(textEditorUI);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
           }
           catch (Exception ex)
           {
@@ -275,8 +286,15 @@ namespace UI.Controls.Runner
         var isControlProgramActive = true;
 
         SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
+
         dockItemDeviceState.Show(dockManager, DockPosition.Document);
         dockItemPk.Show(dockManager, DockPosition.Document);
+
+        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+          SyncBreakpointsFromEditor(textEditorUI);
+        }), System.Windows.Threading.DispatcherPriority.Loaded);
+
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
       }
     }
@@ -391,6 +409,178 @@ namespace UI.Controls.Runner
       BottomRow.Height = GridLength.Auto;
       ErrorListBoxVertical.MaxHeight = desired;
     }
+
+    /// <summary>
+    /// Синхронизирует список точек остановки во вкладке
+    /// с текущим состоянием редактора выполнения.
+    /// </summary>
+    /// <param name="editor">Экземпляр <see cref="TextEditorUI"/>, содержащий активные точки остановки.</param>
+    /// <remarks>
+    /// Метод полностью очищает текущий список точек остановки во вкладке,
+    /// затем заново формирует его на основе данных редактора.
+    /// </remarks>
+    private void SyncBreakpointsFromEditor(TextEditorUI editor)
+    {
+      if (editor == null)
+        return;
+
+      ErrorListBoxVertical.ClearBreakpoints();
+
+      var doc = editor.Document;
+      var cmdNumbers = editor.BreakpointCommandsNumbers;
+      var anchors = editor.BreakPointLines;
+
+      int count = Math.Min(cmdNumbers.Count, anchors.Count);
+
+      for (int i = 0; i < count; i++)
+      {
+        int cmd = cmdNumbers[i];
+        int line1 = doc.GetLineByOffset(anchors[i].Offset).LineNumber;
+        bool enabled = editor.IsBreakpointEnabled(cmd);
+
+        ErrorListBoxVertical.UpsertBreakpoint(cmd, line1, editor.NumCommandWithMnemonic[cmd], enabled);
+        SetModelBreakpoint(cmd, has: true, enabled: enabled);
+      }
+    }
+
+    /// <summary>
+    /// Обрабатывает двойной щелчок по элементу списка точек остановки.
+    /// </summary>
+    /// <param name="bp">Элемент списка точек остановки.</param>
+    /// <remarks>
+    /// При наличии корректного номера строки (1-based)
+    /// выполняется переход редактора к соответствующей строке.
+    /// </remarks>
+    private void BreakpointItemDoubleClicked(BreakpointListItem bp)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      if (bp.RightLine.HasValue && bp.RightLine.Value > 0)
+        editor.ScrollToLine(bp.RightLine.Value);
+    }
+
+    /// <summary>
+    /// Обрабатывает изменение состояния (включена/выключена)
+    /// точки остановки из списка.
+    /// </summary>
+    /// <param name="bp">Элемент точки остановки.</param>
+    /// <param name="enabled">Состояние точки остановки.</param>
+    /// <remarks><see langword="true"/> для включения точки остановки.</remarks>
+    private void BreakpointEnabledChanged(BreakpointListItem bp, bool enabled)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      if (!editor.HasBreakpointCommand(bp.CommandNumber))
+        return;
+
+      if (editor.IsBreakpointEnabled(bp.CommandNumber) == enabled)
+        return;
+
+      if (enabled)
+        editor.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
+      else
+        editor.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
+    }
+
+    /// <summary>
+    /// Обрабатывает событие установки новой точки остановки.
+    /// </summary>
+    /// <param name="e">Аргументы события установки точки остановки.</param>
+    private void OnBreakpointSet(BreakpointEvents.BreakpointSet e)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, editor.NumCommandWithMnemonic[e.CommandNumber], isEnabled: true);
+
+      SetModelBreakpoint(e.CommandNumber, has: true, enabled: true);
+    }
+
+    /// <summary>
+    /// Обрабатывает событие удаления точки остановки.
+    /// </summary>
+    /// <param name="e">Аргументы события удаления точки остановки.</param>
+    private void OnBreakpointRemoved(BreakpointEvents.BreakpointRemoved e)
+    {
+      ErrorListBoxVertical.RemoveBreakpoint(e.CommandNumber);
+      SetModelBreakpoint(e.CommandNumber, has: false, enabled: true);
+    }
+
+    /// <summary>
+    /// Обрабатывает событие включения точки остановки.
+    /// </summary>
+    /// <param name="e">Аргументы события выключения точки остановки.</param>
+    private void OnBreakpointOn(BreakpointEvents.BreakpointOn e)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, editor.NumCommandWithMnemonic[e.CommandNumber], isEnabled: true);
+
+      SetModelBreakpoint(e.CommandNumber, has: true, enabled: true);
+    }
+
+    /// <summary>
+    /// Обрабатывает событие выключения точки остановки.
+    /// </summary>
+    /// <param name="e">Аргументы события выключения точки остановки.</param>
+    private void OnBreakpointOff(BreakpointEvents.BreakpointOff e)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor();
+      if (editor == null)
+        return;
+
+      int line1 = GetLine1BasedByCommand(editor, e.CommandNumber);
+      ErrorListBoxVertical.UpsertBreakpoint(e.CommandNumber, line1, editor.NumCommandWithMnemonic[e.CommandNumber], isEnabled: false);
+
+      SetModelBreakpoint(e.CommandNumber, has: true, enabled: false);
+    }
+
+    /// <summary>
+    /// Возвращает 1-based номер строки документа,
+    /// соответствующий указанной команде.
+    /// </summary>
+    /// <param name="editor">Редактор, содержащий точки остановки.</param>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <returns>
+    /// Номер строки документа (1-based),
+    /// на которой расположена точка остановки.
+    /// </returns>
+    private static int GetLine1BasedByCommand(TextEditorUI editor, int commandNumber)
+    {
+      var doc = editor.Document;
+      int idx = editor.BreakpointCommandsNumbers.IndexOf(commandNumber);
+      return doc.GetLineByOffset(editor.BreakPointLines[idx].Offset).LineNumber; // 1-based
+    }
+
+    /// <summary>
+    /// Обновляет состояние точки остановки
+    /// в модели команды трансляции.
+    /// </summary>
+    /// <param name="commandNumber">Номер команды.</param>
+    /// <param name="has">
+    /// Признак наличия точки остановки.
+    /// </param>
+    /// <param name="enabled">
+    /// Признак включённого состояния точки остановки.
+    /// </param>
+    private void SetModelBreakpoint(int commandNumber, bool has, bool enabled)
+    {
+      var model = translationModels.FirstOrDefault(m =>
+        int.TryParse(m.CommandNumber, out var num) && num == commandNumber);
+
+      if (model == null) return;
+
+      model.HasBreakpoint = has;
+      model.IsBreakpointEnabled = enabled;
+    }
   }
 }
-

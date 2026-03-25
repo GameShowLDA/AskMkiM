@@ -77,7 +77,7 @@ namespace UI.Services.FileManager
     /// </summary>
     private TextEditorUI CreateTextEditor(string fileName)
     {
-      var textEditorModel = new TextEditorModel(fileName);
+      var textEditorModel = new TextEditorModel(string.Empty, fileName);
       var textEditor = new TextEditorUI
       {
         TextEditorModel = textEditorModel
