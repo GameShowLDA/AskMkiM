@@ -1,17 +1,19 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:CustomControls="clr-namespace:UI.Components"
+                    xmlns:CustomControls="clr-namespace:UI.Components" 
                     xmlns:SliderConcerter="clr-namespace:UI"
                     xmlns:LocalizeConv="clr-namespace:Ask.UI.Shared.Converters.Localization;assembly=Ask.UI"
-                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI">
-
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
+                    >
     <ResourceDictionary.MergedDictionaries>
+        
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Localization.Merged.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/Styles.Merged.xaml"/>
-
+        
         <ResourceDictionary Source="/UI;component/Resources/Theme/dark.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/Theme/light.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/Theme/Colors.Dark.xaml"/>
+
 
         <ResourceDictionary Source="/UI;component/Resources/Font/Font.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/AppColors.xaml"/>
@@ -20,6 +22,7 @@
         <ResourceDictionary Source="/UI;component/Resources/ColorsStyle/SettingsStyle.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/ColorsStyle/MainStyle.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/ColorsStyle/TestsStyle.xaml"/>
+
     </ResourceDictionary.MergedDictionaries>
 
     <SliderConcerter:SliderValueToWidthConverter x:Key="SliderValueToWidthConverter" />
@@ -44,10 +47,6 @@
     <SolidColorBrush x:Key="ToggleButtonActiveBorderColor" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ToggleButtonSecondActiveBorderColor" Color="{DynamicResource IsCheckedColor}"/>
 
-    <SolidColorBrush x:Key="Cb_BackBrush" Color="{StaticResource GreenColor}"/>
-    <SolidColorBrush x:Key="Cb_BorderBrush" Color="{StaticResource ForegroundColor}"/>
-    <SolidColorBrush x:Key="Cb_DisabledBrush" Color="{StaticResource ForegroundColor}"/>
-
     <Style TargetType="{x:Type ToolTip}">
         <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
@@ -66,9 +65,10 @@
                             <Border CornerRadius="8"
                                     Background="{TemplateBinding Background}"
                                     Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Stretch"
-                                                  VerticalAlignment="Center"
-                                                  RecognizesAccessKey="True"/>
+                                <ContentPresenter
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    RecognizesAccessKey="True"/>
                             </Border>
                         </Border>
                     </Border>
@@ -90,10 +90,10 @@
                 <ControlTemplate TargetType="ToggleButton">
                     <Viewbox Stretch="Uniform">
                         <Canvas Name="Layer_1" Width="20" Height="20" Canvas.Left="10" Canvas.Top="0">
-                            <Ellipse Canvas.Left="0" Width="20" Height="20" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.5"/>
-                            <Ellipse Canvas.Left="15" Width="20" Height="20" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.5"/>
+                            <Ellipse  Canvas.Left="0" Width="20" Height="20" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.5"/>
+                            <Ellipse  Canvas.Left="15" Width="20" Height="20" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.5"/>
                             <Border Canvas.Left="10" Width="15" Height="20" Name="rect416927" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0.5,0,0.5"/>
-                            <Ellipse x:Name="ellipse" Canvas.Left="0" Width="20" Height="20" Fill="White" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.3">
+                            <Ellipse x:Name="ellipse"  Canvas.Left="0" Width="20" Height="20" Fill="White" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.3">
                                 <Ellipse.RenderTransform>
                                     <TranslateTransform X="0" Y="0" />
                                 </Ellipse.RenderTransform>
@@ -104,7 +104,7 @@
                         </Canvas>
                     </Viewbox>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
+                        <Trigger Property="IsChecked" Value="True" >
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
@@ -146,22 +146,24 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="0"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            BorderBrush="{TemplateBinding BorderBrush}">
+                    <Border Background="{TemplateBinding Background}" 
+                         CornerRadius="0" 
+                         BorderThickness="{TemplateBinding BorderThickness}" 
+                         BorderBrush="{TemplateBinding BorderBrush}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
         <Style.Triggers>
+            <!-- Триггер для изменения цвета фона и текста при наведении -->
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource ToggleButtonActiveBackgroundColor}"/>
                 <Setter Property="Foreground" Value="{DynamicResource ToggleButtonActiveForegroundColor}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonActiveBorderColor}"/>
                 <Setter Property="BorderThickness" Value="5,0,0,0"/>
             </Trigger>
+            <!-- Триггер для изменения цвета фона и текста при нажатии -->
             <Trigger Property="IsChecked" Value="True">
                 <Setter Property="Background" Value="{DynamicResource ToggleButtonSecondActiveBorderColor}" />
                 <Setter Property="Foreground" Value="{DynamicResource ToggleButtonActiveForegroundColor}"/>
@@ -187,11 +189,11 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4"
-                            Padding="{TemplateBinding Padding}">
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4"
+                        Padding="{TemplateBinding Padding}">
                         <TextBlock HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    TextAlignment="Center"
@@ -202,13 +204,13 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="Tag" Value="Warning">
                             <Setter TargetName="border"
-                                    Property="Background"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonBackgroundBrush}"/>
+                                Property="Background"
+                                Value="{DynamicResource ErrorListWarningFilterButtonBackgroundBrush}"/>
                             <Setter TargetName="border"
-                                    Property="BorderBrush"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonBorderBrush}"/>
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListWarningFilterButtonBorderBrush}"/>
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonForegroundBrush}"/>
+                                Value="{DynamicResource ErrorListWarningFilterButtonForegroundBrush}"/>
                         </Trigger>
 
                         <MultiTrigger>
@@ -217,11 +219,11 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="border"
-                                    Property="Background"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonHoverBackgroundBrush}"/>
+                                Property="Background"
+                                Value="{DynamicResource ErrorListWarningFilterButtonHoverBackgroundBrush}"/>
                             <Setter TargetName="border"
-                                    Property="BorderBrush"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonHoverBorderBrush}"/>
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListWarningFilterButtonHoverBorderBrush}"/>
                         </MultiTrigger>
 
                         <MultiTrigger>
@@ -230,24 +232,24 @@
                                 <Condition Property="IsChecked" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="border"
-                                    Property="Background"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonCheckedBackgroundBrush}"/>
+                                Property="Background"
+                                Value="{DynamicResource ErrorListWarningFilterButtonCheckedBackgroundBrush}"/>
                             <Setter TargetName="border"
-                                    Property="BorderBrush"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonCheckedBorderBrush}"/>
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListWarningFilterButtonCheckedBorderBrush}"/>
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource ErrorListWarningFilterButtonCheckedForegroundBrush}"/>
+                                Value="{DynamicResource ErrorListWarningFilterButtonCheckedForegroundBrush}"/>
                         </MultiTrigger>
 
                         <Trigger Property="Tag" Value="Error">
                             <Setter TargetName="border"
-                                    Property="Background"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonBackgroundBrush}"/>
+                                Property="Background"
+                                Value="{DynamicResource ErrorListErrorFilterButtonBackgroundBrush}"/>
                             <Setter TargetName="border"
-                                    Property="BorderBrush"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonBorderBrush}"/>
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListErrorFilterButtonBorderBrush}"/>
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonForegroundBrush}"/>
+                                Value="{DynamicResource ErrorListErrorFilterButtonForegroundBrush}"/>
                         </Trigger>
 
                         <MultiTrigger>
@@ -256,11 +258,11 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="border"
-                                    Property="Background"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonHoverBackgroundBrush}"/>
+                                Property="Background"
+                                Value="{DynamicResource ErrorListErrorFilterButtonHoverBackgroundBrush}"/>
                             <Setter TargetName="border"
-                                    Property="BorderBrush"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonHoverBorderBrush}"/>
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListErrorFilterButtonHoverBorderBrush}"/>
                         </MultiTrigger>
 
                         <MultiTrigger>
@@ -269,13 +271,13 @@
                                 <Condition Property="IsChecked" Value="True"/>
                             </MultiTrigger.Conditions>
                             <Setter TargetName="border"
-                                    Property="Background"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonCheckedBackgroundBrush}"/>
+                                Property="Background"
+                                Value="{DynamicResource ErrorListErrorFilterButtonCheckedBackgroundBrush}"/>
                             <Setter TargetName="border"
-                                    Property="BorderBrush"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonCheckedBorderBrush}"/>
+                                Property="BorderBrush"
+                                Value="{DynamicResource ErrorListErrorFilterButtonCheckedBorderBrush}"/>
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource ErrorListErrorFilterButtonCheckedForegroundBrush}"/>
+                                Value="{DynamicResource ErrorListErrorFilterButtonCheckedForegroundBrush}"/>
                         </MultiTrigger>
 
                         <Trigger Property="IsEnabled" Value="False">
@@ -286,6 +288,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+
 
     <Style x:Key="CustomList" TargetType="TreeViewItem">
         <Setter Property="Margin" Value="2"/>
@@ -342,7 +345,7 @@
                     <Grid Background="Transparent">
                         <Track Name="PART_Track" IsDirectionReversed="true">
                             <Track.DecreaseRepeatButton>
-                                <RepeatButton Command="ScrollBar.LineUpCommand"
+                                <RepeatButton Command="ScrollBar.LineUpCommand" 
                                               Style="{StaticResource ScrollBarButtonStyle}"
                                               Height="10"/>
                             </Track.DecreaseRepeatButton>
@@ -352,7 +355,7 @@
                                        Cursor="ScrollNS"/>
                             </Track.Thumb>
                             <Track.IncreaseRepeatButton>
-                                <RepeatButton Command="ScrollBar.LineDownCommand"
+                                <RepeatButton Command="ScrollBar.LineDownCommand" 
                                               Style="{StaticResource ScrollBarButtonStyle}"
                                               Height="10"/>
                             </Track.IncreaseRepeatButton>
@@ -367,15 +370,15 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
+    
     <Style TargetType="Thumb">
         <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="Transparent"
-                            BorderThickness="0"/>
+                    <Border Background="{TemplateBinding Background}" 
+          BorderBrush="Transparent" 
+          BorderThickness="0"></Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -391,11 +394,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListViewItem">
-                    <Border x:Name="Bd"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" 
+                         BorderBrush="{TemplateBinding BorderBrush}" 
+                         BorderThickness="{TemplateBinding BorderThickness}" 
+                         Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -469,6 +471,7 @@
         <Setter Property="Background" Value="Transparent"/>
     </Style>
 
+    <!-- Стиль для Slider -->
     <Style x:Key="CustomSliderStyle" TargetType="Slider">
         <Setter Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource IsCheckedColorSolidColorBrush}" />
@@ -477,12 +480,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Slider">
                     <Grid Height="20">
+                        <!-- Общий трек -->
                         <Rectangle x:Name="TrackBackground"
                                    Height="4"
                                    Fill="{TemplateBinding Background}"
                                    VerticalAlignment="Center"
                                    Width="{TemplateBinding ActualWidth}" />
 
+                        <!-- Активная часть трека -->
                         <Rectangle x:Name="TrackForeground"
                                    Height="4"
                                    Fill="{TemplateBinding Foreground}"
@@ -497,6 +502,7 @@
                             </Rectangle.Width>
                         </Rectangle>
 
+                        <!-- Ползунок -->
                         <Track x:Name="PART_Track">
                             <Track.Thumb>
                                 <Thumb x:Name="Thumb">
@@ -516,6 +522,7 @@
         </Setter>
     </Style>
 
+    <!-- Стиль для текстового поля -->
     <Style x:Key="ComboBoxTextBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}" />
@@ -531,8 +538,10 @@
         <Setter Property="Padding" Value="5" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
-    </Style>
 
+    </Style>
+    
+    <!-- Стиль для ToggleButton -->
     <Style TargetType="ToggleButton">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}" />
@@ -544,10 +553,10 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
                         <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
+                                              VerticalAlignment="Center" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -560,6 +569,7 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Стиль для элементов списка -->
     <Style TargetType="ComboBoxItem">
         <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}" />
         <Setter Property="BorderThickness" Value="0" />
@@ -575,6 +585,7 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Стиль для списка кнопок в MkrControl -->
     <Style x:Key="MkrPointStyle" TargetType="Button">
         <Setter Property="Content" Value="{Binding PointNumber}"/>
         <Setter Property="Background" Value="Transparent"/>
@@ -596,23 +607,26 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Контекстное меню -->
     <Style x:Key="AppContextMenuStyle" TargetType="{x:Type ContextMenu}">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+        <Setter Property="Background"   Value="{DynamicResource SecondarySolidColorBrush}"/>
+        <Setter Property="BorderBrush"  Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="Foreground"   Value="{DynamicResource ForegroundSolidColorBrush}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Padding"      Value="2"/>
         <Setter Property="ItemContainerStyle" Value="{DynamicResource AppMenuItemStyle}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ContextMenu}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
-                            SnapsToDevicePixels="True">
+                    <Border
+          Background="{TemplateBinding Background}"
+          BorderBrush="{TemplateBinding BorderBrush}"
+          BorderThickness="{TemplateBinding BorderThickness}"
+          CornerRadius="6"
+          SnapsToDevicePixels="True">
+                        <!-- общий scope, чтобы колонка с иконкой была одинаковой ширины -->
                         <ScrollViewer CanContentScroll="True">
                             <StackPanel IsItemsHost="True" Margin="2" Grid.IsSharedSizeScope="True"/>
                         </ScrollViewer>
@@ -622,53 +636,58 @@
         </Setter>
     </Style>
 
+    <!-- Пункты меню -->
     <Style x:Key="AppMenuItemStyle" TargetType="{x:Type MenuItem}">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding"    Value="12,6"/>
+        <Setter Property="Cursor"     Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
                         <Border x:Name="Bg"
-                                Background="Transparent"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}"/>
+                  Background="Transparent"
+                  CornerRadius="4"
+                  Padding="{TemplateBinding Padding}"/>
                         <Grid Margin="8,2,8,2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="IconCol"/>
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*"   />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="GestureCol"/>
                             </Grid.ColumnDefinitions>
 
+                            <!-- Иконка (если есть) -->
                             <ContentPresenter Grid.Column="0"
-                                              ContentSource="Icon"
-                                              Margin="0,0,8,0"
-                                              VerticalAlignment="Center"/>
+                              ContentSource="Icon"
+                              Margin="0,0,8,0"
+                              VerticalAlignment="Center"/>
 
+                            <!-- Текст -->
                             <ContentPresenter Grid.Column="1"
-                                              ContentSource="Header"
-                                              VerticalAlignment="Center"
-                                              RecognizesAccessKey="True"/>
+                              ContentSource="Header"
+                              VerticalAlignment="Center"
+                              RecognizesAccessKey="True"/>
 
+                            <!-- Жест/горячая клавиша -->
                             <ContentPresenter Grid.Column="2"
-                                              ContentSource="InputGestureText"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"/>
+                              ContentSource="InputGestureText"
+                              Margin="12,0,0,0"
+                              VerticalAlignment="Center"/>
                         </Grid>
 
+                        <!-- Подменю (если будет) -->
                         <Popup x:Name="SubmenuPopup"
-                               Placement="Right"
-                               IsOpen="{TemplateBinding IsSubmenuOpen}"
-                               AllowsTransparency="True"
-                               Focusable="False"
-                               PopupAnimation="Fade">
+                 Placement="Right"
+                 IsOpen="{TemplateBinding IsSubmenuOpen}"
+                 AllowsTransparency="True"
+                 Focusable="False"
+                 PopupAnimation="Fade">
                             <Border Background="{DynamicResource SecondarySolidColorBrush}"
-                                    BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="6"
-                                    SnapsToDevicePixels="True">
+                    BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    SnapsToDevicePixels="True">
                                 <ScrollViewer CanContentScroll="True">
                                     <StackPanel IsItemsHost="True" Margin="2" Grid.IsSharedSizeScope="True"/>
                                 </ScrollViewer>
@@ -677,16 +696,19 @@
                     </Grid>
 
                     <ControlTemplate.Triggers>
+                        <!-- Hover / выделение -->
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="Bg" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
                             <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
                         </Trigger>
 
+                        <!-- Disabled -->
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
                             <Setter TargetName="Bg" Property="Background" Value="Transparent"/>
                         </Trigger>
 
+                        <!-- Открыто подменю -->
                         <Trigger Property="IsSubmenuOpen" Value="True">
                             <Setter TargetName="Bg" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
                         </Trigger>
@@ -696,6 +718,7 @@
         </Setter>
     </Style>
 
+    <!-- Разделитель -->
     <Style x:Key="AppSeparatorStyle" TargetType="{x:Type Separator}">
         <Setter Property="Margin" Value="8,6"/>
         <Setter Property="Template">
@@ -717,6 +740,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" SnapsToDevicePixels="True">
+
+                        <!-- база -->
                         <Border x:Name="Box"
                                 Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
                                 BorderBrush="#415163"
@@ -730,22 +755,28 @@
                                 BorderThickness="1"
                                 BorderBrush="#20FFFFFF"
                                 IsHitTestVisible="False"/>
+
+
                     </Grid>
 
                     <ControlTemplate.Triggers>
+                        <!-- Checked -->
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Box" Property="Background" Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
                             <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
                         </Trigger>
 
+                        <!-- Hover -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
                         </Trigger>
 
+                        <!-- Pressed (слегка темнее) -->
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Box" Property="Background" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
                         </Trigger>
 
+                        <!-- Disabled -->
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Box" Property="Opacity" Value="0.6"/>
                         </Trigger>
@@ -755,154 +786,130 @@
         </Setter>
     </Style>
 
-    <Style x:Key="MarkingCheckBox" TargetType="{x:Type CheckBox}">
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Focusable" Value="True"/>
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type CheckBox}">
-                    <Grid x:Name="Root" SnapsToDevicePixels="True">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Border x:Name="Box"
-                                Width="20"
-                                Height="20"
-                                Background="{StaticResource Cb_BackBrush}"
-                                BorderBrush="{StaticResource Cb_BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="6"
-                                VerticalAlignment="Center">
-                            <Border.Effect>
-                                <DropShadowEffect Color="Black"
-                                                  BlurRadius="5"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.20"/>
-                            </Border.Effect>
-
-                            <TextBlock x:Name="CheckMark"
-                                       Text="✓"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="White"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Opacity="0"
-                                       RenderTransformOrigin="0.5,0.5">
-                                <TextBlock.RenderTransform>
-                                    <ScaleTransform ScaleX="0.4" ScaleY="0.4"/>
-                                </TextBlock.RenderTransform>
-                            </TextBlock>
-                        </Border>
-
-                        <ContentPresenter Grid.Column="1"
-                                          Margin="6,0,0,0"
-                                          VerticalAlignment="Center"
-                                          RecognizesAccessKey="True"/>
-                    </Grid>
-
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="CheckMark" Property="Opacity" Value="1"/>
-                            <Setter TargetName="CheckMark" Property="RenderTransform">
-                                <Setter.Value>
-                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                </Setter.Value>
-                            </Setter>
-                        </Trigger>
-
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Box" Property="Background" Value="{StaticResource Cb_DisabledBrush}"/>
-                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Cb_DisabledBrush}"/>
-                            <Setter Property="Foreground" Value="#FF777777"/>
-                            <Setter TargetName="CheckMark" Property="Opacity" Value="0.5"/>
-                        </Trigger>
-
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="Box" Property="BorderThickness" Value="2"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="ArchiveDataGridHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource MainPanelBackgroundColor}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource MainPanelBackgroundColor}" />
-        <Setter Property="BorderThickness" Value="0,0,1,1" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Padding" Value="12,6,8,6" />
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+    <!-- Стиль для архива -->
+    <Style x:Key="ArchiveDataGridHeaderStyle"
+       TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="Foreground"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="BorderBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="BorderThickness"
+          Value="0,0,1,1" />
+        <Setter Property="FontWeight"
+          Value="SemiBold" />
+        <Setter Property="Padding"
+          Value="12,6,8,6" />
+        <Setter Property="HorizontalContentAlignment"
+          Value="Left" />
+        <Setter Property="VerticalContentAlignment"
+          Value="Center" />
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource GridHeaderHoverBrush}" />
+            <Trigger Property="IsMouseOver"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource GridHeaderHoverBrush}" />
             </Trigger>
-            <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
+            <Trigger Property="IsPressed"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ArchiveDataGridRowStyle" TargetType="{x:Type DataGridRow}">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Margin" Value="2,1,2,1" />
-        <Setter Property="MinHeight" Value="30" />
+    <Style x:Key="ArchiveDataGridRowStyle"
+       TargetType="{x:Type DataGridRow}">
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="BorderBrush"
+          Value="Transparent" />
+        <Setter Property="BorderThickness"
+          Value="0" />
+        <Setter Property="Margin"
+          Value="2,1,2,1" />
+        <Setter Property="MinHeight"
+          Value="30" />
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
+            <Trigger Property="IsMouseOver"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
             </Trigger>
-            <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
+            <Trigger Property="IsSelected"
+             Value="True">
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonBackgroundIsCheckedColor}" />
             </Trigger>
             <MultiTrigger>
                 <MultiTrigger.Conditions>
-                    <Condition Property="IsSelected" Value="True" />
-                    <Condition Property="IsMouseOver" Value="True" />
+                    <Condition Property="IsSelected"
+                   Value="True" />
+                    <Condition Property="IsMouseOver"
+                   Value="True" />
                 </MultiTrigger.Conditions>
-                <Setter Property="Background" Value="{DynamicResource ToggleButtonActiveForegroundColor}" />
+                <Setter Property="Background"
+              Value="{DynamicResource ToggleButtonActiveForegroundColor}" />
             </MultiTrigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ArchiveDataGridCellStyle" TargetType="{x:Type DataGridCell}">
-        <Setter Property="Padding" Value="12,0,8,0" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Style x:Key="ArchiveDataGridCellStyle"
+       TargetType="{x:Type DataGridCell}">
+        <Setter Property="Padding"
+          Value="12,0,8,0" />
+        <Setter Property="BorderThickness"
+          Value="0" />
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="FocusVisualStyle"
+          Value="{x:Null}" />
         <Style.Triggers>
-            <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="BorderBrush" Value="Transparent" />
-                <Setter Property="Foreground" Value="#1F2A38" />
+            <Trigger Property="IsSelected"
+             Value="True">
+                <Setter Property="Background"
+              Value="Transparent" />
+                <Setter Property="BorderBrush"
+              Value="Transparent" />
+                <Setter Property="Foreground"
+              Value="#1F2A38" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ArchiveDataGridStyle" TargetType="{x:Type DataGrid}">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{DynamicResource MainPanelBackgroundColor}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="GridLinesVisibility" Value="Horizontal" />
-        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource MainPanelBackgroundColor}" />
-        <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource MainPanelBackgroundColor}" />
-        <Setter Property="HeadersVisibility" Value="Column" />
-        <Setter Property="RowHeaderWidth" Value="0" />
-        <Setter Property="ColumnHeaderStyle" Value="{DynamicResource ArchiveDataGridHeaderStyle}" />
-        <Setter Property="RowStyle" Value="{DynamicResource ArchiveDataGridRowStyle}" />
-        <Setter Property="CellStyle" Value="{DynamicResource ArchiveDataGridCellStyle}" />
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
-        <Setter Property="CanUserAddRows" Value="False" />
-        <Setter Property="CanUserDeleteRows" Value="False" />
+    <Style x:Key="ArchiveDataGridStyle"
+       TargetType="{x:Type DataGrid}">
+        <Setter Property="Background"
+          Value="Transparent" />
+        <Setter Property="BorderBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="BorderThickness"
+          Value="1" />
+        <Setter Property="GridLinesVisibility"
+          Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="VerticalGridLinesBrush"
+          Value="{DynamicResource MainPanelBackgroundColor}" />
+        <Setter Property="HeadersVisibility"
+          Value="Column" />
+        <Setter Property="RowHeaderWidth"
+          Value="0" />
+        <Setter Property="ColumnHeaderStyle"
+          Value="{DynamicResource ArchiveDataGridHeaderStyle}" />
+        <Setter Property="RowStyle"
+          Value="{DynamicResource ArchiveDataGridRowStyle}" />
+        <Setter Property="CellStyle"
+          Value="{DynamicResource ArchiveDataGridCellStyle}" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+          Value="Auto" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+          Value="Auto" />
+        <Setter Property="CanUserAddRows"
+          Value="False" />
+        <Setter Property="CanUserDeleteRows"
+          Value="False" />
     </Style>
 
 </ResourceDictionary>

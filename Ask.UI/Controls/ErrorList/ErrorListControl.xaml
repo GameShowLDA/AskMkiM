@@ -3,272 +3,181 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Ask.UI.Controls.ErrorList"
              xmlns:Icon="clr-namespace:Ask.UI.Shared.Components.Icons"
-             xmlns:DiagnosticsConv="clr-namespace:Ask.Core.Shared.Metadata.Converters;assembly=Ask.Core"
-             xmlns:help="clr-namespace:Ask.Support;assembly=Ask.Support"
+             xmlns:DiagnosticsConv ="clr-namespace:Ask.Core.Shared.Metadata.Converters;assembly=Ask.Core"
              MinHeight="28"
+             xmlns:help="clr-namespace:Ask.Support;assembly=Ask.Support"
              x:Name="root">
-
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/TabControl.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
+        <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
+        <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
+        <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
+        <DataTemplate x:Key="ErrorIconTemplate">
+            <Icon:CrossIcon Size="13"
+                            CircleColor="{DynamicResource ErrorListErrorIconBrush}"
+                            IconStrokeColor="{DynamicResource ErrorListErrorIconForegroundBrush}"/>
+        </DataTemplate>
 
-            <local:ErrorCountToHeaderConverter x:Key="ErrorCountConverter"/>
-            <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
-            <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
-
-            <DataTemplate x:Key="ErrorIconTemplate">
-                <Icon:CrossIcon Size="13"
-                                CircleColor="{DynamicResource ErrorListErrorIconBrush}"
-                                IconStrokeColor="{DynamicResource ErrorListErrorIconForegroundBrush}"/>
-            </DataTemplate>
-
-            <DataTemplate x:Key="WarningIconTemplate">
-                <Icon:TiangleWarningIcon Size="17"
-                                         TriangleColor="{DynamicResource ErrorListWarningIconBrush}"
-                                         IconStrokeColor="{DynamicResource ErrorListWarningIconForegroundBrush}"/>
-            </DataTemplate>
-
-            <local:IssueIconSelector x:Key="IssueIconSelector"
-                                     ErrorTemplate="{StaticResource ErrorIconTemplate}"
-                                     WarningTemplate="{StaticResource WarningIconTemplate}" />
-        </ResourceDictionary>
+        <DataTemplate x:Key="WarningIconTemplate">
+            <Icon:TiangleWarningIcon Size="17"
+                                     TriangleColor="{DynamicResource ErrorListWarningIconBrush}"
+                                     IconStrokeColor="{DynamicResource ErrorListWarningIconForegroundBrush}"/>
+        </DataTemplate>
+        <local:IssueIconSelector x:Key="IssueIconSelector"
+                         ErrorTemplate="{StaticResource ErrorIconTemplate}"
+                         WarningTemplate="{StaticResource WarningIconTemplate}" />
     </UserControl.Resources>
 
+
     <Grid Background="{DynamicResource ErrorListBackground}">
-        <TabControl x:Name="MainTabControl"
-                    TabStripPlacement="Bottom"
-                    Style="{StaticResource BottomTabControlStyle}"
-                    ItemContainerStyle="{StaticResource BottomTabItemStyle}"
-                    Background="{DynamicResource ErrorListBackground}"
-                    BorderThickness="0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <TabItem x:Name="ErrorsTab" Header="Ошибки">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0"
+                Orientation="Horizontal"
+                Margin="8,8,8,6"
+                HorizontalAlignment="Left">
+                
+                <ToggleButton 
+                    x:Name="WarningButton"
+                    Tag="Warning"
+                    Style="{StaticResource VsFilterButtonStyle}"
+                    Content="0 из 0 предупреждений"
+                    PreviewMouseDown="WarningButton_PreviewMouseDown"
+                    Margin="0,0,6,0"/>
 
-                    <StackPanel Grid.Row="0"
-                                Orientation="Horizontal"
-                                Margin="8,8,8,6"
-                                HorizontalAlignment="Left">
+                <ToggleButton 
+                    x:Name="ErrorsButton"
+                    Tag="Error"
+                    Style="{StaticResource VsFilterButtonStyle}"
+                    Content="0 из 0 ошибок"
+                    PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
+            </StackPanel>
 
-                        <ToggleButton x:Name="WarningButton"
-                                      Tag="Warning"
-                                      Style="{StaticResource VsFilterButtonStyle}"
-                                      Content="0 из 0 предупреждений"
-                                      PreviewMouseDown="WarningButton_PreviewMouseDown"
-                                      Margin="0,0,6,0"/>
+            <DataGrid ItemsSource="{Binding Items, ElementName=root}"
+                AutoGenerateColumns="False"
+                HeadersVisibility="Column"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                IsReadOnly="True"
+                FontFamily="{DynamicResource WinstonRegular}"
+                FontSize="13"
+                Background="{DynamicResource ErrorListBackground}"
+                Foreground="{DynamicResource ForegrounfBrushes}"
+                RowBackground="{DynamicResource ErrorListBackground}"
+                AlternatingRowBackground="{DynamicResource ErrorListBackground}"
+                GridLinesVisibility="None"
+                BorderThickness="0"
+                ColumnHeaderHeight="30"
+                MouseDoubleClick="DataGrid_MouseDoubleClick"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Grid.Row="1"
+                >
+            <DataGrid.Resources>
+                <Style x:Key="CellTextBase" TargetType="TextBlock">
+                    <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                    <Setter Property="TextAlignment" Value="Center"/>
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+                    <Setter Property="LineHeight" Value="18"/>
+                </Style>
+                <Style x:Key="CellTextTrim" TargetType="TextBlock" BasedOn="{StaticResource CellTextBase}">
+                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                    <Setter Property="TextWrapping" Value="NoWrap"/>
+                </Style>
+                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ModernDataGridColumnHeaderStyle}">
+                    <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridBorderBrush}"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="Padding" Value="12,6"/>
+                    <Setter Property="Height" Value="30"/>
+                    <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+                    <Setter Property="FontSize" Value="12.5"/>
+                </Style>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource ModernDataGridCellStyle}">
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Padding" Value="10,6"/>
+                </Style>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernDataGridRowStyle}">
+                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridSeparatorBrush}"/>
+                    <Setter Property="MinHeight" Value="30"/>
+                    <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="help:HelpProvider.HelpKey" 
+                            Value="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <!-- Крестик -->
+                <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="{Binding Items.Count}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10"/>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}"
+                            ContentTemplateSelector="{StaticResource IssueIconSelector}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!-- Код ошибки -->
+                <DataGridTextColumn Header="Код"
+                    Width="SizeToCells"
+                    MinWidth="110"
+                    Binding="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"
+                    ElementStyle="{StaticResource CellTextBase}"
+                    FontFamily="{DynamicResource WinstonRegular}"
+                    FontSize="14"/>
+                <!-- Номер строки -->
+                <DataGridTextColumn Header="Строка"
+                    x:Name="StringsNumber"
+                    Binding="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"
+                    Width="60"
+                    ElementStyle="{StaticResource CellTextBase}"
+                    FontFamily="{DynamicResource WinstonRegular}"
+                    FontSize="14"/>
+                <!-- Номер команды -->
+                <DataGridTextColumn Header="Команда" Width="Auto"
+                    Binding="{Binding Command}"
+                    ElementStyle="{StaticResource CellTextTrim}"
+                    FontFamily="{DynamicResource WinstonRegular}" 
+                    FontSize="14"/>
+                <!--Результат измерения-->
+                <DataGridTextColumn x:Name="MeasureResult" Header="Результат измерения" Binding="{Binding MeasureResult}" Width="150" FontFamily="{DynamicResource WinstonRegular}" FontSize="14" Visibility="Collapsed"/>
+                <!-- Описание ошибки -->
+                <DataGridTextColumn Header="Описание" Width="Auto"
+                    Binding="{Binding Description}"
+                    ElementStyle="{StaticResource CellTextTrim}"
+                    FontFamily="{DynamicResource WinstonRegular}" FontSize="14"/>
 
-                        <ToggleButton x:Name="ErrorsButton"
-                                      Tag="Error"
-                                      Style="{StaticResource VsFilterButtonStyle}"
-                                      Content="0 из 0 ошибок"
-                                      PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
-                    </StackPanel>
-
-                    <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding Items, ElementName=root}"
-                              AutoGenerateColumns="False"
-                              HeadersVisibility="Column"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              IsReadOnly="True"
-                              FontFamily="{DynamicResource WinstonRegular}"
-                              FontSize="13"
-                              Background="{DynamicResource ErrorListBackground}"
-                              Foreground="{DynamicResource ForegrounfBrushes}"
-                              RowBackground="{DynamicResource ErrorListBackground}"
-                              AlternatingRowBackground="{DynamicResource ErrorListBackground}"
-                              GridLinesVisibility="None"
-                              BorderThickness="0"
-                              ColumnHeaderHeight="30"
-                              MouseDoubleClick="DataGrid_MouseDoubleClick"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto">
-
-                        <DataGrid.Resources>
-                            <Style x:Key="CellTextTrim" TargetType="TextBlock">
-                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                <Setter Property="TextWrapping" Value="NoWrap"/>
-                            </Style>
-
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Style>
-
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                <Setter Property="Margin" Value="5,0"/>
-                            </Style>
-
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="FontWeight" Value="Normal"/>
-                                <Setter Property="help:HelpProvider.HelpKey"
-                                        Value="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.Resources>
-
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
-                                <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="{Binding Items.Count, ElementName=root}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Padding="10"/>
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <ContentControl Content="{Binding}"
-                                                        ContentTemplateSelector="{StaticResource IssueIconSelector}"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <DataGridTextColumn Header="Код"
-                                                Width="80"
-                                                Binding="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn Header="Строка"
-                                                x:Name="StringsNumber"
-                                                Binding="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"
-                                                Width="60"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn Header="Команда"
-                                                Width="Auto"
-                                                Binding="{Binding Command}"
-                                                ElementStyle="{StaticResource CellTextTrim}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn x:Name="MeasureResult"
-                                                Header="Результат измерения"
-                                                Binding="{Binding MeasureResult}"
-                                                Width="150"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"
-                                                Visibility="Collapsed"/>
-
-                            <DataGridTextColumn Header="Описание"
-                                                Width="Auto"
-                                                Binding="{Binding Description}"
-                                                ElementStyle="{StaticResource CellTextTrim}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn Header="DEBUG"
-                                                Width="*"
-                                                x:Name="DebugColumn"
-                                                Binding="{Binding DebugInfo}"
-                                                ElementStyle="{StaticResource CellTextTrim}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"
-                                                Visibility="Collapsed"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </TabItem>
-
-            <TabItem x:Name="BreakpointsTab" Header="Точки остановки">
-                <DataGrid x:Name="BreakpointsGrid"
-                          ItemsSource="{Binding Breakpoints, ElementName=root}"
-                          AutoGenerateColumns="False"
-                          HeadersVisibility="Column"
-                          CanUserAddRows="False"
-                          CanUserDeleteRows="False"
-                          IsReadOnly="True"
-                          Background="{DynamicResource ErrorListBackground}"
-                          Foreground="{DynamicResource ForegrounfBrushes}"
-                          RowBackground="{DynamicResource ErrorListBackground}"
-                          AlternatingRowBackground="{DynamicResource ErrorListBackground}"
-                          GridLinesVisibility="None"
-                          BorderThickness="0"
-                          ColumnHeaderHeight="28"
-                          RowHeight="25"
-                          MouseDoubleClick="BreakpointsGrid_MouseDoubleClick"
-                          ScrollViewer.VerticalScrollBarVisibility="Auto">
-
-                    <DataGrid.Resources>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Style>
-
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                            <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                            <Setter Property="Margin" Value="5,0"/>
-                        </Style>
-
-                        <Style TargetType="DataGridRow">
-                            <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
-
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="80" MinWidth="80" MaxWidth="80" Header="Состояние">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Style="{StaticResource MarkingCheckBox}"
-                                              VerticalAlignment="Center"
-                                              Click="BreakpointEnabled_Click"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTextColumn Header="Номер"
-                                            Width="80"
-                                            MinWidth="25"
-                                            Binding="{Binding CommandNumber}"
-                                            FontFamily="{DynamicResource WinstonLight}"
-                                            FontSize="14"/>
-
-                        <DataGridTextColumn Header="Мнемоника"
-                                            Width="80"
-                                            MinWidth="25"
-                                            Binding="{Binding Mnemonic}"
-                                            FontFamily="{DynamicResource WinstonLight}"
-                                            FontSize="14"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </TabItem>
-
-        </TabControl>
+                <DataGridTextColumn Header="DEBUG" Width="*"
+                                    x:Name="DebugColumn"
+                    Binding="{Binding DebugInfo}"
+                    ElementStyle="{StaticResource CellTextTrim}"
+                    FontFamily="{DynamicResource WinstonRegular}" FontSize="14"
+                    Visibility="Collapsed"
+                                    />
+            </DataGrid.Columns>
+        </DataGrid>
+            </Grid>
     </Grid>
+
 </UserControl>
+
+

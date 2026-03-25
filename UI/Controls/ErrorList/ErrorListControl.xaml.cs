@@ -6,11 +6,9 @@ using Ask.Support;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 
 namespace UI.Controls.ErrorList
@@ -25,12 +23,6 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public RangeObservableCollection<IDisplayIssue> Items { get; } = new();
 
-    /// <summary>
-    /// Коллекция точек остановки для вкладки "Точки остановки".
-    /// </summary>
-    /// <remarks>Должна обновляться сразу при появлении/удалении/переключении точки.</remarks>
-    public ObservableCollection<BreakpointListItem> Breakpoints { get; } = new();
-
     private readonly List<IDisplayIssue> _allIssues = new();
 
     private bool _warningsHidden = false;
@@ -44,7 +36,6 @@ namespace UI.Controls.ErrorList
       InitializeComponent();
       Loaded += ErrorListControl_Loaded;
       DataContext = this;
-
       EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
 
       if (AdminConfig.GetDebugRights())
@@ -56,58 +47,47 @@ namespace UI.Controls.ErrorList
       {
         HelpProvider.SetHelpKey(this, "DescriptionWorkTranslator");
       };
-
-      Items.CollectionChanged += (_, __) => UpdateTabsVisibilityAndSelection();
-      Breakpoints.CollectionChanged += (_, __) => 
-      { 
-        UpdateTabsVisibilityAndSelection();
-        EnsureBreakpointsSorting();
-      };
     }
-
-    #region События для вкладки "Точки остановки"
-
-    /// <summary>
-    /// Срабатывает при двойном клике по точке остановки в таблице (нужно перейти к нему в редакторе).
-    /// </summary>
-    public event Action<BreakpointListItem>? BreakpointItemDoubleClicked;
-
-    /// <summary>
-    /// Срабатывает при изменении состояния чекбокса точки (вкл/выкл).
-    /// </summary>
-    public event Action<BreakpointListItem, bool>? BreakpointEnabledChanged;
-
-    #endregion
 
     private void DebugChanged(bool isDebug)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        DebugColumn.Visibility = isDebug ? Visibility.Visible : Visibility.Collapsed;
+
+        if (isDebug)
+        {
+          DebugColumn.Visibility = Visibility.Visible;
+        }
+        else
+        {
+          DebugColumn.Visibility = Visibility.Collapsed;
+        }
       });
-    }
-
-    private void UpdateTabsVisibilityAndSelection()
-    {
-      bool hasBreakpoints = Breakpoints.Count > 0;
-
-      if (!hasBreakpoints && MainTabControl.SelectedItem == BreakpointsTab)
-        MainTabControl.SelectedItem = ErrorsTab;
     }
 
     public Visibility StringsNumberVisible
     {
-      get => StringsNumber.Visibility;
-      set => StringsNumber.Visibility = value;
+      get
+      {
+        return StringsNumber.Visibility;
+      }
+      set
+      {
+        StringsNumber.Visibility = value;
+      }
     }
 
     public Visibility MeasureResultVisible
     {
-      get => MeasureResult.Visibility;
-      set => MeasureResult.Visibility = value;
+      get
+      {
+        return MeasureResult.Visibility;
+      }
+      set
+      {
+        MeasureResult.Visibility = value;
+      }
     }
-
-    #region Ошибки/предупреждения
 
     /// <summary>
     /// Очищает все элементы.
@@ -115,8 +95,6 @@ namespace UI.Controls.ErrorList
     public void Clear()
     {
       Items.Clear();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -124,15 +102,6 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddError(ErrorItem error)
     {
-      _allIssues.Add(error);
-      _errorTotal++;
-      if (!_errorsHidden)
-        Items.Add(error);
-
-      ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
-	  
       AppendIssues(new IDisplayIssue[] { error });
     }
 
@@ -141,15 +110,6 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddWarning(WarningItem warning)
     {
-      _allIssues.Add(warning);
-      _warningTotal++;
-      if (!_warningsHidden)
-        Items.Add(warning);
-
-      ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
-	  
       AppendIssues(new IDisplayIssue[] { warning });
     }
 
@@ -158,18 +118,6 @@ namespace UI.Controls.ErrorList
     /// </summary>
     public void AddErrors(IEnumerable<ErrorItem> errors)
     {
-      foreach (var err in errors)
-      {
-        _allIssues.Add(err);
-        _errorTotal++;
-        if (!_errorsHidden)
-          Items.Add(err);
-      }
-
-      ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
-	  
       AppendIssues(errors.Cast<IDisplayIssue>());
     }
 
@@ -195,8 +143,6 @@ namespace UI.Controls.ErrorList
       RecalculateTotals();
       ReplaceVisibleItems();
       ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     public void ClearAll()
@@ -208,9 +154,8 @@ namespace UI.Controls.ErrorList
       _warningTotal = 0;
 
       UpdateButtons();
-
-      UpdateTabsVisibilityAndSelection();
     }
+
 
     /// <summary>
     /// Событие вызывается при двойном клике по строке с ошибкой или предупреждением.
@@ -221,20 +166,6 @@ namespace UI.Controls.ErrorList
     {
       ReplaceVisibleItems();
       UpdateButtons();
-
-      UpdateTabsVisibilityAndSelection();
-    }
-
-    private void EnsureBreakpointsSorting()
-    {
-      var view = CollectionViewSource.GetDefaultView(Breakpoints);
-      if (view == null) return;
-
-      using (view.DeferRefresh())
-      {
-        view.SortDescriptions.Clear();
-        view.SortDescriptions.Add(new SortDescription(nameof(BreakpointListItem.RightLine), ListSortDirection.Ascending));
-      }
     }
 
     private void UpdateButtons()
@@ -330,21 +261,21 @@ namespace UI.Controls.ErrorList
 
     private void ApplyInitialButtonState()
     {
-      _warningTotal = _allIssues.Count(i => i.IsWarning);
-      _errorTotal = _allIssues.Count(i => !i.IsWarning);
-
       // Предупреждения
       if (_warningTotal == 0)
       {
         WarningButton.Visibility = Visibility.Collapsed;
-        WarningButton.IsChecked = true;
+        WarningButton.IsChecked = true; // просто для логики, скрывать нечего
       }
       else
       {
         WarningButton.Visibility = Visibility.Visible;
+
+        // показываем все => IsChecked = true
         WarningButton.IsChecked = !_warningsHidden;
       }
 
+      // Ошибки
       if (_errorTotal == 0)
       {
         ErrorsButton.Visibility = Visibility.Collapsed;
@@ -353,12 +284,13 @@ namespace UI.Controls.ErrorList
       else
       {
         ErrorsButton.Visibility = Visibility.Visible;
+
+        // показываем все => IsChecked = true
         ErrorsButton.IsChecked = !_errorsHidden;
       }
 
+      // Перерисовываем видимость сразу
       UpdateButtons();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -368,104 +300,6 @@ namespace UI.Controls.ErrorList
         ItemDoubleClicked?.Invoke(selectedError);
       }
     }
-
-    #endregion
-
-    #region Точки остановки
-
-    /// <summary>
-    /// Добавляет точку остановки в список или обновляет существующий по номеру команды.
-    /// </summary>
-    public void UpsertBreakpoint(int commandNumber, int? lineNumber, bool isEnabled)
-    {
-      if (Dispatcher.CheckAccess())
-      {
-        UpsertBreakpointCore(commandNumber, lineNumber, isEnabled);
-        return;
-      }
-
-      Dispatcher.Invoke(() => UpsertBreakpointCore(commandNumber, lineNumber, isEnabled));
-    }
-
-    private void UpsertBreakpointCore(int commandNumber, int? lineNumber, bool isEnabled)
-    {
-      var existing = Breakpoints.FirstOrDefault(b => b.CommandNumber == commandNumber);
-      if (existing != null)
-      {
-        existing.RightLine = lineNumber;
-        existing.IsEnabled = isEnabled;
-        return;
-      }
-
-      Breakpoints.Add(new BreakpointListItem(
-        commandNumber: commandNumber,
-        leftLine: null,
-        rightLine: lineNumber,
-        isEnabled: isEnabled
-      ));
-    }
-
-    /// <summary>
-    /// Удаляет точку остановки из списка по номеру команды.
-    /// </summary>
-    public void RemoveBreakpoint(int commandNumber)
-    {
-      if (Dispatcher.CheckAccess())
-      {
-        RemoveBreakpointCore(commandNumber);
-        return;
-      }
-
-      Dispatcher.Invoke(() => RemoveBreakpointCore(commandNumber));
-    }
-
-    private void RemoveBreakpointCore(int commandNumber)
-    {
-      var existing = Breakpoints.FirstOrDefault(b => b.CommandNumber == commandNumber);
-      if (existing != null)
-        Breakpoints.Remove(existing);
-    }
-
-    /// <summary>
-    /// Полностью очищает список точек остановки.
-    /// </summary>
-    public void ClearBreakpoints()
-    {
-      if (Dispatcher.CheckAccess())
-      {
-        Breakpoints.Clear();
-        return;
-      }
-
-      Dispatcher.Invoke(() => Breakpoints.Clear());
-    }
-
-    /// <summary>
-    /// Двойной клик по таблице для перехода на строку с точкой остановки.
-    /// </summary>
-    private void BreakpointsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-      if (sender is DataGrid grid && grid.SelectedItem is BreakpointListItem bp)
-      {
-        BreakpointItemDoubleClicked?.Invoke(bp);
-        e.Handled = true;
-      }
-    }
-
-    /// <summary>
-    /// Клик по чекбоксу для включения/отключения точки остановки.
-    /// </summary>
-    private void BreakpointEnabled_Click(object sender, RoutedEventArgs e)
-    {
-      if (sender is CheckBox cb && cb.DataContext is BreakpointListItem bp)
-      {
-        bool enabled = cb.IsChecked == true;
-        BreakpointEnabledChanged?.Invoke(bp, enabled);
-        e.Handled = true;
-      }
-    }
-
-    #endregion
   }
 
   public sealed class RangeObservableCollection<T> : ObservableCollection<T>

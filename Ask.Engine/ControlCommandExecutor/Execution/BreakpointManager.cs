@@ -24,13 +24,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(OnSet);
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(OnRemoved);
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(OnEnable);
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(OnDisable);
     }
 
     /// <summary>
     /// Обрабатывает событие установки точки останова.
-    /// Устанавливает флаг точки остановки у соответствующей команды в коллекции.
+    /// Устанавливает флаг точки останова у соответствующей команды в коллекции.
     /// </summary>
     /// <param name="e">
     /// Событие установки точки останова, содержащее номер команды.
@@ -44,7 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     /// <summary>
     /// Обрабатывает событие удаления точки останова.
-    /// Снимает флаг точки остановки у соответствующей команды в коллекции.
+    /// Снимает флаг точки останова у соответствующей команды в коллекции.
     /// </summary>
     /// <param name="e">
     /// Событие удаления точки останова, содержащее номер команды.
@@ -54,34 +52,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       var cmd = _commands.FindByNumber(e.CommandNumber);
       if (cmd != null)
         cmd.HasBreakpoint = false;
-    }
-
-    /// <summary>
-    /// Обрабатывает событие включения точки остановки.
-    /// Устанавливает флаг точки остановки у соответствующей команды в коллекции.
-    /// </summary>
-    /// <param name="e">
-    /// Событие удаления точки останова, содержащее номер команды.
-    /// </param>
-    private void OnEnable(BreakpointEvents.BreakpointOn e)
-    {
-      var cmd = _commands.FindByNumber(e.CommandNumber);
-      if (cmd != null)
-        cmd.IsBreakpointEnabled = true;
-    }
-
-    /// <summary>
-    /// Обрабатывает событие выключения точки остановки.
-    /// Снимает флаг точки остановки у соответствующей команды в коллекции.
-    /// </summary>
-    /// <param name="e">
-    /// Событие удаления точки останова, содержащее номер команды.
-    /// </param>
-    private void OnDisable(BreakpointEvents.BreakpointOff e)
-    {
-      var cmd = _commands.FindByNumber(e.CommandNumber);
-      if (cmd != null)
-        cmd.IsBreakpointEnabled = false;
     }
   }
 }

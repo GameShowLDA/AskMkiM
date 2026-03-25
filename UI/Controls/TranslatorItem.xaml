@@ -7,7 +7,7 @@
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
              xmlns:DefaultGUI="clr-namespace:UI.Components" 
              xmlns:Controls="clr-namespace:UI.Controls"
-             xmlns:ErrorList="clr-namespace:Ask.UI.Controls.ErrorList;assembly=Ask.UI"
+             xmlns:ErrorList="clr-namespace:UI.Controls.ErrorList"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     

@@ -35,17 +35,12 @@ namespace UI.Controls.TextEditor
 
     public TextEditorUI GetTextEditor()
     {
-      var foundDockItem = DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      var foundDockItem = this.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
       if (foundDockItem != null)
       {
         if (foundDockItem.Content is TextEditorUI textEditor)
         {
           return textEditor;
-        }
-
-        if (foundDockItem.Content is TranslatorEditor translatorEditor)
-        {
-          return translatorEditor.GetTextEditor();
         }
       }
       return null;

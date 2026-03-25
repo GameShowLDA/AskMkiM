@@ -77,11 +77,6 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     public List<int> RightBreakpoint { get; set; }
 
     /// <summary>
-    /// Словарь, где ключ - номер команды, а значение - название команды (мнемоника).
-    /// </summary>
-    public Dictionary<int, string> NumCommandWithMnemonic { get; set; }
-
-    /// <summary>
     /// Лист номеров команд, на которых установлены точки остановки.
     /// </summary>
     public List<int> BreakpointCommandsNumbers { get; }
@@ -105,16 +100,6 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     /// Устанавливает или снимает точку остановки.
     /// </summary>
     public void EnsureBreakpoint(int formattedLine, int commandNumber, bool isSet, bool raiseEvents = false);
-
-    /// <summary>
-    /// Включает точку остановки, делая её активной для отладки и взаимодействия.
-    /// </summary>
-    public void EnableBreakpoint(int commandNumber, bool raiseEvents = false);
-
-    /// <summary>
-    /// Выключает точку остановки, делая её неактивной для отладки и взаимодействия.
-    /// </summary>
-    public void DisableBreakpoint(int commandNumber, bool raiseEvents = false);
 
     /// <summary>
     /// Подсвечивает набор диапазонов текста.
