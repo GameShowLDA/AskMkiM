@@ -408,3 +408,7 @@ FodyWeavers.xsd
 .idea/.idea.AskMkiM/.idea/vcs.xml
 .idea/.idea.AskMkiM/.idea/workspace.xml
 /_tmpout
+.tmpbindings/
+tmp_build_output.txt
+tmp_rus_test*.txt
+tmpinspect_margin*/
