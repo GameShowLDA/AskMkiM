@@ -1,7 +1,7 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace Ask.DataBase.Provider.Contracts.DTO;
+namespace Ask.Core.Shared.DTO.Devices.FastMeter;
 
 /// <summary>
 /// DTO быстрого измерителя.
