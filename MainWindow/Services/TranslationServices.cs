@@ -5,7 +5,6 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
-using System.IO;
 using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
@@ -45,100 +44,32 @@ namespace MainWindowProgram.Services
     /// <see langword="true"/>, если команда поддерживает точки остановки; иначе <see langword="false"/>.
     /// </returns>
     private static bool IsBreakpointAllowed(BaseCommandModel m) =>
-      m.Mnemonic != "СП"
-      && m.Mnemonic != "ЦУ"
-      && m.Mnemonic != "КЦ"
-      && m.Mnemonic != "РМ"
-      && m.Mnemonic != "УП"
-      && m.Mnemonic != "ОК"
-      ;
+        m.Mnemonic != "СП"
+        && m.Mnemonic != "ЦУ"
+        && m.Mnemonic != "КЦ"
+        && m.Mnemonic != "РМ"
+        && m.Mnemonic != "УП"
+        && m.Mnemonic != "ОК";
 
     /// <summary>
-    /// Строит список строк исходного текста, на которые можно ставить точку остановки в левом редакторе.
+    /// Строит словарь соответствия между номерами команд и их наименованиями (мнемониками) для быстрого доступа при работе с точками остановки.
     /// </summary>
-    /// <param name="allowed">Команды, на которые разрешены точки.</param>
-    /// <returns>Список номеров строк исходного текста.</returns>
-    private static List<int> BuildLeftBreakpointLines(IEnumerable<BaseCommandModel> allowed)
-      => allowed.Select(m => m.StartLineNumber)
-                .ToList();
-
-    /// <summary>
-    /// Строит список строк документа трансляции, на которые можно ставить точку остановки.
-    /// </summary>
-    /// <param name="doc">Документ правого редактора (текст трансляции).</param>
-    /// <param name="models">Список моделей команд (результат разбора/трансляции).</param>
-    /// <returns>
-    /// Список номеров строк в документе трансляции, на которые разрешено ставить точку остановки.
-    /// </returns>
-    private static List<int> BuildRightBreakpointLinesFromDocument(ITextDocumentView doc, List<BaseCommandModel> models)
+    /// <param name="models">Команды, на которые разрешены точки.</param>
+    /// <returns>Словарь </returns>
+    private static Dictionary<int, string> BuildNumCommandWithMnemonic(IEnumerable<BaseCommandModel> models)
     {
-      var allowedCommands = new HashSet<int>(models.Count);
-      for (int i = 0; i < models.Count; i++)
+      var result = new Dictionary<int, string>();
+      int commandNumber;
+
+      foreach (var model in models)
       {
-        if (IsBreakpointAllowed(models[i]) && int.TryParse(models[i].CommandNumber, out var commandNumber))
-          allowedCommands.Add(commandNumber);
-      }
-
-      var result = new List<int>(allowedCommands.Count);
-
-      for (int lineNumber = 1; lineNumber <= doc.LineCount; lineNumber++)
-      {
-        var line = doc.GetLine(lineNumber);
-        var text = doc.GetText(line);
-        if (string.IsNullOrWhiteSpace(text))
-          continue;
-
-        int i = 0;
-        while (i < text.Length && (text[i] == ' ' || text[i] == '\t')) i++;
-        if (i >= text.Length)
-          continue;
-
-        int value = 0;
-        bool hasDigits = false;
-
-        while (i < text.Length)
+        commandNumber = int.Parse(model.CommandNumber);
+        if (result.ContainsKey(commandNumber))
         {
-          char c = text[i];
-          if (c < '0' || c > '9') break;
-          hasDigits = true;
-          value = value * 10 + (c - '0');
-          i++;
+          continue;
         }
 
-        if (hasDigits && allowedCommands.Contains(value))
-          result.Add(lineNumber);
-      }
-
-      return result;
-    }
-
-    /// <summary>
-    /// Собирает номера команд, для которых установлены точки останова
-    /// в текущем элементе транслятора (из модели и визуального состояния редакторов).
-    /// </summary>
-    private static HashSet<int> CollectBreakpoints(TranslatorItem item)
-    {
-      var result = new HashSet<int>();
-
-      for (int i = 0; i < item.TranslationModels.Count; i++)
-      {
-        var model = item.TranslationModels[i];
-        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out var commandNumber))
-          result.Add(commandNumber);
-      }
-
-      var leftEditor = item.GetLeftBox().GetTextEditor();
-      if (leftEditor != null)
-      {
-        for (int i = 0; i < leftEditor.BreakpointCommandsNumbers.Count; i++)
-          result.Add(leftEditor.BreakpointCommandsNumbers[i]);
-      }
-
-      var rightEditor = item.GetRightBox().GetTextEditor();
-      if (rightEditor != null)
-      {
-        for (int i = 0; i < rightEditor.BreakpointCommandsNumbers.Count; i++)
-          result.Add(rightEditor.BreakpointCommandsNumbers[i]);
+        result.Add(commandNumber, model.Mnemonic);
       }
 
       return result;
@@ -149,40 +80,52 @@ namespace MainWindowProgram.Services
     /// обновляет флаги моделей и синхронизирует два редактора.
     /// </summary>
     private static void RestoreBreakpoints(
-      List<BaseCommandModel> models,
-      ITextEditorView leftEditor,
-      ITextEditorView rightEditor,
-      HashSet<int> preservedCommandNumbers)
+        List<BaseCommandModel> models,
+        ITextEditorView leftEditor,
+        ITextEditorView rightEditor,
+        Dictionary<int, bool> preserved)
     {
       var requiredCommands = new HashSet<int>();
+
       var leftLineByCommand = new Dictionary<int, int>();
       var rightLineByCommand = new Dictionary<int, int>();
+      var enabledByCommand = new Dictionary<int, bool>();
 
       for (int i = 0; i < models.Count; i++)
       {
         var model = models[i];
-        if (!int.TryParse(model.CommandNumber, out var commandNumber))
+
+        if (!int.TryParse(model.CommandNumber, out var cmd))
         {
           model.HasBreakpoint = false;
+          model.IsBreakpointEnabled = true;
           continue;
         }
 
         bool isAllowed = IsBreakpointAllowed(model);
-        bool hasBreakpoint = isAllowed && preservedCommandNumbers.Contains(commandNumber);
+        bool hasPreserved = preserved.TryGetValue(cmd, out bool preservedEnabled);
+
+        bool hasBreakpoint = isAllowed && hasPreserved;
         model.HasBreakpoint = hasBreakpoint;
+        model.IsBreakpointEnabled = hasBreakpoint ? preservedEnabled : true;
 
         if (!isAllowed)
+        {
           continue;
+        }
 
-        leftLineByCommand[commandNumber] = model.StartLineNumber;
-        rightLineByCommand[commandNumber] = model.FormattedStartLineNumber + 1;
+        leftLineByCommand[cmd] = model.StartLineNumber;
+        rightLineByCommand[cmd] = model.FormattedStartLineNumber + 1;
 
         if (hasBreakpoint)
-          requiredCommands.Add(commandNumber);
+        {
+          requiredCommands.Add(cmd);
+          enabledByCommand[cmd] = preservedEnabled;
+        }
       }
 
-      SyncEditorBreakpoints(leftEditor, requiredCommands, leftLineByCommand);
-      SyncEditorBreakpoints(rightEditor, requiredCommands, rightLineByCommand);
+      SyncEditorBreakpoints(leftEditor, requiredCommands, leftLineByCommand, enabledByCommand);
+      SyncEditorBreakpoints(rightEditor, requiredCommands, rightLineByCommand, enabledByCommand);
     }
 
     /// <summary>
@@ -190,23 +133,40 @@ namespace MainWindowProgram.Services
     /// снимает лишние и добавляет отсутствующие.
     /// </summary>
     private static void SyncEditorBreakpoints(
-      ITextEditorView editor,
-      HashSet<int> requiredCommands,
-      Dictionary<int, int> lineByCommand)
+        ITextEditorView editor,
+        HashSet<int> requiredCommands,
+        Dictionary<int, int> lineByCommand,
+        Dictionary<int, bool> enabledByCommand)
     {
       var existing = editor.BreakpointCommandsNumbers.ToList();
 
       for (int i = 0; i < existing.Count; i++)
       {
-        int commandNumber = existing[i];
-        if (!requiredCommands.Contains(commandNumber))
-          editor.EnsureBreakpoint(1, commandNumber, isSet: false, raiseEvents: false);
+        int cmd = existing[i];
+        if (!requiredCommands.Contains(cmd))
+        {
+          editor.EnsureBreakpoint(1, cmd, isSet: false, raiseEvents: false);
+        }
       }
 
-      foreach (var commandNumber in requiredCommands)
+      foreach (var cmd in requiredCommands)
       {
-        if (lineByCommand.TryGetValue(commandNumber, out int lineNumber))
-          editor.EnsureBreakpoint(lineNumber, commandNumber, isSet: true, raiseEvents: false);
+        if (lineByCommand.TryGetValue(cmd, out int line1Based))
+        {
+          editor.EnsureBreakpoint(line1Based, cmd, isSet: true, raiseEvents: false);
+        }
+
+        if (enabledByCommand.TryGetValue(cmd, out bool enabled))
+        {
+          if (enabled)
+          {
+            editor.EnableBreakpoint(cmd, raiseEvents: false);
+          }
+          else
+          {
+            editor.DisableBreakpoint(cmd, raiseEvents: false);
+          }
+        }
       }
     }
 
@@ -233,17 +193,19 @@ namespace MainWindowProgram.Services
         {
           Owner = owner,
           WindowStartupLocation = owner == null
-            ? WindowStartupLocation.CenterScreen
-            : WindowStartupLocation.CenterOwner,
+                ? WindowStartupLocation.CenterScreen
+                : WindowStartupLocation.CenterOwner,
         };
 
         progressWindow.Configure(
-          "Трансляция программы контроля",
-          "Подготовка окна",
-          "Готовим отображение этапов и интерфейс транслятора.");
+            "Трансляция программы контроля",
+            "Подготовка окна",
+            "Готовим отображение этапов и интерфейс транслятора.");
 
         if (owner != null)
+        {
           owner.Effect = new BlurEffect { Radius = 8 };
+        }
 
         progressWindow.Show();
 
@@ -255,23 +217,25 @@ namespace MainWindowProgram.Services
         progressWindow?.Close();
 
         if (owner != null)
+        {
           owner.Effect = previousEffect;
+        }
       }
     }
 
     private async Task<TranslationBuildResult> BuildTranslationAsync(string text, ProgressWindow progressWindow)
     {
       SetTranslationStage(
-        progressWindow,
-        "Подготовка фоновой трансляции",
-        "Запускаем разбор программы контроля вне UI-потока.",
-        8d);
+          progressWindow,
+          "Подготовка фоновой трансляции",
+          "Запускаем разбор программы контроля вне UI-потока.",
+          8d);
 
       if (System.Windows.Application.Current != null)
       {
         await System.Windows.Application.Current.Dispatcher.InvokeAsync(
-          () => { },
-          DispatcherPriority.ContextIdle);
+            () => { },
+            DispatcherPriority.ContextIdle);
       }
 
       bool buildStageUpdatesEnabled = true;
@@ -279,7 +243,9 @@ namespace MainWindowProgram.Services
       var progress = new Progress<string>(stage =>
       {
         if (!buildStageUpdatesEnabled)
+        {
           return;
+        }
 
         var (status, hint, progressValue) = MapBuildStage(stage);
         SetTranslationStage(progressWindow, status, hint, progressValue);
@@ -300,41 +266,43 @@ namespace MainWindowProgram.Services
     private static (string Status, string Hint, double Progress) MapBuildStage(string stage) => stage switch
     {
       "Начало трансляции" => (
-        "Подготовка трансляции",
-        "Инициализируем парсеры, форматтеры и служебные структуры.",
-        18d),
+          "Подготовка трансляции",
+          "Инициализируем парсеры, форматтеры и служебные структуры.",
+          18d),
       "Формирование данных" => (
-        "Формирование текста трансляции",
-        "Строим строки результата и связываем их с исходными командами.",
-        42d),
+          "Формирование текста трансляции",
+          "Строим строки результата и связываем их с исходными командами.",
+          42d),
       "Проверка взаимосвязей" => (
-        "Проверка взаимосвязей",
-        "Проверяем обязательные команды, переходы и связи между точками.",
-        62d),
+          "Проверка взаимосвязей",
+          "Проверяем обязательные команды, переходы и связи между точками.",
+          62d),
       "Готово" => (
-        "Фоновая сборка завершена",
-        "Результат готов. Подключаем его к интерфейсу.",
-        70d),
+          "Фоновая сборка завершена",
+          "Результат готов. Подключаем его к интерфейсу.",
+          70d),
       _ => (stage, stage, 0d),
     };
 
     private static void SetTranslationStage(
-      ProgressWindow progressWindow,
-      string status,
-      string hint,
-      double? progress = null)
+        ProgressWindow progressWindow,
+        string status,
+        string hint,
+        double? progress = null)
     {
       if (progress.HasValue)
+      {
         progressWindow.SetProgress(progress.Value);
+      }
 
       progressWindow.SetStage(status, hint);
     }
 
     private static async Task SetTranslationStageAsync(
-      ProgressWindow progressWindow,
-      string status,
-      string hint,
-      double? progress = null)
+        ProgressWindow progressWindow,
+        string status,
+        string hint,
+        double? progress = null)
     {
       SetTranslationStage(progressWindow, status, hint, progress);
       await FlushProgressWindowAsync(progressWindow);
@@ -344,25 +312,29 @@ namespace MainWindowProgram.Services
     {
       var dispatcher = progressWindow.Dispatcher;
       if (dispatcher == null)
+      {
         return;
+      }
 
       await dispatcher.InvokeAsync(
-        progressWindow.UpdateLayout,
-        DispatcherPriority.Background);
+          progressWindow.UpdateLayout,
+          DispatcherPriority.Background);
 
       await dispatcher.InvokeAsync(
-        progressWindow.UpdateLayout,
-        DispatcherPriority.Render);
+          progressWindow.UpdateLayout,
+          DispatcherPriority.Render);
 
       await dispatcher.InvokeAsync(
-        () => { },
-        DispatcherPriority.ContextIdle);
+          () => { },
+          DispatcherPriority.ContextIdle);
     }
 
     private static void SetDeferredVisibility(FrameworkElement? element, bool isVisible)
     {
       if (element == null)
+      {
         return;
+      }
 
       element.Opacity = isVisible ? 1d : 0d;
       element.IsHitTestVisible = isVisible;
@@ -371,13 +343,15 @@ namespace MainWindowProgram.Services
     private static async Task RevealDeferredElementsAsync(params FrameworkElement?[] elements)
     {
       var visibleElements = elements
-        .Where(element => element != null)
-        .Cast<FrameworkElement>()
-        .Distinct()
-        .ToArray();
+          .Where(element => element != null)
+          .Cast<FrameworkElement>()
+          .Distinct()
+          .ToArray();
 
       if (visibleElements.Length == 0)
+      {
         return;
+      }
 
       foreach (var element in visibleElements)
       {
@@ -390,10 +364,10 @@ namespace MainWindowProgram.Services
     private static async Task WaitForUiReadyAsync(params FrameworkElement?[] elements)
     {
       var readyElements = elements
-        .Where(element => element != null)
-        .Cast<FrameworkElement>()
-        .Distinct()
-        .ToArray();
+          .Where(element => element != null)
+          .Cast<FrameworkElement>()
+          .Distinct()
+          .ToArray();
 
       foreach (var element in readyElements)
       {
@@ -402,7 +376,9 @@ namespace MainWindowProgram.Services
 
       var dispatcher = readyElements.FirstOrDefault()?.Dispatcher ?? System.Windows.Application.Current?.Dispatcher;
       if (dispatcher == null)
+      {
         return;
+      }
 
       await dispatcher.InvokeAsync(() =>
       {
@@ -426,7 +402,9 @@ namespace MainWindowProgram.Services
     private static Task WaitForLoadedAsync(FrameworkElement element)
     {
       if (element.IsLoaded)
+      {
         return Task.CompletedTask;
+      }
 
       var source = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
       RoutedEventHandler? handler = null;
@@ -489,7 +467,10 @@ namespace MainWindowProgram.Services
 
       if (container == null && runContainer == null && editor == null)
       {
-        MessageBoxCustom.Show($"Не удалось запустить исполнитель программы контроля.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
+        MessageBoxCustom.Show(
+            $"Не удалось запустить исполнитель программы контроля.",
+            "Ошибка запуска программы контроля",
+            image: MessageBoxImage.Error);
         return;
       }
 
@@ -504,8 +485,12 @@ namespace MainWindowProgram.Services
       {
         container = runContainer;
       }
+
       var dockManager = container.GetDockControl();
-      if (dockManager == null) return;
+      if (dockManager == null)
+      {
+        return;
+      }
 
       DockItem? foundDockItem = null;
 
@@ -519,6 +504,7 @@ namespace MainWindowProgram.Services
             break;
           }
         }
+
         await Task.Delay(10);
       }
 
@@ -528,7 +514,7 @@ namespace MainWindowProgram.Services
         {
           await PrepareRun(runContainer, _actualTextEditor, run);
           // TODO: закрыть вкладку со старым транслятором
-          //await _multiWindow.CloseRunItem(run, EditorType.Run);
+          // await _multiWindow.CloseRunItem(run, EditorType.Run);
         }
         else
         {
@@ -546,7 +532,10 @@ namespace MainWindowProgram.Services
 
         if (translator.ErrorCount > 0)
         {
-          MessageBoxCustom.Show($"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.", "Ошибка запуска программы контроля", image: MessageBoxImage.Error);
+          MessageBoxCustom.Show(
+              $"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.",
+              "Ошибка запуска программы контроля",
+              image: MessageBoxImage.Error);
           return;
         }
 
@@ -568,6 +557,7 @@ namespace MainWindowProgram.Services
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
       runControl.SetLeftEditor(editor);
+
       var foundItem = runControl.TranslationModels.FirstOrDefault(item => item.GetType() == typeof(OkCommandModel));
       if (foundItem != null && foundItem is OkCommandModel okCommandModel)
       {
@@ -614,10 +604,16 @@ namespace MainWindowProgram.Services
     private async Task TryUpdateExistingTranslator(TextEditorContainer container)
     {
       var dockManager = container.GetDockControl();
-      if (dockManager == null) return;
+      if (dockManager == null)
+      {
+        return;
+      }
 
       var foundDockItem = dockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
-      if (foundDockItem?.Content is not TranslatorItem translator) return;
+      if (foundDockItem?.Content is not TranslatorItem translator)
+      {
+        return;
+      }
 
       var editor = translator.GetLeftBox().GetTextEditor();
       if (editor == null)
@@ -640,9 +636,9 @@ namespace MainWindowProgram.Services
     private void ShowTranslationError(Exception ex)
     {
       MessageBoxCustom.Show(
-        "Не удалось выполнить трансляцию программы контроля.",
-        "Ошибка запуска программы контроля",
-        image: MessageBoxImage.Error);
+          "Не удалось выполнить трансляцию программы контроля.",
+          "Ошибка запуска программы контроля",
+          image: MessageBoxImage.Error);
 
       LogError($"Не удалось выполнить трансляцию программы контроля: {ex}.");
     }
@@ -658,84 +654,101 @@ namespace MainWindowProgram.Services
       string text = editor.Text;
       var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
       if (translateEditor == null)
+      {
         return;
+      }
+
+      if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
+      {
+        translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
+      }
 
       var currentItem = foundDockItem.Content as TranslatorItem;
-      var preservedBreakpoints = currentItem != null
-        ? CollectBreakpoints(currentItem)
-        : new HashSet<int>();
+      Dictionary<int, bool> preservedBreakpoints = currentItem != null
+          ? currentItem.TranslationModels
+              .Where(x => x.HasBreakpoint)
+              .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled)
+          : new Dictionary<int, bool>();
 
       SetDeferredVisibility(currentItem, false);
+      SetDeferredVisibility(translateEditor.View, false);
 
       try
       {
         await RunWithTranslationProgressAsync(async progressWindow =>
         {
           await SetTranslationStageAsync(
-            progressWindow,
-            "Подготовка редактора результата",
-            "Создаём новый экземпляр редактора для обновлённого текста трансляции.",
-            8d);
+              progressWindow,
+              "Подготовка редактора результата",
+              "Создаём новый экземпляр редактора для обновлённого текста трансляции.",
+              8d);
 
           var translationResult = await BuildTranslationAsync(text, progressWindow);
           var models = translationResult.Models;
+          var allowed = models.Where(IsBreakpointAllowed).ToList();
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Подготовка диагностики",
-            "Собираем ошибки и предупреждения в пакет до обновления интерфейса.",
-            76d);
+              progressWindow,
+              "Подготовка диагностики",
+              "Собираем ошибки и предупреждения в пакет до обновления интерфейса.",
+              76d);
 
           var issuesSnapshot = await Task.Run(() => TranslatorItem.BuildIssuesSnapshot(models));
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Передача текста результата",
-            "Загружаем сформированный текст в правый редактор.",
-            82d);
+              progressWindow,
+              "Передача текста результата",
+              "Загружаем сформированный текст в правый редактор.",
+              82d);
 
           translateEditor.Text = translationResult.FormattedText;
 
-          var allowed = models.Where(IsBreakpointAllowed).ToList();
-
+          // ЛЕВЫЙ редактор работает по исходным строкам
           editor.ConfigureBreakpoints(interactive: true, visible: false);
-          editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+          editor.RightBreakpoint = allowed
+              .Select(m => m.StartLineNumber)
+              .ToList();
+          editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
           if (currentItem != null)
           {
             await SetTranslationStageAsync(
-              progressWindow,
-              "Подключение редактора",
-              "Меняем экземпляр правого редактора и подготавливаем его к отображению.",
-              86d);
+                progressWindow,
+                "Подключение редактора",
+                "Меняем экземпляр правого редактора и подготавливаем его к отображению.",
+                86d);
 
             currentItem.SetRightEditor(translateEditor);
             currentItem.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
-            
+
             await SetTranslationStageAsync(
-              progressWindow,
-              "Обновление диагностики",
-              "Применяем подготовленный список ошибок и предупреждений к таблице.",
-              90d);
+                progressWindow,
+                "Обновление диагностики",
+                "Применяем подготовленный список ошибок и предупреждений к таблице.",
+                90d);
 
             currentItem.ApplyTranslationModels(models, issuesSnapshot);
 
             await SetTranslationStageAsync(
-              progressWindow,
-              "Синхронизация точек останова",
-              "Обновляем разрешённые строки и восстанавливаем сохранённые точки останова.",
-              94d);
+                progressWindow,
+                "Синхронизация точек останова",
+                "Обновляем разрешённые строки и восстанавливаем сохранённые точки останова.",
+                94d);
 
+            // ПРАВЫЙ редактор работает по форматированным строкам
             translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-            translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+            translateEditor.RightBreakpoint = allowed
+                .Select(m => m.FormattedStartLineNumber + 1)
+                .ToList();
+            translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
             RestoreBreakpoints(models, editor, translateEditor, preservedBreakpoints);
 
             await SetTranslationStageAsync(
-              progressWindow,
-              "Загрузка интерфейса",
-              "Подготавливаем обновлённую вкладку к показу без промежуточного мерцания.",
-              98d);
+                progressWindow,
+                "Загрузка интерфейса",
+                "Подготавливаем обновлённую вкладку к показу без промежуточного мерцания.",
+                98d);
 
             await WaitForUiReadyAsync(currentItem, translateEditor.View);
           }
@@ -761,17 +774,22 @@ namespace MainWindowProgram.Services
     private async Task CreateNewTranslator(TextEditorUI editor, string text)
     {
       TranslatorItem? createdItem = null;
+      ITextEditorView? translateEditor = null;
 
       try
       {
-        var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
+        translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
         if (translateEditor == null)
+        {
           return;
+        }
 
         editor.TextArea.Document.Text = text;
 
         if (!editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
+        {
           editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
+        }
 
         CancellationTokenSource redrawToken = null;
 
@@ -792,83 +810,98 @@ namespace MainWindowProgram.Services
               });
             }
           }
-          catch (TaskCanceledException) { }
+          catch (TaskCanceledException)
+          {
+          }
         };
 
         if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
+        {
           translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
+        }
+
+        SetDeferredVisibility(translateEditor.View, false);
 
         await RunWithTranslationProgressAsync(async progressWindow =>
         {
           await SetTranslationStageAsync(
-            progressWindow,
-            "Подготовка редактора результата",
-            "Создаём редактор для новой вкладки транслятора.",
-            8d);
+              progressWindow,
+              "Подготовка редактора результата",
+              "Создаём редактор для новой вкладки транслятора.",
+              8d);
 
           var translationResult = await BuildTranslationAsync(text, progressWindow);
           var models = translationResult.Models;
+          var allowed = models.Where(IsBreakpointAllowed).ToList();
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Подготовка диагностики",
-            "Собираем ошибки и предупреждения до открытия новой вкладки.",
-            76d);
+              progressWindow,
+              "Подготовка диагностики",
+              "Собираем ошибки и предупреждения до открытия новой вкладки.",
+              76d);
 
           var issuesSnapshot = await Task.Run(() => TranslatorItem.BuildIssuesSnapshot(models));
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Передача текста результата",
-            "Передаём итоговый текст в редактор результата.",
-            82d);
+              progressWindow,
+              "Передача текста результата",
+              "Передаём итоговый текст в редактор результата.",
+              82d);
 
           translateEditor.Text = translationResult.FormattedText;
 
-          var allowed = models.Where(IsBreakpointAllowed).ToList();
-
+          // ЛЕВЫЙ редактор — исходные строки
           editor.ConfigureBreakpoints(interactive: true, visible: false);
-          editor.RightBreakpoint = BuildLeftBreakpointLines(allowed);
+          editor.RightBreakpoint = allowed
+              .Select(m => m.StartLineNumber)
+              .ToList();
+          editor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
           EditorEventAdapter.RaiseCloseRunItem(editor);
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Открытие вкладки трансляции",
-            "Создаём контейнер и подключаем исходный и результирующий редакторы.",
-            86d);
+              progressWindow,
+              "Открытие вкладки трансляции",
+              "Создаём контейнер и подключаем исходный и результирующий редакторы.",
+              86d);
 
           createdItem = await _multiWindow.AddTranslatorItem(editor, translateEditor, EditorType.Translator);
           if (createdItem == null)
+          {
             return;
+          }
+
+          SetDeferredVisibility(createdItem, false);
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Обновление диагностики",
-            "Применяем подготовленный список ошибок и предупреждений к новой вкладке.",
-            90d);
+              progressWindow,
+              "Обновление диагностики",
+              "Применяем подготовленный список ошибок и предупреждений к новой вкладке.",
+              90d);
 
           createdItem.ApplyTranslationModels(models, issuesSnapshot);
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Синхронизация точек останова",
-            "Готовим правый редактор к навигации и установке точек останова.",
-            94d);
+              progressWindow,
+              "Синхронизация точек останова",
+              "Готовим правый редактор к навигации и установке точек останова.",
+              94d);
 
+          // ПРАВЫЙ редактор — форматированные строки
           translateEditor.ConfigureBreakpoints(interactive: true, visible: true);
-          translateEditor.RightBreakpoint = BuildRightBreakpointLinesFromDocument(translateEditor.Document, models);
+          translateEditor.RightBreakpoint = allowed
+              .Select(m => m.FormattedStartLineNumber + 1)
+              .ToList();
+          translateEditor.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
 
           await SetTranslationStageAsync(
-            progressWindow,
-            "Загрузка интерфейса",
-            "Подготавливаем новую вкладку к показу без преждевременного отображения.",
-            98d);
+              progressWindow,
+              "Загрузка интерфейса",
+              "Подготавливаем новую вкладку к показу без преждевременного отображения.",
+              98d);
 
           await WaitForUiReadyAsync(createdItem, translateEditor.View);
         });
-
-        await RevealDeferredElementsAsync(createdItem, translateEditor.View);
       }
       catch (Exception ex)
       {
@@ -876,6 +909,10 @@ namespace MainWindowProgram.Services
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
         _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
+      }
+      finally
+      {
+        await RevealDeferredElementsAsync(createdItem, translateEditor?.View);
       }
     }
   }

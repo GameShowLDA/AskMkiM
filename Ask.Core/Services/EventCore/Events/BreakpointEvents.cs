@@ -50,5 +50,49 @@ namespace Ask.Core.Services.EventCore.Events
         CommandNumber = commandNumber;
       }
     }
+
+    /// <summary>
+    /// Событие, обозначающее включение точки остановки.
+    /// </summary>
+    public class BreakpointOn : IEvent
+    {
+      /// <summary>
+      /// Номер строки, где точку включили.
+      /// </summary>
+      public int LineNumber { get; }
+
+      /// <summary>
+      /// Метка команды, где точку включили.
+      /// </summary>
+      public int CommandNumber { get; }
+
+      public BreakpointOn(int lineNumber, int commandNumber)
+      {
+        LineNumber = lineNumber;
+        CommandNumber = commandNumber;
+      }
+    }
+
+    /// <summary>
+    /// Событие, обозначающее выключение точки остановки.
+    /// </summary>
+    public class BreakpointOff : IEvent
+    {
+      /// <summary>
+      /// Номер строки, где точку выключили.
+      /// </summary>
+      public int LineNumber { get; }
+
+      /// <summary>
+      /// Метка команды, где точку выключили.
+      /// </summary>
+      public int CommandNumber { get; }
+
+      public BreakpointOff(int lineNumber, int commandNumber)
+      {
+        LineNumber = lineNumber;
+        CommandNumber = commandNumber;
+      }
+    }
   }
 }
