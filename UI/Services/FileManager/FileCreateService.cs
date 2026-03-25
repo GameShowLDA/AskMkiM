@@ -78,6 +78,7 @@ namespace UI.Services.FileManager
     private TextEditorUI CreateTextEditor(string fileName)
     {
       var textEditorModel = new TextEditorModel(string.Empty, fileName);
+      textEditorModel.SavedTextSnapshot = string.Empty;
       var textEditor = new TextEditorUI
       {
         TextEditorModel = textEditorModel

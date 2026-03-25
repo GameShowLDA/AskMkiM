@@ -146,8 +146,7 @@ namespace UI.Components.MultiEditorMethods
         var fileName = control.Title;
         if (fileManager.EditorWorkspaceModel.FilePaths.ContainsKey(fileName))
         {
-          if (fileManager.EditorWorkspaceModel.FilePaths[fileName] == string.Empty
-            || fileManager.EditorWorkspaceModel.FilePaths[fileName].Contains(FileLocations.BackupDirectory))
+          if (RequiresSaveAs(fileManager.EditorWorkspaceModel.FilePaths[fileName]))
           {
             return SaveFileAs(control);
           }
@@ -171,7 +170,7 @@ namespace UI.Components.MultiEditorMethods
           if (control.Content is TranslatorItem translator)
           {
             var textEditor = translator.GetLeftBox().GetTextEditor();
-            if (textEditor.TextEditorModel.FilePath.Contains(FileLocations.BackupDirectory))
+            if (RequiresSaveAs(textEditor.TextEditorModel.FilePath))
             {
               return SaveFileAs(control);
             }
@@ -444,6 +443,11 @@ namespace UI.Components.MultiEditorMethods
           File.WriteAllText(filePath, fileData, encoding == null ? Encoding.GetEncoding(866) : encoding);
         }
 
+        if (textEditor.TextEditorModel != null)
+        {
+          textEditor.TextEditorModel.SavedTextSnapshot = fileData;
+        }
+
         LogInformation($"Файл {filePath} сохранен");
         if (ShouldShowSaveSuccessNotification(filePath))
         {
@@ -518,6 +522,12 @@ namespace UI.Components.MultiEditorMethods
 
     private static bool RequiresCloseConfirmation(DockItem control) =>
       control.Content is TextEditorUI || control.Content is TranslatorItem;
+
+    private static bool RequiresSaveAs(string? filePath)
+    {
+      return string.IsNullOrWhiteSpace(filePath)
+        || filePath.Contains(FileLocations.BackupDirectory, StringComparison.OrdinalIgnoreCase);
+    }
 
     private DockItem GetActiveDockItem()
     {
