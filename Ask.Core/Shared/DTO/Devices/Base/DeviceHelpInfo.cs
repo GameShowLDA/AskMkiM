@@ -1,4 +1,4 @@
-﻿namespace Ask.Core.Shared.DTO.Devices
+﻿namespace Ask.Core.Shared.DTO.Devices.Base
 {
   public class DeviceHelpInfo
   {

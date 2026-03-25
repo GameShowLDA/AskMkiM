@@ -16,12 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Context\" />
-    <Folder Include="Configuration\" />
+    <Folder Include="Contracts\" />
     <Folder Include="Initialization\" />
     <Folder Include="DataAccess\" />
     <Folder Include="Services\" />
-    <Folder Include="Contracts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
   </ItemGroup>
 	
 
