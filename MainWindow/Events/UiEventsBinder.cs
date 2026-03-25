@@ -7,6 +7,7 @@ using MainWindowProgram.ViewModels;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using UI.Components;
 using UI.Components.FileComparerControls;
 using UI.Controls.TextEditor;
@@ -58,6 +59,7 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<EditorEvents.TextEditorActive>(e => OnTextEditorActive(e.IsActive));
       EventAggregator.Subscribe<EditorEvents.TextEditorActivated>(e => OnTextEditorActivated(e.ActiveEditor));
       EventAggregator.Subscribe<EditorEvents.TextEditorContainerClosing>(e => OnTextEditorClosing(e.IsClosing, e.EditorName));
+      EventAggregator.Subscribe<EditorEvents.ActiveEditorChanged>(e => RefreshActiveEditorUiState());
 
       EventAggregator.Subscribe<SearchEvents.SearchWindowClosing>(e => OnSearchWindowClosing(e.IsClosing));
       EventAggregator.Subscribe<SearchEvents.SearchWindowActivated>(e => OnSearchWindowActivated(e.IsActive));
@@ -101,6 +103,7 @@ namespace MainWindowProgram.Events
       _mainWindow.openFolderMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
+      _mainWindow.searchReplaceMenuItem.Visibility = visibility;
     }
 
 
@@ -146,10 +149,7 @@ namespace MainWindowProgram.Events
     /// <param name="name">Имя закрываемого редактора.</param>
     private void OnTextEditorClosing(bool isActive, string name)
     {
-      if (isActive)
-      {
-        OnTextEditorActive(false);
-      }
+      RefreshActiveEditorUiState();
     }
 
     /// <summary>
@@ -188,6 +188,23 @@ namespace MainWindowProgram.Events
     private void SearchWindow_ReplaceTextHandler(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       _multiWindow.ReplaceData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+    }
+
+    private void RefreshActiveEditorUiState()
+    {
+      Application.Current.Dispatcher.BeginInvoke(
+        DispatcherPriority.Background,
+        new Action(() =>
+        {
+          var activeEditor = _multiWindow.GetActiveTextEditor();
+          bool isActive = activeEditor != null;
+
+          OnTextEditorActive(isActive);
+          if (activeEditor != null)
+          {
+            OnTextEditorActivated(activeEditor);
+          }
+        }));
     }
   }
 }
