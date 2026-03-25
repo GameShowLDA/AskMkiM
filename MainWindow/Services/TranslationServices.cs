@@ -66,11 +66,7 @@ namespace MainWindowProgram.Services
         commandNumber = int.Parse(model.CommandNumber);
         if (result.ContainsKey(commandNumber))
         {
-          char c = text[i];
-          if (c < '0' || c > '9') break;
-          hasDigits = true;
-          value = (value * 10) + (c - '0');
-          i++;
+          continue;
         }
 
         result.Add(commandNumber, model.Mnemonic);
@@ -111,7 +107,7 @@ namespace MainWindowProgram.Services
 
         bool hasBreakpoint = isAllowed && hasPreserved;
         model.HasBreakpoint = hasBreakpoint;
-        model.IsBreakpointEnabled = hasBreakpoint ? preservedEnabled : true;
+        model.IsBreakpointEnabled = !hasBreakpoint || preservedEnabled;
 
         if (!isAllowed)
         {

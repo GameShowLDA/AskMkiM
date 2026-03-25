@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using UI.Components.FileComparerControls;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
