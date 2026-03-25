@@ -1,5 +1,4 @@
-﻿using DataBaseConfiguration.Configurations.Measurement;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration.Context
 {
@@ -20,20 +19,6 @@ namespace DataBaseConfiguration.Context
       {
         optionsBuilder.UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
       }
-    }
-
-    /// <summary>
-    /// Настройка моделей базы данных.
-    /// </summary>
-    /// <param name="modelBuilder">
-    /// Построитель моделей, используемый для конфигурации сущностей и их связей в базе данных.
-    /// </param>
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-      modelBuilder.ApplyConfiguration(new MeasurementErrorEntityConfiguration());
-      modelBuilder.ApplyConfiguration(new MeasurementErrorRangeEntityConfiguration());
-
-      base.OnModelCreating(modelBuilder);
     }
 
     /// <summary>
