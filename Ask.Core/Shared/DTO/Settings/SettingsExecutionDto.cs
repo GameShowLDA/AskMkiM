@@ -1,11 +1,21 @@
-﻿namespace Ask.Core.Shared.DTO.Settings;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ask.Core.Shared.DTO.Settings;
 
 /// <summary>
 /// DTO настроек выполнения.
 /// Определяет режимы и поведение процесса выполнения без привязки к источнику данных.
 /// </summary>
+[Table("Execution")]
 public class SettingsExecutionDto
 {
+  /// <summary>
+  /// Идентификатор записи настроек.
+  /// </summary>
+  [Key]
+  public int Id { get; set; }
+
   /// <summary>
   /// Активирует холостой режим выполнения (без реальных воздействий).
   /// </summary>

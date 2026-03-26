@@ -1,4 +1,6 @@
-﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ask.Core.Shared.DTO.Settings;
 
@@ -6,8 +8,15 @@ namespace Ask.Core.Shared.DTO.Settings;
 /// DTO настроек пользовательского интерфейса.
 /// Содержит параметры отображения и поведения UI без привязки к источнику данных.
 /// </summary>
+[Table("UserInterface")]
 public class UserInterfaceDto
 {
+  /// <summary>
+  /// Идентификатор записи настроек.
+  /// </summary>
+  [Key]
+  public int Id { get; set; }
+
   /// <summary>
   /// Выбранный язык интерфейса.
   /// </summary>

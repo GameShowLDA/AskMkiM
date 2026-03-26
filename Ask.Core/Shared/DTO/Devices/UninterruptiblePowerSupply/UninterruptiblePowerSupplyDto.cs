@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Base;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 
@@ -6,6 +7,7 @@ namespace Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 /// DTO источника бесперебойного питания (UPS).
 /// Содержит параметры устройства без логики управления питанием и внешних зависимостей.
 /// </summary>
+[Table("UninterruptiblePowerSupplies")]
 public class UninterruptiblePowerSupplyDto : AttachableDeviceDto
 {
   /// <summary>

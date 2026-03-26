@@ -22,8 +22,7 @@ public static class RelaySwitchModuleMapper
     ArgumentNullException.ThrowIfNull(device);
 
     var dto = ReflectionMapper.Map<IRelaySwitchModule, RelaySwitchModuleDto>(device);
-
-    // Кастомная логика, при необходимости
+    dto.NumberRack = GetNumberRack(device);
 
     return dto;
   }
@@ -41,7 +40,26 @@ public static class RelaySwitchModuleMapper
     ArgumentNullException.ThrowIfNull(dto);
 
     ReflectionMapper.Apply(dto, device);
+    SetNumberRack(device, dto.NumberRack);
+  }
 
-    // Кастомная логика, при необходимости
+  private static int GetNumberRack(IRelaySwitchModule device)
+  {
+    var property = device.GetType().GetProperty(nameof(RelaySwitchModuleDto.NumberRack));
+    if (property?.CanRead == true && property.PropertyType == typeof(int))
+    {
+      return (int)(property.GetValue(device) ?? 0);
+    }
+
+    return 0;
+  }
+
+  private static void SetNumberRack(IRelaySwitchModule device, int numberRack)
+  {
+    var property = device.GetType().GetProperty(nameof(RelaySwitchModuleDto.NumberRack));
+    if (property?.CanWrite == true && property.PropertyType == typeof(int))
+    {
+      property.SetValue(device, numberRack);
+    }
   }
 }

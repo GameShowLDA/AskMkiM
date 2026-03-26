@@ -1,11 +1,21 @@
-﻿namespace Ask.Core.Shared.DTO.Settings;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ask.Core.Shared.DTO.Settings;
 
 /// <summary>
 /// DTO настроек отображения устройств.
 /// Определяет, какие данные о устройствах и измерениях отображаются в интерфейсе.
 /// </summary>
+[Table("DeviceDisplaySettings")]
 public class DeviceDisplaySettingsDto
 {
+  /// <summary>
+  /// Идентификатор записи настроек.
+  /// </summary>
+  [Key]
+  public int Id { get; set; }
+
   /// <summary>
   /// Отображать машинные адреса точек.
   /// </summary>

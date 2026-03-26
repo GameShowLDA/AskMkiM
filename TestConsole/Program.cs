@@ -1,4 +1,3 @@
-using Ask.DataBase.Engine.Initialization;
 using TestConsole.GPT;
 using TestConsole.MINT;
 
@@ -8,11 +7,6 @@ namespace TestConsole
   {
     private static async Task Main(string[] args)
     {
-      await DatabaseEngineInitializer.InitializeAsync(WriteStartupLog);
-      Console.ForegroundColor = ConsoleColor.White;
-
-      Console.WriteLine("=== Main Menu ===");
-
       while (true)
       {
         Console.WriteLine("\nВыберите действие:");
@@ -31,9 +25,10 @@ namespace TestConsole
         Console.WriteLine("13. Отладка UPS");
         Console.WriteLine("14. Проверка namespace по папкам");
         Console.WriteLine("15. New DB check");
+        Console.WriteLine("16. Добавить устройство в новую БД");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 15)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 16)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -99,6 +94,10 @@ namespace TestConsole
 
           case 15:
             await ProviderDatabaseCheck.RunAsync();
+            break;
+
+          case 16:
+            await DatabaseDeviceCreate.RunAsync();
             break;
 
           case 0:

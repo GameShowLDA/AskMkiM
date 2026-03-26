@@ -1,5 +1,6 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
@@ -7,6 +8,7 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 /// DTO модуля коммутации реле.
 /// Содержит только данные устройства без логики управления и зависимостей.
 /// </summary>
+[Table("RelaySwitchModules")]
 public class RelaySwitchModuleDto : AttachableDeviceDto
 {
   /// <summary>
