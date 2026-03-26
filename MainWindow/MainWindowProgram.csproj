@@ -46,7 +46,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
+			<ProjectReference Include="..\Ask.DataBase.Engine\Ask.DataBase.Engine.csproj" />
+			<ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
 		<ProjectReference Include="..\Ask.UI\Ask.UI.csproj" />
 		<ProjectReference Include="..\ConsoleUI\ConsoleUI.csproj" />
 		<ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />

@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.DataBase.Engine.Initialization;
 using DataBaseConfiguration;
 using DataBaseConfiguration.Services.Device;
 using static Ask.LogLib.LoggerUtility;
@@ -14,6 +15,12 @@ namespace MainWindowProgram.Init
       try
       {
         await DataBaseConfig.InitializeDB();
+        var newDatabaseReport = await DatabaseEngineInitializer.InitializeAsync();
+        LogInformation(
+          $"Новая БД инициализирована. Применено миграций: {newDatabaseReport.AppliedMigrations}, " +
+          $"использован EnsureCreated: {newDatabaseReport.UsedEnsureCreated}, " +
+          $"добавлено горячих клавиш: {newDatabaseReport.SeededHotkeys}, " +
+          $"создано строк настроек: {newDatabaseReport.CreatedDefaultSettingsRows}.");
         WarmUpDeviceCaches();
 
         var protocolTask = new DataBaseConfiguration.Services.Settings.ProtocolService().GetProtocolAsync();
