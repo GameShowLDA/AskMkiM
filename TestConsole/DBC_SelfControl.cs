@@ -3,17 +3,25 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Initialization;
 using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using static Ask.LogLib.LoggerUtility;
+using EngineSwitchingDevices = Ask.DataBase.Engine.Static.Devices.SwitchingDevices;
 
 namespace TestConsole
 {
   internal class DBC_SelfControl
   {
+    private enum UkshDatabaseSource
+    {
+      OldDatabase,
+      NewDatabase,
+    }
 
     private static bool meterConnect = false;
     private static bool dbcConnect = false;
+    private static UkshDatabaseSource _ukshDatabaseSource = UkshDatabaseSource.OldDatabase;
     internal static async Task RunAsync()
     {
       Console.WriteLine("=== Самоконтроль УКШ ===");
@@ -21,6 +29,7 @@ namespace TestConsole
       {
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("\nВыберите действие:");
+        Console.WriteLine($"Источник УКШ: {GetUkshDatabaseSourceName(_ukshDatabaseSource)}");
         Console.WriteLine("1. Тест блокировочных реле");
         Console.WriteLine("2. Тест мультиметра");
         Console.WriteLine("3. Тест АЦП");
@@ -29,10 +38,11 @@ namespace TestConsole
         Console.WriteLine("6. Тест Шунт");
         Console.WriteLine("7. Тест ППУ");
         Console.WriteLine("8. Весь самоконтроль");
+        Console.WriteLine("9. Выбрать источник УКШ");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 8)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 9)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -93,6 +103,11 @@ namespace TestConsole
             }
 
             LogDebug("Полный самоконтроль завершен.");
+            break;
+
+          case 9:
+            _ukshDatabaseSource = SelectUkshDatabaseSource();
+            Console.WriteLine($"Источник УКШ переключен: {GetUkshDatabaseSourceName(_ukshDatabaseSource)}");
             break;
 
           case 0:
@@ -331,7 +346,7 @@ namespace TestConsole
 
     private static ISwitchingDevice SelectDeviceBusCommutation()
     {
-      var dbc = new SwitchingDeviceServices().GetAll();
+      var dbc = GetSwitchingDevices();
 
       if (dbc == null || !dbc.Any())
       {
@@ -361,6 +376,58 @@ namespace TestConsole
       }
 
       return null;
+    }
+
+    private static List<ISwitchingDevice> GetSwitchingDevices()
+    {
+      return _ukshDatabaseSource switch
+      {
+        UkshDatabaseSource.OldDatabase => new SwitchingDeviceServices().GetAll(),
+        UkshDatabaseSource.NewDatabase => GetSwitchingDevicesFromNewDatabase(),
+        _ => new List<ISwitchingDevice>(),
+      };
+    }
+
+    private static List<ISwitchingDevice> GetSwitchingDevicesFromNewDatabase()
+    {
+      DatabaseEngineInitializer.InitializeAsync().GetAwaiter().GetResult();
+      return EngineSwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
+    }
+
+    private static UkshDatabaseSource SelectUkshDatabaseSource()
+    {
+      Console.WriteLine("Выберите источник УКШ:");
+      Console.WriteLine("1. Старая БД");
+      Console.WriteLine("2. Новая БД");
+
+      while (true)
+      {
+        Console.Write("Введите номер источника: ");
+        if (int.TryParse(Console.ReadLine(), out var choice))
+        {
+          if (choice == 1)
+          {
+            return UkshDatabaseSource.OldDatabase;
+          }
+
+          if (choice == 2)
+          {
+            return UkshDatabaseSource.NewDatabase;
+          }
+        }
+
+        Console.WriteLine("Неверный выбор. Попробуйте снова.");
+      }
+    }
+
+    private static string GetUkshDatabaseSourceName(UkshDatabaseSource source)
+    {
+      return source switch
+      {
+        UkshDatabaseSource.OldDatabase => "старая БД",
+        UkshDatabaseSource.NewDatabase => "новая БД",
+        _ => "неизвестно",
+      };
     }
 
     private static IFastMeter SelectMeter()
