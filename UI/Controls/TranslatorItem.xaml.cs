@@ -48,6 +48,7 @@ namespace UI.Controls
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
+    private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
 
     public List<BaseCommandModel> TranslationModels
     {
@@ -148,6 +149,7 @@ namespace UI.Controls
 
       MessageEventAdapter.RaiseInfoMessage(
              $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+      UpdateRightEditorActions();
     }
 
     public void SetLeftEditor(ITextEditorView editor)
@@ -200,6 +202,9 @@ namespace UI.Controls
       rightEditor.BackRequested += RightEditor_BackRequestedAsync;
       rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
+      rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
+      rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
+      UpdateRightEditorActions();
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
@@ -219,6 +224,11 @@ namespace UI.Controls
       }
     }
 
+    private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
+    {
+      SaveTranslatedFileToDisk();
+    }
+
     private bool SaveFileToArchive()
     {
       var rightBox = GetRightBox();
@@ -233,6 +243,36 @@ namespace UI.Controls
       }
 
       return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
+    }
+
+    private bool SaveTranslatedFileToDisk()
+    {
+      var rightBox = GetRightBox();
+      var rightTextEditor = rightBox?.GetTextEditor();
+      if (rightTextEditor?.TextEditorModel == null)
+      {
+        NotificationHostService.Instance.Show(
+          "Сохранение на диск",
+          "Редактор не готов к сохранению на диск.",
+          NotificationType.Error);
+        return false;
+      }
+
+      return _translatedFileSaveService.SaveToDisk(
+        this,
+        rightTextEditor.Text,
+        rightTextEditor.TextEditorModel.FilePath);
+    }
+
+    private void UpdateRightEditorActions()
+    {
+      var rightEditor = GetRightBox();
+      if (rightEditor == null)
+      {
+        return;
+      }
+
+      rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
     }
 
     private void LeftEditor_SaveRequested(object? sender, EventArgs e)

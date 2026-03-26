@@ -17,9 +17,9 @@ namespace UI.Services.Archive
 
     public IReadOnlyList<string> IntegrityNotifications => _archiveOpening.IntegrityNotifications;
 
-    public string CreateArchive(string archiveName)
+    public string CreateArchive(string archiveName, string? targetDirectory = null)
     {
-      var createdArchivePath = _archiveCreation.Create(archiveName);
+      var createdArchivePath = _archiveCreation.Create(archiveName, targetDirectory);
       EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveCreated, createdArchivePath));
       return createdArchivePath;
     }

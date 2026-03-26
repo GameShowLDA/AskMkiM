@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Services.FilesUtility;
-using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using System.IO.Compression;
 using static Ask.LogLib.LoggerUtility;
@@ -10,10 +9,10 @@ namespace UI.Services.Archive
   {
     private const string ArchiveExtension = ".apkw";
 
-    public string Create(string archiveName)
+    public string Create(string archiveName, string? targetDirectory = null)
     {
       var normalizedArchiveName = NormalizeArchiveName(archiveName);
-      var archivesDirectoryPath = EnsureArchivesDirectory();
+      var archivesDirectoryPath = EnsureArchivesDirectory(targetDirectory);
       var archivePath = Path.Combine(archivesDirectoryPath, normalizedArchiveName + ArchiveExtension);
 
       if (File.Exists(archivePath))
@@ -34,18 +33,16 @@ namespace UI.Services.Archive
       return archivePath;
     }
 
-    private string EnsureArchivesDirectory()
+    private string EnsureArchivesDirectory(string? targetDirectory)
     {
-      var baseDir = new DirectoryInfo(AppContext.BaseDirectory);
-      var archivesDirectoryPath = Path.Combine(baseDir.FullName, FileLocations.ArchiveDirectory);
-      var directoryInfo = Directory.CreateDirectory(archivesDirectoryPath);
-     
-      if ((directoryInfo.Attributes & FileAttributes.Hidden) == 0)
+      if (string.IsNullOrWhiteSpace(targetDirectory))
       {
-          directoryInfo.Attributes |= FileAttributes.Hidden;
+        return ArchiveDirectoryService.ResolveArchivesRootPath();
       }
 
-      return directoryInfo.FullName;
+      var fullDirectoryPath = Path.GetFullPath(targetDirectory);
+      Directory.CreateDirectory(fullDirectoryPath);
+      return fullDirectoryPath;
     }
 
     private static string NormalizeArchiveName(string archiveName)

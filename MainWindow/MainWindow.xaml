@@ -167,7 +167,8 @@
                     <MenuItem Header="Замена" Style="{DynamicResource StyleMenuItem}" Tag="SearchReplace" x:Name="searchReplaceMenuItem" Visibility="Collapsed" Command="{Binding File.SearchReplaceFileCommand}"/>
 
                     <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Archive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Archive" Command="{Binding File.OpenArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+                    <MenuItem x:Name="openArchiveMenuItem" Header="Открыть архив" Style="{DynamicResource StyleMenuItem}" Tag="Archive" Command="{Binding File.OpenArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+                    <MenuItem x:Name="createArchiveMenuItem" Header="Создать архив" Style="{DynamicResource StyleMenuItem}" Tag="CreateArchive" Visibility="Collapsed" Command="{Binding File.CreateArchiveCommand}"/>
                     
                     <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
