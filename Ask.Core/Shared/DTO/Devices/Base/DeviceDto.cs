@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ask.Core.Shared.DTO.Devices.Base;
 
@@ -11,6 +12,7 @@ public class DeviceDto
   /// <summary>
   /// Уникальный идентификатор устройства.
   /// </summary>
+  [Key]
   public int Id { get; set; }
 
   /// <summary>

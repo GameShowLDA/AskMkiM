@@ -1,5 +1,6 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ask.Core.Shared.DTO.Devices.Breakdown;
 
@@ -7,6 +8,7 @@ namespace Ask.Core.Shared.DTO.Devices.Breakdown;
 /// DTO пробойной установки.
 /// Содержит параметры режимов и ограничений устройства без логики управления.
 /// </summary>
+[Table("BreakdownTesters")]
 public class BreakdownTesterDto : AttachableDeviceDto
 {
   /// <summary>

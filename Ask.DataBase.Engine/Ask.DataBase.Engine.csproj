@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.Device.Application\Ask.Device.Application.csproj" />
     <ProjectReference Include="..\Ask.DataBase.Provider\Ask.DataBase.Provider.csproj" />
   </ItemGroup>
 

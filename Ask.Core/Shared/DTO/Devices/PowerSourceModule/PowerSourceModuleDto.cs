@@ -1,9 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Ask.Core.Shared.DTO.Devices.Base;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ask.Core.Shared.DTO.Devices.PowerSourceModule
 {
@@ -11,6 +7,7 @@ namespace Ask.Core.Shared.DTO.Devices.PowerSourceModule
   /// DTO модуля источника питания.
   /// Содержит параметры устройства без логики управления и зависимостей.
   /// </summary>
+  [Table("PowerSourceModules")]
   public class PowerSourceModuleDto : AttachableDeviceDto
   {
     /// <summary>
