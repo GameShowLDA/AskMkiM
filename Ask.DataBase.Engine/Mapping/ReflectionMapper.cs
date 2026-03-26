@@ -100,14 +100,30 @@ namespace Ask.DataBase.Engine.Mapping
     /// <returns>Список пар свойств для копирования.</returns>
     private static List<(PropertyInfo src, PropertyInfo dst)> BuildMap(Type source, Type destination)
     {
-      var srcProps = source.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-      var dstProps = destination.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+      var srcProps = GetPublicInstanceProperties(source);
+      var dstProps = GetPublicInstanceProperties(destination);
 
       return (from s in srcProps
               join d in dstProps on s.Name equals d.Name
               where s.CanRead && d.CanWrite
               where d.PropertyType.IsAssignableFrom(s.PropertyType)
               select (s, d)).ToList();
+    }
+
+    private static IReadOnlyList<PropertyInfo> GetPublicInstanceProperties(Type type)
+    {
+      if (!type.IsInterface)
+      {
+        return type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+      }
+
+      return type
+        .GetInterfaces()
+        .Append(type)
+        .SelectMany(x => x.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        .GroupBy(x => (x.Name, x.PropertyType))
+        .Select(x => x.First())
+        .ToList();
     }
   }
 }
