@@ -3,7 +3,7 @@ using Message;
 using System.IO;
 using System.Windows;
 using UI.Controls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Services.FileManager
 {
