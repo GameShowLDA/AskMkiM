@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using System.Text;
@@ -75,7 +76,22 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             ExecutorMessageBuilder.BuildChainCheckBlock(BuildChainDisplayString(chainCopy)),
             IsBlockStart: true);
 
-          var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1, preMeasurementDelegate);
+          bool polarity = false;
+
+          if (context.CommandModel is NeCommandModel neCommandModel)
+          {
+            var item = neCommandModel.ElementEnablingType.FirstOrDefault(x => x.Item1 == chain);
+            
+            if (item != default)
+            {
+              if (item.Item2 == ElementEnabling.Type.Direct)
+              { 
+                polarity = true;
+              }
+            }
+          }
+
+          var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1, preMeasurementDelegate, polarity);
 
           LogDebug($"[ConnectedPointChecker] Chain checked. Fragments={result.Fragments.Count}. Display={BuildDisconnectionDisplayString(result.Fragments)}");
 
@@ -83,12 +99,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           errors.AddRange(result.Errors);
           infos.AddRange(result.Infos);
 
-          if (context.TypeCommand == MeasurementTypeCommand.KC)
+          if (context.TypeCommand == MeasurementTypeCommand.KC || context.TypeCommand == MeasurementTypeCommand.NE)
           {
             foreach (var failedMeasurement in result.FailedMeasurements)
             {
               var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
-                MeasurementTypeCommand.KC,
+                context.TypeCommand,
                 context.LowerLimit,
                 context.HigherLimit,
                 failedMeasurement.Value,
@@ -163,7 +179,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Рекурсивная проверка цепи: первая точка подключается к нижней шине,
     /// остальные по очереди к верхней шине с тестом на связь.
     /// </summary>
-    private static async Task<ChainProcessingResult> ProcessChainAsync(List<PointModel> points, ConnectedPointContext context, int indentLevel, PreMeasurementDelegate preMeasurementDelegate = null)
+    private static async Task<ChainProcessingResult> ProcessChainAsync(List<PointModel> points, ConnectedPointContext context, int indentLevel, PreMeasurementDelegate preMeasurementDelegate = null, bool revers = false)
     {
       var result = new ChainProcessingResult();
 
@@ -189,7 +205,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       LogDebug($"[ConnectedPointChecker] Enter fragment. Count={points.Count}, Base={basePoint.Mnemonic}, Indent={indentLevel}");
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = indentLevel }, IsBlockStart: true);
-      await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(basePoint, messageService, false);
+      await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(basePoint, messageService, revers);
       baseConnected = true;
 
       if (preMeasurementDelegate != null)
@@ -206,7 +222,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(basePoint, point, CircuitFaultType.ShortCircuit), IsBlockStart: true);
 
           var pointConnected = false;
-          await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, messageService, false);
+          await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, messageService, revers);
           pointConnected = true;
 
           try
@@ -235,7 +251,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               brokenPoints.Add(point);
               firstFailureValue ??= measured.Value;
 
-              if (context.TypeCommand == MeasurementTypeCommand.KC)
+              if (context.TypeCommand == MeasurementTypeCommand.KC || context.TypeCommand == MeasurementTypeCommand.NE)
               {
                 result.FailedMeasurements.Add(new FailedMeasurement(chainStr, measured.Value));
               }
@@ -256,7 +272,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             if (pointConnected)
             {
-              await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, messageService, false);
+              await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, messageService, revers);
             }
           }
         }
@@ -265,7 +281,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         if (baseConnected)
         {
-          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(basePoint, messageService, false);
+          await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(basePoint, messageService, revers);
         }
       }
 
@@ -275,7 +291,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       result.FirstFailureValue ??= firstFailureValue;
 
       // Если найдены разрывы, формируем новую цепь из точек с разрывами и повторяем проверку.
-      if (brokenPoints.Count > 0 && context.TypeCommand != MeasurementTypeCommand.KC)
+      if (brokenPoints.Count > 0 && context.TypeCommand != MeasurementTypeCommand.KC && context.TypeCommand != MeasurementTypeCommand.NE)
       {
         var nextFragment = await ProcessChainAsync(brokenPoints, context, indentLevel + 1, preMeasurementDelegate);
         result.Append(nextFragment);
