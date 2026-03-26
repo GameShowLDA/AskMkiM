@@ -145,6 +145,7 @@ namespace UI.Controls
       WarningCount = issuesSnapshot.WarningCount;
 
       ErrorListBoxVertical.SetIssues(issuesSnapshot.Issues);
+      UpdateArchiveButtonVisibility();
 
       MessageEventAdapter.RaiseInfoMessage(
              $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
@@ -200,6 +201,7 @@ namespace UI.Controls
       rightEditor.BackRequested += RightEditor_BackRequestedAsync;
       rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
+      rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
@@ -327,6 +329,12 @@ namespace UI.Controls
 
     public void SetRightEditorName(string newText) => GetRightBox().TranslationFileName.Text = newText;
     public void SetLeftEditorName(string newText) => GetLeftBox().FileName.Text = newText;
+
+    private void UpdateArchiveButtonVisibility()
+    {
+      var rightEditor = GetRightBox();
+      rightEditor?.SetArchiveButtonVisibility(ErrorCount == 0);
+    }
 
     private void ErrorListBoxVertical_BreakpointItemDoubleClicked(BreakpointListItem bp)
 	  {
