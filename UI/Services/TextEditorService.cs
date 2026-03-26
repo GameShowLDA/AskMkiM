@@ -59,6 +59,12 @@ namespace UI.Services
       {
         Text = fileContent
       };
+
+      if (textEditorModel != null)
+      {
+        textEditorModel.SavedTextSnapshot = fileContent;
+      }
+
       return editor;
     }
 
