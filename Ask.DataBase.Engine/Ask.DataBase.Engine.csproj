@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.DataBase.Provider\Ask.DataBase.Provider.csproj" />
   </ItemGroup>
 
 </Project>

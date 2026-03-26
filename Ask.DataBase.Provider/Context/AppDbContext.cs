@@ -8,6 +8,8 @@ namespace Ask.DataBase.Provider.Context
   /// </summary>
   public partial class AppDbContext : DbContext
   {
+    public AppDbContext() { }
+
     /// <summary>
     /// Конфигурация базы данных.
     /// </summary>
