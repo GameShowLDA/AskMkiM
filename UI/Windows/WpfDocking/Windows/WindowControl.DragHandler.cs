@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using UI.Windows.WpfDocking.Internal.Windows;
 
 namespace UI.Windows.WpfDocking.Windows
 {

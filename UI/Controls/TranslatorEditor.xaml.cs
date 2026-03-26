@@ -1,9 +1,8 @@
-using System;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
-using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
-using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Controls
 {

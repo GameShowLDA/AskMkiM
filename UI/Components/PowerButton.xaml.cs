@@ -4,6 +4,8 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using DataBaseConfiguration.Services.Device;
 using Message;
 using System.Windows;
@@ -234,7 +236,7 @@ namespace UI.Components
     /// </summary>
     private async Task StopPowerSequenceAsync()
     {
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
       await Task.Delay(500);
 
       bool power = true;

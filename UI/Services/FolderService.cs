@@ -1,10 +1,10 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.Static;
 using System.Diagnostics;
 using System.IO;
 using UI.Controls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
-namespace UI.Services.Services
+namespace UI.Services
 {
   /// <summary>
   /// Сервис для работы с файловой системой, связанной с редактором.

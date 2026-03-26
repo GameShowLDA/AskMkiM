@@ -300,10 +300,10 @@
 
 Реальные классы протоколов:
 
-- `SerialDeviceProtocol`;
-- `UdpDeviceProtocol`;
-- `KeysightDeviceProtocol`;
-- `UninterruptiblePowerSupplyUsbProtocol`.
+- `ComProtocol`;
+- `UdpProtocol`;
+- `TcpProtocol`;
+- `UsbProtocol`.
 
 ## База данных и настройки
 

@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static UI.Controls.StatusBarControl;
 
 

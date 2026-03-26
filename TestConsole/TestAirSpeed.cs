@@ -1,6 +1,5 @@
-﻿using DataBaseConfiguration.Services.Device;
-using NewCore.Base.Device;
-using NewCore.Communication;
+using Ask.Device.Communication.Ethernet.Udp.Protocols;
+using DataBaseConfiguration.Services.Device;
 
 namespace TestConsole
 {
@@ -12,7 +11,7 @@ namespace TestConsole
       await manager.PowerManager.StartPowerAsync();
 
       await Task.Delay(5000);
-      var udp = new UdpDeviceProtocol(manager as DeviceWithIP);
+      var udp = new UdpProtocol(manager);
 
       for (int speed = 0; speed <= 255; speed += 50)
       {

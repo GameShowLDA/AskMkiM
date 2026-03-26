@@ -2,7 +2,7 @@
 using Ask.Core.Shared.Metadata.Static;
 using System.Windows;
 using UI.Components.SearchControls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Services.FileManager
 {

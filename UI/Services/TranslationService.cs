@@ -7,7 +7,7 @@ using Message;
 using System.Windows;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services

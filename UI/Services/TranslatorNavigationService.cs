@@ -1,11 +1,9 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Message;
-using System;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using UI.Controls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Services
 {

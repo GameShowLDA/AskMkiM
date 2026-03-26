@@ -1,8 +1,8 @@
 ﻿using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.Runtime.Device;
 using DataBaseConfiguration.Services.Device;
-using NewCore.Base.DeviceResponses;
-using NewCore.Device;
 using System.Text.Json;
 
 namespace TestConsole.MINT

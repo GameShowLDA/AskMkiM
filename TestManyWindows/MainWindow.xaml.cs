@@ -1,7 +1,7 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 
-namespace TestDocking
+namespace TestManyWindows
 {
   public partial class MainWindow : Window
   {

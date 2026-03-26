@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.DTO.TextEditor;
-using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
+﻿using Ask.Core.Shared.DTO.TextEditor.Ask.Core.Shared.DTO.TextEditor;
 using Ask.Support;
 using Message;
 using Microsoft.Win32;
@@ -8,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Components.FileComparerControls

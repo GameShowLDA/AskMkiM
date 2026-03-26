@@ -2,16 +2,13 @@
 using Ask.Core.Services.Metrology;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Atributes;
-using Ask.Core.Shared.Metadata.Enums.MetrologyEnums;
 using Ask.Core.Shared.Metadata.View;
+using Ask.Device.Runtime.Device;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
-using MainWindowProgram.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NewCore.Device;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;

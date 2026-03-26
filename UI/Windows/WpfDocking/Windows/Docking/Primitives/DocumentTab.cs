@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UI.Windows.WpfDocking.Internal;
 using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 
 namespace UI.Windows.WpfDocking.Windows.Docking.Primitives

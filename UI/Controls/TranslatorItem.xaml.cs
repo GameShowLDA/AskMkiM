@@ -11,7 +11,7 @@ using System.Windows.Controls;
 using Ask.UI.Controls.ErrorList;
 using System.Windows.Media;
 using UI.Components;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Services;
 using UI.Services.Archive;
 using Ask.Core.Services.EventCore.Adapters;
