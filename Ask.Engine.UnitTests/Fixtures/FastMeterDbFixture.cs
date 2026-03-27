@@ -1,4 +1,5 @@
 using Ask.Core.Shared.Entity.Devices;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration;
 using DataBaseConfiguration.Services.Device;
 
@@ -12,10 +13,7 @@ public sealed class FastMeterDbFixture : IDisposable
   {
     DataBaseConfig.InitializeDB().GetAwaiter().GetResult();
 
-    var fastMeterServices = new FastMeterServices();
-    fastMeterServices.ReloadCache();
-
-    if (fastMeterServices.GetAll().Any())
+    if (FastMeters.GetAllAsync().GetAwaiter().GetResult().Any())
     {
       return;
     }
@@ -31,7 +29,7 @@ public sealed class FastMeterDbFixture : IDisposable
       MaxContinuityResistance = 100
     };
 
-    fastMeterServices.Create(entity);
+    FastMeters.CreateAsync(entity).GetAwaiter();
     createdFastMeterId = entity.Id;
   }
 
@@ -42,14 +40,11 @@ public sealed class FastMeterDbFixture : IDisposable
       return;
     }
 
-    var fastMeterServices = new FastMeterServices();
-    var entity = fastMeterServices
-      .GetAllEntities()
-      .FirstOrDefault(item => item.Id == createdFastMeterId.Value);
+    var entity = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == createdFastMeterId.Value);
 
     if (entity is not null)
     {
-      fastMeterServices.Delete(entity);
+      FastMeters.DeleteAsync(entity).GetAwaiter();
     }
   }
 }

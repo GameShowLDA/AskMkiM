@@ -2,6 +2,7 @@
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using static Ask.LogLib.LoggerUtility;
@@ -35,7 +36,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       }
 
       // TODO: заменить на точный измеритель в дальнейшем
-      var meter = new DataBaseConfiguration.Services.Device.FastMeterServices().GetAll().FirstOrDefault();
+      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       //var minResistance = Measurement.MeasurementTypeCommand.PR.GetDisplayInfo().LowerLimit;
       if (meter == null)
       {

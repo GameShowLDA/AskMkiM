@@ -98,7 +98,6 @@ namespace MainWindowProgram.Init
       try
       {
         new PowerSourceModuleServices().ReloadCache();
-        new FastMeterServices().ReloadCache();
         new BreakdownTesterServices().ReloadCache();
         new RackServices().ReloadCache();
         DeviceRuntime.ClearCache();

@@ -21,6 +21,7 @@ using UI.Controls.Settings.DeviceConfig.FastMeter;
 using UI.Controls.Settings.DeviceConfig.ModuleRelayControl;
 using UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
@@ -254,8 +255,11 @@ namespace UI.Controls.Settings.DeviceConfig
     private void LoadFastMeters(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
       devicesControl.ClearDevice(new FastMeterEntity());
-
-      var fastMeters = new FastMeterServices().GetEntitiesByNumberChassis(chassis.Number);
+      var fastMeters = FastMeters
+        .GetDevicesByNumberChassisAsync(chassis.Number)
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToFastMeterEntity);
 
       foreach (var device in fastMeters)
       {
@@ -504,6 +508,22 @@ namespace UI.Controls.Settings.DeviceConfig
         SwitchResistance = device.SwitchResistance,
         SwitchCapacitance = device.SwitchCapacitance,
         BusType = device.BusType,
+      };
+    }
+
+    private static FastMeterEntity ToFastMeterEntity(IFastMeter device)
+    {
+      return new FastMeterEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+        MaxContinuityResistance = device.MaxContinuityResistance,
+        TypeMode = device.TypeMode,
       };
     }
   }

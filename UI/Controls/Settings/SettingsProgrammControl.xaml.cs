@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -97,7 +98,6 @@ namespace UI.Controls.Settings
     {
       try
       {
-        var fastMeterService = new FastMeterServices();
         var breakdownService = new BreakdownTesterServices();
         var powerSourceService = new PowerSourceModuleServices();
 
@@ -106,7 +106,7 @@ namespace UI.Controls.Settings
 
         string printableText = BuildPrintableConfiguration(
           chassisList,
-          fastMeterService,
+          numberChassis => FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
           breakdownService,
           powerSourceService,
           numberChassis => RelaySwitchModules.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
@@ -463,7 +463,6 @@ namespace UI.Controls.Settings
     {
       new RackServices().ReloadCache();
       new PowerSourceModuleServices().ReloadCache();
-      new FastMeterServices().ReloadCache();
       new BreakdownTesterServices().ReloadCache();
       DeviceRuntime.ClearCache();
     }
@@ -581,7 +580,7 @@ namespace UI.Controls.Settings
 
     private static string BuildPrintableConfiguration(
       IReadOnlyCollection<IChassisManager> chassisList,
-      FastMeterServices fastMeterService,
+      Func<int, IEnumerable<IFastMeter>> fastMeterService,
       BreakdownTesterServices breakdownService,
       PowerSourceModuleServices powerSourceService,
       Func<int, IEnumerable<IRelaySwitchModule>> getRelaySwitchModules,
@@ -639,7 +638,7 @@ namespace UI.Controls.Settings
         devicesPrinted += AppendDeviceSection(
           sb,
           "Измеритель (быстрый)",
-          fastMeterService.GetEntitiesByNumberChassis(chassis.Number),
+          fastMeterService(chassis.Number),
           insertSectionSeparator: devicesPrinted > 0);
 
         devicesPrinted += AppendDeviceSection(

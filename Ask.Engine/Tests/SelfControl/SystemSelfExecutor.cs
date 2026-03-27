@@ -31,7 +31,7 @@ namespace Ask.Engine.Tests.SelfControl
         return;
       }
 
-      var meter = new DataBaseConfiguration.Services.Device.FastMeterServices().GetDevicesByNumberChassis(managerShassi.Number).FirstOrDefault();
+      var meter = FastMeters.GetDevicesByNumberChassisAsync(managerShassi.Number).GetAwaiter().GetResult().FirstOrDefault();
       if (meter == null)
       {
         return;

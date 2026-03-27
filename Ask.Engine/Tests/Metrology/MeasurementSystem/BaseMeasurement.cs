@@ -86,8 +86,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       var modeDevice = GetDeviceTypeForMode(mode);
       if (modeDevice == MetrologicalDeviceType.FastMeter || modeDevice == MetrologicalDeviceType.Mint)
       {
-        var fastRepo = new FastMeterServices();
-        var fast = fastRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        var fast = FastMeters.GetDevicesByNumberChassisAsync(point1.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
         if (fast == null)
         {
           throw ConnectionExceptionAdapter.NotFoundInConfiguration("Мультиметр");

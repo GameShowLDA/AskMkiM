@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
@@ -90,12 +91,12 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
           {
             if (_editingEntity == null)
             {
-              new FastMeterServices().Create(deviceEntity);
+              FastMeters.CreateAsync(deviceEntity).GetAwaiter().GetResult();
             }
             else
             {
               deviceEntity.Id = _editingEntity.Id;
-              new FastMeterServices().Update(deviceEntity);
+              FastMeters.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
             }
 
             RequestSave?.Invoke(s, deviceEntity);
