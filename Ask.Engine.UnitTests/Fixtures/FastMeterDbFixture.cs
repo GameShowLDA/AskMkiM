@@ -1,7 +1,6 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration;
-using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.UnitTests.Fixtures;
 

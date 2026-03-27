@@ -1,9 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 using System.Diagnostics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TestConsole.GPT
 {

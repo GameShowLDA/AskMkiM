@@ -18,7 +18,6 @@ using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using DataBaseConfiguration;
-using DataBaseConfiguration.Services.Device;
 using Microsoft.Win32;
 using System.Globalization;
 using System.IO;

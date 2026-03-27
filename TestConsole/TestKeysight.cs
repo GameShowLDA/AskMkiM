@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 using System.Net;
 
 namespace TestConsole

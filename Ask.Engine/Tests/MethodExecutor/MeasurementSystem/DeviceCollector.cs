@@ -1,11 +1,8 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
-using DataBaseConfiguration.Services.Device;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
 {

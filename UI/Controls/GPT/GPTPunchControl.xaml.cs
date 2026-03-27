@@ -1,10 +1,7 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using System.Windows.Controls;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Controls.GPT
 {

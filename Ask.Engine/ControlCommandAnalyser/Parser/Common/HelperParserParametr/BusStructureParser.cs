@@ -3,7 +3,6 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using DataBaseConfiguration.Services.Device;
 using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr

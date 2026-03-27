@@ -3,7 +3,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Device;
-using DataBaseConfiguration.Services.Device;
 using System.Text.Json;
 
 namespace TestConsole.MINT

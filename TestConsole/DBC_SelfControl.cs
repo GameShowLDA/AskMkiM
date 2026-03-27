@@ -5,7 +5,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using static Ask.LogLib.LoggerUtility;
 using EngineSwitchingDevices = Ask.DataBase.Engine.Static.Devices.SwitchingDevices;

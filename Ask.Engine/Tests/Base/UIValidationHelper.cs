@@ -8,7 +8,6 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 using System.Globalization;
 
 namespace Ask.Engine.Tests.Base

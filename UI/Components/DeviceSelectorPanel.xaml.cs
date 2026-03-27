@@ -3,7 +3,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
@@ -14,14 +13,12 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 using static Ask.LogLib.LoggerUtility;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Components
 {
@@ -38,7 +35,7 @@ namespace UI.Components
     /// </summary>
     public ChoiceDevice PartDataControl;
 
-    bool _isHasDevice = false;
+    private bool _isHasDevice = false;
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceSelectorPanel"/>.

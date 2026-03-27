@@ -1,6 +1,5 @@
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Communication.Ethernet.Udp.Protocols;
-using DataBaseConfiguration.Services.Device;
 
 namespace TestConsole
 {

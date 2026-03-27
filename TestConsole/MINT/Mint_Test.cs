@@ -5,7 +5,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Commands;
-using DataBaseConfiguration.Services.Device;
 
 
 namespace TestConsole.MINT
