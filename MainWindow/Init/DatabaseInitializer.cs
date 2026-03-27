@@ -4,7 +4,6 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static;
 using DataBaseConfiguration;
-using DataBaseConfiguration.Services.Device;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init

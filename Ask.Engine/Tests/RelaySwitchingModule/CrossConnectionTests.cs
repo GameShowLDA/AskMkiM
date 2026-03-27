@@ -1,13 +1,10 @@
-﻿using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
-using DataBaseConfiguration.Services.Device;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.LogLib.LoggerUtility;
 

@@ -9,7 +9,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
-using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.Base
 {
@@ -115,7 +114,7 @@ namespace Ask.Engine.Tests.Base
         cancellationToken.ThrowIfCancellationRequested();
         return await module.MeterManager.GetMeterResponseAsync();
       }
-      catch 
+      catch
       {
         return false;
       }

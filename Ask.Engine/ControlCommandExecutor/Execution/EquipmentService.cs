@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -7,8 +6,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
 {

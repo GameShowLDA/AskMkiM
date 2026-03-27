@@ -1,5 +1,4 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -12,10 +11,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Support;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
-using DataBaseConfiguration.Services.Device;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using UI.Controls.Settings.DeviceConfig.BreakDown;
@@ -26,7 +21,6 @@ using UI.Controls.Settings.DeviceConfig.FastMeter;
 using UI.Controls.Settings.DeviceConfig.ModuleRelayControl;
 using UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
