@@ -344,7 +344,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var meter = new FastMeterServices().GetDevicesByNumberChassis(number).FirstOrDefault();
+        var meter = FastMeters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
         if (meter != null)
         {
           ValidFastMeter = meter;

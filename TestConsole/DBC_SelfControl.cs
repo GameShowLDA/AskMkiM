@@ -433,7 +433,7 @@ namespace TestConsole
 
     private static IFastMeter SelectMeter()
     {
-      var dbc = new FastMeterServices().GetAll();
+      var dbc = FastMeters.GetAllAsync().GetAwaiter().GetResult();
 
       if (dbc == null || !dbc.Any())
       {

@@ -128,7 +128,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IFastMeter:
-          new FastMeterServices().Delete((IFastMeter)device);
+          FastMeters.DeleteAsync((IFastMeter)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из FastMeterTable");
           break;
 

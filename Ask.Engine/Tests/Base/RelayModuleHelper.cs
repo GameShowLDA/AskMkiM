@@ -147,11 +147,7 @@ namespace Ask.Engine.Tests.Base
     /// </exception>
     public static IFastMeter ResolveFastMeter(int numberChassis)
     {
-      var fastMeter = new FastMeterServices()
-        .GetDevicesByNumberChassis(numberChassis)
-        .OfType<IFastMeter>()
-        .FirstOrDefault();
-
+      var fastMeter = FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult().OfType<IFastMeter>().FirstOrDefault();
       return fastMeter ?? throw ConnectionExceptionAdapter.NotFoundInConfiguration("Мультиметр (FastMeter)");
     }
 

@@ -179,7 +179,7 @@ namespace UI.Components
     /// <returns>Объект типа IFastMeter или null, если выбранное устройство не реализует IFastMeter.</returns>
     public IFastMeter GetFastMeterSafe()
     {
-      IFastMeter? result = new FastMeterServices().GetAll().FirstOrDefault();
+      IFastMeter? result = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
 
       return result;
     }

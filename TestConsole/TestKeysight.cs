@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Net;
 
@@ -14,7 +15,7 @@ namespace TestConsole
       Console.WriteLine("=== Управление Keysight ===");
       IPAddress iPAddress = IPAddress.Parse("192.168.1.16");
 
-      var keysight3466 = new FastMeterServices().GetAll().FirstOrDefault();
+      var keysight3466 = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if ((await keysight3466.ConnectableManager.InitializeAsync()).Connect)
       {
         Console.WriteLine($"Подключен к: {keysight3466.Name}");

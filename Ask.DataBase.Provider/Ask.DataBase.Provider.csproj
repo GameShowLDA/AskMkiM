@@ -23,14 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Ask.Core">
-      <HintPath>..\Ask.Core\Bin\Ask.Core\Ask.Core.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="Ask.LogLib">
-      <HintPath>..\Ask.LogLib\Bin\Ask.LogLib\Ask.LogLib.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
+    <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.LogLib\Ask.LogLib.csproj" />
   </ItemGroup>
 	
 
