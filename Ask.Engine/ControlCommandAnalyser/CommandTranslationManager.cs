@@ -129,7 +129,7 @@ namespace Ask.Engine.ControlCommandAnalyser
           {
             vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(managerShassi.Number);
           }
-          var managerRack = new RackServices().GetAllEntities();
+          var managerRack = Racks.GetAllAsync().GetAwaiter().GetResult();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)

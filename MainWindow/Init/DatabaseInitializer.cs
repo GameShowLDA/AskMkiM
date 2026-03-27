@@ -99,7 +99,6 @@ namespace MainWindowProgram.Init
       {
         new PowerSourceModuleServices().ReloadCache();
         new BreakdownTesterServices().ReloadCache();
-        new RackServices().ReloadCache();
         DeviceRuntime.ClearCache();
 
         LogInformation("Кэш устройств прогрет при старте приложения.");
