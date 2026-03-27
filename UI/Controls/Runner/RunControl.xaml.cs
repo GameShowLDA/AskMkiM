@@ -77,6 +77,7 @@ namespace UI.Controls.Runner
         }
 
         UpdateTranslatorEditorActions();
+        UpdateArchiveButtonVisibility();
       }
     }
 
@@ -235,6 +236,7 @@ namespace UI.Controls.Runner
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
       rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
+      rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
       var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
@@ -369,6 +371,19 @@ namespace UI.Controls.Runner
       {
         ErrorListBoxVertical.ClearAll();
         ErrorCount = 0;
+        UpdateArchiveButtonVisibility();
+      });
+    }
+
+    private void UpdateArchiveButtonVisibility()
+    {
+      Application.Current.Dispatcher?.Invoke(() =>
+      {
+        var translatorEditor = ChildTextEditorContainer.DockManager.DockItems
+          .FirstOrDefault(item => item.Content is TranslatorEditor)?
+          .Content as TranslatorEditor;
+
+        translatorEditor?.SetArchiveButtonVisibility(ErrorCount == 0);
       });
     }
 
