@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -99,15 +100,13 @@ namespace UI.Controls.Settings
     {
       try
       {
-        var breakdownService = new BreakdownTesterServices();
-
         var chassisList = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().OrderBy(chassis => chassis.Number)
           .ToList();
 
         string printableText = BuildPrintableConfiguration(
           chassisList,
           numberChassis => FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
-          breakdownService,
+          numberChassis => BreakdownTesters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
           numberChassis => PowerSourceModules.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
           numberChassis => RelaySwitchModules.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
           numberChassis => SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult());
@@ -461,7 +460,6 @@ namespace UI.Controls.Settings
 
     private static void ReloadDeviceCaches()
     {
-      new BreakdownTesterServices().ReloadCache();
       DeviceRuntime.ClearCache();
     }
 
@@ -579,7 +577,7 @@ namespace UI.Controls.Settings
     private static string BuildPrintableConfiguration(
       IReadOnlyCollection<IChassisManager> chassisList,
       Func<int, IEnumerable<IFastMeter>> fastMeterService,
-      BreakdownTesterServices breakdownService,
+      Func<int, IEnumerable<IBreakdownTester>> breakdownService,
       Func<int, IEnumerable<IPowerSourceModule>> powerSourceService,
       Func<int, IEnumerable<IRelaySwitchModule>> getRelaySwitchModules,
       Func<int, IEnumerable<ISwitchingDevice>> getSwitchingDevices)
@@ -642,7 +640,7 @@ namespace UI.Controls.Settings
         devicesPrinted += AppendDeviceSection(
           sb,
           "Пробойная установка",
-          breakdownService.GetEntitiesByNumberChassis(chassis.Number),
+          breakdownService(chassis.Number),
           insertSectionSeparator: devicesPrinted > 0);
 
         if (devicesPrinted == 0)

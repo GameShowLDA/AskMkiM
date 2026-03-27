@@ -304,7 +304,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var tester = ServiceLocator.GetRequired<BreakdownTesterServices>().GetDevicesByNumberChassis(number).FirstOrDefault();
+        var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
         if (tester != null)
         {
           ValidBreakdownTester = tester;

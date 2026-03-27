@@ -3,10 +3,12 @@ using Ask.Core.Services.Errors.DataBase;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Controls.Settings.DeviceConfig.BreakDown
 {
@@ -86,18 +88,17 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
         {
           deviceEntity.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
           deviceEntity.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
-          var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
-
+       
           try
           {
             if (_editingEntity == null)
             {
-              svc.Create(deviceEntity);
+              BreakdownTesters.CreateAsync(deviceEntity).GetAwaiter().GetResult();
             }
             else
             {
               deviceEntity.Id = _editingEntity.Id;
-              svc.Update(deviceEntity);
+              BreakdownTesters.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
             }
 
             RequestSave?.Invoke(s, deviceEntity);

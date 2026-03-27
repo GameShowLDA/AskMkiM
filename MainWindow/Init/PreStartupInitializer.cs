@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using static Ask.LogLib.LoggerUtility;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MainWindowProgram.Init
 {
@@ -76,9 +77,6 @@ namespace MainWindowProgram.Init
           {
             services.AddSingleton<Dispatcher>(_ => Application.Current.Dispatcher);
 
-            services.AddSingleton<IBreakdownTester, GPT79904>();
-            services.AddSingleton<BreakdownTesterServices>();
-
             services.AddSingleton<IUsbMonitorView, UsbMonitorService>();
             services.AddSingleton<MetrologyControlFactory>();
 
@@ -106,9 +104,7 @@ namespace MainWindowProgram.Init
           LogInformation("Инициализация устройств шасси: шасси не найдено");
           return;
         }
-
-        var testerService = ServiceLocator.GetRequired<BreakdownTesterServices>();
-        var tester = testerService.GetDevicesByNumberChassis(chassis.Number).FirstOrDefault();
+        var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(chassis.Number).GetAwaiter().GetResult().FirstOrDefault();
 
         LogInformation($"Инициализация устройств шасси завершена для №{chassis.Number}");
       }

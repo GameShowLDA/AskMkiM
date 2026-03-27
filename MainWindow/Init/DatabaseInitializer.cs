@@ -97,7 +97,6 @@ namespace MainWindowProgram.Init
     {
       try
       {
-        new BreakdownTesterServices().ReloadCache();
         DeviceRuntime.ClearCache();
 
         LogInformation("Кэш устройств прогрет при старте приложения.");

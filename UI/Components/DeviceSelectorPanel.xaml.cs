@@ -21,6 +21,7 @@ using System.Windows;
 using System.Windows.Controls;
 using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 using static Ask.LogLib.LoggerUtility;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Components
 {
@@ -231,13 +232,14 @@ namespace UI.Components
     {
       var relaySwitchModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
       var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
+      var breakdowns = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
 
       var sources = new List<IEnumerable<dynamic>>
       {
         PowerSourceModules.GetAllAsync().GetAwaiter().GetResult(),
         switchingDevices,
         relaySwitchModules,
-        new BreakdownTesterServices().GetAll()
+        breakdowns
       };
 
       var combined = new List<object>();
