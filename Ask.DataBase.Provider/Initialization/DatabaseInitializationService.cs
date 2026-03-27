@@ -119,6 +119,7 @@ public static class DatabaseInitializationService
     CancellationToken cancellationToken)
   {
     var options = new DbContextOptionsBuilder<AppDbContext>()
+      .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
       .UseSqlite($"Data Source={databasePath}")
       .Options;
 
@@ -128,42 +129,47 @@ public static class DatabaseInitializationService
 
     if (migrations.Count > 0)
     {
+      var appliedMigrations = await GetAppliedMigrationIdsSafeAsync(context.Database.GetDbConnection(), cancellationToken);
+
       if (await TryAdoptExistingSchemaAsync(context, migrations, report, progress, cancellationToken))
       {
+        appliedMigrations = new HashSet<string>(migrations, StringComparer.OrdinalIgnoreCase);
         TraceWarning(
           report,
           progress,
           "[DB] Обнаружена существующая схема без истории миграций. Текущие миграции помечены как уже применённые.");
       }
 
+      var pendingMigrations = migrations
+        .Where(migration => !appliedMigrations.Contains(migration))
+        .ToList();
+
+      if (pendingMigrations.Count == 0)
+      {
+        TraceInfo(report, progress, "[DB] Ожидающих миграций нет.");
+        return;
+      }
+
       try
       {
-        var pendingMigrations = context.Database.GetPendingMigrations().ToList();
-        if (pendingMigrations.Count == 0)
+        try
         {
-          TraceInfo(report, progress, "[DB] Ожидающих миграций нет.");
+          await context.Database.MigrateAsync(cancellationToken);
+          report.AppliedMigrations = pendingMigrations.Count;
+          TraceInfo(report, progress, $"[DB] Применены миграции: {string.Join(", ", pendingMigrations)}");
         }
-        else
+        catch (SqliteException ex) when (IsExistingTablesException(ex))
         {
-          try
+          if (await TryAdoptExistingSchemaAsync(context, migrations, report, progress, cancellationToken))
           {
-            await context.Database.MigrateAsync(cancellationToken);
-            report.AppliedMigrations = pendingMigrations.Count;
-            TraceInfo(report, progress, $"[DB] Применены миграции: {string.Join(", ", pendingMigrations)}");
+            TraceWarning(
+              report,
+              progress,
+              "[DB] Таблицы уже существуют без истории миграций. Миграции помечены как уже применённые.");
+            return;
           }
-          catch (SqliteException ex) when (IsExistingTablesException(ex))
-          {
-            if (await TryAdoptExistingSchemaAsync(context, migrations, report, progress, cancellationToken))
-            {
-              TraceWarning(
-                report,
-                progress,
-                "[DB] Таблицы уже существуют без истории миграций. Миграции помечены как уже применённые.");
-              return;
-            }
 
-            throw;
-          }
+          throw;
         }
       }
       catch (Exception ex) when (IsPendingModelChangesException(ex))
@@ -203,6 +209,7 @@ public static class DatabaseInitializationService
     CancellationToken cancellationToken)
   {
     var options = new DbContextOptionsBuilder<AppDbContext>()
+      .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
       .UseSqlite($"Data Source={databasePath}")
       .Options;
 
@@ -492,6 +499,36 @@ public static class DatabaseInitializationService
 
     var result = await command.ExecuteScalarAsync(cancellationToken);
     return result is not null;
+  }
+
+  private static async Task<HashSet<string>> GetAppliedMigrationIdsSafeAsync(
+    System.Data.Common.DbConnection connection,
+    CancellationToken cancellationToken)
+  {
+    var closeConnection = false;
+
+    if (connection.State != System.Data.ConnectionState.Open)
+    {
+      await connection.OpenAsync(cancellationToken);
+      closeConnection = true;
+    }
+
+    try
+    {
+      if (!await TableExistsAsync(connection, "__EFMigrationsHistory", cancellationToken))
+      {
+        return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      }
+
+      return await GetAppliedMigrationIdsAsync(connection, cancellationToken);
+    }
+    finally
+    {
+      if (closeConnection)
+      {
+        await connection.CloseAsync();
+      }
+    }
   }
 
   private static async Task<HashSet<string>> GetAppliedMigrationIdsAsync(
