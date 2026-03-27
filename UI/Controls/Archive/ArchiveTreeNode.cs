@@ -6,7 +6,6 @@ namespace UI.Controls.Archive
   {
     public string DisplayName { get; private set; }
     public ArchiveTreeNodeKind Kind { get; private set; }
-    public string DirectoryPath { get; private set; }
     public string ArchivePath { get; private set; }
     public string EntryName { get; private set; }
     public bool IsExpanded { get; set; }
@@ -32,16 +31,6 @@ namespace UI.Controls.Archive
         DisplayName = name,
         Kind = ArchiveTreeNodeKind.Archive,
         ArchivePath = archivePath,
-      };
-    }
-
-    public static ArchiveTreeNode CreateDirectory(string name, string directoryPath)
-    {
-      return new ArchiveTreeNode
-      {
-        DisplayName = name,
-        Kind = ArchiveTreeNodeKind.Directory,
-        DirectoryPath = directoryPath,
       };
     }
 

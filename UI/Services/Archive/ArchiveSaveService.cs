@@ -98,7 +98,8 @@ namespace UI.Services.Archive
     private string GetArchivePathForSave(FrameworkElement ownerElement, string suggestedArchiveName)
     {
       var archivesFolderPath = ArchiveDirectoryService.ResolveArchivesRootPath();
-      return PromptForArchiveSelectionWithDirectories(ownerElement, archivesFolderPath, suggestedArchiveName);
+      var archivePaths = ArchiveDirectoryService.GetArchivesInDirectory(archivesFolderPath);
+      return PromptForArchiveSelection(ownerElement, archivePaths, archivesFolderPath, suggestedArchiveName);
     }
 
     private string PromptForArchiveSelection(

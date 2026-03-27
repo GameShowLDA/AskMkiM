@@ -9,10 +9,10 @@ namespace UI.Services.Archive
   {
     private const string ArchiveExtension = ".apkw";
 
-    public string Create(string archiveName, string? targetDirectory = null)
+    public string Create(string archiveName)
     {
       var normalizedArchiveName = NormalizeArchiveName(archiveName);
-      var archivesDirectoryPath = EnsureArchivesDirectory(targetDirectory);
+      var archivesDirectoryPath = ArchiveDirectoryService.ResolveArchivesRootPath();
       var archivePath = Path.Combine(archivesDirectoryPath, normalizedArchiveName + ArchiveExtension);
 
       if (File.Exists(archivePath))
@@ -32,19 +32,6 @@ namespace UI.Services.Archive
 
       return archivePath;
     }
-
-    private string EnsureArchivesDirectory(string? targetDirectory)
-    {
-      if (string.IsNullOrWhiteSpace(targetDirectory))
-      {
-        return ArchiveDirectoryService.ResolveArchivesRootPath();
-      }
-
-      var fullDirectoryPath = Path.GetFullPath(targetDirectory);
-      Directory.CreateDirectory(fullDirectoryPath);
-      return fullDirectoryPath;
-    }
-
     private static string NormalizeArchiveName(string archiveName)
     {
       if (string.IsNullOrWhiteSpace(archiveName))
