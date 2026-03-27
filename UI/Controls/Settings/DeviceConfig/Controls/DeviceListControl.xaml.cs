@@ -148,7 +148,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IRack:
-          new RackServices().Delete((IRack)device);
+          Racks.DeleteAsync((IRack)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 

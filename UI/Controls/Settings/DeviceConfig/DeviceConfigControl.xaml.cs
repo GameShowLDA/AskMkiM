@@ -22,6 +22,7 @@ using UI.Controls.Settings.DeviceConfig.ModuleRelayControl;
 using UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
@@ -377,8 +378,11 @@ namespace UI.Controls.Settings.DeviceConfig
         AddSystem(chassis);
       }
 
-      var racks = new RackServices()
-        .GetAllEntities()
+      var racks = Racks
+        .GetAllAsync()
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToRackEntity)
         .OrderBy(rack => rack.NumberChassis)
         .ThenBy(rack => rack.Number)
         .ToList();
@@ -524,6 +528,21 @@ namespace UI.Controls.Settings.DeviceConfig
         DeviceClass = device.DeviceClass,
         MaxContinuityResistance = device.MaxContinuityResistance,
         TypeMode = device.TypeMode,
+      };
+    }
+
+    private static RackEntity ToRackEntity(IRack device)
+    {
+      return new RackEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+        BusType = device.BusType,
       };
     }
   }

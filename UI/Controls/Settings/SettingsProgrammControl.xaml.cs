@@ -461,7 +461,6 @@ namespace UI.Controls.Settings
 
     private static void ReloadDeviceCaches()
     {
-      new RackServices().ReloadCache();
       new PowerSourceModuleServices().ReloadCache();
       new BreakdownTesterServices().ReloadCache();
       DeviceRuntime.ClearCache();

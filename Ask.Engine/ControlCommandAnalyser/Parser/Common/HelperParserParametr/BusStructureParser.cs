@@ -54,7 +54,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           {
             busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary, shassiBusType);
           }
-          var managerRack = new RackServices().GetAllEntities();
+          var managerRack = Racks.GetAllAsync().GetAwaiter().GetResult();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
