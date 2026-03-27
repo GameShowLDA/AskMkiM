@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using static Ask.LogLib.LoggerUtility;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Controls.Settings.DeviceConfig.Controls
 {
@@ -138,7 +139,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IBreakdownTester:
-          ServiceLocator.GetRequired<BreakdownTesterServices>().Delete((IBreakdownTester)device);
+          BreakdownTesters.DeleteAsync((IBreakdownTester)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из BreakdownTesterTable");
           break;
 

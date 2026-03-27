@@ -14,12 +14,12 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using DataBaseConfiguration.Services.Device;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
-using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration.Services.Device;
 
 
 namespace Ask.Engine.Tests.Metrology.MeasurementSystem
@@ -102,8 +102,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       }
       else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
-        var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
-        var breakdown = svc.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        var breakdown = BreakdownTesters.GetDevicesByNumberChassisAsync(point1.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
         AddUniqueDevice(mode, breakdown);
       }
       else

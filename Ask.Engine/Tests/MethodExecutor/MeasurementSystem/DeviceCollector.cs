@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
 using DataBaseConfiguration.Services.Device;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
 {
@@ -26,9 +27,6 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     public async Task CollectAsync(PointModel startPoint, PointModel endPoint)
     {
       Devices.Clear();
-
-      var breakdownRepo = ServiceLocator.GetRequired<BreakdownTesterServices>();
-
       var relayModules = RelayModuleHelper.GetModulesByRangeAsync(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber).GetAwaiter().GetResult();
 
       Devices.AddRange(relayModules);
@@ -39,7 +37,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         Devices.Add(deviceBusCommutation);
       }
 
-      var breakdown = breakdownRepo.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
+      var breakdown = BreakdownTesters.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
       if (breakdown != null)
       {
         Devices.Add(breakdown);

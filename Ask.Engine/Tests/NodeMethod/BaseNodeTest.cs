@@ -14,6 +14,7 @@ using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Base;
 using DataBaseConfiguration.Services.Device;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.Tests.NodeMethod
 {
@@ -58,7 +59,6 @@ namespace Ask.Engine.Tests.NodeMethod
     public virtual async Task CollectDevicesAsync(PointModel startPoint, PointModel endPoint)
     {
       Devices.Clear();
-            var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
       var relayModules = RelayModuleHelper.GetModulesByRangeAsync(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber).GetAwaiter().GetResult();
       foreach (var module in relayModules)
@@ -69,7 +69,7 @@ namespace Ask.Engine.Tests.NodeMethod
       var uksh = (await SwitchingDevices.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber)).FirstOrDefault();
       Devices.Add(uksh);
 
-      var breakdown = svc.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
+      var breakdown = BreakdownTesters.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
       Devices.Add(breakdown);
     }
 

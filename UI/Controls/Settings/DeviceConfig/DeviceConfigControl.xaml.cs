@@ -1,12 +1,17 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Support;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using DataBaseConfiguration.Services.Device;
 using System;
 using System.Linq;
@@ -21,10 +26,7 @@ using UI.Controls.Settings.DeviceConfig.FastMeter;
 using UI.Controls.Settings.DeviceConfig.ModuleRelayControl;
 using UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
@@ -243,7 +245,12 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       devicesControl.ClearDevice(new BreakdownTesterEntity());
 
-      var breakdownTesters = ServiceLocator.GetRequired<BreakdownTesterServices>().GetEntitiesByNumberChassis(chassis.Number);
+      var breakdownTesters = BreakdownTesters
+        .GetDevicesByNumberChassisAsync(chassis.Number)
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToBreakdownEntity);
+
       foreach (var device in breakdownTesters)
       {
         devicesControl.AddDevice(device);
@@ -583,6 +590,23 @@ namespace UI.Controls.Settings.DeviceConfig
         ConnectionDetails = device.ConnectionDetails,
         DeviceClass = device.DeviceClass,
         LastResolvedDevicePath = device.LastResolvedDevicePath,
+      };
+    }
+
+    private static BreakdownTesterEntity ToBreakdownEntity(IBreakdownTester device)
+    {
+      return new BreakdownTesterEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+        PiMaxVoltage = device.PiMaxVoltage,
+        SiMaxVoltage = device.SiMaxVoltage,
+        IRMinVoltage = device.IRMinVoltage,
       };
     }
   }
