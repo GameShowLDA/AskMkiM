@@ -1,99 +1,125 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Message;
 using System.IO;
 using System.Windows;
+using UI.Controls;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Services.FileManager
 {
   /// <summary>
-  /// Сервис для сравнения содержимого открытого файла с содержимым редактора.
-  /// Предназначен для определения, были ли внесены изменения в текст по сравнению с сохранённой версией на диске.
+  /// Сервис для определения локальных изменений в редакторе.
+  /// Сравнивает текущий текст с последним загруженным или сохранённым снимком.
   /// </summary>
   public class FileCompareService
   {
-    private readonly EditorWorkspaceModel _context;
-
     /// <summary>
     /// Инициализирует новый экземпляр сервиса сравнения файлов.
     /// </summary>
-    /// <param name="editorWorkspaceModel">Контекст редактора, содержащий пути к открытым файлам.</param>
+    /// <param name="editorWorkspaceModel">Контекст редактора.</param>
     public FileCompareService(EditorWorkspaceModel editorWorkspaceModel)
     {
-      _context = editorWorkspaceModel;
+      _ = editorWorkspaceModel;
     }
 
     /// <summary>
-    /// Проверяет, изменилось ли содержимое открытого файла в редакторе по сравнению с сохранённой версией на диске.
+    /// Проверяет, изменилось ли содержимое редактора относительно последнего сохранённого состояния.
     /// </summary>
-    /// <param name="control">Объект <see cref="IDockItem"/>, представляющий открытую вкладку с редактируемым текстом.</param>
+    /// <param name="control">Вкладка редактора или транслятора.</param>
     /// <returns>
-    /// Возвращает <c>true</c>, если файл был изменён (содержимое отличается, файл не найден или является новым);
-    /// <c>false</c>, если содержимое файла не изменялось.
+    /// Возвращает <c>true</c>, если в редакторе есть несохранённые изменения;
+    /// иначе <c>false</c>.
     /// </returns>
     public bool HasFileChanged(IDockItem control)
     {
-      if (!IsValidDockItem(control)) return false;
-      if (IsIgnoredFile(control.Title)) return false;
+      if (!IsValidDockItem(control))
+      {
+        return false;
+      }
 
-      if (!TryGetFilePath(control.Title, out var filePath))
-        return true;
+      var editor = ExtractSourceEditor(control);
+      if (editor?.TextEditorModel == null)
+      {
+        return false;
+      }
 
-      return string.IsNullOrEmpty(filePath)
-        ? CheckUnsavedFile(control)
-        : CompareWithSavedFile(control, filePath);
+      if (IsIgnoredFile(editor.TextEditorModel.FileName ?? control.Title))
+      {
+        return false;
+      }
+
+      if (string.IsNullOrWhiteSpace(editor.TextEditorModel.FilePath))
+      {
+        return CheckUnsavedFile(editor);
+      }
+
+      if (editor.TextEditorModel.SavedTextSnapshot != null)
+      {
+        return !string.Equals(
+          NormalizeText(editor.TextEditorModel.SavedTextSnapshot),
+          NormalizeText(editor.Text),
+          StringComparison.Ordinal);
+      }
+
+      return CompareWithSavedFile(editor, editor.TextEditorModel.FilePath);
     }
-
-    #region 🔍 Подметоды проверки состояния файла
 
     /// <summary>
     /// Проверяет корректность объекта <see cref="IDockItem"/>.
     /// </summary>
     private static bool IsValidDockItem(IDockItem control)
     {
-      return !string.IsNullOrEmpty(control?.Title);
+      return control != null;
     }
 
     /// <summary>
-    /// Проверяет, относится ли файл к игнорируемым (например, служебные файлы OPK).
+    /// Проверяет, относится ли файл к игнорируемым.
     /// </summary>
-    private static bool IsIgnoredFile(string fileName)
+    private static bool IsIgnoredFile(string? fileName)
     {
-      return fileName.Contains(".opk", StringComparison.OrdinalIgnoreCase);
+      return !string.IsNullOrWhiteSpace(fileName)
+        && fileName.Contains(".opk", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// Пытается получить путь к файлу из контекста.
+    /// Возвращает исходный редактор текста для вкладки.
+    /// Для транслятора используется левый редактор с исходным файлом.
     /// </summary>
-    private bool TryGetFilePath(string fileName, out string filePath)
+    private static TextEditorUI? ExtractSourceEditor(IDockItem control)
     {
-      return _context.FilePaths.TryGetValue(fileName, out filePath);
+      return control.Content switch
+      {
+        TextEditorUI textEditor => textEditor,
+        TranslatorItem translatorItem => translatorItem.GetLeftBox()?.GetTextEditor(),
+        TranslatorEditor translatorEditor => translatorEditor.GetTextEditor(),
+        _ => null,
+      };
     }
 
     /// <summary>
-    /// Проверяет состояние несохранённого файла: если в редакторе есть содержимое — он считается изменённым.
+    /// Проверяет состояние нового несохранённого файла.
     /// </summary>
-    private static bool CheckUnsavedFile(IDockItem control)
+    private static bool CheckUnsavedFile(TextEditorUI editor)
     {
-      if (control.Content is ITextEditorAdapter editor)
-        return !string.IsNullOrWhiteSpace(editor.Text);
-
-      return false;
+      return !string.IsNullOrWhiteSpace(editor.Text);
     }
 
     /// <summary>
-    /// Сравнивает содержимое редактора с сохранённым файлом на диске.
+    /// Сравнивает текст редактора с содержимым файла на диске.
+    /// Используется только как резервный путь, если снимок ещё не заполнен.
     /// </summary>
-    private static bool CompareWithSavedFile(IDockItem control, string filePath)
+    private static bool CompareWithSavedFile(TextEditorUI editor, string filePath)
     {
       if (!File.Exists(filePath))
+      {
         return HandleMissingFile();
+      }
 
       var diskContent = File.ReadAllText(filePath);
-
-      if (control.Content is ITextEditorAdapter editor)
-        return diskContent != editor.Text;
-
-      return false;
+      return !string.Equals(
+        NormalizeText(diskContent),
+        NormalizeText(editor.Text),
+        StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -105,6 +131,14 @@ namespace UI.Services.FileManager
       return true;
     }
 
-    #endregion
+    /// <summary>
+    /// Нормализует переводы строк, чтобы они не считались изменением содержимого.
+    /// </summary>
+    private static string NormalizeText(string? text)
+    {
+      return (text ?? string.Empty)
+        .Replace("\r\n", "\n")
+        .Replace('\r', '\n');
+    }
   }
 }
