@@ -3,7 +3,7 @@ using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -93,12 +93,13 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           {
             if (_editingEntity == null)
             {
-              new RelaySwitchModuleServices().Create(deviceEntity);
+              var createdDevice = RelaySwitchModules.CreateAsync(deviceEntity).GetAwaiter().GetResult();
+              deviceEntity.Id = createdDevice.Id;
             }
             else
             {
               deviceEntity.Id = _editingEntity.Id;
-              new RelaySwitchModuleServices().Update(deviceEntity);
+              RelaySwitchModules.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
             }
 
             RequestSave?.Invoke(s, deviceEntity);

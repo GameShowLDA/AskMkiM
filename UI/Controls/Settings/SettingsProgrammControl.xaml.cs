@@ -3,6 +3,8 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -95,23 +97,19 @@ namespace UI.Controls.Settings
     {
       try
       {
-        var chassisService = new ChassisManagerServices();
-        var relayService = new RelaySwitchModuleServices();
         var fastMeterService = new FastMeterServices();
         var breakdownService = new BreakdownTesterServices();
         var powerSourceService = new PowerSourceModuleServices();
 
-        var chassisList = chassisService
-          .GetAllEntities()
-          .OrderBy(chassis => chassis.Number)
+        var chassisList = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().OrderBy(chassis => chassis.Number)
           .ToList();
 
         string printableText = BuildPrintableConfiguration(
           chassisList,
-          relayService,
           fastMeterService,
           breakdownService,
           powerSourceService,
+          numberChassis => RelaySwitchModules.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
           numberChassis => SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult());
 
         PrintText(printableText);
@@ -463,9 +461,7 @@ namespace UI.Controls.Settings
 
     private static void ReloadDeviceCaches()
     {
-      new ChassisManagerServices().ReloadCache();
       new RackServices().ReloadCache();
-      new RelaySwitchModuleServices().ReloadCache();
       new PowerSourceModuleServices().ReloadCache();
       new FastMeterServices().ReloadCache();
       new BreakdownTesterServices().ReloadCache();
@@ -584,11 +580,11 @@ namespace UI.Controls.Settings
     }
 
     private static string BuildPrintableConfiguration(
-      IReadOnlyCollection<ChassisManagerEntity> chassisList,
-      RelaySwitchModuleServices relayService,
+      IReadOnlyCollection<IChassisManager> chassisList,
       FastMeterServices fastMeterService,
       BreakdownTesterServices breakdownService,
       PowerSourceModuleServices powerSourceService,
+      Func<int, IEnumerable<IRelaySwitchModule>> getRelaySwitchModules,
       Func<int, IEnumerable<ISwitchingDevice>> getSwitchingDevices)
     {
       if (chassisList.Count == 0)
@@ -619,7 +615,7 @@ namespace UI.Controls.Settings
         devicesPrinted += AppendDeviceSection(
           sb,
           "Модуль коммутации релейный",
-          relayService.GetEntitiesByNumberChassis(chassis.Number),
+          getRelaySwitchModules(chassis.Number),
           insertSectionSeparator: devicesPrinted > 0,
           (builder, device) =>
           {

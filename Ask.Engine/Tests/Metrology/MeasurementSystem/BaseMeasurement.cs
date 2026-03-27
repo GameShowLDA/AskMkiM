@@ -15,10 +15,10 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
-using DataBaseConfiguration.Services.Device;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
 using Ask.DataBase.Engine.Static.Devices;
+using DataBaseConfiguration.Services.Device;
 
 
 namespace Ask.Engine.Tests.Metrology.MeasurementSystem
@@ -66,14 +66,16 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         throw MetrologyValidationErrors.PointParsingFailed();
       }
 
-      var relayRepo = new RelaySwitchModuleServices();
-
-      var mkr1 = relayRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault(m => m.Number == point1.ModuleNumber);
+      var relayModules1 = await RelaySwitchModules.GetDevicesByNumberChassisAsync(point1.DeviceNumber);
+      var mkr1 = relayModules1.FirstOrDefault(m => m.Number == point1.ModuleNumber);
       AddUniqueDevice(mode, mkr1);
 
       if (point1.DeviceNumber != point2.DeviceNumber || point1.ModuleNumber != point2.ModuleNumber)
       {
-        var mkr2 = relayRepo.GetDevicesByNumberChassis(point2.DeviceNumber).FirstOrDefault(m => m.Number == point2.ModuleNumber);
+        var relayModules2 = point1.DeviceNumber == point2.DeviceNumber
+          ? relayModules1
+          : await RelaySwitchModules.GetDevicesByNumberChassisAsync(point2.DeviceNumber);
+        var mkr2 = relayModules2.FirstOrDefault(m => m.Number == point2.ModuleNumber);
         AddUniqueDevice(mode, mkr2);
       }
 

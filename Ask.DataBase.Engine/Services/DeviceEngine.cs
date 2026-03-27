@@ -194,7 +194,7 @@ public class DeviceEngine : IDeviceEngine
   public async Task<TDevice?> ReloadByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
-    _cache.Remove(id);
+    _cache.Remove(typeof(TDevice), id);
     return await GetByIdAsync<TDevice>(id, cancellationToken);
   }
 
@@ -265,21 +265,21 @@ public class DeviceEngine : IDeviceEngine
     var requestedType = typeof(TDevice);
 
     if (requestedType == typeof(IBreakdownTester))
-      return DeleteByIdInternalAsync(id, _breakdownTesterService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, BreakdownTesterDto>(id, _breakdownTesterService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
-      return DeleteByIdInternalAsync(id, _chassisManagerService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, ChassisManagerDto>(id, _chassisManagerService, cancellationToken);
     if (requestedType == typeof(IFastMeter))
-      return DeleteByIdInternalAsync(id, _fastMeterService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, FastMeterDto>(id, _fastMeterService, cancellationToken);
     if (requestedType == typeof(IPowerSourceModule))
-      return DeleteByIdInternalAsync(id, _powerSourceModuleService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, PowerSourceModuleDto>(id, _powerSourceModuleService, cancellationToken);
     if (requestedType == typeof(IRack))
-      return DeleteByIdInternalAsync(id, _rackService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, RackDto>(id, _rackService, cancellationToken);
     if (requestedType == typeof(IRelaySwitchModule))
-      return DeleteByIdInternalAsync(id, _relaySwitchModuleService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, RelaySwitchModuleDto>(id, _relaySwitchModuleService, cancellationToken);
     if (requestedType == typeof(ISwitchingDevice))
-      return DeleteByIdInternalAsync(id, _switchingDeviceService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, SwitchingDeviceDto>(id, _switchingDeviceService, cancellationToken);
     if (requestedType == typeof(IUninterruptiblePowerSupply))
-      return DeleteByIdInternalAsync(id, _uninterruptiblePowerSupplyService, cancellationToken);
+      return DeleteByIdInternalAsync<TDevice, UninterruptiblePowerSupplyDto>(id, _uninterruptiblePowerSupplyService, cancellationToken);
 
     throw CreateUnsupportedTypeException<TDevice>();
   }
@@ -289,7 +289,7 @@ public class DeviceEngine : IDeviceEngine
   {
     ArgumentNullException.ThrowIfNull(dto);
 
-    if (_cache.TryGet(dto.Id, out var cached))
+    if (_cache.TryGet(typeof(TDevice), dto.Id, out var cached))
     {
       if (cached is TDevice typedCached)
       {
@@ -301,7 +301,7 @@ public class DeviceEngine : IDeviceEngine
     }
 
     var device = DeviceBuilder.Build<TDevice>(dto);
-    _cache.Set(dto.Id, device);
+    _cache.Set(typeof(TDevice), dto.Id, device);
     return device;
   }
 
@@ -317,7 +317,7 @@ public class DeviceEngine : IDeviceEngine
     where TDevice : class, IDevice
     where TDto : DeviceDto
   {
-    if (_cache.TryGet(id, out var cached))
+    if (_cache.TryGet(typeof(TDevice), id, out var cached))
     {
       if (cached is TDevice typedCached)
       {
@@ -405,7 +405,7 @@ public class DeviceEngine : IDeviceEngine
     dto.Id = 0;
 
     var created = await service.CreateAsync(dto, cancellationToken);
-    _cache.Remove(created.Id);
+    _cache.Remove(typeof(TDevice), created.Id);
     return Build<TDevice>(created);
   }
 
@@ -420,14 +420,15 @@ public class DeviceEngine : IDeviceEngine
     var dto = mapper(device);
 
     var updated = await service.UpdateAsync(dto, cancellationToken);
-    _cache.Remove(updated.Id);
+    _cache.Remove(typeof(TDevice), updated.Id);
     return Build<TDevice>(updated);
   }
 
-  private async Task<bool> DeleteByIdInternalAsync<TDto>(
+  private async Task<bool> DeleteByIdInternalAsync<TDevice, TDto>(
     int id,
     CrudService<TDto> service,
     CancellationToken cancellationToken)
+    where TDevice : class, IDevice
     where TDto : DeviceDto
   {
     if (id <= 0)
@@ -438,7 +439,7 @@ public class DeviceEngine : IDeviceEngine
     var deleted = await service.DeleteByIdAsync(id, cancellationToken);
     if (deleted)
     {
-      _cache.Remove(id);
+      _cache.Remove(typeof(TDevice), id);
     }
 
     return deleted;

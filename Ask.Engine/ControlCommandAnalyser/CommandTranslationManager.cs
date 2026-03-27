@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -122,7 +123,8 @@ namespace Ask.Engine.ControlCommandAnalyser
               { BusStructureEnum.Type.Bus2, new List<int?> () },
             }
           };
-          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+          var managerShassi =  ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+
           if (managerShassi != null)
           {
             vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(managerShassi.Number);

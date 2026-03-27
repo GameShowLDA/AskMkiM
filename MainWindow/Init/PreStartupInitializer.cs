@@ -4,6 +4,7 @@ using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.View;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Device;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
@@ -99,7 +100,7 @@ namespace MainWindowProgram.Init
       {
         LogInformation("Инициализация устройств шасси: начало");
 
-        var chassis = new ChassisManagerServices().GetAll().FirstOrDefault();
+        var chassis = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
         if (chassis == null)
         {
           LogInformation("Инициализация устройств шасси: шасси не найдено");

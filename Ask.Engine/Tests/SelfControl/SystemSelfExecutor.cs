@@ -25,7 +25,7 @@ namespace Ask.Engine.Tests.SelfControl
     /// <param name="cancellationToken">Токен отмены.</param>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var managerShassi = new DataBaseConfiguration.Services.Device.ChassisManagerServices().GetAllEntities().FirstOrDefault();
+      var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (managerShassi == null)
       {
         return;
@@ -38,7 +38,7 @@ namespace Ask.Engine.Tests.SelfControl
       }
 
       var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
-      var mkr = new DataBaseConfiguration.Services.Device.RelaySwitchModuleServices().GetDevicesByNumberChassis(managerShassi.Number);
+      var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
 
       await dbc.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), SwitchingDeviceTypeConnector.FullCheck, _messageService, dbc, meter);
 

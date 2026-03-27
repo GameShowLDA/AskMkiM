@@ -60,7 +60,7 @@ namespace Ask.Engine.Tests.NodeMethod
       Devices.Clear();
             var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
-      var relayModules = RelayModuleHelper.GetModulesByRange(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber);
+      var relayModules = RelayModuleHelper.GetModulesByRangeAsync(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber).GetAwaiter().GetResult();
       foreach (var module in relayModules)
       {
         Devices.Add(module);

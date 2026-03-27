@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.DataBase.Engine.Static.Devices;
@@ -288,7 +289,11 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       devicesControl.ClearDevice(new RelaySwitchModuleEntity());
 
-      var relaySwitchModules = new RelaySwitchModuleServices().GetEntitiesByNumberChassis(chassis.Number);
+      var relaySwitchModules = RelaySwitchModules
+        .GetDevicesByNumberChassisAsync(chassis.Number)
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToRelaySwitchModuleEntity);
 
       foreach (var device in relaySwitchModules)
       {
@@ -360,11 +365,8 @@ namespace UI.Controls.Settings.DeviceConfig
       ToggleThirdColumn(false);
 
       chassisManager.Reset();
+      var chassisList = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().OrderBy(chassis => chassis.Number).ToList();
 
-      var chassisList = new ChassisManagerServices()
-        .GetAll()
-        .OrderBy(chassis => chassis.Number)
-        .ToList();
 
       foreach (var chassis in chassisList)
       {
@@ -486,6 +488,23 @@ namespace UI.Controls.Settings.DeviceConfig
         DeviceClass = device.DeviceClass,
       };
     }
+
+    private static RelaySwitchModuleEntity ToRelaySwitchModuleEntity(IRelaySwitchModule device)
+    {
+      return new RelaySwitchModuleEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        PointCount = device.PointCount,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+        SwitchResistance = device.SwitchResistance,
+        SwitchCapacitance = device.SwitchCapacitance,
+        BusType = device.BusType,
+      };
+    }
   }
 }
-

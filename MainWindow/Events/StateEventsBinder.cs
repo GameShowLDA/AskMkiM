@@ -5,6 +5,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Metadata.View;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
 using ConsoleUI.ConsoleCommanding.Services;
@@ -122,10 +123,7 @@ namespace MainWindowProgram.Events
 
     private static IUninterruptiblePowerSupply? GetConfiguredUps()
     {
-      int? chassisNumber = new ChassisManagerServices()
-        .GetAll()
-        .FirstOrDefault()
-        ?.Number;
+      int? chassisNumber = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault()?.Number;
 
       IEnumerable<IUninterruptiblePowerSupply> devices = new UninterruptiblePowerSupplyServices().GetAll();
 
