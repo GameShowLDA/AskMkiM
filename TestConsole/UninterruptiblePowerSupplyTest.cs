@@ -1,4 +1,5 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Device;
 using DataBaseConfiguration.Services.Device;
 
@@ -123,7 +124,7 @@ namespace TestConsole
 
     private static IUninterruptiblePowerSupply? SelectDeviceFromDatabase()
     {
-      var devices = new UninterruptiblePowerSupplyServices().GetAll();
+      var devices = UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult();
 
       if (devices == null || devices.Count == 0)
       {

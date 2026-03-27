@@ -125,7 +125,7 @@ namespace MainWindowProgram.Events
     {
       int? chassisNumber = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault()?.Number;
 
-      IEnumerable<IUninterruptiblePowerSupply> devices = new UninterruptiblePowerSupplyServices().GetAll();
+      IEnumerable<IUninterruptiblePowerSupply> devices = UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult();
 
       if (chassisNumber.HasValue)
       {
