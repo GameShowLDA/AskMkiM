@@ -233,12 +233,12 @@ namespace UI.Components
       var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
 
       var sources = new List<IEnumerable<dynamic>>
-	    {
-	        new PowerSourceModuleServices().GetAll(),
-	        switchingDevices,
-	        relaySwitchModules,
-	        new BreakdownTesterServices().GetAll()
-	    };
+      {
+        PowerSourceModules.GetAllAsync().GetAwaiter().GetResult(),
+        switchingDevices,
+        relaySwitchModules,
+        new BreakdownTesterServices().GetAll()
+      };
 
       var combined = new List<object>();
       var displayNames = new List<string>();

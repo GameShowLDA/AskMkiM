@@ -23,6 +23,7 @@ using UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource;
 using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
@@ -277,7 +278,11 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       devicesControl.ClearDevice(new PowerSourceModuleEntity());
 
-      var powerSources = new PowerSourceModuleServices().GetEntitiesByNumberChassis(chassis.Number);
+      var powerSources = PowerSourceModules
+        .GetDevicesByNumberChassisAsync(chassis.Number)
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToPowerSourceModuleEntity);
 
       foreach (var device in powerSources)
       {
@@ -543,6 +548,21 @@ namespace UI.Controls.Settings.DeviceConfig
         ConnectionDetails = device.ConnectionDetails,
         DeviceClass = device.DeviceClass,
         BusType = device.BusType,
+      };
+    }
+
+    private static PowerSourceModuleEntity ToPowerSourceModuleEntity(IPowerSourceModule device)
+    {
+      return new PowerSourceModuleEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+        ResistanceCalibrationJson = device.ResistanceCalibrationJson,
       };
     }
   }

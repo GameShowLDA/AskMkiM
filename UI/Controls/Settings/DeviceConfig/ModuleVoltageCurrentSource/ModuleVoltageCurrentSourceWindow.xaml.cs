@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
@@ -88,12 +89,12 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
           {
             if (_editingEntity == null)
             {
-              new PowerSourceModuleServices().Create(deviceEntity);
+              PowerSourceModules.CreateAsync(deviceEntity).GetAwaiter().GetResult();
             }
             else
             {
               deviceEntity.Id = _editingEntity.Id;
-              new PowerSourceModuleServices().Update(deviceEntity);
+              PowerSourceModules.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
             }
 
             RequestSave?.Invoke(s, deviceEntity);

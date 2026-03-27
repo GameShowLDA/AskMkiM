@@ -141,7 +141,7 @@ namespace TestConsole.MINT
     }
     private static IPowerSourceModule SelectPowerSource()
     {
-      var dbc = new PowerSourceModuleServices().GetAll();
+      var dbc = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult();
 
       if (dbc == null || !dbc.Any())
       {

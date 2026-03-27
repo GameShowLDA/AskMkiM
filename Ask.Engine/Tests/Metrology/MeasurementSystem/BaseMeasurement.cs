@@ -95,8 +95,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
 
         if (modeDevice == MetrologicalDeviceType.Mint)
         {
-          var power = new PowerSourceModuleServices();
-          var mint = power.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+          var mint = PowerSourceModules.GetDevicesByNumberChassisAsync(point1.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
           AddUniqueDevice(mode, mint);
         }
       }
