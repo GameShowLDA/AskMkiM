@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -122,7 +123,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
       switch (device)
       {
         case ISwitchingDevice:
-          new SwitchingDeviceServices().Delete((ISwitchingDevice)device);
+          SwitchingDevices.DeleteAsync((ISwitchingDevice)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из SwitchingDeviceTable");
           break;
 

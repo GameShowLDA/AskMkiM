@@ -3,8 +3,11 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.DataBase.Engine.Static;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
@@ -94,7 +97,6 @@ namespace UI.Controls.Settings
       {
         var chassisService = new ChassisManagerServices();
         var relayService = new RelaySwitchModuleServices();
-        var switchingService = new SwitchingDeviceServices();
         var fastMeterService = new FastMeterServices();
         var breakdownService = new BreakdownTesterServices();
         var powerSourceService = new PowerSourceModuleServices();
@@ -107,10 +109,10 @@ namespace UI.Controls.Settings
         string printableText = BuildPrintableConfiguration(
           chassisList,
           relayService,
-          switchingService,
           fastMeterService,
           breakdownService,
-          powerSourceService);
+          powerSourceService,
+          numberChassis => SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult());
 
         PrintText(printableText);
       }
@@ -464,10 +466,10 @@ namespace UI.Controls.Settings
       new ChassisManagerServices().ReloadCache();
       new RackServices().ReloadCache();
       new RelaySwitchModuleServices().ReloadCache();
-      new SwitchingDeviceServices().ReloadCache();
       new PowerSourceModuleServices().ReloadCache();
       new FastMeterServices().ReloadCache();
       new BreakdownTesterServices().ReloadCache();
+      DeviceRuntime.ClearCache();
     }
 
     private static string NormalizeRequired(string? value)
@@ -584,10 +586,10 @@ namespace UI.Controls.Settings
     private static string BuildPrintableConfiguration(
       IReadOnlyCollection<ChassisManagerEntity> chassisList,
       RelaySwitchModuleServices relayService,
-      SwitchingDeviceServices switchingService,
       FastMeterServices fastMeterService,
       BreakdownTesterServices breakdownService,
-      PowerSourceModuleServices powerSourceService)
+      PowerSourceModuleServices powerSourceService,
+      Func<int, IEnumerable<ISwitchingDevice>> getSwitchingDevices)
     {
       if (chassisList.Count == 0)
       {
@@ -629,7 +631,7 @@ namespace UI.Controls.Settings
         devicesPrinted += AppendDeviceSection(
           sb,
           "Устройство коммутации шин",
-          switchingService.GetEntitiesByNumberChassis(chassis.Number),
+          getSwitchingDevices(chassis.Number),
           insertSectionSeparator: devicesPrinted > 0);
 
         devicesPrinted += AppendDeviceSection(

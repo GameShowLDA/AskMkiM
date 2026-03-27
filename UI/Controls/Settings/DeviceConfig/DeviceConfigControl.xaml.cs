@@ -2,7 +2,9 @@
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Support;
 using DataBaseConfiguration.Services.Device;
 using System;
@@ -303,7 +305,11 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       devicesControl.ClearDevice(new SwitchingDeviceEntity());
 
-      var switchingDevices = new SwitchingDeviceServices().GetEntitiesByNumberChassis(chassis.Number);
+      var switchingDevices = SwitchingDevices
+        .GetDevicesByNumberChassisAsync(chassis.Number)
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToSwitchingDeviceEntity);
 
       foreach (var device in switchingDevices)
       {
@@ -465,6 +471,20 @@ namespace UI.Controls.Settings.DeviceConfig
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
       await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
+    }
+
+    private static SwitchingDeviceEntity ToSwitchingDeviceEntity(ISwitchingDevice device)
+    {
+      return new SwitchingDeviceEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+      };
     }
   }
 }

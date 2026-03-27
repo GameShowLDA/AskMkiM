@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Static.Devices;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -36,7 +37,7 @@ namespace Ask.Engine.Tests.SelfControl
         return;
       }
 
-      var dbc = new DataBaseConfiguration.Services.Device.SwitchingDeviceServices().GetDevicesByNumberChassis(managerShassi.Number).FirstOrDefault();
+      var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
       var mkr = new DataBaseConfiguration.Services.Device.RelaySwitchModuleServices().GetDevicesByNumberChassis(managerShassi.Number);
 
       await dbc.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), SwitchingDeviceTypeConnector.FullCheck, _messageService, dbc, meter);

@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using DataBaseConfiguration.Services.Device;
 
@@ -130,12 +131,9 @@ namespace Ask.Engine.Tests.Base
     /// <exception cref="DeviceException">
     /// Генерируется, если УКШ не найдено в конфигурации.
     /// </exception>
-    public static ISwitchingDevice ResolveUksh(int numberChassis)
+    public static async Task<ISwitchingDevice> ResolveUkshAsync(int numberChassis)
     {
-      var uksh = new SwitchingDeviceServices()
-        .GetDevicesByNumberChassis(numberChassis)
-        .FirstOrDefault();
-
+      var uksh = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis)).FirstOrDefault();
       return uksh ?? throw ConnectionExceptionAdapter.NotFoundInConfiguration("Устройство коммутации шин (УКШ)");
     }
 
@@ -283,7 +281,7 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      var uksh = ResolveUksh(numberChassis);
+      var uksh = await ResolveUkshAsync(numberChassis);
       var meter = ResolveFastMeter(numberChassis);
 
       await ConnectIfNeededAsync(uksh, ui, token);

@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Commands;
 using DataBaseConfiguration.Services.Device;
 
@@ -46,7 +47,7 @@ namespace TestConsole.MINT
     private static async Task SelfCheck()
     {
       IChassisManager chassisManager = GetDeviceInstance(SelectManagerChassis);
-      ISwitchingDevice dbc = GetDeviceInstance(SelectDeviceBusCommutation);
+      ISwitchingDevice dbc = GetDeviceInstance(SelectDeviceBusCommutationAsync);
       IFastMeter meter = GetDeviceInstance(SelectMeter);
       IPowerSourceModule powerSource = GetDeviceInstance(SelectPowerSource);
 
@@ -72,9 +73,9 @@ namespace TestConsole.MINT
       await powerSource.ConnectableManager.ResetAsync();
     }
 
-    private static ISwitchingDevice SelectDeviceBusCommutation()
+    private static ISwitchingDevice SelectDeviceBusCommutationAsync()
     {
-      var dbc = new SwitchingDeviceServices().GetAll();
+      var dbc = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
 
       if (dbc == null || !dbc.Any())
       {
