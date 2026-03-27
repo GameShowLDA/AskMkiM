@@ -6,9 +6,10 @@
 	<Color name="PurposeAndResults" foreground="#006FCB" fontWeight="bold" />
 	<Color name="Voltage" foreground="#C62828" fontWeight="bold" />
 	<Color name="Time" foreground="#C62828" fontWeight="bold" />
-	<Color name="Error" foreground="#C62828" fontWeight="bold" />
-	<Color name="Mnemonic" foreground="#A86B00" fontWeight="bold" />
-	<Color name="CommandNumber" foreground="#2F8F4E" fontWeight="bold" />
+		<Color name="Error" foreground="#C62828" fontWeight="bold" />
+		<Color name="Mnemonic" foreground="#A86B00" fontWeight="bold" />
+		<Color name="ErrorCommandNumber" foreground="#C62828" fontWeight="bold" />
+		<Color name="InfoCommandNumber" foreground="#006FCB" fontWeight="bold" />
 
 	<RuleSet ignoreCase="true">
 
@@ -36,8 +37,8 @@
 		<Rule color="Error">^\s*Ошибки\s+команды:</Rule>
 
 		<!-- Номер команды (вместе с номером строки, чтобы не перекрывало) -->
-		<Rule color="CommandNumber">^ERR\d+\s*\d+</Rule>
-		<Rule color="CommandNumber">^DOC\d+\s*\d+</Rule>
+			<Rule color="ErrorCommandNumber">^ERR\d+\s*\d+</Rule>
+			<Rule color="InfoCommandNumber">^DOC\d+\s*\d+</Rule>
 
 		<!-- Мнемоника -->
 		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ)\b</Rule>
