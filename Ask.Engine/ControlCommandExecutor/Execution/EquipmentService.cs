@@ -99,7 +99,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var chassisNumber in allNumbers)
       {
-        if (new ChassisManagerServices().GetByNumber(chassisNumber) == null)
+        if (await ChassisManagers.GetByNumberAsync(chassisNumber) == null)
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"Менеджер шасси {chassisNumber}",
             message: "Устройство не найдено в конфигурации.", type: ShowMessageModel.MessageType.Error)
@@ -135,7 +135,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var item in grouped)
       {
-        var allModules = new RelaySwitchModuleServices().GetDevicesByNumberChassis(item.DeviceNumber);
+        var allModules = await RelaySwitchModules.GetDevicesByNumberChassisAsync(item.DeviceNumber);
+
         if (allModules == null || allModules.Count == 0)
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",

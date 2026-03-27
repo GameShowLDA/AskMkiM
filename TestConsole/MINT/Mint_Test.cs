@@ -108,7 +108,7 @@ namespace TestConsole.MINT
     }
     private static IChassisManager SelectManagerChassis()
     {
-      var dbc = new ChassisManagerServices().GetAll();
+      var dbc = ChassisManagers.GetAllAsync().GetAwaiter().GetResult();
 
       if (dbc == null || !dbc.Any())
       {

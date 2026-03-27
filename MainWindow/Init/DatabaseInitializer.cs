@@ -97,8 +97,6 @@ namespace MainWindowProgram.Init
     {
       try
       {
-        new ChassisManagerServices().ReloadCache();
-        new RelaySwitchModuleServices().ReloadCache();
         new PowerSourceModuleServices().ReloadCache();
         new FastMeterServices().ReloadCache();
         new BreakdownTesterServices().ReloadCache();

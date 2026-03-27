@@ -133,7 +133,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IRelaySwitchModule:
-          new RelaySwitchModuleServices().Delete((IRelaySwitchModule)device);
+          RelaySwitchModules.DeleteAsync((IRelaySwitchModule)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из RelaySwitchModuleTable");
           break;
 
@@ -143,7 +143,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IChassisManager:
-          new ChassisManagerServices().Delete((IChassisManager)device);
+          ChassisManagers.DeleteAsync((IChassisManager)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 

@@ -6,9 +6,9 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
-using DataBaseConfiguration.Services.Device;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 
@@ -582,8 +582,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     private static bool TryValidateBusSupport(PointModel point, SwitchingBus bus, List<ErrorItem> errors)
     {
-      var module = new RelaySwitchModuleServices()
-          .GetDevicesByNumberChassis(point.DeviceNumber)
+      var module = RelaySwitchModules
+          .GetDevicesByNumberChassisAsync(point.DeviceNumber)
+          .GetAwaiter()
+          .GetResult()
           .FirstOrDefault(x => x.Number == point.ModuleNumber);
 
       if (module == null)

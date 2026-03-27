@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using DataBaseConfiguration.Services.Device;
 using System.Text.RegularExpressions;
@@ -42,7 +43,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
             ? int.Parse(match.Groups["value"].Value)
             : null;
         var shassiBusType = BusStructureEnum.Type.None;
-        var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+        var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
         if (managerShassi != null)
         {
           shassiBusType = managerShassi.BusType;

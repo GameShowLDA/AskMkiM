@@ -229,13 +229,14 @@ namespace UI.Components
     /// </summary>
     private void LoadAllSelectableDevices()
     {
+      var relaySwitchModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
       var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
 
       var sources = new List<IEnumerable<dynamic>>
 	    {
 	        new PowerSourceModuleServices().GetAll(),
 	        switchingDevices,
-	        new RelaySwitchModuleServices().GetAll(),
+	        relaySwitchModules,
 	        new BreakdownTesterServices().GetAll()
 	    };
 

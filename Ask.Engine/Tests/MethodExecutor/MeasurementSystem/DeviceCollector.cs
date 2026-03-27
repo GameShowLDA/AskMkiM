@@ -29,7 +29,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
 
       var breakdownRepo = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
-      var relayModules = RelayModuleHelper.GetModulesByRange(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber);
+      var relayModules = RelayModuleHelper.GetModulesByRangeAsync(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber).GetAwaiter().GetResult();
 
       Devices.AddRange(relayModules);
 

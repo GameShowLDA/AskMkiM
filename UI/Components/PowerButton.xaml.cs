@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using DataBaseConfiguration.Services.Device;
@@ -428,7 +429,7 @@ namespace UI.Components
     /// </summary>
     private bool TryResolveChassisManager()
     {
-      model = new ChassisManagerServices().GetAll().FirstOrDefault();
+      model = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (model != null)
       {
         return true;

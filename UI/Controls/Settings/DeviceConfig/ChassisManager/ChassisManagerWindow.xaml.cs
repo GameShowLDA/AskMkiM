@@ -3,6 +3,7 @@ using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
@@ -79,7 +80,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
           deviceEntity.BusType = (baseDevice as IChassisManager).BusType;
           try
           {
-            new ChassisManagerServices().Create(deviceEntity);
+            ChassisManagers.CreateAsync(deviceEntity).GetAwaiter();
             RequestSave?.Invoke(s, deviceEntity);
             RequestCloseWindow();
           }

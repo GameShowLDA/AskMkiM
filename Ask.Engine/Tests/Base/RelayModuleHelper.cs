@@ -25,10 +25,9 @@ namespace Ask.Engine.Tests.Base
     /// <param name="startModule">Номер начального модуля.</param>
     /// <param name="endModule">Номер конечного модуля.</param>
     /// <returns>Список модулей, соответствующих диапазону.</returns>
-    public static List<IRelaySwitchModule> GetModulesByRange(int chassisNumber, int startModule, int endModule)
+    public static async Task<List<IRelaySwitchModule>> GetModulesByRangeAsync(int chassisNumber, int startModule, int endModule)
     {
-      var relayRepo = new RelaySwitchModuleServices();
-      var allModules = relayRepo.GetDevicesByNumberChassis(chassisNumber);
+      var allModules = await RelaySwitchModules.GetDevicesByNumberChassisAsync(chassisNumber);
       var filteredModules = allModules
           .Where(m => m.Number >= startModule && m.Number <= endModule)
           .ToList();

@@ -31,7 +31,7 @@ public class DeviceProvider
   /// <returns>Готовый экземпляр устройства.</returns>
   public async Task<T> GetAsync<T>(int id) where T : class, IDevice
   {
-    if (_cache.TryGet(id, out var cached))
+    if (_cache.TryGet(typeof(T), id, out var cached))
     {
       if (cached is T typed)
         return typed;
@@ -44,7 +44,7 @@ public class DeviceProvider
 
     var device = DeviceBuilder.Build(dto);
 
-    _cache.Set(id, device);
+    _cache.Set(typeof(T), id, device);
 
     if (device is not T result)
       throw new InvalidOperationException($"Device {id} is not {typeof(T).Name}");
@@ -57,7 +57,7 @@ public class DeviceProvider
   /// </summary>
   public async Task<T> ReloadAsync<T>(int id) where T : class, IDevice
   {
-    _cache.Remove(id);
+    _cache.Remove(typeof(T), id);
     return await GetAsync<T>(id);
   }
 }
