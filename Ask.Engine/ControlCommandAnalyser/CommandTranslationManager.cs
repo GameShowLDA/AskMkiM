@@ -15,6 +15,7 @@ using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
@@ -179,8 +180,14 @@ namespace Ask.Engine.ControlCommandAnalyser
 
         // Получаем исходные строки для текущей команды
         List<string> sourceLines = GetSourceLines(model, out int startSourceLineNumber);
+        if (sourceLines.Count == 0)
+        {
+          sourceLines = BuildFallbackLines(model);
+        }
 
-        lines = formatter != null ? formatter.Format(model) : sourceLines;
+        lines = formatter != null
+            ? FormatModelSafely(formatter, model, sourceLines)
+            : sourceLines;
 
         int countSourceLines = sourceLines.Count;
         int localSourceLineIdx = 0;
@@ -206,6 +213,63 @@ namespace Ask.Engine.ControlCommandAnalyser
         }
       }
       return lineMapping;
+    }
+
+    /// <summary>
+    /// Безопасно форматирует команду: при сбое добавляет ошибку и возвращает строки исходника.
+    /// </summary>
+    private static IEnumerable<string> FormatModelSafely(
+        ICommandFormatter formatter,
+        BaseCommandModel model,
+        List<string> fallbackLines)
+    {
+      try
+      {
+        var lines = formatter.Format(model)?.ToList();
+        return lines is { Count: > 0 } ? lines : fallbackLines;
+      }
+      catch (Exception ex)
+      {
+        AddFormattingError(model, ex);
+        LogError(
+            $"Ошибка форматирования команды {model.CommandNumber} {model.Mnemonic} " +
+            $"(строка {model.StartLineNumber}): {ex}");
+        return fallbackLines;
+      }
+    }
+
+    /// <summary>
+    /// Возвращает безопасный fallback-текст, если исходные строки команды недоступны.
+    /// </summary>
+    private static List<string> BuildFallbackLines(BaseCommandModel model)
+    {
+      var header = $"{model.CommandNumber} {model.Mnemonic}".Trim();
+      return new List<string> { string.IsNullOrWhiteSpace(header) ? "Ошибка форматирования команды" : header };
+    }
+
+    /// <summary>
+    /// Добавляет ошибку форматирования только один раз для команды.
+    /// </summary>
+    private static void AddFormattingError(BaseCommandModel model, Exception ex)
+    {
+      string command = $"{model.CommandNumber} {model.Mnemonic}".Trim();
+      string description = $"Не удалось отформатировать команду {command}. Исправьте текст и повторите трансляцию.";
+
+      if (model.Errors.Any(error =>
+          error.Code == ErrorCode.Unknown &&
+          string.Equals(error.Description, description, StringComparison.Ordinal)))
+      {
+        return;
+      }
+
+      model.Errors.Add(new ErrorItem
+      {
+        SourceLineNumber = model.StartLineNumber,
+        Command = command,
+        Code = ErrorCode.Unknown,
+        DebugInfo = $"{ex.GetType().Name}: {ex.Message}",
+        Description = description
+      });
     }
 
     /// <summary>
