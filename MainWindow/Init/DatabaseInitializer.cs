@@ -97,7 +97,6 @@ namespace MainWindowProgram.Init
     {
       try
       {
-        new PowerSourceModuleServices().ReloadCache();
         new BreakdownTesterServices().ReloadCache();
         DeviceRuntime.ClearCache();
 

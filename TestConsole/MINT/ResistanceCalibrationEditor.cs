@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Device;
 using DataBaseConfiguration.Services.Device;
@@ -13,8 +14,7 @@ namespace TestConsole.MINT
     {
       Console.WriteLine("=== Редактор калибровки сопротивления ===");
 
-      var service = new PowerSourceModuleServices();
-      var modules = service.GetAllEntities().OfType<PowerSourceModuleEntity>().ToList();
+      var modules = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult().OfType<PowerSourceModuleEntity>().ToList();
 
       if (modules == null || !modules.Any())
       {
@@ -27,15 +27,14 @@ namespace TestConsole.MINT
 
       var editableModule = new ModuleVoltageCurrentSource();
       CopyProperties(selected, editableModule);
-      EditResistanceCalibration(selected, service);
+      EditResistanceCalibration(selected);
     }
 
     /// <summary>
     /// Запускает цикл редактирования диапазонов сопротивления с калибровочными коэффициентами.
     /// </summary>
     /// <param name="selected">Сущность модуля из базы.</param>
-    /// <param name="service">Сервис для сохранения изменений.</param>
-    private static void EditResistanceCalibration(PowerSourceModuleEntity selected, PowerSourceModuleServices service)
+    private static void EditResistanceCalibration(PowerSourceModuleEntity selected)
     {
       while (true)
       {
@@ -82,7 +81,7 @@ namespace TestConsole.MINT
 
         editableModule.ResistanceCalibration.Add(updatedRange);
         selected.ResistanceCalibrationJson = JsonSerializer.Serialize(editableModule.ResistanceCalibration);
-        service.Update(selected);
+        PowerSourceModules.UpdateAsync(selected).GetAwaiter().GetResult();
       }
     }
 

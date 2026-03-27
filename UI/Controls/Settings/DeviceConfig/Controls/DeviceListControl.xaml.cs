@@ -153,7 +153,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IPowerSourceModule:
-          new PowerSourceModuleServices().Delete((IPowerSourceModule)device);
+          PowerSourceModules.DeleteAsync((IPowerSourceModule)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
