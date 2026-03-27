@@ -76,8 +76,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         {
           foreach (var chain in group.ChainModels)
           {
-            ApplySign(chain, part.Sign, model);
-            finalGroups.Add(new GroupModel(new List<ChainModel> { chain }));
+            if (part.Sign == '+' || part.Sign == '-')
+            {
+              ApplySign(chain, part.Sign, model);
+              finalGroups.Add(new GroupModel(new List<ChainModel> { chain }));
+            }
+            else
+            {
+              allErrors.Add(NeErrors.MissingSignForChain(numberLine, $"{commandNumber} {mnemonic}"));
+            }
           }
         }
       }

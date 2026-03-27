@@ -230,5 +230,20 @@ namespace Ask.Core.Services.Errors.Translation
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Не удалось распознать параметры: {parameters}"
       };
+
+    /// <summary>
+    /// Ошибка: не удалось распознать параметры (напряжение, сопротивление, время).
+    /// </summary>
+    public static ErrorItem MissingSignForChain(int startLineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = startLineNumber,
+        Command = command,
+        Code = ErrorCode.Ne_MissingSignForChain,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Не указана полярность для точек"
+      };
   }
 }
