@@ -246,6 +246,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
 
             if (context.IsProtocolAttribute)
+            //if (context.IsProtocolAttribute && measured.Result)
             {
               var info = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, chainStr);
               info.IndentLevel = indentLevel + 1;
