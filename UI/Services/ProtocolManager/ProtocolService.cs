@@ -61,7 +61,7 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     private string BuildProtocolText(ProtocolModel protocol)
     {
-      return protocol.Errors.Count > 0
+      return protocol.HasErrors
           ? ProtocolModel.GetProtocolWithErrorsText(protocol)
           : ProtocolModel.GetProtocolText(protocol);
     }

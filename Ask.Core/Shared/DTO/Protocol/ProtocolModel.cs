@@ -1,9 +1,17 @@
 ﻿using System.Text;
 
+using System.Text.RegularExpressions;
+
 namespace Ask.Core.Shared.DTO.Protocol
 {
   public class ProtocolModel
   {
+    public enum ProtocolMessageKind
+    {
+      Error,
+      Information
+    }
+
     /// <summary>
     /// Дата протокола.
     /// </summary>
@@ -56,14 +64,9 @@ namespace Ask.Core.Shared.DTO.Protocol
     public string Mode { get; set; }
 
     /// <summary>
-    /// Список ошибок программы контроля.
+    /// Единый список сообщений программы контроля по командам.
     /// </summary>
-    public Dictionary<string, List<ShowMessageModel>> Errors { get; set; } = new Dictionary<string, List<ShowMessageModel>>();
-
-    /// <summary>
-    /// Список информации программы контроля.
-    /// </summary>
-    public Dictionary<string, List<ShowMessageModel>> Info { get; set; } = new Dictionary<string, List<ShowMessageModel>>();
+    public Dictionary<string, List<(ShowMessageModel Message, ProtocolMessageKind Kind)>> Messages { get; set; } = new();
 
     /// <summary>
     /// Время начала выполнения.
@@ -93,6 +96,14 @@ namespace Ask.Core.Shared.DTO.Protocol
     private static string Template { get; set; } = string.Empty;
     private static string ErrorsTemplate { get; set; } = string.Empty;
 
+    public int ErrorCount => Messages.Values.Sum(list => list.Count(item => item.Kind == ProtocolMessageKind.Error));
+
+    public int InformationCount => Messages.Values.Sum(list => list.Count(item => item.Kind == ProtocolMessageKind.Information));
+
+    public int TotalMessageCount => Messages.Values.Sum(list => list.Count);
+
+    public bool HasErrors => ErrorCount > 0;
+
     public ProtocolModel()
     {
       StartTime = DateTime.Now;
@@ -112,7 +123,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     static public string GetProtocolText(ProtocolModel protocolModel)
     {
       string timeText = protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss\:ff");
-      string documentationText = BuildDocumentationBlock(protocolModel);
+      string messagesText = BuildMessagesBlock(protocolModel);
 
       string formattedText = Template
           .Replace("$ДАТА", protocolModel.Date.ToString("dd.MM.yyyy"))
@@ -122,7 +133,7 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$ПРОГРАММА", protocolModel.ProgramName)
           .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss:ff"))
           .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss:ff"))
-          .Replace("$ВРЕМЯ", timeText + documentationText)
+          .Replace("$ВРЕМЯ", timeText + messagesText)
           .Replace("$ИСПОЛНИТЕЛЬ", protocolModel.Executor)
           .Replace("$ПРЕДСТАВИТЕЛЬ", protocolModel.Agent)
           .Replace("$ЗАКАЗЧИК", protocolModel.Customer);
@@ -131,37 +142,7 @@ namespace Ask.Core.Shared.DTO.Protocol
 
     public static string GetProtocolWithErrorsText(ProtocolModel protocolModel)
     {
-      int totalErrors = protocolModel.Errors.Values.Sum(list => list.Count);
-      var errorsText = $"\r\nОшибки программы (всего: {totalErrors}):";
-
-      int i = 1;
-      foreach (var item in protocolModel.Errors.Keys)
-      {
-        //errorsText += $"\r\n\tОшибки команды: {item}";
-        foreach (var error in protocolModel.Errors[item])
-        {
-          errorsText += $"\r\nERR{i} {item}: {error}";
-          i++;
-        }
-      }
-
-      int totalInfo = protocolModel.Info.Values.Sum(list => list.Count);
-      string infoText = string.Empty;
-      if (totalInfo > 0)
-      {
-        infoText = $"\r\nДокументирование (всего: {totalInfo}):";
-
-        i = 1;
-        foreach (var item in protocolModel.Info.Keys)
-        {
-          //errorsText += $"\r\n\tОшибки команды: {item}";
-          foreach (var info in protocolModel.Info[item])
-          {
-            infoText += $"\r\nDOC{i} {item}: {info}";
-            i++;
-          }
-        }
-      }
+      string messagesText = BuildMessagesBlock(protocolModel);
 
       const string marker = "$ПРОГРАММА";
       int markerIndex = ErrorsTemplate.IndexOf(marker);
@@ -187,40 +168,69 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$ПРЕДСТАВИТЕЛЬ", protocolModel.Agent)
           .Replace("$ЗАКАЗЧИК", protocolModel.Customer);
 
-      if (totalInfo <= 0)
+      if (string.IsNullOrEmpty(messagesText))
       {
-        return before + "\r\n" + errorsText + "\r\n" + after;
+        return before + "\r\n" + after;
       }
-      else
-      {
-        return before + "\r\n" + errorsText + "\r\n" + infoText + "\r\n" + after;
-      }
+
+      return before + messagesText + "\r\n" + after;
     }
 
-    private static string BuildDocumentationBlock(ProtocolModel protocolModel)
+    private static string BuildMessagesBlock(ProtocolModel protocolModel)
     {
-      int totalInfo = protocolModel.Info.Values.Sum(list => list.Count);
-
-      if (totalInfo == 0)
+      if (protocolModel.TotalMessageCount == 0)
         return string.Empty;
 
       var sb = new StringBuilder();
 
-      sb.AppendLine().AppendLine()
-        .AppendLine($"Документирование (всего: {totalInfo}):");
+      sb.AppendLine().AppendLine().AppendLine();
 
-      int i = 1;
+      int sequenceIndex = 1;
 
-      foreach (var (command, infos) in protocolModel.Info)
+      foreach (var (command, entries) in protocolModel.Messages)
       {
-        foreach (var info in infos)
+        var errorSignatures = entries
+          .Where(item => item.Kind == ProtocolMessageKind.Error)
+          .Select(item => BuildMessageSignature(item.Message))
+          .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var (message, kind) in entries)
         {
-          sb.AppendLine($"DOC{i} {command}: {info}");
-          i++;
+          if (kind == ProtocolMessageKind.Information &&
+              errorSignatures.Contains(BuildMessageSignature(message)))
+          {
+            continue;
+          }
+
+          var prefix = kind == ProtocolMessageKind.Error
+            ? $"ERR{sequenceIndex++}"
+            : $"DOC{sequenceIndex++}";
+
+          sb.AppendLine($"{prefix} {command}: {message}");
         }
       }
 
       return sb.ToString();
+    }
+
+    private static string BuildMessageSignature(ShowMessageModel message)
+    {
+      return $"{NormalizeProtocolText(message?.Header)}|{NormalizeProtocolText(message?.Message)}";
+    }
+
+    private static string NormalizeProtocolText(string? value)
+    {
+      if (string.IsNullOrWhiteSpace(value))
+      {
+        return string.Empty;
+      }
+
+      var normalized = value.Trim();
+      normalized = normalized.Replace("[БРАК]", string.Empty, StringComparison.Ordinal);
+      normalized = normalized.Replace("[НОРМА]", string.Empty, StringComparison.Ordinal);
+      normalized = Regex.Replace(normalized, @"\s+\(", "(");
+      normalized = Regex.Replace(normalized, @"\s+", " ");
+      return normalized.Trim();
     }
 
   }
