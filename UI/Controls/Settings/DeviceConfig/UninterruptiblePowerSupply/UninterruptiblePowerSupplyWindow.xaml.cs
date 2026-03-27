@@ -2,6 +2,7 @@ using Ask.Core.Services.Errors.DataBase;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
@@ -78,15 +79,14 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
 
           try
           {
-            var service = new UninterruptiblePowerSupplyServices();
             if (_editingEntity == null)
             {
-              service.Create(deviceEntity);
+              UninterruptiblePowerSupplies.CreateAsync(deviceEntity).GetAwaiter().GetResult();
             }
             else
             {
               deviceEntity.Id = _editingEntity.Id;
-              service.Update(deviceEntity);
+              UninterruptiblePowerSupplies.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
             }
 
             RequestSave?.Invoke(s, deviceEntity);

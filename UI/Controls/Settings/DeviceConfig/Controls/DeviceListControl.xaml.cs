@@ -158,7 +158,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
           break;
 
         case IUninterruptiblePowerSupply:
-          new UninterruptiblePowerSupplyServices().Delete((IUninterruptiblePowerSupply)device);
+          UninterruptiblePowerSupplies.DeleteAsync((IUninterruptiblePowerSupply)device).GetAwaiter().GetResult();
           LogInformation("Удаляем устройство из UninterruptiblePowerSuppliesTable");
           break;
 

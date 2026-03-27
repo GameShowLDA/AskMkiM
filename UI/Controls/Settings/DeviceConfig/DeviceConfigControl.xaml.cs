@@ -24,6 +24,7 @@ using UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 
 namespace UI.Controls.Settings.DeviceConfig
 {
@@ -339,7 +340,11 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       devicesControl.ClearDevice(new UninterruptiblePowerSupplyEntity());
 
-      var uninterruptiblePowerSupplies = new UninterruptiblePowerSupplyServices().GetEntitiesByNumberChassis(chassis.Number);
+      var uninterruptiblePowerSupplies = UninterruptiblePowerSupplies
+        .GetDevicesByNumberChassisAsync(chassis.Number)
+        .GetAwaiter()
+        .GetResult()
+        .Select(ToUninterruptiblePowerSupplyEntity);
 
       foreach (var device in uninterruptiblePowerSupplies)
       {
@@ -563,6 +568,21 @@ namespace UI.Controls.Settings.DeviceConfig
         ConnectionDetails = device.ConnectionDetails,
         DeviceClass = device.DeviceClass,
         ResistanceCalibrationJson = device.ResistanceCalibrationJson,
+      };
+    }
+
+    private static UninterruptiblePowerSupplyEntity ToUninterruptiblePowerSupplyEntity(IUninterruptiblePowerSupply device)
+    {
+      return new UninterruptiblePowerSupplyEntity
+      {
+        Id = device.Id,
+        Name = device.Name,
+        Description = device.Description,
+        Number = device.Number,
+        NumberChassis = device.NumberChassis,
+        ConnectionDetails = device.ConnectionDetails,
+        DeviceClass = device.DeviceClass,
+        LastResolvedDevicePath = device.LastResolvedDevicePath,
       };
     }
   }

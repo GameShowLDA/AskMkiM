@@ -274,9 +274,7 @@ namespace UI.Components
     /// </summary>
     private IUninterruptiblePowerSupply? GetConfiguredUps()
     {
-      return new UninterruptiblePowerSupplyServices()
-        .GetAll()
-        .FirstOrDefault(device => device.NumberChassis == model.Number);
+      return UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault(device => device.NumberChassis == model.Number);
     }
 
     /// <summary>
