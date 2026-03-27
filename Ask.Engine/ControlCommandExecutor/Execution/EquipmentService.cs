@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using DataBaseConfiguration.Services.Device;
 
@@ -187,7 +188,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (int number in validChassisNumbers)
       {
-        var device = new SwitchingDeviceServices().GetDevicesByNumberChassis(number).FirstOrDefault();
+        var device = (await SwitchingDevices.GetDevicesByNumberChassisAsync(number)).FirstOrDefault();
         if (device != null)
         {
           ValidSwitchingDevice = device;

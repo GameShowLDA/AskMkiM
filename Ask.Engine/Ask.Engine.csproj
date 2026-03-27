@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.DataBase.Engine\Ask.DataBase.Engine.csproj" />
     <ProjectReference Include="..\Ask.LogLib\Ask.LogLib.csproj" />
     <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
     <ProjectReference Include="..\Message\Message.csproj" />

@@ -18,6 +18,7 @@ using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using DataBaseConfiguration.Services.Device;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
+using Ask.DataBase.Engine.Static.Devices;
 
 
 namespace Ask.Engine.Tests.Metrology.MeasurementSystem
@@ -56,7 +57,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="point1">Первая точка (в формате A.B.C).</param>
     /// <param name="point2">Вторая точка (в формате A.B.C).</param>
     /// <param name="mode">Метрологический режим, для которого выполняется алгоритм.</param>
-    protected virtual void CollectDevices(PointModel point1, PointModel point2, MeasurementTypeCommand mode)
+    protected virtual async Task CollectDevices(PointModel point1, PointModel point2, MeasurementTypeCommand mode)
     {
       Devices.Clear();
 
@@ -66,7 +67,6 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       }
 
       var relayRepo = new RelaySwitchModuleServices();
-      var ukshRepo = new SwitchingDeviceServices();
 
       var mkr1 = relayRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault(m => m.Number == point1.ModuleNumber);
       AddUniqueDevice(mode, mkr1);
@@ -77,7 +77,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         AddUniqueDevice(mode, mkr2);
       }
 
-      var uksh = ukshRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+      var uksh = (await SwitchingDevices.GetDevicesByNumberChassisAsync(point1.DeviceNumber)).FirstOrDefault();
       AddUniqueDevice(mode, uksh);
 
       var modeDevice = GetDeviceTypeForMode(mode);

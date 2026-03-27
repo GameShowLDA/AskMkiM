@@ -2,6 +2,7 @@
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.DataBase.Engine.Initialization;
+using Ask.DataBase.Engine.Static;
 using DataBaseConfiguration;
 using DataBaseConfiguration.Services.Device;
 using static Ask.LogLib.LoggerUtility;
@@ -99,10 +100,10 @@ namespace MainWindowProgram.Init
         new ChassisManagerServices().ReloadCache();
         new RelaySwitchModuleServices().ReloadCache();
         new PowerSourceModuleServices().ReloadCache();
-        new SwitchingDeviceServices().ReloadCache();
         new FastMeterServices().ReloadCache();
         new BreakdownTesterServices().ReloadCache();
         new RackServices().ReloadCache();
+        DeviceRuntime.ClearCache();
 
         LogInformation("Кэш устройств прогрет при старте приложения.");
       }

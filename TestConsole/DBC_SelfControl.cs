@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Initialization;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using static Ask.LogLib.LoggerUtility;
@@ -346,7 +347,7 @@ namespace TestConsole
 
     private static ISwitchingDevice SelectDeviceBusCommutation()
     {
-      var dbc = GetSwitchingDevices();
+      var dbc = GetSwitchingDevicesAsync().GetAwaiter().GetResult();
 
       if (dbc == null || !dbc.Any())
       {
@@ -378,11 +379,11 @@ namespace TestConsole
       return null;
     }
 
-    private static List<ISwitchingDevice> GetSwitchingDevices()
+    private static async Task<List<ISwitchingDevice>> GetSwitchingDevicesAsync()
     {
       return _ukshDatabaseSource switch
       {
-        UkshDatabaseSource.OldDatabase => new SwitchingDeviceServices().GetAll(),
+        UkshDatabaseSource.OldDatabase => await SwitchingDevices.GetAllAsync(),
         UkshDatabaseSource.NewDatabase => GetSwitchingDevicesFromNewDatabase(),
         _ => new List<ISwitchingDevice>(),
       };

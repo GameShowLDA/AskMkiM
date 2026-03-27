@@ -13,6 +13,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration.Services.Device;
 using System.ComponentModel;
 using System.Reflection;
@@ -228,13 +229,15 @@ namespace UI.Components
     /// </summary>
     private void LoadAllSelectableDevices()
     {
+      var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
+
       var sources = new List<IEnumerable<dynamic>>
-    {
-        new PowerSourceModuleServices().GetAll(),
-        new SwitchingDeviceServices().GetAll(),
-        new RelaySwitchModuleServices().GetAll(),
-        new BreakdownTesterServices().GetAll()
-    };
+	    {
+	        new PowerSourceModuleServices().GetAll(),
+	        switchingDevices,
+	        new RelaySwitchModuleServices().GetAll(),
+	        new BreakdownTesterServices().GetAll()
+	    };
 
       var combined = new List<object>();
       var displayNames = new List<string>();

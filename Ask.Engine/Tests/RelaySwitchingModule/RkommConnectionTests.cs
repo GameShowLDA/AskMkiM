@@ -94,7 +94,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           ;
 
       // УКШ
-      _busSwitcher = RelayModuleHelper.ResolveUksh(data.FirstPoint.DeviceNumber);
+      _busSwitcher = await RelayModuleHelper.ResolveUkshAsync(data.FirstPoint.DeviceNumber);
 
       // Мультиметр
       _fastMeter = RelayModuleHelper.ResolveFastMeter(data.FirstPoint.DeviceNumber);
