@@ -1,4 +1,6 @@
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -49,6 +51,10 @@ namespace Ask.Core.Shared.Entity.Devices
     public IDeviceProtocol DeviceProtocol { get; set; }
 
     /// <inheritdoc />
+    [NotMapped]
+    public IPower PowerManager { get; set; }
+
+    /// <inheritdoc />
     public Task StopPowerAsync(IUserInteractionService? userMessageService = null)
     {
       return Task.CompletedTask;
@@ -64,6 +70,22 @@ namespace Ask.Core.Shared.Entity.Devices
     public Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
       return Task.FromResult(true);
+    }
+
+    public UninterruptiblePowerSupplyDto Convert()
+    {
+      return new UninterruptiblePowerSupplyDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty,
+        LastResolvedDevicePath = LastResolvedDevicePath ?? string.Empty
+      };
     }
   }
 }

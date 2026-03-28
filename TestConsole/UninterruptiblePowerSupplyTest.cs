@@ -48,15 +48,15 @@ namespace TestConsole
             break;
 
           case 3:
-            await RunBooleanActionAsync("Проверка питания", () => device.VerifyPowerAsync(), device);
+            await RunBooleanActionAsync("Проверка питания", () => device.PowerManager.VerifyPowerAsync(), device);
             break;
 
           case 4:
-            await RunActionAsync("Включение питания", () => device.StartPowerAsync(), device);
+            await RunActionAsync("Включение питания", () => device.PowerManager.StartPowerAsync(), device);
             break;
 
           case 5:
-            await RunActionAsync("Отключение питания", () => device.StopPowerAsync(), device);
+            await RunActionAsync("Отключение питания", () => device.PowerManager.StopPowerAsync(), device);
             break;
 
           case 6:
@@ -202,17 +202,17 @@ namespace TestConsole
       try
       {
         Console.WriteLine("--- Смена питания ---");
-        bool hasPower = await device.VerifyPowerAsync();
+        bool hasPower = await device.PowerManager.VerifyPowerAsync();
         Console.WriteLine($"Текущее состояние: {(hasPower ? "Включено" : "Выключено")}");
 
         if (hasPower)
         {
-          await device.StopPowerAsync();
+          await device.PowerManager.StopPowerAsync();
           Console.WriteLine("Выполнено отключение питания.");
         }
         else
         {
-          await device.StartPowerAsync();
+          await device.PowerManager.StartPowerAsync();
           Console.WriteLine("Выполнено включение питания.");
         }
       }

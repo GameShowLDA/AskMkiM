@@ -261,9 +261,9 @@ namespace UI.Components
         return;
       }
 
-      if (!await ups.VerifyPowerAsync())
+      if (!await ups.PowerManager.VerifyPowerAsync())
       {
-        await ups.StartPowerAsync();
+        await ups.PowerManager.StartPowerAsync();
       }
     }
 
