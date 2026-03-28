@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -79,5 +80,10 @@ namespace Ask.Core.Shared.Entity.Devices
     /// <inheritdoc />
     [NotMapped]
     public ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
+
+    public RelaySwitchModuleDto Convert(IRelaySwitchModule device)
+    {
+      throw new NotImplementedException();
+    }
   }
 }
