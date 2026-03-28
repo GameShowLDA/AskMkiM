@@ -103,11 +103,11 @@ namespace MainWindowProgram.Events
 
           if (e)
           {
-            await ups.StartPowerAsync();
+            await ups.PowerManager.StartPowerAsync();
           }
           else
           {
-            await ups.StopPowerAsync();
+            await ups.PowerManager.StopPowerAsync();
           }
         }
         catch (Exception ex)

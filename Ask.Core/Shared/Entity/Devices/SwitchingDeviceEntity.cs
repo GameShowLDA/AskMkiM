@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -64,5 +65,20 @@ namespace Ask.Core.Shared.Entity.Devices
     /// <inheritdoc />
     [NotMapped]
     public IDeviceProtocol DeviceProtocol { get; set; }
+
+    public SwitchingDeviceDto Convert()
+    {
+      return new SwitchingDeviceDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty
+      };
+    }
   }
 }

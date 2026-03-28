@@ -81,9 +81,24 @@ namespace Ask.Core.Shared.Entity.Devices
     [NotMapped]
     public ISelfTestCheckerModuleRelayControl SelfTestManager { get; set; }
 
-    public RelaySwitchModuleDto Convert(IRelaySwitchModule device)
+    public RelaySwitchModuleDto Convert()
     {
-      throw new NotImplementedException();
+      return new RelaySwitchModuleDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        NumberRack = NumberRack,
+        PointCount = PointCount,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty,
+        BusType = BusType,
+        SwitchResistance = SwitchResistance,
+        SwitchCapacitance = SwitchCapacitance
+      };
     }
   }
 }

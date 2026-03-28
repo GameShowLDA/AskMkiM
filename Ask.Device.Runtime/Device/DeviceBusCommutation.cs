@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Device.Communication.Ethernet;
@@ -48,5 +49,20 @@ namespace Ask.Device.Runtime.Device
     /// Устанавливает или возвращает номер шасси.
     /// </summary>
     public int NumberChassis { get; set; }
+
+    public SwitchingDeviceDto Convert()
+    {
+      return new SwitchingDeviceDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty
+      };
+    }
   }
 }
