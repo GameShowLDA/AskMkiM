@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -16,6 +17,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.DataBase.Engine.Builder;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.DataBase.Provider.Services.Devices;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
@@ -229,9 +231,9 @@ namespace UI.Controls.Settings
       {
         Version = 1,
         ExportedAtUtc = DateTime.UtcNow,
-        Chassis = db.ChassisManagers
+        Chassis = ChassisManagers.GetAllAsync().GetAwaiter().GetResult()
           .OrderBy(chassis => chassis.Number)
-          .Select(chassis => new ChassisConfigurationItem
+          .Select(chassis => new ChassisManagerDto
           {
             Name = chassis.Name,
             Description = chassis.Description,
@@ -343,7 +345,7 @@ namespace UI.Controls.Settings
       var model = JsonSerializer.Deserialize<DeviceConfigurationFileModel>(json, ImportJsonOptions)
         ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
 
-      model.Chassis ??= new List<ChassisConfigurationItem>();
+      model.Chassis ??= new List<ChassisManagerDto>();
       model.Racks ??= new List<RackDto>();
       model.RelaySwitchModules ??= new List<RelaySwitchModuleConfigurationItem>();
       model.SwitchingDevices ??= new List<SwitchingDeviceConfigurationItem>();
@@ -450,12 +452,12 @@ namespace UI.Controls.Settings
       db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
       db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
       Racks.DeleteAllAsync().GetAwaiter().GetResult();
-
-      db.ChassisManagers.RemoveRange(db.ChassisManagers);
+      ChassisManagers.DeleteAllAsync().GetAwaiter().GetResult();
       db.SaveChanges();
 
-      db.ChassisManagers.AddRange(model.Chassis.Select(ToEntity));
+
       Racks.CreateRangeAsync(model.Racks.Select(ToEntity));
+      ChassisManagers.CreateRangeAsync(model.Chassis.Select(ToEntity));
 
       db.RelaySwitchModules.AddRange(model.RelaySwitchModules.Select(ToEntity));
       db.SwitchingDevices.AddRange(model.SwitchingDevices.Select(ToEntity));
@@ -483,19 +485,7 @@ namespace UI.Controls.Settings
       return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
-    private static ChassisManagerEntity ToEntity(ChassisConfigurationItem item)
-    {
-      return new ChassisManagerEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-        BusType = item.BusType,
-      };
-    }
-
+    private static IChassisManager ToEntity(ChassisManagerDto item) => ChassisManagers.Build(item);
     private static IRack ToEntity(RackDto item) => Racks.Build(item);
 
     private static RelaySwitchModuleEntity ToEntity(RelaySwitchModuleConfigurationItem item)
@@ -863,7 +853,7 @@ namespace UI.Controls.Settings
 
       public DateTime ExportedAtUtc { get; set; }
 
-      public List<ChassisConfigurationItem> Chassis { get; set; } = new();
+      public List<ChassisManagerDto> Chassis { get; set; } = new();
 
       public List<RackDto> Racks { get; set; } = new();
 
@@ -877,22 +867,6 @@ namespace UI.Controls.Settings
 
       public List<BreakdownTesterConfigurationItem> BreakdownTesters { get; set; } = new();
     }
-
-    private sealed class ChassisConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
-
-      public BusStructureEnum.Type BusType { get; set; }
-    }
-
     private sealed class RelaySwitchModuleConfigurationItem
     {
       public string? Name { get; set; }

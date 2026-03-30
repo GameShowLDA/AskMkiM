@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
     /// <summary>
     /// Событие, вызываемое при сохранении данных измерителя.
     /// </summary>
-    public event EventHandler<FastMeterEntity> RequestSave;
+    public event EventHandler<FastMeterDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FastMeterWindow"/>.
@@ -77,28 +78,29 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        FastMeterEntity deviceEntity = processor.ProcessDevice<FastMeterEntity>(
+        FastMeterDto deviceDto = processor.ProcessDevice<FastMeterDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
-          deviceEntity.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
+          deviceDto.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
 
+          var fastMeter = FastMeters.Build(deviceDto);
           try
           {
             if (_editingEntity == null)
             {
-              FastMeters.CreateAsync(deviceEntity).GetAwaiter().GetResult();
+              FastMeters.CreateAsync(fastMeter).GetAwaiter().GetResult();
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              FastMeters.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
+              deviceDto.Id = _editingEntity.Id;
+              FastMeters.UpdateAsync(fastMeter).GetAwaiter().GetResult();
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

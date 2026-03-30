@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Rack;
+﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using System.Collections.ObjectModel;
@@ -16,7 +17,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Коллекция доступных систем шасси.
     /// </summary>
-    public ObservableCollection<IChassisManager> SystemsChassis { get; set; } = new();
+    public ObservableCollection<ChassisManagerDto> SystemsChassis { get; set; } = new();
 
     /// <summary>
     /// Коллекция доступных стоек.
@@ -95,7 +96,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// Добавляет систему в список для отображения.
     /// </summary>
     /// <param name="chassisManager">Экземпляр <see cref="ChassisManagerEntity"/>.</param>
-    public void AddSystem(IChassisManager chassisManager)
+    public void AddSystem(ChassisManagerDto chassisManager)
     {
       if (chassisManager == null)
       {

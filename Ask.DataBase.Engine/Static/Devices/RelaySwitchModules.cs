@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -72,6 +74,22 @@ public static class RelaySwitchModules
   /// </summary>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IRelaySwitchModule>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все модули коммутации реле из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IRelaySwitchModule>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект модуля коммутации реле на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные устройства.</param>
+  /// <returns>
+  /// Готовый runtime-объект модуля коммутации реле.
+  /// </returns>
+  public static IRelaySwitchModule Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IRelaySwitchModule>(dto);
 
   /// <summary>
   /// Обновляет сопротивление переключения для модуля,

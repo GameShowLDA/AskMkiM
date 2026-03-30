@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -24,7 +25,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     /// <summary>
     /// Событие запроса сохранения данных устройства.
     /// </summary>
-    public event EventHandler<BreakdownTesterEntity> RequestSave;
+    public event EventHandler<BreakdownTesterDto> RequestSave;
 
     /// <summary>
     /// Свойство, предоставляющее доступ к параметрам устройства.
@@ -76,29 +77,31 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        BreakdownTesterEntity deviceEntity = processor.ProcessDevice<BreakdownTesterEntity>(
+        BreakdownTesterDto deviceDto = processor.ProcessDevice<BreakdownTesterDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
-          deviceEntity.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
-          deviceEntity.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
+          deviceDto.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
+          deviceDto.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
 
           try
           {
+            var breakDown = BreakdownTesters.Build(deviceDto);
+
             if (_editingEntity == null)
             {
-              BreakdownTesters.CreateAsync(deviceEntity).GetAwaiter().GetResult();
+              BreakdownTesters.CreateAsync(breakDown).GetAwaiter().GetResult();
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              BreakdownTesters.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
+              deviceDto.Id = _editingEntity.Id;
+              BreakdownTesters.UpdateAsync(breakDown).GetAwaiter().GetResult();
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

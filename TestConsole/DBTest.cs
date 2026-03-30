@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Entity.Devices;
+using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration;
 using DataBaseConfiguration.Context;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,6 @@ namespace TestConsole
       {
         Console.WriteLine("\nВыберите действие:");
         Console.WriteLine("1. Вывести список устройств");
-        Console.WriteLine("2. Добавить тестовые данные");
         Console.WriteLine("3. Удалить все данные");
         Console.WriteLine("0. Назад");
 
@@ -36,10 +36,6 @@ namespace TestConsole
         {
           case 1:
             Task.Run(DisplayDevicesAsync).Wait();
-            break;
-
-          case 2:
-            Task.Run(AddRandomDataAsync).Wait();
             break;
 
           case 3:
@@ -62,14 +58,12 @@ namespace TestConsole
     /// </summary>
     private static async Task DisplayDevicesAsync()
     {
-      using var dbContext = DataBaseConfig.Context;
-
-      var chassisManagers = await dbContext.ChassisManagers.ToListAsync();
-      var relaySwitchModules = await dbContext.RelaySwitchModules.ToListAsync();
-      var powerSourceModules = await dbContext.PowerSourceModules.ToListAsync();
-      var switchingDevices = await dbContext.SwitchingDevices.ToListAsync();
-      var fastMeters = await dbContext.FastMeters.ToListAsync();
-      var breakdownTesters = await dbContext.BreakdownTesters.ToListAsync();
+      var chassisManagers = await ChassisManagers.GetAllAsync();
+      var relaySwitchModules = await RelaySwitchModules.GetAllAsync();
+      var powerSourceModules = await PowerSourceModules.GetAllAsync();
+      var switchingDevices = await SwitchingDevices.GetAllAsync();
+      var fastMeters = await FastMeters.GetAllAsync();
+      var breakdownTesters = await BreakdownTesters.GetAllAsync();
 
       Console.WriteLine("\nСписок устройств:");
       Console.WriteLine($"Менеджеры шасси: {chassisManagers.Count}");
@@ -85,45 +79,15 @@ namespace TestConsole
     /// </summary>
     private static async Task DeleteAllDataAsync()
     {
-      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
-
-      using var dbContext = new AppDbContext(optionsBuilder.Options);
       Console.WriteLine("Удаление всех данных...");
 
-      dbContext.ChassisManagers.RemoveRange(dbContext.ChassisManagers);
-      dbContext.RelaySwitchModules.RemoveRange(dbContext.RelaySwitchModules);
-      dbContext.PowerSourceModules.RemoveRange(dbContext.PowerSourceModules);
-      dbContext.SwitchingDevices.RemoveRange(dbContext.SwitchingDevices);
-      dbContext.FastMeters.RemoveRange(dbContext.FastMeters);
-      dbContext.BreakdownTesters.RemoveRange(dbContext.BreakdownTesters);
-
-      await dbContext.SaveChangesAsync();
+      await ChassisManagers.DeleteAllAsync();
+      await RelaySwitchModules.DeleteAllAsync();
+      await PowerSourceModules.DeleteAllAsync();
+      await SwitchingDevices.DeleteAllAsync();
+      await FastMeters.DeleteAllAsync();
+      await BreakdownTesters.DeleteAllAsync();
       Console.WriteLine("Все данные удалены.");
-    }
-
-    /// <summary>
-    /// Добавляет случайные данные в базу данных.
-    /// </summary>
-    private static async Task AddRandomDataAsync()
-    {
-      DbContextOptionsBuilder<AppDbContext> optionsBuilder = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlite($"Data Source={DataBaseConfig.ConfigFilePath}");
-
-      using var dbContext = new AppDbContext(optionsBuilder.Options);
-      Console.WriteLine("Добавление тестовых данных...");
-
-      var random = new Random();
-
-      dbContext.ChassisManagers.Add(new ChassisManagerEntity { Name = "Шасси 1", Description = "Тестовое шасси", Number = random.Next(1, 100) });
-      dbContext.RelaySwitchModules.Add(new RelaySwitchModuleEntity { Name = "Модуль реле 1", Description = "Тестовый модуль реле", Number = random.Next(1, 100), NumberChassis = 1, PointCount = 16 });
-      dbContext.PowerSourceModules.Add(new PowerSourceModuleEntity { Name = "Источник питания 1", Description = "Тестовый источник", Number = random.Next(1, 100) });
-      dbContext.SwitchingDevices.Add(new SwitchingDeviceEntity { Name = "Коммутационное устройство 1", Description = "Тестовое устройство", Number = random.Next(1, 100), NumberChassis = 1 });
-      dbContext.FastMeters.Add(new FastMeterEntity { Name = "Быстрый измеритель 1", Description = "Тестовый измеритель", Number = random.Next(1, 100) });
-      dbContext.BreakdownTesters.Add(new BreakdownTesterEntity { Name = "Пробойная установка 1", Description = "Тестовая установка", Number = random.Next(1, 100), NumberChassis = 1 });
-
-      await dbContext.SaveChangesAsync();
-      Console.WriteLine("Тестовые данные добавлены.");
     }
   }
 }

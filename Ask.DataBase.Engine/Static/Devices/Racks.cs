@@ -101,6 +101,7 @@ public static class Racks
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IRack>(id, cancellationToken);
+
   /// <summary>
   /// Удаляет все устройства из таблицы данных.
   /// </summary>

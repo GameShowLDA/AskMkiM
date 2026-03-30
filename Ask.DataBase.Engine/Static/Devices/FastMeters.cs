@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -116,4 +118,20 @@ public static class FastMeters
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IFastMeter>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все быстрые измерители из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IFastMeter>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект стойки на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные быстрого измерителя.</param>
+  /// <returns>
+  /// Готовый runtime-объект стойки.
+  /// </returns>
+  public static IFastMeter Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IFastMeter>(dto);
 }

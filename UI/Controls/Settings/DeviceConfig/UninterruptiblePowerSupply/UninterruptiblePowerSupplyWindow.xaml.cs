@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
     /// <summary>
     /// Save request event.
     /// </summary>
-    public event EventHandler<UninterruptiblePowerSupplyEntity> RequestSave;
+    public event EventHandler<UninterruptiblePowerSupplyDto> RequestSave;
 
     /// <summary>
     /// Window constructor.
@@ -67,28 +68,29 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        UninterruptiblePowerSupplyEntity deviceEntity = processor.ProcessDevice<UninterruptiblePowerSupplyEntity>(
+        UninterruptiblePowerSupplyDto deviceDto = processor.ProcessDevice<UninterruptiblePowerSupplyDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
-          deviceEntity.LastResolvedDevicePath = (baseDevice as IUninterruptiblePowerSupply)?.LastResolvedDevicePath ?? string.Empty;
+          deviceDto.LastResolvedDevicePath = (baseDevice as IUninterruptiblePowerSupply)?.LastResolvedDevicePath ?? string.Empty;
 
+          var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(deviceDto);
           try
           {
             if (_editingEntity == null)
             {
-              UninterruptiblePowerSupplies.CreateAsync(deviceEntity).GetAwaiter().GetResult();
+              UninterruptiblePowerSupplies.CreateAsync(uninterruptiblePowerSupply).GetAwaiter().GetResult();
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              UninterruptiblePowerSupplies.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
+              deviceDto.Id = _editingEntity.Id;
+              UninterruptiblePowerSupplies.UpdateAsync(uninterruptiblePowerSupply).GetAwaiter().GetResult();
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)
