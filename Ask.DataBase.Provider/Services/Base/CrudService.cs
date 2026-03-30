@@ -14,10 +14,7 @@ namespace Ask.DataBase.Provider.Services.Base;
 /// <typeparam name="T">Тип DTO.</typeparam>
 public class CrudService<T> : ICrudService<T> where T : class
 {
-
-  /// <summary>
-  /// Возвращает все записи указанного типа.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task<List<T>> GetAllAsync(CancellationToken cancellationToken = default)
   {
     await using var context = CreateContext();
@@ -26,9 +23,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     return await context.Set<T>().ToListAsync(cancellationToken);
   }
 
-  /// <summary>
-  /// Возвращает запись по идентификатору.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
   {
     await using var context = CreateContext();
@@ -37,9 +32,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     return await context.Set<T>().FindAsync([id], cancellationToken);
   }
 
-  /// <summary>
-  /// Создаёт новую запись.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(entity);
@@ -53,9 +46,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     return entity;
   }
 
-  /// <summary>
-  /// Обновляет существующую запись.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task<T> UpdateAsync(T entity, CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(entity);
@@ -69,9 +60,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     return entity;
   }
 
-  /// <summary>
-  /// Удаляет запись по экземпляру DTO.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(entity);
@@ -83,9 +72,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     await context.SaveChangesAsync(cancellationToken);
   }
 
-  /// <summary>
-  /// Удаляет запись по идентификатору.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default)
   {
     await using var context = CreateContext();
@@ -104,9 +91,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     return true;
   }
 
-  /// <summary>
-  /// Ищет записи по значению произвольного свойства.
-  /// </summary>
+  /// <inheritdoc/>
   public virtual async Task<List<T>> FindByPropertyAsync<TProperty>(
     Expression<Func<T, TProperty>> propertyExpression,
     TProperty value,
