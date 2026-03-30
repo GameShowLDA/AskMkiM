@@ -14,6 +14,7 @@ namespace Ask.DataBase.Provider.Services.Base;
 /// <typeparam name="T">Тип DTO.</typeparam>
 public class CrudService<T> : ICrudService<T> where T : class
 {
+
   /// <summary>
   /// Возвращает все записи указанного типа.
   /// </summary>

@@ -67,6 +67,7 @@ public class DeviceEngine : IDeviceEngine
     _uninterruptiblePowerSupplyService = uninterruptiblePowerSupplyService ?? new UninterruptiblePowerSupplyDtoService();
   }
 
+  /// <inheritdoc/>
   public Task<TDevice?> GetByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -92,6 +93,7 @@ public class DeviceEngine : IDeviceEngine
     throw CreateUnsupportedTypeException<TDevice>();
   }
 
+  /// <inheritdoc/>
   public Task<List<TDevice>> GetAllAsync<TDevice>(CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -117,6 +119,7 @@ public class DeviceEngine : IDeviceEngine
     throw CreateUnsupportedTypeException<TDevice>();
   }
 
+  /// <inheritdoc/>
   public Task<TDevice?> GetByNumberAsync<TDevice>(int number, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -142,6 +145,7 @@ public class DeviceEngine : IDeviceEngine
     throw CreateUnsupportedTypeException<TDevice>();
   }
 
+  /// <inheritdoc/>
   public Task<List<TDevice>> GetDevicesByNumberChassisAsync<TDevice>(
     int numberChassis,
     CancellationToken cancellationToken = default)
@@ -166,6 +170,7 @@ public class DeviceEngine : IDeviceEngine
       $"Для интерфейса '{requestedType.Name}' выборка по номеру шасси не поддерживается.");
   }
 
+  /// <inheritdoc/>
   public Task<TDevice?> GetDeviceByNumberChassisAsync<TDevice>(
     int numberChassis,
     int number,
@@ -191,6 +196,7 @@ public class DeviceEngine : IDeviceEngine
       $"Для интерфейса '{requestedType.Name}' выборка по номеру шасси и номеру устройства не поддерживается.");
   }
 
+  /// <inheritdoc/>
   public async Task<TDevice?> ReloadByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -198,6 +204,7 @@ public class DeviceEngine : IDeviceEngine
     return await GetByIdAsync<TDevice>(id, cancellationToken);
   }
 
+  /// <inheritdoc/>
   public Task<TDevice> CreateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -225,6 +232,7 @@ public class DeviceEngine : IDeviceEngine
     throw CreateUnsupportedTypeException<TDevice>();
   }
 
+  /// <inheritdoc/>
   public Task<TDevice> UpdateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -252,6 +260,7 @@ public class DeviceEngine : IDeviceEngine
     throw CreateUnsupportedTypeException<TDevice>();
   }
 
+  /// <inheritdoc/>
   public Task<bool> DeleteAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -259,6 +268,7 @@ public class DeviceEngine : IDeviceEngine
     return DeleteByIdAsync<TDevice>(device.Id, cancellationToken);
   }
 
+  /// <inheritdoc/>
   public Task<bool> DeleteByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -284,6 +294,7 @@ public class DeviceEngine : IDeviceEngine
     throw CreateUnsupportedTypeException<TDevice>();
   }
 
+  /// <inheritdoc/>
   public TDevice Build<TDevice>(DeviceDto dto)
     where TDevice : class, IDevice
   {
@@ -305,6 +316,7 @@ public class DeviceEngine : IDeviceEngine
     return device;
   }
 
+  /// <inheritdoc/>
   public void ClearCache()
   {
     _cache.Clear();
