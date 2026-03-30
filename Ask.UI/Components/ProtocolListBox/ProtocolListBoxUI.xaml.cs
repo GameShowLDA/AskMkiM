@@ -1,7 +1,10 @@
-﻿using Ask.Core.Services.FilesUtility;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +23,10 @@ namespace Ask.UI.Components.ProtocolListBox
     private const double MaxFontSize = 48.0;
     private const double ZoomStep = 1.0;
     private const double DefaultFontSize = 20.0;
+    private const double MouseWheelScrollStep = 48.0;
+    private ScrollViewer? _protocolScrollViewer;
+    private ProtocolDisplayItem? _currentGroup;
+    private ProtocolDisplayItem? _pendingCommandHeaderItem;
 
     /// <summary>
     /// Размер шрифта строк протокола.
@@ -31,26 +38,58 @@ namespace Ask.UI.Components.ProtocolListBox
         typeof(ProtocolListBoxUI),
         new PropertyMetadata(DefaultFontSize));
 
+    /// <summary>
+    /// Размер шрифта протокола.
+    /// </summary>
     public double ProtocolFontSize
     {
       get => (double)GetValue(ProtocolFontSizeProperty);
       set => SetValue(ProtocolFontSizeProperty, value);
     }
 
+    /// <summary>
+    /// Плоский список сообщений протокола.
+    /// Старый источник данных, который можно пока оставить без изменений.
+    /// </summary>
     public ObservableCollection<ShowMessageModel> Messages { get; } = new();
+
+    /// <summary>
+    /// Новая коллекция элементов отображения.
+    /// Нужна для будущего сворачиваемого отображения блоков.
+    /// </summary>
+    public ObservableCollection<ProtocolDisplayItem> DisplayItems { get; } = new();
+
     public string Header { get; set; }
 
     public bool HasRetryAction => throw new NotImplementedException();
 
-    public bool ClickRetry { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public IButtonService ButtonService { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public bool ClickRetry
+    {
+      get => throw new NotImplementedException();
+      set => throw new NotImplementedException();
+    }
+
+    public IButtonService ButtonService
+    {
+      get => throw new NotImplementedException();
+      set => throw new NotImplementedException();
+    }
 
     public ProtocolListBoxUI()
     {
       InitializeComponent();
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
+      Loaded += ProtocolListBoxUI_Loaded;
     }
 
+    private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)
+    {
+      _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
+    }
+
+    /// <summary>
+    /// Обработка клавиатурных сокращений контрола.
+    /// </summary>
     private void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (HandleZoomShortcuts(e))
@@ -61,39 +100,77 @@ namespace Ask.UI.Components.ProtocolListBox
       if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
       {
         e.Handled = true;
+
         try
         {
-          // Вытаскиваем текст напрямую из Messages
           var text = GetText();
           TextPrintHelper.PrintText(text, "Печать протокола");
         }
         catch (Exception ex)
         {
-          MessageBox.Show($"Ошибка при печати: {ex.Message}", "Ошибка печати", MessageBoxButton.OK, MessageBoxImage.Error);
+          MessageBox.Show(
+            $"Ошибка при печати: {ex.Message}",
+            "Ошибка печати",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
         }
       }
     }
 
     /// <summary>
-    /// Масштабирование текста протокола по Ctrl+колесо мыши.
+    /// Масштабирование текста протокола по Ctrl + колесо мыши.
     /// </summary>
     private void ProtocolListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
-      if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+      if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
       {
+        if (e.Delta > 0)
+        {
+          Zoom(true);
+        }
+        else if (e.Delta < 0)
+        {
+          Zoom(false);
+        }
+
+        e.Handled = true;
         return;
       }
 
-      if (e.Delta > 0)
+      if (_protocolScrollViewer != null)
       {
-        Zoom(true);
+        double delta = e.Delta > 0 ? -MouseWheelScrollStep : MouseWheelScrollStep;
+        _protocolScrollViewer.ScrollToVerticalOffset(_protocolScrollViewer.VerticalOffset + delta);
+        e.Handled = true;
       }
-      else if (e.Delta < 0)
+    }
+
+    private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+    {
+      if (parent == null)
       {
-        Zoom(false);
+        return null;
       }
 
-      e.Handled = true;
+      int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+
+      for (int i = 0; i < childrenCount; i++)
+      {
+        var child = VisualTreeHelper.GetChild(parent, i);
+
+        if (child is T typedChild)
+        {
+          return typedChild;
+        }
+
+        var result = FindVisualChild<T>(child);
+        if (result != null)
+        {
+          return result;
+        }
+      }
+
+      return null;
     }
 
     /// <summary>
@@ -130,6 +207,9 @@ namespace Ask.UI.Components.ProtocolListBox
       return false;
     }
 
+    /// <summary>
+    /// Увеличивает или уменьшает размер шрифта.
+    /// </summary>
     private void Zoom(bool zoomIn)
     {
       var candidate = zoomIn
@@ -139,16 +219,25 @@ namespace Ask.UI.Components.ProtocolListBox
       SetProtocolFontSize(Clamp(candidate, MinFontSize, MaxFontSize));
     }
 
+    /// <summary>
+    /// Сбрасывает масштаб шрифта к значению по умолчанию.
+    /// </summary>
     private void ResetZoom()
     {
       SetProtocolFontSize(DefaultFontSize);
     }
 
+    /// <summary>
+    /// Устанавливает размер шрифта протокола.
+    /// </summary>
     private void SetProtocolFontSize(double size)
     {
       ProtocolFontSize = size;
     }
 
+    /// <summary>
+    /// Ограничивает значение диапазоном.
+    /// </summary>
     private static double Clamp(double value, double min, double max)
       => Math.Max(min, Math.Min(max, value));
 
@@ -169,9 +258,11 @@ namespace Ask.UI.Components.ProtocolListBox
       Application.Current.Dispatcher.Invoke(() =>
       {
         int linesToRemove = Math.Min(count, Messages.Count);
+
         for (int i = 0; i < linesToRemove; i++)
         {
           Messages.RemoveAt(Messages.Count - 1);
+          RemoveLastDisplayItem();
           removed++;
         }
       });
@@ -179,15 +270,25 @@ namespace Ask.UI.Components.ProtocolListBox
       return Task.FromResult(removed);
     }
 
+    /// <summary>
+    /// Полностью очищает протокол.
+    /// </summary>
     public async Task ClearAsync()
     {
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
         Messages.Clear();
+        DisplayItems.Clear();
+        _currentGroup = null;
+        _pendingCommandHeaderItem = null;
+
         LogInformation("Протокол полностью очищен.");
       });
     }
 
+    /// <summary>
+    /// Удаляет первую найденную строку, содержащую указанный текст.
+    /// </summary>
     public async Task<bool> RemoveLineContainingTextAsync(string textToRemove)
     {
       return await Application.Current.Dispatcher.InvokeAsync(() =>
@@ -195,12 +296,14 @@ namespace Ask.UI.Components.ProtocolListBox
         try
         {
           var target = Messages.FirstOrDefault(m =>
-              (!string.IsNullOrEmpty(m.Header) && m.Header.Contains(textToRemove, StringComparison.OrdinalIgnoreCase)) ||
-              (!string.IsNullOrEmpty(m.Message) && m.Message.Contains(textToRemove, StringComparison.OrdinalIgnoreCase)));
+            (!string.IsNullOrEmpty(m.Header) && m.Header.Contains(textToRemove, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrEmpty(m.Message) && m.Message.Contains(textToRemove, StringComparison.OrdinalIgnoreCase)));
 
           if (target != null)
           {
             Messages.Remove(target);
+            RebuildDisplayItems();
+
             LogInformation($"Строка '{textToRemove}' найдена и удалена.");
             return true;
           }
@@ -216,97 +319,121 @@ namespace Ask.UI.Components.ProtocolListBox
       });
     }
 
+    /// <summary>
+    /// Добавляет новую строку в протокол.
+    /// Если строка является командой, она открывает новый сворачиваемый блок.
+    /// Если команда ещё не встречалась, обычные сообщения добавляются как корневые строки.
+    /// </summary>
     public async Task AppendLineAsync(ShowMessageModel showMessageModel)
     {
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
-        var displayLines = ExpandMessageForDisplay(showMessageModel);
 
-        foreach (var line in displayLines)
+        Messages.Add(showMessageModel);
+
+        AppendToDisplayItems(showMessageModel);
+
+        var lastRootItem = DisplayItems.LastOrDefault();
+        if (lastRootItem != null)
         {
-          Messages.Add(line);
+          ProtocolListBox.ScrollIntoView(lastRootItem);
         }
-
-        ProtocolListBox.ScrollIntoView(displayLines.LastOrDefault() ?? showMessageModel);
       });
     }
 
     /// <summary>
-    /// Разбивает многострочный заголовок на отдельные строки для корректной заливки фона.
-    /// Пустые строки сохраняются, но отображаются без подсветки.
+    /// Добавляет строки в иерархическую коллекцию отображения.
     /// </summary>
-    private static IReadOnlyList<ShowMessageModel> ExpandMessageForDisplay(ShowMessageModel source)
+    private void AppendToDisplayItems(ShowMessageModel model)
     {
-      if (!source.HeaderBackgroundColor.HasValue || string.IsNullOrEmpty(source.Header))
+      if (model.Status == ShowMessageModel.MessageType.Command)
       {
-        return new[] { source };
+        var commandItem = ProtocolDisplayItem.CreateLine(model);
+
+        DisplayItems.Add(commandItem);
+
+        _currentGroup = null;
+        _pendingCommandHeaderItem = commandItem;
+        return;
       }
 
-      string normalized = source.Header.Replace("\r\n", "\n").Replace('\r', '\n');
-      if (!normalized.Contains('\n'))
+      var lineItem = ProtocolDisplayItem.CreateLine(model);
+
+      if (_pendingCommandHeaderItem != null)
       {
-        return new[] { source };
-      }
+        int index = DisplayItems.IndexOf(_pendingCommandHeaderItem);
 
-      string[] headerLines = normalized.Split('\n');
-      var result = new List<ShowMessageModel>(headerLines.Length);
-
-      for (int i = 0; i < headerLines.Length; i++)
-      {
-        string line = headerLines[i];
-        bool hasText = !string.IsNullOrWhiteSpace(line);
-
-        var model = CloneForDisplay(source);
-        model.Header = hasText ? line : " ";
-        model.Message = string.Empty;
-        model.Time = string.Empty;
-        model.Debug = string.Empty;
-        model.HeaderBackgroundColor = hasText ? source.HeaderBackgroundColor : null;
-
-        if (!hasText)
+        if (index >= 0)
         {
-          model.HeaderColor = Colors.Transparent;
-          model.MessageColor = Colors.Transparent;
+          var group = ProtocolDisplayItem.CreateGroup(_pendingCommandHeaderItem.Message!);
+          group.Children.Add(lineItem);
+
+          DisplayItems[index] = group;
+          _currentGroup = group;
+        }
+        else
+        {
+          DisplayItems.Add(lineItem);
+          _currentGroup = null;
         }
 
-        result.Add(model);
+        _pendingCommandHeaderItem = null;
+        return;
       }
 
-      // Хвост сообщения (message/time/debug) привязываем к последней строке.
-      var last = result[^1];
-      last.Message = source.Message;
-      last.Time = source.Time;
-      last.Debug = source.Debug;
+      if (_currentGroup != null)
+      {
+        _currentGroup.Children.Add(lineItem);
+        return;
+      }
 
-      return result;
+      DisplayItems.Add(lineItem);
     }
 
     /// <summary>
-    /// Создаёт копию сообщения для построчного отображения в списке.
+    /// Удаляет последний элемент из иерархической коллекции отображения.
     /// </summary>
-    private static ShowMessageModel CloneForDisplay(ShowMessageModel source)
+    private void RemoveLastDisplayItem()
     {
-      var clone = new ShowMessageModel
+      if (DisplayItems.Count == 0)
       {
-        Status = source.Status,
-        Header = source.Header,
-        Message = source.Message,
-        Time = source.Time,
-        Debug = source.Debug,
-        HeaderColor = source.HeaderColor,
-        HeaderBackgroundColor = source.HeaderBackgroundColor,
-        MessageColor = source.MessageColor,
-        TimeColor = source.TimeColor,
-        ExecutionError = source.ExecutionError,
-        CanBeDeleted = source.CanBeDeleted,
-        IsDeviceMessage = source.IsDeviceMessage,
-        IsControlProgramCommandHeader = source.IsControlProgramCommandHeader,
-        IndentLevel = source.IndentLevel
-      };
+        _currentGroup = null;
+        return;
+      }
 
-      return clone;
+      var lastRoot = DisplayItems[^1];
+
+      if (lastRoot.IsGroup && lastRoot.Children.Count > 0)
+      {
+        lastRoot.Children.RemoveAt(lastRoot.Children.Count - 1);
+      }
+      else
+      {
+        DisplayItems.RemoveAt(DisplayItems.Count - 1);
+      }
+
+      _currentGroup = DisplayItems.LastOrDefault(x => x.IsGroup);
     }
 
+    /// <summary>
+    /// Полностью пересобирает иерархическую коллекцию DisplayItems из плоского списка Messages.
+    /// Нужна после удаления произвольной строки.
+    /// </summary>
+    private void RebuildDisplayItems()
+    {
+      DisplayItems.Clear();
+      _currentGroup = null;
+      _pendingCommandHeaderItem = null;
+
+      foreach (var message in Messages)
+      {
+        AppendToDisplayItems(message);
+      }
+    }
+
+    /// <summary>
+    /// Добавляет пустую строку в протокол.
+    /// </summary>
     public Task AppendEmptyLineAsync(int indentLevel = 0)
     {
       var emptyLine = new ShowMessageModel
@@ -322,7 +449,11 @@ namespace Ask.UI.Components.ProtocolListBox
       return AppendLineAsync(emptyLine);
     }
 
-    public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false,
+    public async Task ShowMessageAsync(
+      ShowMessageModel model,
+      bool IsBlockStart = false,
+      bool SkipStepModeCheck = false,
+      bool skipPause = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)
@@ -339,38 +470,43 @@ namespace Ask.UI.Components.ProtocolListBox
       return string.Join(Environment.NewLine, Messages.Select(m =>
       {
         string indent = new string(' ', m.IndentLevel * 2);
-        string header = string.IsNullOrWhiteSpace(m.Header) ? "" : $"{m.Header}: ";
-        return $"{indent}{header}{m.Message} | {m.Time}";
+        string header = string.IsNullOrWhiteSpace(m.Header) ? string.Empty : $"{m.Header}: ";
+
+        string timePart = string.IsNullOrWhiteSpace(m.Time)
+          ? string.Empty
+          : $" | {m.Time}";
+
+        return $"{indent}{header}{m.Message}{timePart}";
       }));
     }
 
+    /// <summary>
+    /// Возвращает индекс последней строки протокола.
+    /// </summary>
     public int GetLastLineNumber()
     {
       if (Messages.Count > 0)
       {
         return Messages.Count - 1;
       }
-      else
-      {
-        return -1;
-      }
+
+      return -1;
     }
 
+    /// <summary>
+    /// Прокручивает список к указанной строке.
+    /// </summary>
     public async Task MoveToLineAsync(int lineNumber)
     {
-      // Проверьте, что Messages не пустая и lineNumber в пределах доступных индексов
-      if (Messages.Count > 0 && lineNumber >= 0 && lineNumber < Messages.Count)
+      if (DisplayItems.Count > 0 && lineNumber >= 0 && lineNumber < DisplayItems.Count)
       {
         await Application.Current.Dispatcher.InvokeAsync(() =>
         {
-          ProtocolListBox.SelectedItem = Messages[lineNumber];
-          var item = ProtocolListBox.Items.GetItemAt(lineNumber);
+          var item = DisplayItems[lineNumber];
+          ProtocolListBox.SelectedItem = item;
           ProtocolListBox.ScrollIntoView(item);
         });
       }
     }
-
-
   }
 }
-
