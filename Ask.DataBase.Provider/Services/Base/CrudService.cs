@@ -47,6 +47,29 @@ public class CrudService<T> : ICrudService<T> where T : class
   }
 
   /// <inheritdoc/>
+  public virtual async Task<List<T>> CreateRangeAsync(
+    IEnumerable<T> entities,
+    CancellationToken cancellationToken = default)
+  {
+    ArgumentNullException.ThrowIfNull(entities);
+
+    await using var context = CreateContext();
+
+    var list = entities.ToList();
+    if (list.Count == 0)
+    {
+      return list;
+    }
+
+    LogInformation($"[{nameof(CrudService<T>)}] Создание набора записей типа {typeof(T).Name}. Количество: {list.Count}");
+
+    context.Set<T>().AddRange(list);
+    await context.SaveChangesAsync(cancellationToken);
+
+    return list;
+  }
+
+  /// <inheritdoc/>
   public virtual async Task<T> UpdateAsync(T entity, CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(entity);
@@ -86,6 +109,27 @@ public class CrudService<T> : ICrudService<T> where T : class
     }
 
     context.Set<T>().Remove(entity);
+    await context.SaveChangesAsync(cancellationToken);
+
+    return true;
+  }
+
+  /// <inheritdoc/>
+  public async Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default)
+  {
+    await using var context = CreateContext();
+
+    LogInformation($"[{nameof(CrudService<T>)}] Удаление всех записей типа {typeof(T).Name}");
+
+    var set = context.Set<T>();
+
+    var any = await set.AnyAsync(cancellationToken);
+    if (!any)
+    {
+      return false;
+    }
+
+    set.RemoveRange(set);
     await context.SaveChangesAsync(cancellationToken);
 
     return true;

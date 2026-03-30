@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -57,6 +59,17 @@ public static class Racks
     DeviceRuntime.CreateAsync(device, cancellationToken);
 
   /// <summary>
+  /// Создаёт набор стоек.
+  /// </summary>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<IRack>> CreateRangeAsync(IEnumerable<IRack> devices, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
+
+  /// <summary>
   /// Обновляет существующую стойку.
   /// </summary>
   /// <param name="device">Экземпляр устройства с обновлёнными данными.</param>
@@ -88,4 +101,19 @@ public static class Racks
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IRack>(id, cancellationToken);
+  /// <summary>
+  /// Удаляет все устройства из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IRack>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект стойки на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные устройства.</param>
+  /// <returns>
+  /// Готовый runtime-объект стойки.
+  /// </returns>
+  public static IRack Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IRack>(dto);
 }

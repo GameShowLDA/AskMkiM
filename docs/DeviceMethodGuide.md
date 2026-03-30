@@ -12,7 +12,9 @@
 
 IDeviceEngine\
 → DeviceEngine\
+→ ICrudService\
 → CrudService\
+→ DeviceRuntime
 → База данных
 
 Плюс:

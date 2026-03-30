@@ -116,6 +116,18 @@ public interface IDeviceEngine
     where TDevice : class, IDevice;
 
   /// <summary>
+  /// Создаёт набор устройств.
+  /// </summary>
+  /// <typeparam name="TDevice">Тип устройств.</typeparam>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  Task<List<TDevice>> CreateRangeAsync<TDevice>(IEnumerable<TDevice> devices,CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice;
+
+  /// <summary>
   /// Обновляет существующее устройство.
   /// </summary>
   /// <typeparam name="TDevice">Тип устройства.</typeparam>
@@ -149,6 +161,17 @@ public interface IDeviceEngine
   /// <c>true</c>, если устройство успешно удалено; иначе <c>false</c>.
   /// </returns>
   Task<bool> DeleteByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice;
+
+  /// <summary>
+  /// Удаляет все устрйоства из таблицы данных.
+  /// </summary>
+  /// <typeparam name="TDevice">Тип устройства.</typeparam>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// <c>true</c>, если устройства успешно удалены; иначе <c>false</c>.
+  /// </returns>
+  Task<bool> DeleteAllAsync<TDevice>(CancellationToken cancellationToken = default)
     where TDevice : class, IDevice;
 
   /// <summary>

@@ -80,6 +80,19 @@ public static class DeviceRuntime
     Engine.CreateAsync(device, cancellationToken);
 
   /// <summary>
+  /// Создаёт набор устройств.
+  /// </summary>
+  /// <typeparam name="TDevice">Тип устройств.</typeparam>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<TDevice>> CreateRangeAsync<TDevice>(IEnumerable<TDevice> devices, CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice =>
+    Engine.CreateRangeAsync(devices, cancellationToken);
+
+  /// <summary>
   /// Обновляет существующее устройство.
   /// </summary>
   public static Task<TDevice> UpdateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
@@ -99,6 +112,13 @@ public static class DeviceRuntime
   public static Task<bool> DeleteByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice =>
     Engine.DeleteByIdAsync<TDevice>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все устройства из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync<TDevice>(CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice =>
+    Engine.DeleteAllAsync<TDevice>(cancellationToken);
 
   /// <summary>
   /// Создаёт runtime-объект устройства на основе DTO.

@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.Rack;
+using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -366,7 +367,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// Добавляет стойку в список.
     /// </summary>
     /// <param name="data">Данные стойки.</param>
-    public void AddRack(RackEntity data)
+    public void AddRack(RackDto data)
     {
       chassisManager.AddRack(data);
     }
@@ -542,9 +543,9 @@ namespace UI.Controls.Settings.DeviceConfig
       };
     }
 
-    private static RackEntity ToRackEntity(IRack device)
+    private static RackDto ToRackEntity(IRack device)
     {
-      return new RackEntity
+      return new RackDto
       {
         Id = device.Id,
         Name = device.Name,
@@ -553,7 +554,6 @@ namespace UI.Controls.Settings.DeviceConfig
         NumberChassis = device.NumberChassis,
         ConnectionDetails = device.ConnectionDetails,
         DeviceClass = device.DeviceClass,
-        BusType = device.BusType,
       };
     }
 

@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -66,7 +67,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         [typeof(RelaySwitchModuleEntity)] = typeof(IRelaySwitchModule),
         [typeof(SwitchingDeviceEntity)] = typeof(ISwitchingDevice),
         [typeof(UninterruptiblePowerSupplyEntity)] = typeof(IUninterruptiblePowerSupply),
-        [typeof(RackEntity)] = typeof(IRack),
+        [typeof(RackDto)] = typeof(IRack),
       };
 
       Type instanceType = instance.GetType();

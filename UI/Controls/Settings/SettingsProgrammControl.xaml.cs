@@ -1,16 +1,19 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.DataBase.Engine.Builder;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Communication.Com.Configuration;
@@ -238,10 +241,11 @@ namespace UI.Controls.Settings
             BusType = chassis.BusType,
           })
           .ToList(),
-        Racks = db.Rack
+
+        Racks = Racks.GetAllAsync().GetAwaiter().GetResult()
           .OrderBy(rack => rack.NumberChassis)
           .ThenBy(rack => rack.Number)
-          .Select(rack => new RackConfigurationItem
+          .Select(rack => new RackDto
           {
             Name = rack.Name,
             Description = rack.Description,
@@ -251,6 +255,7 @@ namespace UI.Controls.Settings
             DeviceClass = rack.DeviceClass,
           })
           .ToList(),
+
         RelaySwitchModules = db.RelaySwitchModules
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
@@ -269,6 +274,7 @@ namespace UI.Controls.Settings
             BusType = device.BusType,
           })
           .ToList(),
+
         SwitchingDevices = db.SwitchingDevices
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
@@ -282,6 +288,7 @@ namespace UI.Controls.Settings
             DeviceClass = device.DeviceClass,
           })
           .ToList(),
+
         PowerSourceModules = db.PowerSourceModules
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
@@ -296,6 +303,7 @@ namespace UI.Controls.Settings
             ResistanceCalibrationJson = device.ResistanceCalibrationJson,
           })
           .ToList(),
+
         FastMeters = db.FastMeters
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
@@ -310,6 +318,7 @@ namespace UI.Controls.Settings
             MaxContinuityResistance = device.MaxContinuityResistance,
           })
           .ToList(),
+
         BreakdownTesters = db.BreakdownTesters
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
@@ -335,7 +344,7 @@ namespace UI.Controls.Settings
         ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
 
       model.Chassis ??= new List<ChassisConfigurationItem>();
-      model.Racks ??= new List<RackConfigurationItem>();
+      model.Racks ??= new List<RackDto>();
       model.RelaySwitchModules ??= new List<RelaySwitchModuleConfigurationItem>();
       model.SwitchingDevices ??= new List<SwitchingDeviceConfigurationItem>();
       model.PowerSourceModules ??= new List<PowerSourceModuleConfigurationItem>();
@@ -440,12 +449,14 @@ namespace UI.Controls.Settings
       db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
       db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
       db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
-      db.Rack.RemoveRange(db.Rack);
+      Racks.DeleteAllAsync().GetAwaiter().GetResult();
+
       db.ChassisManagers.RemoveRange(db.ChassisManagers);
       db.SaveChanges();
 
       db.ChassisManagers.AddRange(model.Chassis.Select(ToEntity));
-      db.Rack.AddRange(model.Racks.Select(ToEntity));
+      Racks.CreateRangeAsync(model.Racks.Select(ToEntity));
+
       db.RelaySwitchModules.AddRange(model.RelaySwitchModules.Select(ToEntity));
       db.SwitchingDevices.AddRange(model.SwitchingDevices.Select(ToEntity));
       db.PowerSourceModules.AddRange(model.PowerSourceModules.Select(ToEntity));
@@ -485,18 +496,7 @@ namespace UI.Controls.Settings
       };
     }
 
-    private static RackEntity ToEntity(RackConfigurationItem item)
-    {
-      return new RackEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        NumberChassis = item.NumberChassis,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-      };
-    }
+    private static IRack ToEntity(RackDto item) => Racks.Build(item);
 
     private static RelaySwitchModuleEntity ToEntity(RelaySwitchModuleConfigurationItem item)
     {
@@ -865,7 +865,7 @@ namespace UI.Controls.Settings
 
       public List<ChassisConfigurationItem> Chassis { get; set; } = new();
 
-      public List<RackConfigurationItem> Racks { get; set; } = new();
+      public List<RackDto> Racks { get; set; } = new();
 
       public List<RelaySwitchModuleConfigurationItem> RelaySwitchModules { get; set; } = new();
 
@@ -891,21 +891,6 @@ namespace UI.Controls.Settings
       public string? DeviceClass { get; set; }
 
       public BusStructureEnum.Type BusType { get; set; }
-    }
-
-    private sealed class RackConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public int NumberChassis { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
     }
 
     private sealed class RelaySwitchModuleConfigurationItem
