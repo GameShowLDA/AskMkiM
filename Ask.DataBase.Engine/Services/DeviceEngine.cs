@@ -233,6 +233,36 @@ public class DeviceEngine : IDeviceEngine
   }
 
   /// <inheritdoc/>
+  public Task<List<TDevice>> CreateRangeAsync<TDevice>(
+    IEnumerable<TDevice> devices,
+    CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice
+  {
+    ArgumentNullException.ThrowIfNull(devices);
+
+    var requestedType = typeof(TDevice);
+
+    if (requestedType == typeof(IBreakdownTester))
+      return CreateRangeInternalAsync(devices, x => BreakdownTesterMapper.ToDto((IBreakdownTester)(object)x), _breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IChassisManager))
+      return CreateRangeInternalAsync(devices, x => ChassisManagerMapper.ToDto((IChassisManager)(object)x), _chassisManagerService, cancellationToken);
+    if (requestedType == typeof(IFastMeter))
+      return CreateRangeInternalAsync(devices, x => FastMeterMapper.ToDto((IFastMeter)(object)x), _fastMeterService, cancellationToken);
+    if (requestedType == typeof(IPowerSourceModule))
+      return CreateRangeInternalAsync(devices, x => PowerSourceModuleMapper.ToDto((IPowerSourceModule)(object)x), _powerSourceModuleService, cancellationToken);
+    if (requestedType == typeof(IRack))
+      return CreateRangeInternalAsync(devices, x => RackMapper.ToDto((IRack)(object)x), _rackService, cancellationToken);
+    if (requestedType == typeof(IRelaySwitchModule))
+      return CreateRangeInternalAsync(devices, x => RelaySwitchModuleMapper.ToDto((IRelaySwitchModule)(object)x), _relaySwitchModuleService, cancellationToken);
+    if (requestedType == typeof(ISwitchingDevice))
+      return CreateRangeInternalAsync(devices, x => SwitchingDeviceMapper.ToDto((ISwitchingDevice)(object)x), _switchingDeviceService, cancellationToken);
+    if (requestedType == typeof(IUninterruptiblePowerSupply))
+      return CreateRangeInternalAsync(devices, x => UninterruptiblePowerSupplyMapper.ToDto((IUninterruptiblePowerSupply)(object)x), _uninterruptiblePowerSupplyService, cancellationToken);
+
+    throw CreateUnsupportedTypeException<TDevice>();
+  }
+
+  /// <inheritdoc/>
   public Task<TDevice> UpdateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
     where TDevice : class, IDevice
   {
@@ -290,6 +320,31 @@ public class DeviceEngine : IDeviceEngine
       return DeleteByIdInternalAsync<TDevice, SwitchingDeviceDto>(id, _switchingDeviceService, cancellationToken);
     if (requestedType == typeof(IUninterruptiblePowerSupply))
       return DeleteByIdInternalAsync<TDevice, UninterruptiblePowerSupplyDto>(id, _uninterruptiblePowerSupplyService, cancellationToken);
+
+    throw CreateUnsupportedTypeException<TDevice>();
+  }
+
+  /// <inheritdoc/>
+  Task<bool> IDeviceEngine.DeleteAllAsync<TDevice>(CancellationToken cancellationToken)
+  {
+    var requestedType = typeof(TDevice);
+
+    if (requestedType == typeof(IBreakdownTester))
+      return DeleteAllInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IChassisManager))
+      return DeleteAllInternalAsync<TDevice, ChassisManagerDto>(_chassisManagerService, cancellationToken);
+    if (requestedType == typeof(IFastMeter))
+      return DeleteAllInternalAsync<TDevice, FastMeterDto>(_fastMeterService, cancellationToken);
+    if (requestedType == typeof(IPowerSourceModule))
+      return DeleteAllInternalAsync<TDevice, PowerSourceModuleDto>(_powerSourceModuleService, cancellationToken);
+    if (requestedType == typeof(IRack))
+      return DeleteAllInternalAsync<TDevice, RackDto>(_rackService, cancellationToken);
+    if (requestedType == typeof(IRelaySwitchModule))
+      return DeleteAllInternalAsync<TDevice, RelaySwitchModuleDto>(_relaySwitchModuleService, cancellationToken);
+    if (requestedType == typeof(ISwitchingDevice))
+      return DeleteAllInternalAsync<TDevice, SwitchingDeviceDto>(_switchingDeviceService, cancellationToken);
+    if (requestedType == typeof(IUninterruptiblePowerSupply))
+      return DeleteAllInternalAsync<TDevice, UninterruptiblePowerSupplyDto>(_uninterruptiblePowerSupplyService, cancellationToken);
 
     throw CreateUnsupportedTypeException<TDevice>();
   }
@@ -421,6 +476,34 @@ public class DeviceEngine : IDeviceEngine
     return Build<TDevice>(created);
   }
 
+  private async Task<List<TDevice>> CreateRangeInternalAsync<TDevice, TDto>(
+    IEnumerable<TDevice> devices,
+    Func<TDevice, TDto> mapper,
+    CrudService<TDto> service,
+    CancellationToken cancellationToken)
+    where TDevice : class, IDevice
+    where TDto : DeviceDto
+  {
+    var result = new List<TDevice>();
+
+    foreach (var device in devices)
+    {
+      ArgumentNullException.ThrowIfNull(device);
+
+      var dto = mapper(device);
+      dto.Id = 0;
+
+      var created = await service.CreateAsync(dto, cancellationToken);
+
+      _cache.Remove(typeof(TDevice), created.Id);
+
+      var built = Build<TDevice>(created);
+      result.Add(built);
+    }
+
+    return result;
+  }
+
   private async Task<TDevice> UpdateInternalAsync<TDevice, TDto>(
     TDevice device,
     Func<TDevice, TDto> mapper,
@@ -455,6 +538,26 @@ public class DeviceEngine : IDeviceEngine
     }
 
     return deleted;
+  }
+
+  private async Task<bool> DeleteAllInternalAsync<TDevice, TDto>(
+    CrudService<TDto> service,
+    CancellationToken cancellationToken)
+    where TDevice : class, IDevice
+    where TDto : DeviceDto
+  {
+    var all = await service.GetAllAsync(cancellationToken);
+
+    if (all.Count == 0)
+      return false;
+
+    foreach (var dto in all)
+    {
+      await service.DeleteByIdAsync(dto.Id, cancellationToken);
+      _cache.Remove(typeof(TDevice), dto.Id);
+    }
+
+    return true;
   }
 
   private static NotSupportedException CreateUnsupportedTypeException<TDevice>()

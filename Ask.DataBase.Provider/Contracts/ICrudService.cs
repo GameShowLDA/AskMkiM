@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using System.Linq.Expressions;
 
 namespace Ask.DataBase.Provider.Contracts;
@@ -40,6 +41,16 @@ public interface ICrudService<T> where T : class
   Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default);
 
   /// <summary>
+  /// Создаёт набор записей.
+  /// </summary>
+  /// <param name="entities">Коллекция DTO для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных записей с актуальными данными (например, с присвоенными идентификаторами).
+  /// </returns>
+  Task<List<T>> CreateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
+
+  /// <summary>
   /// Обновляет существующую запись.
   /// </summary>
   /// <param name="entity">DTO с обновлёнными данными.</param>
@@ -68,6 +79,16 @@ public interface ICrudService<T> where T : class
   /// <c>true</c>, если запись была найдена и удалена; иначе <c>false</c>.
   /// </returns>
   Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default);
+
+  /// <summary>
+  /// Удаляет все устрйоства из таблицы данных.
+  /// </summary>
+  /// <typeparam name="TDevice">Тип устройства.</typeparam>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// <c>true</c>, если устройства успешно удалены; иначе <c>false</c>.
+  /// </returns>
+  Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default);
 
   /// <summary>
   /// Ищет записи по значению произвольного свойства.

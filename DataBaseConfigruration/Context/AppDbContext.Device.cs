@@ -36,11 +36,6 @@ namespace DataBaseConfiguration.Context
     public DbSet<BreakdownTesterEntity> BreakdownTesters { get; set; }
 
     /// <summary>
-    /// Таблица стоек.
-    /// </summary>
-    public DbSet<RackEntity> Rack { get; set; }
-
-    /// <summary>
     /// Таблица бесперебойников.
     /// </summary>
     public DbSet<UninterruptiblePowerSupplyEntity> UninterruptiblePowerSupplies { get; set; }

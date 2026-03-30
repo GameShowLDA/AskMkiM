@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -33,20 +34,14 @@ namespace UI.Controls.Settings.DeviceConfig.Base
     {
       string connectString = BaseHandler<IDevice>.GetConnectionDetails(control, selectedDevice);
 
-      var deviceModel = CreateDeviceModelByInterface(selectedDevice) as T;
+      var deviceModel = CreateDeviceDtoByInterface(selectedDevice) as T;
 
       if (deviceModel is null)
       {
         throw new ArgumentNullException(nameof(deviceModel));
       }
 
-      deviceModel.Name = selectedDevice.Name;
-      deviceModel.Description = selectedDevice.Description;
-      deviceModel.ConnectionDetails = connectString;
-      deviceModel.Number = BaseHandler<IDevice>.GetNumber(control);
-      deviceModel.DeviceClass = selectedDevice.DeviceClass;
       SetChassisNumber(deviceModel, control);
-
       return deviceModel;
     }
 
@@ -66,10 +61,28 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         IChassisManager => new ChassisManagerEntity(),
         IFastMeter => new FastMeterEntity(),
         IUninterruptiblePowerSupply => new UninterruptiblePowerSupplyEntity(),
-        IRack => new RackEntity(),
 
         _ => throw new ArgumentException("Неизвестный тип устройства", nameof(device))
       };
+    }
+
+    /// <summary>
+    /// Создание конкретной модели по интерфейсу устройства.
+    /// </summary>
+    /// <param name="device">Выбранное устройство.</param>
+    /// <returns>Возвращает созданный экземпляр выбранного устройства.</returns>
+    protected DeviceDto CreateDeviceDtoByInterface(IDevice device)
+    {
+      ArgumentNullException.ThrowIfNull(device);
+
+      if (device is IDeviceToDtoConverter<DeviceDto> converter)
+      {
+        return converter.Convert();
+      }
+
+      throw new ArgumentException(
+        $"Устройство типа '{device.GetType().Name}' не поддерживает конвертацию в DTO.",
+        nameof(device));
     }
 
     /// <summary>
