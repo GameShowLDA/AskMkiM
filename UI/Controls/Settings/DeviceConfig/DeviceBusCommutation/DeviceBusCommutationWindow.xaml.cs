@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
     /// <summary>
     /// Событие запроса сохранения данных устройства.
     /// </summary>
-    public event EventHandler<SwitchingDeviceEntity> RequestSave;
+    public event EventHandler<SwitchingDeviceDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceBusCommutationWindow"/>.
@@ -77,27 +78,29 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        SwitchingDeviceEntity deviceEntity = processor.ProcessDevice<SwitchingDeviceEntity>(
+        SwitchingDeviceDto deviceDto = processor.ProcessDevice<SwitchingDeviceDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
           try
           {
+            var switching = SwitchingDevices.Build(deviceDto);
+
             if (_editingEntity == null)
             {
-              var createdDevice = SwitchingDevices.CreateAsync(deviceEntity).GetAwaiter().GetResult();
-              deviceEntity.Id = createdDevice.Id;
+              var createdDevice = SwitchingDevices.CreateAsync(switching).GetAwaiter().GetResult();
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              SwitchingDevices.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
+              deviceDto.Id = _editingEntity.Id;
+              SwitchingDevices.UpdateAsync(switching).GetAwaiter().GetResult();
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

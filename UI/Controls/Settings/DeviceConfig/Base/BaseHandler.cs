@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -50,68 +51,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base
       ["1.5"] = StopBits.OnePointFive,
       ["2"] = StopBits.Two,
     };
-
-    /// <summary>
-    /// Определяет, какой интерфейс устройства реализует переданный экземпляр.
-    /// </summary>
-    /// <param name="instance">Экземпляр устройства.</param>
-    /// <returns>Тип интерфейса устройства.</returns>
-    private static Type GetDeviceInterface(object instance)
-    {
-      var interfaceMappings = new Dictionary<Type, Type>
-      {
-        [typeof(BreakdownTesterEntity)] = typeof(IBreakdownTester),
-        [typeof(ChassisManagerEntity)] = typeof(IChassisManager),
-        [typeof(FastMeterEntity)] = typeof(IFastMeter),
-        [typeof(PowerSourceModuleEntity)] = typeof(IPowerSourceModule),
-        [typeof(RelaySwitchModuleEntity)] = typeof(IRelaySwitchModule),
-        [typeof(SwitchingDeviceEntity)] = typeof(ISwitchingDevice),
-        [typeof(UninterruptiblePowerSupplyEntity)] = typeof(IUninterruptiblePowerSupply),
-        [typeof(RackDto)] = typeof(IRack),
-      };
-
-      Type instanceType = instance.GetType();
-
-      foreach (var mapping in interfaceMappings)
-      {
-        if (mapping.Key.IsAssignableFrom(instanceType))
-        {
-          return mapping.Value;
-        }
-      }
-
-      throw new InvalidOperationException($"Не удалось определить интерфейс для типа {instanceType.Name}.");
-    }
-
-    /// <summary>
-    /// Проверяет, реализует ли тип T известные интерфейсы устройств, и возвращает соответствующий тип.
-    /// </summary>
-    /// <returns>Тип интерфейса устройства.</returns>
-    private static Type DetermineInterface()
-    {
-      var interfaceMappings = new Dictionary<Type, string>
-      {
-        [typeof(IChassisManager)] = nameof(IChassisManager),
-        [typeof(IBreakdownTester)] = nameof(IBreakdownTester),
-        [typeof(IFastMeter)] = nameof(IFastMeter),
-        [typeof(IPowerSourceModule)] = nameof(IPowerSourceModule),
-        [typeof(IRelaySwitchModule)] = nameof(IRelaySwitchModule),
-        [typeof(ISwitchingDevice)] = nameof(ISwitchingDevice),
-        [typeof(IUninterruptiblePowerSupply)] = nameof(IUninterruptiblePowerSupply),
-        [typeof(IRack)] = nameof(IRack),
-      };
-
-      foreach (var interfaceType in interfaceMappings.Keys)
-      {
-        if (interfaceType.IsAssignableFrom(typeof(T)))
-        {
-          return interfaceType;
-        }
-      }
-
-      throw new InvalidOperationException(
-          $"Тип {typeof(T).Name} не принадлежит к известным интерфейсам ({string.Join(", ", interfaceMappings.Values)}).");
-    }
 
     /// <summary>
     /// Получает параметры подключения устройства.

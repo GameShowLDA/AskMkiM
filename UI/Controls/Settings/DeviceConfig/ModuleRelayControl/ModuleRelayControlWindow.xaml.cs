@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -26,7 +27,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// <summary>
     /// Событие, вызываемое при сохранении данных модуля источника питания.
     /// </summary>
-    public event EventHandler<RelaySwitchModuleEntity> RequestSave;
+    public event EventHandler<RelaySwitchModuleDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControlWindow"/>.
@@ -78,7 +79,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        RelaySwitchModuleEntity deviceEntity = processor.ProcessDevice<RelaySwitchModuleEntity>(
+        RelaySwitchModuleDto deviceEntity = processor.ProcessDevice<RelaySwitchModuleDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
@@ -91,15 +92,17 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           deviceEntity.SwitchCapacitance = deviceSettingsWindow.GetCapacitance();
           try
           {
+            var relaySwitchModule = RelaySwitchModules.Build(deviceEntity);
+
             if (_editingEntity == null)
             {
-              var createdDevice = RelaySwitchModules.CreateAsync(deviceEntity).GetAwaiter().GetResult();
+              var createdDevice = RelaySwitchModules.CreateAsync(relaySwitchModule).GetAwaiter().GetResult();
               deviceEntity.Id = createdDevice.Id;
             }
             else
             {
               deviceEntity.Id = _editingEntity.Id;
-              RelaySwitchModules.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
+              RelaySwitchModules.UpdateAsync(relaySwitchModule).GetAwaiter().GetResult();
             }
 
             RequestSave?.Invoke(s, deviceEntity);

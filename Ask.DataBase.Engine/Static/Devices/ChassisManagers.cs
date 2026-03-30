@@ -1,4 +1,6 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 
 namespace Ask.DataBase.Engine.Static.Devices;
 
@@ -57,6 +59,17 @@ public static class ChassisManagers
     DeviceRuntime.CreateAsync(device, cancellationToken);
 
   /// <summary>
+  /// Создаёт набор стоек.
+  /// </summary>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<IChassisManager>> CreateRangeAsync(IEnumerable<IChassisManager> devices, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
+
+  /// <summary>
   /// Обновляет существующий менеджер шасси.
   /// </summary>
   /// <param name="device">Экземпляр устройства с обновлёнными данными.</param>
@@ -88,4 +101,20 @@ public static class ChassisManagers
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IChassisManager>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все устройства из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IChassisManager>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект менеджера шасси  на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные устройства.</param>
+  /// <returns>
+  /// Готовый runtime-объект менеджера шасси.
+  /// </returns>
+  public static IChassisManager Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IChassisManager>(dto);
 }

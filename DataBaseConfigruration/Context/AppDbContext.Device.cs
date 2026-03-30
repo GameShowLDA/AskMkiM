@@ -1,15 +1,11 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.Entity.Devices;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration.Context
 {
   public partial class AppDbContext
   {
-    /// <summary>
-    /// Таблица менеджеров шасси.
-    /// </summary>
-    public DbSet<ChassisManagerEntity> ChassisManagers { get; set; }
-
     /// <summary>
     /// Таблица модулей коммутации реле.
     /// </summary>

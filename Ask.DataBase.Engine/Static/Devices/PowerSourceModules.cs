@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -116,4 +118,20 @@ public static class PowerSourceModules
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IPowerSourceModule>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все устройства из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IPowerSourceModule>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект стойки на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные устройства.</param>
+  /// <returns>
+  /// Готовый runtime-объект стойки.
+  /// </returns>
+  public static IPowerSourceModule Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IPowerSourceModule>(dto);
 }

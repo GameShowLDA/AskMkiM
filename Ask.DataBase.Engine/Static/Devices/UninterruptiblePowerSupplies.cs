@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -116,4 +118,20 @@ public static class UninterruptiblePowerSupplies
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IUninterruptiblePowerSupply>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все источники бесперебойного питания из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IUninterruptiblePowerSupply>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект источника бесперебойного питания на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные устройства.</param>
+  /// <returns>
+  /// Готовый runtime-объект источника бесперебойного питания.
+  /// </returns>
+  public static IUninterruptiblePowerSupply Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IUninterruptiblePowerSupply>(dto);
 }

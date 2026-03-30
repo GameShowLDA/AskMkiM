@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -24,7 +25,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Событие запроса сохранения данных устройства.
     /// </summary>
-    public event EventHandler<ChassisManagerEntity> RequestSave;
+    public event EventHandler<ChassisManagerDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ChassisManagerWindow"/>.
@@ -68,18 +69,19 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        ChassisManagerEntity deviceEntity = processor.ProcessDevice<ChassisManagerEntity>(
+        ChassisManagerDto deviceDto = processor.ProcessDevice<ChassisManagerDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
-          deviceEntity.BusType = (baseDevice as IChassisManager).BusType;
+          deviceDto.BusType = (baseDevice as IChassisManager).BusType;
           try
           {
-            ChassisManagers.CreateAsync(deviceEntity).GetAwaiter();
-            RequestSave?.Invoke(s, deviceEntity);
+            var chassi = ChassisManagers.Build(deviceDto);
+            ChassisManagers.CreateAsync(chassi).GetAwaiter();
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)
@@ -111,4 +113,3 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     }
   }
 }
-

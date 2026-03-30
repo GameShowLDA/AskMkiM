@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     /// <summary>
     /// Событие, вызываемое при сохранении данных модуля источника питания.
     /// </summary>
-    public event EventHandler<PowerSourceModuleEntity> RequestSave;
+    public event EventHandler<PowerSourceModuleDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleVoltageCurrentSourceWindow"/>.
@@ -77,26 +78,27 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        PowerSourceModuleEntity deviceEntity = processor.ProcessDevice<PowerSourceModuleEntity>(
+        PowerSourceModuleDto deviceDto = processor.ProcessDevice<PowerSourceModuleDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
+          var powerSourceModule = PowerSourceModules.Build(deviceDto);
           try
           {
             if (_editingEntity == null)
             {
-              PowerSourceModules.CreateAsync(deviceEntity).GetAwaiter().GetResult();
+              PowerSourceModules.CreateAsync(powerSourceModule).GetAwaiter().GetResult();
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              PowerSourceModules.UpdateAsync(deviceEntity).GetAwaiter().GetResult();
+              deviceDto.Id = _editingEntity.Id;
+              PowerSourceModules.UpdateAsync(powerSourceModule).GetAwaiter().GetResult();
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

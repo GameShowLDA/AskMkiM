@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Rack;
+﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -360,7 +361,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="data">Данные системы.</param>
     public void AddSystem(IChassisManager data)
     {
-      chassisManager.AddSystem(data);
+      chassisManager.AddSystem(data.Convert());
     }
 
     /// <summary>
@@ -425,7 +426,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <summary>
     /// Обрабатывает сохранение конфигурации шасси.
     /// </summary>
-    private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
+    private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerDto device)
     {
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;

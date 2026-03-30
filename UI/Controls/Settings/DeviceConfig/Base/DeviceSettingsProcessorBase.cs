@@ -30,10 +30,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         IDevice selectedDevice,
         DeviceSettingsControl control,
         IDataProcessor? additionalDataProcessor = null)
-      where T : class, IDevice
+      where T : DeviceDto
     {
       string connectString = BaseHandler<IDevice>.GetConnectionDetails(control, selectedDevice);
-
       var deviceModel = CreateDeviceDtoByInterface(selectedDevice) as T;
 
       if (deviceModel is null)
@@ -43,27 +42,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base
 
       SetChassisNumber(deviceModel, control);
       return deviceModel;
-    }
-
-    /// <summary>
-    /// Создание конкретной модели по интерфейсу устройства.
-    /// </summary>
-    /// <param name="device">Выбранное устройство.</param>
-    /// <returns>Возвращает созданный экземпляр выбранного устройства.</returns>
-    protected IDevice CreateDeviceModelByInterface(IDevice device)
-    {
-      return device switch
-      {
-        IBreakdownTester => new BreakdownTesterEntity(),
-        IPowerSourceModule => new PowerSourceModuleEntity(),
-        IRelaySwitchModule => new RelaySwitchModuleEntity(),
-        ISwitchingDevice => new SwitchingDeviceEntity(),
-        IChassisManager => new ChassisManagerEntity(),
-        IFastMeter => new FastMeterEntity(),
-        IUninterruptiblePowerSupply => new UninterruptiblePowerSupplyEntity(),
-
-        _ => throw new ArgumentException("Неизвестный тип устройства", nameof(device))
-      };
     }
 
     /// <summary>
@@ -89,7 +67,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
     /// Определяет номер шасси, если устройство его поддерживает, и выводит в консоль.
     /// </summary>
     /// <param name="deviceModel">Объект устройства.</param>
-    private void SetChassisNumber(IDevice deviceModel, DeviceSettingsControl control)
+    private void SetChassisNumber(DeviceDto deviceModel, DeviceSettingsControl control)
     {
       if (deviceModel.DeviceType != DeviceType.ChassisManager)
       {

@@ -1,4 +1,6 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 
 namespace Ask.DataBase.Engine.Static.Devices;
 
@@ -112,4 +114,20 @@ public static class BreakdownTesters
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteByIdAsync<IBreakdownTester>(id, cancellationToken);
+
+  /// <summary>
+  /// Удаляет все пробойные установки из таблицы данных.
+  /// </summary>
+  public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.DeleteAllAsync<IBreakdownTester>(cancellationToken);
+
+  /// <summary>
+  /// Создаёт runtime-объект пробойную установку на основе DTO.
+  /// </summary>
+  /// <param name="dto">DTO, содержащий данные пробойной установки.</param>
+  /// <returns>
+  /// Готовый runtime-объект стойки.
+  /// </returns>
+  public static IBreakdownTester Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IBreakdownTester>(dto);
 }
