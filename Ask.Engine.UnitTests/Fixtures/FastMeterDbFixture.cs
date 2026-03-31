@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration;
@@ -17,19 +18,21 @@ public sealed class FastMeterDbFixture : IDisposable
       return;
     }
 
-    var entity = new FastMeterEntity
+    var fastMeterDto = new FastMeterDto
     {
       Name = "Unit test fast meter",
       Description = "Temporary fast meter for KS tests",
       NumberChassis = 9999,
       Number = 1,
       ConnectionDetails = "UNIT-TEST",
-      DeviceClass = typeof(FastMeterEntity).AssemblyQualifiedName ?? typeof(FastMeterEntity).FullName ?? nameof(FastMeterEntity),
+      DeviceClass = typeof(FastMeterDto).AssemblyQualifiedName ?? typeof(FastMeterDto).FullName ?? nameof(FastMeterDto),
       MaxContinuityResistance = 100
     };
 
-    FastMeters.CreateAsync(entity).GetAwaiter();
-    createdFastMeterId = entity.Id;
+    var device = FastMeters.Build(fastMeterDto);
+    FastMeters.CreateAsync(device).GetAwaiter();
+
+    createdFastMeterId = fastMeterDto.Id;
   }
 
   public void Dispose()

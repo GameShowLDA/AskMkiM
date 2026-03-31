@@ -64,7 +64,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
           BreakdownTesterControl.ClearItems();
           break;
 
-        case FastMeterEntity fastMeter:
+        case FastMeterDto fastMeter:
           FastMeterControl.ClearItems();
           break;
 

@@ -22,11 +22,6 @@ namespace DataBaseConfiguration.Context
     public DbSet<SwitchingDeviceEntity> SwitchingDevices { get; set; }
 
     /// <summary>
-    /// Таблица быстрых измерителей.
-    /// </summary>
-    public DbSet<FastMeterEntity> FastMeters { get; set; }
-
-    /// <summary>
     /// Таблица бесперебойников.
     /// </summary>
     public DbSet<UninterruptiblePowerSupplyEntity> UninterruptiblePowerSupplies { get; set; }
