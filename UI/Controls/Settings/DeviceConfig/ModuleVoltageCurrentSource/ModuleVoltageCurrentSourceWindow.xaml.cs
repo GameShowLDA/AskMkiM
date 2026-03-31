@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -72,7 +73,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -84,17 +85,23 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
 
         if (deviceDto != null)
         {
-          var powerSourceModule = PowerSourceModules.Build(deviceDto);
           try
           {
+            if (_editingDto != null)
+            {
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var powerSourceModule = PowerSourceModules.Build(deviceDto);
+
             if (_editingDto == null)
             {
-              PowerSourceModules.CreateAsync(powerSourceModule).GetAwaiter().GetResult();
+              var createdDevice = await PowerSourceModules.CreateAsync(powerSourceModule);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceDto.Id = _editingDto.Id;
-              PowerSourceModules.UpdateAsync(powerSourceModule).GetAwaiter().GetResult();
+              await PowerSourceModules.UpdateAsync(powerSourceModule);
             }
 
             RequestSave?.Invoke(s, deviceDto);

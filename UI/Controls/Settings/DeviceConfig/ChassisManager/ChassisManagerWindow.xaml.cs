@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -63,7 +64,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
       deviceSettingsWindow.NameDevice = "Тест АСКМ";
       deviceSettingsWindow.LoadDeviceModels<IChassisManager>();
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -79,7 +80,8 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
           try
           {
             var chassi = ChassisManagers.Build(deviceDto);
-            ChassisManagers.CreateAsync(chassi).GetAwaiter();
+            var createdDevice = await ChassisManagers.CreateAsync(chassi);
+            deviceDto.Id = createdDevice.Id;
             RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }

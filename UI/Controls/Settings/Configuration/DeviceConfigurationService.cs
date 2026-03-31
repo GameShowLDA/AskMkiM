@@ -250,82 +250,17 @@ public static class DeviceConfigurationService
       $"В разделе \"{sectionName}\" есть привязка к несуществующим шасси: {string.Join(", ", unknownChassis)}.");
   }
 
-  private static ChassisManagerDto ToDto(IChassisManager item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-    BusType = item.BusType,
-  };
+  private static ChassisManagerDto ToDto(IChassisManager item) => item.Convert();
 
-  private static RackDto ToDto(IRack item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    NumberChassis = item.NumberChassis,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-  };
+  private static RackDto ToDto(IRack item) => item.Convert();
 
-  private static RelaySwitchModuleDto ToDto(IRelaySwitchModule item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    NumberChassis = item.NumberChassis,
-    PointCount = item.PointCount,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-    SwitchResistance = item.SwitchResistance,
-    SwitchCapacitance = item.SwitchCapacitance,
-    BusType = item.BusType,
-  };
+  private static RelaySwitchModuleDto ToDto(IRelaySwitchModule item) => item.Convert();
 
-  private static SwitchingDeviceDto ToDto(ISwitchingDevice item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    NumberChassis = item.NumberChassis,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-  };
+  private static SwitchingDeviceDto ToDto(ISwitchingDevice item) => item.Convert();
 
-  private static PowerSourceModuleDto ToDto(IPowerSourceModule item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    NumberChassis = item.NumberChassis,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-    ResistanceCalibrationJson = item.ResistanceCalibrationJson,
-  };
+  private static PowerSourceModuleDto ToDto(IPowerSourceModule item) => item.Convert();
 
-  private static FastMeterDto ToDto(IFastMeter item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    NumberChassis = item.NumberChassis,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-    MaxContinuityResistance = item.MaxContinuityResistance,
-  };
+  private static FastMeterDto ToDto(IFastMeter item) => item.Convert();
 
-  private static BreakdownTesterDto ToDto(IBreakdownTester item) => new()
-  {
-    Name = item.Name,
-    Description = item.Description,
-    Number = item.Number,
-    NumberChassis = item.NumberChassis,
-    ConnectionDetails = item.ConnectionDetails,
-    DeviceClass = item.DeviceClass,
-    PiMaxVoltage = item.PiMaxVoltage,
-    SiMaxVoltage = item.SiMaxVoltage,
-    IRMinVoltage = item.IRMinVoltage,
-  };
+  private static BreakdownTesterDto ToDto(IBreakdownTester item) => item.Convert();
 }

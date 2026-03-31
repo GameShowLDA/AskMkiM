@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -71,7 +72,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -88,16 +89,21 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
 
           try
           {
+            if (_editingDto != null)
+            {
+              deviceDto.Id = _editingDto.Id;
+            }
+
             var breakDown = BreakdownTesters.Build(deviceDto);
 
             if (_editingDto == null)
             {
-              BreakdownTesters.CreateAsync(breakDown).GetAwaiter().GetResult();
+              var createdDevice = await BreakdownTesters.CreateAsync(breakDown);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceDto.Id = _editingDto.Id;
-              BreakdownTesters.UpdateAsync(breakDown).GetAwaiter().GetResult();
+              await BreakdownTesters.UpdateAsync(breakDown);
             }
 
             RequestSave?.Invoke(s, deviceDto);

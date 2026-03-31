@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -62,7 +63,7 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -76,17 +77,23 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
         {
           deviceDto.LastResolvedDevicePath = (baseDevice as IUninterruptiblePowerSupply)?.LastResolvedDevicePath ?? string.Empty;
 
-          var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(deviceDto);
           try
           {
+            if (_editingDto != null)
+            {
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(deviceDto);
+
             if (_editingDto == null)
             {
-              UninterruptiblePowerSupplies.CreateAsync(uninterruptiblePowerSupply).GetAwaiter().GetResult();
+              var createdDevice = await UninterruptiblePowerSupplies.CreateAsync(uninterruptiblePowerSupply);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceDto.Id = _editingDto.Id;
-              UninterruptiblePowerSupplies.UpdateAsync(uninterruptiblePowerSupply).GetAwaiter().GetResult();
+              await UninterruptiblePowerSupplies.UpdateAsync(uninterruptiblePowerSupply);
             }
 
             RequestSave?.Invoke(s, deviceDto);

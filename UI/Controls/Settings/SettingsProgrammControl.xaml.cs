@@ -5,10 +5,12 @@ using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Microsoft.Win32;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Controls.Settings.Configuration;
+using UI.Controls.Settings.DeviceConfig;
 
 namespace UI.Controls.Settings
 {
@@ -18,7 +20,9 @@ namespace UI.Controls.Settings
   public partial class SettingsProgrammControl : UserControl
   {
     private readonly Action<SystemStateEvents.AdminRightsChanged> _adminRightsChangedHandler;
+    private DeviceConfigControl? _deviceConfigManager;
     private bool _isAdminRightsSubscribed;
+    private bool _deviceConfigWarmupStarted;
 
     public SettingsProgrammControl()
     {
@@ -26,6 +30,7 @@ namespace UI.Controls.Settings
       _adminRightsChangedHandler = OnAdminRightsChanged;
       Loaded += SettingsProgrammControl_Loaded;
       Unloaded += SettingsProgrammControl_Unloaded;
+      ToggleSettingsButton.Click += ToggleSettingsButton_Click;
     }
 
     private void SettingsProgrammControl_Loaded(object sender, RoutedEventArgs e)
@@ -40,6 +45,8 @@ namespace UI.Controls.Settings
 
       EventAggregator.Subscribe(_adminRightsChangedHandler);
       _isAdminRightsSubscribed = true;
+
+      _ = WarmUpDeviceConfigManagerAsync();
     }
 
     private void SettingsProgrammControl_Unloaded(object sender, RoutedEventArgs e)
@@ -70,6 +77,56 @@ namespace UI.Controls.Settings
       var visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
       ExportConfigButton.Visibility = visibility;
       ImportConfigButton.Visibility = visibility;
+    }
+
+    private async void ToggleSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+      await Task.Yield();
+
+      if (!ToggleSettingsButton.IsArrowUp)
+      {
+        await EnsureDeviceConfigManagerLoadedAsync();
+      }
+    }
+
+    private async Task<DeviceConfigControl> EnsureDeviceConfigManagerLoadedAsync()
+    {
+      if (_deviceConfigManager != null)
+      {
+        return _deviceConfigManager;
+      }
+
+      var deviceConfigManager = new DeviceConfigControl();
+      DeviceConfigHost.Content = deviceConfigManager;
+      _deviceConfigManager = deviceConfigManager;
+
+      await deviceConfigManager.EnsureInitializedAsync();
+      return deviceConfigManager;
+    }
+
+    private async Task WarmUpDeviceConfigManagerAsync()
+    {
+      if (_deviceConfigWarmupStarted)
+      {
+        return;
+      }
+
+      _deviceConfigWarmupStarted = true;
+
+      try
+      {
+        await Task.Delay(200);
+
+        if (!IsLoaded)
+        {
+          return;
+        }
+
+        await EnsureDeviceConfigManagerLoadedAsync();
+      }
+      catch
+      {
+      }
     }
 
     private async void PrintConfig(object sender, MouseButtonEventArgs e)
@@ -152,7 +209,10 @@ namespace UI.Controls.Settings
 
         await DeviceConfigurationService.ImportFromFileAsync(openDialog.FileName);
 
-        DeviceConfigManager?.ReloadConfiguration();
+        if (_deviceConfigManager != null)
+        {
+          await _deviceConfigManager.ReloadConfigurationAsync();
+        }
 
         NotificationHostService.Instance.Show(
           "Импорт конфигурации",
