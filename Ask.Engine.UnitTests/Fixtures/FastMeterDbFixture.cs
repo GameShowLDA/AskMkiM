@@ -1,6 +1,6 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration;
 
 namespace Ask.Engine.UnitTests.Fixtures;
 
@@ -10,7 +10,7 @@ public sealed class FastMeterDbFixture : IDisposable
 
   public FastMeterDbFixture()
   {
-    DataBaseConfig.InitializeDB().GetAwaiter().GetResult();
+    DatabaseEngineInitializer.InitializeAsync().GetAwaiter().GetResult();
 
     if (FastMeters.GetAllAsync().GetAwaiter().GetResult().Any())
     {
@@ -24,14 +24,13 @@ public sealed class FastMeterDbFixture : IDisposable
       NumberChassis = 9999,
       Number = 1,
       ConnectionDetails = "UNIT-TEST",
-      DeviceClass = typeof(FastMeterDto).AssemblyQualifiedName ?? typeof(FastMeterDto).FullName ?? nameof(FastMeterDto),
+      DeviceClass = "Ask.Device.Runtime.Device.KeysightDevice",
       MaxContinuityResistance = 100
     };
 
     var device = FastMeters.Build(fastMeterDto);
-    FastMeters.CreateAsync(device).GetAwaiter();
-
-    createdFastMeterId = fastMeterDto.Id;
+    var created = FastMeters.CreateAsync(device).GetAwaiter().GetResult();
+    createdFastMeterId = created.Id;
   }
 
   public void Dispose()
@@ -45,7 +44,7 @@ public sealed class FastMeterDbFixture : IDisposable
 
     if (entity is not null)
     {
-      FastMeters.DeleteAsync(entity).GetAwaiter();
+      FastMeters.DeleteAsync(entity).GetAwaiter().GetResult();
     }
   }
 }

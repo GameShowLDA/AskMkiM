@@ -18,11 +18,11 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.DataBase.Provider.Context;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
-using DataBaseConfiguration;
 using Microsoft.Win32;
 using System.Globalization;
 using System.IO;
@@ -225,8 +225,6 @@ namespace UI.Controls.Settings
 
     private static DeviceConfigurationFileModel BuildConfigurationFile()
     {
-      using var db = DataBaseConfig.Context;
-
       return new DeviceConfigurationFileModel
       {
         Version = 1,
@@ -442,26 +440,25 @@ namespace UI.Controls.Settings
 
     private static void ApplyConfigurationFile(DeviceConfigurationFileModel model)
     {
-      using var db = DataBaseConfig.Context;
+      using var db = new AppDbContext();
       using var transaction = db.Database.BeginTransaction();
 
-      FastMeters.DeleteAllAsync().GetAwaiter();
-      PowerSourceModules.DeleteAllAsync().GetAwaiter();
-      RelaySwitchModules.DeleteAllAsync().GetAwaiter();
-      SwitchingDevices.DeleteAllAsync().GetAwaiter();
-      BreakdownTesters.DeleteAllAsync().GetAwaiter();
-      Racks.DeleteAllAsync().GetAwaiter();
-      ChassisManagers.DeleteAllAsync().GetAwaiter();
+      db.FastMeters.RemoveRange(db.FastMeters);
+      db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
+      db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
+      db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
+      db.BreakdownTesters.RemoveRange(db.BreakdownTesters);
+      db.Rack.RemoveRange(db.Rack);
+      db.ChassisManagers.RemoveRange(db.ChassisManagers);
       db.SaveChanges();
 
-
-      Racks.CreateRangeAsync(model.Racks.Select(ToEntity));
-      ChassisManagers.CreateRangeAsync(model.Chassis.Select(ToEntity));
-      BreakdownTesters.CreateRangeAsync(model.BreakdownTesters.Select(ToEntity));
-      RelaySwitchModules.CreateRangeAsync(model.RelaySwitchModules.Select(ToEntity));
-      SwitchingDevices.CreateRangeAsync(model.SwitchingDevices.Select(ToEntity));
-      PowerSourceModules.CreateRangeAsync(model.PowerSourceModules.Select(ToEntity));
-      FastMeters.CreateRangeAsync(model.FastMeters.Select(ToEntity));
+      db.Rack.AddRange(model.Racks);
+      db.ChassisManagers.AddRange(model.Chassis);
+      db.BreakdownTesters.AddRange(model.BreakdownTesters);
+      db.RelaySwitchModules.AddRange(model.RelaySwitchModules);
+      db.SwitchingDevices.AddRange(model.SwitchingDevices);
+      db.PowerSourceModules.AddRange(model.PowerSourceModules);
+      db.FastMeters.AddRange(model.FastMeters);
       db.SaveChanges();
 
       transaction.Commit();
@@ -472,16 +469,6 @@ namespace UI.Controls.Settings
     {
       DeviceRuntime.ClearCache();
     }
-
-    private static IChassisManager ToEntity(ChassisManagerDto item) => ChassisManagers.Build(item);
-    private static IRack ToEntity(RackDto item) => Racks.Build(item);
-    private static IRelaySwitchModule ToEntity(RelaySwitchModuleDto item) => RelaySwitchModules.Build(item);
-
-
-    private static ISwitchingDevice ToEntity(SwitchingDeviceDto item) => SwitchingDevices.Build(item);
-    private static IPowerSourceModule ToEntity(PowerSourceModuleDto item) => PowerSourceModules.Build(item);
-    private static IFastMeter ToEntity(FastMeterDto item) => FastMeters.Build(item);
-    private static IBreakdownTester ToEntity(BreakdownTesterDto item) => BreakdownTesters.Build(item);
 
     private static string BuildPrintableConfiguration(
       IReadOnlyCollection<IChassisManager> chassisList,

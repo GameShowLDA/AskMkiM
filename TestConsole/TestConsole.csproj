@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataBaseConfigruration\DataBaseConfiguration.csproj" />
     <ProjectReference Include="..\Ask.DataBase.Engine\Ask.DataBase.Engine.csproj" />
     <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
     <ProjectReference Include="..\TestWPF\TestWPF.csproj" />
