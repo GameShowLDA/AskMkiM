@@ -7,11 +7,6 @@ namespace DataBaseConfiguration.Context
   public partial class AppDbContext
   {
     /// <summary>
-    /// Таблица модулей коммутации реле.
-    /// </summary>
-    public DbSet<RelaySwitchModuleEntity> RelaySwitchModules { get; set; }
-
-    /// <summary>
     /// Таблица устройств коммутации.
     /// </summary>
     public DbSet<SwitchingDeviceEntity> SwitchingDevices { get; set; }

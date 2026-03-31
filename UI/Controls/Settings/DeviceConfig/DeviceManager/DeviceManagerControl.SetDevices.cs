@@ -72,7 +72,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
           PowerSourceModuleControl.ClearItems();
           break;
 
-        case RelaySwitchModuleEntity relaySwitch:
+        case RelaySwitchModuleDto relaySwitch:
           RelaySwitchModuleControl.ClearItems();
           break;
 
