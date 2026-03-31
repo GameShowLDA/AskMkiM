@@ -76,7 +76,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
           RelaySwitchModuleControl.ClearItems();
           break;
 
-        case SwitchingDeviceEntity switchingDevice:
+        case SwitchingDeviceDto switchingDevice:
           SwitchingDeviceControl.ClearItems();
           break;
 
