@@ -400,13 +400,27 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock 
-                            x:Name="ArchiveFilesTextBlock"
-                            Text="Файлы архива"
-                            FontWeight="SemiBold"
-                            FontSize="14"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource ForegrounfBrushes}"/>
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock 
+                                x:Name="ArchiveFilesTextBlock"
+                                Text="Файлы архива"
+                                FontWeight="SemiBold"
+                                FontSize="14"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource ForegrounfBrushes}"/>
+                            <TextBlock x:Name="SelectedArchiveNameTextBlock"
+                                       Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ForegrounfBrushes45}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="Collapsed" />
+                        </Grid>
                         <StackPanel x:Name="ArchiveActionsPanel"
                                     Grid.Column="1"
                                     Orientation="Horizontal"
@@ -570,13 +584,27 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock 
-                            x:Name="SelectFileContentTextBlock"
-                            Text="Содержимое выбранного файла"
-                            FontWeight="SemiBold"
-                            FontSize="14"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource ForegrounfBrushes}"/>
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock 
+                                x:Name="SelectFileContentTextBlock"
+                                Text="Содержимое выбранного файла"
+                                FontWeight="SemiBold"
+                                FontSize="14"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource ForegrounfBrushes}"/>
+                            <TextBlock x:Name="SelectedArchiveFileNameTextBlock"
+                                       Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ForegrounfBrushes45}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="Collapsed" />
+                        </Grid>
                         <StackPanel Grid.Column="1"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right">

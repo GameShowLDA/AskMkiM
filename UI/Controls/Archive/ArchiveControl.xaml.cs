@@ -20,7 +20,6 @@ using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
 using Button = System.Windows.Controls.Button;
-using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
@@ -658,11 +657,42 @@ namespace UI.Controls.Archive
 
     private void UpdateActionButtons()
     {
+      UpdatePanelTitles();
+
       var hasArchive = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && File.Exists(_lastSelectedArchivePath);
       ArchiveActionsPanel.Visibility = hasArchive ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveFileButton.Visibility = hasArchive && !string.IsNullOrWhiteSpace(_lastSelectedEntryName)
         ? Visibility.Visible
         : Visibility.Collapsed;
+    }
+
+    private void UpdatePanelTitles()
+    {
+      SetPanelTitle(SelectedArchiveNameTextBlock, GetArchiveDisplayName(_lastSelectedArchivePath));
+      SetPanelTitle(SelectedArchiveFileNameTextBlock, GetFileDisplayName(_lastSelectedEntryName));
+    }
+
+    private static string? GetArchiveDisplayName(string archivePath)
+    {
+      return string.IsNullOrWhiteSpace(archivePath)
+        ? null
+        : Path.GetFileName(archivePath);
+    }
+
+    private static string? GetFileDisplayName(string entryName)
+    {
+      return string.IsNullOrWhiteSpace(entryName)
+        ? null
+        : Path.GetFileName(entryName);
+    }
+
+    private static void SetPanelTitle(TextBlock textBlock, string? value)
+    {
+      var hasValue = !string.IsNullOrWhiteSpace(value);
+
+      textBlock.Text = hasValue ? value : string.Empty;
+      textBlock.ToolTip = hasValue ? value : null;
+      textBlock.Visibility = hasValue ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private async Task ShowArchiveInGridAsync(string archivePath, bool clearEditor)
@@ -1008,6 +1038,11 @@ namespace UI.Controls.Archive
           EnsureArchiveOpenedInManagerCore(archivePath);
           _archiveManager.AddFileToOpenedArchive(openFileDialog.FileName);
         }
+
+        ShowArchiveNotification(
+          "Добавление файла",
+          $"Файл '{Path.GetFileName(openFileDialog.FileName)}' успешно добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.",
+          NotificationType.Success);
       }
       catch (Exception ex)
       {
@@ -1017,12 +1052,11 @@ namespace UI.Controls.Archive
 
     private void DeleteArchive(string archivePath, string displayName)
     {
-      var confirmation = MessageBox.Show(
-        Window.GetWindow(this),
+      var confirmation = Message.MessageBoxCustom.Show(
         $"Удалить архив '{displayName}'?",
         "Удаление архива",
         MessageBoxButton.YesNo,
-        MessageBoxImage.Warning);
+        MessageBoxImage.Question);
 
       if (confirmation != MessageBoxResult.Yes)
       {
@@ -1035,6 +1069,11 @@ namespace UI.Controls.Archive
         {
           _archiveManager.DeleteArchive(archivePath);
         }
+
+        ShowArchiveNotification(
+          "Удаление архива",
+          $"Архив '{displayName}' успешно удалён.",
+          NotificationType.Success);
       }
       catch (Exception ex)
       {
@@ -1044,12 +1083,11 @@ namespace UI.Controls.Archive
 
     private void DeleteArchiveFile(string archivePath, string entryName, string displayName)
     {
-      var confirmation = MessageBox.Show(
-        Window.GetWindow(this),
+      var confirmation = Message.MessageBoxCustom.Show(
         $"Удалить файл '{displayName}' из архива?",
         "Удаление файла",
         MessageBoxButton.YesNo,
-        MessageBoxImage.Warning);
+        MessageBoxImage.Question);
 
       if (confirmation != MessageBoxResult.Yes)
       {
@@ -1063,6 +1101,11 @@ namespace UI.Controls.Archive
           EnsureArchiveOpenedInManagerCore(archivePath);
           _archiveManager.DeleteFileFromOpenedArchive(entryName);
         }
+
+        ShowArchiveNotification(
+          "Удаление файла",
+          $"Файл '{displayName}' успешно удалён из архива '{Path.GetFileNameWithoutExtension(archivePath)}'.",
+          NotificationType.Success);
       }
       catch (Exception ex)
       {
