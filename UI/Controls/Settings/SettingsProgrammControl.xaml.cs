@@ -311,7 +311,7 @@ namespace UI.Controls.Settings
           })
           .ToList(),
 
-        FastMeters = db.FastMeters
+        FastMeters = FastMeters.GetAllAsync().GetAwaiter().GetResult()
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
           .Select(device => new FastMeterDto
@@ -451,13 +451,13 @@ namespace UI.Controls.Settings
       using var db = DataBaseConfig.Context;
       using var transaction = db.Database.BeginTransaction();
 
-      db.FastMeters.RemoveRange(db.FastMeters);
+      FastMeters.DeleteAllAsync().GetAwaiter();
       db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
       db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
       db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
-      BreakdownTesters.DeleteAllAsync().GetAwaiter().GetResult();
-      Racks.DeleteAllAsync().GetAwaiter().GetResult();
-      ChassisManagers.DeleteAllAsync().GetAwaiter().GetResult();
+      BreakdownTesters.DeleteAllAsync().GetAwaiter();
+      Racks.DeleteAllAsync().GetAwaiter();
+      ChassisManagers.DeleteAllAsync().GetAwaiter();
       db.SaveChanges();
 
 
