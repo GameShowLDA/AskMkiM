@@ -43,6 +43,7 @@ namespace UI.Controls.Runner
     private const double MaxAutoHeight = 250.0;
 
     public int ErrorCount { get; private set; } = 0;
+    public int TranslationErrorCount { get; private set; } = 0;
 
     private ProtocolUI ProtocolUI { get; set; }
 
@@ -54,6 +55,7 @@ namespace UI.Controls.Runner
 
     private TextEditorContainer _leftEditor;
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
+    private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -62,17 +64,19 @@ namespace UI.Controls.Runner
       }
       set
       {
-        translationModels = value;
+        translationModels = value ?? new List<BaseCommandModel>();
         ErrorClear();
+        TranslationErrorCount = 0;
 
-        foreach (var model in value)
+        foreach (var model in translationModels)
         {
           if (model.Errors.Count > 0)
           {
-            SetError(model.Errors);
+            SetTranslationError(model.Errors);
           }
         }
 
+        UpdateTranslatorEditorActions();
         UpdateArchiveButtonVisibility();
       }
     }
@@ -182,13 +186,14 @@ namespace UI.Controls.Runner
       }
     }
 
-    private void SetError(List<ErrorItem> errorItems)
+    private void SetTranslationError(List<ErrorItem> errorItems)
     {
       if (errorItems == null || errorItems.Count == 0)
         return;
 
       ErrorListBoxVertical.AddErrors(errorItems);
       ErrorCount += errorItems.Count;
+      TranslationErrorCount += errorItems.Count;
 
       if (ErrorCount > 0)
       {
@@ -229,11 +234,14 @@ namespace UI.Controls.Runner
       rightEditor.BackRequested += TranslatorEditor_BackRequested;
       rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
+      rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
+      rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
       var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
         Path.GetFileName(filePath) : fileName;
+      rightEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
       var dockItemPk = new DockItem
       {
         Title = fileName,
@@ -399,6 +407,19 @@ namespace UI.Controls.Runner
       _archiveSaveService.SaveFileToArchive(this, this.TranslationModels, sourceFilePath);
     }
 
+    private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
+    {
+      var rightEditor = sender as TranslatorEditor;
+      var translatedText = rightEditor?.GetTextEditor()?.Text;
+      var sourceFilePath = rightEditor?.GetTextEditor()?.TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(sourceFilePath))
+      {
+        sourceFilePath = OpkFilePath;
+      }
+
+      _translatedFileSaveService.SaveToDisk(this, translatedText ?? string.Empty, sourceFilePath);
+    }
+
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
     {
       _userResizing = true;
@@ -424,6 +445,29 @@ namespace UI.Controls.Runner
 
       BottomRow.Height = GridLength.Auto;
       ErrorListBoxVertical.MaxHeight = desired;
+    }
+
+    private bool CanSaveTranslatedFileToDisk()
+    {
+      return translationModels.Count > 0 && TranslationErrorCount == 0;
+    }
+
+    private TranslatorEditor? GetTranslatorEditor()
+    {
+      return ChildTextEditorContainer.DockManager.DockItems
+        .FirstOrDefault(item => item.Content is TranslatorEditor)?
+        .Content as TranslatorEditor;
+    }
+
+    private void UpdateTranslatorEditorActions()
+    {
+      var translatorEditor = GetTranslatorEditor();
+      if (translatorEditor == null)
+      {
+        return;
+      }
+
+      translatorEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
     }
 
     /// <summary>

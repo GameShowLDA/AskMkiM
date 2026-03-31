@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using UI.Components;
 using UI.Controls;
 using UI.Controls.TextEditorControl;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace MainWindowProgram.Services
 {
@@ -64,6 +65,8 @@ namespace MainWindowProgram.Services
     public TextEditorUI GetActiveTextEditor(EditorType editorType) => _multiWindowControl.GetActiveTextEditor(editorType);
 
     public TextEditorUI GetActiveTextEditor() => _multiWindowControl.GetActiveTextEditor();
+
+    public UserControl? GetActiveWorkspaceControl() => _multiWindowControl.GetActiveWorkspaceControl();
 
     /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.
