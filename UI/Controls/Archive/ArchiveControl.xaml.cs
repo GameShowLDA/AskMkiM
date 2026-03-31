@@ -21,6 +21,7 @@ using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
 using Button = System.Windows.Controls.Button;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
 using UserControl = System.Windows.Controls.UserControl;
@@ -852,9 +853,13 @@ namespace UI.Controls.Archive
       var isRoot = node?.Kind == ArchiveTreeNodeKind.Root;
       var isArchive = node?.Kind == ArchiveTreeNodeKind.Archive;
       var isFile = node?.Kind == ArchiveTreeNodeKind.File;
+      var canManageArchives = isRoot || isArchive;
 
       CreateArchiveMenuItem.Visibility = isRoot ? Visibility.Visible : Visibility.Collapsed;
+      UploadArchiveMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
+      DownloadArchivesMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      SaveArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
@@ -879,6 +884,16 @@ namespace UI.Controls.Archive
       BeginCreateArchiveWorkflow();
     }
 
+    private void UploadArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      ArchiveTransferUiService.UploadArchive();
+    }
+
+    private void DownloadArchivesMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      ArchiveTransferUiService.DownloadArchives();
+    }
+
     private async void OpenArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -888,6 +903,19 @@ namespace UI.Controls.Archive
       }
 
       await OpenArchiveAsync(node.ArchivePath);
+    }
+
+    private void SaveArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
+      {
+        return;
+      }
+
+      _lastSelectedArchivePath = node.ArchivePath;
+      _lastSelectedEntryName = null;
+      SaveSelectedArchiveToDisk();
     }
 
     private void AddFileToArchiveMenuItem_Click(object sender, RoutedEventArgs e)
@@ -944,6 +972,11 @@ namespace UI.Controls.Archive
       {
         AddFileToArchive(_lastSelectedArchivePath);
       }
+    }
+
+    private void SaveArchiveToDiskButton_Click(object sender, RoutedEventArgs e)
+    {
+      SaveSelectedArchiveToDisk();
     }
 
     private void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
@@ -1047,6 +1080,43 @@ namespace UI.Controls.Archive
       catch (Exception ex)
       {
         ShowArchiveNotification("Добавление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private void SaveSelectedArchiveToDisk()
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
+      {
+        ShowArchiveNotification("Сохранение архива", "Выберите архив для сохранения на диск.", NotificationType.Warning);
+        return;
+      }
+
+      var saveFileDialog = new SaveFileDialog
+      {
+        Title = "Сохранить архив на диск",
+        Filter = "Архив ASK (*.apkw)|*.apkw",
+        DefaultExt = ".apkw",
+        AddExtension = true,
+        FileName = Path.GetFileName(_lastSelectedArchivePath),
+        OverwritePrompt = true,
+      };
+
+      if (saveFileDialog.ShowDialog(Window.GetWindow(this)) != true)
+      {
+        return;
+      }
+
+      try
+      {
+        var savedArchivePath = ArchiveTransferService.ExportArchive(_lastSelectedArchivePath, saveFileDialog.FileName);
+        ShowArchiveNotification(
+          "Сохранение архива",
+          $"Архив '{Path.GetFileName(savedArchivePath)}' успешно сохранён на диск.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Сохранение архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -1616,14 +1686,21 @@ namespace UI.Controls.Archive
     private static string GetUserFriendlyArchiveErrorMessage(Exception ex)
     {
       if (ex is InvalidOperationException invalidOperation &&
-          invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+          !string.IsNullOrWhiteSpace(invalidOperation.Message))
       {
-        return "Файл или архив с таким именем уже существует.";
+        return invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)
+          ? "Файл или архив с таким именем уже существует."
+          : invalidOperation.Message;
       }
 
       if (ex is FileNotFoundException)
       {
         return "Архив или файл не найден.";
+      }
+
+      if (ex is DirectoryNotFoundException directoryNotFoundException)
+      {
+        return directoryNotFoundException.Message;
       }
 
       if (ex is IOException ioException &&

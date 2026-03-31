@@ -12,6 +12,7 @@ using UI.Components.FileComparerControls;
 using UI.Controls.Archive;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
+using UI.Services.Archive;
 
 
 namespace MainWindowProgram.Services
@@ -172,6 +173,28 @@ namespace MainWindowProgram.Services
       {
         archiveControl.ShowCreateArchiveDialog();
       }
+    }
+
+    public void DownloadArchives()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      ArchiveTransferUiService.DownloadArchives();
+    }
+
+    public void UploadArchive()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      ArchiveTransferUiService.UploadArchive();
     }
 
     /// <summary>

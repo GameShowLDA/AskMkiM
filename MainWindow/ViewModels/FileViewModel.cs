@@ -63,6 +63,14 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void CreateArchive() => _fileService.CreateArchive();
 
+    /// <summary>Команда выгрузки всех архивов на диск.</summary>
+    [RelayCommand]
+    private void DownloadArchives() => _fileService.DownloadArchives();
+
+    /// <summary>Команда загрузки архива в папку Archives.</summary>
+    [RelayCommand]
+    private void UploadArchive() => _fileService.UploadArchive();
+
     /// <summary>Команда создания нового файла.</summary>
     [RelayCommand]
     private void CreateNewFile() => _fileService.CreateNewFileAsync();
