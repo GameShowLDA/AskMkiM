@@ -12,11 +12,6 @@ namespace DataBaseConfiguration.Context
     public DbSet<RelaySwitchModuleEntity> RelaySwitchModules { get; set; }
 
     /// <summary>
-    /// Таблица модулей источников напряжения и тока.
-    /// </summary>
-    public DbSet<PowerSourceModuleEntity> PowerSourceModules { get; set; }
-
-    /// <summary>
     /// Таблица устройств коммутации.
     /// </summary>
     public DbSet<SwitchingDeviceEntity> SwitchingDevices { get; set; }

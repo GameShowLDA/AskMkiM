@@ -1,4 +1,6 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
+using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Base.DeviceResponses;
@@ -13,7 +15,7 @@ namespace TestConsole.MINT
     {
       Console.WriteLine("=== Редактор калибровки сопротивления ===");
 
-      var modules = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult().OfType<PowerSourceModuleEntity>().ToList();
+      var modules = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult().OfType<PowerSourceModuleDto>().ToList(); ;
 
       if (modules == null || !modules.Any())
       {
@@ -33,7 +35,7 @@ namespace TestConsole.MINT
     /// Запускает цикл редактирования диапазонов сопротивления с калибровочными коэффициентами.
     /// </summary>
     /// <param name="selected">Сущность модуля из базы.</param>
-    private static void EditResistanceCalibration(PowerSourceModuleEntity selected)
+    private static void EditResistanceCalibration(PowerSourceModuleDto selected)
     {
       while (true)
       {
@@ -80,11 +82,13 @@ namespace TestConsole.MINT
 
         editableModule.ResistanceCalibration.Add(updatedRange);
         selected.ResistanceCalibrationJson = JsonSerializer.Serialize(editableModule.ResistanceCalibration);
-        PowerSourceModules.UpdateAsync(selected).GetAwaiter().GetResult();
+
+        var device = PowerSourceModules.Build(selected);
+        PowerSourceModules.UpdateAsync(device).GetAwaiter().GetResult();
       }
     }
 
-    private static PowerSourceModuleEntity SelectModule(List<PowerSourceModuleEntity> modules)
+    private static PowerSourceModuleDto SelectModule(List<PowerSourceModuleDto> modules)
     {
       Console.WriteLine("Выберите модуль:");
       for (int i = 0; i < modules.Count; i++)
