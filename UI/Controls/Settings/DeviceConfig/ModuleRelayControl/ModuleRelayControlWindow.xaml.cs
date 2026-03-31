@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -73,7 +74,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -91,17 +92,21 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           deviceEntity.SwitchCapacitance = deviceSettingsWindow.GetCapacitance();
           try
           {
+            if (_editingDto != null)
+            {
+              deviceEntity.Id = _editingDto.Id;
+            }
+
             var relaySwitchModule = RelaySwitchModules.Build(deviceEntity);
 
             if (_editingDto == null)
             {
-              var createdDevice = RelaySwitchModules.CreateAsync(relaySwitchModule).GetAwaiter().GetResult();
+              var createdDevice = await RelaySwitchModules.CreateAsync(relaySwitchModule);
               deviceEntity.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingDto.Id;
-              RelaySwitchModules.UpdateAsync(relaySwitchModule).GetAwaiter().GetResult();
+              await RelaySwitchModules.UpdateAsync(relaySwitchModule);
             }
 
             RequestSave?.Invoke(s, deviceEntity);

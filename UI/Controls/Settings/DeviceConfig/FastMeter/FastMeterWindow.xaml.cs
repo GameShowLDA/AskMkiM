@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -72,7 +73,7 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -86,17 +87,23 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
         {
           deviceDto.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
 
-          var fastMeter = FastMeters.Build(deviceDto);
           try
           {
+            if (_editingDto != null)
+            {
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var fastMeter = FastMeters.Build(deviceDto);
+
             if (_editingDto == null)
             {
-              FastMeters.CreateAsync(fastMeter).GetAwaiter().GetResult();
+              var createdDevice = await FastMeters.CreateAsync(fastMeter);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceDto.Id = _editingDto.Id;
-              FastMeters.UpdateAsync(fastMeter).GetAwaiter().GetResult();
+              await FastMeters.UpdateAsync(fastMeter);
             }
 
             RequestSave?.Invoke(s, deviceDto);

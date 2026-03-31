@@ -176,10 +176,10 @@
                                 </Grid>
                             </Grid>
 
-                            <Config:DeviceConfigControl x:Name="DeviceConfigManager"
-                                                        Grid.Row="1">
-                                <Config:DeviceConfigControl.Style>
-                                    <Style TargetType="{x:Type Config:DeviceConfigControl}">
+                            <ContentControl x:Name="DeviceConfigHost"
+                                            Grid.Row="1">
+                                <ContentControl.Style>
+                                    <Style TargetType="{x:Type ContentControl}">
                                         <Setter Property="Visibility" Value="Visible"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
@@ -187,8 +187,8 @@
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </Config:DeviceConfigControl.Style>
-                            </Config:DeviceConfigControl>
+                                </ContentControl.Style>
+                            </ContentControl>
 
                         </Grid>
                     </Border>

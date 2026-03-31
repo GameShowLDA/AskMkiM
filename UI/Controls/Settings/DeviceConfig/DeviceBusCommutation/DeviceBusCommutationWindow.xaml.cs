@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -72,7 +73,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
@@ -86,17 +87,21 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
         {
           try
           {
+            if (_editingDto != null)
+            {
+              deviceDto.Id = _editingDto.Id;
+            }
+
             var switching = SwitchingDevices.Build(deviceDto);
 
             if (_editingDto == null)
             {
-              var createdDevice = SwitchingDevices.CreateAsync(switching).GetAwaiter().GetResult();
+              var createdDevice = await SwitchingDevices.CreateAsync(switching);
               deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceDto.Id = _editingDto.Id;
-              SwitchingDevices.UpdateAsync(switching).GetAwaiter().GetResult();
+              await SwitchingDevices.UpdateAsync(switching);
             }
 
             RequestSave?.Invoke(s, deviceDto);
