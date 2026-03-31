@@ -296,7 +296,7 @@ namespace UI.Controls.Settings
           })
           .ToList(),
 
-        PowerSourceModules = db.PowerSourceModules
+        PowerSourceModules = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult()
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
           .Select(device => new PowerSourceModuleDto
@@ -452,7 +452,7 @@ namespace UI.Controls.Settings
       using var transaction = db.Database.BeginTransaction();
 
       FastMeters.DeleteAllAsync().GetAwaiter();
-      db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
+      PowerSourceModules.DeleteAllAsync().GetAwaiter();
       db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
       db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
       BreakdownTesters.DeleteAllAsync().GetAwaiter();

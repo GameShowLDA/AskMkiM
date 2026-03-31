@@ -68,7 +68,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
           FastMeterControl.ClearItems();
           break;
 
-        case PowerSourceModuleEntity powerSource:
+        case PowerSourceModuleDto powerSource:
           PowerSourceModuleControl.ClearItems();
           break;
 
