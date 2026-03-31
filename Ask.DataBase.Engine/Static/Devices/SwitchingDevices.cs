@@ -87,6 +87,17 @@ public static class SwitchingDevices
     DeviceRuntime.CreateAsync(device, cancellationToken);
 
   /// <summary>
+  /// Создаёт набор устройств коммутации.
+  /// </summary>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<ISwitchingDevice>> CreateRangeAsync(IEnumerable<ISwitchingDevice> devices, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
+
+  /// <summary>
   /// Обновляет существующее устройство коммутации.
   /// </summary>
   /// <param name="device">Экземпляр устройства с обновлёнными данными.</param>

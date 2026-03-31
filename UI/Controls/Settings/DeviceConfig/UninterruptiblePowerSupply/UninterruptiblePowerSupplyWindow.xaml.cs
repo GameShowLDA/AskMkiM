@@ -16,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
   public partial class UninterruptiblePowerSupplyWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private UninterruptiblePowerSupplyEntity? _editingEntity;
+    private UninterruptiblePowerSupplyDto? _editingDto;
 
     /// <summary>
     /// Close request event.
@@ -52,9 +52,9 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
     /// <summary>
     /// Initializes settings screen for UPS add/edit.
     /// </summary>
-    public void SetSettings(object? sender, IHeadUnit e, UninterruptiblePowerSupplyEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, UninterruptiblePowerSupplyDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Бесперебойник";
       deviceSettingsWindow.LoadDeviceModels<IUninterruptiblePowerSupply>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -80,13 +80,13 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
           var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(deviceDto);
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto == null)
             {
               UninterruptiblePowerSupplies.CreateAsync(uninterruptiblePowerSupply).GetAwaiter().GetResult();
             }
             else
             {
-              deviceDto.Id = _editingEntity.Id;
+              deviceDto.Id = _editingDto.Id;
               UninterruptiblePowerSupplies.UpdateAsync(uninterruptiblePowerSupply).GetAwaiter().GetResult();
             }
 

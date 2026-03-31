@@ -16,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
   public partial class FastMeterWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private FastMeterEntity? _editingEntity;
+    private FastMeterDto? _editingDto;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -62,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, FastMeterEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, FastMeterDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Измеритель (быстрый)";
       deviceSettingsWindow.LoadDeviceModels<IFastMeter>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -90,13 +90,13 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
           var fastMeter = FastMeters.Build(deviceDto);
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto == null)
             {
               FastMeters.CreateAsync(fastMeter).GetAwaiter().GetResult();
             }
             else
             {
-              deviceDto.Id = _editingEntity.Id;
+              deviceDto.Id = _editingDto.Id;
               FastMeters.UpdateAsync(fastMeter).GetAwaiter().GetResult();
             }
 

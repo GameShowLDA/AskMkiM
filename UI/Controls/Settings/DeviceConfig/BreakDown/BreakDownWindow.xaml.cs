@@ -16,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
   public partial class BreakDownWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private BreakdownTesterEntity? _editingEntity;
+    private BreakdownTesterDto? _editingDto;
     /// <summary>
     /// Событие запроса закрытия окна.
     /// </summary>
@@ -61,9 +61,9 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, BreakdownTesterEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, BreakdownTesterDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Пробойная установка";
       deviceSettingsWindow.LoadDeviceModels<IBreakdownTester>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -91,13 +91,13 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
           {
             var breakDown = BreakdownTesters.Build(deviceDto);
 
-            if (_editingEntity == null)
+            if (_editingDto == null)
             {
               BreakdownTesters.CreateAsync(breakDown).GetAwaiter().GetResult();
             }
             else
             {
-              deviceDto.Id = _editingEntity.Id;
+              deviceDto.Id = _editingDto.Id;
               BreakdownTesters.UpdateAsync(breakDown).GetAwaiter().GetResult();
             }
 
