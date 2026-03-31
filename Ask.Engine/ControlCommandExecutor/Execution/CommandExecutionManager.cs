@@ -208,16 +208,16 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     private bool HasExecutionErrors(BaseCommandModel command)
     {
       var exactKey = $"{command.CommandNumber} {command.Mnemonic}";
-      if (_protocolModel.Errors.TryGetValue(exactKey, out var exactErrors) &&
-          exactErrors is { Count: > 0 })
+      if (_protocolModel.Messages.TryGetValue(exactKey, out var exactMessages) &&
+          exactMessages.Any(item => item.Kind == ProtocolModel.ProtocolMessageKind.Error))
       {
         return true;
       }
 
       var commandPrefix = $"{command.CommandNumber} ";
-      return _protocolModel.Errors.Any(kvp =>
+      return _protocolModel.Messages.Any(kvp =>
         kvp.Key.StartsWith(commandPrefix, StringComparison.OrdinalIgnoreCase) &&
-        kvp.Value is { Count: > 0 });
+        kvp.Value.Any(item => item.Kind == ProtocolModel.ProtocolMessageKind.Error));
     }
 
     public BaseCommandModel? GetNextCommand(BaseCommandModel currentCommand)
