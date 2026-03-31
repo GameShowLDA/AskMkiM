@@ -1,8 +1,4 @@
-﻿using Ask.Core.Shared.Entity.Devices;
-using Ask.DataBase.Engine.Static.Devices;
-using DataBaseConfiguration;
-using DataBaseConfiguration.Context;
-using Microsoft.EntityFrameworkCore;
+﻿using Ask.DataBase.Engine.Static.Devices;
 
 namespace TestConsole
 {

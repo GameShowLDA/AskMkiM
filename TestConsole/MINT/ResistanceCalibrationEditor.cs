@@ -1,6 +1,4 @@
 ﻿using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
-using Ask.Core.Shared.Entity.Devices;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Base.DeviceResponses;

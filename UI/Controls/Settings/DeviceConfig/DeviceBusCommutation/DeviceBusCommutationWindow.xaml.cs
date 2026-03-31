@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
-using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static.Devices;

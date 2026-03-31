@@ -5,8 +5,6 @@ using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
-using Ask.Core.Shared.Entity.Devices;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 
 namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 {
@@ -80,7 +78,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
           SwitchingDeviceControl.ClearItems();
           break;
 
-        case UninterruptiblePowerSupplyEntity uninterruptiblePowerSupply:
+        case UninterruptiblePowerSupplyDto uninterruptiblePowerSupply:
           UninterruptiblePowerSupplyControl.ClearItems();
           break;
 

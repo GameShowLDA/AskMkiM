@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.Entity.Devices;
 using Ask.DataBase.Engine.Static.Devices;
 using DataBaseConfiguration;
 

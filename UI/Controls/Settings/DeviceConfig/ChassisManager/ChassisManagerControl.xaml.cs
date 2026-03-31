@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.Rack;
-using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using System.Collections.ObjectModel;
 using System.Windows;
