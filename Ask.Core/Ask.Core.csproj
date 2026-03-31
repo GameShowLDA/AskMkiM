@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Shared\Entity\Devices\" />
     <Folder Include="Shared\Entity\MeasurementError\" />
     <Folder Include="Shared\Interfaces\DeviceInterfaces\Rack\Capabilities\" />
   </ItemGroup>

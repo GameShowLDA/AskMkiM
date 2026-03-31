@@ -1,14 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Base;
-using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
 
