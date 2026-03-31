@@ -109,26 +109,31 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       if (ne.Scheme.GroupModels.Count > 0)
       {
         yield return "\t\tСписок проверяемых точек:";
-        if (ne.ElementEnablingType.Count > 0)
+        var j = 1;
+
+        for (int i = 0; i < ne.Scheme.GroupModels.Count; i++)
         {
-          var j = 1;
-          for (int i = 0; i < ne.Scheme.GroupModels.Count; i++)
+          var groupChains = ne.Scheme.GetPointsConnected(ne.Scheme.GroupModels[i]);
+          if (groupChains == null)
           {
-            var groupChains = ne.Scheme.GetPointsConnected(ne.Scheme.GroupModels[i]);
-            if (groupChains != null)
+            continue;
+          }
+
+          foreach (var chains in groupChains.ChainModels)
+          {
+            var enabling = ne.ElementEnablingType
+                .FirstOrDefault(item => ReferenceEquals(item.Item1, chains));
+
+            string str = string.Empty;
+            str += $"\t\t\t{j}. *{ne.ElementEnablingType[j - 1].Item2.GetDescription()}";
+            j++;
+
+            foreach (var point in chains.PointModels)
             {
-              foreach (var chains in groupChains.ChainModels)
-              {
-                string str = string.Empty;
-                str += $"\t\t\t{j}. *{ne.ElementEnablingType[j - 1].Item2.GetDescription()}";
-                j++;
-                foreach (var point in chains.PointModels)
-                {
-                  str += $"{point.Mnemonic}[{point}],";
-                }
-                yield return str.Remove(str.Length - 1);
-              }
+              str += $"{point.Mnemonic}[{point}],";
             }
+
+            yield return str.Remove(str.Length - 1);
           }
         }
       }
