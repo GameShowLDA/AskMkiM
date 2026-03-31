@@ -263,7 +263,7 @@ namespace UI.Controls.Settings
           })
           .ToList(),
 
-        RelaySwitchModules = db.RelaySwitchModules
+        RelaySwitchModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult()
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
           .Select(device => new RelaySwitchModuleDto
@@ -272,7 +272,6 @@ namespace UI.Controls.Settings
             Description = device.Description,
             Number = device.Number,
             NumberChassis = device.NumberChassis,
-            NumberRack = device.NumberRack,
             PointCount = device.PointCount,
             ConnectionDetails = device.ConnectionDetails,
             DeviceClass = device.DeviceClass,
@@ -453,7 +452,7 @@ namespace UI.Controls.Settings
 
       FastMeters.DeleteAllAsync().GetAwaiter();
       PowerSourceModules.DeleteAllAsync().GetAwaiter();
-      db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
+      RelaySwitchModules.DeleteAllAsync().GetAwaiter();
       db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
       BreakdownTesters.DeleteAllAsync().GetAwaiter();
       Racks.DeleteAllAsync().GetAwaiter();
