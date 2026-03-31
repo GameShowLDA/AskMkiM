@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -85,6 +86,17 @@ public static class UninterruptiblePowerSupplies
   /// </returns>
   public static Task<IUninterruptiblePowerSupply> CreateAsync(IUninterruptiblePowerSupply device, CancellationToken cancellationToken = default) =>
     DeviceRuntime.CreateAsync(device, cancellationToken);
+
+  /// <summary>
+  /// Создаёт набор источников бесперебойного питания.
+  /// </summary>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<IUninterruptiblePowerSupply>> CreateRangeAsync(IEnumerable<IUninterruptiblePowerSupply> devices, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
 
   /// <summary>
   /// Обновляет существующий источник бесперебойного питания.

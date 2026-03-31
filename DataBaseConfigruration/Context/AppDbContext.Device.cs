@@ -27,11 +27,6 @@ namespace DataBaseConfiguration.Context
     public DbSet<FastMeterEntity> FastMeters { get; set; }
 
     /// <summary>
-    /// Таблица пробойных установок.
-    /// </summary>
-    public DbSet<BreakdownTesterEntity> BreakdownTesters { get; set; }
-
-    /// <summary>
     /// Таблица бесперебойников.
     /// </summary>
     public DbSet<UninterruptiblePowerSupplyEntity> UninterruptiblePowerSupplies { get; set; }

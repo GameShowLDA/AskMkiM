@@ -16,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
   public partial class DeviceBusCommutationWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private SwitchingDeviceEntity? _editingEntity;
+    private SwitchingDeviceDto? _editingDto;
 
     /// <summary>
     /// Событие запроса закрытия окна.
@@ -62,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, SwitchingDeviceEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, SwitchingDeviceDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Устройство коммутации шин";
       deviceSettingsWindow.LoadDeviceModels<ISwitchingDevice>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -89,14 +89,14 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
           {
             var switching = SwitchingDevices.Build(deviceDto);
 
-            if (_editingEntity == null)
+            if (_editingDto == null)
             {
               var createdDevice = SwitchingDevices.CreateAsync(switching).GetAwaiter().GetResult();
               deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceDto.Id = _editingEntity.Id;
+              deviceDto.Id = _editingDto.Id;
               SwitchingDevices.UpdateAsync(switching).GetAwaiter().GetResult();
             }
 

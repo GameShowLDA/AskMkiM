@@ -1,6 +1,11 @@
-﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
+﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.DTO.Devices.Rack;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -156,7 +161,7 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterEntity entity)
+    private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterDto entity)
     {
       BreakDownWindow window = new BreakDownWindow();
       window.SetSettings(this, system, entity);
@@ -164,7 +169,7 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceEntity entity)
+    private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceDto entity)
     {
       DeviceBusCommutationWindow window = new DeviceBusCommutationWindow();
       window.SetSettings(this, system, entity);
@@ -172,7 +177,7 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleEntity entity)
+    private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleDto entity)
     {
       ModuleVoltageCurrentSourceWindow window = new ModuleVoltageCurrentSourceWindow();
       window.SetSettings(this, system, entity);
@@ -180,7 +185,7 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleEntity entity)
+    private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleDto entity)
     {
       ModuleRelayControlWindow window = new ModuleRelayControlWindow();
       window.SetSettings(this, system, entity);
@@ -188,7 +193,7 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterEntity entity)
+    private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterDto entity)
     {
       FastMeterWindow window = new FastMeterWindow();
       window.SetSettings(this, system, entity);
@@ -204,7 +209,7 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Добавление устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyEntity entity)
+    private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyDto entity)
     {
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(this, system, entity);
@@ -239,7 +244,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadBreakdownTesters(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
-      devicesControl.ClearDevice(new BreakdownTesterEntity());
+      devicesControl.ClearDevice(new BreakdownTesterDto());
 
       var breakdownTesters = BreakdownTesters
         .GetDevicesByNumberChassisAsync(chassis.Number)
@@ -260,7 +265,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadFastMeters(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
-      devicesControl.ClearDevice(new FastMeterEntity());
+      devicesControl.ClearDevice(new FastMeterDto());
       var fastMeters = FastMeters
         .GetDevicesByNumberChassisAsync(chassis.Number)
         .GetAwaiter()
@@ -280,7 +285,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadPowerSources(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
-      devicesControl.ClearDevice(new PowerSourceModuleEntity());
+      devicesControl.ClearDevice(new PowerSourceModuleDto());
 
       var powerSources = PowerSourceModules
         .GetDevicesByNumberChassisAsync(chassis.Number)
@@ -301,7 +306,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadRelaySwitchModules(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
-      devicesControl.ClearDevice(new RelaySwitchModuleEntity());
+      devicesControl.ClearDevice(new RelaySwitchModuleDto());
 
       var relaySwitchModules = RelaySwitchModules
         .GetDevicesByNumberChassisAsync(chassis.Number)
@@ -322,7 +327,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
     private void LoadSwitchingDevices(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
-      devicesControl.ClearDevice(new SwitchingDeviceEntity());
+      devicesControl.ClearDevice(new SwitchingDeviceDto());
 
       var switchingDevices = SwitchingDevices
         .GetDevicesByNumberChassisAsync(chassis.Number)
@@ -341,7 +346,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private void LoadUninterruptiblePowerSupplies(IChassisManager chassis, DeviceManagerControl devicesControl)
     {
-      devicesControl.ClearDevice(new UninterruptiblePowerSupplyEntity());
+      devicesControl.ClearDevice(new UninterruptiblePowerSupplyDto());
 
       var uninterruptiblePowerSupplies = UninterruptiblePowerSupplies
         .GetDevicesByNumberChassisAsync(chassis.Number)
@@ -496,113 +501,16 @@ namespace UI.Controls.Settings.DeviceConfig
       await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
 
-    private static SwitchingDeviceEntity ToSwitchingDeviceEntity(ISwitchingDevice device)
-    {
-      return new SwitchingDeviceEntity
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-      };
-    }
+    private static SwitchingDeviceDto ToSwitchingDeviceEntity(ISwitchingDevice device) => device.Convert();
 
-    private static RelaySwitchModuleEntity ToRelaySwitchModuleEntity(IRelaySwitchModule device)
-    {
-      return new RelaySwitchModuleEntity
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        PointCount = device.PointCount,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-        SwitchResistance = device.SwitchResistance,
-        SwitchCapacitance = device.SwitchCapacitance,
-        BusType = device.BusType,
-      };
-    }
+    private static RelaySwitchModuleDto ToRelaySwitchModuleEntity(IRelaySwitchModule device) => device.Convert();
 
-    private static FastMeterEntity ToFastMeterEntity(IFastMeter device)
-    {
-      return new FastMeterEntity
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-        MaxContinuityResistance = device.MaxContinuityResistance,
-        TypeMode = device.TypeMode,
-      };
-    }
+    private static FastMeterDto ToFastMeterEntity(IFastMeter device) => device.Convert();
 
-    private static RackDto ToRackEntity(IRack device)
-    {
-      return new RackDto
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-      };
-    }
+    private static RackDto ToRackEntity(IRack device) => device.Convert();
+    private static PowerSourceModuleDto ToPowerSourceModuleEntity(IPowerSourceModule device) => device.Convert();
 
-    private static PowerSourceModuleEntity ToPowerSourceModuleEntity(IPowerSourceModule device)
-    {
-      return new PowerSourceModuleEntity
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-        ResistanceCalibrationJson = device.ResistanceCalibrationJson,
-      };
-    }
-
-    private static UninterruptiblePowerSupplyEntity ToUninterruptiblePowerSupplyEntity(IUninterruptiblePowerSupply device)
-    {
-      return new UninterruptiblePowerSupplyEntity
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-        LastResolvedDevicePath = device.LastResolvedDevicePath,
-      };
-    }
-
-    private static BreakdownTesterEntity ToBreakdownEntity(IBreakdownTester device)
-    {
-      return new BreakdownTesterEntity
-      {
-        Id = device.Id,
-        Name = device.Name,
-        Description = device.Description,
-        Number = device.Number,
-        NumberChassis = device.NumberChassis,
-        ConnectionDetails = device.ConnectionDetails,
-        DeviceClass = device.DeviceClass,
-        PiMaxVoltage = device.PiMaxVoltage,
-        SiMaxVoltage = device.SiMaxVoltage,
-        IRMinVoltage = device.IRMinVoltage,
-      };
-    }
+    private static UninterruptiblePowerSupplyDto ToUninterruptiblePowerSupplyEntity(IUninterruptiblePowerSupply device) => device.Convert();
+    private static BreakdownTesterDto ToBreakdownEntity(IBreakdownTester device) => device.Convert();
   }
 }

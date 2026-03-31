@@ -1,8 +1,13 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.DTO.Devices.Rack;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -261,7 +266,7 @@ namespace UI.Controls.Settings
         RelaySwitchModules = db.RelaySwitchModules
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
-          .Select(device => new RelaySwitchModuleConfigurationItem
+          .Select(device => new RelaySwitchModuleDto
           {
             Name = device.Name,
             Description = device.Description,
@@ -280,7 +285,7 @@ namespace UI.Controls.Settings
         SwitchingDevices = db.SwitchingDevices
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
-          .Select(device => new SwitchingDeviceConfigurationItem
+          .Select(device => new SwitchingDeviceDto
           {
             Name = device.Name,
             Description = device.Description,
@@ -294,7 +299,7 @@ namespace UI.Controls.Settings
         PowerSourceModules = db.PowerSourceModules
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
-          .Select(device => new PowerSourceModuleConfigurationItem
+          .Select(device => new PowerSourceModuleDto
           {
             Name = device.Name,
             Description = device.Description,
@@ -309,7 +314,7 @@ namespace UI.Controls.Settings
         FastMeters = db.FastMeters
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
-          .Select(device => new FastMeterConfigurationItem
+          .Select(device => new FastMeterDto
           {
             Name = device.Name,
             Description = device.Description,
@@ -321,10 +326,10 @@ namespace UI.Controls.Settings
           })
           .ToList(),
 
-        BreakdownTesters = db.BreakdownTesters
+        BreakdownTesters = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult()
           .OrderBy(device => device.NumberChassis)
           .ThenBy(device => device.Number)
-          .Select(device => new BreakdownTesterConfigurationItem
+          .Select(device => new BreakdownTesterDto
           {
             Name = device.Name,
             Description = device.Description,
@@ -345,13 +350,13 @@ namespace UI.Controls.Settings
       var model = JsonSerializer.Deserialize<DeviceConfigurationFileModel>(json, ImportJsonOptions)
         ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
 
-      model.Chassis ??= new List<ChassisManagerDto>();
-      model.Racks ??= new List<RackDto>();
-      model.RelaySwitchModules ??= new List<RelaySwitchModuleConfigurationItem>();
-      model.SwitchingDevices ??= new List<SwitchingDeviceConfigurationItem>();
-      model.PowerSourceModules ??= new List<PowerSourceModuleConfigurationItem>();
-      model.FastMeters ??= new List<FastMeterConfigurationItem>();
-      model.BreakdownTesters ??= new List<BreakdownTesterConfigurationItem>();
+      model.Chassis ??= [];
+      model.Racks ??= [];
+      model.RelaySwitchModules ??= [];
+      model.SwitchingDevices ??= [];
+      model.PowerSourceModules ??= [];
+      model.FastMeters ??= [];
+      model.BreakdownTesters ??= [];
 
       return model;
     }
@@ -446,11 +451,11 @@ namespace UI.Controls.Settings
       using var db = DataBaseConfig.Context;
       using var transaction = db.Database.BeginTransaction();
 
-      db.BreakdownTesters.RemoveRange(db.BreakdownTesters);
       db.FastMeters.RemoveRange(db.FastMeters);
       db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
       db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
       db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
+      BreakdownTesters.DeleteAllAsync().GetAwaiter().GetResult();
       Racks.DeleteAllAsync().GetAwaiter().GetResult();
       ChassisManagers.DeleteAllAsync().GetAwaiter().GetResult();
       db.SaveChanges();
@@ -458,12 +463,11 @@ namespace UI.Controls.Settings
 
       Racks.CreateRangeAsync(model.Racks.Select(ToEntity));
       ChassisManagers.CreateRangeAsync(model.Chassis.Select(ToEntity));
-
-      db.RelaySwitchModules.AddRange(model.RelaySwitchModules.Select(ToEntity));
-      db.SwitchingDevices.AddRange(model.SwitchingDevices.Select(ToEntity));
-      db.PowerSourceModules.AddRange(model.PowerSourceModules.Select(ToEntity));
-      db.FastMeters.AddRange(model.FastMeters.Select(ToEntity));
-      db.BreakdownTesters.AddRange(model.BreakdownTesters.Select(ToEntity));
+      BreakdownTesters.CreateRangeAsync(model.BreakdownTesters.Select(ToEntity));
+      RelaySwitchModules.CreateRangeAsync(model.RelaySwitchModules.Select(ToEntity));
+      SwitchingDevices.CreateRangeAsync(model.SwitchingDevices.Select(ToEntity));
+      PowerSourceModules.CreateRangeAsync(model.PowerSourceModules.Select(ToEntity));
+      FastMeters.CreateRangeAsync(model.FastMeters.Select(ToEntity));
       db.SaveChanges();
 
       transaction.Commit();
@@ -475,93 +479,15 @@ namespace UI.Controls.Settings
       DeviceRuntime.ClearCache();
     }
 
-    private static string NormalizeRequired(string? value)
-    {
-      return value?.Trim() ?? string.Empty;
-    }
-
-    private static string? NormalizeOptional(string? value)
-    {
-      return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-    }
-
     private static IChassisManager ToEntity(ChassisManagerDto item) => ChassisManagers.Build(item);
     private static IRack ToEntity(RackDto item) => Racks.Build(item);
+    private static IRelaySwitchModule ToEntity(RelaySwitchModuleDto item) => RelaySwitchModules.Build(item);
 
-    private static RelaySwitchModuleEntity ToEntity(RelaySwitchModuleConfigurationItem item)
-    {
-      return new RelaySwitchModuleEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        NumberChassis = item.NumberChassis,
-        NumberRack = item.NumberRack,
-        PointCount = item.PointCount,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-        SwitchResistance = item.SwitchResistance,
-        SwitchCapacitance = item.SwitchCapacitance,
-        BusType = item.BusType,
-      };
-    }
 
-    private static SwitchingDeviceEntity ToEntity(SwitchingDeviceConfigurationItem item)
-    {
-      return new SwitchingDeviceEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        NumberChassis = item.NumberChassis,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-      };
-    }
-
-    private static PowerSourceModuleEntity ToEntity(PowerSourceModuleConfigurationItem item)
-    {
-      return new PowerSourceModuleEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        NumberChassis = item.NumberChassis,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-        ResistanceCalibrationJson = NormalizeOptional(item.ResistanceCalibrationJson),
-      };
-    }
-
-    private static FastMeterEntity ToEntity(FastMeterConfigurationItem item)
-    {
-      return new FastMeterEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        NumberChassis = item.NumberChassis,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-        MaxContinuityResistance = item.MaxContinuityResistance,
-      };
-    }
-
-    private static BreakdownTesterEntity ToEntity(BreakdownTesterConfigurationItem item)
-    {
-      return new BreakdownTesterEntity
-      {
-        Name = NormalizeRequired(item.Name),
-        Description = NormalizeRequired(item.Description),
-        Number = item.Number,
-        NumberChassis = item.NumberChassis,
-        ConnectionDetails = NormalizeRequired(item.ConnectionDetails),
-        DeviceClass = NormalizeRequired(item.DeviceClass),
-        PiMaxVoltage = item.PiMaxVoltage,
-        SiMaxVoltage = item.SiMaxVoltage,
-        IRMinVoltage = item.IRMinVoltage,
-      };
-    }
+    private static ISwitchingDevice ToEntity(SwitchingDeviceDto item) => SwitchingDevices.Build(item);
+    private static IPowerSourceModule ToEntity(PowerSourceModuleDto item) => PowerSourceModules.Build(item);
+    private static IFastMeter ToEntity(FastMeterDto item) => FastMeters.Build(item);
+    private static IBreakdownTester ToEntity(BreakdownTesterDto item) => BreakdownTesters.Build(item);
 
     private static string BuildPrintableConfiguration(
       IReadOnlyCollection<IChassisManager> chassisList,
@@ -857,109 +783,15 @@ namespace UI.Controls.Settings
 
       public List<RackDto> Racks { get; set; } = new();
 
-      public List<RelaySwitchModuleConfigurationItem> RelaySwitchModules { get; set; } = new();
+      public List<RelaySwitchModuleDto> RelaySwitchModules { get; set; } = new();
 
-      public List<SwitchingDeviceConfigurationItem> SwitchingDevices { get; set; } = new();
+      public List<SwitchingDeviceDto> SwitchingDevices { get; set; } = new();
 
-      public List<PowerSourceModuleConfigurationItem> PowerSourceModules { get; set; } = new();
+      public List<PowerSourceModuleDto> PowerSourceModules { get; set; } = new();
 
-      public List<FastMeterConfigurationItem> FastMeters { get; set; } = new();
+      public List<FastMeterDto> FastMeters { get; set; } = new();
 
-      public List<BreakdownTesterConfigurationItem> BreakdownTesters { get; set; } = new();
-    }
-    private sealed class RelaySwitchModuleConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public int NumberChassis { get; set; }
-
-      public int NumberRack { get; set; }
-
-      public int PointCount { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
-
-      public double SwitchResistance { get; set; }
-
-      public double SwitchCapacitance { get; set; }
-
-      public SwitchingBusNew BusType { get; set; }
-    }
-
-    private sealed class SwitchingDeviceConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public int NumberChassis { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
-    }
-
-    private sealed class PowerSourceModuleConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public int NumberChassis { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
-
-      public string? ResistanceCalibrationJson { get; set; }
-    }
-
-    private sealed class FastMeterConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public int NumberChassis { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
-
-      public int MaxContinuityResistance { get; set; }
-    }
-
-    private sealed class BreakdownTesterConfigurationItem
-    {
-      public string? Name { get; set; }
-
-      public string? Description { get; set; }
-
-      public int Number { get; set; }
-
-      public int NumberChassis { get; set; }
-
-      public string? ConnectionDetails { get; set; }
-
-      public string? DeviceClass { get; set; }
-
-      public int PiMaxVoltage { get; set; }
-
-      public int SiMaxVoltage { get; set; }
-
-      public int IRMinVoltage { get; set; }
+      public List<BreakdownTesterDto> BreakdownTesters { get; set; } = new();
     }
   }
 }

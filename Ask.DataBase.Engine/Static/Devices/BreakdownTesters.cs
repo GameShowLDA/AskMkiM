@@ -1,6 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 
 namespace Ask.DataBase.Engine.Static.Devices;
 
@@ -81,6 +82,17 @@ public static class BreakdownTesters
   /// </returns>
   public static Task<IBreakdownTester> CreateAsync(IBreakdownTester device, CancellationToken cancellationToken = default) =>
     DeviceRuntime.CreateAsync(device, cancellationToken);
+
+  /// <summary>
+  /// Создаёт набор пробойных установок.
+  /// </summary>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<IBreakdownTester>> CreateRangeAsync(IEnumerable<IBreakdownTester> devices, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
 
   /// <summary>
   /// Обновляет существующую пробойную установку.

@@ -16,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
   public partial class ModuleVoltageCurrentSourceWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private PowerSourceModuleEntity? _editingEntity;
+    private PowerSourceModuleDto? _editingDto;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -62,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, PowerSourceModuleEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, PowerSourceModuleDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "МИНТ";
       deviceSettingsWindow.LoadDeviceModels<IPowerSourceModule>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -88,13 +88,13 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
           var powerSourceModule = PowerSourceModules.Build(deviceDto);
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto == null)
             {
               PowerSourceModules.CreateAsync(powerSourceModule).GetAwaiter().GetResult();
             }
             else
             {
-              deviceDto.Id = _editingEntity.Id;
+              deviceDto.Id = _editingDto.Id;
               PowerSourceModules.UpdateAsync(powerSourceModule).GetAwaiter().GetResult();
             }
 

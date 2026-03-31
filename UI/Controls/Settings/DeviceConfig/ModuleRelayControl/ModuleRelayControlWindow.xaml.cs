@@ -17,7 +17,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private RelaySwitchModuleEntity? _editingEntity;
+    private RelaySwitchModuleDto? _editingDto;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -63,9 +63,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "МКР";
       deviceSettingsWindow.LoadDeviceModels<IRelaySwitchModule>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -94,14 +94,14 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           {
             var relaySwitchModule = RelaySwitchModules.Build(deviceEntity);
 
-            if (_editingEntity == null)
+            if (_editingDto == null)
             {
               var createdDevice = RelaySwitchModules.CreateAsync(relaySwitchModule).GetAwaiter().GetResult();
               deviceEntity.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
+              deviceEntity.Id = _editingDto.Id;
               RelaySwitchModules.UpdateAsync(relaySwitchModule).GetAwaiter().GetResult();
             }
 

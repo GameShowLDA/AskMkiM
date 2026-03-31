@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 
 namespace Ask.DataBase.Engine.Static.Devices;
@@ -56,6 +57,17 @@ public static class RelaySwitchModules
   /// </summary>
   public static Task<IRelaySwitchModule> CreateAsync(IRelaySwitchModule device, CancellationToken cancellationToken = default) =>
     DeviceRuntime.CreateAsync(device, cancellationToken);
+
+  /// <summary>
+  /// Создаёт набор модулейкоммутации реле.
+  /// </summary>
+  /// <param name="devices">Коллекция устройств для создания.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>
+  /// Список созданных runtime-объектов устройств с актуальными данными.
+  /// </returns>
+  public static Task<List<IRelaySwitchModule>> CreateRangeAsync(IEnumerable<IRelaySwitchModule> devices, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
 
   /// <summary>
   /// Обновляет существующий модуль коммутации реле.
