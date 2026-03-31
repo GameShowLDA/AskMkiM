@@ -1,40 +1,14 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.DTO.Devices.Breakdown;
-using Ask.Core.Shared.DTO.Devices.ChassisManager;
-using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
-using Ask.Core.Shared.DTO.Devices.Rack;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using Ask.DataBase.Engine.Static;
-using Ask.DataBase.Engine.Static.Devices;
-using Ask.DataBase.Provider.Context;
-using Ask.Device.Communication.Com.Configuration;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Microsoft.Win32;
-using System.Globalization;
-using System.IO;
-using System.IO.Ports;
-using System.Net;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
+using UI.Controls.Settings.Configuration;
 
 namespace UI.Controls.Settings
 {
@@ -43,8 +17,6 @@ namespace UI.Controls.Settings
   /// </summary>
   public partial class SettingsProgrammControl : UserControl
   {
-    private static readonly JsonSerializerOptions ExportJsonOptions = CreateJsonOptions(writeIndented: true);
-    private static readonly JsonSerializerOptions ImportJsonOptions = CreateJsonOptions(writeIndented: false);
     private readonly Action<SystemStateEvents.AdminRightsChanged> _adminRightsChangedHandler;
     private bool _isAdminRightsSubscribed;
 
@@ -100,22 +72,12 @@ namespace UI.Controls.Settings
       ImportConfigButton.Visibility = visibility;
     }
 
-    private void PrintConfig(object sender, MouseButtonEventArgs e)
+    private async void PrintConfig(object sender, MouseButtonEventArgs e)
     {
       try
       {
-        var chassisList = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().OrderBy(chassis => chassis.Number)
-          .ToList();
-
-        string printableText = BuildPrintableConfiguration(
-          chassisList,
-          numberChassis => FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
-          numberChassis => BreakdownTesters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
-          numberChassis => PowerSourceModules.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
-          numberChassis => RelaySwitchModules.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult(),
-          numberChassis => SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult());
-
-        PrintText(printableText);
+        string printableText = await DeviceConfigurationPrintService.BuildPrintableConfigurationAsync();
+        DeviceConfigurationPrintService.Print(printableText);
       }
       catch (Exception ex)
       {
@@ -124,7 +86,7 @@ namespace UI.Controls.Settings
       }
     }
 
-    private void ExportConfig(object sender, MouseButtonEventArgs e)
+    private async void ExportConfig(object sender, MouseButtonEventArgs e)
     {
       try
       {
@@ -143,9 +105,7 @@ namespace UI.Controls.Settings
           return;
         }
 
-        var configuration = BuildConfigurationFile();
-        string json = JsonSerializer.Serialize(configuration, ExportJsonOptions);
-        File.WriteAllText(saveDialog.FileName, json, Encoding.UTF8);
+        await DeviceConfigurationService.ExportToFileAsync(saveDialog.FileName);
 
         NotificationHostService.Instance.Show(
           "Экспорт конфигурации",
@@ -161,7 +121,7 @@ namespace UI.Controls.Settings
       }
     }
 
-    private void ImportConfig(object sender, MouseButtonEventArgs e)
+    private async void ImportConfig(object sender, MouseButtonEventArgs e)
     {
       try
       {
@@ -190,10 +150,7 @@ namespace UI.Controls.Settings
           return;
         }
 
-        string json = File.ReadAllText(openDialog.FileName, Encoding.UTF8);
-        var configuration = ParseConfigurationFile(json);
-        ValidateImportedConfiguration(configuration);
-        ApplyConfigurationFile(configuration);
+        await DeviceConfigurationService.ImportFromFileAsync(openDialog.FileName);
 
         DeviceConfigManager?.ReloadConfiguration();
 
@@ -209,570 +166,6 @@ namespace UI.Controls.Settings
           ex.Message,
           NotificationType.Error);
       }
-    }
-
-    private static JsonSerializerOptions CreateJsonOptions(bool writeIndented)
-    {
-      var options = new JsonSerializerOptions
-      {
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = writeIndented
-      };
-
-      options.Converters.Add(new JsonStringEnumConverter());
-      return options;
-    }
-
-    private static DeviceConfigurationFileModel BuildConfigurationFile()
-    {
-      return new DeviceConfigurationFileModel
-      {
-        Version = 1,
-        ExportedAtUtc = DateTime.UtcNow,
-        Chassis = ChassisManagers.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(chassis => chassis.Number)
-          .Select(chassis => new ChassisManagerDto
-          {
-            Name = chassis.Name,
-            Description = chassis.Description,
-            Number = chassis.Number,
-            ConnectionDetails = chassis.ConnectionDetails,
-            DeviceClass = chassis.DeviceClass,
-            BusType = chassis.BusType,
-          })
-          .ToList(),
-
-        Racks = Racks.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(rack => rack.NumberChassis)
-          .ThenBy(rack => rack.Number)
-          .Select(rack => new RackDto
-          {
-            Name = rack.Name,
-            Description = rack.Description,
-            Number = rack.Number,
-            NumberChassis = rack.NumberChassis,
-            ConnectionDetails = rack.ConnectionDetails,
-            DeviceClass = rack.DeviceClass,
-          })
-          .ToList(),
-
-        RelaySwitchModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(device => device.NumberChassis)
-          .ThenBy(device => device.Number)
-          .Select(device => new RelaySwitchModuleDto
-          {
-            Name = device.Name,
-            Description = device.Description,
-            Number = device.Number,
-            NumberChassis = device.NumberChassis,
-            PointCount = device.PointCount,
-            ConnectionDetails = device.ConnectionDetails,
-            DeviceClass = device.DeviceClass,
-            SwitchResistance = device.SwitchResistance,
-            SwitchCapacitance = device.SwitchCapacitance,
-            BusType = device.BusType,
-          })
-          .ToList(),
-
-        SwitchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(device => device.NumberChassis)
-          .ThenBy(device => device.Number)
-          .Select(device => new SwitchingDeviceDto
-          {
-            Name = device.Name,
-            Description = device.Description,
-            Number = device.Number,
-            NumberChassis = device.NumberChassis,
-            ConnectionDetails = device.ConnectionDetails,
-            DeviceClass = device.DeviceClass,
-          })
-          .ToList(),
-
-        PowerSourceModules = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(device => device.NumberChassis)
-          .ThenBy(device => device.Number)
-          .Select(device => new PowerSourceModuleDto
-          {
-            Name = device.Name,
-            Description = device.Description,
-            Number = device.Number,
-            NumberChassis = device.NumberChassis,
-            ConnectionDetails = device.ConnectionDetails,
-            DeviceClass = device.DeviceClass,
-            ResistanceCalibrationJson = device.ResistanceCalibrationJson,
-          })
-          .ToList(),
-
-        FastMeters = FastMeters.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(device => device.NumberChassis)
-          .ThenBy(device => device.Number)
-          .Select(device => new FastMeterDto
-          {
-            Name = device.Name,
-            Description = device.Description,
-            Number = device.Number,
-            NumberChassis = device.NumberChassis,
-            ConnectionDetails = device.ConnectionDetails,
-            DeviceClass = device.DeviceClass,
-            MaxContinuityResistance = device.MaxContinuityResistance,
-          })
-          .ToList(),
-
-        BreakdownTesters = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult()
-          .OrderBy(device => device.NumberChassis)
-          .ThenBy(device => device.Number)
-          .Select(device => new BreakdownTesterDto
-          {
-            Name = device.Name,
-            Description = device.Description,
-            Number = device.Number,
-            NumberChassis = device.NumberChassis,
-            ConnectionDetails = device.ConnectionDetails,
-            DeviceClass = device.DeviceClass,
-            PiMaxVoltage = device.PiMaxVoltage,
-            SiMaxVoltage = device.SiMaxVoltage,
-            IRMinVoltage = device.IRMinVoltage,
-          })
-          .ToList(),
-      };
-    }
-
-    private static DeviceConfigurationFileModel ParseConfigurationFile(string json)
-    {
-      var model = JsonSerializer.Deserialize<DeviceConfigurationFileModel>(json, ImportJsonOptions)
-        ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
-
-      model.Chassis ??= [];
-      model.Racks ??= [];
-      model.RelaySwitchModules ??= [];
-      model.SwitchingDevices ??= [];
-      model.PowerSourceModules ??= [];
-      model.FastMeters ??= [];
-      model.BreakdownTesters ??= [];
-
-      return model;
-    }
-
-    private static void ValidateImportedConfiguration(DeviceConfigurationFileModel model)
-    {
-      EnsureNoDuplicates(model.Chassis, chassis => chassis.Number.ToString(CultureInfo.InvariantCulture), "шасси");
-      EnsureNoDuplicates(model.Racks, rack => $"{rack.NumberChassis}:{rack.Number}", "стойки");
-      EnsureNoDuplicates(model.RelaySwitchModules, device => $"{device.NumberChassis}:{device.Number}", "модули коммутации реле");
-      EnsureNoDuplicates(model.SwitchingDevices, device => $"{device.NumberChassis}:{device.Number}", "устройства коммутации шин");
-      EnsureNoDuplicates(model.PowerSourceModules, device => $"{device.NumberChassis}:{device.Number}", "модули источника питания");
-      EnsureNoDuplicates(model.FastMeters, device => $"{device.NumberChassis}:{device.Number}", "быстрые измерители");
-      EnsureNoDuplicates(model.BreakdownTesters, device => $"{device.NumberChassis}:{device.Number}", "пробойные установки");
-
-      EnsureDeviceClassSet(model.Chassis, item => item.DeviceClass, "шасси");
-      EnsureDeviceClassSet(model.Racks, item => item.DeviceClass, "стойки");
-      EnsureDeviceClassSet(model.RelaySwitchModules, item => item.DeviceClass, "модули коммутации реле");
-      EnsureDeviceClassSet(model.SwitchingDevices, item => item.DeviceClass, "устройства коммутации шин");
-      EnsureDeviceClassSet(model.PowerSourceModules, item => item.DeviceClass, "модули источника питания");
-      EnsureDeviceClassSet(model.FastMeters, item => item.DeviceClass, "быстрые измерители");
-      EnsureDeviceClassSet(model.BreakdownTesters, item => item.DeviceClass, "пробойные установки");
-
-      var chassisNumbers = model.Chassis
-        .Select(chassis => chassis.Number)
-        .ToHashSet();
-
-      bool hasLinkedDevices =
-        model.Racks.Count > 0 ||
-        model.RelaySwitchModules.Count > 0 ||
-        model.SwitchingDevices.Count > 0 ||
-        model.PowerSourceModules.Count > 0 ||
-        model.FastMeters.Count > 0 ||
-        model.BreakdownTesters.Count > 0;
-
-      if (chassisNumbers.Count == 0)
-      {
-        if (hasLinkedDevices)
-        {
-          throw new InvalidDataException("В JSON есть устройства, но отсутствуют шасси.");
-        }
-
-        return;
-      }
-
-      ValidateLinkedDevices(model.Racks.Select(rack => rack.NumberChassis), chassisNumbers, "стойки");
-      ValidateLinkedDevices(model.RelaySwitchModules.Select(device => device.NumberChassis), chassisNumbers, "модули коммутации реле");
-      ValidateLinkedDevices(model.SwitchingDevices.Select(device => device.NumberChassis), chassisNumbers, "устройства коммутации шин");
-      ValidateLinkedDevices(model.PowerSourceModules.Select(device => device.NumberChassis), chassisNumbers, "модули источника питания");
-      ValidateLinkedDevices(model.FastMeters.Select(device => device.NumberChassis), chassisNumbers, "быстрые измерители");
-      ValidateLinkedDevices(model.BreakdownTesters.Select(device => device.NumberChassis), chassisNumbers, "пробойные установки");
-    }
-
-    private static void EnsureNoDuplicates<T>(IEnumerable<T> items, Func<T, string> keySelector, string sectionName)
-    {
-      var duplicate = items
-        .GroupBy(keySelector)
-        .FirstOrDefault(group => group.Count() > 1);
-
-      if (duplicate != null)
-      {
-        throw new InvalidDataException($"В разделе \"{sectionName}\" найдены дубликаты: {duplicate.Key}.");
-      }
-    }
-
-    private static void EnsureDeviceClassSet<T>(IEnumerable<T> items, Func<T, string?> deviceClassSelector, string sectionName)
-    {
-      if (items.Any(item => string.IsNullOrWhiteSpace(deviceClassSelector(item))))
-      {
-        throw new InvalidDataException($"В разделе \"{sectionName}\" поле DeviceClass обязательно для всех записей.");
-      }
-    }
-
-    private static void ValidateLinkedDevices(IEnumerable<int> linkedChassisNumbers, ISet<int> availableChassis, string sectionName)
-    {
-      var unknownChassis = linkedChassisNumbers
-        .Where(number => !availableChassis.Contains(number))
-        .Distinct()
-        .OrderBy(number => number)
-        .ToList();
-
-      if (unknownChassis.Count == 0)
-      {
-        return;
-      }
-
-      throw new InvalidDataException(
-        $"В разделе \"{sectionName}\" есть привязка к несуществующим шасси: {string.Join(", ", unknownChassis)}.");
-    }
-
-    private static void ApplyConfigurationFile(DeviceConfigurationFileModel model)
-    {
-      using var db = new AppDbContext();
-      using var transaction = db.Database.BeginTransaction();
-
-      db.FastMeters.RemoveRange(db.FastMeters);
-      db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
-      db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
-      db.SwitchingDevices.RemoveRange(db.SwitchingDevices);
-      db.BreakdownTesters.RemoveRange(db.BreakdownTesters);
-      db.Rack.RemoveRange(db.Rack);
-      db.ChassisManagers.RemoveRange(db.ChassisManagers);
-      db.SaveChanges();
-
-      db.Rack.AddRange(model.Racks);
-      db.ChassisManagers.AddRange(model.Chassis);
-      db.BreakdownTesters.AddRange(model.BreakdownTesters);
-      db.RelaySwitchModules.AddRange(model.RelaySwitchModules);
-      db.SwitchingDevices.AddRange(model.SwitchingDevices);
-      db.PowerSourceModules.AddRange(model.PowerSourceModules);
-      db.FastMeters.AddRange(model.FastMeters);
-      db.SaveChanges();
-
-      transaction.Commit();
-      ReloadDeviceCaches();
-    }
-
-    private static void ReloadDeviceCaches()
-    {
-      DeviceRuntime.ClearCache();
-    }
-
-    private static string BuildPrintableConfiguration(
-      IReadOnlyCollection<IChassisManager> chassisList,
-      Func<int, IEnumerable<IFastMeter>> fastMeterService,
-      Func<int, IEnumerable<IBreakdownTester>> breakdownService,
-      Func<int, IEnumerable<IPowerSourceModule>> powerSourceService,
-      Func<int, IEnumerable<IRelaySwitchModule>> getRelaySwitchModules,
-      Func<int, IEnumerable<ISwitchingDevice>> getSwitchingDevices)
-    {
-      if (chassisList.Count == 0)
-      {
-        return "Конфигурация устройств не заполнена.";
-      }
-
-      var sb = new StringBuilder();
-      int chassisIndex = 1;
-
-      foreach (var chassis in chassisList)
-      {
-        if (sb.Length > 0)
-        {
-          sb.AppendLine(new string('=', 70));
-        }
-
-        sb.AppendLine($"Шасси #{chassisIndex}");
-        AppendField(sb, "Модель устройства", chassis.Name, 2);
-        AppendField(sb, "Номер шасси", chassis.Number, 2);
-        AppendConnectionDetails(sb, chassis.ConnectionDetails, 2);
-
-        sb.AppendLine();
-        sb.AppendLine("  Устройства:");
-
-        int devicesPrinted = 0;
-
-        devicesPrinted += AppendDeviceSection(
-          sb,
-          "Модуль коммутации релейный",
-          getRelaySwitchModules(chassis.Number),
-          insertSectionSeparator: devicesPrinted > 0,
-          (builder, device) =>
-          {
-            AppendField(builder, "Тип структурной шины", device.BusType.ToString(), 4);
-            AppendField(builder, "Сопротивление коммутатора, Ом", device.SwitchResistance, 4);
-            AppendField(builder, "Ёмкость коммутатора, нФ", device.SwitchCapacitance, 4);
-          });
-
-        devicesPrinted += AppendDeviceSection(
-          sb,
-          "Устройство коммутации шин",
-          getSwitchingDevices(chassis.Number),
-          insertSectionSeparator: devicesPrinted > 0);
-
-        devicesPrinted += AppendDeviceSection(
-          sb,
-          "Модуль ист. напряжения и тока",
-          powerSourceService(chassis.Number),
-          insertSectionSeparator: devicesPrinted > 0);
-
-        devicesPrinted += AppendDeviceSection(
-          sb,
-          "Измеритель (быстрый)",
-          fastMeterService(chassis.Number),
-          insertSectionSeparator: devicesPrinted > 0);
-
-        devicesPrinted += AppendDeviceSection(
-          sb,
-          "Пробойная установка",
-          breakdownService(chassis.Number),
-          insertSectionSeparator: devicesPrinted > 0);
-
-        if (devicesPrinted == 0)
-        {
-          sb.AppendLine("    Не добавлено ни одного устройства.");
-        }
-
-        chassisIndex++;
-      }
-
-      return sb.ToString().TrimEnd();
-    }
-
-    private static int AppendDeviceSection<TDevice>(
-      StringBuilder sb,
-      string title,
-      IEnumerable<TDevice> devices,
-      bool insertSectionSeparator = false,
-      Action<StringBuilder, TDevice>? appendAdditional = null)
-      where TDevice : class, IDevice
-    {
-      var deviceList = devices
-        .OrderBy(device => device.Number)
-        .ToList();
-
-      if (deviceList.Count == 0)
-      {
-        return 0;
-      }
-
-      if (insertSectionSeparator)
-      {
-        sb.AppendLine();
-      }
-
-      int currentIndex = 1;
-      foreach (var device in deviceList)
-      {
-        string suffix = deviceList.Count > 1 ? $" #{currentIndex}" : string.Empty;
-        sb.AppendLine($"    {title}{suffix}");
-
-        AppendField(sb, "Модель устройства", device.Name, 4);
-        AppendField(sb, "Номер устройства", device.Number, 4);
-        AppendConnectionDetails(sb, device.ConnectionDetails, 4);
-
-        appendAdditional?.Invoke(sb, device);
-
-        currentIndex++;
-        if (currentIndex <= deviceList.Count)
-        {
-          sb.AppendLine();
-        }
-      }
-
-      return deviceList.Count;
-    }
-
-    private static void AppendConnectionDetails(StringBuilder sb, string? connectionDetails, int indent)
-    {
-      if (string.IsNullOrWhiteSpace(connectionDetails))
-      {
-        return;
-      }
-
-      if (TryGetIp(connectionDetails, out var ipAddress))
-      {
-        AppendField(sb, "Тип подключения устройства", "IP", indent);
-        AppendField(sb, "IP Address", ipAddress, indent);
-        return;
-      }
-
-      if (TryGetCom(connectionDetails, out var comSettings) && comSettings != null)
-      {
-        AppendField(sb, "Тип подключения устройства", "COM", indent);
-        AppendField(sb, "COM-порт", comSettings.PortName, indent);
-        AppendField(sb, "Бит в секунду", comSettings.BaudRate, indent);
-        AppendField(sb, "Стоповые биты", GetStopBitsText(comSettings.StopBits), indent);
-        AppendField(sb, "Биты данных", comSettings.DataBits, indent);
-        AppendField(sb, "Чётность", GetParityText(comSettings.Parity), indent);
-        return;
-      }
-
-      AppendField(sb, "Адрес подключения", connectionDetails, indent);
-    }
-
-    private static bool TryGetIp(string connectionDetails, out string ipAddress)
-    {
-      ipAddress = string.Empty;
-
-      if (string.IsNullOrWhiteSpace(connectionDetails))
-      {
-        return false;
-      }
-
-      if (connectionDetails.Contains("{"))
-      {
-        return false;
-      }
-
-      string token = connectionDetails.Trim().Split(':')[0];
-      if (!IPAddress.TryParse(token, out var parsed))
-      {
-        return false;
-      }
-
-      ipAddress = parsed.ToString();
-      return true;
-    }
-
-    private static bool TryGetCom(string connectionDetails, out SerialPortCustom? comSettings)
-    {
-      comSettings = null;
-
-      if (string.IsNullOrWhiteSpace(connectionDetails))
-      {
-        return false;
-      }
-
-      try
-      {
-        comSettings = SerialPortCustom.ToObject(connectionDetails);
-        return comSettings != null;
-      }
-      catch
-      {
-        return false;
-      }
-    }
-
-    private static string GetStopBitsText(StopBits stopBits)
-    {
-      return stopBits switch
-      {
-        StopBits.One => "1",
-        StopBits.OnePointFive => "1.5",
-        StopBits.Two => "2",
-        _ => stopBits.ToString()
-      };
-    }
-
-    private static string GetParityText(Parity parity)
-    {
-      return parity switch
-      {
-        Parity.Even => "Чет",
-        Parity.Odd => "Нечет",
-        Parity.Mark => "Маркер",
-        Parity.Space => "Пробел",
-        _ => "Нет"
-      };
-    }
-
-    private static void AppendField(StringBuilder sb, string label, string? value, int indent)
-    {
-      if (string.IsNullOrWhiteSpace(value))
-      {
-        return;
-      }
-
-      sb.Append(' ', indent);
-      sb.Append(label);
-      sb.Append(": ");
-      sb.AppendLine(value);
-    }
-
-    private static void AppendField(StringBuilder sb, string label, int value, int indent)
-    {
-      if (value <= 0)
-      {
-        return;
-      }
-
-      AppendField(sb, label, value.ToString(CultureInfo.InvariantCulture), indent);
-    }
-
-    private static void AppendField(StringBuilder sb, string label, double value, int indent)
-    {
-      if (value <= 0)
-      {
-        return;
-      }
-
-      AppendField(sb, label, value.ToString("0.###", CultureInfo.InvariantCulture), indent);
-    }
-
-    /// <summary>
-    /// Печатает форматированный текст через стандартное диалоговое окно принтера.
-    /// </summary>
-    private void PrintText(string text)
-    {
-      var paragraph = new Paragraph(new Run(text))
-      {
-        FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
-        FontSize = 12,
-        Margin = new Thickness(30, 20, 30, 20),
-        TextAlignment = TextAlignment.Left
-      };
-
-      var document = new FlowDocument(paragraph)
-      {
-        PagePadding = new Thickness(50),
-        FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
-        FontSize = 12,
-        ColumnWidth = double.PositiveInfinity,
-        ColumnGap = 0,
-        IsColumnWidthFlexible = false,
-        TextAlignment = TextAlignment.Left
-      };
-
-      PrintDialog printDialog = new PrintDialog();
-      if (printDialog.ShowDialog() == true)
-      {
-        IDocumentPaginatorSource idpSource = document;
-        printDialog.PrintDocument(idpSource.DocumentPaginator, "Конфигурация устройств");
-      }
-    }
-
-    private sealed class DeviceConfigurationFileModel
-    {
-      public int Version { get; set; }
-
-      public DateTime ExportedAtUtc { get; set; }
-
-      public List<ChassisManagerDto> Chassis { get; set; } = new();
-
-      public List<RackDto> Racks { get; set; } = new();
-
-      public List<RelaySwitchModuleDto> RelaySwitchModules { get; set; } = new();
-
-      public List<SwitchingDeviceDto> SwitchingDevices { get; set; } = new();
-
-      public List<PowerSourceModuleDto> PowerSourceModules { get; set; } = new();
-
-      public List<FastMeterDto> FastMeters { get; set; } = new();
-
-      public List<BreakdownTesterDto> BreakdownTesters { get; set; } = new();
     }
   }
 }
