@@ -1,8 +1,9 @@
 using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -15,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
   public partial class UninterruptiblePowerSupplyWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private UninterruptiblePowerSupplyEntity? _editingEntity;
+    private UninterruptiblePowerSupplyDto? _editingDto;
 
     /// <summary>
     /// Close request event.
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
     /// <summary>
     /// Save request event.
     /// </summary>
-    public event EventHandler<UninterruptiblePowerSupplyEntity> RequestSave;
+    public event EventHandler<UninterruptiblePowerSupplyDto> RequestSave;
 
     /// <summary>
     /// Window constructor.
@@ -51,9 +52,9 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
     /// <summary>
     /// Initializes settings screen for UPS add/edit.
     /// </summary>
-    public void SetSettings(object? sender, IHeadUnit e, UninterruptiblePowerSupplyEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, UninterruptiblePowerSupplyDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Бесперебойник";
       deviceSettingsWindow.LoadDeviceModels<IUninterruptiblePowerSupply>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -62,34 +63,40 @@ namespace UI.Controls.Settings.DeviceConfig.UninterruptiblePowerSupply
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        UninterruptiblePowerSupplyEntity deviceEntity = processor.ProcessDevice<UninterruptiblePowerSupplyEntity>(
+        UninterruptiblePowerSupplyDto deviceDto = processor.ProcessDevice<UninterruptiblePowerSupplyDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
-          deviceEntity.LastResolvedDevicePath = (baseDevice as IUninterruptiblePowerSupply)?.LastResolvedDevicePath ?? string.Empty;
+          deviceDto.LastResolvedDevicePath = (baseDevice as IUninterruptiblePowerSupply)?.LastResolvedDevicePath ?? string.Empty;
 
           try
           {
-            var service = new UninterruptiblePowerSupplyServices();
-            if (_editingEntity == null)
+            if (_editingDto != null)
             {
-              service.Create(deviceEntity);
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(deviceDto);
+
+            if (_editingDto == null)
+            {
+              var createdDevice = await UninterruptiblePowerSupplies.CreateAsync(uninterruptiblePowerSupply);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              service.Update(deviceEntity);
+              await UninterruptiblePowerSupplies.UpdateAsync(uninterruptiblePowerSupply);
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

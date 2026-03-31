@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -53,6 +54,22 @@ namespace Ask.Device.Runtime.Device
     public Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
       return PowerManager.VerifyPowerAsync(userMessageService);
+    }
+
+    public UninterruptiblePowerSupplyDto Convert()
+    {
+      return new UninterruptiblePowerSupplyDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty,
+        LastResolvedDevicePath = LastResolvedDevicePath ?? string.Empty
+      };
     }
   }
 }

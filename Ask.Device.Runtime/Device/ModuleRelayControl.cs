@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -55,5 +56,25 @@ namespace Ask.Device.Runtime.Device
     public SwitchingBusNew BusType { get; set; } = SwitchingBusNew.AB1;
     public double SwitchResistance { get; set; }
     public double SwitchCapacitance { get; set; }
+
+    public RelaySwitchModuleDto Convert()
+    {
+      return new RelaySwitchModuleDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        NumberRack = NumberRack,
+        PointCount = PointCount,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty,
+        BusType = BusType,
+        SwitchResistance = SwitchResistance,
+        SwitchCapacitance = SwitchCapacitance
+      };
+    }
   }
 }

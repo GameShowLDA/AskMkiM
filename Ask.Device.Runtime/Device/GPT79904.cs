@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
@@ -97,5 +98,24 @@ namespace Ask.Device.Runtime.Device
     }
 
     private BreakdownTypeMode _mode { get; set; }
+
+    public BreakdownTesterDto Convert()
+    {
+      return new BreakdownTesterDto
+      {
+        Id = Id,
+        NumberChassis = NumberChassis,
+        Name = Name ?? string.Empty,
+        Description = Description ?? string.Empty,
+        Number = Number,
+        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        DeviceType = DeviceType,
+        DeviceClass = DeviceClass ?? string.Empty,
+        Mode = Mode,
+        PiMaxVoltage = PiMaxVoltage,
+        SiMaxVoltage = SiMaxVoltage,
+        IRMinVoltage = IRMinVoltage
+      };
+    }
   }
 }

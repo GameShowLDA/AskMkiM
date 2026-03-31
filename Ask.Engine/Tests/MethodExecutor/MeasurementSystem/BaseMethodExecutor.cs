@@ -63,7 +63,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     {
       try
       {
-        _deviceCollector.Collect(point1, point2);
+        _deviceCollector.CollectAsync(point1, point2);
         _commutationManager = new CommutationManager(_deviceCollector.Devices);
         _binaryPointMapper = new BinaryPointMapper(_deviceCollector.Devices.OfType<IRelaySwitchModule>());
         _pointGroupingService = new PointGroupingService(_deviceCollector.Devices.OfType<IRelaySwitchModule>());

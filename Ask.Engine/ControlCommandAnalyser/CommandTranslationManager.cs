@@ -3,15 +3,14 @@ using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
-using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -160,12 +159,13 @@ namespace Ask.Engine.ControlCommandAnalyser
               { BusStructureEnum.Type.Bus2, new List<int?> () },
             }
           };
-          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
+          var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+
           if (managerShassi != null)
           {
             vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(managerShassi.Number);
           }
-          var managerRack = new RackServices().GetAllEntities();
+          var managerRack = Racks.GetAllAsync().GetAwaiter().GetResult();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
