@@ -275,19 +275,24 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
-        var strValue = value.ToString();
-
-        if (strValue == "9,9E+37" && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR || measurementTypeCommand == MeasurementTypeCommand.NE))
+        if (MeasurementValueFormatter.IsOverloadValue(value) &&
+            (measurementTypeCommand == MeasurementTypeCommand.EHT ||
+             measurementTypeCommand == MeasurementTypeCommand.KC ||
+             measurementTypeCommand == MeasurementTypeCommand.PR ||
+             measurementTypeCommand == MeasurementTypeCommand.NE))
         {
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
 
-        if (strValue == "9,899999999999999E+46" && (measurementTypeCommand == MeasurementTypeCommand.IE))
+        if (MeasurementValueFormatter.IsOverloadValue(value, 9.899999999999999E+46) &&
+            measurementTypeCommand == MeasurementTypeCommand.IE)
         {
           return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
 
-        return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
+        return new ShowMessageModel(
+          $"{chains}({lowerLimit}-{higherLimit} {attr.Unit})",
+          message: $"{attr.Symbol.ToString()}изм{comparisonSign} {MeasurementValueFormatter.Format(value)} {attr.Unit}");
       }
       else
       {
@@ -296,12 +301,18 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
-        if (value.ToString() == "9,9E+37" && (measurementTypeCommand == MeasurementTypeCommand.EHT || measurementTypeCommand == MeasurementTypeCommand.KC || measurementTypeCommand == MeasurementTypeCommand.PR || measurementTypeCommand == MeasurementTypeCommand.NE))
+        if (MeasurementValueFormatter.IsOverloadValue(value) &&
+            (measurementTypeCommand == MeasurementTypeCommand.EHT ||
+             measurementTypeCommand == MeasurementTypeCommand.KC ||
+             measurementTypeCommand == MeasurementTypeCommand.PR ||
+             measurementTypeCommand == MeasurementTypeCommand.NE))
         {
           return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
 
-        return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} {value} {attr.Unit}");
+        return new ShowMessageModel(
+          $"{chains}({lowerLimit}<{attr.Unit})",
+          message: $"{attr.Symbol.ToString()}изм{comparisonSign} {MeasurementValueFormatter.Format(value)} {attr.Unit}");
       }
     }
   }

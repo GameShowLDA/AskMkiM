@@ -13,6 +13,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using DataBaseConfiguration.Services.Device;
@@ -293,8 +294,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       string unit = info?.Unit ?? "";
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Результаты режима {displayName}"), skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: $"{min:F5} {unit}", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: $"{max:F5} {unit}", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: MeasurementValueFormatter.FormatWithUnit(min, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: MeasurementValueFormatter.FormatWithUnit(max, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
 
       Measurements = new();
     }
