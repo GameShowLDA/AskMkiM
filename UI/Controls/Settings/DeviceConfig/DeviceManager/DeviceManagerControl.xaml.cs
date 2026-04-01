@@ -1,11 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.DTO.Devices.Breakdown;
-using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
-using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
+using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using System.Windows;
 using System.Windows.Controls;
@@ -48,12 +44,12 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     /// </summary>
     public event EventHandler<IHeadUnit> UninterruptiblePowerSupplyEvent;
 
-    public event EventHandler<BreakdownTesterDto> EditBreakdownEvent;
-    public event EventHandler<FastMeterDto> EditFastMeterEvent;
-    public event EventHandler<PowerSourceModuleDto> EditPowerModuleEvent;
-    public event EventHandler<RelaySwitchModuleDto> EditModuleRelayEvent;
-    public event EventHandler<SwitchingDeviceDto> EditDeviceBusCommutationEvent;
-    public event EventHandler<UninterruptiblePowerSupplyDto> EditUninterruptiblePowerSupplyEvent;
+    public event EventHandler<BreakdownTesterEntity> EditBreakdownEvent;
+    public event EventHandler<FastMeterEntity> EditFastMeterEvent;
+    public event EventHandler<PowerSourceModuleEntity> EditPowerModuleEvent;
+    public event EventHandler<RelaySwitchModuleEntity> EditModuleRelayEvent;
+    public event EventHandler<SwitchingDeviceEntity> EditDeviceBusCommutationEvent;
+    public event EventHandler<UninterruptiblePowerSupplyEntity> EditUninterruptiblePowerSupplyEvent;
 
     /// <summary>
     /// Event raised when exit is requested.
@@ -86,7 +82,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       BreakdownTesterControl.EditEvent += (s, device) =>
       {
-        if (device is BreakdownTesterDto entity)
+        if (device is BreakdownTesterEntity entity)
         {
           EditBreakdownEvent?.Invoke(this, entity);
         }
@@ -94,7 +90,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       FastMeterControl.EditEvent += (s, device) =>
       {
-        if (device is FastMeterDto entity)
+        if (device is FastMeterEntity entity)
         {
           EditFastMeterEvent?.Invoke(this, entity);
         }
@@ -102,7 +98,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       PowerSourceModuleControl.EditEvent += (s, device) =>
       {
-        if (device is PowerSourceModuleDto entity)
+        if (device is PowerSourceModuleEntity entity)
         {
           EditPowerModuleEvent?.Invoke(this, entity);
         }
@@ -110,7 +106,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       RelaySwitchModuleControl.EditEvent += (s, device) =>
       {
-        if (device is RelaySwitchModuleDto entity)
+        if (device is RelaySwitchModuleEntity entity)
         {
           EditModuleRelayEvent?.Invoke(this, entity);
         }
@@ -118,7 +114,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       SwitchingDeviceControl.EditEvent += (s, device) =>
       {
-        if (device is SwitchingDeviceDto entity)
+        if (device is SwitchingDeviceEntity entity)
         {
           EditDeviceBusCommutationEvent?.Invoke(this, entity);
         }
@@ -126,7 +122,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       UninterruptiblePowerSupplyControl.EditEvent += (s, device) =>
       {
-        if (device is UninterruptiblePowerSupplyDto entity)
+        if (device is UninterruptiblePowerSupplyEntity entity)
         {
           EditUninterruptiblePowerSupplyEvent?.Invoke(this, entity);
         }

@@ -4,7 +4,6 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
@@ -69,7 +68,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     private static IFastMeter GetFastMeter(IeCommandModel model, int numberLine, string commandNumber, string mnemonic)
     {
-      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      var meter = new DataBaseConfiguration.Services.Device.FastMeterServices()
+          .GetAll()
+          .FirstOrDefault();
 
       if (meter == null)
       {

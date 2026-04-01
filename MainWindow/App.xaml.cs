@@ -61,7 +61,6 @@ namespace MainWindowProgram
       ApplicationClockService.Start();
 
       SplashScreenManager.ShowSplash();
-      Console.SetOut(new ConsoleRedirector());
 
       await Task.Run(async () =>
       {
@@ -70,6 +69,8 @@ namespace MainWindowProgram
       });
 
       base.OnStartup(e);
+
+      Console.SetOut(new ConsoleRedirector());
 
       try
       {

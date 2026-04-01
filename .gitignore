@@ -412,6 +412,3 @@ FodyWeavers.xsd
 tmp_build_output.txt
 tmp_rus_test*.txt
 tmpinspect_margin*/
-/.tmpdotnet
-/.dotnet
-/.dotnet_home

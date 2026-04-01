@@ -10,7 +10,6 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using UI.Components;
 using UI.Components.FileComparerControls;
-using UI.Controls.Archive;
 using UI.Controls.TextEditorControl;
 
 namespace MainWindowProgram.Events
@@ -104,7 +103,6 @@ namespace MainWindowProgram.Events
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
       _mainWindow.searchReplaceMenuItem.Visibility = visibility;
-      UpdateArchiveMenuVisibility();
     }
 
 
@@ -201,20 +199,11 @@ namespace MainWindowProgram.Events
           bool isActive = activeEditor != null;
 
           OnTextEditorActive(isActive);
-          UpdateArchiveMenuVisibility();
           if (activeEditor != null)
           {
             OnTextEditorActivated(activeEditor);
           }
         }));
-    }
-
-    private void UpdateArchiveMenuVisibility()
-    {
-      var isArchiveControlActive = _multiWindow.GetActiveWorkspaceControl() is ArchiveControl;
-      _mainWindow.createArchiveMenuItem.Visibility = isArchiveControlActive
-        ? Visibility.Visible
-        : Visibility.Collapsed;
     }
   }
 }

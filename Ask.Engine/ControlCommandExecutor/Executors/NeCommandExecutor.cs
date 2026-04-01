@@ -64,11 +64,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         secondValue = command.HigherLimitVoltage.Value;
       }
 
-      ConnectedPointChecker.PerformMeasurementAsync measure;
-      measure = DioideMeasure;
-
-
       ConnectedPointContext pointContext = new ConnectedPointContext();
+      ConnectedPointChecker.PerformMeasurementAsync measure =
+        (value, messageService, cancellationToken, errorResistance) =>
+          DioideMeasure(value, messageService, cancellationToken, pointContext, errorResistance);
+
       pointContext.SchemeModel = command.Scheme;
       pointContext.CommandManager = context.CommandExecutionManager;
       pointContext.CommandModel = command;
@@ -108,25 +108,60 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> DioideMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
+    private async Task<(bool, double)> DioideMeasure(
+      double value,
+      IUserInteractionService messageService,
+      CancellationToken cancellationToken,
+      ConnectedPointContext pointContext,
+      double errorResistance = 0)
     {
       var meter = EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.DiodeManager.CheckDiodeAsync(value, firstValue, secondValue);
+        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext);
 
         if (answer < 0)
         {
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.NE, firstValue, secondValue, answer);
+        return await MessageManager.ShowMeasurementResultAsync(
+          messageService,
+          MeasurementTypeCommand.NE,
+          firstValue,
+          secondValue,
+          answer,
+          isOverloadExpected: pointContext.IsOverloadExpected);
       }, messageService);
 
       return result;
     }
+
+    /// <summary>
+    /// Возвращает значение проверки диода с учётом холостого режима и ожидаемой перегрузки.
+    /// </summary>
+    private async Task<double> GetDiodeMeasurementValueAsync(
+      IFastMeter meter,
+      double value,
+      ConnectedPointContext pointContext)
+    {
+      if (ShouldReturnOverloadInIdleReverseMode(pointContext))
+      {
+        return 9.9E+37;
+      }
+
+      return await meter.DiodeManager.CheckDiodeAsync(value, firstValue, secondValue);
+    }
+
+    /// <summary>
+    /// Определяет, нужно ли в холостом режиме вернуть перегрузку для обратного направления NE.
+    /// </summary>
+    private static bool ShouldReturnOverloadInIdleReverseMode(ConnectedPointContext pointContext) =>
+      ExecutionConfig.GetIsIdleModeEnabled()
+      && !ExecutionConfig.GetIsErrorSimulationEnabled().Result
+      && pointContext.IsOverloadExpected;
 
     private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
     {

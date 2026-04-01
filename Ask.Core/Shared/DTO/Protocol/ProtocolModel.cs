@@ -1,5 +1,4 @@
-﻿using System.Text;
-
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Ask.Core.Shared.DTO.Protocol
@@ -64,9 +63,30 @@ namespace Ask.Core.Shared.DTO.Protocol
     public string Mode { get; set; }
 
     /// <summary>
+    /// Список ошибок программы контроля.
+    /// </summary>
+    public Dictionary<string, List<ShowMessageModel>> Errors { get; set; } = new();
+
+    /// <summary>
+    /// Список информации программы контроля.
+    /// </summary>
+    public Dictionary<string, List<ShowMessageModel>> Info { get; set; } = new();
+
+    /// <summary>
     /// Единый список сообщений программы контроля по командам.
     /// </summary>
-    public Dictionary<string, List<(ShowMessageModel Message, ProtocolMessageKind Kind)>> Messages { get; set; } = new();
+    public Dictionary<string, List<(ShowMessageModel Message, ProtocolMessageKind Kind)>> Messages
+    {
+      get
+      {
+        var messages = new Dictionary<string, List<(ShowMessageModel Message, ProtocolMessageKind Kind)>>(StringComparer.Ordinal);
+
+        AppendMessages(messages, Errors, ProtocolMessageKind.Error);
+        AppendMessages(messages, Info, ProtocolMessageKind.Information);
+
+        return messages;
+      }
+    }
 
     /// <summary>
     /// Время начала выполнения.
@@ -96,11 +116,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     private static string Template { get; set; } = string.Empty;
     private static string ErrorsTemplate { get; set; } = string.Empty;
 
-    public int ErrorCount => Messages.Values.Sum(list => list.Count(item => item.Kind == ProtocolMessageKind.Error));
+    public int ErrorCount => Errors.Values.Sum(list => list.Count);
 
-    public int InformationCount => Messages.Values.Sum(list => list.Count(item => item.Kind == ProtocolMessageKind.Information));
+    public int InformationCount => Info.Values.Sum(list => list.Count);
 
-    public int TotalMessageCount => Messages.Values.Sum(list => list.Count);
+    public int TotalMessageCount => ErrorCount + InformationCount;
 
     public bool HasErrors => ErrorCount > 0;
 
@@ -233,5 +253,21 @@ namespace Ask.Core.Shared.DTO.Protocol
       return normalized.Trim();
     }
 
+    private static void AppendMessages(
+      Dictionary<string, List<(ShowMessageModel Message, ProtocolMessageKind Kind)>> target,
+      Dictionary<string, List<ShowMessageModel>> source,
+      ProtocolMessageKind kind)
+    {
+      foreach (var (command, items) in source)
+      {
+        if (!target.TryGetValue(command, out var commandMessages))
+        {
+          commandMessages = new List<(ShowMessageModel Message, ProtocolMessageKind Kind)>();
+          target[command] = commandMessages;
+        }
+
+        commandMessages.AddRange(items.Select(item => (item, kind)));
+      }
+    }
   }
 }

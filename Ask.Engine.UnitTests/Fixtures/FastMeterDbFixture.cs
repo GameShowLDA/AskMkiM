@@ -1,6 +1,6 @@
-using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.DataBase.Engine.Initialization;
-using Ask.DataBase.Engine.Static.Devices;
+using Ask.Core.Shared.Entity.Devices;
+using DataBaseConfiguration;
+using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.UnitTests.Fixtures;
 
@@ -10,27 +10,29 @@ public sealed class FastMeterDbFixture : IDisposable
 
   public FastMeterDbFixture()
   {
-    DatabaseEngineInitializer.InitializeAsync().GetAwaiter().GetResult();
+    DataBaseConfig.InitializeDB().GetAwaiter().GetResult();
 
-    if (FastMeters.GetAllAsync().GetAwaiter().GetResult().Any())
+    var fastMeterServices = new FastMeterServices();
+    fastMeterServices.ReloadCache();
+
+    if (fastMeterServices.GetAll().Any())
     {
       return;
     }
 
-    var fastMeterDto = new FastMeterDto
+    var entity = new FastMeterEntity
     {
       Name = "Unit test fast meter",
       Description = "Temporary fast meter for KS tests",
       NumberChassis = 9999,
       Number = 1,
       ConnectionDetails = "UNIT-TEST",
-      DeviceClass = "Ask.Device.Runtime.Device.KeysightDevice",
+      DeviceClass = typeof(FastMeterEntity).AssemblyQualifiedName ?? typeof(FastMeterEntity).FullName ?? nameof(FastMeterEntity),
       MaxContinuityResistance = 100
     };
 
-    var device = FastMeters.Build(fastMeterDto);
-    var created = FastMeters.CreateAsync(device).GetAwaiter().GetResult();
-    createdFastMeterId = created.Id;
+    fastMeterServices.Create(entity);
+    createdFastMeterId = entity.Id;
   }
 
   public void Dispose()
@@ -40,11 +42,14 @@ public sealed class FastMeterDbFixture : IDisposable
       return;
     }
 
-    var entity = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault(item => item.Id == createdFastMeterId.Value);
+    var fastMeterServices = new FastMeterServices();
+    var entity = fastMeterServices
+      .GetAllEntities()
+      .FirstOrDefault(item => item.Id == createdFastMeterId.Value);
 
     if (entity is not null)
     {
-      FastMeters.DeleteAsync(entity).GetAwaiter().GetResult();
+      fastMeterServices.Delete(entity);
     }
   }
 }

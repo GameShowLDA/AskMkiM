@@ -1,4 +1,3 @@
-using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -65,8 +64,6 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public int MaxContinuityResistance { get; set; }
-
-    /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
 
     /// <summary>
@@ -97,23 +94,6 @@ namespace Ask.Device.Runtime.Device
       DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
       DeviceProtocol = new TcpProtocol(this, Port);
       MaxContinuityResistance = 100000;
-    }
-
-    public FastMeterDto Convert()
-    {
-      return new FastMeterDto
-      {
-        Id = Id,
-        NumberChassis = NumberChassis,
-        Name = Name ?? string.Empty,
-        Description = Description ?? string.Empty,
-        Number = Number,
-        ConnectionDetails = ConnectionDetails ?? string.Empty,
-        DeviceType = DeviceType,
-        DeviceClass = DeviceClass ?? string.Empty,
-        TypeMode = TypeMode,
-        MaxContinuityResistance = MaxContinuityResistance
-      };
     }
   }
 }

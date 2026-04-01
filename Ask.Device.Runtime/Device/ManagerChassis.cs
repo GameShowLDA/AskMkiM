@@ -1,4 +1,3 @@
-using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -31,20 +30,5 @@ namespace Ask.Device.Runtime.Device
     /// <inheritdoc />
     public IPower PowerManager { get; set; }
     public BusStructureEnum.Type BusType { get; set; }
-
-    public ChassisManagerDto Convert()
-    {
-      return new ChassisManagerDto
-      {
-        Id = Id,
-        Name = Name ?? string.Empty,
-        Description = Description ?? string.Empty,
-        Number = Number,
-        ConnectionDetails = ConnectionDetails ?? string.Empty,
-        DeviceType = DeviceType,
-        DeviceClass = DeviceClass ?? string.Empty,
-        BusType = BusType
-      };
-    }
   }
 }

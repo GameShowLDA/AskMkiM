@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
@@ -12,7 +13,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.DataBase.Engine.Static.Devices;
+using DataBaseConfiguration.Services.Device;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
@@ -35,7 +36,7 @@ namespace UI.Components
     /// </summary>
     public ChoiceDevice PartDataControl;
 
-    private bool _isHasDevice = false;
+    bool _isHasDevice = false;
 
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceSelectorPanel"/>.
@@ -177,7 +178,7 @@ namespace UI.Components
     /// <returns>Объект типа IFastMeter или null, если выбранное устройство не реализует IFastMeter.</returns>
     public IFastMeter GetFastMeterSafe()
     {
-      IFastMeter? result = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      IFastMeter? result = new FastMeterServices().GetAll().FirstOrDefault();
 
       return result;
     }
@@ -227,17 +228,13 @@ namespace UI.Components
     /// </summary>
     private void LoadAllSelectableDevices()
     {
-      var relaySwitchModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
-      var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
-      var breakdowns = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
-
       var sources = new List<IEnumerable<dynamic>>
-      {
-        PowerSourceModules.GetAllAsync().GetAwaiter().GetResult(),
-        switchingDevices,
-        relaySwitchModules,
-        breakdowns
-      };
+    {
+        new PowerSourceModuleServices().GetAll(),
+        new SwitchingDeviceServices().GetAll(),
+        new RelaySwitchModuleServices().GetAll(),
+        new BreakdownTesterServices().GetAll()
+    };
 
       var combined = new List<object>();
       var displayNames = new List<string>();

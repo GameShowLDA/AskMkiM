@@ -1,4 +1,4 @@
-using Ask.DataBase.Engine.Static.Settings;
+﻿using DataBaseConfiguration;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
 
@@ -22,10 +22,8 @@ namespace MainWindowProgram.HotkeyBindings
         return;
       }
 
-      var hotkeys = FileHotkeys.GetAllAsync().GetAwaiter().GetResult();
-
-      MenuHotkeyBinder.Attach(window, dataContext, hotkeys);
-      UniversalHotkeyBinder.Attach(window, hotkeys);
+      MenuHotkeyBinder.Attach(window, dataContext, DataBaseConfig.Context);
+      UniversalHotkeyBinder.Attach(window, DataBaseConfig.Context);
 
       window.PreviewKeyDown += (s, e) =>
       {

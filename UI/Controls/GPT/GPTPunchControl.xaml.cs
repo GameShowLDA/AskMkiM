@@ -1,5 +1,6 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.DataBase.Engine.Static.Devices;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -21,7 +22,7 @@ namespace UI.Controls.GPT
     public GPTPunchControl()
     {
       InitializeComponent();
-      ModelGPT = BreakdownTesters.GetDevicesByNumberChassisAsync(1).GetAwaiter().GetResult().FirstOrDefault();
+      ModelGPT = ServiceLocator.GetRequired<BreakdownTesterServices>().GetDevicesByNumberChassis(1).FirstOrDefault();
       Controller.Visibility = Visibility.Visible;
     }
   }

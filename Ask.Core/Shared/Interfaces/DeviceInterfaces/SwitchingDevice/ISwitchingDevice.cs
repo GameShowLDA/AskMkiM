@@ -1,12 +1,11 @@
-﻿using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice
 {
   /// <summary>
   /// Интерфейс для устройства коммутации.
   /// </summary>
-  public interface ISwitchingDevice : IAttachableDevice, IDeviceToDtoConverter<SwitchingDeviceDto>
+  public interface ISwitchingDevice : IAttachableDevice
   {
     /// <summary>
     /// Задает или возвращает объект для управления конденсаторами.

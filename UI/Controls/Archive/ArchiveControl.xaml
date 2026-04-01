@@ -395,60 +395,12 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid VerticalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock 
-                                x:Name="ArchiveFilesTextBlock"
-                                Text="Файлы архива"
-                                FontWeight="SemiBold"
-                                FontSize="14"
-                                VerticalAlignment="Center"
-                                Foreground="{DynamicResource ForegrounfBrushes}"/>
-                            <TextBlock x:Name="SelectedArchiveNameTextBlock"
-                                       Grid.Column="1"
-                                       Margin="8,0,0,0"
-                                       VerticalAlignment="Center"
-                                       FontSize="14"
-                                       Foreground="{DynamicResource ForegrounfBrushes45}"
-                                       TextTrimming="CharacterEllipsis"
-                                       Visibility="Collapsed" />
-                        </Grid>
-                        <StackPanel x:Name="ArchiveActionsPanel"
-                                    Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    Visibility="Collapsed">
-                            <Button x:Name="AddFileToArchiveButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="220"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Добавить файл в архив"
-                                    Click="AddFileToArchiveButton_Click" />
-                            <Button x:Name="DeleteArchiveButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="180"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Удалить архив"
-                                    Click="DeleteArchiveButton_Click" />
-                        </StackPanel>
-                    </Grid>
+                    <TextBlock 
+                        x:Name="ArchiveFilesTextBlock"
+                        Text="Файлы архива"
+                   FontWeight="SemiBold"
+                   FontSize="14"
+                   Foreground="{DynamicResource ForegrounfBrushes}"/>
 
                     <DataGrid x:Name="ArchiveFilesDataGrid"
                         Grid.Row="1"
@@ -584,54 +536,25 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Grid VerticalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock 
-                                x:Name="SelectFileContentTextBlock"
-                                Text="Содержимое выбранного файла"
-                                FontWeight="SemiBold"
-                                FontSize="14"
+                        <TextBlock 
+                            x:Name="SelectFileContentTextBlock"
+                            Text="Содержимое выбранного файла"
+                            FontWeight="SemiBold"
+                            FontSize="14"
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource ForegrounfBrushes}"/>
+                        <Button x:Name="ConvertToPkwButton"
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Padding="10,4"
+                                MinWidth="220"
+                                HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
-                                Foreground="{DynamicResource ForegrounfBrushes}"/>
-                            <TextBlock x:Name="SelectedArchiveFileNameTextBlock"
-                                       Grid.Column="1"
-                                       Margin="8,0,0,0"
-                                       VerticalAlignment="Center"
-                                       FontSize="14"
-                                       Foreground="{DynamicResource ForegrounfBrushes45}"
-                                       TextTrimming="CharacterEllipsis"
-                                       Visibility="Collapsed" />
-                        </Grid>
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Right">
-                            <Button x:Name="DeleteArchiveFileButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="160"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Visibility="Collapsed"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Удалить файл"
-                                    Click="DeleteArchiveFileButton_Click" />
-                            <Button x:Name="ConvertToPkwButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="220"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Конвертировать в pkw"
-                                    Click="ConvertToPkwButton_Click" />
-                        </StackPanel>
+                                Cursor="Hand"
+                                FontSize="16"
+                                Style="{DynamicResource ButtonStyleV8}"
+                                Content="Конвертировать в pkw"
+                                Click="ConvertToPkwButton_Click" />
                     </Grid>
                     <TextEditor:TextEditorUI x:Name="FileContentTextBox"
                  Grid.Row="1"

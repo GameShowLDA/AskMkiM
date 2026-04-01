@@ -1,17 +1,16 @@
-﻿using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.Errors.Translation;
-using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
+using Ask.Core.Services.Errors.Models;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
@@ -77,7 +76,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
       }
 
       var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
-      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      var meter = new DataBaseConfiguration.Services.Device.FastMeterServices().GetAll().FirstOrDefault();
       remainder = KsParameterPipeline.Execute(model, remainder, ctx, meter);
       model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
 

@@ -59,10 +59,6 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void OpenArchive() => _fileService.OpenArchive();
 
-    /// <summary>Команда создания архива на активной вкладке архива.</summary>
-    [RelayCommand]
-    private void CreateArchive() => _fileService.CreateArchive();
-
     /// <summary>Команда создания нового файла.</summary>
     [RelayCommand]
     private void CreateNewFile() => _fileService.CreateNewFileAsync();

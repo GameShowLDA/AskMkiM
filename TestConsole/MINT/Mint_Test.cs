@@ -3,8 +3,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Commands;
+using DataBaseConfiguration.Services.Device;
 
 
 namespace TestConsole.MINT
@@ -46,7 +46,7 @@ namespace TestConsole.MINT
     private static async Task SelfCheck()
     {
       IChassisManager chassisManager = GetDeviceInstance(SelectManagerChassis);
-      ISwitchingDevice dbc = GetDeviceInstance(SelectDeviceBusCommutationAsync);
+      ISwitchingDevice dbc = GetDeviceInstance(SelectDeviceBusCommutation);
       IFastMeter meter = GetDeviceInstance(SelectMeter);
       IPowerSourceModule powerSource = GetDeviceInstance(SelectPowerSource);
 
@@ -72,9 +72,9 @@ namespace TestConsole.MINT
       await powerSource.ConnectableManager.ResetAsync();
     }
 
-    private static ISwitchingDevice SelectDeviceBusCommutationAsync()
+    private static ISwitchingDevice SelectDeviceBusCommutation()
     {
-      var dbc = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
+      var dbc = new SwitchingDeviceServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -107,7 +107,7 @@ namespace TestConsole.MINT
     }
     private static IChassisManager SelectManagerChassis()
     {
-      var dbc = ChassisManagers.GetAllAsync().GetAwaiter().GetResult();
+      var dbc = new ChassisManagerServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -140,7 +140,7 @@ namespace TestConsole.MINT
     }
     private static IPowerSourceModule SelectPowerSource()
     {
-      var dbc = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult();
+      var dbc = new PowerSourceModuleServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {
@@ -173,7 +173,7 @@ namespace TestConsole.MINT
     }
     private static IFastMeter SelectMeter()
     {
-      var dbc = FastMeters.GetAllAsync().GetAwaiter().GetResult();
+      var dbc = new FastMeterServices().GetAll();
 
       if (dbc == null || !dbc.Any())
       {

@@ -1,10 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
-using Ask.Core.Shared.DTO.Devices.Breakdown;
-using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
-using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
+﻿using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 
 namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 {
@@ -15,31 +10,31 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     /// </summary>
     /// <typeparam name="T">Тип устройства.</typeparam>
     /// <param name="device">Модель устройства.</param>
-    public void AddDevice<T>(T device) where T : DeviceDto
+    public void AddDevice<T>(T device) where T : IDevice
     {
       switch (device)
       {
-        case BreakdownTesterDto breakdownTester:
+        case BreakdownTesterEntity breakdownTester:
           BreakdownTesterControl.AddDevice(breakdownTester);
           break;
 
-        case FastMeterDto fastMeter:
+        case FastMeterEntity fastMeter:
           FastMeterControl.AddDevice(fastMeter);
           break;
 
-        case PowerSourceModuleDto powerSource:
+        case PowerSourceModuleEntity powerSource:
           PowerSourceModuleControl.AddDevice(powerSource);
           break;
 
-        case RelaySwitchModuleDto relaySwitch:
+        case RelaySwitchModuleEntity relaySwitch:
           RelaySwitchModuleControl.AddDevice(relaySwitch);
           break;
 
-        case SwitchingDeviceDto switchingDevice:
+        case SwitchingDeviceEntity switchingDevice:
           SwitchingDeviceControl.AddDevice(switchingDevice);
           break;
 
-        case UninterruptiblePowerSupplyDto uninterruptiblePowerSupply:
+        case UninterruptiblePowerSupplyEntity uninterruptiblePowerSupply:
           UninterruptiblePowerSupplyControl.AddDevice(uninterruptiblePowerSupply);
           break;
 
@@ -54,31 +49,31 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     /// </summary>
     /// <typeparam name="T">Тип устройства.</typeparam>
     /// <param name="typeDevices">Тип устройств.</param>
-    public void ClearDevice<T>(T typeDevices) where T : DeviceDto
+    public void ClearDevice<T>(T typeDevices) where T : IDevice
     {
       switch (typeDevices)
       {
-        case BreakdownTesterDto breakdownTester:
+        case BreakdownTesterEntity breakdownTester:
           BreakdownTesterControl.ClearItems();
           break;
 
-        case FastMeterDto fastMeter:
+        case FastMeterEntity fastMeter:
           FastMeterControl.ClearItems();
           break;
 
-        case PowerSourceModuleDto powerSource:
+        case PowerSourceModuleEntity powerSource:
           PowerSourceModuleControl.ClearItems();
           break;
 
-        case RelaySwitchModuleDto relaySwitch:
+        case RelaySwitchModuleEntity relaySwitch:
           RelaySwitchModuleControl.ClearItems();
           break;
 
-        case SwitchingDeviceDto switchingDevice:
+        case SwitchingDeviceEntity switchingDevice:
           SwitchingDeviceControl.ClearItems();
           break;
 
-        case UninterruptiblePowerSupplyDto uninterruptiblePowerSupply:
+        case UninterruptiblePowerSupplyEntity uninterruptiblePowerSupply:
           UninterruptiblePowerSupplyControl.ClearItems();
           break;
 

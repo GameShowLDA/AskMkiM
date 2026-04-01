@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+﻿using Ask.Core.Shared.DTO.Devices;
 using System;
 using System.Linq;
 using System.Net;

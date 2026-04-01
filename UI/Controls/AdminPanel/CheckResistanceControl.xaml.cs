@@ -1,5 +1,5 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.DataBase.Engine.Static.Devices;
+using DataBaseConfiguration.Services.Device;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ namespace UI.Controls.AdminPanel
 
     private void CheckResistanceControl_Loaded(object sender, RoutedEventArgs e)
     {
-      var rms = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
+      var rms = new RelaySwitchModuleServices().GetAll();
 
       foreach (var r in rms)
       {
@@ -65,7 +65,7 @@ namespace UI.Controls.AdminPanel
         var value = pair.Value;
         module.SwitchResistance = value;
 
-        RelaySwitchModules.UpdateResistanceAsync(module.NumberChassis, module.Number, value).GetAwaiter().GetResult();
+        new RelaySwitchModuleServices().UpdateResistance(module.NumberChassis, module.Number, value);
       }
 
       defaultData = new Dictionary<IRelaySwitchModule, double>(newData);

@@ -50,9 +50,9 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Error);
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information, expectedCount: 1);
-    AssertMessage(GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information)[0], "X1, X2(5-15 Ом)", "Rизм= 10 Ом");
+    Assert.Empty(protocol.Errors);
+    AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2(5-15 Ом)", "Rизм= 10 Ом");
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ResistanceManagerMock.Verify(x => x.MeasureResistanceAsync(10, 5, 15, It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ContinuityManagerMock.Verify(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()), Times.Never);
@@ -76,8 +76,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Error);
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information, expectedCount: 1);
+    Assert.Empty(protocol.Errors);
+    AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
     harness.ContinuityManagerMock.Verify(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ContinuityManagerMock.Verify(x => x.CheckContinuityAsync(10, 5, 15, It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Never);
@@ -101,7 +101,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    Assert.Empty(protocol.Messages);
+    Assert.Empty(protocol.Errors);
+    Assert.Empty(protocol.Info);
   }
 
   /// <summary>
@@ -120,9 +121,9 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error, expectedCount: 1);
-    AssertMessage(GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error)[0], "X1, X2 (5-15 Ом)", "Rизм= 20 Ом");
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Information);
+    AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
+    AssertMessage(protocol.Errors[GetCommandKey(command)][0], "X1, X2 (5-15 Ом)", "Rизм= 20 Ом");
+    Assert.Empty(protocol.Info);
     Assert.Single(harness.PublishedErrors);
     Assert.Contains("X1", harness.PublishedErrors[0].Description);
     Assert.Contains("X2", harness.PublishedErrors[0].Description);
@@ -145,8 +146,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error, expectedCount: 1);
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Information);
+    AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
+    AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
     Assert.Single(harness.PublishedErrors);
   }
 
@@ -166,8 +167,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Error);
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information, expectedCount: 1);
+    Assert.Empty(protocol.Errors);
+    AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
     harness.ResistanceManagerMock.Verify(x => x.MeasureResistanceAsync(15, 5, -1, It.IsAny<IUserInteractionService>()), Times.Once);
   }
 
@@ -187,8 +188,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error, expectedCount: 1);
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Information);
+    AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
+    Assert.Empty(protocol.Info);
   }
 
   /// <summary>
@@ -206,7 +207,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       .ReturnsAsync(5);
 
     var protocol = await harness.ExecuteAsync(command);
-    var error = Assert.Single(GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error));
+    var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
     AssertMessage(error, "X1, X2 (0,5-5 Ом)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
@@ -227,7 +228,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       .ReturnsAsync(5);
 
     var protocol = await harness.ExecuteAsync(command);
-    var error = Assert.Single(GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error));
+    var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
     AssertMessage(error, "X1, X2 (0,5-5 Ом)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
@@ -251,7 +252,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    Assert.Empty(protocol.Messages);
+    Assert.Empty(protocol.Errors);
+    Assert.Empty(protocol.Info);
   }
 
   /// <summary>
@@ -270,8 +272,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error, expectedCount: 1);
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Information);
+    AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
+    Assert.Empty(protocol.Info);
     Assert.Single(harness.PublishedErrors);
   }
 
@@ -290,9 +292,9 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Error);
-    AssertProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information, expectedCount: 1);
-    AssertMessage(GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information)[0], "X1, X2(5-15 Ом)", "Rизм= 10 Ом");
+    Assert.Empty(protocol.Errors);
+    AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2(5-15 Ом)", "Rизм= 10 Ом");
   }
 
   /// <summary>
@@ -311,9 +313,9 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       .ReturnsAsync(10);
 
     var protocol = await harness.ExecuteAsync(command);
-    var messages = GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Information);
+    var messages = protocol.Info[GetCommandKey(command)];
 
-    AssertNoProtocolMessages(protocol, ProtocolModel.ProtocolMessageKind.Error);
+    Assert.Empty(protocol.Errors);
     Assert.Equal(2, messages.Count);
     Assert.Contains(messages, item => item.Header == "X1, X2(5-15 Ом)" && item.Message == "Rизм= 10 Ом");
     Assert.Contains(messages, item => item.Header == "X1, X3(5-15 Ом)" && item.Message == "Rизм= 10 Ом");
@@ -335,7 +337,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       .ReturnsAsync(25);
 
     var protocol = await harness.ExecuteAsync(command);
-    var messages = GetProtocolMessages(protocol, command, ProtocolModel.ProtocolMessageKind.Error);
+    var messages = protocol.Errors[GetCommandKey(command)];
 
     Assert.Equal(2, messages.Count);
     Assert.Contains(messages, item => item.Header == "X1, X2 (5-15 Ом)" && item.Message == "Rизм= 20 Ом");
@@ -355,7 +357,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     var protocol = await harness.ExecuteAsync(command);
 
-    Assert.Empty(protocol.Messages);
+    Assert.Empty(protocol.Errors);
+    Assert.Empty(protocol.Info);
     harness.ResistanceManagerMock.Verify(
       x => x.MeasureResistanceAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
       Times.Never);
@@ -491,32 +494,11 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     return $"{command.CommandNumber} {command.Mnemonic}";
   }
 
-  private static void AssertProtocolMessages(
-    ProtocolModel protocol,
-    KsCommandModel command,
-    ProtocolModel.ProtocolMessageKind kind,
-    int expectedCount)
-  {
-    Assert.Equal(expectedCount, GetProtocolMessages(protocol, command, kind).Count);
-  }
-
-  private static void AssertNoProtocolMessages(ProtocolModel protocol, ProtocolModel.ProtocolMessageKind kind)
-  {
-    Assert.Empty(protocol.Messages.Values.SelectMany(items => items).Where(item => item.Kind == kind));
-  }
-
-  private static List<ShowMessageModel> GetProtocolMessages(
-    ProtocolModel protocol,
-    KsCommandModel command,
-    ProtocolModel.ProtocolMessageKind kind)
+  private static void AssertProtocolMessages(Dictionary<string, List<ShowMessageModel>> bucket, KsCommandModel command, int expectedCount)
   {
     var commandKey = GetCommandKey(command);
-    Assert.True(protocol.Messages.ContainsKey(commandKey));
-
-    return protocol.Messages[commandKey]
-      .Where(item => item.Kind == kind)
-      .Select(item => item.Message)
-      .ToList();
+    Assert.True(bucket.ContainsKey(commandKey));
+    Assert.Equal(expectedCount, bucket[commandKey].Count);
   }
 
   private static void AssertMessage(ShowMessageModel message, string expectedHeader, string expectedBody)

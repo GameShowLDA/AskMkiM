@@ -1,0 +1,140 @@
+﻿<UserControl x:Class="UI.Components.MeasurementErrorCardControl.MeasurementErrorRangeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Components="clr-namespace:UI.Components"
+             xmlns:Icons="clr-namespace:UI.Icon"
+             mc:Ignorable="d" 
+             >
+
+    <Border 
+      Background="{StaticResource IsCheckedColorSolidColorBrush80}" 
+      Margin="0,5"
+      CornerRadius="15"
+      BorderThickness="1"
+      BorderBrush="{StaticResource ForegroundSolidColorBrush60}">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ===== Заголовок диапазона ===== -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock 
+            x:Name="RangeHeaderText"
+            Text="Диапазон 0–1000"
+            FontSize="18"
+            Padding="10,10"
+            Foreground="{StaticResource ForegroundSolidColorBrush}"
+            FontFamily="{StaticResource WinstonMedium}"
+            VerticalAlignment="Center"/>
+
+                <!-- Кнопка раскрытия -->
+                <Icons:ArrowButton x:Name="ToggleSettingsButton" 
+                                   IsArrowUp="True"
+                                   Grid.Column="1"
+                                   HorizontalAlignment="Left"
+                                   Width="30" Height="30"
+                                   ButtonBackground="{StaticResource IsCheckedColorSolidColorBrush}"
+                                   ButtonBorder="{StaticResource PrimarySolidColorBrush}"
+                                   ArrowBrush="{StaticResource ForegroundSolidColorBrush}"
+                                   ArrowHoverBrush="{StaticResource ActiveForegroundSolidColorBrush80}"
+                                   VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- ===== Контент ===== -->
+            <Grid Grid.Row="1" Margin="10">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Диапазон -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Components:TextBoxPlaceholder x:Name="MinInput"
+                                         VerticalAlignment="Center"
+                                         Height="40"
+                                         Background="{StaticResource SecondarySolidColorBrush}"
+                                         Placeholder="Min"/>
+
+                    <TextBlock Text="—"
+                     Grid.Column="1"
+                     FontSize="18"
+                     Foreground="White"
+                     VerticalAlignment="Center"
+                     Margin="10,0"/>
+
+                    <Components:TextBoxPlaceholder x:Name="MaxInput"
+                                         Grid.Column="2"
+                                         VerticalAlignment="Center"
+                                         Height="40"
+                                         Background="{StaticResource SecondarySolidColorBrush}"
+                                         Placeholder="Max"/>
+                </Grid>
+
+                <!-- Процентная погрешность -->
+                <Grid Grid.Row="1" Margin="0,5,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Components:TextBoxPlaceholder x:Name="PercentageInput"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,5,0"
+                                         Height="40"
+                                         Background="{StaticResource SecondarySolidColorBrush}"
+                                         Placeholder="Процентная"/>
+                    <TextBlock Text="%" VerticalAlignment="Center" Foreground="White" Grid.Column="1" FontSize="16"/>
+                </Grid>
+
+                <!-- Абсолютная погрешность -->
+                <Grid Grid.Row="2" Margin="0,5,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Components:TextBoxPlaceholder x:Name="NumericInput"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,5,0"
+                                         Height="40"
+                                         Background="{StaticResource SecondarySolidColorBrush}"
+                                         Placeholder="Абсолютная"/>
+                    <TextBlock x:Name="UnitTextBlock"
+                        Text="{Binding Unit, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        VerticalAlignment="Center"
+                        Foreground="White"
+                        Grid.Column="1"
+                        FontSize="16"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

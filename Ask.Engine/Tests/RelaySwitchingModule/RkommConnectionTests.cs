@@ -84,16 +84,17 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       _pairBus = data.ActivePairBus;
       // МКР
-      _module = RelayModuleHelper.GetModulesByRangeAsync
-          (data.FirstPoint.DeviceNumber,
-           data.FirstPoint.ModuleNumber,
-           data.FirstPoint.ModuleNumber).GetAwaiter().
-          GetResult().
-          FirstOrDefault()
+      _module = RelayModuleHelper.GetModulesByRange
+          (
+              data.FirstPoint.DeviceNumber,
+              data.FirstPoint.ModuleNumber,
+              data.FirstPoint.ModuleNumber
+          )
+          .FirstOrDefault()
           ;
 
       // УКШ
-      _busSwitcher = await RelayModuleHelper.ResolveUkshAsync(data.FirstPoint.DeviceNumber);
+      _busSwitcher = RelayModuleHelper.ResolveUksh(data.FirstPoint.DeviceNumber);
 
       // Мультиметр
       _fastMeter = RelayModuleHelper.ResolveFastMeter(data.FirstPoint.DeviceNumber);

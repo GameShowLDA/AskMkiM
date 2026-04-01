@@ -1,11 +1,13 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.DataBase.Engine.Static.Devices;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
+using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
 {
@@ -96,7 +98,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var chassisNumber in allNumbers)
       {
-        if (await ChassisManagers.GetByNumberAsync(chassisNumber) == null)
+        if (new ChassisManagerServices().GetByNumber(chassisNumber) == null)
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"Менеджер шасси {chassisNumber}",
             message: "Устройство не найдено в конфигурации.", type: ShowMessageModel.MessageType.Error)
@@ -132,8 +134,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var item in grouped)
       {
-        var allModules = await RelaySwitchModules.GetDevicesByNumberChassisAsync(item.DeviceNumber);
-
+        var allModules = new RelaySwitchModuleServices().GetDevicesByNumberChassis(item.DeviceNumber);
         if (allModules == null || allModules.Count == 0)
         {
           await messageService.ShowMessageAsync(new ShowMessageModel($"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
@@ -186,7 +187,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (int number in validChassisNumbers)
       {
-        var device = (await SwitchingDevices.GetDevicesByNumberChassisAsync(number)).FirstOrDefault();
+        var device = new SwitchingDeviceServices().GetDevicesByNumberChassis(number).FirstOrDefault();
         if (device != null)
         {
           ValidSwitchingDevice = device;
@@ -301,7 +302,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
+        var tester = ServiceLocator.GetRequired<BreakdownTesterServices>().GetDevicesByNumberChassis(number).FirstOrDefault();
         if (tester != null)
         {
           ValidBreakdownTester = tester;
@@ -341,7 +342,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var meter = FastMeters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
+        var meter = new FastMeterServices().GetDevicesByNumberChassis(number).FirstOrDefault();
         if (meter != null)
         {
           ValidFastMeter = meter;

@@ -3,18 +3,18 @@ using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
+using DataBaseConfiguration.Services.Device;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
@@ -81,49 +81,21 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <returns>Скомпилированные модели и итоговый текст трансляции.</returns>
     public TranslationBuildResult BuildTranslation(string text, IProgress<string>? progress = null)
     {
-      try
-      {
-        ReportProgress(progress, "Начало трансляции");
-        var models = ParseAll(text);
+      ReportProgress(progress, "Начало трансляции");
+      var models = ParseAll(text);
+      CheckVshModel(models);
 
-        try
-        {
-          CheckVshModel(models);
-        }
-        catch (Exception ex)
-        {
-          LogError($"Ошибка при добавлении ВШ: {ex}");
-          AddGlobalTranslationError(models, text, "добавлении команды ВШ", ex);
-        }
+      ReportProgress(progress, "Формирование данных");
+      _ = BuildFormattedText(models);
 
-        ReportProgress(progress, "Формирование данных");
-        _ = BuildFormattedTextSafely(models, text);
+      ReportProgress(progress, "Проверка взаимосвязей");
+      Analyze(models);
 
-        ReportProgress(progress, "Проверка взаимосвязей");
-        Analyze(models, text);
+      ReportProgress(progress, "Формирование данных");
+      string formattedText = BuildFormattedText(models);
 
-        ReportProgress(progress, "Формирование данных");
-        string formattedText = BuildFormattedTextSafely(models, text);
-
-        ReportProgress(progress, "Готово");
-        return new TranslationBuildResult(models, formattedText);
-      }
-      catch (Exception ex)
-      {
-        LogError($"Критическая ошибка трансляции: {ex}");
-        ReportProgress(progress, "Готово");
-        return BuildUnexpectedFailureResult(text, ex, "общей трансляции");
-      }
-    }
-
-    public static TranslationBuildResult BuildUnexpectedFailureResult(
-        string text,
-        Exception ex,
-        string stage = "выполнении трансляции")
-    {
-      var model = CreateFatalTranslationModel(text, stage, ex);
-      var formattedText = string.Join("\n", model.SourceLines);
-      return new TranslationBuildResult(new List<BaseCommandModel> { model }, formattedText);
+      ReportProgress(progress, "Готово");
+      return new TranslationBuildResult(models, formattedText);
     }
 
     private static void CheckVshModel(List<BaseCommandModel> models)
@@ -133,16 +105,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         var rmIndex = models.FindLastIndex(model => model is RmCommandModel);
         if (rmIndex >= 0)
         {
-          if (!int.TryParse(models[rmIndex].CommandNumber, out var commandNumber))
-          {
-            AddInternalTranslationError(
-                models[rmIndex],
-                "добавлении команды ВШ",
-                new FormatException("Некорректный номер команды РМ."));
-            return;
-          }
-
-          commandNumber++;
+          var commandNumber = int.Parse(models[rmIndex].CommandNumber) + 1;
           while (models.Contains(models.FirstOrDefault(m => m.CommandNumber == commandNumber.ToString())))
           {
             commandNumber++;
@@ -159,13 +122,12 @@ namespace Ask.Engine.ControlCommandAnalyser
               { BusStructureEnum.Type.Bus2, new List<int?> () },
             }
           };
-          var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
-
+          var managerShassi = new ChassisManagerServices().GetAllEntities().FirstOrDefault();
           if (managerShassi != null)
           {
             vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(managerShassi.Number);
           }
-          var managerRack = Racks.GetAllAsync().GetAwaiter().GetResult();
+          var managerRack = new RackServices().GetAllEntities();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
@@ -200,20 +162,6 @@ namespace Ask.Engine.ControlCommandAnalyser
       return string.Join("\n", formattedLines);
     }
 
-    private string BuildFormattedTextSafely(List<BaseCommandModel> models, string text)
-    {
-      try
-      {
-        return BuildFormattedText(models);
-      }
-      catch (Exception ex)
-      {
-        LogError($"Критическая ошибка при формировании текста трансляции: {ex}");
-        AddGlobalTranslationError(models, text, "формировании текста трансляции", ex);
-        return BuildRawFallbackText(models, text);
-      }
-    }
-
     /// <summary>
     /// Формирует форматированный текст и строит mapping строк исходник → трансляция.
     /// </summary>
@@ -224,121 +172,40 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       foreach (var model in models)
       {
-        try
+        var formatter = _formatters.FirstOrDefault(f => f.CanFormat(model));
+        IEnumerable<string> lines;
+
+        model.FormattedStartLineNumber = formattedLineNumber;
+
+        // Получаем исходные строки для текущей команды
+        List<string> sourceLines = GetSourceLines(model, out int startSourceLineNumber);
+
+        lines = formatter != null ? formatter.Format(model) : sourceLines;
+
+        int countSourceLines = sourceLines.Count;
+        int localSourceLineIdx = 0;
+        foreach (var line in lines)
         {
-          var formatter = _formatters.FirstOrDefault(f => f.CanFormat(model));
-          IEnumerable<string> lines;
+          var splitStr = line.Split("\n");
 
-          model.FormattedStartLineNumber = formattedLineNumber;
-
-          // Получаем исходные строки для текущей команды
-          List<string> sourceLines = GetSourceLines(model, out int startSourceLineNumber);
-          if (sourceLines.Count == 0)
+          foreach (var item in splitStr)
           {
-            sourceLines = BuildFallbackLines(model);
-          }
-
-          lines = formatter != null
-              ? FormatModelSafely(formatter, model, sourceLines)
-              : sourceLines;
-
-          int countSourceLines = sourceLines.Count;
-          int localSourceLineIdx = 0;
-          foreach (var line in lines)
-          {
-            var splitStr = line.Split("\n");
-
-            foreach (var item in splitStr)
+            if (!string.IsNullOrEmpty(item))
             {
-              if (!string.IsNullOrEmpty(item))
-              {
-                formattedLines.Add(item);
-                formattedLineNumber++;
-              }
+              formattedLines.Add(item);
+              formattedLineNumber++;
             }
-
-            int sourceLineNumber = (localSourceLineIdx < countSourceLines)
-                ? startSourceLineNumber + localSourceLineIdx
-                : startSourceLineNumber;
-
-            lineMapping.Add((sourceLineNumber, formattedLineNumber));
-            localSourceLineIdx++;
           }
-        }
-        catch (Exception ex)
-        {
-          AddInternalTranslationError(model, "формировании текста трансляции", ex);
 
-          model.FormattedStartLineNumber = formattedLineNumber;
-          var fallbackLines = BuildFallbackLines(model);
-          int fallbackStartLine = model.StartLineNumber > 0 ? model.StartLineNumber : 1;
+          int sourceLineNumber = (localSourceLineIdx < countSourceLines)
+              ? startSourceLineNumber + localSourceLineIdx
+              : startSourceLineNumber;
 
-          foreach (var fallbackLine in fallbackLines)
-          {
-            formattedLines.Add(fallbackLine);
-            formattedLineNumber++;
-            lineMapping.Add((fallbackStartLine, formattedLineNumber));
-          }
+          lineMapping.Add((sourceLineNumber, formattedLineNumber));
+          localSourceLineIdx++;
         }
       }
       return lineMapping;
-    }
-
-    /// <summary>
-    /// Безопасно форматирует команду: при сбое добавляет ошибку и возвращает строки исходника.
-    /// </summary>
-    private static IEnumerable<string> FormatModelSafely(
-        ICommandFormatter formatter,
-        BaseCommandModel model,
-        List<string> fallbackLines)
-    {
-      try
-      {
-        var lines = formatter.Format(model)?.ToList();
-        return lines is { Count: > 0 } ? lines : fallbackLines;
-      }
-      catch (Exception ex)
-      {
-        AddFormattingError(model, ex);
-        LogError(
-            $"Ошибка форматирования команды {model.CommandNumber} {model.Mnemonic} " +
-            $"(строка {model.StartLineNumber}): {ex}");
-        return fallbackLines;
-      }
-    }
-
-    /// <summary>
-    /// Возвращает безопасный fallback-текст, если исходные строки команды недоступны.
-    /// </summary>
-    private static List<string> BuildFallbackLines(BaseCommandModel model)
-    {
-      var header = $"{model.CommandNumber} {model.Mnemonic}".Trim();
-      return new List<string> { string.IsNullOrWhiteSpace(header) ? "Ошибка форматирования команды" : header };
-    }
-
-    /// <summary>
-    /// Добавляет ошибку форматирования только один раз для команды.
-    /// </summary>
-    private static void AddFormattingError(BaseCommandModel model, Exception ex)
-    {
-      string command = GetCommandDisplay(model);
-      string description = $"Не удалось отформатировать команду {command}. Исправьте текст и повторите трансляцию.";
-
-      if (model.Errors.Any(error =>
-          error.Code == ErrorCode.Unknown &&
-          string.Equals(error.Description, description, StringComparison.Ordinal)))
-      {
-        return;
-      }
-
-      model.Errors.Add(new ErrorItem
-      {
-        SourceLineNumber = model.StartLineNumber > 0 ? model.StartLineNumber : 1,
-        Command = string.IsNullOrWhiteSpace(command) ? "Трансляция программы" : command,
-        Code = ErrorCode.Unknown,
-        DebugInfo = $"{ex.GetType().Name}: {ex.Message}",
-        Description = description
-      });
     }
 
     /// <summary>
@@ -396,17 +263,9 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Анализирует собранные модели команд.
     /// </summary>
-    private void Analyze(List<BaseCommandModel> models, string text)
+    private void Analyze(List<BaseCommandModel> models)
     {
-      try
-      {
-        CommandPostAnalyzer.Analyze(models);
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка пост-анализа трансляции: {ex}");
-        AddGlobalTranslationError(models, text, "пост-анализе", ex);
-      }
+      CommandPostAnalyzer.Analyze(models);
 
       var totalErrorCount = models.Sum(m => m?.Errors?.Count() ?? 0);
       if (totalErrorCount > 0)
@@ -432,22 +291,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       MessageEventAdapter.RaiseInfoMessage("Сбор данных...");
 
-      Dictionary<int, string> lines;
-      List<(int LineIndex, string Text)> comments;
-
-      try
-      {
-        (lines, comments) = PreprocessText.PreprocessTextAndExtractComments(text ?? string.Empty);
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка предобработки текста трансляции: {ex}");
-        return new List<BaseCommandModel>
-        {
-          CreateFatalTranslationModel(text, "предобработке текста программы", ex)
-        };
-      }
-
+      var (lines, comments) = PreprocessText.PreprocessTextAndExtractComments(text);
       var commands = new List<BaseCommandModel>();
 
       if (CommandsModel.CommandModels.Count > 0)
@@ -528,21 +372,11 @@ namespace Ask.Engine.ControlCommandAnalyser
 
     private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, int lineNumber, List<string> lines)
     {
-      try
-      {
-        foreach (var parser in _parsers)
+      foreach (var parser in _parsers)
+        if (parser.CanParse(mnemonic))
         {
-          if (parser.CanParse(mnemonic))
-          {
-            return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
-          }
+          return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
         }
-      }
-      catch (Exception ex)
-      {
-        LogError($"Ошибка разбора команды {commandNumber} {mnemonic}: {ex}");
-        return CreateCommandFailureModel(commandNumber, mnemonic, lineNumber, lines, "разборе команды", ex);
-      }
 
       var unknownCommandModel = new UnknownCommandModel
       {
@@ -570,233 +404,109 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       foreach (var model in models)
       {
-        try
+        var newSourseLines = new StringBuilder();
+        var commandNumberProp = model.GetType().GetProperty("CommandNumber");
+        if (commandNumberProp != null)
         {
-          var newSourseLines = new StringBuilder();
-          var commandNumberProp = model.GetType().GetProperty("CommandNumber");
-          if (commandNumberProp != null)
+          var commandNumber = commandNumberProp.GetValue(model) as string;
+          if (commandNumber != null && !string.IsNullOrEmpty(commandNumber))
           {
-            var commandNumber = commandNumberProp.GetValue(model) as string;
-            if (commandNumber != null && !string.IsNullOrEmpty(commandNumber))
-            {
-              newSourseLines.Append($"{commandNumber} ");
-            }
+            newSourseLines.Append($"{commandNumber} ");
           }
-          var mnemonicProp = model.GetType().GetProperty("Mnemonic");
-          if (mnemonicProp != null)
+        }
+        var mnemonicProp = model.GetType().GetProperty("Mnemonic");
+        if (mnemonicProp != null)
+        {
+          var mnemonic = mnemonicProp.GetValue(model) as string;
+          if (mnemonic != null && !string.IsNullOrEmpty(mnemonic))
           {
-            var mnemonic = mnemonicProp.GetValue(model) as string;
-            if (mnemonic != null && !string.IsNullOrEmpty(mnemonic))
-            {
-              newSourseLines.Append($"{mnemonic}  ");
-            }
+            newSourseLines.Append($"{mnemonic}  ");
           }
-          var algorithmKeyProp = model.GetType().GetProperty("AlgorithmKey");
-          if (algorithmKeyProp != null)
+        }
+        var algorithmKeyProp = model.GetType().GetProperty("AlgorithmKey");
+        if (algorithmKeyProp != null)
+        {
+          var algorithmKey = algorithmKeyProp.GetValue(model) as IEnumerable<string>;
+          if (algorithmKey != null)
           {
-            var algorithmKey = algorithmKeyProp.GetValue(model) as IEnumerable<string>;
-            if (algorithmKey != null)
+            var algorithmKeysList = algorithmKey.ToList();
+            foreach(var key in algorithmKeysList)
             {
-              var algorithmKeysList = algorithmKey.ToList();
-              foreach (var key in algorithmKeysList)
+              if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
               {
-                if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
-                {
-                  newSourseLines.Append($"{key}, ");
-                }
+                newSourseLines.Append($"{key}, ");
+              }
+            }
+            //for (int i = 0; i < algorithmKeysList.Count; i++)
+            //{
+            //  if (!string.IsNullOrEmpty(algorithmKeysList[i]) && !string.IsNullOrWhiteSpace(algorithmKeysList[i]) && i < algorithmKeysList.Count - 1)
+            //  {
+            //    newSourseLines.Append($"{algorithmKeysList[i]}, ");
+            //  }
+            //  else
+            //  {
+            //    newSourseLines.Append($"{algorithmKeysList[i]} ");
+            //  }
+            //}
+          }
+        }
+        var pointsLine = new StringBuilder();
+        var pointsLineProp = model.GetType().GetProperty("PointsSourse");
+        if (pointsLineProp != null)
+        {
+          var points = pointsLineProp.GetValue(model) as string;
+          if (points == null || string.IsNullOrEmpty(points))
+          {
+            points = string.Empty;
+          }
+          pointsLine.Append($"{points} ");
+        }
+
+        var commentsLine = new StringBuilder();
+        var commentsLineProp = model.GetType().GetProperty("Comment");
+        if (commentsLineProp != null)
+        {
+          var comments = commentsLineProp.GetValue(model) as IEnumerable<string>;
+          if (comments != null)
+          {
+            var commentsList = comments.ToList();
+            for (int i = 0; i < commentsList.Count; i++)
+            {
+              if (!string.IsNullOrEmpty(commentsList[i]) && !string.IsNullOrWhiteSpace(commentsList[i]) && i < commentsList.Count - 1)
+              {
+                commentsLine.Append($"{commentsList[i]}\n");
+              }
+              else
+              {
+                commentsLine.Append($"\t{commentsList[i]}\n");
               }
             }
           }
-          var pointsLine = new StringBuilder();
-          var pointsLineProp = model.GetType().GetProperty("PointsSourse");
-          if (pointsLineProp != null)
-          {
-            var points = pointsLineProp.GetValue(model) as string;
-            if (points == null || string.IsNullOrEmpty(points))
-            {
-              points = string.Empty;
-            }
-            pointsLine.Append($"{points} ");
-          }
-
-          var commentsLine = new StringBuilder();
-          var commentsLineProp = model.GetType().GetProperty("Comment");
-          if (commentsLineProp != null)
-          {
-            var comments = commentsLineProp.GetValue(model) as IEnumerable<string>;
-            if (comments != null)
-            {
-              var commentsList = comments.ToList();
-              for (int i = 0; i < commentsList.Count; i++)
-              {
-                if (!string.IsNullOrEmpty(commentsList[i]) && !string.IsNullOrWhiteSpace(commentsList[i]) && i < commentsList.Count - 1)
-                {
-                  commentsLine.Append($"{commentsList[i]}\n");
-                }
-                else
-                {
-                  commentsLine.Append($"\t{commentsList[i]}\n");
-                }
-              }
-            }
-          }
-
-          var bodyCreator = _commandBodyBuilders.FirstOrDefault(f => f.CanCreate(model));
-          if (bodyCreator != null)
-          {
-            newSourseLines = bodyCreator.Create(model, newSourseLines);
-          }
-          else
-          {
-            foreach (var line in model.SourceLines)
-            {
-              newSourseLines.AppendLine(line);
-            }
-          }
-
-          model.SourceLines = new List<string> { newSourseLines.ToString() };
-          if (!string.IsNullOrEmpty(pointsLine.ToString()) && !string.IsNullOrWhiteSpace(pointsLine.ToString()))
-          {
-            model.SourceLines.Add($"\t{pointsLine.ToString()}");
-          }
-          if (!string.IsNullOrEmpty(commentsLine.ToString()) && !string.IsNullOrWhiteSpace(commentsLine.ToString()))
-          {
-            model.SourceLines.Add($"{commentsLine.ToString()}");
-          }
         }
-        catch (Exception ex)
+
+        var bodyCreator = _commandBodyBuilders.FirstOrDefault(f => f.CanCreate(model));
+        if (bodyCreator != null)
         {
-          LogError($"Ошибка формирования SourceLines для команды {model.CommandNumber} {model.Mnemonic}: {ex}");
-          AddInternalTranslationError(model, "формировании исходных строк", ex);
-          model.SourceLines = BuildFallbackLines(model);
+          newSourseLines = bodyCreator.Create(model, newSourseLines);
+        }
+        else
+        {
+          foreach (var line in model.SourceLines)
+          {
+            newSourseLines.AppendLine(line);
+          }
+        }
+
+        model.SourceLines = new List<string> { newSourseLines.ToString() };
+        if (!string.IsNullOrEmpty(pointsLine.ToString()) && !string.IsNullOrWhiteSpace(pointsLine.ToString()))
+        {
+          model.SourceLines.Add($"\t{pointsLine.ToString()}");
+        }
+        if (!string.IsNullOrEmpty(commentsLine.ToString()) && !string.IsNullOrWhiteSpace(commentsLine.ToString()))
+        {
+          model.SourceLines.Add($"{commentsLine.ToString()}");
         }
       }
-    }
-
-    private static void AddGlobalTranslationError(
-        List<BaseCommandModel> models,
-        string text,
-        string stage,
-        Exception ex)
-    {
-      if (models.Count == 0)
-      {
-        models.Add(CreateFatalTranslationModel(text, stage, ex));
-        return;
-      }
-
-      AddInternalTranslationError(models[0], stage, ex);
-    }
-
-    private static void AddInternalTranslationError(
-        BaseCommandModel model,
-        string stage,
-        Exception ex,
-        string? prefix = null)
-    {
-      string command = GetCommandDisplay(model);
-      string description = BuildInternalErrorDescription(command, stage, prefix);
-
-      if (model.Errors.Any(error =>
-          error.Code == ErrorCode.Unknown &&
-          string.Equals(error.Description, description, StringComparison.Ordinal)))
-      {
-        return;
-      }
-
-      model.Errors.Add(new ErrorItem
-      {
-        SourceLineNumber = model.StartLineNumber > 0 ? model.StartLineNumber : 1,
-        Command = string.IsNullOrWhiteSpace(command) ? "Трансляция программы" : command,
-        Code = ErrorCode.Unknown,
-        DebugInfo = $"{ex.GetType().Name}: {ex.Message}",
-        Description = description
-      });
-    }
-
-    private static string BuildInternalErrorDescription(
-        string command,
-        string stage,
-        string? prefix = null)
-    {
-      string beginning = string.IsNullOrWhiteSpace(prefix)
-          ? "Внутренняя ошибка транслятора"
-          : prefix;
-
-      return string.IsNullOrWhiteSpace(command)
-          ? $"{beginning} на этапе {stage}. Исправьте текст и повторите трансляцию."
-          : $"{beginning} на этапе {stage} для команды {command}. Исправьте текст и повторите трансляцию.";
-    }
-
-    private static string GetCommandDisplay(BaseCommandModel model)
-    {
-      var command = $"{model.CommandNumber} {model.Mnemonic}".Trim();
-      return command;
-    }
-
-    private static BaseCommandModel CreateCommandFailureModel(
-        string commandNumber,
-        string mnemonic,
-        int lineNumber,
-        List<string>? lines,
-        string stage,
-        Exception ex)
-    {
-      var model = new UnknownCommandModel
-      {
-        CommandNumber = commandNumber,
-        Mnemonic = mnemonic,
-        StartLineNumber = lineNumber,
-        SourceLines = lines != null && lines.Count > 0
-            ? new List<string>(lines)
-            : new List<string> { $"{commandNumber} {mnemonic}".Trim() }
-      };
-
-      AddInternalTranslationError(model, stage, ex);
-      return model;
-    }
-
-    private static BaseCommandModel CreateFatalTranslationModel(string text, string stage, Exception ex)
-    {
-      var model = new UnknownCommandModel
-      {
-        CommandNumber = string.Empty,
-        Mnemonic = string.Empty,
-        StartLineNumber = 1,
-        SourceLines = BuildFatalSourceLines(text, stage)
-      };
-
-      AddInternalTranslationError(model, stage, ex);
-      return model;
-    }
-
-    private static List<string> BuildFatalSourceLines(string text, string stage)
-    {
-      if (!string.IsNullOrWhiteSpace(text))
-      {
-        return text.Replace("\r\n", "\n").Split('\n').ToList();
-      }
-
-      return new List<string>
-      {
-        "// Трансляция завершилась внутренней ошибкой.",
-        $"// Этап: {stage}"
-      };
-    }
-
-    private static string BuildRawFallbackText(List<BaseCommandModel> models, string text)
-    {
-      var lines = models
-          .SelectMany(model => model.SourceLines ?? Enumerable.Empty<string>())
-          .Where(line => !string.IsNullOrWhiteSpace(line))
-          .ToList();
-
-      if (lines.Count > 0)
-      {
-        return string.Join("\n", lines);
-      }
-
-      return text ?? string.Empty;
     }
   }
 
