@@ -1,10 +1,7 @@
-﻿using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Services.FilesUtility;
+﻿using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -48,14 +45,7 @@ namespace Ask.UI.Components.ProtocolListBox
     }
 
     /// <summary>
-    /// Плоский список сообщений протокола.
-    /// Старый источник данных, который можно пока оставить без изменений.
-    /// </summary>
-    public ObservableCollection<ShowMessageModel> Messages { get; } = new();
-
-    /// <summary>
-    /// Новая коллекция элементов отображения.
-    /// Нужна для будущего сворачиваемого отображения блоков.
+    /// Коллекция элементов, поддерживающая иерархическую структуру отображения протокола.
     /// </summary>
     public ObservableCollection<ProtocolDisplayItem> DisplayItems { get; } = new();
 
@@ -174,6 +164,59 @@ namespace Ask.UI.Components.ProtocolListBox
     }
 
     /// <summary>
+    /// Возвращает плоский снимок всех сообщений протокола
+    /// на текущий момент времени.
+    /// </summary>
+    /// <returns>
+    /// Неизменяемый список сообщений <see cref="ShowMessageModel"/>,
+    /// сформированный из текущего содержимого.
+    /// </returns>
+    public IReadOnlyList<ShowMessageModel> GetMessagesSnapshot()
+    {
+      if (Application.Current.Dispatcher.CheckAccess())
+      {
+        return FlattenDisplayItems(DisplayItems).ToList();
+      }
+
+      return Application.Current.Dispatcher.Invoke(
+        () => (IReadOnlyList<ShowMessageModel>)FlattenDisplayItems(DisplayItems).ToList());
+    }
+
+    /// <summary>
+    /// Преобразует иерархическую структуру элементов отображения протокола
+    /// в плоскую последовательность сообщений.
+    /// </summary>
+    /// <param name="items">
+    /// Коллекция элементов отображения, содержащая обычные строки
+    /// и, при наличии, группы с дочерними элементами.
+    /// </param>
+    /// <returns>
+    /// Последовательность объектов <see cref="ShowMessageModel"/>,
+    /// извлечённых из всех элементов <paramref name="items"/>,
+    /// включая дочерние элементы групп, в порядке их отображения.
+    /// </returns>
+    private static IEnumerable<ShowMessageModel> FlattenDisplayItems(IEnumerable<ProtocolDisplayItem> items)
+    {
+      foreach (var item in items)
+      {
+        if (item.Message != null)
+        {
+          yield return item.Message;
+        }
+
+        if (item.Children.Count == 0)
+        {
+          continue;
+        }
+
+        foreach (var childMessage in FlattenDisplayItems(item.Children))
+        {
+          yield return childMessage;
+        }
+      }
+    }
+
+    /// <summary>
     /// Обрабатывает Ctrl + '+', Ctrl + '-', Ctrl + '0' для масштаба.
     /// </summary>
     private bool HandleZoomShortcuts(KeyEventArgs e)
@@ -241,11 +284,6 @@ namespace Ask.UI.Components.ProtocolListBox
     private static double Clamp(double value, double min, double max)
       => Math.Max(min, Math.Min(max, value));
 
-    public ObservableCollection<ShowMessageModel> GetShowMessageModels()
-    {
-      return Messages;
-    }
-
     /// <summary>
     /// Удаляет указанное количество последних строк из списка протокола.
     /// </summary>
@@ -257,14 +295,18 @@ namespace Ask.UI.Components.ProtocolListBox
 
       Application.Current.Dispatcher.Invoke(() =>
       {
-        int linesToRemove = Math.Min(count, Messages.Count);
+        var messages = GetMessagesSnapshot().ToList();
+        int linesToRemove = Math.Min(count, messages.Count);
 
-        for (int i = 0; i < linesToRemove; i++)
+        if (linesToRemove <= 0)
         {
-          Messages.RemoveAt(Messages.Count - 1);
-          RemoveLastDisplayItem();
-          removed++;
+          return;
         }
+
+        messages.RemoveRange(messages.Count - linesToRemove, linesToRemove);
+        RestoreDisplayItems(messages);
+
+        removed = linesToRemove;
       });
 
       return Task.FromResult(removed);
@@ -277,13 +319,32 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
-        Messages.Clear();
         DisplayItems.Clear();
         _currentGroup = null;
         _pendingCommandHeaderItem = null;
 
         LogInformation("Протокол полностью очищен.");
       });
+    }
+
+    /// <summary>
+    /// Полностью восстанавливает иерархическую коллекцию отображения протокола
+    /// из плоской последовательности сообщений.
+    /// </summary>
+    /// <param name="messages">
+    /// Последовательность сообщений, на основе которой необходимо заново
+    /// построить коллекцию.
+    /// </param>
+    private void RestoreDisplayItems(IEnumerable<ShowMessageModel> messages)
+    {
+      DisplayItems.Clear();
+      _currentGroup = null;
+      _pendingCommandHeaderItem = null;
+
+      foreach (var message in messages)
+      {
+        AppendToDisplayItems(message);
+      }
     }
 
     /// <summary>
@@ -295,14 +356,16 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         try
         {
-          var target = Messages.FirstOrDefault(m =>
+          var messages = GetMessagesSnapshot().ToList();
+
+          var target = messages.FirstOrDefault(m =>
             (!string.IsNullOrEmpty(m.Header) && m.Header.Contains(textToRemove, StringComparison.OrdinalIgnoreCase)) ||
             (!string.IsNullOrEmpty(m.Message) && m.Message.Contains(textToRemove, StringComparison.OrdinalIgnoreCase)));
 
           if (target != null)
           {
-            Messages.Remove(target);
-            RebuildDisplayItems();
+            messages.Remove(target);
+            RestoreDisplayItems(messages);
 
             LogInformation($"Строка '{textToRemove}' найдена и удалена.");
             return true;
@@ -330,8 +393,6 @@ namespace Ask.UI.Components.ProtocolListBox
       {
 
         if(showMessageModel.Status == ShowMessageModel.MessageType.Command) showMessageModel.Header = showMessageModel.Header.TrimStart();
-
-        Messages.Add(showMessageModel);
 
         AppendToDisplayItems(showMessageModel);
 
@@ -421,30 +482,6 @@ namespace Ask.UI.Components.ProtocolListBox
     }
 
     /// <summary>
-    /// Полностью пересобирает иерархическую коллекцию DisplayItems из плоского списка Messages.
-    /// Нужна после удаления произвольной строки.
-    /// </summary>
-    private void RebuildDisplayItems()
-    {
-      DisplayItems.Clear();
-      _currentGroup = null;
-      _pendingCommandHeaderItem = null;
-
-      foreach (var message in Messages)
-      {
-        AppendToDisplayItems(message);
-      }
-
-      foreach (var item in DisplayItems)
-      {
-        if (item.IsGroup)
-        {
-          item.UpdateBackgroundColor();
-        }
-      }
-    }
-
-    /// <summary>
     /// Добавляет пустую строку в протокол.
     /// </summary>
     public Task AppendEmptyLineAsync(int indentLevel = 0)
@@ -480,7 +517,7 @@ namespace Ask.UI.Components.ProtocolListBox
     /// <returns>Общий текст протокола.</returns>
     public string GetText()
     {
-      return string.Join(Environment.NewLine, Messages.Select(m =>
+      return string.Join(Environment.NewLine, GetMessagesSnapshot().Select(m =>
       {
         string indent = new string(' ', m.IndentLevel * 2);
         string header = string.IsNullOrWhiteSpace(m.Header) ? string.Empty : $"{m.Header}: ";
@@ -498,12 +535,8 @@ namespace Ask.UI.Components.ProtocolListBox
     /// </summary>
     public int GetLastLineNumber()
     {
-      if (Messages.Count > 0)
-      {
-        return Messages.Count - 1;
-      }
-
-      return -1;
+      int count = GetMessagesSnapshot().Count;
+      return count > 0 ? count - 1 : -1;
     }
 
     /// <summary>

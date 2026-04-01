@@ -457,7 +457,7 @@ namespace Ask.UI.Controls.ProtocolNew
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
       }
 
-      var lines = protocolTextBox.Messages
+      var lines = protocolTextBox.GetMessagesSnapshot()
         .Select(FormatProtocolLineForSave)
         .Where(static line => !string.IsNullOrWhiteSpace(line));
 
