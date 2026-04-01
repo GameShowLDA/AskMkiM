@@ -16,6 +16,13 @@ namespace MainWindowProgram
       InitializeComponent();
     }
 
+    public void SetStatus(string message)
+    {
+      StatusTextBlock.Text = string.IsNullOrWhiteSpace(message)
+        ? "Подготовка приложения..."
+        : message;
+    }
+
     /// <summary>
     /// Асинхронно выполняет плавное закрытие окна с анимацией исчезновения.
     /// </summary>

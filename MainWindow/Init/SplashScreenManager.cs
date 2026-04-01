@@ -38,6 +38,16 @@ namespace MainWindowProgram.Init
       splashStarted.WaitOne();
     }
 
+    public static void UpdateStatus(string message)
+    {
+      if (_splashWindow is not SplashWindow splash)
+      {
+        return;
+      }
+
+      splash.Dispatcher.BeginInvoke(() => splash.SetStatus(message));
+    }
+
     /// <summary>
     /// Закрывает окно-заставку, если оно активно.
     /// </summary>

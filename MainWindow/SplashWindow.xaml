@@ -60,6 +60,14 @@
                     </Ellipse.Triggers>
                 </Ellipse>
             </Grid>
+
+            <TextBlock x:Name="StatusTextBlock"
+                       Text="Подготовка приложения..."
+                       FontSize="14"
+                       Foreground="#D7E3EE"
+                       Margin="0,18,0,0"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"/>
         </StackPanel>
     </Border>
 </Window>

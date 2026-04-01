@@ -10,6 +10,10 @@ namespace DataBaseConfiguration.Configurations.Security
     {
       builder.HasIndex(x => x.Role).IsUnique();
 
+      builder.Property(x => x.DisplayName)
+        .IsRequired()
+        .HasMaxLength(128);
+
       builder.Property(x => x.Password)
         .IsRequired()
         .HasMaxLength(256);

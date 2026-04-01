@@ -17,6 +17,11 @@ namespace Ask.Core.Shared.Entity.Settings
     public RoleType Role { get; set; }
 
     /// <summary>
+    /// Отображаемое название роли на русском языке.
+    /// </summary>
+    public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>
     /// Пароль роли.
     /// </summary>
     public string Password { get; set; } = string.Empty;

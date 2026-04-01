@@ -51,13 +51,13 @@ namespace MainWindowProgram
     /// Сервис управления USB-устройствами.
     /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    private readonly IUsbMonitorView _usbServices;
+    private IUsbMonitorView? _usbServices;
 
     /// <summary>
     /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
     /// Связывает интерфейс с бизнес-логикой.
     /// </summary>
-    private readonly MainWindowViewModel _viewModel;
+    private MainWindowViewModel? _viewModel;
     private bool _isThemeToggleInProgress;
     private Action<UserInterfaceModel>? _onUserInterfaceSaved;
 
@@ -95,31 +95,7 @@ namespace MainWindowProgram
       this.PreviewKeyDown += MainWindow_PreviewKeyDown;
       InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
-      (var vm, var usb) = AppServices.Build(this);
-      _viewModel = vm;
-      _usbServices = usb;
-
-      StatusBar.DataContext = _statusBarViewModel;
-      _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
-
-      this.DataContext = _viewModel;
-      GuiInitializer.Apply(this);
-
       Loaded += MainWindow_Loaded;
-      _onUserInterfaceSaved = model =>
-      {
-        if (!Dispatcher.CheckAccess())
-        {
-          Dispatcher.BeginInvoke(() => ApplyFileMenuTopIconMode(model.UseTopMenuIcons));
-          return;
-        }
-
-        ApplyFileMenuTopIconMode(model.UseTopMenuIcons);
-      };
-      UserInterfaceConfig.SaveUserInterfaceEvent += _onUserInterfaceSaved;
-
-      ThemeSettings.ThemeChanged += OnThemeChanged;
-      UpdateThemeToggleButtons(ThemeSettings.CurrentTheme);
 
       this.Closed += (_, _) =>
       {
@@ -163,6 +139,124 @@ namespace MainWindowProgram
         LogException($"Ошибка выполнения программы", ex);
         MessageBoxCustom.Show($"Ошибка: {ex.Message}", image: MessageBoxImage.Error);
       }
+    }
+
+    public async Task InitializeDeferredAsync(Action<string>? reportProgress = null)
+    {
+      async Task YieldUiAsync()
+      {
+        await this.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+        await this.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
+      }
+
+      async Task ReportProgressAsync(string message)
+      {
+        reportProgress?.Invoke(message);
+        await YieldUiAsync();
+      }
+
+      var lifecycle = new ApplicationLifecycleManager();
+
+      try
+      {
+        await ReportProgressAsync("Подключение интерфейса...");
+        InitializeWindowServices();
+
+        await ReportProgressAsync("Инициализация системных сервисов...");
+        lifecycle.Initialize(this, _usbServices!, _statusBarViewModel);
+
+        await ReportProgressAsync("Обработка параметров запуска...");
+        new CommandLineParser(_usbServices!).ProcessCommandLineArgs();
+
+        await ReportProgressAsync("Подключение рабочих модулей...");
+        ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
+        SystemStateEventAdapter.RaiseControlProgramActiveChanged(false);
+        applicationInitializer.SubscribeToMessageEvents();
+
+        await ReportProgressAsync("Подключение горячих клавиш...");
+        await this.Dispatcher.InvokeAsync(() =>
+        {
+          HotkeyBinderManager.AttachAllHotkeys(this, this.DataContext);
+        }, DispatcherPriority.Loaded);
+
+        await ReportProgressAsync("Завершение запуска...");
+      }
+      catch (InvalidOperationException exception)
+      {
+        LogException($"РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё С‚РµРјС‹ РїСЂРѕРіСЂР°РјРјС‹", exception);
+        MessageBoxCustom.Show($"РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё С‚РµРјС‹: {exception.Message}", image: MessageBoxImage.Error);
+      }
+      catch (Exception ex)
+      {
+        LogException($"РћС€РёР±РєР° РІС‹РїРѕР»РЅРµРЅРёСЏ РїСЂРѕРіСЂР°РјРјС‹", ex);
+        MessageBoxCustom.Show($"РћС€РёР±РєР°: {ex.Message}", image: MessageBoxImage.Error);
+      }
+    }
+
+    public void ShowStartupOverlay(string message)
+    {
+      if (StartupOverlay == null)
+      {
+        return;
+      }
+
+      StartupOverlay.Visibility = Visibility.Visible;
+      MainContentLayer.IsEnabled = false;
+      StartupStatusTextBlock.Text = message;
+    }
+
+    public void UpdateStartupOverlay(string message)
+    {
+      if (StartupStatusTextBlock == null)
+      {
+        return;
+      }
+
+      StartupStatusTextBlock.Text = message;
+    }
+
+    public void HideStartupOverlay()
+    {
+      if (StartupOverlay == null)
+      {
+        return;
+      }
+
+      StartupOverlay.Visibility = Visibility.Collapsed;
+      MainContentLayer.IsEnabled = true;
+    }
+
+    private void InitializeWindowServices()
+    {
+      if (_viewModel != null && _usbServices != null)
+      {
+        return;
+      }
+
+      (var vm, var usb) = AppServices.Build(this);
+      _viewModel = vm;
+      _usbServices = usb;
+
+      this.StatusBar.DataContext = _statusBarViewModel;
+      _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
+
+      this.DataContext = _viewModel;
+      GuiInitializer.Apply(this);
+
+      _onUserInterfaceSaved = model =>
+      {
+        if (!Dispatcher.CheckAccess())
+        {
+          Dispatcher.BeginInvoke(() => ApplyFileMenuTopIconMode(model.UseTopMenuIcons));
+          return;
+        }
+
+        ApplyFileMenuTopIconMode(model.UseTopMenuIcons);
+      };
+
+      UserInterfaceConfig.SaveUserInterfaceEvent += _onUserInterfaceSaved;
+      ThemeSettings.ThemeChanged += OnThemeChanged;
+      UpdateThemeToggleButtons(ThemeSettings.CurrentTheme);
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)

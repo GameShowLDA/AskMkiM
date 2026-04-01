@@ -10,6 +10,13 @@ namespace DataBaseConfiguration.Services.Settings
   internal static class RolePasswordSeeder
   {
     private const string DefaultPassword = "test";
+    private static readonly IReadOnlyDictionary<RoleType, string> DefaultRoleDisplayNames = new Dictionary<RoleType, string>
+    {
+      [RoleType.Administrator] = "Администратор",
+      [RoleType.Metrology] = "Метрология",
+      [RoleType.SystemMaintenance] = "Обслуживание системы",
+      [RoleType.Developer] = "Разработчик",
+    };
 
     /// <summary>
     /// Создаёт записи для системных ролей, если они отсутствуют.
@@ -27,14 +34,27 @@ namespace DataBaseConfiguration.Services.Settings
 
       foreach (var role in defaultRoles)
       {
-        bool exists = context.RolePasswords.Any(x => x.Role == role);
-        if (!exists)
+        var entity = context.RolePasswords.FirstOrDefault(x => x.Role == role);
+        if (entity == null)
         {
           context.RolePasswords.Add(new RolePasswordModel
           {
             Role = role,
+            DisplayName = DefaultRoleDisplayNames[role],
             Password = DefaultPassword,
           });
+
+          continue;
+        }
+
+        if (!string.Equals(entity.DisplayName, DefaultRoleDisplayNames[role], StringComparison.Ordinal))
+        {
+          entity.DisplayName = DefaultRoleDisplayNames[role];
+        }
+
+        if (string.IsNullOrWhiteSpace(entity.Password))
+        {
+          entity.Password = DefaultPassword;
         }
       }
 

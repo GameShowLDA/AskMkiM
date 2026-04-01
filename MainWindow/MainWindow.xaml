@@ -452,6 +452,72 @@
         </Grid>
         </Grid>
 
+        <Grid x:Name="StartupOverlay"
+              Visibility="Collapsed"
+              Panel.ZIndex="9000"
+              Background="#D916202A">
+            <Border Width="420"
+                    Padding="28"
+                    CornerRadius="18"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="#E62A3440"
+                    BorderBrush="#556B82"
+                    BorderThickness="1">
+                <StackPanel>
+                    <Grid Width="92"
+                          Height="92"
+                          Margin="0,0,0,20"
+                          HorizontalAlignment="Center">
+                        <Ellipse Stroke="#365064"
+                                 StrokeThickness="8"
+                                 Opacity="0.35"/>
+
+                        <Path Stroke="#8AD8FF"
+                              StrokeThickness="8"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Data="M 46,8 A 38,38 0 0 1 84,46">
+                            <Path.RenderTransform>
+                                <RotateTransform x:Name="MainStartupSpinnerRotateTransform"
+                                                 CenterX="46"
+                                                 CenterY="46"/>
+                            </Path.RenderTransform>
+                            <Path.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever">
+                                            <DoubleAnimation Storyboard.TargetName="MainStartupSpinnerRotateTransform"
+                                                             Storyboard.TargetProperty="Angle"
+                                                             From="0"
+                                                             To="360"
+                                                             Duration="0:0:1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Path.Triggers>
+                        </Path>
+                    </Grid>
+
+                    <TextBlock Text="Подготовка приложения"
+                               FontSize="26"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"/>
+
+                    <TextBlock x:Name="StartupStatusTextBlock"
+                               Margin="0,14,0,0"
+                               FontSize="15"
+                               Foreground="#D7E3EE"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               Text="Загрузка модулей приложения..."/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
         <askUiNotifications:WindowNotificationManagerControl Panel.ZIndex="9998" />
         <askUi:DrawerControl Panel.ZIndex="9999" />
     </Grid>

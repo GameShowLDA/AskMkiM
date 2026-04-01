@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Support;
@@ -37,6 +37,7 @@ namespace MainWindowProgram
     /// Содержит аргументы командной строки, переданные при запуске приложения.
     /// </summary>
     public static string[] CommandLineArgs { get; private set; }
+
     static App()
     {
       var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
@@ -55,50 +56,76 @@ namespace MainWindowProgram
     /// <param name="e"></param>
     protected override async void OnStartup(StartupEventArgs e)
     {
+      ShutdownMode = ShutdownMode.OnExplicitShutdown;
       RegisterGlobalExceptionHandlers();
       CommandLineArgs = e.Args;
       FileAssociationRegistrar.RegisterCurrentUserAssociations();
       ApplicationClockService.Start();
 
-      SplashScreenManager.ShowSplash();
-
-      await Task.Run(async () =>
-      {
-        await PreStartupInitializer.Initialize();
-        await InitializeTheme();
-      });
-
       base.OnStartup(e);
 
       Console.SetOut(new ConsoleRedirector());
+      var startupInitializationTask = Task.Run(async () =>
+      {
+        await PreStartupInitializer.Initialize();
+      });
+
+      var loginWindowManager = new RoleLoginWindowManager();
 
       try
       {
+        loginWindowManager.Show();
+
+        var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
+        if (authenticatedRole == null)
+        {
+          RoleAuthorizationConfig.Clear();
+          await loginWindowManager.WaitForCloseAsync();
+          Application.Current.Shutdown();
+          return;
+        }
+
+        RoleAuthorizationConfig.SetCurrentRole(
+          authenticatedRole.Role,
+          authenticatedRole.DisplayName);
+
+        await loginWindowManager.UpdateLoadingStatusAsync("Завершение фоновой инициализации...");
+        await startupInitializationTask;
+
+        await loginWindowManager.UpdateLoadingStatusAsync("Применение настроек интерфейса...");
+        await InitializeTheme();
+
         var mainWindow = new MainWindow
         {
-          Visibility = Visibility.Hidden
+          Opacity = 0,
+          ShowInTaskbar = false,
+          Visibility = Visibility.Visible
         };
-        Application.Current.MainWindow = mainWindow;
 
-        await mainWindow.InitializeAsync();
+        Application.Current.MainWindow = mainWindow;
+        mainWindow.Show();
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
+        await mainWindow.Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+
+        await mainWindow.InitializeDeferredAsync(message =>
+          loginWindowManager.UpdateLoadingStatusAsync(message).GetAwaiter().GetResult());
+
         ApplicationActivator.FlushPendingFileRequests();
 
-        await SplashScreenManager.CloseSplashAsync();
-
-
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
-        mainWindow.Visibility = Visibility.Visible;
+
+        mainWindow.ShowInTaskbar = true;
+        mainWindow.Opacity = 1;
+        await mainWindow.Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+        await loginWindowManager.CloseAsync();
 
         mainWindow.Topmost = true;
-
-
         await mainWindow.Dispatcher.BeginInvoke(new Action(() =>
         {
           mainWindow.Topmost = false;
         }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
-        // отслеживаем закрытие
-        mainWindow.Closed += (s, _) =>
+        mainWindow.Closed += (_, _) =>
         {
           SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
         };
@@ -108,6 +135,7 @@ namespace MainWindowProgram
       }
       catch (Exception ex)
       {
+        await loginWindowManager.CloseAsync();
 
         LogError("FATAL OnStartup exception");
         LogError(ex.ToString());
@@ -187,7 +215,6 @@ namespace MainWindowProgram
       }
       catch
       {
-
       }
     }
 
