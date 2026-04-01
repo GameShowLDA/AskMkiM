@@ -329,6 +329,8 @@ namespace Ask.UI.Components.ProtocolListBox
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
 
+        if(showMessageModel.Status == ShowMessageModel.MessageType.Command) showMessageModel.Header = showMessageModel.Header.TrimStart();
+
         Messages.Add(showMessageModel);
 
         AppendToDisplayItems(showMessageModel);

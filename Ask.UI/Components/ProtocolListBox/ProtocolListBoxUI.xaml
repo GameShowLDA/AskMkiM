@@ -69,7 +69,8 @@
         <DataTemplate x:Key="ProtocolGroupTemplate">
             <Expander IsExpanded="{Binding IsExpanded}"
                       Background="Transparent"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      >
                 <Expander.Header>
                     <ContentControl Content="{Binding}"
                                     ContentTemplate="{StaticResource ProtocolLineTemplate}"/>
@@ -120,6 +121,7 @@
                         <ContentControl Content="{Binding}">
                             <ContentControl.Style>
                                 <Style TargetType="ContentControl">
+                                    <Setter Property="Margin" Value="0,0,0,6"/>
                                     <Setter Property="ContentTemplate"
                                             Value="{StaticResource ProtocolLineTemplate}"/>
 
