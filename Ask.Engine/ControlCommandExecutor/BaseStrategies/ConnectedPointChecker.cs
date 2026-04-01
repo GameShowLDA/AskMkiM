@@ -1,10 +1,12 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -128,7 +130,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     }
 
     /// <summary>
-    /// Проверяет одну исходную цепь и добавляет её сообщения в общие коллекции.
+    /// Проверяет одну исходную цепь и для команды NE выполняет
+    /// два прогона: в прямом и обратном направлении.
     /// </summary>
     private static async Task<ChainProcessingResult?> ProcessChainEntryAsync(
       ChainModel chain,
@@ -147,16 +150,32 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       var neCommandModel = GetNeCommandModel(context);
       var isNeCommand = neCommandModel != null;
-      var polarity = isNeCommand && ResolvePolarity(chain, neCommandModel);
+      var directPolarity = isNeCommand && ResolvePolarity(chain, neCommandModel!);
 
-      var result = await ProcessChainAsync(chainCopy.PointModels, context, indentLevel: 1, preMeasurementDelegate, polarity);
+      var result = await RunChainPassAsync(
+        chainCopy.PointModels,
+        context,
+        preMeasurementDelegate,
+        directPolarity,
+        errors,
+        infos,
+        isNeCommand,
+        isDirectDirection: true,
+        currentNeDirectionSign: ResolveNeDirectionSign(directPolarity, isDirectPass: true));
 
-      LogDebug($"[ConnectedPointChecker] Chain checked. Fragments={result.Fragments.Count}. Display={BuildDisconnectionDisplayString(result.Fragments)}");
-
-      errors.AddRange(result.Errors);
-      infos.AddRange(result.Infos);
-
-      await AppendChainErrorsAsync(result, context, errors);
+      if (isNeCommand)
+      {
+        await RunChainPassAsync(
+          chainCopy.PointModels,
+          context,
+          preMeasurementDelegate,
+          !directPolarity,
+          errors,
+          infos,
+          isNeCommand: true,
+          isDirectDirection: false,
+          currentNeDirectionSign: ResolveNeDirectionSign(directPolarity, isDirectPass: false));
+      }
 
       return result;
     }
@@ -200,6 +219,85 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       var item = neCommandModel.ElementEnablingType.FirstOrDefault(x => x.Item1 == chain);
       return item != default && item.Item2 == ElementEnabling.Type.Direct;
+    }
+
+    /// <summary>
+    /// Выполняет один прогон проверки цепи и при необходимости показывает направление проверки для NE.
+    /// </summary>
+    private static async Task<ChainProcessingResult> RunChainPassAsync(
+      List<PointModel> points,
+      ConnectedPointContext context,
+      PreMeasurementDelegate preMeasurementDelegate,
+      bool polarity,
+      List<ShowMessageModel> errors,
+      List<ShowMessageModel> infos,
+      bool isNeCommand,
+      bool isDirectDirection,
+      string? currentNeDirectionSign)
+    {
+      await ShowNeDirectionMessageIfRequiredAsync(context, isNeCommand, isDirectDirection);
+
+      var previousOverloadExpectation = context.IsOverloadExpected;
+      var previousDirectionSign = context.CurrentNeDirectionSign;
+      context.IsOverloadExpected = isNeCommand && !isDirectDirection;
+      context.CurrentNeDirectionSign = currentNeDirectionSign;
+
+      ChainProcessingResult result;
+
+      try
+      {
+        result = await ProcessChainAsync(points, context, indentLevel: 1, preMeasurementDelegate, polarity);
+      }
+      finally
+      {
+        context.IsOverloadExpected = previousOverloadExpectation;
+        context.CurrentNeDirectionSign = previousDirectionSign;
+      }
+
+      LogDebug($"[ConnectedPointChecker] Chain checked. Fragments={result.Fragments.Count}. Display={BuildDisconnectionDisplayString(result.Fragments)}");
+
+      errors.AddRange(result.Errors);
+      infos.AddRange(result.Infos);
+
+      await AppendChainErrorsAsync(result, context, errors);
+
+      return result;
+    }
+
+    /// <summary>
+    /// Возвращает знак направления для протокола NE с учётом текущего прохода.
+    /// </summary>
+    private static string ResolveNeDirectionSign(bool isOriginalDirect, bool isDirectPass)
+    {
+      var isDirectSign = isDirectPass ? isOriginalDirect : !isOriginalDirect;
+      return isDirectSign
+        ? ElementEnabling.Type.Direct.GetDescription()
+        : ElementEnabling.Type.Reverse.GetDescription();
+    }
+
+    /// <summary>
+    /// Показывает сообщение о направлении проверки диода для команды NE.
+    /// </summary>
+    private static Task ShowNeDirectionMessageIfRequiredAsync(
+      ConnectedPointContext context,
+      bool isNeCommand,
+      bool isDirectDirection)
+    {
+      if (!isNeCommand)
+      {
+        return Task.CompletedTask;
+      }
+
+      var directionMessage = isDirectDirection
+        ? "Проверка диода в прямом направлении:"
+        : "Проверка диода в обратном направлении:";
+
+      return context.MessageService.ShowMessageAsync(
+        new ShowMessageModel(directionMessage)
+        {
+          IndentLevel = 1
+        },
+        IsBlockStart: true);
     }
 
     /// <summary>
@@ -508,7 +606,29 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     private static string BuildChainString(ConnectedPointContext context, PointModel basePoint, PointModel point)
     {
       var chain = new ChainModel(new List<PointModel> { basePoint, point });
+
+      if (context.TypeCommand == MeasurementTypeCommand.NE)
+      {
+        return BuildNeProtocolChainString(chain, context.CurrentNeDirectionSign);
+      }
+
       return context.CommandModel.BuildDislpayInfo.BuildErrorChainStringAsync(chain);
+    }
+
+    /// <summary>
+    /// Формирует строку цепи для протокола NE со знаком направления перед первой точкой.
+    /// </summary>
+    private static string BuildNeProtocolChainString(ChainModel chain, string? directionSign)
+    {
+      var chainStr = PointFormater.GetFormatConnectPoint(chain);
+      if (string.IsNullOrEmpty(directionSign))
+      {
+        return chainStr;
+      }
+
+      return chainStr.StartsWith("*", StringComparison.Ordinal)
+        ? $"*{directionSign}{chainStr[1..]}"
+        : $"{directionSign}{chainStr}";
     }
 
     /// <summary>
