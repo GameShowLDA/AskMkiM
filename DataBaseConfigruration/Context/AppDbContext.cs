@@ -1,4 +1,5 @@
-﻿using DataBaseConfiguration.Configurations.Measurement;
+using DataBaseConfiguration.Configurations.Measurement;
+using DataBaseConfiguration.Configurations.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration.Context
@@ -32,6 +33,7 @@ namespace DataBaseConfiguration.Context
     {
       modelBuilder.ApplyConfiguration(new MeasurementErrorEntityConfiguration());
       modelBuilder.ApplyConfiguration(new MeasurementErrorRangeEntityConfiguration());
+      modelBuilder.ApplyConfiguration(new RolePasswordModelConfiguration());
 
       base.OnModelCreating(modelBuilder);
     }

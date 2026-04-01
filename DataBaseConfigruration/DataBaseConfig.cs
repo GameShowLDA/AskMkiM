@@ -1,7 +1,8 @@
-﻿using Ask.Core.Services.Translator;
+using Ask.Core.Services.Translator;
 using DataBaseConfiguration.Context;
 using DataBaseConfiguration.Services.Hotkey.Defaults;
 using DataBaseConfiguration.Services.MeasurementError;
+using DataBaseConfiguration.Services.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataBaseConfiguration
@@ -37,6 +38,7 @@ namespace DataBaseConfiguration
 
         FileHotkeySeeder.Seed(context);
         MeasurementErrorSeeder.Seed(context);
+        RolePasswordSeeder.Seed(context);
         ErrorProviderLocator.Provider = new MeasurementErrorServices();
 
         Console.ForegroundColor = ConsoleColor.Green;

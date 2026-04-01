@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Entity.UI;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,5 +30,10 @@ namespace DataBaseConfiguration.Context
     /// Таблица настроек отображения информации об устройствах.
     /// </summary>
     public DbSet<DeviceDisplaySettingsModel> DeviceDisplaySettings { get; set; }
+
+    /// <summary>
+    /// Таблица паролей системных ролей.
+    /// </summary>
+    public DbSet<RolePasswordModel> RolePasswords { get; set; }
   }
 }
