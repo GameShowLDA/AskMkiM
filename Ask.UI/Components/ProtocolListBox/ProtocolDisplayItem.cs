@@ -12,7 +12,22 @@ namespace Ask.UI.Components.ProtocolListBox
   /// </summary>
   public sealed class ProtocolDisplayItem : INotifyPropertyChanged
   {
+    /// <summary>
+    /// Указывает, является ли текущий элемент отображения группой,
+    /// содержащей дочерние элементы протокола.
+    /// </summary>
+    /// <remarks>
+    /// Значение <see langword="true"/> означает, что элемент представляет
+    /// сворачиваемый групповой узел.
+    /// </remarks>
     private readonly bool _isGroup;
+
+    /// <summary>
+    /// Хранит текущее состояние развёрнутости группового элемента.
+    /// </summary>
+    /// <remarks>
+    /// Значение <see langword="true"/> означает, что группа раскрыта.
+    /// </remarks>
     private bool _isExpanded = false;
 
     private ProtocolDisplayItem(bool isGroup)
@@ -66,6 +81,10 @@ namespace Ask.UI.Components.ProtocolListBox
       };
     }
 
+    /// <summary>
+    /// Обновляет цвет фона текущего элемента отображения протокола
+    /// в соответствии с его текущим состоянием и связанными данными.
+    /// </summary>
     public void UpdateBackgroundColor()
     {
       if (!IsGroup || Message == null) return;
