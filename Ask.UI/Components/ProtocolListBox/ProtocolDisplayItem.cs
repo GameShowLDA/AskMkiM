@@ -13,7 +13,7 @@ namespace Ask.UI.Components.ProtocolListBox
   public sealed class ProtocolDisplayItem : INotifyPropertyChanged
   {
     private readonly bool _isGroup;
-    private bool _isExpanded = true;
+    private bool _isExpanded = false;
 
     private ProtocolDisplayItem(bool isGroup)
     {
@@ -85,7 +85,7 @@ namespace Ask.UI.Components.ProtocolListBox
       return new ProtocolDisplayItem(true)
       {
         Message = headerModel,
-        IsExpanded = true
+        IsExpanded = false
       };
     }
 
