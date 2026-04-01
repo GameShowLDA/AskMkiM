@@ -620,15 +620,30 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </summary>
     private static string BuildNeProtocolChainString(ChainModel chain, string? directionSign)
     {
-      var chainStr = PointFormater.GetFormatConnectPoint(chain);
-      if (string.IsNullOrEmpty(directionSign))
+      if (chain.PointModels.Count == 0)
       {
-        return chainStr;
+        return string.Empty;
       }
 
-      return chainStr.StartsWith("*", StringComparison.Ordinal)
-        ? $"*{directionSign}{chainStr[1..]}"
-        : $"{directionSign}{chainStr}";
+      var parts = new List<string>(chain.PointModels.Count);
+
+      for (int index = 0; index < chain.PointModels.Count; index++)
+      {
+        var point = chain.PointModels[index];
+        var machineAddress = DeviceDisplayConfig.GetMachineAddressVisibility()
+          ? $" [{point}]"
+          : string.Empty;
+
+        var pointText = $"{point.Mnemonic}{machineAddress}";
+        if (index == 0 && !string.IsNullOrEmpty(directionSign))
+        {
+          pointText = $"{directionSign}{pointText}";
+        }
+
+        parts.Add(pointText);
+      }
+
+      return string.Join(", ", parts);
     }
 
     /// <summary>
