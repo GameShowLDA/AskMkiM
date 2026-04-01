@@ -50,6 +50,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// <summary>
     /// Определяет, соответствует ли измеренное значение перегрузке прибора.
     /// </summary>
-    private static bool IsOverloadValue(double value) => value >= 9.9E+37;
+    private static bool IsOverloadValue(double value) => MeasurementValueFormatter.IsOverloadValue(value);
   }
 }

@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -90,7 +91,7 @@ namespace Ask.Core.Services.Errors.Translation
       [CallerLineNumber] int callerLine = 0) => new()
       {
         Command = command,
-        MeasureResult = measured.ToString() + " Ом",
+        MeasureResult = MeasurementValueFormatter.FormatWithUnit(measured, "Ом"),
         Code = ErrorCode.Eht_ResistanceOutOfRange,
         SourceLineNumber = sourceLineNumber,
         FormattedLineNumber = formaterLineNumber,

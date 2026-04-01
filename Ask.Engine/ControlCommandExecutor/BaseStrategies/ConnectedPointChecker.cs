@@ -402,7 +402,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
 
       var value = result.FirstFailureValue ?? 0;
-      valueForProtocol = $"{value} {ResolveUnit(context)}";
+      valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
 
       var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
         context.TypeCommand,

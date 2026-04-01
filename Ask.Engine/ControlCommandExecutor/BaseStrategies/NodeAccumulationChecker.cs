@@ -89,7 +89,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
                 PointModel.ConvertToPointStrings(chain.PointModels),
                 PointModel.ConvertToPointStrings(localized.PointModels),
-                measured.Value.ToString(),
+                MeasurementValueFormatter.Format(measured.Value),
                 messageService.GetLastLineNumber(),
                 context.CommandModel.FormattedStartLineNumber));
             }

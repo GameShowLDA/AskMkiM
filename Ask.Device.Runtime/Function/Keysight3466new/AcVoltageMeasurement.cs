@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.Helpers;
 
 namespace Ask.Device.Runtime.Function.Keysight3466new
 {
@@ -57,7 +58,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return param;
+        return MeasurementAdapterHelper.Round(param);
       }
 
       if (!_device.IsConnected)
@@ -70,7 +71,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))
       {
-        return voltage;
+        return MeasurementAdapterHelper.Round(voltage);
       }
 
       throw new FormatException($"Неверный формат ответа прибора при измерении AC-напряжения: '{response}'.");

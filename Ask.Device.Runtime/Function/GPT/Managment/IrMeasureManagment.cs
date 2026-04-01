@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
+using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
@@ -56,7 +57,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       IUserInteractionService? userMessageService = null)
     {
       if (await _getIsIdleMode())
-        return (param, string.Empty);
+        return (MeasurementAdapterHelper.Round(param), string.Empty);
 
       await StopMeasure();
       await Task.Delay(_delayBeforeCall);
@@ -170,7 +171,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
       }
 
-      return (value * multiplier, string.Empty);
+      return (MeasurementAdapterHelper.Round(value * multiplier), string.Empty);
     }
 
     /// <inheritdoc />

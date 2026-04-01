@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
+using Ask.Device.Runtime.Function.Helpers;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 
@@ -53,7 +54,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         waitFullTime = true;
       }
 
-      return await MeasureHelper.MeasureAsync(
+      var measurement = await MeasureHelper.MeasureAsync(
         _gptModel,
         time,
         timeRamp,
@@ -63,6 +64,8 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         rangeTo,
         waitFullTime,
         userMessageService);
+
+      return (MeasurementAdapterHelper.Round(measurement.value), measurement.unit);
     }
 
     /// <inheritdoc />
