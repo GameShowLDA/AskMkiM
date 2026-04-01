@@ -370,6 +370,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
           DisplayItems[index] = group;
           _currentGroup = group;
+          group.UpdateBackgroundColor();
         }
         else
         {
@@ -384,6 +385,7 @@ namespace Ask.UI.Components.ProtocolListBox
       if (_currentGroup != null)
       {
         _currentGroup.Children.Add(lineItem);
+        _currentGroup.UpdateBackgroundColor();
         return;
       }
 
@@ -406,6 +408,7 @@ namespace Ask.UI.Components.ProtocolListBox
       if (lastRoot.IsGroup && lastRoot.Children.Count > 0)
       {
         lastRoot.Children.RemoveAt(lastRoot.Children.Count - 1);
+        lastRoot.UpdateBackgroundColor();
       }
       else
       {
@@ -428,6 +431,14 @@ namespace Ask.UI.Components.ProtocolListBox
       foreach (var message in Messages)
       {
         AppendToDisplayItems(message);
+      }
+
+      foreach (var item in DisplayItems)
+      {
+        if (item.IsGroup)
+        {
+          item.UpdateBackgroundColor();
+        }
       }
     }
 

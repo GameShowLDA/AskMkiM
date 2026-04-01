@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace Ask.UI.Components.ProtocolListBox
 {
@@ -63,6 +64,17 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         Message = model
       };
+    }
+
+    public void UpdateBackgroundColor()
+    {
+      if (!IsGroup || Message == null) return;
+
+      bool hasError = Children.Any(child => child.Message?.Status == ShowMessageModel.MessageType.Error);
+
+      Color backgroundColor = hasError ? Colors.Red : Colors.Green;
+
+      Message.HeaderBackgroundColor = backgroundColor;
     }
 
     /// <summary>
