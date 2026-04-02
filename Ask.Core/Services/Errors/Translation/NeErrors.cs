@@ -230,20 +230,5 @@ namespace Ask.Core.Services.Errors.Translation
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Не удалось распознать параметры: {parameters}"
       };
-
-    /// <summary>
-    /// Ошибка: для блока точек команды НЭ не указана полярность.
-    /// </summary>
-    public static ErrorItem MissingPolarity(int startLineNumber, string command, string pointsBlock,
-      [CallerMemberName] string callerName = "",
-      [CallerFilePath] string callerFile = "",
-      [CallerLineNumber] int callerLine = 0) => new()
-      {
-        SourceLineNumber = startLineNumber,
-        Command = command,
-        Code = ErrorCode.Ne_CannotParseParameters,
-        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Для блока точек {pointsBlock} не указана полярность '+' или '-'."
-      };
   }
 }

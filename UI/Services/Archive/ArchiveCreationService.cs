@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.FilesUtility;
+using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using System.IO.Compression;
 using static Ask.LogLib.LoggerUtility;
@@ -12,7 +13,7 @@ namespace UI.Services.Archive
     public string Create(string archiveName)
     {
       var normalizedArchiveName = NormalizeArchiveName(archiveName);
-      var archivesDirectoryPath = ArchiveDirectoryService.ResolveArchivesRootPath();
+      var archivesDirectoryPath = EnsureArchivesDirectory();
       var archivePath = Path.Combine(archivesDirectoryPath, normalizedArchiveName + ArchiveExtension);
 
       if (File.Exists(archivePath))
@@ -32,6 +33,21 @@ namespace UI.Services.Archive
 
       return archivePath;
     }
+
+    private string EnsureArchivesDirectory()
+    {
+      var baseDir = new DirectoryInfo(AppContext.BaseDirectory);
+      var archivesDirectoryPath = Path.Combine(baseDir.FullName, FileLocations.ArchiveDirectory);
+      var directoryInfo = Directory.CreateDirectory(archivesDirectoryPath);
+     
+      if ((directoryInfo.Attributes & FileAttributes.Hidden) == 0)
+      {
+          directoryInfo.Attributes |= FileAttributes.Hidden;
+      }
+
+      return directoryInfo.FullName;
+    }
+
     private static string NormalizeArchiveName(string archiveName)
     {
       if (string.IsNullOrWhiteSpace(archiveName))

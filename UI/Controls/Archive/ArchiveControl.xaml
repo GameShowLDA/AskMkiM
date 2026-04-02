@@ -397,7 +397,7 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Resources>
-                    
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*"  MinHeight="0"/>
@@ -509,11 +509,11 @@
                                    BasedOn="{StaticResource ArchiveFilesDataGridScrollBarStyle}" >
                                 <Style.Triggers>
 
-                                <!-- ГОРИЗОНТАЛЬНЫЙ -->
-                                <Trigger Property="Orientation" Value="Horizontal">
-                                    <Setter Property="Cursor" Value="SizeWE" />
-                                    <Setter Property="Height" Value="Auto" />
-                                    <Setter Property="Width" Value="Auto" />
+                                    <!-- ГОРИЗОНТАЛЬНЫЙ -->
+                                    <Trigger Property="Orientation" Value="Horizontal">
+                                        <Setter Property="Cursor" Value="SizeWE" />
+                                        <Setter Property="Height" Value="Auto" />
+                                        <Setter Property="Width" Value="Auto" />
                                         <Setter Property="Template"
                         Value="{StaticResource ArchiveFilesHorizontalScrollBarTemplate}" />
                                     </Trigger>
@@ -596,7 +596,7 @@
                   ResizeBehavior="PreviousAndNext"
                 BorderThickness="0"
                   Background="{DynamicResource VioletColorSolidColorBrush}"/>
-            
+
             <Border x:Name="EditorPanel"
             Grid.Row="2"
             Background="{DynamicResource BackgroundBrushes}"

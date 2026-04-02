@@ -247,7 +247,6 @@
                                     <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               Style="{StaticResource MarkingCheckBox}"
                                               VerticalAlignment="Center"
-                                              Focusable="False"
                                               Click="BreakpointEnabled_Click"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

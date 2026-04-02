@@ -1,4 +1,4 @@
-using Ask.Core.Shared.DTO.Settings;
+﻿using DataBaseConfiguration.Context;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,7 +19,7 @@ namespace MainWindowProgram.HotkeyBindings
     /// <summary>
     /// Привязывает горячие клавиши к пунктам меню, основываясь на Tag и ActionName.
     /// </summary>
-    public static void Attach(MainWindow window, object dataContext, IReadOnlyCollection<FileHotkeyDto> hotkeys)
+    public static void Attach(MainWindow window, object dataContext, AppDbContext context)
     {
       if (window.mainMenu != null)
       {
@@ -39,6 +39,7 @@ namespace MainWindowProgram.HotkeyBindings
         LogInformation($"🍔 Меню найдено: Name={menu.Name}, Items.Count={menu.Items.Count}");
       }
 
+      var hotkeys = context.FileHotKeys.ToList();
       var converter = new KeyGestureConverter();
       var menuItems = FindLogicalChildren<MenuItem>(window).ToList();
 
@@ -78,6 +79,7 @@ namespace MainWindowProgram.HotkeyBindings
         }
       }
 
+      // Добавляем глобальную обработку Ctrl+Shift+№ и Ctrl+№
       ComponentDispatcher.ThreadPreprocessMessage += (ref MSG msg, ref bool handled) =>
       {
         ProcessHierarchyKeyCombination(menuItems, msg, ref handled);
@@ -97,6 +99,7 @@ namespace MainWindowProgram.HotkeyBindings
 
       var key = KeyInterop.KeyFromVirtualKey((int)msg.wParam);
 
+      // Ctrl+Shift+N — открыть верхнее меню
       if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
       {
         if (key >= Key.D1 && key <= Key.D9)
@@ -116,6 +119,7 @@ namespace MainWindowProgram.HotkeyBindings
           }
         }
       }
+      // Ctrl+N — открыть или выполнить подпункт
       else if (Keyboard.Modifiers == ModifierKeys.Control && _currentOpenMenu != null)
       {
         if (key >= Key.D1 && key <= Key.D9)
@@ -272,7 +276,6 @@ namespace MainWindowProgram.HotkeyBindings
         }
       }
     }
-
     public static void RenumberVisibleMenuItemsWithUid(MenuItem menuItem, string uidPrefix)
     {
       if (!menuItem.HasItems)
@@ -298,6 +301,7 @@ namespace MainWindowProgram.HotkeyBindings
         }
         else
         {
+          // Очистка Uid и Header, чтобы не участвовали в логике
           mi.Uid = string.Empty;
           mi.Header = StripHeaderText(mi.Header?.ToString());
 
@@ -343,5 +347,6 @@ namespace MainWindowProgram.HotkeyBindings
         };
       }
     }
+
   }
 }

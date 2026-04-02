@@ -59,14 +59,11 @@ namespace MainWindowProgram.Services
     private static Dictionary<int, string> BuildNumCommandWithMnemonic(IEnumerable<BaseCommandModel> models)
     {
       var result = new Dictionary<int, string>();
+      int commandNumber;
 
       foreach (var model in models)
       {
-        if (!int.TryParse(model.CommandNumber, out int commandNumber) || commandNumber <= 0)
-        {
-          continue;
-        }
-
+        commandNumber = int.Parse(model.CommandNumber);
         if (result.ContainsKey(commandNumber))
         {
           continue;
@@ -256,21 +253,10 @@ namespace MainWindowProgram.Services
 
       var result = await Task.Run(() =>
       {
-        try
-        {
-          var manager = new CommandTranslationManager();
-          var result = manager.BuildTranslation(text, progress);
-          manager.SetSourseLines(result.Models);
-          return result;
-        }
-        catch (Exception ex)
-        {
-          LogError($"Критическая ошибка фоновой трансляции: {ex}");
-          return CommandTranslationManager.BuildUnexpectedFailureResult(
-              text,
-              ex,
-              "фоновой трансляции");
-        }
+        var manager = new CommandTranslationManager();
+        var result = manager.BuildTranslation(text, progress);
+        manager.SetSourseLines(result.Models);
+        return result;
       });
 
       buildStageUpdatesEnabled = false;
@@ -680,9 +666,8 @@ namespace MainWindowProgram.Services
       var currentItem = foundDockItem.Content as TranslatorItem;
       Dictionary<int, bool> preservedBreakpoints = currentItem != null
           ? currentItem.TranslationModels
-              .Where(x => x.HasBreakpoint && int.TryParse(x.CommandNumber, out var number) && number > 0)
-              .GroupBy(x => int.Parse(x.CommandNumber))
-              .ToDictionary(group => group.Key, group => group.First().IsBreakpointEnabled)
+              .Where(x => x.HasBreakpoint)
+              .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled)
           : new Dictionary<int, bool>();
 
       SetDeferredVisibility(currentItem, false);

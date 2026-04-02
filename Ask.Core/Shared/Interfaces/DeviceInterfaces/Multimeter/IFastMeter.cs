@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
@@ -7,7 +6,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
   /// <summary>
   /// Интерфейс для быстрого измерителя.
   /// </summary>
-  public interface IFastMeter : IAttachableDevice, IDeviceToDtoConverter<FastMeterDto>
+  public interface IFastMeter : IAttachableDevice
   {
     MultimeterTypeMode TypeMode { get; set; }
 

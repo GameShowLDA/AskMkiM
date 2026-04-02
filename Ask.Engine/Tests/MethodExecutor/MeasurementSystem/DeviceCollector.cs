@@ -1,8 +1,9 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
+using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
 {
@@ -21,20 +22,24 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// </summary>
     /// <param name="startPoint">Начальная точка диапазона (A.B.C).</param>
     /// <param name="endPoint">Конечная точка диапазона (A.B.C).</param>
-    public async Task CollectAsync(PointModel startPoint, PointModel endPoint)
+    public void Collect(PointModel startPoint, PointModel endPoint)
     {
       Devices.Clear();
-      var relayModules = RelayModuleHelper.GetModulesByRangeAsync(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber).GetAwaiter().GetResult();
+
+      var deviceBusCommutationRepo = new SwitchingDeviceServices();
+      var breakdownRepo = ServiceLocator.GetRequired<BreakdownTesterServices>();
+
+      var relayModules = RelayModuleHelper.GetModulesByRange(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber);
 
       Devices.AddRange(relayModules);
 
-      var deviceBusCommutation = (await SwitchingDevices.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber)).FirstOrDefault();
+      var deviceBusCommutation = deviceBusCommutationRepo.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
       if (deviceBusCommutation != null)
       {
         Devices.Add(deviceBusCommutation);
       }
 
-      var breakdown = BreakdownTesters.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
+      var breakdown = breakdownRepo.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
       if (breakdown != null)
       {
         Devices.Add(breakdown);

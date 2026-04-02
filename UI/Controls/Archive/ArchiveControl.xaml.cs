@@ -862,7 +862,7 @@ namespace UI.Controls.Archive
       _contextMenuNode = null;
     }
 
-    private async Task<(IReadOnlyList<ArchiveEntryInfo> entries, string archivePath)>EnsureEntriesForPrintAsync()
+    private async Task<(IReadOnlyList<ArchiveEntryInfo> entries, string archivePath)> EnsureEntriesForPrintAsync()
     {
       var node = GetNodeForPrint();
 
@@ -893,7 +893,7 @@ namespace UI.Controls.Archive
 
       if (entries == null || entries.Count == 0)
       {
-        MessageBoxCustom.Show("Нет данных для печати", "Ошибка печати",MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Нет данных для печати", "Ошибка печати", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 

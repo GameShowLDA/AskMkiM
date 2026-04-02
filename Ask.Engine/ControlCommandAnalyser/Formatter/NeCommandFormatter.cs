@@ -2,7 +2,6 @@
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using static Ask.LogLib.LoggerUtility;
@@ -36,7 +35,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       }
 
       // TODO: заменить на точный измеритель в дальнейшем
-      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      var meter = new DataBaseConfiguration.Services.Device.FastMeterServices().GetAll().FirstOrDefault();
       //var minResistance = Measurement.MeasurementTypeCommand.PR.GetDisplayInfo().LowerLimit;
       if (meter == null)
       {
@@ -109,31 +108,26 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       if (ne.Scheme.GroupModels.Count > 0)
       {
         yield return "\t\tСписок проверяемых точек:";
-        var j = 1;
-
-        for (int i = 0; i < ne.Scheme.GroupModels.Count; i++)
+        if (ne.ElementEnablingType.Count > 0)
         {
-          var groupChains = ne.Scheme.GetPointsConnected(ne.Scheme.GroupModels[i]);
-          if (groupChains == null)
+          var j = 1;
+          for (int i = 0; i < ne.Scheme.GroupModels.Count; i++)
           {
-            continue;
-          }
-
-          foreach (var chains in groupChains.ChainModels)
-          {
-            var enabling = ne.ElementEnablingType
-                .FirstOrDefault(item => ReferenceEquals(item.Item1, chains));
-
-            string str = string.Empty;
-            str += $"\t\t\t{j}. *{ne.ElementEnablingType[j - 1].Item2.GetDescription()}";
-            j++;
-
-            foreach (var point in chains.PointModels)
+            var groupChains = ne.Scheme.GetPointsConnected(ne.Scheme.GroupModels[i]);
+            if (groupChains != null)
             {
-              str += $"{point.Mnemonic}[{point}],";
+              foreach (var chains in groupChains.ChainModels)
+              {
+                string str = string.Empty;
+                str += $"\t\t\t{j}. *{ne.ElementEnablingType[j - 1].Item2.GetDescription()}";
+                j++;
+                foreach (var point in chains.PointModels)
+                {
+                  str += $"{point.Mnemonic}[{point}],";
+                }
+                yield return str.Remove(str.Length - 1);
+              }
             }
-
-            yield return str.Remove(str.Length - 1);
           }
         }
       }

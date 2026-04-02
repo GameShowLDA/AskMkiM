@@ -4,8 +4,9 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using DataBaseConfiguration.Services.Device;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -261,9 +262,9 @@ namespace UI.Components
         return;
       }
 
-      if (!await ups.PowerManager.VerifyPowerAsync())
+      if (!await ups.VerifyPowerAsync())
       {
-        await ups.PowerManager.StartPowerAsync();
+        await ups.StartPowerAsync();
       }
     }
 
@@ -272,7 +273,9 @@ namespace UI.Components
     /// </summary>
     private IUninterruptiblePowerSupply? GetConfiguredUps()
     {
-      return UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault(device => device.NumberChassis == model.Number);
+      return new UninterruptiblePowerSupplyServices()
+        .GetAll()
+        .FirstOrDefault(device => device.NumberChassis == model.Number);
     }
 
     /// <summary>
@@ -425,7 +428,7 @@ namespace UI.Components
     /// </summary>
     private bool TryResolveChassisManager()
     {
-      model = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      model = new ChassisManagerServices().GetAll().FirstOrDefault();
       if (model != null)
       {
         return true;

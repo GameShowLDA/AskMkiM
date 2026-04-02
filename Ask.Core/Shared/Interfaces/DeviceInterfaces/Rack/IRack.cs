@@ -1,7 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.Rack;
-using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
-
-namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack
+﻿namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack
 {
-  public interface IRack : IAttachableDevice, IHeadUnit, IDeviceToDtoConverter<RackDto> { }
+  public interface IRack : IAttachableDevice { }
 }

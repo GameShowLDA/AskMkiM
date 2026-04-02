@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+﻿using Ask.Core.Services.App;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -8,9 +8,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using Ask.DataBase.Engine.Static.Devices;
+using DataBaseConfiguration.Services.Device;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using static Ask.LogLib.LoggerUtility;
@@ -30,8 +29,8 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <summary>
     /// Событие, вызываемое при удалении устройства.
     /// </summary>
-    public event EventHandler<DeviceDto> DeleteEvent;
-    public event EventHandler<DeviceDto> EditEvent;
+    public event EventHandler<IDevice> DeleteEvent;
+    public event EventHandler<IDevice> EditEvent;
 
     /// <summary>
     /// Свойство зависимости для заголовка списка устройств.
@@ -84,7 +83,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// Добавляет устройство в список.
     /// </summary>
     /// <param name="device">Экземпляр устройства.</param>
-    public void AddDevice(DeviceDto device)
+    public void AddDevice(IDevice device)
     {
       Devices.Add(new DeviceWrapper(device));
       UpdateAddButtonVisibility();
@@ -103,13 +102,13 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// Удаляет устройство из списка и базы данных.
     /// </summary>
     /// <param name="deviceWrapper">Экземпляр <see cref="DeviceWrapper"/>.</param>
-    public async Task RemoveDeviceAsync(DeviceWrapper deviceWrapper)
+    public void RemoveDevice(DeviceWrapper deviceWrapper)
     {
       if (Devices.Contains(deviceWrapper))
       {
         Devices.Remove(deviceWrapper);
         UpdateAddButtonVisibility();
-        await RemoveDeviceFromDatabaseAsync(deviceWrapper.Device);
+        RemoveDeviceFromDatabase(deviceWrapper.Device);
         DeleteEvent?.Invoke(this, deviceWrapper.Device);
       }
     }
@@ -118,55 +117,47 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// Удаляет устройство из базы данных в зависимости от его типа.
     /// </summary>
     /// <param name="device">Экземпляр устройства.</param>
-    private async Task RemoveDeviceFromDatabaseAsync(DeviceDto device)
+    private void RemoveDeviceFromDatabase(IDevice device)
     {
       switch (device)
       {
         case ISwitchingDevice:
-          var switchingDevice = SwitchingDevices.Build(device);
-          await SwitchingDevices.DeleteAsync(switchingDevice);
+          new SwitchingDeviceServices().Delete((ISwitchingDevice)device);
           LogInformation("Удаляем устройство из SwitchingDeviceTable");
           break;
 
         case IFastMeter:
-          var fastMeter = FastMeters.Build(device);
-          await FastMeters.DeleteAsync(fastMeter);
+          new FastMeterServices().Delete((IFastMeter)device);
           LogInformation("Удаляем устройство из FastMeterTable");
           break;
 
         case IRelaySwitchModule:
-          var relaySwitchModule = RelaySwitchModules.Build(device);
-          await RelaySwitchModules.DeleteAsync(relaySwitchModule);
+          new RelaySwitchModuleServices().Delete((IRelaySwitchModule)device);
           LogInformation("Удаляем устройство из RelaySwitchModuleTable");
           break;
 
         case IBreakdownTester:
-          var breakdownTester = BreakdownTesters.Build(device);
-          await BreakdownTesters.DeleteAsync(breakdownTester);
+          ServiceLocator.GetRequired<BreakdownTesterServices>().Delete((IBreakdownTester)device);
           LogInformation("Удаляем устройство из BreakdownTesterTable");
           break;
 
         case IChassisManager:
-          var chassisManager = ChassisManagers.Build(device);
-          await ChassisManagers.DeleteAsync(chassisManager);
+          new ChassisManagerServices().Delete((IChassisManager)device);
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
         case IRack:
-          var rack = Racks.Build(device);
-          await Racks.DeleteAsync(rack);
+          new RackServices().Delete((IRack)device);
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
         case IPowerSourceModule:
-          var powerSourceModule = PowerSourceModules.Build(device);
-          await PowerSourceModules.DeleteAsync(powerSourceModule);
+          new PowerSourceModuleServices().Delete((IPowerSourceModule)device);
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
         case IUninterruptiblePowerSupply:
-          var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(device);
-          await UninterruptiblePowerSupplies.DeleteAsync(uninterruptiblePowerSupply);
+          new UninterruptiblePowerSupplyServices().Delete((IUninterruptiblePowerSupply)device);
           LogInformation("Удаляем устройство из UninterruptiblePowerSuppliesTable");
           break;
 
@@ -181,11 +172,11 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Аргументы события.</param>
-    private async void RemoveDeviceButton_Click(object sender, RoutedEventArgs e)
+    private void RemoveDeviceButton_Click(object sender, RoutedEventArgs e)
     {
       if (sender is Button button && button.CommandParameter is DeviceWrapper deviceWrapper)
       {
-        await RemoveDeviceAsync(deviceWrapper);
+        RemoveDevice(deviceWrapper);
       }
     }
 
@@ -241,7 +232,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <summary>
     /// Получает экземпляр устройства.
     /// </summary>
-    public DeviceDto Device { get; }
+    public IDevice Device { get; }
 
     /// <summary>
     /// Получает отображаемое имя устройства.
@@ -252,7 +243,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// Инициализирует новый экземпляр класса <see cref="DeviceWrapper"/>.
     /// </summary>
     /// <param name="device">Экземпляр устройства.</param>
-    public DeviceWrapper(DeviceDto device)
+    public DeviceWrapper(IDevice device)
     {
       Device = device;
     }
