@@ -7,36 +7,52 @@
         ResizeMode="NoResize"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
-        Background="#16202A">
+        Background="#0E141B">
 
     <Window.Resources>
-        <Style x:Key="PlainButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#223040"/>
-            <Setter Property="BorderBrush" Value="#4C6177"/>
+        <SolidColorBrush x:Key="LoginForegroundBrush" Color="#F3F5F8"/>
+        <SolidColorBrush x:Key="LoginMutedForegroundBrush" Color="#ADB4C0"/>
+        <SolidColorBrush x:Key="LoginWeakForegroundBrush" Color="#7A8492"/>
+        <SolidColorBrush x:Key="LoginAccentBrush" Color="#F4D568"/>
+        <SolidColorBrush x:Key="LoginInputBackgroundBrush" Color="#7B7984"/>
+        <SolidColorBrush x:Key="LoginInputForegroundBrush" Color="#F0F2F7"/>
+        <SolidColorBrush x:Key="LoginInputHintBrush" Color="#D0D3DC"/>
+        <SolidColorBrush x:Key="LoginButtonBackgroundBrush" Color="#B7BED4"/>
+        <SolidColorBrush x:Key="LoginButtonForegroundBrush" Color="#4B556A"/>
+        <SolidColorBrush x:Key="LoginButtonHoverBrush" Color="#C3CAE0"/>
+        <SolidColorBrush x:Key="LoginButtonDisabledBrush" Color="#8891A5"/>
+        <SolidColorBrush x:Key="LoginStatusErrorBrush" Color="#F28F8F"/>
+        <SolidColorBrush x:Key="LoginOverlayBrush" Color="#C00B1016"/>
+        <SolidColorBrush x:Key="LoginSpinnerTrackBrush" Color="#4F596B"/>
+        <SolidColorBrush x:Key="LoginSpinnerAccentBrush" Color="#D7DEE9"/>
+
+        <Style x:Key="GhostCloseButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource LoginMutedForegroundBrush}"/>
+            <Setter Property="Background" Value="#14000000"/>
+            <Setter Property="BorderBrush" Value="#22FFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="46"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="18"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
+                                CornerRadius="23">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#2B3B4D"/>
+                                <Setter Property="Background" Value="#1DFFFFFF"/>
+                                <Setter Property="Foreground" Value="{StaticResource LoginForegroundBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#182430"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.55"/>
+                                <Setter Property="Background" Value="#2AFFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -44,190 +60,457 @@
             </Setter>
         </Style>
 
-        <Style x:Key="PlainComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#18202A"/>
-            <Setter Property="BorderBrush" Value="#4C6177"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,6"/>
+        <Style x:Key="RoleListStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{StaticResource LoginForegroundBrush}"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <ItemsPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <Style x:Key="PlainPasswordBoxStyle" TargetType="PasswordBox">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#18202A"/>
-            <Setter Property="BorderBrush" Value="#4C6177"/>
+        <Style x:Key="RoleListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="ItemRoot"
+                                Background="Transparent"
+                                CornerRadius="16"
+                                Padding="4,2">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemRoot" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemRoot" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ItemRoot" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LoginPasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Foreground" Value="{StaticResource LoginInputForegroundBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="0"
+                                      Background="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LoginVisiblePasswordTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{StaticResource LoginInputForegroundBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="CaretBrush" Value="{StaticResource LoginInputForegroundBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="PasswordAuxButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource LoginForegroundBrush}"/>
+            <Setter Property="Background" Value="#20FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#26FFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#34FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#46FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="KeyboardLayoutButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource PasswordAuxButtonStyle}">
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="LoginButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource LoginButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{StaticResource LoginButtonBackgroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="24"
+                                Height="48">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource LoginButtonHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.92"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#636D80"/>
+                                <Setter Property="Background" Value="{StaticResource LoginButtonDisabledBrush}"/>
+                                <Setter Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
     <Grid>
         <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#16202A" Offset="0"/>
-                <GradientStop Color="#243241" Offset="0.55"/>
-                <GradientStop Color="#101820" Offset="1"/>
-            </LinearGradientBrush>
+            <RadialGradientBrush Center="0.36,0.58"
+                                 GradientOrigin="0.36,0.58"
+                                 RadiusX="0.46"
+                                 RadiusY="0.58">
+                <GradientStop Color="#6E625E64" Offset="0"/>
+                <GradientStop Color="#38292A2E" Offset="0.38"/>
+                <GradientStop Color="#171A1E23" Offset="0.72"/>
+                <GradientStop Color="#0E11161A" Offset="1"/>
+            </RadialGradientBrush>
         </Grid.Background>
 
-        <Border HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Width="560"
-                Padding="36"
-                CornerRadius="22"
-                Background="#CC2A3440"
-                BorderBrush="#556B82"
-                BorderThickness="1">
-            <Grid>
-                <Grid x:Name="LoginPanel">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        <Ellipse Width="940"
+                 Height="940"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Bottom"
+                 Margin="-320,0,0,-420"
+                 IsHitTestVisible="False"
+                 Opacity="0.42">
+            <Ellipse.Fill>
+                <RadialGradientBrush Center="0.54,0.44"
+                                     GradientOrigin="0.54,0.44">
+                    <GradientStop Color="#8A874B46" Offset="0"/>
+                    <GradientStop Color="#24503B38" Offset="0.48"/>
+                    <GradientStop Color="#00000000" Offset="1"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
 
-                    <Image Grid.Row="0"
-                           Source="/Resources/logo.png"
-                           Width="88"
-                           Height="88"
-                           Margin="0,0,0,18"
-                           HorizontalAlignment="Center"/>
+        <Ellipse Width="880"
+                 Height="880"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Top"
+                 Margin="0,-360,-260,0"
+                 IsHitTestVisible="False"
+                 Opacity="0.22">
+            <Ellipse.Fill>
+                <RadialGradientBrush Center="0.46,0.42"
+                                     GradientOrigin="0.46,0.42">
+                    <GradientStop Color="#5A2E4F69" Offset="0"/>
+                    <GradientStop Color="#15253D4E" Offset="0.54"/>
+                    <GradientStop Color="#00000000" Offset="1"/>
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
 
-                    <TextBlock Grid.Row="1"
-                               Text="Вход в систему"
-                               FontSize="28"
-                               FontWeight="SemiBold"
-                               Foreground="White"
-                               HorizontalAlignment="Center"/>
+        <Button x:Name="CancelButton"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,28,28,0"
+                Style="{StaticResource GhostCloseButtonStyle}"
+                Content="✕"
+                IsCancel="True"
+                Click="CancelButton_Click"/>
 
-                    <TextBlock Grid.Row="2"
-                               Margin="0,10,0,26"
-                               Text="Выберите роль и введите пароль"
+        <Grid Margin="48,40,72,56">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0"
+                  VerticalAlignment="Bottom"
+                  Margin="0,0,0,28">
+                <StackPanel>
+                    <TextBlock Text="Выбор учётной записи"
+                               Margin="0,0,0,18"
                                FontSize="16"
-                               Foreground="#C2CEDA"
-                               HorizontalAlignment="Center"/>
+                               Foreground="{StaticResource LoginWeakForegroundBrush}"/>
 
-                    <TextBlock Grid.Row="3"
-                               Text="Роль"
-                               Margin="0,0,0,8"
-                               FontSize="16"
-                               Foreground="#DCE6F0"/>
+                    <ListBox x:Name="RolesListBox"
+                             Style="{StaticResource RoleListStyle}"
+                             ItemContainerStyle="{StaticResource RoleListItemStyle}"
+                             SelectionChanged="RolesListBox_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                    <ComboBox x:Name="RolesComboBox"
-                              Grid.Row="4"
-                              Style="{StaticResource PlainComboBoxStyle}"
-                              Height="42"
-                              DisplayMemberPath="DisplayName"
-                              SelectionChanged="RolesComboBox_SelectionChanged"/>
+                                    <Border Width="22"
+                                            Height="22"
+                                            VerticalAlignment="Center"
+                                            Background="Transparent">
+                                        <TextBlock x:Name="RoleGlyph"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="16"
+                                                   Text="&#xE77B;"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{StaticResource LoginForegroundBrush}"/>
+                                    </Border>
 
-                    <StackPanel Grid.Row="5"
-                                Margin="0,20,0,0">
-                        <TextBlock Text="Пароль"
-                                   Margin="0,0,0,8"
-                                   FontSize="16"
-                                   Foreground="#DCE6F0"/>
+                                    <TextBlock x:Name="RoleText"
+                                               Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               FontSize="16"
+                                               Text="{Binding DisplayName}"
+                                               Foreground="{StaticResource LoginForegroundBrush}"/>
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                        <Setter TargetName="RoleGlyph" Property="Foreground" Value="{StaticResource LoginAccentBrush}"/>
+                                        <Setter TargetName="RoleText" Property="Foreground" Value="{StaticResource LoginAccentBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="False">
+                                        <Setter TargetName="RoleText" Property="Opacity" Value="0.94"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Grid>
 
-                        <PasswordBox x:Name="PasswordBox"
-                                     Style="{StaticResource PlainPasswordBoxStyle}"
-                                     Height="42"
-                                     PasswordChanged="PasswordBox_PasswordChanged"/>
-                    </StackPanel>
+            <Grid Grid.Column="1">
+                <Grid x:Name="LoginPanel"
+                      Width="360"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+                    <StackPanel>
+                        <Border Width="82"
+                                Height="82"
+                                Margin="0,0,0,18"
+                                HorizontalAlignment="Center"
+                                BorderBrush="#9EA7B8"
+                                BorderThickness="1"
+                                CornerRadius="41">
+                            <Grid>
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="36"
+                                           Text="&#xE77B;"
+                                           Foreground="#C4CBDA"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
 
-                    <TextBlock x:Name="StatusTextBlock"
-                               Grid.Row="6"
-                               Margin="0,18,0,0"
-                               TextWrapping="Wrap"
-                               FontSize="12"
-                               Foreground="#FF9A9A"/>
+                        <TextBlock x:Name="SelectedRoleNameTextBlock"
+                                   Margin="0,0,0,30"
+                                   HorizontalAlignment="Center"
+                                   FontSize="18"
+                                   Foreground="{StaticResource LoginMutedForegroundBrush}"
+                                   Text="Выберите роль"/>
 
-                    <Grid Grid.Row="7"
-                          Margin="0,26,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                        <Border Height="48"
+                                Margin="0,0,0,18"
+                                Background="{StaticResource LoginInputBackgroundBrush}"
+                                CornerRadius="24">
+                            <Grid Margin="14,0,18,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="38"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="36"/>
+                                    <ColumnDefinition Width="54"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Button x:Name="CancelButton"
-                                Grid.Column="0"
-                                Style="{StaticResource PlainButtonStyle}"
-                                Height="42"
-                                Content="Выход"
-                                IsCancel="True"
-                                Click="CancelButton_Click"/>
+                                <Border Width="30"
+                                        Height="30"
+                                        VerticalAlignment="Center"
+                                        Background="#AEB7C9"
+                                        CornerRadius="15">
+                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                               FontSize="15"
+                                               Text="&#xE72E;"
+                                               Foreground="#586176"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+
+                                <PasswordBox x:Name="PasswordBox"
+                                             Grid.Column="1"
+                                             VerticalContentAlignment="Center"
+                                             Style="{StaticResource LoginPasswordBoxStyle}"
+                                             GotFocus="PasswordBox_GotFocus"
+                                             LostFocus="PasswordBox_LostFocus"
+                                             PasswordChanged="PasswordBox_PasswordChanged"/>
+
+                                <TextBox x:Name="VisiblePasswordTextBox"
+                                         Grid.Column="1"
+                                         Visibility="Collapsed"
+                                         Style="{StaticResource LoginVisiblePasswordTextBoxStyle}"
+                                         GotFocus="VisiblePasswordTextBox_GotFocus"
+                                         LostFocus="VisiblePasswordTextBox_LostFocus"
+                                         TextChanged="VisiblePasswordTextBox_TextChanged"/>
+
+                                <TextBlock x:Name="PasswordPlaceholderTextBlock"
+                                           Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           FontSize="18"
+                                           Foreground="{StaticResource LoginInputHintBrush}"
+                                           Text="Пароль"
+                                           IsHitTestVisible="False"/>
+
+                                <Button x:Name="TogglePasswordVisibilityButton"
+                                        Grid.Column="2"
+                                        Margin="4,0,0,0"
+                                        Style="{StaticResource PasswordAuxButtonStyle}"
+                                        ToolTip="Показать пароль"
+                                        Click="TogglePasswordVisibilityButton_Click"
+                                        Content="👁"/>
+
+                                <Button x:Name="KeyboardLayoutButton"
+                                        Grid.Column="3"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource KeyboardLayoutButtonStyle}"
+                                        Click="KeyboardLayoutButton_Click">
+                                    <TextBlock x:Name="KeyboardLayoutTextBlock"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                               Text="RU"/>
+                                </Button>
+                            </Grid>
+                        </Border>
 
                         <Button x:Name="LoginButton"
-                                Grid.Column="2"
-                                Style="{StaticResource PlainButtonStyle}"
-                                Height="42"
+                                Style="{StaticResource LoginButtonStyle}"
                                 Content="Войти"
                                 IsDefault="True"
                                 Click="LoginButton_Click"/>
-                    </Grid>
+
+                        <TextBlock x:Name="StatusTextBlock"
+                                   Margin="0,18,0,0"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   FontSize="13"
+                                   Foreground="{StaticResource LoginStatusErrorBrush}"/>
+                    </StackPanel>
                 </Grid>
 
                 <Grid x:Name="LoadingPanel"
                       Visibility="Collapsed">
-                    <StackPanel HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Width="340">
-                        <Grid Width="104"
-                              Height="104"
-                              Margin="0,0,0,24"
-                              HorizontalAlignment="Center">
-                            <Ellipse Stroke="#365064"
-                                     StrokeThickness="8"
-                                     Opacity="0.35"/>
+                    <Border Background="{StaticResource LoginOverlayBrush}"
+                            CornerRadius="28"
+                            Width="400"
+                            Height="260"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <Grid Width="92"
+                                  Height="92"
+                                  Margin="0,12,0,22"
+                                  HorizontalAlignment="Center">
+                                <Ellipse Stroke="{StaticResource LoginSpinnerTrackBrush}"
+                                         StrokeThickness="7"
+                                         Opacity="0.35"/>
 
-                            <Path Stroke="#8AD8FF"
-                                  StrokeThickness="8"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  Data="M 52,8 A 44,44 0 0 1 96,52">
-                                <Path.RenderTransform>
-                                    <RotateTransform x:Name="SpinnerRotateTransform"
-                                                     CenterX="52"
-                                                     CenterY="52"/>
-                                </Path.RenderTransform>
-                                <Path.Triggers>
-                                    <EventTrigger RoutedEvent="Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard RepeatBehavior="Forever">
-                                                <DoubleAnimation Storyboard.TargetName="SpinnerRotateTransform"
-                                                                 Storyboard.TargetProperty="Angle"
-                                                                 From="0"
-                                                                 To="360"
-                                                                 Duration="0:0:1"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Path.Triggers>
-                            </Path>
-                        </Grid>
+                                <Path Stroke="{StaticResource LoginSpinnerAccentBrush}"
+                                      StrokeThickness="7"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Data="M 46,8 A 38,38 0 0 1 84,46">
+                                    <Path.RenderTransform>
+                                        <RotateTransform x:Name="SpinnerRotateTransform"
+                                                         CenterX="46"
+                                                         CenterY="46"/>
+                                    </Path.RenderTransform>
+                                    <Path.Triggers>
+                                        <EventTrigger RoutedEvent="Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="SpinnerRotateTransform"
+                                                                     Storyboard.TargetProperty="Angle"
+                                                                     From="0"
+                                                                     To="360"
+                                                                     Duration="0:0:1"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Path.Triggers>
+                                </Path>
+                            </Grid>
 
-                        <TextBlock Text="Подготовка рабочего места"
-                                   FontSize="22"
-                                   FontWeight="SemiBold"
-                                   Foreground="White"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"/>
+                            <TextBlock Text="Подготовка рабочего места"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource LoginForegroundBrush}"
+                                       HorizontalAlignment="Center"/>
 
-                        <TextBlock x:Name="LoadingStatusTextBlock"
-                                   Margin="0,14,0,0"
-                                   FontSize="13"
-                                   Foreground="#C2CEDA"
-                                   HorizontalAlignment="Center"
-                                   TextAlignment="Center"
-                                   TextWrapping="Wrap"
-                                   Text="Загрузка модулей приложения..."/>
-                    </StackPanel>
+                            <TextBlock x:Name="LoadingStatusTextBlock"
+                                       Margin="0,14,0,0"
+                                       Width="280"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       FontSize="14"
+                                       Foreground="{StaticResource LoginMutedForegroundBrush}"
+                                       Text="Загрузка модулей приложения..."/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </Grid>
-        </Border>
+        </Grid>
     </Grid>
 </Window>
