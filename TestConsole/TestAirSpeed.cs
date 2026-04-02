@@ -1,5 +1,5 @@
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Communication.Ethernet.Udp.Protocols;
-using DataBaseConfiguration.Services.Device;
 
 namespace TestConsole
 {
@@ -7,7 +7,7 @@ namespace TestConsole
   {
     public static async Task RunAsync()
     {
-      var manager = new ChassisManagerServices().GetByNumber(1);
+      var manager = ChassisManagers.GetByNumberAsync(1).GetAwaiter().GetResult();
       await manager.PowerManager.StartPowerAsync();
 
       await Task.Delay(5000);

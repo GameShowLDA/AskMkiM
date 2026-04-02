@@ -1,8 +1,9 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -15,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
   public partial class DeviceBusCommutationWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private SwitchingDeviceEntity? _editingEntity;
+    private SwitchingDeviceDto? _editingDto;
 
     /// <summary>
     /// Событие запроса закрытия окна.
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
     /// <summary>
     /// Событие запроса сохранения данных устройства.
     /// </summary>
-    public event EventHandler<SwitchingDeviceEntity> RequestSave;
+    public event EventHandler<SwitchingDeviceDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceBusCommutationWindow"/>.
@@ -61,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, SwitchingDeviceEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, SwitchingDeviceDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Устройство коммутации шин";
       deviceSettingsWindow.LoadDeviceModels<ISwitchingDevice>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -72,31 +73,38 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        SwitchingDeviceEntity deviceEntity = processor.ProcessDevice<SwitchingDeviceEntity>(
+        SwitchingDeviceDto deviceDto = processor.ProcessDevice<SwitchingDeviceDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto != null)
             {
-              new SwitchingDeviceServices().Create(deviceEntity);
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var switching = SwitchingDevices.Build(deviceDto);
+
+            if (_editingDto == null)
+            {
+              var createdDevice = await SwitchingDevices.CreateAsync(switching);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              new SwitchingDeviceServices().Update(deviceEntity);
+              await SwitchingDevices.UpdateAsync(switching);
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

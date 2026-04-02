@@ -1,8 +1,9 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -15,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
   public partial class ModuleVoltageCurrentSourceWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private PowerSourceModuleEntity? _editingEntity;
+    private PowerSourceModuleDto? _editingDto;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     /// <summary>
     /// Событие, вызываемое при сохранении данных модуля источника питания.
     /// </summary>
-    public event EventHandler<PowerSourceModuleEntity> RequestSave;
+    public event EventHandler<PowerSourceModuleDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleVoltageCurrentSourceWindow"/>.
@@ -61,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, PowerSourceModuleEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, PowerSourceModuleDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "МИНТ";
       deviceSettingsWindow.LoadDeviceModels<IPowerSourceModule>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -72,31 +73,38 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        PowerSourceModuleEntity deviceEntity = processor.ProcessDevice<PowerSourceModuleEntity>(
+        PowerSourceModuleDto deviceDto = processor.ProcessDevice<PowerSourceModuleDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto != null)
             {
-              new PowerSourceModuleServices().Create(deviceEntity);
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var powerSourceModule = PowerSourceModules.Build(deviceDto);
+
+            if (_editingDto == null)
+            {
+              var createdDevice = await PowerSourceModules.CreateAsync(powerSourceModule);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              new PowerSourceModuleServices().Update(deviceEntity);
+              await PowerSourceModules.UpdateAsync(powerSourceModule);
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

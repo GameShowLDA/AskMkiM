@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
 using System.Diagnostics;
 
 namespace TestConsole.GPT
@@ -226,7 +226,7 @@ namespace TestConsole.GPT
 
     private static IBreakdownTester SelectBreakdownTester()
     {
-      var dbc = new BreakdownTesterServices().GetAll();
+      var dbc = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
 
       if (dbc == null || !dbc.Any())
       {
@@ -257,7 +257,7 @@ namespace TestConsole.GPT
 
     private static async Task TestStop()
     {
-      var tester = new BreakdownTesterServices().GetDevicesByNumberChassis(1).FirstOrDefault();
+      var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(1).GetAwaiter().GetResult().FirstOrDefault();
       if (tester != null)
       {
         await tester.IrManger.Measure.StopMeasure();

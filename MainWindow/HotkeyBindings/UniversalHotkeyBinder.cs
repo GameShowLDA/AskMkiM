@@ -1,4 +1,4 @@
-﻿using DataBaseConfiguration.Context;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Globalization;
 using System.Windows;
@@ -18,11 +18,11 @@ namespace MainWindowProgram.HotkeyBindings
     private static readonly Dictionary<string, List<Func<bool>>> Map = new(StringComparer.OrdinalIgnoreCase);
     private static bool _attached;
 
-    public static void Attach(MainWindow window, AppDbContext context)
+    public static void Attach(MainWindow window, IReadOnlyCollection<FileHotkeyDto> hotkeys)
     {
       Map.Clear();
 
-      var records = context.FileHotKeys.Where(x => x.IsEnabled).ToList();
+      var records = hotkeys.Where(x => x.IsEnabled).ToList();
       var elements = FindLogicalChildren<FrameworkElement>(window).ToList();
       var occupiedCombos = GetExistingInputBindingCombos(window);
 
@@ -51,15 +51,14 @@ namespace MainWindowProgram.HotkeyBindings
           continue;
         }
 
-        // ⬇️ добавь это — выставим подсказку на контрол
         SetHotkeyTooltip(element, normalized, element is MenuItem);
 
-        // индексируем действие
         if (!Map.TryGetValue(normalized, out var list))
         {
           list = new List<Func<bool>>();
           Map[normalized] = list;
         }
+
         list.Add(invoker);
       }
 
@@ -115,7 +114,6 @@ namespace MainWindowProgram.HotkeyBindings
         {
           var cmd = cmdSrc.Command;
           var param = cmdSrc.CommandParameter;
-          var target = cmdSrc.CommandTarget;
           if (cmd == null) return false;
           if (!cmd.CanExecute(param)) return false;
           cmd.Execute(param);
@@ -151,7 +149,6 @@ namespace MainWindowProgram.HotkeyBindings
         {
           try
           {
-            // Ищем метод PowerButtonClick без параметров
             var m = element.GetType().GetMethod("PowerButtonClick",
               System.Reflection.BindingFlags.Instance |
               System.Reflection.BindingFlags.Public |
@@ -160,7 +157,6 @@ namespace MainWindowProgram.HotkeyBindings
             if (m == null)
               return false;
 
-            // Если возвращает Task — запускаем асинхронно через Dispatcher
             if (typeof(Task).IsAssignableFrom(m.ReturnType))
             {
               element.Dispatcher.InvokeAsync(async () =>
@@ -175,13 +171,14 @@ namespace MainWindowProgram.HotkeyBindings
             }
             return true;
           }
-          catch { return false; }
+          catch
+          {
+            return false;
+          }
         };
         return true;
       }
 
-      // 3) Общий fallback для любых UserControl:
-      //    пробуем найти "кликабельный" метод по популярным именам.
       var candidateNames = new[] { "PowerButtonClick", "Click", "OnClick", "PerformClick", "Invoke", "Execute" };
       var mi = candidateNames
         .Select(name => element.GetType().GetMethod(name,
@@ -213,16 +210,17 @@ namespace MainWindowProgram.HotkeyBindings
             }
             return true;
           }
-          catch { return false; }
+          catch
+          {
+            return false;
+          }
         };
         return true;
       }
 
-      // 4) Нечего вызвать
       invoker = null!;
       return false;
     }
-
 
     private static bool TryParseCombo(string text, out Key key, out ModifierKeys mods)
     {
