@@ -5,34 +5,35 @@ using DataBaseConfiguration.Context;
 namespace DataBaseConfiguration.Services.Settings
 {
   /// <summary>
-  /// Выполняет инициализацию таблицы паролей ролей значениями по умолчанию.
+  /// Seeds default role passwords and keeps the role list in sync with current application roles.
   /// </summary>
   internal static class RolePasswordSeeder
   {
     private const string DefaultPassword = "test";
+
     private static readonly IReadOnlyDictionary<RoleType, string> DefaultRoleDisplayNames = new Dictionary<RoleType, string>
     {
       [RoleType.Administrator] = "Администратор",
-      [RoleType.Metrology] = "Метрология",
-      [RoleType.SystemMaintenance] = "Обслуживание системы",
+      [RoleType.Adjuster] = "Регулировщик",
       [RoleType.Developer] = "Разработчик",
     };
 
-    /// <summary>
-    /// Создаёт записи для системных ролей, если они отсутствуют.
-    /// </summary>
-    /// <param name="context">Контекст базы данных.</param>
     public static void Seed(AppDbContext context)
     {
-      var defaultRoles = new[]
-      {
-        RoleType.Administrator,
-        RoleType.Metrology,
-        RoleType.SystemMaintenance,
-        RoleType.Developer,
-      };
+      var validRoleValues = DefaultRoleDisplayNames.Keys
+        .Select(role => (int)role)
+        .ToHashSet();
 
-      foreach (var role in defaultRoles)
+      var obsoleteRoles = context.RolePasswords
+        .Where(x => !validRoleValues.Contains((int)x.Role))
+        .ToList();
+
+      if (obsoleteRoles.Count > 0)
+      {
+        context.RolePasswords.RemoveRange(obsoleteRoles);
+      }
+
+      foreach (var role in DefaultRoleDisplayNames.Keys)
       {
         var entity = context.RolePasswords.FirstOrDefault(x => x.Role == role);
         if (entity == null)

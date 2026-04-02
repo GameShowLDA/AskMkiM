@@ -43,6 +43,37 @@ namespace UI.Components.MultiEditorMethods
     }
 
     /// <summary>
+    /// Закрывает все открытые вкладки.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c>, если удалось закрыть все вкладки;
+    /// <c>false</c>, если пользователь прервал закрытие одной из вкладок.
+    /// </returns>
+    public async Task<bool> RemoveAllControlsAsync()
+    {
+      SearchEventAdapter.RaiseCloseSearchWindow();
+
+      while (fileManager.EditorWorkspaceModel.OpenPages.Count > 0
+        && fileManager.EditorWorkspaceModel.UserControls.Count > 0)
+      {
+        var index = fileManager.EditorWorkspaceModel.OpenPages.Count - 1;
+        var tab = fileManager.EditorWorkspaceModel.OpenPages[index];
+        var control = fileManager.EditorWorkspaceModel.UserControls[index];
+
+        await RemoveControl(tab, control);
+
+        if (fileManager.EditorWorkspaceModel.OpenPages.Contains(tab)
+          || fileManager.EditorWorkspaceModel.UserControls.Contains(control))
+        {
+          return false;
+        }
+      }
+
+      return fileManager.EditorWorkspaceModel.OpenPages.Count == 0
+        && fileManager.EditorWorkspaceModel.UserControls.Count == 0;
+    }
+
+    /// <summary>
     /// Удаляет указанный элемент управления и соответствующую вкладку.
     /// </summary>
     /// <param name="tabButton">Вкладка для удаления.</param>

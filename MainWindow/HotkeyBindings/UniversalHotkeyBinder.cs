@@ -3,6 +3,7 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
 
@@ -108,7 +109,7 @@ namespace MainWindowProgram.HotkeyBindings
     {
       invoker = null!;
 
-      if (element is ICommandSource cmdSrc)
+      if (element is ICommandSource cmdSrc && cmdSrc.Command != null)
       {
         invoker = () =>
         {
@@ -119,6 +120,26 @@ namespace MainWindowProgram.HotkeyBindings
           if (!cmd.CanExecute(param)) return false;
           cmd.Execute(param);
           return true;
+        };
+        return true;
+      }
+
+      if (element is ButtonBase buttonBase)
+      {
+        invoker = () =>
+        {
+          try
+          {
+            buttonBase.Dispatcher.Invoke(() =>
+            {
+              buttonBase.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, buttonBase));
+            });
+            return true;
+          }
+          catch
+          {
+            return false;
+          }
         };
         return true;
       }

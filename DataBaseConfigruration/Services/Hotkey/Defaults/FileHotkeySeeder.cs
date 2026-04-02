@@ -17,22 +17,34 @@ namespace DataBaseConfiguration.Services.Hotkey.Defaults
     {
       foreach (var (actionName, keyCombo) in UiDictonary.DefaultsHotKeys)
       {
-        bool exists = context.FileHotKeys.Any(x => x.ActionName == actionName);
-        if (!exists)
+        var existingHotkey = context.FileHotKeys.FirstOrDefault(x => x.ActionName == actionName);
+        if (existingHotkey == null)
         {
           var entity = new FileHotkeyEntity
           {
             ActionName = actionName,
             KeyCombination = keyCombo,
             IsEnabled = true,
-            Description = null
+            Description = GetDescription(actionName)
           };
 
           context.FileHotKeys.Add(entity);
+          continue;
+        }
+
+        if (string.IsNullOrWhiteSpace(existingHotkey.Description))
+        {
+          existingHotkey.Description = GetDescription(actionName);
         }
       }
 
       context.SaveChanges();
     }
+
+    private static string? GetDescription(string actionName) => actionName switch
+    {
+      "SwitchUser" => "Сменить пользователя",
+      _ => null,
+    };
   }
 }

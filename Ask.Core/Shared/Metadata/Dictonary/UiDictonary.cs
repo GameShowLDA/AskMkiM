@@ -30,6 +30,9 @@
         // Включение питания
         { "Power", "Ctrl+Shift+P" },
 
+        // Смена пользователя
+        { "SwitchUser", "Ctrl+L" },
+
         // Выход
         { "ExitApplication", "Alt+F4" }
       };

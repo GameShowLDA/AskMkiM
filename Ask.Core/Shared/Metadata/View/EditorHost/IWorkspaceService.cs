@@ -28,5 +28,14 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
     /// </summary>
     /// <param name="editorType">Тип вкладки.</param>
     void RemoveControl(EditorType editorType);
+
+    /// <summary>
+    /// Закрывает все открытые вкладки и очищает рабочее пространство.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c>, если все вкладки были закрыты;
+    /// <c>false</c>, если закрытие было прервано пользователем.
+    /// </returns>
+    Task<bool> RemoveAllControlsAsync();
   }
 }

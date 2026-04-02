@@ -1,29 +1,23 @@
 namespace Ask.Core.Shared.Metadata.Enums.RoleEnums
 {
   /// <summary>
-  /// Роли пользователей в системе.
-  /// Используются для разграничения доступа и хранения паролей ролей.
+  /// Application roles used for authorization and role password storage.
   /// </summary>
   public enum RoleType
   {
     /// <summary>
-    /// Администратор.
+    /// Administrator role.
     /// </summary>
-    Administrator,
+    Administrator = 0,
 
     /// <summary>
-    /// Роль метрологии.
+    /// Adjuster role.
     /// </summary>
-    Metrology,
+    Adjuster = 1,
 
     /// <summary>
-    /// Роль обслуживания системы.
+    /// Control program developer role.
     /// </summary>
-    SystemMaintenance,
-
-    /// <summary>
-    /// Разработчик программ контроля.
-    /// </summary>
-    Developer,
+    Developer = 3,
   }
 }
