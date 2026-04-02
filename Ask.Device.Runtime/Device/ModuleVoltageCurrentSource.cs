@@ -1,4 +1,3 @@
-using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Device.Communication.Ethernet;
@@ -59,21 +58,5 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     [NotMapped]
     public List<ResistanceCalibrationRange> ResistanceCalibration { get; set; } = new();
-
-    public PowerSourceModuleDto Convert()
-    {
-      return new PowerSourceModuleDto
-      {
-        Id = Id,
-        NumberChassis = NumberChassis,
-        Name = Name ?? string.Empty,
-        Description = Description ?? string.Empty,
-        Number = Number,
-        ConnectionDetails = ConnectionDetails ?? string.Empty,
-        DeviceType = DeviceType,
-        DeviceClass = DeviceClass ?? string.Empty,
-        ResistanceCalibrationJson = ResistanceCalibrationJson
-      };
-    }
   }
 }

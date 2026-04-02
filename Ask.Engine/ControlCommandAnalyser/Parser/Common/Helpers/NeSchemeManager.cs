@@ -57,7 +57,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
       var parts = PointParser.ExtractSigns(pointsBlob);
-      ValidateSigns(model, parts, numberLine, commandNumber, mnemonic);
 
       var finalGroups = new List<GroupModel>();
       var allErrors = new List<ErrorItem>();
@@ -110,27 +109,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
 
       return scheme;
-    }
-
-    /// <summary>
-    /// Проверяет, что у каждого блока точек указана полярность.
-    /// </summary>
-    private static void ValidateSigns(
-        NeCommandModel model,
-        IEnumerable<ParsedExprPart> parts,
-        int numberLine,
-        string commandNumber,
-        string mnemonic)
-    {
-      string command = $"{commandNumber} {mnemonic}";
-
-      foreach (var part in parts.Where(part => part.Sign == null))
-      {
-        LogWarning(
-            $"Для блока точек не указана полярность в команде {command} (строка {numberLine}): {part.CleanExpr}");
-
-        model.Errors.Add(NeErrors.MissingPolarity(numberLine, command, part.CleanExpr));
-      }
     }
 
     /// <summary>

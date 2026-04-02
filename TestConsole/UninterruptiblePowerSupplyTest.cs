@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Device;
+using DataBaseConfiguration.Services.Device;
 
 namespace TestConsole
 {
@@ -48,15 +48,15 @@ namespace TestConsole
             break;
 
           case 3:
-            await RunBooleanActionAsync("Проверка питания", () => device.PowerManager.VerifyPowerAsync(), device);
+            await RunBooleanActionAsync("Проверка питания", () => device.VerifyPowerAsync(), device);
             break;
 
           case 4:
-            await RunActionAsync("Включение питания", () => device.PowerManager.StartPowerAsync(), device);
+            await RunActionAsync("Включение питания", () => device.StartPowerAsync(), device);
             break;
 
           case 5:
-            await RunActionAsync("Отключение питания", () => device.PowerManager.StopPowerAsync(), device);
+            await RunActionAsync("Отключение питания", () => device.StopPowerAsync(), device);
             break;
 
           case 6:
@@ -123,7 +123,7 @@ namespace TestConsole
 
     private static IUninterruptiblePowerSupply? SelectDeviceFromDatabase()
     {
-      var devices = UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult();
+      var devices = new UninterruptiblePowerSupplyServices().GetAll();
 
       if (devices == null || devices.Count == 0)
       {
@@ -202,17 +202,17 @@ namespace TestConsole
       try
       {
         Console.WriteLine("--- Смена питания ---");
-        bool hasPower = await device.PowerManager.VerifyPowerAsync();
+        bool hasPower = await device.VerifyPowerAsync();
         Console.WriteLine($"Текущее состояние: {(hasPower ? "Включено" : "Выключено")}");
 
         if (hasPower)
         {
-          await device.PowerManager.StopPowerAsync();
+          await device.StopPowerAsync();
           Console.WriteLine("Выполнено отключение питания.");
         }
         else
         {
-          await device.PowerManager.StartPowerAsync();
+          await device.StartPowerAsync();
           Console.WriteLine("Выполнено включение питания.");
         }
       }

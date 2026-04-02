@@ -2,13 +2,16 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Metadata.View;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
+using DataBaseConfiguration.Services.Device;
+using MainWindowProgram.Services;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -103,11 +106,11 @@ namespace MainWindowProgram.Events
 
           if (e)
           {
-            await ups.PowerManager.StartPowerAsync();
+            await ups.StartPowerAsync();
           }
           else
           {
-            await ups.PowerManager.StopPowerAsync();
+            await ups.StopPowerAsync();
           }
         }
         catch (Exception ex)
@@ -119,9 +122,12 @@ namespace MainWindowProgram.Events
 
     private static IUninterruptiblePowerSupply? GetConfiguredUps()
     {
-      int? chassisNumber = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault()?.Number;
+      int? chassisNumber = new ChassisManagerServices()
+        .GetAll()
+        .FirstOrDefault()
+        ?.Number;
 
-      IEnumerable<IUninterruptiblePowerSupply> devices = UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult();
+      IEnumerable<IUninterruptiblePowerSupply> devices = new UninterruptiblePowerSupplyServices().GetAll();
 
       if (chassisNumber.HasValue)
       {

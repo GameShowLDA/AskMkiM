@@ -1,10 +1,12 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
+using DataBaseConfiguration.Services.Device;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.LogLib.LoggerUtility;
 
@@ -58,9 +60,13 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <returns>True, если оба модуля найдены и инициализированы; иначе — false.</returns>
     private async Task<bool> SearchAndInitializeRelaySwitchModules(string numTestedModule, string numVerificatModule)
     {
+      var searchService = new RelaySwitchModuleServices();
+      var searckChassis = new ChassisManagerServices();
+
       var testedCoords = numTestedModule.Split('.').Select(int.Parse).ToArray();
       var verificatCoords = numVerificatModule.Split('.').Select(int.Parse).ToArray();
-      var chassis = ChassisManagers.GetByIdAsync(testedCoords[0]).GetAwaiter().GetResult();
+
+      var chassis = searckChassis.GetEntityById(testedCoords[0]);
 
       if (chassis == null)
       {
@@ -71,7 +77,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return false;
       }
 
-      var list = await RelaySwitchModules.GetDevicesByNumberChassisAsync(testedCoords[0]);
+      var list = searchService.GetDevicesByNumberChassis(testedCoords[0]);
 
       testedModuleRelayControl = list.FirstOrDefault(m => m.Number == testedCoords[1]);
       if (testedModuleRelayControl == null)
@@ -83,7 +89,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return false;
       }
 
-      list = await RelaySwitchModules.GetDevicesByNumberChassisAsync(verificatCoords[0]);
+      list = searchService.GetDevicesByNumberChassis(verificatCoords[0]);
       if (list == null || list.Count == 0)
       {
         await _userInteractionService

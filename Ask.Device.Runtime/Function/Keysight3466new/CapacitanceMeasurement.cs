@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.Helpers;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.Keysight3466new
@@ -60,7 +61,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return param;
+        return MeasurementAdapterHelper.Round(param);
       }
 
       if (!_device.IsConnected)
@@ -74,7 +75,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
       if (double.TryParse(response, System.Globalization.NumberStyles.Float,
                           System.Globalization.CultureInfo.InvariantCulture, out double capacitance))
       {
-        return capacitance * 1e9;
+        return MeasurementAdapterHelper.Round(capacitance * 1e9);
       }
 
       throw new InvalidOperationException(LogError($"Не удалось обработать значение ёмкости: {response}", isDeviceLog: true));

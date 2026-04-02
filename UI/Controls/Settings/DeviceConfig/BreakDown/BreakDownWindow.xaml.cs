@@ -1,9 +1,9 @@
-﻿using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.DTO.Devices.Breakdown;
+﻿using Ask.Core.Services.App;
+using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.DataBase.Engine.Static.Devices;
-using System.Threading.Tasks;
+using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -16,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
   public partial class BreakDownWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private BreakdownTesterDto? _editingDto;
+    private BreakdownTesterEntity? _editingEntity;
     /// <summary>
     /// Событие запроса закрытия окна.
     /// </summary>
@@ -25,7 +25,7 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     /// <summary>
     /// Событие запроса сохранения данных устройства.
     /// </summary>
-    public event EventHandler<BreakdownTesterDto> RequestSave;
+    public event EventHandler<BreakdownTesterEntity> RequestSave;
 
     /// <summary>
     /// Свойство, предоставляющее доступ к параметрам устройства.
@@ -61,9 +61,9 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, BreakdownTesterDto? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, BreakdownTesterEntity? editingEntity = null)
     {
-      _editingDto = editingEntity;
+      _editingEntity = editingEntity;
       deviceSettingsWindow.NameDevice = "Пробойная установка";
       deviceSettingsWindow.LoadDeviceModels<IBreakdownTester>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -72,41 +72,35 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += async (s, a) =>
+      deviceSettingsWindow.SaveEvent += (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        BreakdownTesterDto deviceDto = processor.ProcessDevice<BreakdownTesterDto>(
+        BreakdownTesterEntity deviceEntity = processor.ProcessDevice<BreakdownTesterEntity>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceDto != null)
+        if (deviceEntity != null)
         {
-          deviceDto.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
-          deviceDto.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
+          deviceEntity.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
+          deviceEntity.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
+          var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
           try
           {
-            if (_editingDto != null)
+            if (_editingEntity == null)
             {
-              deviceDto.Id = _editingDto.Id;
-            }
-
-            var breakDown = BreakdownTesters.Build(deviceDto);
-
-            if (_editingDto == null)
-            {
-              var createdDevice = await BreakdownTesters.CreateAsync(breakDown);
-              deviceDto.Id = createdDevice.Id;
+              svc.Create(deviceEntity);
             }
             else
             {
-              await BreakdownTesters.UpdateAsync(breakDown);
+              deviceEntity.Id = _editingEntity.Id;
+              svc.Update(deviceEntity);
             }
 
-            RequestSave?.Invoke(s, deviceDto);
+            RequestSave?.Invoke(s, deviceEntity);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

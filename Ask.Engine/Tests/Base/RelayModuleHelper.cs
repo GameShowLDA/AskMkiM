@@ -7,8 +7,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
+using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.Base
 {
@@ -24,9 +24,10 @@ namespace Ask.Engine.Tests.Base
     /// <param name="startModule">Номер начального модуля.</param>
     /// <param name="endModule">Номер конечного модуля.</param>
     /// <returns>Список модулей, соответствующих диапазону.</returns>
-    public static async Task<List<IRelaySwitchModule>> GetModulesByRangeAsync(int chassisNumber, int startModule, int endModule)
+    public static List<IRelaySwitchModule> GetModulesByRange(int chassisNumber, int startModule, int endModule)
     {
-      var allModules = await RelaySwitchModules.GetDevicesByNumberChassisAsync(chassisNumber);
+      var relayRepo = new RelaySwitchModuleServices();
+      var allModules = relayRepo.GetDevicesByNumberChassis(chassisNumber);
       var filteredModules = allModules
           .Where(m => m.Number >= startModule && m.Number <= endModule)
           .ToList();
@@ -114,7 +115,7 @@ namespace Ask.Engine.Tests.Base
         cancellationToken.ThrowIfCancellationRequested();
         return await module.MeterManager.GetMeterResponseAsync();
       }
-      catch
+      catch 
       {
         return false;
       }
@@ -129,9 +130,12 @@ namespace Ask.Engine.Tests.Base
     /// <exception cref="DeviceException">
     /// Генерируется, если УКШ не найдено в конфигурации.
     /// </exception>
-    public static async Task<ISwitchingDevice> ResolveUkshAsync(int numberChassis)
+    public static ISwitchingDevice ResolveUksh(int numberChassis)
     {
-      var uksh = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis)).FirstOrDefault();
+      var uksh = new SwitchingDeviceServices()
+        .GetDevicesByNumberChassis(numberChassis)
+        .FirstOrDefault();
+
       return uksh ?? throw ConnectionExceptionAdapter.NotFoundInConfiguration("Устройство коммутации шин (УКШ)");
     }
 
@@ -146,7 +150,11 @@ namespace Ask.Engine.Tests.Base
     /// </exception>
     public static IFastMeter ResolveFastMeter(int numberChassis)
     {
-      var fastMeter = FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult().OfType<IFastMeter>().FirstOrDefault();
+      var fastMeter = new FastMeterServices()
+        .GetDevicesByNumberChassis(numberChassis)
+        .OfType<IFastMeter>()
+        .FirstOrDefault();
+
       return fastMeter ?? throw ConnectionExceptionAdapter.NotFoundInConfiguration("Мультиметр (FastMeter)");
     }
 
@@ -275,7 +283,7 @@ namespace Ask.Engine.Tests.Base
       IUserInteractionService ui,
       CancellationToken token)
     {
-      var uksh = await ResolveUkshAsync(numberChassis);
+      var uksh = ResolveUksh(numberChassis);
       var meter = ResolveFastMeter(numberChassis);
 
       await ConnectIfNeededAsync(uksh, ui, token);

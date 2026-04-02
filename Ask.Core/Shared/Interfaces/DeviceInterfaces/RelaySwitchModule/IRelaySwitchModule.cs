@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
@@ -7,7 +6,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule
   /// <summary>
   /// Интерфейс для модуля коммутации реле.
   /// </summary>
-  public interface IRelaySwitchModule : IAttachableDevice, IDeviceToDtoConverter<RelaySwitchModuleDto>
+  public interface IRelaySwitchModule : IAttachableDevice
   {
     /// <summary>
     /// Количество точек модуля.

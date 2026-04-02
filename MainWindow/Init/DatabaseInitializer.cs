@@ -1,9 +1,8 @@
-using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.DataBase.Engine.Initialization;
-using Ask.DataBase.Engine.Static;
-using Ask.DataBase.Engine.Static.Settings;
+using DataBaseConfiguration;
+using DataBaseConfiguration.Services.Device;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init
@@ -14,24 +13,19 @@ namespace MainWindowProgram.Init
     {
       try
       {
-        var newDatabaseReport = await DatabaseEngineInitializer.InitializeAsync();
-        LogInformation(
-          $"Новая БД инициализирована. Применено миграций: {newDatabaseReport.AppliedMigrations}, " +
-          $"использован EnsureCreated: {newDatabaseReport.UsedEnsureCreated}, " +
-          $"добавлено горячих клавиш: {newDatabaseReport.SeededHotkeys}, " +
-          $"создано строк настроек: {newDatabaseReport.CreatedDefaultSettingsRows}.");
+        await DataBaseConfig.InitializeDB();
         WarmUpDeviceCaches();
 
-        var protocolTask = ProtocolSettings.GetAsync();
-        var executionTask = ExecutionSettings.GetAsync();
-        var userInterfaceTask = UserInterfaceSettings.GetAsync();
-        var deviceDisplayTask = DeviceDisplaySettings.GetAsync();
+        var protocolTask = new DataBaseConfiguration.Services.Settings.ProtocolService().GetProtocolAsync();
+        var executionTask = new DataBaseConfiguration.Services.Settings.ExecutionService().GetExecutionAsync();
+        var userInterfaceTask = new DataBaseConfiguration.Services.Settings.UserInterfaceService().GetUserInterfaceAsync();
+        var deviceDisplayTask = new DataBaseConfiguration.Services.Settings.DeviceDisplayService().GetDeviceDisplayAsync();
 
         Task.WaitAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
 
         var protocol = protocolTask.Result;
         var execution = executionTask.Result;
-        var userInterface = userInterfaceTask.Result;
+        var userInreface = userInterfaceTask.Result;
         var deviceDisplay = deviceDisplayTask.Result;
 
         if (protocol != null)
@@ -46,9 +40,9 @@ namespace MainWindowProgram.Init
           await ExecutionConfig.SetExecutionModel(execution);
         }
 
-        if (userInterface != null)
+        if (userInreface != null)
         {
-          await UserInterfaceConfig.SetUserInterfaceModel(userInterface);
+          await UserInterfaceConfig.SetUserInterfaceModel(userInreface);
         }
 
         if (deviceDisplay != null)
@@ -56,26 +50,30 @@ namespace MainWindowProgram.Init
           await DeviceDisplayConfig.SetDeviceDisplaySettingsModel(deviceDisplay);
         }
 
-        ProtocolConfig.SaveProtocolEvent += async model =>
+        ProtocolConfig.SaveProtocolEvent += async (model) =>
         {
-          await ProtocolSettings.SaveAsync(model);
+          var service = new DataBaseConfiguration.Services.Settings.ProtocolService();
+          await service.SaveProtocolAsync(model);
           ProtocolModel.SetTemplate(model.CleanTextProtocol);
           ProtocolModel.SetErrorsTemplate(model.CleanTextErrorsProtocol);
         };
 
-        ExecutionConfig.SaveExecutionEvent += async model =>
+        ExecutionConfig.SaveExecutionEvent += async (model) =>
         {
-          await ExecutionSettings.SaveAsync(model);
+          var service = new DataBaseConfiguration.Services.Settings.ExecutionService();
+          await service.SaveExecutionAsync(model);
         };
 
-        UserInterfaceConfig.SaveUserInterfaceEvent += async model =>
+        UserInterfaceConfig.SaveUserInterfaceEvent += async (model) =>
         {
-          await UserInterfaceSettings.SaveAsync(model);
+          var service = new DataBaseConfiguration.Services.Settings.UserInterfaceService();
+          await service.SaveUserInterfaceAsync(model);
         };
 
-        DeviceDisplayConfig.DeviceDisplaySettingsSaved += async model =>
+        DeviceDisplayConfig.DeviceDisplaySettingsSaved += async (model) =>
         {
-          await DeviceDisplaySettings.SaveAsync(model);
+          var service = new DataBaseConfiguration.Services.Settings.DeviceDisplayService();
+          await service.SaveDeviceDisplayAsync(model);
         };
       }
       catch (Exception ex)
@@ -91,7 +89,13 @@ namespace MainWindowProgram.Init
     {
       try
       {
-        DeviceRuntime.ClearCache();
+        new ChassisManagerServices().ReloadCache();
+        new RelaySwitchModuleServices().ReloadCache();
+        new PowerSourceModuleServices().ReloadCache();
+        new SwitchingDeviceServices().ReloadCache();
+        new FastMeterServices().ReloadCache();
+        new BreakdownTesterServices().ReloadCache();
+        new RackServices().ReloadCache();
 
         LogInformation("Кэш устройств прогрет при старте приложения.");
       }

@@ -6,7 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.DataBase.Engine.Static.Devices;
+using DataBaseConfiguration.Services.Device;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -54,7 +54,7 @@ namespace Ask.Engine.Tests.SelfControl
         {
           case DeviceType.RelaySwitchModule when device is IRelaySwitchModule relay:
             var dbcChassinumbers = relay.NumberChassis;
-            var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(dbcChassinumbers)).FirstOrDefault();
+            var dbc = new SwitchingDeviceServices().GetDevicesByNumberChassis(dbcChassinumbers).FirstOrDefault();
             await relay.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, dbc);
             await dbc.ConnectableManager.ResetAsync();
             break;
@@ -65,14 +65,14 @@ namespace Ask.Engine.Tests.SelfControl
 
           case DeviceType.PowerSourceModule when device is IPowerSourceModule mint:
             var numberChassis = mint.NumberChassis;
-            var switcher1 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis)).FirstOrDefault();
+            var switcher1 = new SwitchingDeviceServices().GetDevicesByNumberChassis(numberChassis).FirstOrDefault();
             await mint.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), _messageService, part, switcher1, mint, meter);
             break;
 
 
           case DeviceType.BreakdownTester when device is IBreakdownTester breakdown:
             var numberBreakdown = breakdown.NumberChassis;
-            var switcher2 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberBreakdown)).FirstOrDefault();
+            var switcher2 = new SwitchingDeviceServices().GetDevicesByNumberChassis(numberBreakdown).FirstOrDefault();
             await breakdown.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, breakdown, switcher2, meter);
             break;
         }

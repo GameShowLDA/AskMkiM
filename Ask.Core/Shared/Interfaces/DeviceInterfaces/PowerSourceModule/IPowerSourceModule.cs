@@ -1,13 +1,11 @@
-﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
-using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule
 {
   /// <summary>
   /// Интерфейс для модуля источника напряжения и тока.
   /// </summary>
-  public interface IPowerSourceModule : IAttachableDevice, IDeviceToDtoConverter<PowerSourceModuleDto>
+  public interface IPowerSourceModule : IAttachableDevice
   {
 
     /// <summary>

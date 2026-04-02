@@ -1,10 +1,9 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Entity.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.DataBase.Engine.Static.Devices;
-using System.Threading.Tasks;
+using DataBaseConfiguration.Services.Device;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -17,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private RelaySwitchModuleDto? _editingDto;
+    private RelaySwitchModuleEntity? _editingEntity;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -27,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// <summary>
     /// Событие, вызываемое при сохранении данных модуля источника питания.
     /// </summary>
-    public event EventHandler<RelaySwitchModuleDto> RequestSave;
+    public event EventHandler<RelaySwitchModuleEntity> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControlWindow"/>.
@@ -63,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleDto? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleEntity? editingEntity = null)
     {
-      _editingDto = editingEntity;
+      _editingEntity = editingEntity;
       deviceSettingsWindow.NameDevice = "МКР";
       deviceSettingsWindow.LoadDeviceModels<IRelaySwitchModule>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -74,12 +73,12 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += async (s, a) =>
+      deviceSettingsWindow.SaveEvent += (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        RelaySwitchModuleDto deviceEntity = processor.ProcessDevice<RelaySwitchModuleDto>(
+        RelaySwitchModuleEntity deviceEntity = processor.ProcessDevice<RelaySwitchModuleEntity>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
@@ -92,21 +91,14 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           deviceEntity.SwitchCapacitance = deviceSettingsWindow.GetCapacitance();
           try
           {
-            if (_editingDto != null)
+            if (_editingEntity == null)
             {
-              deviceEntity.Id = _editingDto.Id;
-            }
-
-            var relaySwitchModule = RelaySwitchModules.Build(deviceEntity);
-
-            if (_editingDto == null)
-            {
-              var createdDevice = await RelaySwitchModules.CreateAsync(relaySwitchModule);
-              deviceEntity.Id = createdDevice.Id;
+              new RelaySwitchModuleServices().Create(deviceEntity);
             }
             else
             {
-              await RelaySwitchModules.UpdateAsync(relaySwitchModule);
+              deviceEntity.Id = _editingEntity.Id;
+              new RelaySwitchModuleServices().Update(deviceEntity);
             }
 
             RequestSave?.Invoke(s, deviceEntity);

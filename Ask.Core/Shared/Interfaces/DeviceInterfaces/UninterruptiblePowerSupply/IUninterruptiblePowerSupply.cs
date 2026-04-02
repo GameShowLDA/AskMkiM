@@ -1,5 +1,3 @@
-using Ask.Core.Shared.DTO.Devices.ChassisManager;
-using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply
@@ -7,13 +5,8 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply
   /// <summary>
   /// Общий интерфейс бесперебойников.
   /// </summary>
-  public interface IUninterruptiblePowerSupply : IAttachableDevice, IDeviceToDtoConverter<UninterruptiblePowerSupplyDto>
+  public interface IUninterruptiblePowerSupply : IAttachableDevice, IPower
   {
-    /// <summary>
-    /// Получает или задаёт реализацию управления питанием UPS.
-    /// </summary>
-    public IPower PowerManager { get; set; }
-
     /// <summary>
     /// Последний найденный системный путь устройства.
     /// </summary>

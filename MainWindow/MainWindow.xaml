@@ -171,6 +171,7 @@
                     <MenuItem x:Name="createArchiveMenuItem" Header="Создать архив" Style="{DynamicResource StyleMenuItem}" Tag="CreateArchive" Visibility="Collapsed" Command="{Binding File.CreateArchiveCommand}"/>
                     <MenuItem x:Name="downloadArchivesMenuItem" Header="Скачать архивы" Style="{DynamicResource StyleMenuItem}" Tag="DownloadArchives" Visibility="Collapsed" Command="{Binding File.DownloadArchivesCommand}"/>
                     <MenuItem x:Name="uploadArchiveMenuItem" Header="Загрузить архив" Style="{DynamicResource StyleMenuItem}" Tag="UploadArchive" Visibility="Collapsed" Command="{Binding File.UploadArchiveCommand}"/>
+
                     
                     <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>

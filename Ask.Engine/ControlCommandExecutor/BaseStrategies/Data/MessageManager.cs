@@ -8,7 +8,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
   internal class MessageManager
   {
-    public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value, string? chains = null)
+    public static async Task<(bool, double)> ShowMeasurementResultAsync(
+      IUserInteractionService messageService,
+      MeasurementTypeCommand measurementTypeCommand,
+      double lowerLimit,
+      double upperLimit,
+      double value,
+      string? chains = null,
+      bool isOverloadExpected = false)
     {
       var random = new Random();
 
@@ -24,7 +31,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
         }
       }
 
-      bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
+      bool result = isOverloadExpected
+        ? IsOverloadValue(value)
+        : upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
 
       if (messageService != null && (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility()))
       {
@@ -37,5 +46,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       return (result, value);
     }
+
+    /// <summary>
+    /// Определяет, соответствует ли измеренное значение перегрузке прибора.
+    /// </summary>
+    private static bool IsOverloadValue(double value) => MeasurementValueFormatter.IsOverloadValue(value);
   }
 }

@@ -104,7 +104,6 @@ namespace MainWindowProgram.Events
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
       _mainWindow.searchReplaceMenuItem.Visibility = visibility;
-      UpdateArchiveMenuVisibility();
     }
 
 
@@ -201,7 +200,6 @@ namespace MainWindowProgram.Events
           bool isActive = activeEditor != null;
 
           OnTextEditorActive(isActive);
-          UpdateArchiveMenuVisibility();
           if (activeEditor != null)
           {
             OnTextEditorActivated(activeEditor);

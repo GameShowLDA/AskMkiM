@@ -31,7 +31,6 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <icons:ArrowButton x:Name="BackButton"
@@ -53,7 +52,7 @@
                 </icons:ArrowButton>
 
                 <TextBlock x:Name="TranslationFileName" 
-                           Grid.Column = "3" 
+                           Grid.Column = "2" 
                            Text="Some text"
                            FontSize="16"
                            FontFamily="{DynamicResource WinstonBold}"
@@ -73,18 +72,6 @@
                         ToolTip="{Binding Source={StaticResource LS_TranslatorEditor_Tooltip_SaveArchive}, Path=Value}">
                     <icons:ArchiveIcon Size="18"
                                        Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
-                </Button>
-
-                <Button x:Name="SaveToDiskButton"
-                        Grid.Column="2"
-                        Style="{StaticResource SaveButtonStyle}"
-                        Margin="8,0,0,0"
-                        VerticalAlignment="Center"
-                        Visibility="Collapsed"
-                        Click="SaveToDiskButton_Click"
-                        ToolTip="Сохранить на диск">
-                    <icons:SaveIcon Size="18"
-                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                 </Button>
             </Grid>
         </Border>

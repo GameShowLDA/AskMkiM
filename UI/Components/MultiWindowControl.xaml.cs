@@ -176,13 +176,6 @@ namespace UI.Components
       return MultiEditor.GetActiveTextEditor();
     }
 
-    public UserControl? GetActiveWorkspaceControl()
-    {
-      return MultiEditor.ContentPanel.Children
-        .OfType<UserControl>()
-        .FirstOrDefault(control => control.Visibility == Visibility.Visible);
-    }
-
     /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.
     /// </summary>
