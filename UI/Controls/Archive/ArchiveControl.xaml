@@ -29,39 +29,39 @@
                           Cursor="Hand"
                 SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
                     <TreeView.ContextMenu>
-                        <ContextMenu x:Name="ArchivesTreeContextMenu"
+                            <ContextMenu x:Name="ArchivesTreeContextMenu"
                        Style="{DynamicResource AppContextMenuStyle}"
                        Opened="ArchivesTreeContextMenu_Opened"
                        Closed="ArchivesTreeContextMenu_Closed">
-                            <MenuItem x:Name="CreateArchiveMenuItem"
+                                <MenuItem x:Name="CreateArchiveMenuItem"
                       Header="Создать архив"
                       Click="CreateArchiveMenuItem_Click" />
-                            <MenuItem x:Name="UploadArchiveMenuItem"
+                                <MenuItem x:Name="UploadArchiveMenuItem"
                       Header="Загрузить архив"
                       Click="UploadArchiveMenuItem_Click" />
-                            <MenuItem x:Name="DownloadArchivesMenuItem"
+                                <MenuItem x:Name="DownloadArchivesMenuItem"
                       Header="Скачать архивы"
                       Click="DownloadArchivesMenuItem_Click" />
-                            <MenuItem x:Name="OpenArchiveMenuItem"
+                                <MenuItem x:Name="OpenArchiveMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveMenuItem_Click" />
-                            <MenuItem x:Name="SaveArchiveMenuItem"
+                                <MenuItem x:Name="SaveArchiveMenuItem"
                       Header="Сохранить архив на диск"
                       Click="SaveArchiveMenuItem_Click" />
-                            <MenuItem x:Name="PrintArchiveCatalogMenuItem"
+                                <MenuItem x:Name="PrintArchiveCatalogMenuItem"
                       Header="Распечатать каталог архива"
                       Click="PrintArchiveCatalogMenuItem_Click" />
-                            <MenuItem x:Name="DeleteArchiveMenuItem"
+                                <MenuItem x:Name="DeleteArchiveMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveMenuItem_Click" />
-                            <MenuItem x:Name="OpenArchiveFileMenuItem"
+                                <MenuItem x:Name="OpenArchiveFileMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveFileMenuItem_Click" />
-                            <MenuItem x:Name="DeleteArchiveFileMenuItem"
+                                <MenuItem x:Name="DeleteArchiveFileMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveFileMenuItem_Click" />
-                        </ContextMenu>
-                    </TreeView.ContextMenu>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                     <TreeView.Resources>
                         <Style x:Key="ArchiveTreeExpandToggleStyle"
                                TargetType="{x:Type ToggleButton}">
@@ -397,7 +397,7 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Resources>
-
+                    
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*"  MinHeight="0"/>
@@ -434,28 +434,6 @@
                                     Grid.Column="1"
                                     Orientation="Horizontal"
                                     Visibility="Collapsed">
-                            <Button x:Name="SaveArchiveToDiskButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="220"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Сохранить архив на диск"
-                                    Click="SaveArchiveToDiskButton_Click" />
-                            <Button x:Name="PrintArchiveCatalogButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="250"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Распечатать каталог архива"
-                                    Click="PrintArchiveCatalogButton_Click" />
                             <Button x:Name="AddFileToArchiveButton"
                                     Margin="12,0,0,0"
                                     Padding="10,4"
@@ -509,11 +487,11 @@
                                    BasedOn="{StaticResource ArchiveFilesDataGridScrollBarStyle}" >
                                 <Style.Triggers>
 
-                                    <!-- ГОРИЗОНТАЛЬНЫЙ -->
-                                    <Trigger Property="Orientation" Value="Horizontal">
-                                        <Setter Property="Cursor" Value="SizeWE" />
-                                        <Setter Property="Height" Value="Auto" />
-                                        <Setter Property="Width" Value="Auto" />
+                                <!-- ГОРИЗОНТАЛЬНЫЙ -->
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter Property="Cursor" Value="SizeWE" />
+                                    <Setter Property="Height" Value="Auto" />
+                                    <Setter Property="Width" Value="Auto" />
                                         <Setter Property="Template"
                         Value="{StaticResource ArchiveFilesHorizontalScrollBarTemplate}" />
                                     </Trigger>
@@ -596,7 +574,7 @@
                   ResizeBehavior="PreviousAndNext"
                 BorderThickness="0"
                   Background="{DynamicResource VioletColorSolidColorBrush}"/>
-
+            
             <Border x:Name="EditorPanel"
             Grid.Row="2"
             Background="{DynamicResource BackgroundBrushes}"

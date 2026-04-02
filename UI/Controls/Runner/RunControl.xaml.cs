@@ -43,6 +43,7 @@ namespace UI.Controls.Runner
     private const double MaxAutoHeight = 250.0;
 
     public int ErrorCount { get; private set; } = 0;
+    public int TranslationErrorCount { get; private set; } = 0;
 
     private ProtocolUI ProtocolUI { get; set; }
 
@@ -54,6 +55,8 @@ namespace UI.Controls.Runner
 
     private TextEditorContainer _leftEditor;
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
+    private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
+
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -64,15 +67,17 @@ namespace UI.Controls.Runner
       {
         translationModels = value;
         ErrorClear();
+        TranslationErrorCount = 0;
 
         foreach (var model in value)
         {
           if (model.Errors.Count > 0)
           {
-            SetError(model.Errors);
+            SetTranslationError(model.Errors);
           }
         }
 
+        UpdateTranslatorEditorActions();
         UpdateArchiveButtonVisibility();
       }
     }
@@ -182,19 +187,21 @@ namespace UI.Controls.Runner
       }
     }
 
-    private void SetError(List<ErrorItem> errorItems)
+    private void SetTranslationError(List<ErrorItem> errorItems)
     {
       if (errorItems == null || errorItems.Count == 0)
         return;
 
       ErrorListBoxVertical.AddErrors(errorItems);
       ErrorCount += errorItems.Count;
+      TranslationErrorCount += errorItems.Count;
 
       if (ErrorCount > 0)
       {
         MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
       }
     }
+
 
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
@@ -229,11 +236,14 @@ namespace UI.Controls.Runner
       rightEditor.BackRequested += TranslatorEditor_BackRequested;
       rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
+      rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
+      rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
       var fileName = textEditorUI.TextEditorModel.FileName;
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
         Path.GetFileName(filePath) : fileName;
+      rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
       var dockItemPk = new DockItem
       {
         Title = fileName,
@@ -376,6 +386,7 @@ namespace UI.Controls.Runner
           .Content as TranslatorEditor;
 
         translatorEditor?.SetArchiveButtonVisibility(ErrorCount == 0);
+        translatorEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
       });
     }
 
@@ -397,6 +408,19 @@ namespace UI.Controls.Runner
       }
 
       _archiveSaveService.SaveFileToArchive(this, this.TranslationModels, sourceFilePath);
+    }
+
+    private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
+    {
+      var rightEditor = sender as TranslatorEditor;
+      var translatedText = rightEditor?.GetTextEditor()?.Text;
+      var sourceFilePath = rightEditor?.GetTextEditor()?.TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(sourceFilePath))
+      {
+        sourceFilePath = OpkFilePath;
+      }
+
+      _translatedFileSaveService.SaveToDisk(this, translatedText ?? string.Empty, sourceFilePath);
     }
 
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
@@ -424,6 +448,29 @@ namespace UI.Controls.Runner
 
       BottomRow.Height = GridLength.Auto;
       ErrorListBoxVertical.MaxHeight = desired;
+    }
+
+    private bool CanSaveTranslatedFileToDisk()
+    {
+      return translationModels.Count > 0 && TranslationErrorCount == 0;
+    }
+
+    private TranslatorEditor? GetTranslatorEditor()
+    {
+      return ChildTextEditorContainer.DockManager.DockItems
+        .FirstOrDefault(item => item.Content is TranslatorEditor)?
+        .Content as TranslatorEditor;
+    }
+
+    private void UpdateTranslatorEditorActions()
+    {
+      var translatorEditor = GetTranslatorEditor();
+      if (translatorEditor == null)
+      {
+        return;
+      }
+
+      translatorEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
     }
 
     /// <summary>
