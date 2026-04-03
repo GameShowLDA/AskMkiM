@@ -415,3 +415,4 @@ tmpinspect_margin*/
 /.tmpdotnet
 /.dotnet
 /.dotnet_home
+.dotnet/
