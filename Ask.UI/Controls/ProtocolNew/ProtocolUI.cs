@@ -36,6 +36,11 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
+    /// <summary>
+    /// Флаг, указывающий, что текущее сообщение является последним.
+    /// </summary>
+    public bool LastMessage { get; set; } = false;
+
     public IButtonService ButtonService { get; set; }
 
     /// <summary>
@@ -253,7 +258,8 @@ namespace Ask.UI.Controls.ProtocolNew
         return;
       }
 
-      await protocolTextBox.AppendLineAsync(showMessageModel);
+      await protocolTextBox.AppendLineAsync(showMessageModel, LastMessage);
+      LastMessage = false;
 
       if (ActionExecutor.IsPaused)
       {

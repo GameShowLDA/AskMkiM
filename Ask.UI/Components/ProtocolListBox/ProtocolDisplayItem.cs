@@ -28,7 +28,7 @@ namespace Ask.UI.Components.ProtocolListBox
     /// <remarks>
     /// Значение <see langword="true"/> означает, что группа раскрыта.
     /// </remarks>
-    private bool _isExpanded = false;
+    private bool _isExpanded = true;
 
     private ProtocolDisplayItem(bool isGroup)
     {
@@ -99,12 +99,12 @@ namespace Ask.UI.Components.ProtocolListBox
     /// <summary>
     /// Создаёт группу.
     /// </summary>
-    public static ProtocolDisplayItem CreateGroup(ShowMessageModel headerModel)
+    public static ProtocolDisplayItem CreateGroup(ShowMessageModel headerModel, bool isExpanded = true)
     {
       return new ProtocolDisplayItem(true)
       {
         Message = headerModel,
-        IsExpanded = false
+        IsExpanded = isExpanded
       };
     }
 

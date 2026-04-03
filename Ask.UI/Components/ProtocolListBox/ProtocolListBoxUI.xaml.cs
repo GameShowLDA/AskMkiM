@@ -387,13 +387,10 @@ namespace Ask.UI.Components.ProtocolListBox
     /// Если строка является командой, она открывает новый сворачиваемый блок.
     /// Если команда ещё не встречалась, обычные сообщения добавляются как корневые строки.
     /// </summary>
-    public async Task AppendLineAsync(ShowMessageModel showMessageModel)
+    public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
-
-        if(showMessageModel.Status == ShowMessageModel.MessageType.Command) showMessageModel.Header = showMessageModel.Header.TrimStart();
-
         AppendToDisplayItems(showMessageModel);
 
         var lastRootItem = DisplayItems.LastOrDefault();
@@ -401,6 +398,7 @@ namespace Ask.UI.Components.ProtocolListBox
         {
           ProtocolListBox.ScrollIntoView(lastRootItem);
         }
+        if (lastMessage) _currentGroup.IsExpanded = false;
       });
     }
 
@@ -411,12 +409,20 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       if (model.Status == ShowMessageModel.MessageType.Command)
       {
+        model.Header = model.Header.TrimStart();
+
         var commandItem = ProtocolDisplayItem.CreateLine(model);
 
         DisplayItems.Add(commandItem);
 
-        _currentGroup = null;
         _pendingCommandHeaderItem = commandItem;
+
+        if (_currentGroup != null)
+        {
+          _currentGroup.IsExpanded = false;
+          _currentGroup = null;
+        }
+
         return;
       }
 
