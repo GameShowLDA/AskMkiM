@@ -30,6 +30,16 @@ namespace Ask.UI.Components.ProtocolListBox
     /// </remarks>
     private bool _isExpanded = true;
 
+    /// <summary>
+    /// Задний фон заголовка с успешно выполненными тестами.
+    /// </summary>
+    private Color _successBackground = Color.FromRgb(94, 127, 107);
+
+    /// <summary>
+    /// Задний фон заголовка с ошибками в тестах.
+    /// </summary>
+    private Color _errorBackground = Color.FromRgb(168, 93, 93);
+
     private ProtocolDisplayItem(bool isGroup)
     {
       _isGroup = isGroup;
@@ -91,7 +101,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
       bool hasError = Children.Any(child => child.Message?.Status == ShowMessageModel.MessageType.Error);
 
-      Color backgroundColor = hasError ? Colors.Red : Colors.Green;
+      Color backgroundColor = hasError ? _errorBackground : _successBackground;
 
       Message.HeaderBackgroundColor = backgroundColor;
     }
