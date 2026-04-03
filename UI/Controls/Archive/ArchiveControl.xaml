@@ -507,11 +507,6 @@
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="90"
                                 Width="Auto" />
-                            <DataGridTextColumn Header="ИК"
-                                Binding="{Binding IK}"
-                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
-                                MinWidth="90"
-                                Width="Auto" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
