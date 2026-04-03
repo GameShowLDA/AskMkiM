@@ -903,34 +903,43 @@ namespace UI.Controls.Archive
 
       if (printDialog.ShowDialog() == true)
       {
-        var document = CreatePrintDocument(entries, archiveName);
-
-        document.PageHeight = printDialog.PrintableAreaHeight;
-        document.PageWidth = printDialog.PrintableAreaWidth;
+        var document = CreatePrintDocument(
+          entries,
+          archiveName,
+          printDialog.PrintableAreaWidth,
+          printDialog.PrintableAreaHeight);
 
         IDocumentPaginatorSource idpSource = document;
         printDialog.PrintDocument(idpSource.DocumentPaginator, "Каталог архива");
       }
     }
 
-    private FlowDocument CreatePrintDocument(IReadOnlyList<ArchiveEntryInfo> entries, string archiveName)
+    private FlowDocument CreatePrintDocument(
+      IReadOnlyList<ArchiveEntryInfo> entries,
+      string archiveName,
+      double printableAreaWidth,
+      double printableAreaHeight)
     {
-      var cellPadding = new Thickness(4);
+      var cellPadding = new Thickness(2);
       var doc = new FlowDocument
       {
         FontFamily = new FontFamily("Segoe UI"),
-        FontSize = 12,
-        PagePadding = new Thickness(40),
+        FontSize = 9.5,
+        PagePadding = new Thickness(14),
+        PageWidth = printableAreaWidth,
+        PageHeight = printableAreaHeight,
         ColumnWidth = double.PositiveInfinity
       };
+
+      var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
 
       // Заголовок
       doc.Blocks.Add(new Paragraph(new Run($"Каталог архива {archiveName}"))
       {
-        FontSize = 16,
+        FontSize = 14,
         FontWeight = FontWeights.Bold,
         TextAlignment = TextAlignment.Center,
-        Margin = new Thickness(0, 0, 0, 20)
+        Margin = new Thickness(0, 0, 0, 12)
       });
 
       var table = new Table
@@ -955,25 +964,69 @@ namespace UI.Controls.Archive
         return Math.Ceiling(formattedText.WidthIncludingTrailingWhitespace + horizontalPadding + bordersWidth);
       }
 
-      var designationColumnWidth = MeasureColumnWidth("Обозначение", FontWeights.Bold);
-      var nameOkColumnWidth = MeasureColumnWidth("Наименование ОК", FontWeights.Bold);
+      double MeasureCharactersWidth(int characterCount, char sampleChar)
+      {
+        return MeasureColumnWidth(new string(sampleChar, characterCount), FontWeights.Normal);
+      }
+
+      var designationColumnWidth = Math.Max(
+        MeasureColumnWidth("Обозначение", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var nameOkColumnWidth = Math.Max(
+        MeasureColumnWidth("Наименование ОК", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var opkColumnWidth = Math.Max(
+        MeasureColumnWidth("ОПК", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
 
       var orderColumnWidth = Math.Max(
         MeasureColumnWidth("Заказ", FontWeights.Bold),
-        MeasureColumnWidth("00000000", FontWeights.Normal));
+        MeasureCharactersWidth(8, '0'));
+
+      var opkFileColumnWidth = Math.Max(
+        MeasureColumnWidth("Файл ОПК", FontWeights.Bold),
+        MeasureCharactersWidth(16, 'A'));
+
+      var createdColumnWidth = Math.Max(
+        MeasureColumnWidth("Создан", FontWeights.Bold),
+        MeasureCharactersWidth(10, '0'));
 
       var departmentColumnWidth = Math.Max(
         MeasureColumnWidth("Цех", FontWeights.Bold),
-        MeasureColumnWidth("0000", FontWeights.Normal));
+        MeasureCharactersWidth(4, '0'));
 
-      table.Columns.Add(new TableColumn { Width = new GridLength(designationColumnWidth) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(nameOkColumnWidth) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(designationColumnWidth) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(orderColumnWidth) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(departmentColumnWidth) });
-      table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
+      var commentColumnWidth = MeasureColumnWidth("Примечание", FontWeights.Bold);
+      var columnWidths = new[]
+      {
+        designationColumnWidth,
+        nameOkColumnWidth,
+        opkColumnWidth,
+        orderColumnWidth,
+        opkFileColumnWidth,
+        createdColumnWidth,
+        departmentColumnWidth,
+        commentColumnWidth
+      };
+
+      var requiredWidth = columnWidths.Sum();
+      if (requiredWidth > availableTableWidth && availableTableWidth > 0)
+      {
+        var scale = availableTableWidth / requiredWidth;
+        for (int i = 0; i < columnWidths.Length; i++)
+        {
+          columnWidths[i] = Math.Floor(columnWidths[i] * scale);
+        }
+      }
+
+      var fixedColumnsWidth = columnWidths.Take(7).Sum();
+      columnWidths[7] = Math.Max(columnWidths[7], Math.Max(0, availableTableWidth - fixedColumnsWidth));
+
+      foreach (var columnWidth in columnWidths)
+      {
+        table.Columns.Add(new TableColumn { Width = new GridLength(columnWidth) });
+      }
 
       // Заголовки
       var headerRow = new TableRow();
@@ -1161,6 +1214,7 @@ namespace UI.Controls.Archive
     private void SaveArchiveToDiskButton_Click(object sender, RoutedEventArgs e)
     {
       SaveSelectedArchiveToDisk();
+      ResetArchiveActionButtonFocus();
     }
 
     private void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
@@ -1183,6 +1237,15 @@ namespace UI.Controls.Archive
     private async void PrintArchiveCatalogButton_Click(object sender, RoutedEventArgs e)
     {
       await PrintArchiveCatalogAsync();
+      ResetArchiveActionButtonFocus();
+    }
+
+    private void ResetArchiveActionButtonFocus()
+    {
+      Dispatcher.BeginInvoke(new Action(() =>
+      {
+        Keyboard.ClearFocus();
+      }), DispatcherPriority.Background);
     }
 
     private async void PrintArchiveCatalogMenuItem_Click(object sender, RoutedEventArgs e)
