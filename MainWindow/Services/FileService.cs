@@ -104,6 +104,10 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Открывает протокол для просмотра.
+    /// </summary>
+    /// <param name="protocol">Модель протокола.</param>
     public void ViewProtocol(ProtocolModel protocol)
     {
       if (_isLockedProvider())
@@ -117,8 +121,9 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает диалог выбора файла и загружает его в редактор.
+    /// Открывает указанный файл в редакторе.
     /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
     public void OpenFileAsync(string filePath)
     {
       if (_isLockedProvider())
@@ -147,7 +152,7 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает экран работы с архивами.
+    /// Открывает интерфейс работы с архивами.
     /// </summary>
     public void OpenArchive()
     {
@@ -161,6 +166,9 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Запускает создание нового архива в текущем окне архивов.
+    /// </summary>
     public void CreateArchive()
     {
       if (_isLockedProvider())
@@ -175,6 +183,9 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Загружает архивы с внешнего источника.
+    /// </summary>
     public void DownloadArchives()
     {
       if (_isLockedProvider())
@@ -186,6 +197,9 @@ namespace MainWindowProgram.Services
       ArchiveTransferUiService.DownloadArchives();
     }
 
+    /// <summary>
+    /// Отправляет архив на внешний источник.
+    /// </summary>
     public void UploadArchive()
     {
       if (_isLockedProvider())
@@ -353,4 +367,3 @@ namespace MainWindowProgram.Services
     }
   }
 }
-

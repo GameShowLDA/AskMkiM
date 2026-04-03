@@ -11,6 +11,32 @@ namespace UI.Services.Archive
     private const string ArchiveExtension = ".apkw";
     private const string DownloadedArchivesFolderName = "Скачанные архивы";
 
+    /// <summary>
+    /// Экспортирует указанный архив в выбранное пользователем место.
+    /// </summary>
+    /// <param name="archivePath">Путь к исходному архиву.</param>
+    /// <param name="destinationFilePath">Путь, по которому архив будет сохранён.</param>
+    /// <returns>
+    /// Полный путь к экспортированному архиву.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если путь назначения не указан.
+    /// </exception>
+    /// <exception cref="DirectoryNotFoundException">
+    /// Выбрасывается, если не удалось определить каталог назначения.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если исходный и целевой пути совпадают.
+    /// </exception>
+    /// <exception cref="FileNotFoundException">
+    /// Выбрасывается, если исходный архив не найден.
+    /// </exception>
+    /// <exception cref="InvalidDataException">
+    /// Выбрасывается, если файл не имеет поддерживаемого расширения.
+    /// </exception>
+    /// <remarks>
+    /// Архив копируется в указанное место с перезаписью существующего файла.
+    /// </remarks>
     public static string ExportArchive(string archivePath, string destinationFilePath)
     {
       var fullArchivePath = ValidateArchivePath(archivePath, nameof(archivePath));
@@ -36,6 +62,22 @@ namespace UI.Services.Archive
       return fullDestinationFilePath;
     }
 
+    /// <summary>
+    /// Экспортирует все архивы из корневого каталога архивов в указанную папку.
+    /// </summary>
+    /// <param name="destinationRootDirectory">Папка, в которую будут экспортированы архивы.</param>
+    /// <returns>
+    /// Объект <see cref="ArchiveExportBatchResult"/>, содержащий путь к каталогу экспорта
+    /// и количество экспортированных архивов.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если не указана папка назначения.
+    /// </exception>
+    /// <remarks>
+    /// Все архивы копируются с сохранением структуры каталогов.
+    /// Если в целевой папке уже существует каталог "Скачанные архивы",
+    /// создаётся уникальный каталог с временной меткой.
+    /// </remarks>
     public static ArchiveExportBatchResult ExportAllArchives(string destinationRootDirectory)
     {
       if (string.IsNullOrWhiteSpace(destinationRootDirectory))
@@ -73,6 +115,33 @@ namespace UI.Services.Archive
       return new ArchiveExportBatchResult(exportDirectory, archivePaths.Count);
     }
 
+    /// <summary>
+    /// Импортирует архив в корневой каталог архивов приложения.
+    /// </summary>
+    /// <param name="sourceArchivePath">Путь к импортируемому архиву.</param>
+    /// <returns>
+    /// Объект <see cref="ArchiveImportResult"/>, содержащий путь к импортированному архиву
+    /// и флаг создания манифеста.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если путь к архиву не указан.
+    /// </exception>
+    /// <exception cref="FileNotFoundException">
+    /// Выбрасывается, если архив не найден.
+    /// </exception>
+    /// <exception cref="InvalidDataException">
+    /// Выбрасывается, если файл не является архивом поддерживаемого формата.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если архив уже существует в целевом каталоге
+    /// или если выполняется попытка импорта самого себя.
+    /// </exception>
+    /// <remarks>
+    /// После копирования проверяется наличие манифеста внутри архива.
+    /// Если манифест отсутствует — он создаётся.
+    /// Также публикуется событие об изменении списка архивов.
+    /// В случае ошибки частично скопированный файл удаляется.
+    /// </remarks>
     public static ArchiveImportResult ImportArchive(string sourceArchivePath)
     {
       var fullSourceArchivePath = ValidateArchivePath(sourceArchivePath, nameof(sourceArchivePath));
