@@ -759,6 +759,13 @@ namespace UI.Controls.Archive
       _suppressGridSelection = false;
     }
 
+    /// <summary>
+    /// Открывает диалог создания нового архива.
+    /// </summary>
+    /// <remarks>
+    /// Если вызов происходит не из UI-потока, выполнение будет перенаправлено в диспетчер.
+    /// Запускает процесс создания архива с пользовательским вводом имени.
+    /// </remarks>
     public void ShowCreateArchiveDialog()
     {
       if (!Dispatcher.CheckAccess())

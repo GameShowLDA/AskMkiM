@@ -104,6 +104,14 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Открывает протокол для просмотра.
+    /// </summary>
+    /// <param name="protocol">Модель протокола, содержащая данные для отображения.</param>
+    /// <remarks>
+    /// Если приложение находится в заблокированном состоянии — операция не выполняется,
+    /// и пользователю отображается сообщение об ошибке.
+    /// </remarks>
     public void ViewProtocol(ProtocolModel protocol)
     {
       if (_isLockedProvider())
@@ -161,6 +169,13 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Инициирует создание нового архива в активном окне архивов.
+    /// </summary>
+    /// <remarks>
+    /// Метод работает только если активный элемент рабочей области — <see cref="ArchiveControl"/>.
+    /// Если приложение заблокировано — операция не выполняется.
+    /// </remarks>
     public void CreateArchive()
     {
       if (_isLockedProvider())
@@ -175,6 +190,13 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Запускает процесс скачивания всех архивов на диск через UI.
+    /// </summary>
+    /// <remarks>
+    /// Открывает диалог выбора папки и выполняет экспорт архивов.
+    /// Если приложение заблокировано — операция не выполняется.
+    /// </remarks>
     public void DownloadArchives()
     {
       if (_isLockedProvider())
@@ -186,6 +208,13 @@ namespace MainWindowProgram.Services
       ArchiveTransferUiService.DownloadArchives();
     }
 
+    /// <summary>
+    /// Запускает процесс загрузки архива в систему через UI.
+    /// </summary>
+    /// <remarks>
+    /// Открывает диалог выбора файла и выполняет импорт архива.
+    /// Если приложение заблокировано — операция не выполняется.
+    /// </remarks>
     public void UploadArchive()
     {
       if (_isLockedProvider())

@@ -176,6 +176,12 @@ namespace UI.Components
       return MultiEditor.GetActiveTextEditor();
     }
 
+    /// <summary>
+    /// Возвращает текущий активный пользовательский элемент управления в рабочей области.
+    /// </summary>
+    /// <returns>
+    /// Активный <see cref="UserControl"/> или <c>null</c>, если активный элемент отсутствует.
+    /// </returns>
     public UserControl? GetActiveWorkspaceControl()
     {
       return MultiEditor.ContentPanel.Children
@@ -193,6 +199,16 @@ namespace UI.Components
       return MultiEditor.RemoveActiveTextEditor(isTranslation);
     }
 
+    /// <summary>
+    /// Пытается асинхронно закрыть текущую активную вкладку.
+    /// </summary>
+    /// <param name="eventAlreadyHandled">
+    /// Указывает, было ли событие закрытия уже обработано ранее.
+    /// </param>
+    /// <returns>
+    /// Задача, возвращающая <c>true</c>, если вкладка успешно закрыта;
+    /// иначе <c>false</c>.
+    /// </returns>
     public Task<bool> TryCloseActiveTabAsync(bool eventAlreadyHandled = false)
     {
       return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
@@ -570,7 +586,14 @@ namespace UI.Components
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-
+    /// <summary>
+    /// Удаляет вкладку транслятора указанного типа.
+    /// </summary>
+    /// <param name="translatorItem">Элемент транслятора, который необходимо удалить.</param>
+    /// <param name="editorType">Тип редактора, к которому относится вкладка.</param>
+    /// <returns>
+    /// Асинхронная задача, представляющая операцию удаления.
+    /// </returns>
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
