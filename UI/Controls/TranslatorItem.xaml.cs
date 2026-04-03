@@ -147,6 +147,7 @@ namespace UI.Controls
 
       ErrorListBoxVertical.SetIssues(issuesSnapshot.Issues);
       UpdateArchiveButtonVisibility();
+      UpdateRightEditorActions();
 
       MessageEventAdapter.RaiseInfoMessage(
              $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
@@ -205,8 +206,33 @@ namespace UI.Controls
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
       rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
+
       UpdateRightEditorActions();
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
+    }
+
+    private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
+    {
+      SaveTranslatedFileToDisk();
+    }
+
+    private bool SaveTranslatedFileToDisk()
+    {
+      var rightBox = GetRightBox();
+      var rightTextEditor = rightBox?.GetTextEditor();
+      if (rightTextEditor?.TextEditorModel == null)
+      {
+        NotificationHostService.Instance.Show(
+          "Сохранение на диск",
+          "Редактор не готов к сохранению на диск.",
+          NotificationType.Error);
+        return false;
+      }
+
+      return _translatedFileSaveService.SaveToDisk(
+        this,
+        rightTextEditor.Text,
+        rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
