@@ -504,32 +504,32 @@
                                 Binding="{Binding Name}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="150"
-                                Width="Auto"
+                                Width="15*"
                                 />
                             <DataGridTextColumn Header="Наименование ОК"
                                 Binding="{Binding NameOK}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="190"
-                                Width="Auto" />
+                                Width="19*" />
                             <DataGridTextColumn Header="ОПК"
                                 Binding="{Binding OPK}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="90"
-                                Width="Auto" />
+                                Width="9*" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="110"
-                                Width="Auto" />
+                                Width="11*" />
                             <DataGridTextColumn Header="Файл ОПК"
                                 Binding="{Binding OpkFileName}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="180"
-                                Width="Auto" />
+                                Width="18*" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"
                                 MinWidth="120"
-                                Width="Auto">
+                                Width="12*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource ArchiveFilesDataGridTextStyle}"
@@ -542,12 +542,12 @@
                                 Binding="{Binding Department}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="80"
-                                Width="Auto" />
+                                Width="8*" />
                             <DataGridTextColumn Header="Примечание"
                                 Binding="{Binding Comment}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="200"
-                                Width="*" />
+                                Width="20*" />
                         </DataGrid.Columns>
                     </DataGrid>
 

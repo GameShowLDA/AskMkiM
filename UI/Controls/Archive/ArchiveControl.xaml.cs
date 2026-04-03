@@ -915,6 +915,7 @@ namespace UI.Controls.Archive
 
     private FlowDocument CreatePrintDocument(IReadOnlyList<ArchiveEntryInfo> entries, string archiveName)
     {
+      var cellPadding = new Thickness(4);
       var doc = new FlowDocument
       {
         FontFamily = new FontFamily("Segoe UI"),
@@ -937,16 +938,48 @@ namespace UI.Controls.Archive
         CellSpacing = 0
       };
 
-      // Колонки (пример)
-      for (int i = 0; i < 9; i++)
-        table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
+      double MeasureColumnWidth(string sampleText, FontWeight fontWeight)
+      {
+        var formattedText = new FormattedText(
+          sampleText,
+          CultureInfo.CurrentCulture,
+          FlowDirection.LeftToRight,
+          new Typeface(doc.FontFamily, FontStyles.Normal, fontWeight, FontStretches.Normal),
+          doc.FontSize,
+          Brushes.Black,
+          VisualTreeHelper.GetDpi(this).PixelsPerDip);
+
+        var horizontalPadding = cellPadding.Left + cellPadding.Right;
+        const double bordersWidth = 2;
+
+        return Math.Ceiling(formattedText.WidthIncludingTrailingWhitespace + horizontalPadding + bordersWidth);
+      }
+
+      var designationColumnWidth = MeasureColumnWidth("Обозначение", FontWeights.Bold);
+      var nameOkColumnWidth = MeasureColumnWidth("Наименование ОК", FontWeights.Bold);
+
+      var orderColumnWidth = Math.Max(
+        MeasureColumnWidth("Заказ", FontWeights.Bold),
+        MeasureColumnWidth("00000000", FontWeights.Normal));
+
+      var departmentColumnWidth = Math.Max(
+        MeasureColumnWidth("Цех", FontWeights.Bold),
+        MeasureColumnWidth("0000", FontWeights.Normal));
+
+      table.Columns.Add(new TableColumn { Width = new GridLength(designationColumnWidth) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(nameOkColumnWidth) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(designationColumnWidth) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(orderColumnWidth) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(departmentColumnWidth) });
+      table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
 
       // Заголовки
       var headerRow = new TableRow();
       headerRow.Cells.Add(new TableCell(CreateCell("Обозначение")));
       headerRow.Cells.Add(new TableCell(CreateCell("Наименование ОК")));
       headerRow.Cells.Add(new TableCell(CreateCell("ОПК")));
-      headerRow.Cells.Add(new TableCell(CreateCell("ИК")));
       headerRow.Cells.Add(new TableCell(CreateCell("Заказ")));
       headerRow.Cells.Add(new TableCell(CreateCell("Файл ОПК")));
       headerRow.Cells.Add(new TableCell(CreateCell("Создан")));
@@ -957,7 +990,7 @@ namespace UI.Controls.Archive
       {
         cell.BorderBrush = Brushes.Black;
         cell.BorderThickness = new Thickness(0.5);
-        cell.Padding = new Thickness(4);
+        cell.Padding = cellPadding;
         cell.FontWeight = FontWeights.Bold;
       }
 
@@ -972,7 +1005,6 @@ namespace UI.Controls.Archive
         row.Cells.Add(new TableCell(CreateCell(item.Name)));
         row.Cells.Add(new TableCell(CreateCell(item.NameOK)));
         row.Cells.Add(new TableCell(CreateCell(item.OPK)));
-        row.Cells.Add(new TableCell(CreateCell(item.IK)));
         row.Cells.Add(new TableCell(CreateCell(item.Order)));
         row.Cells.Add(new TableCell(CreateCell(item.OpkFileName)));
         row.Cells.Add(new TableCell(CreateCell(item.CreationDate.ToString("dd.MM.yyyy"))));
@@ -983,7 +1015,7 @@ namespace UI.Controls.Archive
         {
           cell.BorderBrush = Brushes.Black;
           cell.BorderThickness = new Thickness(0.5);
-          cell.Padding = new Thickness(4);
+          cell.Padding = cellPadding;
         }
 
         rowGroup.Rows.Add(row);
@@ -1423,7 +1455,6 @@ namespace UI.Controls.Archive
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontSize = 15,
         HorizontalContentAlignment = HorizontalAlignment.Stretch,
-        VerticalContentAlignment = VerticalAlignment.Center,
       };
       ScrollViewer.SetHorizontalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Disabled);
       ScrollViewer.SetVerticalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Auto);

@@ -252,11 +252,6 @@ namespace UI.Controls
       }
     }
 
-    private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
-    {
-      SaveTranslatedFileToDisk();
-    }
-
     private bool SaveFileToArchive()
     {
       var rightBox = GetRightBox();
@@ -271,25 +266,6 @@ namespace UI.Controls
       }
 
       return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
-    }
-
-    private bool SaveTranslatedFileToDisk()
-    {
-      var rightBox = GetRightBox();
-      var rightTextEditor = rightBox?.GetTextEditor();
-      if (rightTextEditor?.TextEditorModel == null)
-      {
-        NotificationHostService.Instance.Show(
-          "Сохранение на диск",
-          "Редактор не готов к сохранению на диск.",
-          NotificationType.Error);
-        return false;
-      }
-
-      return _translatedFileSaveService.SaveToDisk(
-        this,
-        rightTextEditor.Text,
-        rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void UpdateRightEditorActions()
