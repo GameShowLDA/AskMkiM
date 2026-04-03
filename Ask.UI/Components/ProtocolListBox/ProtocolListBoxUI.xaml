@@ -16,71 +16,173 @@
         <local:MessageToLeadingNewLineConverter x:Key="MessageToLeadingNewLineConverter"/>
         <local:HeaderToBrushIfNoMessageConverter x:Key="HeaderToBrushIfNoMessageConverter"/>
 
-        <!-- Шаблон одной обычной строки -->
+        <DataTemplate x:Key="ProtocolLineContentTemplate">
+            <TextBlock TextWrapping="Wrap"
+                   FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                   FontFamily="Consolas"
+                   SnapsToDevicePixels="True"
+                   TextOptions.TextFormattingMode="Display"
+                   Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
+
+            <Run>
+                <Run.Text>
+                    <MultiBinding Converter="{StaticResource MessageToLeadingNewLineConverter}">
+                        <Binding Path="Message.Header"/>
+                        <Binding Path="Message.Message"/>
+                    </MultiBinding>
+                </Run.Text>
+            </Run>
+
+            <Run Text="{Binding Message.Header}">
+                <Run.Foreground>
+                    <MultiBinding Converter="{StaticResource HeaderToBrushIfNoMessageConverter}">
+                        <Binding Path="Message.Header"/>
+                        <Binding Path="Message.Message"/>
+                        <Binding Path="Message.HeaderColor"
+                                 Converter="{StaticResource ColorToBrushConverter}"/>
+                    </MultiBinding>
+                </Run.Foreground>
+            </Run>
+
+            <Run Text="{Binding Message.Message, Converter={StaticResource MessageToColonConverter}}"
+                 Foreground="{Binding Message.HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+            <Run Text="{Binding Message.Message}"
+                 Foreground="{Binding Message.MessageColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+            <Run Text="{Binding Message.Time, Converter={StaticResource TimeToSeparatorConverter}}"
+                 Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+            <Run Text="{Binding Message.Time}"
+                 Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+            <Run Text="{Binding Message.Debug}" Foreground="DarkGray"/>
+            </TextBlock>
+        </DataTemplate>
+
+        <!-- Обычная строка -->
         <DataTemplate x:Key="ProtocolLineTemplate">
             <Border Background="{Binding Message.HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}"
-                    BorderThickness="0"
-                    Padding="0">
-                <TextBlock TextWrapping="Wrap"
-                           FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
-                           FontFamily="Consolas"
-                           SnapsToDevicePixels="True"
-                           TextOptions.TextFormattingMode="Display"
-                           Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
-
-                    <Run>
-                        <Run.Text>
-                            <MultiBinding Converter="{StaticResource MessageToLeadingNewLineConverter}">
-                                <Binding Path="Message.Header"/>
-                                <Binding Path="Message.Message"/>
-                            </MultiBinding>
-                        </Run.Text>
-                    </Run>
-
-                    <Run Text="{Binding Message.Header}">
-                        <Run.Foreground>
-                            <MultiBinding Converter="{StaticResource HeaderToBrushIfNoMessageConverter}">
-                                <Binding Path="Message.Header"/>
-                                <Binding Path="Message.Message"/>
-                                <Binding Path="Message.HeaderColor"
-                                         Converter="{StaticResource ColorToBrushConverter}"/>
-                            </MultiBinding>
-                        </Run.Foreground>
-                    </Run>
-
-                    <Run Text="{Binding Message.Message, Converter={StaticResource MessageToColonConverter}}"
-                         Foreground="{Binding Message.HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
-
-                    <Run Text="{Binding Message.Message}"
-                         Foreground="{Binding Message.MessageColor, Converter={StaticResource ColorToBrushConverter}}"/>
-
-                    <Run Text="{Binding Message.Time, Converter={StaticResource TimeToSeparatorConverter}}"
-                         Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
-
-                    <Run Text="{Binding Message.Time}"
-                         Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
-
-                    <Run Text="{Binding Message.Debug}" Foreground="DarkGray"/>
-                </TextBlock>
+                BorderThickness="0"
+                Padding="0"
+                HorizontalAlignment="Stretch">
+                <ContentControl Content="{Binding}"
+                            HorizontalAlignment="Stretch"
+                            ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
             </Border>
         </DataTemplate>
+
+        <!-- Кнопка заголовка группы -->
+        <Style x:Key="ProtocolGroupHeaderToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="HeaderBorder"
+                            Background="{Binding Message.HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}"
+                            Padding="0"
+                            SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Path x:Name="Chevron"
+                                  Grid.Column="0"
+                                  Width="9"
+                                  Height="9"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Stretch="Fill"
+                                  Stroke="#9DA4AD"
+                                  StrokeThickness="1.7"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Data="M 3 1 L 7 5 L 3 9"/>
+
+                                <ContentPresenter Grid.Column="1"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chevron"
+                                    Property="Data"
+                                    Value="M 1 3 L 5 7 L 9 3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ProtocolGroupExpanderStyle" TargetType="Expander">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Expander">
+                        <Grid SnapsToDevicePixels="True">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ToggleButton Grid.Row="0"
+                                      Style="{StaticResource ProtocolGroupHeaderToggleStyle}"
+                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                      Content="{TemplateBinding Header}"
+                                      ContentTemplate="{TemplateBinding HeaderTemplate}"/>
+
+                            <ContentPresenter x:Name="ExpandSite"
+                                          Grid.Row="1"
+                                          Margin="22,0,0,0"
+                                          Visibility="Collapsed"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <!-- Шаблон группы -->
         <DataTemplate x:Key="ProtocolGroupTemplate">
             <Expander IsExpanded="{Binding IsExpanded}"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      >
+                  Style="{StaticResource ProtocolGroupExpanderStyle}">
                 <Expander.Header>
                     <ContentControl Content="{Binding}"
-                                    ContentTemplate="{StaticResource ProtocolLineTemplate}"/>
+                                ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
                 </Expander.Header>
 
                 <ItemsControl ItemsSource="{Binding Children}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <ContentControl Content="{Binding}"
-                                            ContentTemplate="{StaticResource ProtocolLineTemplate}"/>
+                                        HorizontalAlignment="Stretch"
+                                        ContentTemplate="{StaticResource ProtocolLineTemplate}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
