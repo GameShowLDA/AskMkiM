@@ -23,6 +23,7 @@ using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
+using static Ask.LogLib.LoggerUtility;
 using Button = System.Windows.Controls.Button;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Orientation = System.Windows.Controls.Orientation;
@@ -56,6 +57,7 @@ namespace UI.Controls.Archive
     private string _lastSelectedArchivePath;
     private string _lastSelectedEntryName;
     private ArchiveTreeNode _contextMenuNode;
+    private ArchiveClipboardEntry? _archiveClipboardEntry;
 
     private readonly Dictionary<string, Dictionary<string, DateTime>> _manifestCache = new();
 
@@ -658,7 +660,106 @@ namespace UI.Controls.Archive
         return;
       }
 
-      ArchiveFilesDataGrid.ItemsSource = _currentGridEntries;
+      _suppressGridSelection = true;
+      try
+      {
+        ArchiveFilesDataGrid.ItemsSource = _currentGridEntries;
+      }
+      finally
+      {
+        _suppressGridSelection = false;
+      }
+    }
+
+    private bool HasArchiveClipboardEntry()
+    {
+      return _archiveClipboardEntry != null;
+    }
+
+    private void StoreArchiveClipboardEntry(string archivePath, string entryName, string displayName, ArchiveClipboardOperation operation)
+    {
+      var normalizedArchivePath = Path.GetFullPath(archivePath);
+      var normalizedEntryName = NormalizeEntryName(entryName);
+      var normalizedDisplayName = Path.GetFileName(string.IsNullOrWhiteSpace(displayName) ? normalizedEntryName : displayName);
+
+      _archiveClipboardEntry = new ArchiveClipboardEntry(
+        normalizedArchivePath,
+        normalizedEntryName,
+        normalizedDisplayName,
+        operation);
+
+      LogInformation(
+        $"Файл '{normalizedDisplayName}' помещён в буфер архива. Режим: {(operation == ArchiveClipboardOperation.Cut ? "вырезать" : "копировать")}. Источник: '{Path.GetFileNameWithoutExtension(normalizedArchivePath)}'.");
+
+      UpdateActionButtons();
+    }
+
+    private void ClearArchiveClipboardEntry(bool wasConsumed)
+    {
+      if (_archiveClipboardEntry == null)
+      {
+        return;
+      }
+
+      if (wasConsumed)
+      {
+        LogInformation($"Буфер архива очищен после вставки файла '{_archiveClipboardEntry.DisplayName}'.");
+      }
+
+      _archiveClipboardEntry = null;
+      UpdateActionButtons();
+    }
+
+    private async Task PasteArchiveClipboardToAsync(string targetArchivePath)
+    {
+      var clipboardEntry = _archiveClipboardEntry;
+      if (clipboardEntry == null)
+      {
+        return;
+      }
+
+      var fullTargetArchivePath = Path.GetFullPath(targetArchivePath);
+      var sourceArchiveDisplayName = Path.GetFileNameWithoutExtension(clipboardEntry.SourceArchivePath);
+      var targetArchiveDisplayName = Path.GetFileNameWithoutExtension(fullTargetArchivePath);
+
+      try
+      {
+        LogInformation(
+          $"Начата вставка файла '{clipboardEntry.DisplayName}' из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}'. Режим: {(clipboardEntry.Operation == ArchiveClipboardOperation.Cut ? "вырезать" : "копировать")}.");
+
+        var insertedEntryName = await Task.Run(() =>
+        {
+          lock (_archiveManagerSync)
+          {
+            return clipboardEntry.Operation == ArchiveClipboardOperation.Cut
+              ? _archiveManager.MoveFileBetweenArchives(clipboardEntry.SourceArchivePath, clipboardEntry.EntryName, fullTargetArchivePath)
+              : _archiveManager.CopyFileBetweenArchives(clipboardEntry.SourceArchivePath, clipboardEntry.EntryName, fullTargetArchivePath);
+          }
+        });
+
+        var successMessage = clipboardEntry.Operation == ArchiveClipboardOperation.Cut
+          ? $"Файл '{Path.GetFileName(insertedEntryName)}' успешно перемещён из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}'."
+          : $"Файл '{Path.GetFileName(insertedEntryName)}' успешно скопирован из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}'.";
+
+        LogInformation(successMessage);
+        ShowArchiveNotification("Вставка файла", successMessage, NotificationType.Success);
+
+        if (clipboardEntry.Operation == ArchiveClipboardOperation.Cut)
+        {
+          ClearArchiveClipboardEntry(wasConsumed: true);
+        }
+        else
+        {
+          UpdateActionButtons();
+        }
+      }
+      catch (Exception ex)
+      {
+        LogError(
+          $"Ошибка вставки файла '{clipboardEntry.DisplayName}' из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}': {ex}");
+        ShowArchiveNotification("Вставка файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+        UpdateActionButtons();
+      }
     }
 
     private void UpdateActionButtons()
@@ -666,10 +767,15 @@ namespace UI.Controls.Archive
       UpdatePanelTitles();
 
       var hasArchive = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && File.Exists(_lastSelectedArchivePath);
+      var hasSelectedFile = hasArchive && !string.IsNullOrWhiteSpace(_lastSelectedEntryName);
+      var hasClipboardEntry = HasArchiveClipboardEntry();
+
       ArchiveActionsPanel.Visibility = hasArchive ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveFileButton.Visibility = hasArchive && !string.IsNullOrWhiteSpace(_lastSelectedEntryName)
-        ? Visibility.Visible
-        : Visibility.Collapsed;
+      PasteIntoArchiveButton.Visibility = hasArchive && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      CopyArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      CutArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      PasteArchiveFileButton.Visibility = hasSelectedFile && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void UpdatePanelTitles()
@@ -717,7 +823,9 @@ namespace UI.Controls.Archive
       if (clearEditor)
       {
         _lastSelectedEntryName = null;
+        _suppressGridSelection = true;
         ArchiveFilesDataGrid.SelectedItem = null;
+        _suppressGridSelection = false;
         FileContentTextBox.Content = null;
         FileContentTextBox.Text = string.Empty;
         EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра..";
@@ -736,6 +844,7 @@ namespace UI.Controls.Archive
     {
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
+      var normalizedEntryName = NormalizeEntryName(entryName);
 
       var textEditor = new TextEditorUI(FileType.OPKW);
       textEditor.Text = text;
@@ -751,18 +860,18 @@ namespace UI.Controls.Archive
       }
 
       FileContentTextBox.Content = textEditor;
+      _lastSelectedArchivePath = archivePath;
+      _lastSelectedEntryName = normalizedEntryName;
 
       EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
       UpdateActionButtons();
       UpdateRightPanels(true, true);
       if (!fromGrid)
       {
-        var normalized = NormalizeEntryName(entryName);
-
         var selectedRow = ArchiveFilesDataGrid.Items
             .Cast<ArchiveEntryInfo>()
             .FirstOrDefault(x =>
-                string.Equals(x.EntryName, normalized, StringComparison.OrdinalIgnoreCase));
+                string.Equals(x.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
 
         await SelectGridRow(selectedRow);
       }
@@ -784,12 +893,27 @@ namespace UI.Controls.Archive
     {
       _suppressGridSelection = true;
 
-      ArchiveFilesDataGrid.SelectedItem = selectedRow;
-      ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+      try
+      {
+        ArchiveFilesDataGrid.SelectedItem = selectedRow;
 
-      await Task.Yield();
+        if (selectedRow is ArchiveEntryInfo selectedEntry)
+        {
+          _lastSelectedArchivePath = selectedEntry.ArchivePath;
+          _lastSelectedEntryName = selectedEntry.EntryName;
+        }
 
-      _suppressGridSelection = false;
+        if (selectedRow != null)
+        {
+          ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+        }
+
+        await Task.Yield();
+      }
+      finally
+      {
+        _suppressGridSelection = false;
+      }
     }
 
     /// <summary>
@@ -1112,6 +1236,7 @@ namespace UI.Controls.Archive
       var isRoot = node?.Kind == ArchiveTreeNodeKind.Root;
       var isArchive = node?.Kind == ArchiveTreeNodeKind.Archive;
       var isFile = node?.Kind == ArchiveTreeNodeKind.File;
+      var hasClipboardEntry = HasArchiveClipboardEntry();
       var canManageArchives = isRoot;
 
       CreateArchiveMenuItem.Visibility = isRoot ? Visibility.Visible : Visibility.Collapsed;
@@ -1121,7 +1246,11 @@ namespace UI.Controls.Archive
       OpenArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       SaveArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      AddFileToArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      CopyArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      CutArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      PasteArchiveFileMenuItem.Visibility = (isFile || isArchive) && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
 
       if (!isRoot && !isArchive && !isFile)
@@ -1221,6 +1350,44 @@ namespace UI.Controls.Archive
       DeleteArchiveFile(node.ArchivePath, node.EntryName, node.DisplayName);
     }
 
+    private void CopyArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node?.Kind != ArchiveTreeNodeKind.File ||
+          string.IsNullOrWhiteSpace(node.ArchivePath) ||
+          string.IsNullOrWhiteSpace(node.EntryName))
+      {
+        return;
+      }
+
+      StoreArchiveClipboardEntry(node.ArchivePath, node.EntryName, node.DisplayName, ArchiveClipboardOperation.Copy);
+    }
+
+    private void CutArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node?.Kind != ArchiveTreeNodeKind.File ||
+          string.IsNullOrWhiteSpace(node.ArchivePath) ||
+          string.IsNullOrWhiteSpace(node.EntryName))
+      {
+        return;
+      }
+
+      StoreArchiveClipboardEntry(node.ArchivePath, node.EntryName, node.DisplayName, ArchiveClipboardOperation.Cut);
+    }
+
+    private async void PasteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if ((node?.Kind != ArchiveTreeNodeKind.File && node?.Kind != ArchiveTreeNodeKind.Archive) ||
+          string.IsNullOrWhiteSpace(node.ArchivePath))
+      {
+        return;
+      }
+
+      await PasteArchiveClipboardToAsync(node.ArchivePath);
+    }
+
     private void AddFileToArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
@@ -1243,6 +1410,14 @@ namespace UI.Controls.Archive
       }
     }
 
+    private async void PasteIntoArchiveButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
+      {
+        await PasteArchiveClipboardToAsync(_lastSelectedArchivePath);
+      }
+    }
+
     private void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
@@ -1252,6 +1427,40 @@ namespace UI.Controls.Archive
       }
     }
 
+    private void CopyArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
+          !string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        StoreArchiveClipboardEntry(
+          _lastSelectedArchivePath,
+          _lastSelectedEntryName,
+          Path.GetFileName(_lastSelectedEntryName),
+          ArchiveClipboardOperation.Copy);
+      }
+    }
+
+    private void CutArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
+          !string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        StoreArchiveClipboardEntry(
+          _lastSelectedArchivePath,
+          _lastSelectedEntryName,
+          Path.GetFileName(_lastSelectedEntryName),
+          ArchiveClipboardOperation.Cut);
+      }
+    }
+
+    private async void PasteArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
+      {
+        await PasteArchiveClipboardToAsync(_lastSelectedArchivePath);
+      }
+    }
+    
     private async void PrintArchiveCatalogButton_Click(object sender, RoutedEventArgs e)
     {
       await PrintArchiveCatalogAsync();
@@ -2027,6 +2236,12 @@ namespace UI.Controls.Archive
           : invalidOperation.Message;
       }
 
+      if (ex is InvalidOperationException invalidOperationWithMessage &&
+          !string.IsNullOrWhiteSpace(invalidOperationWithMessage.Message))
+      {
+        return invalidOperationWithMessage.Message;
+      }
+
       if (ex is FileNotFoundException)
       {
         return "Архив или файл не найден.";
@@ -2043,6 +2258,12 @@ namespace UI.Controls.Archive
         return "Архив сейчас используется другим процессом. Повторите попытку.";
       }
 
+      if (ex is IOException ioExceptionWithMessage &&
+          !string.IsNullOrWhiteSpace(ioExceptionWithMessage.Message))
+      {
+        return ioExceptionWithMessage.Message;
+      }
+
       if (ex is InvalidDataException invalidDataException)
       {
         return invalidDataException.Message;
@@ -2054,6 +2275,28 @@ namespace UI.Controls.Archive
       }
 
       return "Не удалось выполнить операцию с архивом.";
+    }
+
+    private enum ArchiveClipboardOperation
+    {
+      Copy,
+      Cut
+    }
+
+    private sealed class ArchiveClipboardEntry
+    {
+      public ArchiveClipboardEntry(string sourceArchivePath, string entryName, string displayName, ArchiveClipboardOperation operation)
+      {
+        SourceArchivePath = sourceArchivePath;
+        EntryName = entryName;
+        DisplayName = displayName;
+        Operation = operation;
+      }
+
+      public string SourceArchivePath { get; }
+      public string EntryName { get; }
+      public string DisplayName { get; }
+      public ArchiveClipboardOperation Operation { get; }
     }
 
     private sealed class TreeRefreshState

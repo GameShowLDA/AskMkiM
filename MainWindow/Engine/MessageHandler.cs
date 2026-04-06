@@ -147,6 +147,7 @@ namespace MainWindowProgram.Engine
               _infoBlock.Opacity = 1;
             }
           });
+        
         }
       }
       catch (Exception)
