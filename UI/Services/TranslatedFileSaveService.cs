@@ -1,4 +1,4 @@
-﻿using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Microsoft.Win32;
 using System.IO;

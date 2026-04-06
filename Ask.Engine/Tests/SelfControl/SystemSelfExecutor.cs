@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Static.Devices;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -24,20 +25,20 @@ namespace Ask.Engine.Tests.SelfControl
     /// <param name="cancellationToken">Токен отмены.</param>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var managerShassi = new DataBaseConfiguration.Services.Device.ChassisManagerServices().GetAllEntities().FirstOrDefault();
+      var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (managerShassi == null)
       {
         return;
       }
 
-      var meter = new DataBaseConfiguration.Services.Device.FastMeterServices().GetDevicesByNumberChassis(managerShassi.Number).FirstOrDefault();
+      var meter = FastMeters.GetDevicesByNumberChassisAsync(managerShassi.Number).GetAwaiter().GetResult().FirstOrDefault();
       if (meter == null)
       {
         return;
       }
 
-      var dbc = new DataBaseConfiguration.Services.Device.SwitchingDeviceServices().GetDevicesByNumberChassis(managerShassi.Number).FirstOrDefault();
-      var mkr = new DataBaseConfiguration.Services.Device.RelaySwitchModuleServices().GetDevicesByNumberChassis(managerShassi.Number);
+      var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
+      var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
 
       await dbc.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), SwitchingDeviceTypeConnector.FullCheck, _messageService, dbc, meter);
 

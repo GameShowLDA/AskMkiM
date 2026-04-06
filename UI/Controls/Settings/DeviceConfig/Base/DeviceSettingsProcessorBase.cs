@@ -1,13 +1,5 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
 
@@ -29,24 +21,17 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         IDevice selectedDevice,
         DeviceSettingsControl control,
         IDataProcessor? additionalDataProcessor = null)
-      where T : class, IDevice
+      where T : DeviceDto
     {
       string connectString = BaseHandler<IDevice>.GetConnectionDetails(control, selectedDevice);
-
-      var deviceModel = CreateDeviceModelByInterface(selectedDevice) as T;
+      var deviceModel = CreateDeviceDtoByInterface(selectedDevice) as T;
 
       if (deviceModel is null)
       {
         throw new ArgumentNullException(nameof(deviceModel));
       }
 
-      deviceModel.Name = selectedDevice.Name;
-      deviceModel.Description = selectedDevice.Description;
-      deviceModel.ConnectionDetails = connectString;
-      deviceModel.Number = BaseHandler<IDevice>.GetNumber(control);
-      deviceModel.DeviceClass = selectedDevice.DeviceClass;
       SetChassisNumber(deviceModel, control);
-
       return deviceModel;
     }
 
@@ -55,28 +40,25 @@ namespace UI.Controls.Settings.DeviceConfig.Base
     /// </summary>
     /// <param name="device">Выбранное устройство.</param>
     /// <returns>Возвращает созданный экземпляр выбранного устройства.</returns>
-    protected IDevice CreateDeviceModelByInterface(IDevice device)
+    protected DeviceDto CreateDeviceDtoByInterface(IDevice device)
     {
-      return device switch
-      {
-        IBreakdownTester => new BreakdownTesterEntity(),
-        IPowerSourceModule => new PowerSourceModuleEntity(),
-        IRelaySwitchModule => new RelaySwitchModuleEntity(),
-        ISwitchingDevice => new SwitchingDeviceEntity(),
-        IChassisManager => new ChassisManagerEntity(),
-        IFastMeter => new FastMeterEntity(),
-        IUninterruptiblePowerSupply => new UninterruptiblePowerSupplyEntity(),
-        IRack => new RackEntity(),
+      ArgumentNullException.ThrowIfNull(device);
 
-        _ => throw new ArgumentException("Неизвестный тип устройства", nameof(device))
-      };
+      if (device is IDeviceToDtoConverter<DeviceDto> converter)
+      {
+        return converter.Convert();
+      }
+
+      throw new ArgumentException(
+        $"Устройство типа '{device.GetType().Name}' не поддерживает конвертацию в DTO.",
+        nameof(device));
     }
 
     /// <summary>
     /// Определяет номер шасси, если устройство его поддерживает, и выводит в консоль.
     /// </summary>
     /// <param name="deviceModel">Объект устройства.</param>
-    private void SetChassisNumber(IDevice deviceModel, DeviceSettingsControl control)
+    private void SetChassisNumber(DeviceDto deviceModel, DeviceSettingsControl control)
     {
       if (deviceModel.DeviceType != DeviceType.ChassisManager)
       {

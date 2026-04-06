@@ -1,8 +1,9 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
@@ -15,7 +16,7 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
   public partial class FastMeterWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private FastMeterEntity? _editingEntity;
+    private FastMeterDto? _editingDto;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -25,7 +26,7 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
     /// <summary>
     /// Событие, вызываемое при сохранении данных измерителя.
     /// </summary>
-    public event EventHandler<FastMeterEntity> RequestSave;
+    public event EventHandler<FastMeterDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FastMeterWindow"/>.
@@ -61,9 +62,9 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, FastMeterEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, FastMeterDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "Измеритель (быстрый)";
       deviceSettingsWindow.LoadDeviceModels<IFastMeter>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -72,33 +73,40 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        FastMeterEntity deviceEntity = processor.ProcessDevice<FastMeterEntity>(
+        FastMeterDto deviceDto = processor.ProcessDevice<FastMeterDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
 
-        if (deviceEntity != null)
+        if (deviceDto != null)
         {
-          deviceEntity.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
+          deviceDto.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
 
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto != null)
             {
-              new FastMeterServices().Create(deviceEntity);
+              deviceDto.Id = _editingDto.Id;
+            }
+
+            var fastMeter = FastMeters.Build(deviceDto);
+
+            if (_editingDto == null)
+            {
+              var createdDevice = await FastMeters.CreateAsync(fastMeter);
+              deviceDto.Id = createdDevice.Id;
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              new FastMeterServices().Update(deviceEntity);
+              await FastMeters.UpdateAsync(fastMeter);
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
+            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
           }
           catch (DuplicateEntityException ex)

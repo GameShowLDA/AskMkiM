@@ -1,4 +1,4 @@
-﻿using DataBaseConfiguration;
+using Ask.DataBase.Provider.Context;
 using Message;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -26,7 +26,7 @@ namespace UI.Controls.AdminPanel
     public DataBaseView()
     {
       InitializeComponent();
-      _context = DataBaseConfig.Context;
+      _context = new AppDbContext();
       _setMethod = typeof(DbContext).GetMethod(nameof(DbContext.Set), Type.EmptyTypes)
         ?? throw new InvalidOperationException("Не удалось найти метод DbContext.Set().");
 

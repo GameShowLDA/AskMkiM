@@ -1,12 +1,10 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Metrology;
 using Ask.Core.Services.Usb;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.View;
-using Ask.Device.Runtime.Device;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Support;
-using DataBaseConfiguration.Services.Device;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
@@ -75,9 +73,6 @@ namespace MainWindowProgram.Init
           {
             services.AddSingleton<Dispatcher>(_ => Application.Current.Dispatcher);
 
-            services.AddSingleton<IBreakdownTester, GPT79904>();
-            services.AddSingleton<BreakdownTesterServices>();
-
             services.AddSingleton<IUsbMonitorView, UsbMonitorService>();
             services.AddSingleton<MetrologyControlFactory>();
 
@@ -99,15 +94,13 @@ namespace MainWindowProgram.Init
       {
         LogInformation("Инициализация устройств шасси: начало");
 
-        var chassis = new ChassisManagerServices().GetAll().FirstOrDefault();
+        var chassis = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
         if (chassis == null)
         {
           LogInformation("Инициализация устройств шасси: шасси не найдено");
           return;
         }
-
-        var testerService = ServiceLocator.GetRequired<BreakdownTesterServices>();
-        var tester = testerService.GetDevicesByNumberChassis(chassis.Number).FirstOrDefault();
+        var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(chassis.Number).GetAwaiter().GetResult().FirstOrDefault();
 
         LogInformation($"Инициализация устройств шасси завершена для №{chassis.Number}");
       }

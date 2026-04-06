@@ -65,11 +65,11 @@ namespace UI.Controls.Runner
       }
       set
       {
-        translationModels = value;
+        translationModels = value ?? new List<BaseCommandModel>();
         ErrorClear();
         TranslationErrorCount = 0;
 
-        foreach (var model in value)
+        foreach (var model in translationModels)
         {
           if (model.Errors.Count > 0)
           {

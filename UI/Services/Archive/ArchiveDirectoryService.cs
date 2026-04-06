@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using static Ask.LogLib.LoggerUtility;
 

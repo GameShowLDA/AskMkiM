@@ -166,6 +166,20 @@ namespace MainWindowProgram.Services
       }
     }
 
+    public void CreateArchive()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      if (_multiWindow.GetActiveWorkspaceControl() is ArchiveControl archiveControl)
+      {
+        archiveControl.ShowCreateArchiveDialog();
+      }
+    }
+
     /// <summary>
     /// Запускает создание нового архива в текущем окне архивов.
     /// </summary>

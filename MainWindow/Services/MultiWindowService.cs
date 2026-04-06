@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using UI.Components;
 using UI.Controls;
 using UI.Controls.TextEditorControl;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace MainWindowProgram.Services
 {
@@ -77,6 +78,8 @@ namespace MainWindowProgram.Services
     /// либо <c>null</c>, если ни один редактор не активен.
     /// </returns>
     public TextEditorUI GetActiveTextEditor() => _multiWindowControl.GetActiveTextEditor();
+
+    public UserControl? GetActiveWorkspaceControl() => _multiWindowControl.GetActiveWorkspaceControl();
 
     /// <summary>
     /// Возвращает активный пользовательский элемент управления в рабочей области.
