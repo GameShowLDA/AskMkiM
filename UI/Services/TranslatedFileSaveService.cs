@@ -14,6 +14,29 @@ namespace UI.Services
     private const string DefaultFileNameWithoutExtension = "translated";
     private const string OpkwExtension = ".opkw";
 
+    /// <summary>
+    /// Сохраняет переведённый текст в файл на диске с использованием диалога сохранения.
+    /// </summary>
+    /// <param name="ownerElement">
+    /// UI-элемент, относительно которого будет отображён диалог сохранения.
+    /// </param>
+    /// <param name="translatedText">Текст, который необходимо сохранить.</param>
+    /// <param name="sourceFilePath">
+    /// Путь к исходному файлу (используется для формирования имени файла по умолчанию).
+    /// </param>
+    /// <returns>
+    /// <c>true</c>, если файл был успешно сохранён;
+    /// <c>false</c>, если пользователь отменил операцию или произошла ошибка.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Выбрасывается, если <paramref name="ownerElement"/> равен <c>null</c>.
+    /// </exception>
+    /// <remarks>
+    /// Если текст пустой — операция не выполняется, и пользователю показывается предупреждение.
+    /// Имя файла по умолчанию формируется на основе исходного файла или значения "translated".
+    /// Файл сохраняется в кодировке UTF-8 с расширением .opkw.
+    /// В случае ошибки пользователю отображается уведомление.
+    /// </remarks>
     public bool SaveToDisk(FrameworkElement ownerElement, string translatedText, string? sourceFilePath)
     {
       if (ownerElement == null)

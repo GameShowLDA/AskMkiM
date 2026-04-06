@@ -29,30 +29,39 @@
                           Cursor="Hand"
                 SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
                     <TreeView.ContextMenu>
-                        <ContextMenu x:Name="ArchivesTreeContextMenu"
+                            <ContextMenu x:Name="ArchivesTreeContextMenu"
                        Style="{DynamicResource AppContextMenuStyle}"
                        Opened="ArchivesTreeContextMenu_Opened"
                        Closed="ArchivesTreeContextMenu_Closed">
-                            <MenuItem x:Name="CreateArchiveMenuItem"
+                                <MenuItem x:Name="CreateArchiveMenuItem"
                       Header="Создать архив"
                       Click="CreateArchiveMenuItem_Click" />
-                            <MenuItem x:Name="OpenArchiveMenuItem"
+                                <MenuItem x:Name="UploadArchiveMenuItem"
+                      Header="Загрузить архив"
+                      Click="UploadArchiveMenuItem_Click" />
+                                <MenuItem x:Name="DownloadArchivesMenuItem"
+                      Header="Скачать архивы"
+                      Click="DownloadArchivesMenuItem_Click" />
+                                <MenuItem x:Name="OpenArchiveMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveMenuItem_Click" />
-                            <MenuItem x:Name="DeleteArchiveMenuItem"
+                                <MenuItem x:Name="SaveArchiveMenuItem"
+                      Header="Сохранить архив на диск"
+                      Click="SaveArchiveMenuItem_Click" />
+                                <MenuItem x:Name="PrintArchiveCatalogMenuItem"
+                      Header="Распечатать каталог архива"
+                      Click="PrintArchiveCatalogMenuItem_Click" />
+                                <MenuItem x:Name="DeleteArchiveMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveMenuItem_Click" />
-                            <!--MenuItem x:Name="AddFileToArchiveMenuItem"
-                      Header="Добавить файл"
-                      Click="AddFileToArchiveMenuItem_Click" /-->
-                            <MenuItem x:Name="OpenArchiveFileMenuItem"
+                                <MenuItem x:Name="OpenArchiveFileMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveFileMenuItem_Click" />
-                            <MenuItem x:Name="DeleteArchiveFileMenuItem"
+                                <MenuItem x:Name="DeleteArchiveFileMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveFileMenuItem_Click" />
-                        </ContextMenu>
-                    </TreeView.ContextMenu>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                     <TreeView.Resources>
                         <Style x:Key="ArchiveTreeExpandToggleStyle"
                                TargetType="{x:Type ToggleButton}">

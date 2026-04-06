@@ -82,6 +82,10 @@ namespace UI.Controls
       SaveToDiskButton.Visibility = isVisible
         ? Visibility.Visible
         : Visibility.Collapsed;
+      if (isVisible)
+      {
+        SaveToDiskButton.ToolTip = "��������� �� ����";
+      }
     }
 
     public void SetEditor(ITextEditorView editor)
