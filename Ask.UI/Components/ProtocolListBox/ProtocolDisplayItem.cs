@@ -33,12 +33,12 @@ namespace Ask.UI.Components.ProtocolListBox
     /// <summary>
     /// Задний фон заголовка с успешно выполненными тестами.
     /// </summary>
-    private Color _successBackground = Color.FromRgb(94, 127, 107);
+    private Color _successBackground = Color.FromArgb(128, 94, 127, 107);
 
     /// <summary>
     /// Задний фон заголовка с ошибками в тестах.
     /// </summary>
-    private Color _errorBackground = Color.FromRgb(168, 93, 93);
+    private Color _errorBackground = Color.FromArgb(128, 168, 93, 93);
 
     private ProtocolDisplayItem(bool isGroup)
     {
