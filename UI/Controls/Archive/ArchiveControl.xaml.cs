@@ -892,8 +892,6 @@ namespace UI.Controls.Archive
       return (entries, archivePath);
     }
 
-
-
     private async Task PrintArchiveCatalogAsync()
     {
       var (entries, archivePath) = await EnsureEntriesForPrintAsync();
@@ -908,14 +906,21 @@ namespace UI.Controls.Archive
 
       var printDialog = new PrintDialog();
 
+      var printCapabilities = printDialog.PrintQueue.GetPrintCapabilities(printDialog.PrintTicket);
+
+      double hardMarginX = printCapabilities.PageImageableArea.OriginWidth;
+      double hardMarginY = printCapabilities.PageImageableArea.OriginHeight;
+
+
       if (printDialog.ShowDialog() == true)
       {
         var document = CreatePrintDocument(
           entries,
           archiveName,
+          hardMarginX,
+          hardMarginY,
           printDialog.PrintableAreaWidth,
           printDialog.PrintableAreaHeight);
-
         IDocumentPaginatorSource idpSource = document;
         printDialog.PrintDocument(idpSource.DocumentPaginator, "Каталог архива");
       }
@@ -924,20 +929,27 @@ namespace UI.Controls.Archive
     private FlowDocument CreatePrintDocument(
       IReadOnlyList<ArchiveEntryInfo> entries,
       string archiveName,
+      double hardMarginX,
+      double hardMarginY,
       double printableAreaWidth,
       double printableAreaHeight)
     {
       var cellPadding = new Thickness(2);
+      
       var doc = new FlowDocument
       {
         FontFamily = new FontFamily("Segoe UI"),
         FontSize = 9.5,
-        PagePadding = new Thickness(14),
-        PageWidth = printableAreaWidth,
-        PageHeight = printableAreaHeight,
+        PagePadding = new Thickness(
+          hardMarginX,
+          hardMarginY,
+          hardMarginX,
+          hardMarginY),
+        PageWidth = printableAreaWidth + hardMarginX * 2,
+        PageHeight = printableAreaHeight + hardMarginY * 2,
         ColumnWidth = double.PositiveInfinity
       };
-
+      
       var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
 
       // Заголовок
