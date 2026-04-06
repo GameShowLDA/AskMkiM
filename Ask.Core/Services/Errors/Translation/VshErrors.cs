@@ -38,7 +38,7 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Vsh_NoneVshBusStructure,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = "Системная ошибка: в конфигурации не указана структора стройки коммутации. Проверьте конфигурацию."
+        Description = "Системная ошибка: в конфигурации не указана структура стройки коммутации. Проверьте конфигурацию."
       };
   }
 }
