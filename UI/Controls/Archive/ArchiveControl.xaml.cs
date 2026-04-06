@@ -660,7 +660,15 @@ namespace UI.Controls.Archive
         return;
       }
 
-      ArchiveFilesDataGrid.ItemsSource = _currentGridEntries;
+      _suppressGridSelection = true;
+      try
+      {
+        ArchiveFilesDataGrid.ItemsSource = _currentGridEntries;
+      }
+      finally
+      {
+        _suppressGridSelection = false;
+      }
     }
 
     private bool HasArchiveClipboardEntry()
@@ -815,7 +823,9 @@ namespace UI.Controls.Archive
       if (clearEditor)
       {
         _lastSelectedEntryName = null;
+        _suppressGridSelection = true;
         ArchiveFilesDataGrid.SelectedItem = null;
+        _suppressGridSelection = false;
         FileContentTextBox.Content = null;
         FileContentTextBox.Text = string.Empty;
         EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра..";
@@ -834,6 +844,7 @@ namespace UI.Controls.Archive
     {
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
+      var normalizedEntryName = NormalizeEntryName(entryName);
 
       var textEditor = new TextEditorUI(FileType.OPKW);
       textEditor.Text = text;
@@ -849,18 +860,18 @@ namespace UI.Controls.Archive
       }
 
       FileContentTextBox.Content = textEditor;
+      _lastSelectedArchivePath = archivePath;
+      _lastSelectedEntryName = normalizedEntryName;
 
       EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
       UpdateActionButtons();
       UpdateRightPanels(true, true);
       if (!fromGrid)
       {
-        var normalized = NormalizeEntryName(entryName);
-
         var selectedRow = ArchiveFilesDataGrid.Items
             .Cast<ArchiveEntryInfo>()
             .FirstOrDefault(x =>
-                string.Equals(x.EntryName, normalized, StringComparison.OrdinalIgnoreCase));
+                string.Equals(x.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
 
         await SelectGridRow(selectedRow);
       }
@@ -882,12 +893,27 @@ namespace UI.Controls.Archive
     {
       _suppressGridSelection = true;
 
-      ArchiveFilesDataGrid.SelectedItem = selectedRow;
-      ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+      try
+      {
+        ArchiveFilesDataGrid.SelectedItem = selectedRow;
 
-      await Task.Yield();
+        if (selectedRow is ArchiveEntryInfo selectedEntry)
+        {
+          _lastSelectedArchivePath = selectedEntry.ArchivePath;
+          _lastSelectedEntryName = selectedEntry.EntryName;
+        }
 
-      _suppressGridSelection = false;
+        if (selectedRow != null)
+        {
+          ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+        }
+
+        await Task.Yield();
+      }
+      finally
+      {
+        _suppressGridSelection = false;
+      }
     }
 
     /// <summary>
