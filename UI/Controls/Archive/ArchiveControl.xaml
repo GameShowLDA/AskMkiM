@@ -434,6 +434,28 @@
                                     Grid.Column="1"
                                     Orientation="Horizontal"
                                     Visibility="Collapsed">
+                            <Button x:Name="SaveArchiveButton"
+                                    Margin="12,0,0,0"
+                                    Padding="10,4"
+                                    MinWidth="220"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Cursor="Hand"
+                                    FontSize="16"
+                                    Style="{DynamicResource ButtonStyleV8}"
+                                    Content="Сохранить архив на диск"
+                                    Click="SaveArchiveToDiskButton_Click" />
+                            <Button x:Name="PrintArchiveCatalogButton"
+                                    Margin="12,0,0,0"
+                                    Padding="10,4"
+                                    MinWidth="260"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Cursor="Hand"
+                                    FontSize="16"
+                                    Style="{DynamicResource ButtonStyleV8}"
+                                    Content="Распечатать каталог архива"
+                                    Click="PrintArchiveCatalogButton_Click" />
                             <Button x:Name="AddFileToArchiveButton"
                                     Margin="12,0,0,0"
                                     Padding="10,4"
@@ -504,37 +526,32 @@
                                 Binding="{Binding Name}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="150"
-                                Width="Auto"
+                                Width="15*"
                                 />
                             <DataGridTextColumn Header="Наименование ОК"
                                 Binding="{Binding NameOK}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="190"
-                                Width="Auto" />
+                                Width="19*" />
                             <DataGridTextColumn Header="ОПК"
                                 Binding="{Binding OPK}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="90"
-                                Width="Auto" />
-                            <DataGridTextColumn Header="ИК"
-                                Binding="{Binding IK}"
-                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
-                                MinWidth="90"
-                                Width="Auto" />
+                                Width="9*" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="110"
-                                Width="Auto" />
+                                Width="11*" />
                             <DataGridTextColumn Header="Файл ОПК"
                                 Binding="{Binding OpkFileName}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="180"
-                                Width="Auto" />
+                                Width="18*" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"
                                 MinWidth="120"
-                                Width="Auto">
+                                Width="12*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource ArchiveFilesDataGridTextStyle}"
@@ -547,12 +564,12 @@
                                 Binding="{Binding Department}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="80"
-                                Width="Auto" />
+                                Width="8*" />
                             <DataGridTextColumn Header="Примечание"
                                 Binding="{Binding Comment}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="200"
-                                Width="*" />
+                                Width="20*" />
                         </DataGrid.Columns>
                     </DataGrid>
 

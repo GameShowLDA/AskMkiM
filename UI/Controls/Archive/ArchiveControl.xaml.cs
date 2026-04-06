@@ -892,8 +892,6 @@ namespace UI.Controls.Archive
       return (entries, archivePath);
     }
 
-
-
     private async Task PrintArchiveCatalogAsync()
     {
       var (entries, archivePath) = await EnsureEntriesForPrintAsync();
@@ -908,35 +906,59 @@ namespace UI.Controls.Archive
 
       var printDialog = new PrintDialog();
 
+      var printCapabilities = printDialog.PrintQueue.GetPrintCapabilities(printDialog.PrintTicket);
+
+      double hardMarginX = printCapabilities.PageImageableArea.OriginWidth;
+      double hardMarginY = printCapabilities.PageImageableArea.OriginHeight;
+
+
       if (printDialog.ShowDialog() == true)
       {
-        var document = CreatePrintDocument(entries, archiveName);
-
-        document.PageHeight = printDialog.PrintableAreaHeight;
-        document.PageWidth = printDialog.PrintableAreaWidth;
-
+        var document = CreatePrintDocument(
+          entries,
+          archiveName,
+          hardMarginX,
+          hardMarginY,
+          printDialog.PrintableAreaWidth,
+          printDialog.PrintableAreaHeight);
         IDocumentPaginatorSource idpSource = document;
         printDialog.PrintDocument(idpSource.DocumentPaginator, "Каталог архива");
       }
     }
 
-    private FlowDocument CreatePrintDocument(IReadOnlyList<ArchiveEntryInfo> entries, string archiveName)
+    private FlowDocument CreatePrintDocument(
+      IReadOnlyList<ArchiveEntryInfo> entries,
+      string archiveName,
+      double hardMarginX,
+      double hardMarginY,
+      double printableAreaWidth,
+      double printableAreaHeight)
     {
+      var cellPadding = new Thickness(2);
+      
       var doc = new FlowDocument
       {
         FontFamily = new FontFamily("Segoe UI"),
-        FontSize = 12,
-        PagePadding = new Thickness(40),
+        FontSize = 9.5,
+        PagePadding = new Thickness(
+          hardMarginX,
+          hardMarginY,
+          hardMarginX,
+          hardMarginY),
+        PageWidth = printableAreaWidth + hardMarginX * 2,
+        PageHeight = printableAreaHeight + hardMarginY * 2,
         ColumnWidth = double.PositiveInfinity
       };
+      
+      var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
 
       // Заголовок
       doc.Blocks.Add(new Paragraph(new Run($"Каталог архива {archiveName}"))
       {
-        FontSize = 16,
+        FontSize = 14,
         FontWeight = FontWeights.Bold,
         TextAlignment = TextAlignment.Center,
-        Margin = new Thickness(0, 0, 0, 20)
+        Margin = new Thickness(0, 0, 0, 12)
       });
 
       var table = new Table
@@ -944,16 +966,92 @@ namespace UI.Controls.Archive
         CellSpacing = 0
       };
 
-      // Колонки (пример)
-      for (int i = 0; i < 9; i++)
-        table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Auto) });
+      double MeasureColumnWidth(string sampleText, FontWeight fontWeight)
+      {
+        var formattedText = new FormattedText(
+          sampleText,
+          CultureInfo.CurrentCulture,
+          FlowDirection.LeftToRight,
+          new Typeface(doc.FontFamily, FontStyles.Normal, fontWeight, FontStretches.Normal),
+          doc.FontSize,
+          Brushes.Black,
+          VisualTreeHelper.GetDpi(this).PixelsPerDip);
+
+        var horizontalPadding = cellPadding.Left + cellPadding.Right;
+        const double bordersWidth = 2;
+
+        return Math.Ceiling(formattedText.WidthIncludingTrailingWhitespace + horizontalPadding + bordersWidth);
+      }
+
+      double MeasureCharactersWidth(int characterCount, char sampleChar)
+      {
+        return MeasureColumnWidth(new string(sampleChar, characterCount), FontWeights.Normal);
+      }
+
+      var designationColumnWidth = Math.Max(
+        MeasureColumnWidth("Обозначение", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var nameOkColumnWidth = Math.Max(
+        MeasureColumnWidth("Наименование ОК", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var opkColumnWidth = Math.Max(
+        MeasureColumnWidth("ОПК", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var orderColumnWidth = Math.Max(
+        MeasureColumnWidth("Заказ", FontWeights.Bold),
+        MeasureCharactersWidth(8, '0'));
+
+      var opkFileColumnWidth = Math.Max(
+        MeasureColumnWidth("Файл ОПК", FontWeights.Bold),
+        MeasureCharactersWidth(16, 'A'));
+
+      var createdColumnWidth = Math.Max(
+        MeasureColumnWidth("Создан", FontWeights.Bold),
+        MeasureCharactersWidth(10, '0'));
+
+      var departmentColumnWidth = Math.Max(
+        MeasureColumnWidth("Цех", FontWeights.Bold),
+        MeasureCharactersWidth(4, '0'));
+
+      var commentColumnWidth = MeasureColumnWidth("Примечание", FontWeights.Bold);
+      var columnWidths = new[]
+      {
+        designationColumnWidth,
+        nameOkColumnWidth,
+        opkColumnWidth,
+        orderColumnWidth,
+        opkFileColumnWidth,
+        createdColumnWidth,
+        departmentColumnWidth,
+        commentColumnWidth
+      };
+
+      var requiredWidth = columnWidths.Sum();
+      if (requiredWidth > availableTableWidth && availableTableWidth > 0)
+      {
+        var scale = availableTableWidth / requiredWidth;
+        for (int i = 0; i < columnWidths.Length; i++)
+        {
+          columnWidths[i] = Math.Floor(columnWidths[i] * scale);
+        }
+      }
+
+      var fixedColumnsWidth = columnWidths.Take(7).Sum();
+      columnWidths[7] = Math.Max(columnWidths[7], Math.Max(0, availableTableWidth - fixedColumnsWidth));
+
+      foreach (var columnWidth in columnWidths)
+      {
+        table.Columns.Add(new TableColumn { Width = new GridLength(columnWidth) });
+      }
 
       // Заголовки
       var headerRow = new TableRow();
       headerRow.Cells.Add(new TableCell(CreateCell("Обозначение")));
       headerRow.Cells.Add(new TableCell(CreateCell("Наименование ОК")));
       headerRow.Cells.Add(new TableCell(CreateCell("ОПК")));
-      headerRow.Cells.Add(new TableCell(CreateCell("ИК")));
       headerRow.Cells.Add(new TableCell(CreateCell("Заказ")));
       headerRow.Cells.Add(new TableCell(CreateCell("Файл ОПК")));
       headerRow.Cells.Add(new TableCell(CreateCell("Создан")));
@@ -964,7 +1062,7 @@ namespace UI.Controls.Archive
       {
         cell.BorderBrush = Brushes.Black;
         cell.BorderThickness = new Thickness(0.5);
-        cell.Padding = new Thickness(4);
+        cell.Padding = cellPadding;
         cell.FontWeight = FontWeights.Bold;
       }
 
@@ -979,7 +1077,6 @@ namespace UI.Controls.Archive
         row.Cells.Add(new TableCell(CreateCell(item.Name)));
         row.Cells.Add(new TableCell(CreateCell(item.NameOK)));
         row.Cells.Add(new TableCell(CreateCell(item.OPK)));
-        row.Cells.Add(new TableCell(CreateCell(item.IK)));
         row.Cells.Add(new TableCell(CreateCell(item.Order)));
         row.Cells.Add(new TableCell(CreateCell(item.OpkFileName)));
         row.Cells.Add(new TableCell(CreateCell(item.CreationDate.ToString("dd.MM.yyyy"))));
@@ -990,7 +1087,7 @@ namespace UI.Controls.Archive
         {
           cell.BorderBrush = Brushes.Black;
           cell.BorderThickness = new Thickness(0.5);
-          cell.Padding = new Thickness(4);
+          cell.Padding = cellPadding;
         }
 
         rowGroup.Rows.Add(row);
@@ -1135,6 +1232,7 @@ namespace UI.Controls.Archive
     private void SaveArchiveToDiskButton_Click(object sender, RoutedEventArgs e)
     {
       SaveSelectedArchiveToDisk();
+      ResetArchiveActionButtonFocus();
     }
 
     private void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
@@ -1157,6 +1255,15 @@ namespace UI.Controls.Archive
     private async void PrintArchiveCatalogButton_Click(object sender, RoutedEventArgs e)
     {
       await PrintArchiveCatalogAsync();
+      ResetArchiveActionButtonFocus();
+    }
+
+    private void ResetArchiveActionButtonFocus()
+    {
+      Dispatcher.BeginInvoke(new Action(() =>
+      {
+        Keyboard.ClearFocus();
+      }), DispatcherPriority.Background);
     }
 
     private async void PrintArchiveCatalogMenuItem_Click(object sender, RoutedEventArgs e)
