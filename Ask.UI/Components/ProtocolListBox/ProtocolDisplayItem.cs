@@ -1,69 +1,55 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
-using System.Collections.ObjectModel;
+using Ask.Core.Shared.DTO.Protocol;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Media;
+using System.Windows;
 
 namespace Ask.UI.Components.ProtocolListBox
 {
   /// <summary>
-  /// Узел отображения протокола.
-  /// Может быть либо обычной строкой, либо группой со сворачиваемым содержимым.
+  /// Плоский элемент отображения протокола.
+  /// Один объект соответствует одной видимой строке ListBox.
   /// </summary>
   public sealed class ProtocolDisplayItem : INotifyPropertyChanged
   {
-    /// <summary>
-    /// Указывает, является ли текущий элемент отображения группой,
-    /// содержащей дочерние элементы протокола.
-    /// </summary>
-    /// <remarks>
-    /// Значение <see langword="true"/> означает, что элемент представляет
-    /// сворачиваемый групповой узел.
-    /// </remarks>
-    private readonly bool _isGroup;
-
-    /// <summary>
-    /// Хранит текущее состояние развёрнутости группового элемента.
-    /// </summary>
-    /// <remarks>
-    /// Значение <see langword="true"/> означает, что группа раскрыта.
-    /// </remarks>
     private bool _isExpanded = true;
 
-    /// <summary>
-    /// Задний фон заголовка с успешно выполненными тестами.
-    /// </summary>
-    private Color _successBackground = Color.FromArgb(128, 94, 127, 107);
-
-    /// <summary>
-    /// Задний фон заголовка с ошибками в тестах.
-    /// </summary>
-    private Color _errorBackground = Color.FromArgb(128, 168, 93, 93);
-
-    private ProtocolDisplayItem(bool isGroup)
+    private ProtocolDisplayItem(
+      ShowMessageModel message,
+      bool isCommandHeader,
+      Thickness containerMargin,
+      ProtocolCommandGroup? group = null)
     {
-      _isGroup = isGroup;
+      Message = message;
+      IsCommandHeader = isCommandHeader;
+      ContainerMargin = containerMargin;
+      Group = group;
     }
 
     /// <summary>
-    /// Сообщение протокола.
-    /// Для обычной строки — сама строка.
-    /// Для группы — заголовок группы.
+    /// Сообщение, отображаемое в строке.
     /// </summary>
-    public ShowMessageModel? Message { get; set; }
+    public ShowMessageModel Message { get; }
 
     /// <summary>
-    /// Дочерние элементы группы.
+    /// Признак заголовка главной команды.
+    /// Только такие строки можно сворачивать и разворачивать.
     /// </summary>
-    public ObservableCollection<ProtocolDisplayItem> Children { get; } = new();
+    public bool IsCommandHeader { get; }
 
     /// <summary>
-    /// Признак того, что элемент является группой.
+    /// Отступ контейнера строки относительно левого края списка.
     /// </summary>
-    public bool IsGroup => _isGroup;
+    public Thickness ContainerMargin { get; }
 
     /// <summary>
-    /// Признак развёрнутости группы.
+    /// Ссылка на состояние группы команды для строки-заголовка.
+    /// Для обычных строк равно <see langword="null"/>.
+    /// </summary>
+    internal ProtocolCommandGroup? Group { get; }
+
+    /// <summary>
+    /// Признак раскрытия группы команды.
+    /// Используется только для отображения положения шеврона.
     /// </summary>
     public bool IsExpanded
     {
@@ -81,41 +67,26 @@ namespace Ask.UI.Components.ProtocolListBox
     }
 
     /// <summary>
-    /// Создаёт обычную строку.
+    /// Создаёт строку-заголовок главной команды.
     /// </summary>
-    public static ProtocolDisplayItem CreateLine(ShowMessageModel model)
+    internal static ProtocolDisplayItem CreateCommandHeader(ShowMessageModel model, ProtocolCommandGroup group)
     {
-      return new ProtocolDisplayItem(false)
-      {
-        Message = model
-      };
+      return new ProtocolDisplayItem(
+        model,
+        isCommandHeader: true,
+        containerMargin: new Thickness(0),
+        group: group);
     }
 
     /// <summary>
-    /// Обновляет цвет фона текущего элемента отображения протокола
-    /// в соответствии с его текущим состоянием и связанными данными.
+    /// Создаёт обычную строку тела команды или корневую строку без группы.
     /// </summary>
-    public void UpdateBackgroundColor()
+    public static ProtocolDisplayItem CreateLine(ShowMessageModel model, bool isInsideCommandGroup)
     {
-      if (!IsGroup || Message == null) return;
-
-      bool hasError = Children.Any(child => child.Message?.Status == ShowMessageModel.MessageType.Error);
-
-      Color backgroundColor = hasError ? _errorBackground : _successBackground;
-
-      Message.HeaderBackgroundColor = backgroundColor;
-    }
-
-    /// <summary>
-    /// Создаёт группу.
-    /// </summary>
-    public static ProtocolDisplayItem CreateGroup(ShowMessageModel headerModel, bool isExpanded = true)
-    {
-      return new ProtocolDisplayItem(true)
-      {
-        Message = headerModel,
-        IsExpanded = isExpanded
-      };
+      return new ProtocolDisplayItem(
+        model,
+        isCommandHeader: false,
+        containerMargin: isInsideCommandGroup ? new Thickness(22, 0, 0, 0) : new Thickness(0));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
