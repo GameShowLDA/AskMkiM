@@ -192,14 +192,11 @@ namespace UI.Components
       return MultiEditor.GetActiveTextEditor();
     }
 
-    /// <param name="isTranslation">
-    /// Указывает, выполняется ли закрытие в рамках операции трансляции.
-    /// Может влиять на дополнительную обработку (например, очистку связанных вкладок).
-    /// </param>
-    /// <returns>
-    /// <c>true</c>, если вкладка успешно закрыта;
-    /// <c>false</c>, если закрытие не выполнено.
-    /// </returns>
+    /// <summary>
+    /// Закрывает вкладку с активным текстовым редактором.
+    /// </summary>
+    /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>
+    /// <returns>Возвращает <c>true</c>, если вкладка была закрыта, <c>false</c> в противном случае.</returns>
     public bool RemoveActiveTextEditor(bool isTranslation)
     {
       return MultiEditor.RemoveActiveTextEditor(isTranslation);
@@ -605,11 +602,13 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Удаляет вкладку транслятора.
+    /// Удаляет вкладку транслятора указанного типа.
     /// </summary>
-    /// <param name="translatorItem">Удаляемый элемент транслятора.</param>
-    /// <param name="editorType">Тип вкладки.</param>
-    /// <returns>Асинхронная операция удаления.</returns>
+    /// <param name="translatorItem">Элемент транслятора, который необходимо удалить.</param>
+    /// <param name="editorType">Тип редактора, к которому относится вкладка.</param>
+    /// <returns>
+    /// Асинхронная задача, представляющая операцию удаления.
+    /// </returns>
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);
