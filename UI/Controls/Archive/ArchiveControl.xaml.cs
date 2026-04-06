@@ -761,6 +761,7 @@ namespace UI.Controls.Archive
       DeleteArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
       CopyArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
       CutArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      PasteArchiveFileButton.Visibility = hasSelectedFile && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void UpdatePanelTitles()
@@ -1134,6 +1135,14 @@ namespace UI.Controls.Archive
           _lastSelectedEntryName,
           Path.GetFileName(_lastSelectedEntryName),
           ArchiveClipboardOperation.Cut);
+      }
+    }
+
+    private async void PasteArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
+      {
+        await PasteArchiveClipboardToAsync(_lastSelectedArchivePath);
       }
     }
 
