@@ -14,7 +14,6 @@ namespace UI.Services
     private const string DefaultFileNameWithoutExtension = "translated";
     private const string OpkwExtension = ".opkw";
 
-
     /// <summary>
     /// Сохраняет переведённый текст в файл на диске с использованием диалога сохранения.
     /// </summary>

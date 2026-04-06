@@ -206,7 +206,6 @@ namespace UI.Controls
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
       rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
-
       UpdateRightEditorActions();
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
     }
