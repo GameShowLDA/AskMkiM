@@ -181,13 +181,6 @@ namespace UI.Components
         .FirstOrDefault(control => control.Visibility == Visibility.Visible);
     }
 
-    public UserControl? GetActiveWorkspaceControl()
-    {
-      return MultiEditor.ContentPanel.Children
-        .OfType<UserControl>()
-        .FirstOrDefault(control => control.Visibility == Visibility.Visible);
-    }
-
     /// <summary>
     /// Возвращает активный текстовый редактор независимо от его типа.
     /// </summary>
