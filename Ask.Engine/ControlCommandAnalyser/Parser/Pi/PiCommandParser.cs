@@ -6,6 +6,7 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
@@ -51,7 +52,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       int numberLine,
       List<string> lines)
     {
-      var breakdown = ServiceLocator.GetRequired<IBreakdownTester>();
+      var breakdown = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (breakdown == null)
       {
         model.Errors.Add(GeneralErrors.FastMeterNotFound(numberLine, $"{commandNumber} {mnemonic}"));
@@ -78,7 +79,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       string mnemonic,
       int numberLine,
       PiCommandModel model)
-      => new(commandNumber, mnemonic, numberLine, ServiceLocator.GetRequired<IBreakdownTester>());
+      => new(commandNumber, mnemonic, numberLine, BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault());
 
     /// <summary>
     /// Выполняет разбор параметров ПИ и вложенной части СИ.
