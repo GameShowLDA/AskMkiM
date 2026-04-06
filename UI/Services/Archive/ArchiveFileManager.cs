@@ -8,6 +8,7 @@ namespace UI.Services.Archive
   internal sealed class ArchiveFileManager
   {
     private const string ArchiveExtension = ".apkw";
+    private const string ArchiveEntryExtension = ".opkw";
 
     public void AddFile(string archivePath, string filePath)
     {
@@ -48,6 +49,8 @@ namespace UI.Services.Archive
         LogError(message);
         throw new FileNotFoundException(message, fullFilePath);
       }
+
+      ValidateArchiveEntryExtension(Path.GetFileName(fullFilePath), nameof(filePath));
 
       var normalizedArchiveEntryName = ResolveArchiveEntryNameFromFilePath(fullFilePath);
       if (normalizedArchiveEntryName.Equals(ArchiveManifestService.ManifestEntryName, StringComparison.OrdinalIgnoreCase))
@@ -112,6 +115,7 @@ namespace UI.Services.Archive
       }
 
       var normalizedArchiveEntryName = ResolveArchiveEntryNameFromFilePath(fullFilePathArchive);
+      ValidateArchiveEntryExtension(normalizedArchiveEntryName, nameof(fileName));
       if (normalizedArchiveEntryName.Equals(ArchiveManifestService.ManifestEntryName, StringComparison.OrdinalIgnoreCase))
       {
         var message = $"'{ArchiveManifestService.ManifestEntryName}' зарезервирован для архивных метаданных.";
@@ -240,6 +244,16 @@ namespace UI.Services.Archive
       }
 
       return normalizedName;
+    }
+
+    private static void ValidateArchiveEntryExtension(string entryName, string parameterName)
+    {
+      if (!string.Equals(Path.GetExtension(entryName), ArchiveEntryExtension, StringComparison.OrdinalIgnoreCase))
+      {
+        var message = "В архив можно добавлять только файлы с расширением .opkw.";
+        LogError(message);
+        throw new InvalidDataException(message);
+      }
     }
 
     private static string ValidateArchivePath(string archivePath)

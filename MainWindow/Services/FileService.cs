@@ -125,8 +125,9 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает диалог выбора файла и загружает его в редактор.
+    /// Открывает указанный файл в редакторе.
     /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
     public void OpenFileAsync(string filePath)
     {
       if (_isLockedProvider())
@@ -155,7 +156,7 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает экран работы с архивами.
+    /// Открывает интерфейс работы с архивами.
     /// </summary>
     public void OpenArchive()
     {
@@ -382,4 +383,3 @@ namespace MainWindowProgram.Services
     }
   }
 }
-

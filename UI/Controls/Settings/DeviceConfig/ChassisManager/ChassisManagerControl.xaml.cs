@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -15,12 +16,12 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Коллекция доступных систем шасси.
     /// </summary>
-    public ObservableCollection<IChassisManager> SystemsChassis { get; set; } = new();
+    public ObservableCollection<ChassisManagerDto> SystemsChassis { get; set; } = new();
 
     /// <summary>
     /// Коллекция доступных стоек.
     /// </summary>
-    public ObservableCollection<RackEntity> SystemsRack { get; set; } = new();
+    public ObservableCollection<RackDto> SystemsRack { get; set; } = new();
 
     /// <summary>
     /// Выбранная система шасси.
@@ -44,9 +45,9 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Выбранная стойка.
     /// </summary>
-    public RackEntity SelectedRack
+    public RackDto SelectedRack
     {
-      get => (RackEntity)GetValue(SelectedRackProperty);
+      get => (RackDto)GetValue(SelectedRackProperty);
       set => SetValue(SelectedRackProperty, value);
     }
 
@@ -56,7 +57,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     public static readonly DependencyProperty SelectedRackProperty =
         DependencyProperty.Register(
             nameof(SelectedRack),
-            typeof(RackEntity),
+            typeof(RackDto),
             typeof(ChassisManagerControl),
             new PropertyMetadata(null));
 
@@ -68,7 +69,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Событие, вызываемое при выборе стойки.
     /// </summary>
-    public event EventHandler<RackEntity> RackSelected;
+    public event EventHandler<RackDto> RackSelected;
 
     /// <summary>
     /// Событие, вызываемое при добавлении новой системы.
@@ -94,7 +95,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// Добавляет систему в список для отображения.
     /// </summary>
     /// <param name="chassisManager">Экземпляр <see cref="ChassisManagerEntity"/>.</param>
-    public void AddSystem(IChassisManager chassisManager)
+    public void AddSystem(ChassisManagerDto chassisManager)
     {
       if (chassisManager == null)
       {
@@ -110,7 +111,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// Добавляет стойку в список для отображения.
     /// </summary>
     /// <param name="rack">Экземпляр <see cref="RackEntity"/>.</param>
-    public void AddRack(RackEntity rack)
+    public void AddRack(RackDto rack)
     {
       if (rack == null)
       {
@@ -158,7 +159,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <param name="e">Аргументы события.</param>
     private void OnRackSelected(object sender, RoutedEventArgs e)
     {
-      if (sender is Button button && button.DataContext is RackEntity system)
+      if (sender is Button button && button.DataContext is RackDto system)
       {
         SelectedRack = system;
         RackSelected?.Invoke(this, system);

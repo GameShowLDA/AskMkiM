@@ -1,4 +1,3 @@
-using Ask.Core.Services.App;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -8,10 +7,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Ethernet.Udp;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Base;
-using DataBaseConfiguration.Services.Device;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod
@@ -54,22 +52,20 @@ namespace Ask.Engine.Tests.NodeMethod
     /// </summary>
     /// <param name="startPoint">Начальная точка диапазона.</param>
     /// <param name="endPoint">Конечная точка диапазона.</param>
-    public virtual void CollectDevices(PointModel startPoint, PointModel endPoint)
+    public virtual async Task CollectDevicesAsync(PointModel startPoint, PointModel endPoint)
     {
       Devices.Clear();
-      var ukshRepo = new SwitchingDeviceServices();
-      var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
 
-      var relayModules = RelayModuleHelper.GetModulesByRange(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber);
+      var relayModules = RelayModuleHelper.GetModulesByRangeAsync(startPoint.DeviceNumber, startPoint.ModuleNumber, endPoint.ModuleNumber).GetAwaiter().GetResult();
       foreach (var module in relayModules)
       {
         Devices.Add(module);
       }
 
-      var uksh = ukshRepo.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
+      var uksh = (await SwitchingDevices.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber)).FirstOrDefault();
       Devices.Add(uksh);
 
-      var breakdown = svc.GetDevicesByNumberChassis(startPoint.DeviceNumber).FirstOrDefault();
+      var breakdown = BreakdownTesters.GetDevicesByNumberChassisAsync(startPoint.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
       Devices.Add(breakdown);
     }
 
@@ -245,7 +241,7 @@ namespace Ask.Engine.Tests.NodeMethod
     {
       try
       {
-        CollectDevices(point1, point2);
+        CollectDevicesAsync(point1, point2);
       }
       catch (Exception ex)
       {

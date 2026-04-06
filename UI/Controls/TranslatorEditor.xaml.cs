@@ -29,6 +29,11 @@ namespace UI.Controls
     public event EventHandler? SaveRequested;
 
     /// <summary>
+    /// Raised when saving the translated file to disk is requested.
+    /// </summary>
+    public event EventHandler? SaveToDiskRequested;
+
+    /// <summary>
     /// Gets the underlying text editor control.
     /// </summary>
     public TextEditorUI Editor => _activeEditor ?? TranslatorTextEditor;
@@ -67,7 +72,21 @@ namespace UI.Controls
     private void SaveButton_Click(object sender, RoutedEventArgs e) =>
       SaveRequested?.Invoke(this, EventArgs.Empty);
 
+    private void SaveToDiskButton_Click(object sender, RoutedEventArgs e) =>
+      SaveToDiskRequested?.Invoke(this, EventArgs.Empty);
+
     public TextEditorUI GetTextEditor() => Editor;
+
+    public void SetSaveToDiskVisible(bool isVisible)
+    {
+      SaveToDiskButton.Visibility = isVisible
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+      if (isVisible)
+      {
+        SaveToDiskButton.ToolTip = "��������� �� ����";
+      }
+    }
 
     public void SetEditor(ITextEditorView editor)
     {

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using static Ask.LogLib.LoggerUtility;
 
@@ -12,6 +12,19 @@ namespace UI.Services.Archive
       Path.Combine(Directory.GetCurrentDirectory(), FileLocations.ArchiveDirectory),
     };
 
+    /// <summary>
+    /// Определяет и возвращает путь к корневому каталогу архивов.
+    /// </summary>
+    /// <returns>
+    /// Полный путь к существующему (или созданному) каталогу архивов.
+    /// </returns>
+    /// <exception cref="DirectoryNotFoundException">
+    /// Выбрасывается, если не удалось создать или получить доступ ни к одному из возможных каталогов.
+    /// </exception>
+    /// <remarks>
+    /// Проверяет несколько возможных расположений каталога и создаёт его при необходимости.
+    /// Устанавливает атрибут "скрытый" для корневого каталога.
+    /// </remarks>
     public static string ResolveArchivesRootPath()
     {
       foreach (var candidatePath in ArchiveFolderCandidates)
@@ -32,6 +45,19 @@ namespace UI.Services.Archive
       throw new DirectoryNotFoundException(message);
     }
 
+    /// <summary>
+    /// Возвращает список подкаталогов в корневом каталоге архивов.
+    /// </summary>
+    /// <param name="archivesRootPath">Путь к корневому каталогу архивов.</param>
+    /// <returns>
+    /// Отсортированный список путей к подкаталогам.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если путь не задан.
+    /// </exception>
+    /// <exception cref="DirectoryNotFoundException">
+    /// Выбрасывается, если указанный каталог не существует.
+    /// </exception>
     public static IReadOnlyList<string> GetArchiveDirectories(string archivesRootPath)
     {
       EnsureExistingDirectory(archivesRootPath, nameof(archivesRootPath));
@@ -41,6 +67,19 @@ namespace UI.Services.Archive
         .ToList();
     }
 
+    /// <summary>
+    /// Возвращает список архивных файлов в указанном каталоге.
+    /// </summary>
+    /// <param name="directoryPath">Путь к каталогу.</param>
+    /// <returns>
+    /// Отсортированный список файлов с расширением .apkw.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если путь не задан.
+    /// </exception>
+    /// <exception cref="DirectoryNotFoundException">
+    /// Выбрасывается, если каталог не существует.
+    /// </exception>
     public static IReadOnlyList<string> GetArchivesInDirectory(string directoryPath)
     {
       EnsureExistingDirectory(directoryPath, nameof(directoryPath));
@@ -50,6 +89,26 @@ namespace UI.Services.Archive
         .ToList();
     }
 
+    /// <summary>
+    /// Создаёт новый подкаталог в корневом каталоге архивов.
+    /// </summary>
+    /// <param name="archivesRootPath">Путь к корневому каталогу архивов.</param>
+    /// <param name="directoryName">Имя создаваемого каталога.</param>
+    /// <returns>
+    /// Полный путь к созданному каталогу.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если путь или имя каталога некорректны.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если каталог уже существует.
+    /// </exception>
+    /// <exception cref="DirectoryNotFoundException">
+    /// Выбрасывается, если корневой каталог не найден.
+    /// </exception>
+    /// <remarks>
+    /// Имя каталога нормализуется перед созданием (удаляются недопустимые символы).
+    /// </remarks>
     public static string CreateDirectory(string archivesRootPath, string directoryName)
     {
       var fullArchivesRootPath = EnsureExistingDirectory(archivesRootPath, nameof(archivesRootPath));
@@ -66,6 +125,16 @@ namespace UI.Services.Archive
       return Directory.CreateDirectory(directoryPath).FullName;
     }
 
+    /// <summary>
+    /// Нормализует имя каталога, удаляя недопустимые символы и приводя его к корректному виду.
+    /// </summary>
+    /// <param name="directoryName">Исходное имя каталога.</param>
+    /// <returns>
+    /// Корректное имя каталога, пригодное для использования в файловой системе.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если имя пустое или содержит только недопустимые символы.
+    /// </exception>
     public static string NormalizeDirectoryName(string directoryName)
     {
       if (string.IsNullOrWhiteSpace(directoryName))
@@ -91,6 +160,20 @@ namespace UI.Services.Archive
       return normalizedName;
     }
 
+    /// <summary>
+    /// Проверяет существование каталога и возвращает его полный путь.
+    /// </summary>
+    /// <param name="directoryPath">Путь к каталогу.</param>
+    /// <param name="parameterName">Имя параметра для формирования исключения.</param>
+    /// <returns>
+    /// Нормализованный полный путь к существующему каталогу.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если путь пустой или не задан.
+    /// </exception>
+    /// <exception cref="DirectoryNotFoundException">
+    /// Выбрасывается, если каталог не существует.
+    /// </exception>
     public static string EnsureExistingDirectory(string directoryPath, string parameterName)
     {
       if (string.IsNullOrWhiteSpace(directoryPath))
