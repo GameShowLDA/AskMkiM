@@ -1429,7 +1429,6 @@ namespace UI.Controls.Archive
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontSize = 15,
         HorizontalContentAlignment = HorizontalAlignment.Stretch,
-        VerticalContentAlignment = VerticalAlignment.Center,
       };
       ScrollViewer.SetHorizontalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Disabled);
       ScrollViewer.SetVerticalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Auto);
@@ -1692,100 +1691,7 @@ namespace UI.Controls.Archive
         ? dialog.Tag as string
         : null;
     }
-
-    private string PromptForArchiveName(string suggestedArchiveName)
-    {
-      var dialog = CreateDialogWindow("Создание архива");
-      var shell = CreateDialogShell();
-
-      var layout = new Grid
-      {
-        MinWidth = 420,
-      };
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-      var label = new TextBlock
-      {
-        Text = "Введите название нового архива:",
-        Margin = new Thickness(0, 0, 0, 4),
-        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
-        FontFamily = Application.Current?.Resources["WinstonMedium"] as FontFamily,
-        FontSize = 16,
-        TextWrapping = TextWrapping.Wrap,
-      };
-
-      var inputBorder = new Border
-      {
-        Background = GetThemeBrush("PrimarySolidColorBrush", Color.FromRgb(239, 239, 224)),
-        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromArgb(120, 0, 0, 0)),
-        BorderThickness = new Thickness(1),
-        CornerRadius = new CornerRadius(10),
-        Margin = new Thickness(0, 8, 0, 0),
-        Padding = new Thickness(10, 8, 10, 8),
-      };
-
-      var inputBox = new TextBox
-      {
-        MinWidth = 360,
-        Background = Brushes.Transparent,
-        BorderThickness = new Thickness(0),
-        Text = string.IsNullOrWhiteSpace(suggestedArchiveName) ? "new_archive" : suggestedArchiveName,
-        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
-        FontSize = 15,
-      };
-
-      inputBorder.Child = inputBox;
-
-      var buttonsPanel = new StackPanel
-      {
-        Orientation = Orientation.Horizontal,
-        HorizontalAlignment = HorizontalAlignment.Right,
-        Margin = new Thickness(0, 12, 0, 0),
-      };
-
-      var createButton = new Button
-      {
-        Content = "Создать",
-        MinWidth = 140,
-        IsDefault = true,
-        Margin = new Thickness(0, 0, 8, 0),
-      };
-      ApplyDialogButtonStyle(createButton);
-      createButton.Click += (_, _) => dialog.DialogResult = true;
-
-      var cancelButton = new Button
-      {
-        Content = "Отмена",
-        MinWidth = 120,
-        IsCancel = true,
-      };
-      ApplyDialogButtonStyle(cancelButton);
-
-      buttonsPanel.Children.Add(createButton);
-      buttonsPanel.Children.Add(cancelButton);
-
-      Grid.SetRow(label, 0);
-      Grid.SetRow(inputBorder, 1);
-      Grid.SetRow(buttonsPanel, 2);
-      layout.Children.Add(label);
-      layout.Children.Add(inputBorder);
-      layout.Children.Add(buttonsPanel);
-      shell.Child = layout;
-      dialog.Content = shell;
-
-      dialog.Loaded += (_, _) =>
-      {
-        inputBox.Focus();
-        inputBox.SelectAll();
-      };
-
-      return dialog.ShowDialog() == true
-        ? inputBox.Text?.Trim()
-        : null;
-    }
-
+        
     private async void ArchivesTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
       var node = e.NewValue as ArchiveTreeNode;
@@ -1876,75 +1782,6 @@ namespace UI.Controls.Archive
         ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
-    private Window CreateDialogWindow(string title)
-    {
-      return new Window
-      {
-        Title = title,
-        Owner = Window.GetWindow(this),
-        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        ResizeMode = ResizeMode.NoResize,
-        SizeToContent = SizeToContent.WidthAndHeight,
-        ShowInTaskbar = false,
-        WindowStyle = WindowStyle.None,
-        AllowsTransparency = true,
-        Background = Brushes.Transparent,
-      };
-    }
-
-    private Border CreateDialogShell()
-    {
-      return new Border
-      {
-        Background = GetThemeBrush("IsCheckedColorSolidColorBrush", Color.FromRgb(230, 232, 236)),
-        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromRgb(120, 130, 140)),
-        BorderThickness = new Thickness(1),
-        CornerRadius = new CornerRadius(20),
-        Padding = new Thickness(20),
-      };
-    }
-
-    private void PopulateArchiveList(ListBox listBox, string? directoryPath)
-    {
-      listBox.Items.Clear();
-
-      if (string.IsNullOrWhiteSpace(directoryPath))
-      {
-        return;
-      }
-
-      foreach (var archivePath in ArchiveDirectoryService.GetArchivesInDirectory(directoryPath))
-      {
-        listBox.Items.Add(new ListBoxItem
-        {
-          Content = Path.GetFileName(archivePath),
-          Tag = archivePath,
-        });
-      }
-    }
-
-    private void ApplyArchiveListItemStyle(ListBox listBox)
-    {
-      var accentBrush = GetThemeBrush("ActiveForegroundSolidColorBrush80", Color.FromArgb(120, 164, 235, 158));
-      var itemStyle = new Style(typeof(ListBoxItem));
-      itemStyle.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(10, 8, 10, 8)));
-      itemStyle.Setters.Add(new Setter(Control.MarginProperty, new Thickness(0, 2, 0, 2)));
-      itemStyle.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
-      itemStyle.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-      itemStyle.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
-
-      var hoverTrigger = new Trigger { Property = ListBoxItem.IsMouseOverProperty, Value = true };
-      hoverTrigger.Setters.Add(new Setter(Control.BackgroundProperty, accentBrush));
-      itemStyle.Triggers.Add(hoverTrigger);
-
-      var selectedTrigger = new Trigger { Property = ListBoxItem.IsSelectedProperty, Value = true };
-      selectedTrigger.Setters.Add(new Setter(Control.BackgroundProperty, accentBrush));
-      selectedTrigger.Setters.Add(new Setter(Control.FontWeightProperty, FontWeights.SemiBold));
-      itemStyle.Triggers.Add(selectedTrigger);
-
-      listBox.ItemContainerStyle = itemStyle;
-    }
-
     private Window CreateDialogWindow(string title)
     {
       return new Window

@@ -193,19 +193,6 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Возвращает текущий активный пользовательский элемент управления в рабочей области.
-    /// </summary>
-    /// <returns>
-    /// Активный <see cref="UserControl"/> или <c>null</c>, если активный элемент отсутствует.
-    /// </returns>
-    public UserControl? GetActiveWorkspaceControl()
-    {
-      return MultiEditor.ContentPanel.Children
-        .OfType<UserControl>()
-        .FirstOrDefault(control => control.Visibility == Visibility.Visible);
-    }
-
-    /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.
     /// </summary>
     /// <param name="isTranslation">Переменная, показывающая, выполняется закрытие вкладки при трансляции или нет.</param>

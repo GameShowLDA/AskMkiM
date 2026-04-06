@@ -79,8 +79,6 @@ namespace MainWindowProgram.Services
     /// </returns>
     public TextEditorUI GetActiveTextEditor() => _multiWindowControl.GetActiveTextEditor();
 
-    public UserControl? GetActiveWorkspaceControl() => _multiWindowControl.GetActiveWorkspaceControl();
-
     /// <summary>
     /// Возвращает активный пользовательский элемент управления в рабочей области.
     /// </summary>
