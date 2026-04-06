@@ -90,17 +90,29 @@
                           Cursor="Hand"
                 SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
                     <TreeView.ContextMenu>
-                        <ContextMenu x:Name="ArchivesTreeContextMenu"
+                            <ContextMenu x:Name="ArchivesTreeContextMenu"
                        Style="{DynamicResource AppContextMenuStyle}"
                        Opened="ArchivesTreeContextMenu_Opened"
                        Closed="ArchivesTreeContextMenu_Closed">
-                            <MenuItem x:Name="CreateArchiveMenuItem"
+                                <MenuItem x:Name="CreateArchiveMenuItem"
                       Header="Создать архив"
                       Click="CreateArchiveMenuItem_Click" />
-                            <MenuItem x:Name="OpenArchiveMenuItem"
+                                <MenuItem x:Name="UploadArchiveMenuItem"
+                      Header="Загрузить архив"
+                      Click="UploadArchiveMenuItem_Click" />
+                                <MenuItem x:Name="DownloadArchivesMenuItem"
+                      Header="Скачать архивы"
+                      Click="DownloadArchivesMenuItem_Click" />
+                                <MenuItem x:Name="OpenArchiveMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveMenuItem_Click" />
-                            <MenuItem x:Name="DeleteArchiveMenuItem"
+                                <MenuItem x:Name="SaveArchiveMenuItem"
+                      Header="Сохранить архив на диск"
+                      Click="SaveArchiveMenuItem_Click" />
+                                <MenuItem x:Name="PrintArchiveCatalogMenuItem"
+                      Header="Распечатать каталог архива"
+                      Click="PrintArchiveCatalogMenuItem_Click" />
+                                <MenuItem x:Name="DeleteArchiveMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveMenuItem_Click" />
                             <MenuItem x:Name="AddFileToArchiveMenuItem"
@@ -121,8 +133,8 @@
                             <MenuItem x:Name="DeleteArchiveFileMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveFileMenuItem_Click" />
-                        </ContextMenu>
-                    </TreeView.ContextMenu>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                     <TreeView.Resources>
                         <Style x:Key="ArchiveTreeExpandToggleStyle"
                                TargetType="{x:Type ToggleButton}">
@@ -495,6 +507,28 @@
                                     Grid.Column="1"
                                     Orientation="Horizontal"
                                     Visibility="Collapsed">
+                            <Button x:Name="SaveArchiveButton"
+                                    Margin="12,0,0,0"
+                                    Padding="10,4"
+                                    MinWidth="220"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Cursor="Hand"
+                                    FontSize="16"
+                                    Style="{DynamicResource ButtonStyleV8}"
+                                    Content="Сохранить архив на диск"
+                                    Click="SaveArchiveToDiskButton_Click" />
+                            <Button x:Name="PrintArchiveCatalogButton"
+                                    Margin="12,0,0,0"
+                                    Padding="10,4"
+                                    MinWidth="260"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Cursor="Hand"
+                                    FontSize="16"
+                                    Style="{DynamicResource ButtonStyleV8}"
+                                    Content="Распечатать каталог архива"
+                                    Click="PrintArchiveCatalogButton_Click" />
                             <Button x:Name="AddFileToArchiveButton"
                                     Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
                                     ToolTip="Добавить файл в архив"
@@ -567,37 +601,32 @@
                                 Binding="{Binding Name}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="150"
-                                Width="Auto"
+                                Width="15*"
                                 />
                             <DataGridTextColumn Header="Наименование ОК"
                                 Binding="{Binding NameOK}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="190"
-                                Width="Auto" />
+                                Width="19*" />
                             <DataGridTextColumn Header="ОПК"
                                 Binding="{Binding OPK}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="90"
-                                Width="Auto" />
-                            <DataGridTextColumn Header="ИК"
-                                Binding="{Binding IK}"
-                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
-                                MinWidth="90"
-                                Width="Auto" />
+                                Width="9*" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="110"
-                                Width="Auto" />
+                                Width="11*" />
                             <DataGridTextColumn Header="Файл ОПК"
                                 Binding="{Binding OpkFileName}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="180"
-                                Width="Auto" />
+                                Width="18*" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"
                                 MinWidth="120"
-                                Width="Auto">
+                                Width="12*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource ArchiveFilesDataGridTextStyle}"
@@ -610,12 +639,12 @@
                                 Binding="{Binding Department}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="80"
-                                Width="Auto" />
+                                Width="8*" />
                             <DataGridTextColumn Header="Примечание"
                                 Binding="{Binding Comment}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="200"
-                                Width="*" />
+                                Width="20*" />
                         </DataGrid.Columns>
                     </DataGrid>
 

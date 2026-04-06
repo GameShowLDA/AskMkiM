@@ -81,8 +81,7 @@
                         Margin="8,0,0,0"
                         VerticalAlignment="Center"
                         Visibility="Collapsed"
-                        Click="SaveToDiskButton_Click"
-                        ToolTip="Сохранить на диск">
+                        Click="SaveToDiskButton_Click">
                     <icons:SaveIcon Size="18"
                                     Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                 </Button>

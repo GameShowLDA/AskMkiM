@@ -147,6 +147,7 @@ namespace UI.Controls
 
       ErrorListBoxVertical.SetIssues(issuesSnapshot.Issues);
       UpdateArchiveButtonVisibility();
+      UpdateRightEditorActions();
 
       MessageEventAdapter.RaiseInfoMessage(
              $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
@@ -209,42 +210,9 @@ namespace UI.Controls
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
     }
 
-    private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
-    {
-      if (TranslatorNavigationService.TryOpenSourceFileFromTranslator(GetRightBox()))
-      {
-        CloseTranslatorTab();
-      }
-    }
-
-    private void RightEditor_SaveRequestedAsync(object? sender, EventArgs e)
-    {
-      bool flowControl = SaveFileToArchive();
-      if (!flowControl)
-      {
-        return;
-      }
-    }
-
     private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
     {
       SaveTranslatedFileToDisk();
-    }
-
-    private bool SaveFileToArchive()
-    {
-      var rightBox = GetRightBox();
-      var rightTextEditor = rightBox?.GetTextEditor();
-      if (rightTextEditor?.TextEditorModel == null)
-      {
-        NotificationHostService.Instance.Show(
-          "Сохранение в архив",
-          "Редактор не готов к сохранению в архив.",
-          NotificationType.Error);
-        return false;
-      }
-
-      return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
     }
 
     private bool SaveTranslatedFileToDisk()
@@ -264,6 +232,39 @@ namespace UI.Controls
         this,
         rightTextEditor.Text,
         rightTextEditor.TextEditorModel.FilePath);
+    }
+
+    private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
+    {
+      if (TranslatorNavigationService.TryOpenSourceFileFromTranslator(GetRightBox()))
+      {
+        CloseTranslatorTab();
+      }
+    }
+
+    private void RightEditor_SaveRequestedAsync(object? sender, EventArgs e)
+    {
+      bool flowControl = SaveFileToArchive();
+      if (!flowControl)
+      {
+        return;
+      }
+    }
+
+    private bool SaveFileToArchive()
+    {
+      var rightBox = GetRightBox();
+      var rightTextEditor = rightBox?.GetTextEditor();
+      if (rightTextEditor?.TextEditorModel == null)
+      {
+        NotificationHostService.Instance.Show(
+          "Сохранение в архив",
+          "Редактор не готов к сохранению в архив.",
+          NotificationType.Error);
+        return false;
+      }
+
+      return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void UpdateRightEditorActions()
