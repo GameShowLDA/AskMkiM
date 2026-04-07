@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -45,6 +46,10 @@ namespace Ask.UI.Components.ProtocolListBox
     /// Отступ контейнера строки относительно левого края списка.
     /// </summary>
     public bool IsInsideCommandGroup { get; }
+
+    public FontWeight CommandFontWeight => IsCommandHeader && UserInterfaceConfig.GetCommandBodyBackgroundHighlighting()
+      ? FontWeights.Bold
+      : FontWeights.Normal;
 
     public GridLength GutterWidth => HasChildItems || IsInsideCommandGroup
       ? new GridLength(24)

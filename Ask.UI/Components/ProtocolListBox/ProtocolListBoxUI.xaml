@@ -21,6 +21,7 @@
             <TextBlock TextWrapping="Wrap"
                        FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
                        FontFamily="Consolas"
+                       FontWeight="{Binding CommandFontWeight}"
                        LineStackingStrategy="BlockLineHeight"
                        LineHeight="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}},
                                             Path=ProtocolFontSize,
