@@ -1,6 +1,9 @@
 using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -34,6 +37,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private ProtocolCommandGroup? _currentGroup;
     private ProtocolCommandGroup? _pendingGroup;
     private bool _scrollToEndRequested;
+    private bool _themeSubscribed;
     private int _visibleRowCount;
 
     public static readonly DependencyProperty ProtocolFontSizeProperty =
@@ -78,11 +82,38 @@ namespace Ask.UI.Components.ProtocolListBox
       InitializeComponent();
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
       Loaded += ProtocolListBoxUI_Loaded;
+      Unloaded += ProtocolListBoxUI_Unloaded;
     }
 
     private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)
     {
       _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
+
+      if (_themeSubscribed)
+      {
+        return;
+      }
+
+      ThemeSettings.ThemeChanged += ProtocolListBoxUI_ThemeChanged;
+      _themeSubscribed = true;
+    }
+
+    private void ProtocolListBoxUI_Unloaded(object sender, RoutedEventArgs e)
+    {
+      if (!_themeSubscribed)
+      {
+        return;
+      }
+
+      ThemeSettings.ThemeChanged -= ProtocolListBoxUI_ThemeChanged;
+      _themeSubscribed = false;
+    }
+
+    private void ProtocolListBoxUI_ThemeChanged(ThemeMode theme)
+    {
+      Dispatcher.BeginInvoke(
+        new Action(RefreshThemeColors),
+        DispatcherPriority.Loaded);
     }
 
     private void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -468,6 +499,103 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         AppendVisibleMessage(_historyMessages[i]);
       }
+    }
+
+    private void RefreshThemeColors()
+    {
+      bool useSyntaxHighlighting = UserInterfaceConfig.GetSyntaxHighlighting();
+      bool useCommandBackgroundHighlighting = UserInterfaceConfig.GetCommandBodyBackgroundHighlighting();
+      bool useChainPointBackgroundHighlighting = UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting();
+
+      foreach (var message in _historyMessages)
+      {
+        ApplyThemeColors(
+          message,
+          useSyntaxHighlighting,
+          useCommandBackgroundHighlighting,
+          useChainPointBackgroundHighlighting);
+      }
+
+      RestoreVisibleItems();
+    }
+
+    private static void ApplyThemeColors(
+      ShowMessageModel message,
+      bool useSyntaxHighlighting,
+      bool useCommandBackgroundHighlighting,
+      bool useChainPointBackgroundHighlighting)
+    {
+      if (message.HeaderColor == Colors.Transparent && message.MessageColor == Colors.Transparent)
+      {
+        message.HeaderBackgroundColor = null;
+        return;
+      }
+
+      bool hadBackground = message.HeaderBackgroundColor.HasValue;
+      Color headerForeground = GetThemeColor("TestsProtocolHeaderForeground", Colors.Black);
+      Color messageForeground = GetThemeColor("TestsProtocolMessageForeground", headerForeground);
+      Color timeForeground = GetThemeColor("TestsProtocolTimeForeground", headerForeground);
+
+      message.HeaderColor = headerForeground;
+      message.MessageColor = messageForeground;
+      message.TimeColor = timeForeground;
+      message.HeaderBackgroundColor = null;
+
+      if (!useSyntaxHighlighting)
+      {
+        message.MessageColor = headerForeground;
+        message.TimeColor = headerForeground;
+        return;
+      }
+
+      switch (message.Status)
+      {
+        case ShowMessageModel.MessageType.Success:
+        case ShowMessageModel.MessageType.Error:
+          message.MessageColor = message.GetColorMessage();
+          break;
+
+        case ShowMessageModel.MessageType.Command:
+          var commandColor = message.GetColorMessage();
+          if (commandColor.HasValue)
+          {
+            message.HeaderColor = commandColor.Value;
+            message.MessageColor = commandColor.Value;
+            message.HeaderBackgroundColor = useCommandBackgroundHighlighting
+              ? BuildPaleTextBackground(commandColor.Value)
+              : null;
+          }
+
+          break;
+
+        case ShowMessageModel.MessageType.CommandBlock:
+          var commandBlockColor = message.GetColorMessage();
+          if (commandBlockColor.HasValue)
+          {
+            message.MessageColor = commandBlockColor.Value;
+            message.HeaderBackgroundColor = hadBackground && useChainPointBackgroundHighlighting
+              ? BuildPaleTextBackground(commandBlockColor.Value)
+              : null;
+          }
+
+          break;
+      }
+    }
+
+    private static Color BuildPaleTextBackground(Color textColor)
+    {
+      const byte paleAlpha = 70;
+      return Color.FromArgb(paleAlpha, textColor.R, textColor.G, textColor.B);
+    }
+
+    private static Color GetThemeColor(string resourceKey, Color fallbackColor)
+    {
+      if (Application.Current?.Resources[resourceKey] is SolidColorBrush brush)
+      {
+        return brush.Color;
+      }
+
+      return fallbackColor;
     }
 
     private void RequestScrollToEnd()

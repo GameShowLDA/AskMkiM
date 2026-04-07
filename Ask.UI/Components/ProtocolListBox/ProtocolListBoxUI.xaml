@@ -54,7 +54,7 @@
                 <Run Text="{Binding Message.Time}"
                      Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
 
-                <Run Text="{Binding Message.Debug}" Foreground="DarkGray"/>
+                <Run Text="{Binding Message.Debug}" Foreground="{DynamicResource TextEditorLineNumberBrush}"/>
             </TextBlock>
         </DataTemplate>
 
@@ -71,7 +71,7 @@
                             Width="1"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Stretch"
-                            Background="#6D7680"
+                            Background="{DynamicResource TextEditorLineNumberBrush}"
                             Visibility="Collapsed"/>
 
                     <Border x:Name="BodyTreeElbow"
@@ -79,7 +79,7 @@
                             Height="1"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
-                            Background="#6D7680"
+                            Background="{DynamicResource TextEditorLineNumberBrush}"
                             Visibility="Collapsed"/>
                 </Grid>
 
@@ -144,8 +144,8 @@
                                          Stretch="Uniform">
                                     <Path x:Name="Chevron"
                                           Data="M4.08 7.6a1.5 1.5 0 0 1 2.12 0l5.66 5.65 5.66-5.65a1.5 1.5 0 1 1 2.12 2.12l-6.72 6.72a1.5 1.5 0 0 1-2.12 0L4.08 9.72a1.5 1.5 0 0 1 0-2.12Z"
-                                          Fill="#AEB6BF"
-                                          Stroke="#AEB6BF"
+                                          Fill="{DynamicResource TextEditorFoldingChevronBrush}"
+                                          Stroke="{DynamicResource TextEditorFoldingChevronBrush}"
                                           StrokeThickness="1.15"
                                           StrokeStartLineCap="Round"
                                           StrokeEndLineCap="Round"
@@ -165,7 +165,7 @@
                                         Margin="0,2,0,0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Stretch"
-                                        Background="#6D7680"
+                                        Background="{DynamicResource TextEditorLineNumberBrush}"
                                         Visibility="Collapsed"/>
 
                                 <ContentPresenter Grid.RowSpan="2"
@@ -194,8 +194,8 @@
                             </Trigger>
 
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Chevron" Property="Fill" Value="#D7DEE6"/>
-                                <Setter TargetName="Chevron" Property="Stroke" Value="#D7DEE6"/>
+                                <Setter TargetName="Chevron" Property="Fill" Value="{DynamicResource TextEditorFoldingChevronHoverBrush}"/>
+                                <Setter TargetName="Chevron" Property="Stroke" Value="{DynamicResource TextEditorFoldingChevronHoverBrush}"/>
                             </Trigger>
 
                             <Trigger Property="IsEnabled" Value="False">
