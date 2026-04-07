@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Ask.UI.Components.ProtocolListBox
@@ -11,8 +12,10 @@ namespace Ask.UI.Components.ProtocolListBox
   /// </summary>
   internal sealed class ProtocolCommandGroup
   {
-    private static readonly Color SuccessBackground = Color.FromArgb(128, 94, 127, 107);
-    private static readonly Color ErrorBackground = Color.FromArgb(128, 168, 93, 93);
+    private const string SuccessBackgroundResourceKey = "TestsProtocolCommandSuccessBackgroundBrush";
+    private const string ErrorBackgroundResourceKey = "TestsProtocolCommandErrorBackgroundBrush";
+    private static readonly Color SuccessBackgroundFallback = Color.FromArgb(128, 94, 127, 107);
+    private static readonly Color ErrorBackgroundFallback = Color.FromArgb(128, 168, 93, 93);
 
     private bool _hasErrors;
 
@@ -83,8 +86,18 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       HeaderItem.Message.HeaderBackgroundColor = _hasErrors
-        ? ErrorBackground
-        : SuccessBackground;
+        ? GetThemeColorOrFallback(ErrorBackgroundResourceKey, ErrorBackgroundFallback)
+        : GetThemeColorOrFallback(SuccessBackgroundResourceKey, SuccessBackgroundFallback);
+    }
+
+    private static Color GetThemeColorOrFallback(string resourceKey, Color fallbackColor)
+    {
+      if (Application.Current?.Resources[resourceKey] is SolidColorBrush brush)
+      {
+        return brush.Color;
+      }
+
+      return fallbackColor;
     }
   }
 }

@@ -241,6 +241,8 @@
   <SolidColorBrush x:Key="TestsProtocolMessageErrorForeground" Color="#E07B72"/>
   <SolidColorBrush x:Key="TestsProtocolMessageSucces" Color="#61B282"/>
   <SolidColorBrush x:Key="TestsProtocolMessageError" Color="#E07B72"/>
+  <SolidColorBrush x:Key="TestsProtocolCommandSuccessBackgroundBrush" Color="#805E7F6B"/>
+  <SolidColorBrush x:Key="TestsProtocolCommandErrorBackgroundBrush" Color="#80A85D5D"/>
   <SolidColorBrush x:Key="TestsProtocolHeaderForeground" Color="#E8EEF7"/>
   <SolidColorBrush x:Key="TestsProtocolMessageForeground" Color="#DCE4F0"/>
   <SolidColorBrush x:Key="TestsProtocolTimeForeground" Color="#B8C66E"/>
