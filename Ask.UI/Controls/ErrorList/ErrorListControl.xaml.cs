@@ -113,9 +113,7 @@ namespace Ask.UI.Controls.ErrorList
     /// </summary>
     public void Clear()
     {
-      Items.Clear();
-
-      UpdateTabsVisibilityAndSelection();
+      ClearAll();
     }
 
     /// <summary>
