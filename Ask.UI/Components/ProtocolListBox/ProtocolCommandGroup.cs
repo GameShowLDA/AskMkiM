@@ -39,6 +39,22 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public void AddBodyItem(ProtocolDisplayItem item)
     {
+      if (BodyItems.Count == 0)
+      {
+        HeaderItem.HasChildItems = true;
+        HeaderItem.OuterMargin = IsExpanded
+          ? new System.Windows.Thickness(0)
+          : new System.Windows.Thickness(0, 0, 0, 6);
+      }
+      else
+      {
+        var previousLastItem = BodyItems[^1];
+        previousLastItem.IsLastGroupItem = false;
+        previousLastItem.OuterMargin = new System.Windows.Thickness(0);
+      }
+
+      item.IsLastGroupItem = true;
+      item.OuterMargin = new System.Windows.Thickness(0, 0, 0, 6);
       BodyItems.Add(item);
 
       if (item.Message.Status == ShowMessageModel.MessageType.Error)
@@ -52,6 +68,9 @@ namespace Ask.UI.Components.ProtocolListBox
     public void SetExpanded(bool isExpanded)
     {
       HeaderItem.IsExpanded = isExpanded;
+      HeaderItem.OuterMargin = isExpanded && BodyItems.Count > 0
+        ? new System.Windows.Thickness(0)
+        : new System.Windows.Thickness(0, 0, 0, 6);
     }
 
     private void UpdateHeaderBackground()

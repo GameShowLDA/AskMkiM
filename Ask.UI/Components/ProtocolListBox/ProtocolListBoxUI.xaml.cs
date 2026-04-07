@@ -317,6 +317,11 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
+      AppendLineItem(model);
+    }
+
+    private void AppendLineItem(ShowMessageModel model)
+    {
       EnsureCurrentGroupStarted();
 
       var lineItem = ProtocolDisplayItem.CreateLine(model, isInsideCommandGroup: _currentGroup != null);
@@ -341,7 +346,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void StartCommandGroup(ShowMessageModel model)
     {
-      model.Header = model.Header.TrimStart();
+      model.Header = model.Header?.TrimStart() ?? string.Empty;
 
       CollapseLatestCommandGroup();
 

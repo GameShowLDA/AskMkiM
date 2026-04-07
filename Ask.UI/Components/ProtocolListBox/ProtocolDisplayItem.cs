@@ -12,16 +12,21 @@ namespace Ask.UI.Components.ProtocolListBox
   public sealed class ProtocolDisplayItem : INotifyPropertyChanged
   {
     private bool _isExpanded = true;
+    private bool _hasChildItems;
+    private bool _isLastGroupItem;
+    private Thickness _outerMargin;
 
     private ProtocolDisplayItem(
       ShowMessageModel message,
       bool isCommandHeader,
-      Thickness containerMargin,
+      bool isInsideCommandGroup,
+      Thickness outerMargin,
       ProtocolCommandGroup? group = null)
     {
       Message = message;
       IsCommandHeader = isCommandHeader;
-      ContainerMargin = containerMargin;
+      IsInsideCommandGroup = isInsideCommandGroup;
+      _outerMargin = outerMargin;
       Group = group;
     }
 
@@ -39,7 +44,57 @@ namespace Ask.UI.Components.ProtocolListBox
     /// <summary>
     /// Отступ контейнера строки относительно левого края списка.
     /// </summary>
-    public Thickness ContainerMargin { get; }
+    public bool IsInsideCommandGroup { get; }
+
+    public GridLength GutterWidth => HasChildItems || IsInsideCommandGroup
+      ? new GridLength(24)
+      : new GridLength(0);
+
+    public Thickness OuterMargin
+    {
+      get => _outerMargin;
+      set
+      {
+        if (_outerMargin == value)
+        {
+          return;
+        }
+
+        _outerMargin = value;
+        OnPropertyChanged();
+      }
+    }
+
+    public bool HasChildItems
+    {
+      get => _hasChildItems;
+      set
+      {
+        if (_hasChildItems == value)
+        {
+          return;
+        }
+
+        _hasChildItems = value;
+        OnPropertyChanged();
+        OnPropertyChanged(nameof(GutterWidth));
+      }
+    }
+
+    public bool IsLastGroupItem
+    {
+      get => _isLastGroupItem;
+      set
+      {
+        if (_isLastGroupItem == value)
+        {
+          return;
+        }
+
+        _isLastGroupItem = value;
+        OnPropertyChanged();
+      }
+    }
 
     /// <summary>
     /// Ссылка на состояние группы команды для строки-заголовка.
@@ -74,7 +129,8 @@ namespace Ask.UI.Components.ProtocolListBox
       return new ProtocolDisplayItem(
         model,
         isCommandHeader: true,
-        containerMargin: new Thickness(0),
+        isInsideCommandGroup: false,
+        outerMargin: new Thickness(0, 0, 0, 6),
         group: group);
     }
 
@@ -86,7 +142,8 @@ namespace Ask.UI.Components.ProtocolListBox
       return new ProtocolDisplayItem(
         model,
         isCommandHeader: false,
-        containerMargin: isInsideCommandGroup ? new Thickness(22, 0, 0, 0) : new Thickness(0));
+        isInsideCommandGroup: isInsideCommandGroup,
+        outerMargin: new Thickness(0, 0, 0, 6));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
