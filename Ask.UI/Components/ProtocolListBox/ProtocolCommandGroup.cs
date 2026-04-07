@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using System.Collections.Generic;
 using System.Windows.Media;
@@ -75,6 +76,12 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void UpdateHeaderBackground()
     {
+      if (!UserInterfaceConfig.GetSyntaxHighlighting() || !UserInterfaceConfig.GetCommandBodyBackgroundHighlighting())
+      {
+        HeaderItem.Message.HeaderBackgroundColor = null;
+        return;
+      }
+
       HeaderItem.Message.HeaderBackgroundColor = _hasErrors
         ? ErrorBackground
         : SuccessBackground;
