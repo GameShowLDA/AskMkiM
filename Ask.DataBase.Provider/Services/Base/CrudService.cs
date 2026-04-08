@@ -1,3 +1,5 @@
+using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.DataBase.Provider.Context;
 using Ask.DataBase.Provider.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +40,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     ArgumentNullException.ThrowIfNull(entity);
 
     await using var context = CreateContext();
+    await ValidateUniqueDeviceNumberAsync(context, entity, cancellationToken);
 
     LogInformation($"[{nameof(CrudService<T>)}] Создание записи типа {typeof(T).Name}");
     context.Set<T>().Add(entity);
@@ -75,6 +78,7 @@ public class CrudService<T> : ICrudService<T> where T : class
     ArgumentNullException.ThrowIfNull(entity);
 
     await using var context = CreateContext();
+    await ValidateUniqueDeviceNumberAsync(context, entity, cancellationToken);
 
     LogInformation($"[{nameof(CrudService<T>)}] Обновление записи типа {typeof(T).Name}");
     context.Set<T>().Update(entity);
@@ -259,6 +263,53 @@ public class CrudService<T> : ICrudService<T> where T : class
   protected virtual AppDbContext CreateContext()
   {
     return new AppDbContext();
+  }
+
+  private static async Task ValidateUniqueDeviceNumberAsync(
+    AppDbContext context,
+    T entity,
+    CancellationToken cancellationToken)
+  {
+    if (entity is not DeviceDto deviceDto)
+    {
+      return;
+    }
+
+    var parameter = Expression.Parameter(typeof(T), "x");
+    Expression predicateBody =
+      Expression.NotEqual(
+        Expression.Property(parameter, nameof(DeviceDto.Id)),
+        Expression.Constant(deviceDto.Id));
+
+    predicateBody = Expression.AndAlso(
+      predicateBody,
+      Expression.Equal(
+        Expression.Property(parameter, nameof(DeviceDto.Number)),
+        Expression.Constant(deviceDto.Number)));
+
+    string duplicateKeyDescription = $"номером {deviceDto.Number}";
+
+    if (entity is AttachableDeviceDto attachableDeviceDto)
+    {
+      predicateBody = Expression.AndAlso(
+        predicateBody,
+        Expression.Equal(
+          Expression.Property(parameter, nameof(AttachableDeviceDto.NumberChassis)),
+          Expression.Constant(attachableDeviceDto.NumberChassis)));
+
+      duplicateKeyDescription = $"шасси {attachableDeviceDto.NumberChassis} и номером {deviceDto.Number}";
+    }
+
+    var predicate = Expression.Lambda<Func<T, bool>>(predicateBody, parameter);
+    bool duplicateExists = await context.Set<T>().AnyAsync(predicate, cancellationToken);
+
+    if (!duplicateExists)
+    {
+      return;
+    }
+
+    throw new DuplicateEntityException(
+      $"Запись типа {typeof(T).Name} с {duplicateKeyDescription} уже существует.");
   }
 
   private static Expression UnwrapExpression(Expression expression)

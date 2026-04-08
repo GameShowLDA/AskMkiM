@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.BreakDown
 {
@@ -100,14 +101,16 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
             {
               var createdDevice = await BreakdownTesters.CreateAsync(breakDown);
               deviceDto.Id = createdDevice.Id;
+              ShowCreated(deviceDto);
             }
             else
             {
               await BreakdownTesters.UpdateAsync(breakDown);
+              ShowUpdated(deviceDto);
             }
 
-            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
+            RequestSave?.Invoke(s, deviceDto);
           }
           catch (DuplicateEntityException ex)
           {

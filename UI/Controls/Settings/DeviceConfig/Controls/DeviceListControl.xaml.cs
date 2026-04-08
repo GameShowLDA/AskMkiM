@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using static Ask.LogLib.LoggerUtility;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.Controls
 {
@@ -114,12 +115,23 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <param name="deviceWrapper">Экземпляр <see cref="DeviceWrapper"/>.</param>
     public async Task RemoveDeviceAsync(DeviceWrapper deviceWrapper)
     {
-      if (Devices.Contains(deviceWrapper))
+      if (!Devices.Contains(deviceWrapper))
       {
+        return;
+      }
+
+      try
+      {
+        await RemoveDeviceFromDatabaseAsync(deviceWrapper.Device);
         Devices.Remove(deviceWrapper);
         UpdateAddButtonVisibility();
-        await RemoveDeviceFromDatabaseAsync(deviceWrapper.Device);
+        ShowDeleted(deviceWrapper.Device);
         DeleteEvent?.Invoke(this, deviceWrapper.Device);
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, $"Ошибка удаления устройства {deviceWrapper.DisplayName}");
+        ShowDeleteError(deviceWrapper.Device, ex);
       }
     }
 
