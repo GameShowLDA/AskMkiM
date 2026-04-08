@@ -56,6 +56,7 @@ namespace UI.Controls.Runner
     private TextEditorContainer _leftEditor;
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
+
     public List<BaseCommandModel> TranslationModels
     {
       get
@@ -201,6 +202,7 @@ namespace UI.Controls.Runner
       }
     }
 
+
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
       LogInformation("SetLeftEditor вызван: " + this.GetHashCode());
@@ -241,7 +243,7 @@ namespace UI.Controls.Runner
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
         Path.GetFileName(filePath) : fileName;
-      rightEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
+      rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
       var dockItemPk = new DockItem
       {
         Title = fileName,
@@ -382,8 +384,11 @@ namespace UI.Controls.Runner
         var translatorEditor = ChildTextEditorContainer.DockManager.DockItems
           .FirstOrDefault(item => item.Content is TranslatorEditor)?
           .Content as TranslatorEditor;
-
-        translatorEditor?.SetArchiveButtonVisibility(ErrorCount == 0);
+        if (translatorEditor != null)
+        {
+          translatorEditor.SetArchiveButtonVisibility(ErrorCount == 0);
+          translatorEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
+        }
       });
     }
 

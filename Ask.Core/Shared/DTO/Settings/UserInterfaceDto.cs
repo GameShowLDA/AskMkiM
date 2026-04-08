@@ -46,4 +46,9 @@ public class UserInterfaceDto
   /// Заменяет текст верхнего меню на иконки.
   /// </summary>
   public bool UseTopMenuIcons { get; set; }
+
+  /// <summary>
+  /// Флаг, указывающий, нужно ли автоматически сворачивать завершённые блоки команд в протоколе выполнения.
+  /// </summary>
+  public bool UseCommandAutoCollapse { get; set; }
 }

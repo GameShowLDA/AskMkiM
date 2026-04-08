@@ -558,6 +558,7 @@ namespace Ask.UI.Controls.ProtocolNew
         Header = $"Завершено",
         CanBeDeleted = false,
       };
+      ProtocolSelfCheck.LastMessage = true;
       await ProtocolSelfCheck.ShowMessageAsync(showMessage);
     }
 

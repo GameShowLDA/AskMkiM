@@ -1,89 +1,301 @@
-﻿<UserControl x:Class="Ask.UI.Components.ProtocolListBox.ProtocolListBoxUI"
+<UserControl x:Class="Ask.UI.Components.ProtocolListBox.ProtocolListBoxUI"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Ask.UI.Components.ProtocolListBox"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:conv="clr-namespace:Ask.UI.Shared.Converters.Math"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+
     <UserControl.Resources>
+        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <local:IndentToMarginConverter x:Key="IndentToMarginConverter"/>
         <local:MessageToColonConverter x:Key="MessageToColonConverter"/>
         <local:TimeToSeparatorConverter x:Key="TimeToSeparatorConverter"/>
-        <local:MessageToLeadingNewLineConverter x:Key="MessageToLeadingNewLineConverter"/>
         <local:HeaderToBrushIfNoMessageConverter x:Key="HeaderToBrushIfNoMessageConverter"/>
+
+        <DataTemplate x:Key="ProtocolLineContentTemplate">
+            <TextBlock TextWrapping="Wrap"
+                       FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                       FontFamily="Consolas"
+                       FontWeight="{Binding CommandFontWeight}"
+                       LineStackingStrategy="BlockLineHeight"
+                       LineHeight="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}},
+                                            Path=ProtocolFontSize,
+                                            Converter={StaticResource MultiplyConverter},
+                                            ConverterParameter=1.0}"
+                       SnapsToDevicePixels="True"
+                       TextOptions.TextFormattingMode="Display"
+                       Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
+
+                <Run Text="{Binding Message.Header}">
+                    <Run.Foreground>
+                        <MultiBinding Converter="{StaticResource HeaderToBrushIfNoMessageConverter}">
+                            <Binding Path="Message.Header"/>
+                            <Binding Path="Message.Message"/>
+                            <Binding Path="Message.HeaderColor"
+                                     Converter="{StaticResource ColorToBrushConverter}"/>
+                        </MultiBinding>
+                    </Run.Foreground>
+                </Run>
+
+                <Run Text="{Binding Message.Message, Converter={StaticResource MessageToColonConverter}}"
+                     Foreground="{Binding Message.HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+                <Run Text="{Binding Message.Message}"
+                     Foreground="{Binding Message.MessageColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+                <Run Text="{Binding Message.Time, Converter={StaticResource TimeToSeparatorConverter}}"
+                     Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+                <Run Text="{Binding Message.Time}"
+                     Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
+
+                <Run Text="{Binding Message.Debug}" Foreground="{DynamicResource TextEditorLineNumberBrush}"/>
+            </TextBlock>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ProtocolLineTemplate">
+            <Grid Margin="{Binding OuterMargin}"
+                  HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding GutterWidth}"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" HorizontalAlignment="Stretch">
+                    <Border x:Name="BodyTreeLine"
+                            Width="1"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Stretch"
+                            Background="{DynamicResource TextEditorLineNumberBrush}"
+                            Visibility="Collapsed"/>
+
+                    <Border x:Name="BodyTreeElbow"
+                            Width="12"
+                            Height="1"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Background="{DynamicResource TextEditorLineNumberBrush}"
+                            Visibility="Collapsed"/>
+                </Grid>
+
+                <Border Grid.Column="1"
+                        Background="{Binding Message.HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}"
+                        BorderThickness="0"
+                        Padding="0"
+                        HorizontalAlignment="Stretch">
+                    <ContentControl Content="{Binding}"
+                                    HorizontalAlignment="Stretch"
+                                    ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
+                </Border>
+            </Grid>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsInsideCommandGroup}" Value="True">
+                    <Setter TargetName="BodyTreeLine" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding IsLastGroupItem}" Value="True">
+                    <Setter TargetName="BodyTreeElbow" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <Style x:Key="ProtocolCommandHeaderToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{Binding Message.HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}"
+                                Padding="0"
+                                Margin="{Binding OuterMargin}"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}},
+                                                                    Path=ProtocolFontSize,
+                                                                    Converter={StaticResource MultiplyConverter},
+                                                                    ConverterParameter=1.0}"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Viewbox Grid.Row="0"
+                                         Grid.Column="0"
+                                         Width="10"
+                                         Height="10"
+                                         Margin="0,0,0,0"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         Stretch="Uniform">
+                                    <Path x:Name="Chevron"
+                                          Data="M4.08 7.6a1.5 1.5 0 0 1 2.12 0l5.66 5.65 5.66-5.65a1.5 1.5 0 1 1 2.12 2.12l-6.72 6.72a1.5 1.5 0 0 1-2.12 0L4.08 9.72a1.5 1.5 0 0 1 0-2.12Z"
+                                          Fill="{DynamicResource TextEditorFoldingChevronBrush}"
+                                          Stroke="{DynamicResource TextEditorFoldingChevronBrush}"
+                                          StrokeThickness="1.15"
+                                          StrokeStartLineCap="Round"
+                                          StrokeEndLineCap="Round"
+                                          StrokeLineJoin="Round"
+                                          Stretch="Uniform"
+                                          RenderTransformOrigin="0.5,0.5">
+                                        <Path.RenderTransform>
+                                            <RotateTransform Angle="-90"/>
+                                        </Path.RenderTransform>
+                                    </Path>
+                                </Viewbox>
+
+                                <Border x:Name="TreeLine"
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Width="1"
+                                        Margin="0,2,0,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Stretch"
+                                        Background="{DynamicResource TextEditorLineNumberBrush}"
+                                        Visibility="Collapsed"/>
+
+                                <ContentPresenter Grid.RowSpan="2"
+                                                  Grid.Column="1"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Top"/>
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chevron"
+                                        Property="RenderTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="TreeLine" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chevron" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chevron" Property="Fill" Value="{DynamicResource TextEditorFoldingChevronHoverBrush}"/>
+                                <Setter TargetName="Chevron" Property="Stroke" Value="{DynamicResource TextEditorFoldingChevronHoverBrush}"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chevron" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="ProtocolCommandHeaderTemplate">
+            <ToggleButton Click="ProtocolCommandHeaderToggleButton_Click"
+                          Style="{StaticResource ProtocolCommandHeaderToggleStyle}"
+                          IsChecked="{Binding IsExpanded, Mode=OneWay}"
+                          Content="{Binding}"
+                          ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
-        <Border CornerRadius="20,20,0,0" Background="{DynamicResource TestsProtocolBackgroundBrush}">
+        <Border CornerRadius="20,20,0,0"
+                Background="{DynamicResource TestsProtocolBackgroundBrush}">
             <ListBox x:Name="ProtocolListBox"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 ItemsSource="{Binding Messages, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                    FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
-                    FontFamily="Consolas"
-                    HorizontalContentAlignment="Stretch"
-                    UseLayoutRounding="True"
-                    SnapsToDevicePixels="True"
-                    TextOptions.TextFormattingMode="Display"
-                    TextOptions.TextRenderingMode="ClearType"
-                    VirtualizingStackPanel.IsVirtualizing="True"
-                    VirtualizingStackPanel.VirtualizationMode="Recycling"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                    SelectionMode="Single"
-                    Focusable="True"
-                    IsHitTestVisible="True"
-                    PreviewMouseWheel="ProtocolListBox_PreviewMouseWheel"
-                 >
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ItemsSource="{Binding DisplayItems, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                     FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                     FontFamily="Consolas"
+                     HorizontalContentAlignment="Stretch"
+                     UseLayoutRounding="True"
+                     SnapsToDevicePixels="True"
+                     TextOptions.TextFormattingMode="Display"
+                     TextOptions.TextRenderingMode="ClearType"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Recycling"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     SelectionMode="Single"
+                     Focusable="True"
+                     IsHitTestVisible="True"
+                     PreviewMouseWheel="ProtocolListBox_PreviewMouseWheel"
+                     ScrollViewer.CanContentScroll="True"
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     VirtualizingPanel.CacheLength="1"
+                     VirtualizingPanel.CacheLengthUnit="Page">
+
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock TextWrapping="Wrap"
-                                   FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=FontSize}"
-                                   FontFamily="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=FontFamily}"
-                                   SnapsToDevicePixels="True"
-                                   TextOptions.TextFormattingMode="Display"
-                                   Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
-                            <Run>
-                                <Run.Text>
-                                    <MultiBinding Converter="{StaticResource MessageToLeadingNewLineConverter}">
-                                        <Binding Path="Header"/>
-                                        <Binding Path="Message"/>
-                                    </MultiBinding>
-                                </Run.Text>
-                            </Run>
+                        <ContentControl Content="{Binding}"
+                                        Margin="0"
+                                        HorizontalAlignment="Stretch">
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Setter Property="ContentTemplate"
+                                            Value="{StaticResource ProtocolLineTemplate}"/>
 
-                            <Run Text="{Binding Header}">
-                                <Run.Foreground>
-                                    <MultiBinding Converter="{StaticResource HeaderToBrushIfNoMessageConverter}">
-                                        <Binding Path="Header"/>
-                                        <Binding Path="Message"/>
-                                        <Binding Path="HeaderColor" Converter="{StaticResource ColorToBrushConverter}"/>
-                                    </MultiBinding>
-                                </Run.Foreground>
-                            </Run>
-                            <Run Text="{Binding Message, Converter={StaticResource MessageToColonConverter}}"  Foreground="{Binding HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
-                            <Run Text="{Binding Message}" Foreground="{Binding MessageColor, Converter={StaticResource ColorToBrushConverter}}" />
-                            <Run Text="{Binding Time, Converter={StaticResource TimeToSeparatorConverter}}" Foreground="{Binding TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
-                            <Run Text="{Binding Time}" Foreground="{Binding TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
-                            <Run Text="{Binding Debug}" Foreground="DarkGray"/>
-                        </TextBlock>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
+                                                <Condition Binding="{Binding HasChildItems}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="ContentTemplate"
+                                                    Value="{StaticResource ProtocolCommandHeaderTemplate}"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
 
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
-                        <Setter Property="Focusable" Value="False" />
-                        <Setter Property="IsHitTestVisible" Value="False" />
-                        <Setter Property="Background" Value="{Binding HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="OverridesDefaultStyle" Value="True"/>
+                        <Setter Property="Focusable" Value="False"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}"
+                                            SnapsToDevicePixels="True">
+                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
                 </ListBox.ItemContainerStyle>
-
             </ListBox>
         </Border>
     </Grid>
 </UserControl>
-

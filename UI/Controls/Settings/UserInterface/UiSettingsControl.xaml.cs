@@ -3,6 +3,7 @@ using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Infrastructure.Localization;
@@ -17,7 +18,7 @@ namespace UI.Controls.Settings.UserInterface
   /// </summary>
   public partial class UiSettingsControl : UserControl
   {
-    private UserInterfaceModel _baseParameterModel { get; set; }
+    private UserInterfaceDto _baseParameterModel { get; set; }
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
 
@@ -89,6 +90,7 @@ namespace UI.Controls.Settings.UserInterface
       CommandBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
       ChainPointBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
       TopMenuIcons.CheckedChanged += (s, ev) => ValueChanged(s, ev);
+      CommandAutoCollapsing.CheckedChanged += (s, ev) => ValueChanged(s, ev);
 
       Success.PreviewMouseDown += Success_PreviewMouseDown;
       Error.PreviewMouseDown += Error_PreviewMouseDown;
@@ -155,6 +157,7 @@ namespace UI.Controls.Settings.UserInterface
       ThemeSelect.SelectedValue = currentTheme;
 
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
+      CommandAutoCollapsing.IsChecked = _baseParameterModel.UseCommandAutoCollapse;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
@@ -163,7 +166,7 @@ namespace UI.Controls.Settings.UserInterface
     /// <summary>
     /// Формирует модель параметров из текущих значений элементов UI.
     /// </summary>
-    private UserInterfaceModel GetModel()
+    private UserInterfaceDto GetModel()
     {
       var languageCode =
           LanguageSelect.SelectedValue as string
@@ -173,26 +176,28 @@ namespace UI.Controls.Settings.UserInterface
       var themeValue = ThemeSelect.SelectedValue as string ?? "Dark";
       var parsedTheme = Enum.TryParse<ThemeMode>(themeValue, out var theme) ? theme : ThemeMode.Dark;
 
-      return new UserInterfaceModel
+      return new UserInterfaceDto
       {
         Language = languageCode,
         Theme = parsedTheme,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
         UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
         UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked,
-        UseTopMenuIcons = TopMenuIcons.IsChecked
+        UseTopMenuIcons = TopMenuIcons.IsChecked,
+        UseCommandAutoCollapse = CommandAutoCollapsing.IsChecked
       };
     }
 
     /// <summary>
     /// Сравнивает две модели параметров.
     /// </summary>
-    private static bool ProtocolEquals(UserInterfaceModel a, UserInterfaceModel b) =>
+    private static bool ProtocolEquals(UserInterfaceDto a, UserInterfaceDto b) =>
       a.Language == b.Language &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
       a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
       a.UseTopMenuIcons == b.UseTopMenuIcons &&
+      a.UseCommandAutoCollapse == b.UseCommandAutoCollapse &&
       b.Theme == a.Theme;
 
     /// <summary>

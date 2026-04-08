@@ -15,23 +15,23 @@ public static class UserInterfaceSettings
   /// <summary>
   /// Возвращает сохранённые настройки пользовательского интерфейса.
   /// </summary>
-  public static async Task<UserInterfaceModel?> GetAsync(CancellationToken cancellationToken = default)
+  public static async Task<UserInterfaceDto?> GetAsync(CancellationToken cancellationToken = default)
   {
     var dto = await Service.GetUserInterfaceAsync(cancellationToken);
-    return dto == null ? null : ReflectionMapper.Map<UserInterfaceDto, UserInterfaceModel>(dto);
+    return dto == null ? null : ReflectionMapper.Map<UserInterfaceDto, UserInterfaceDto>(dto);
   }
 
   /// <summary>
   /// Сохраняет настройки пользовательского интерфейса.
   /// </summary>
-  public static async Task<UserInterfaceModel> SaveAsync(
-    UserInterfaceModel model,
+  public static async Task<UserInterfaceDto> SaveAsync(
+    UserInterfaceDto model,
     CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(model);
 
-    var dto = ReflectionMapper.Map<UserInterfaceModel, UserInterfaceDto>(model);
+    var dto = ReflectionMapper.Map<UserInterfaceDto, UserInterfaceDto>(model);
     var saved = await Service.SaveUserInterfaceAsync(dto, cancellationToken);
-    return ReflectionMapper.Map<UserInterfaceDto, UserInterfaceModel>(saved);
+    return ReflectionMapper.Map<UserInterfaceDto, UserInterfaceDto>(saved);
   }
 }

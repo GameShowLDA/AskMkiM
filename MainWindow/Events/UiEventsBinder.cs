@@ -215,6 +215,12 @@ namespace MainWindowProgram.Events
       _mainWindow.createArchiveMenuItem.Visibility = isArchiveControlActive
         ? Visibility.Visible
         : Visibility.Collapsed;
+      _mainWindow.downloadArchivesMenuItem.Visibility = isArchiveControlActive
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+      _mainWindow.uploadArchiveMenuItem.Visibility = isArchiveControlActive
+        ? Visibility.Visible
+        : Visibility.Collapsed;
     }
   }
 }

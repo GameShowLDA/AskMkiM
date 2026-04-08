@@ -10,6 +10,55 @@ namespace UI.Services.Archive
     private const string ArchiveExtension = ".apkw";
     private const string ArchiveEntryExtension = ".opkw";
 
+    public string TransferFile(string sourceArchivePath, string archiveEntryName, string targetArchivePath, bool removeSource)
+    {
+      var fullSourceArchivePath = ValidateArchivePath(sourceArchivePath);
+      var fullTargetArchivePath = ValidateArchivePath(targetArchivePath);
+      var normalizedArchiveEntryName = ResolveArchiveEntryName(archiveEntryName);
+
+      ValidateArchiveEntryExtension(normalizedArchiveEntryName, nameof(archiveEntryName));
+
+      if (string.Equals(fullSourceArchivePath, fullTargetArchivePath, StringComparison.OrdinalIgnoreCase))
+      {
+        var message = "Копирование и вставка файла в тот же архив не поддерживаются.";
+        LogError(message);
+        throw new InvalidOperationException(message);
+      }
+
+      var fileContent = ReadEntryBytes(fullSourceArchivePath, normalizedArchiveEntryName);
+      AddEntry(fullTargetArchivePath, normalizedArchiveEntryName, fileContent);
+
+      if (!removeSource)
+      {
+        return normalizedArchiveEntryName;
+      }
+
+      try
+      {
+        DeleteEntry(fullSourceArchivePath, normalizedArchiveEntryName);
+        return normalizedArchiveEntryName;
+      }
+      catch (Exception deleteException)
+      {
+        try
+        {
+          DeleteEntry(fullTargetArchivePath, normalizedArchiveEntryName);
+        }
+        catch (Exception rollbackException)
+        {
+          var rollbackMessage =
+            $"Не удалось завершить перенос файла '{normalizedArchiveEntryName}' и откатить целевой архив '{fullTargetArchivePath}'.";
+          LogError($"{rollbackMessage} {rollbackException}");
+          throw new IOException(rollbackMessage, rollbackException);
+        }
+
+        var message =
+          $"Не удалось удалить исходный файл '{normalizedArchiveEntryName}' из архива '{fullSourceArchivePath}'. Изменения в целевом архиве отменены.";
+        LogError($"{message} {deleteException}");
+        throw new IOException(message, deleteException);
+      }
+    }
+
     public void AddFile(string archivePath, string filePath)
     {
       if (string.IsNullOrWhiteSpace(archivePath))
@@ -196,6 +245,81 @@ namespace UI.Services.Archive
     {
       var fullArchivePath = ValidateArchivePath(archivePath);
       File.Delete(fullArchivePath);
+    }
+
+    private static byte[] ReadEntryBytes(string archivePath, string normalizedArchiveEntryName)
+    {
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(archivePath))
+      using (var archiveStream = new FileStream(archivePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+      using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, leaveOpen: false))
+      {
+        var sourceEntry = FindArchiveEntry(archive, normalizedArchiveEntryName);
+        if (sourceEntry == null)
+        {
+          var message = $"Файл '{normalizedArchiveEntryName}' не найден в архиве '{archivePath}'.";
+          LogError(message);
+          throw new FileNotFoundException(message, normalizedArchiveEntryName);
+        }
+
+        using (var sourceStream = sourceEntry.Open())
+        using (var buffer = new MemoryStream())
+        {
+          sourceStream.CopyTo(buffer);
+          return buffer.ToArray();
+        }
+      }
+    }
+
+    private static void AddEntry(string archivePath, string normalizedArchiveEntryName, byte[] content)
+    {
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(archivePath))
+      using (var archiveStream = new FileStream(archivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+      using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Update, leaveOpen: false))
+      {
+        var fileAlreadyExists = FindArchiveEntry(archive, normalizedArchiveEntryName) != null;
+        if (fileAlreadyExists)
+        {
+          var message = $"Файл '{normalizedArchiveEntryName}' уже существует в архиве '{archivePath}'.";
+          LogError(message);
+          throw new InvalidOperationException(message);
+        }
+
+        var archiveEntry = archive.CreateEntry(normalizedArchiveEntryName, CompressionLevel.Optimal);
+        using (var targetStream = archiveEntry.Open())
+        {
+          targetStream.Write(content, 0, content.Length);
+        }
+
+        var manifestRecords = ArchiveManifestService.BuildManifestRecords(archive);
+        ArchiveManifestService.WriteManifest(archive, manifestRecords);
+      }
+    }
+
+    private static void DeleteEntry(string archivePath, string normalizedArchiveEntryName)
+    {
+      using (var encryptionSession = ArchiveEncryptionSession.Acquire(archivePath))
+      using (var archiveStream = new FileStream(archivePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+      using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Update, leaveOpen: false))
+      {
+        var entryToDelete = FindArchiveEntry(archive, normalizedArchiveEntryName);
+        if (entryToDelete == null)
+        {
+          var message = $"Файл '{normalizedArchiveEntryName}' не найден в архиве '{archivePath}'.";
+          LogError(message);
+          throw new FileNotFoundException(message, normalizedArchiveEntryName);
+        }
+
+        entryToDelete.Delete();
+        ArchiveManifestService.RemoveFileRecord(archive, normalizedArchiveEntryName);
+      }
+    }
+
+    private static ZipArchiveEntry? FindArchiveEntry(ZipArchive archive, string normalizedArchiveEntryName)
+    {
+      return archive.Entries.FirstOrDefault(entry =>
+        ArchiveManifestService.IsArchiveFileEntry(entry) &&
+        ArchiveManifestService.NormalizeEntryName(entry.FullName)
+          .Equals(normalizedArchiveEntryName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string ResolveArchiveEntryNameFromFilePath(string filePath)

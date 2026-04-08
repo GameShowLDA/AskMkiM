@@ -11,7 +11,6 @@
         <local:IndentToMarginConverter x:Key="IndentToMarginConverter"/>
         <local:MessageToColonConverter x:Key="MessageToColonConverter"/>
         <local:TimeToSeparatorConverter x:Key="TimeToSeparatorConverter"/>
-        <local:MessageToLeadingNewLineConverter x:Key="MessageToLeadingNewLineConverter"/>
         <local:HeaderToBrushIfNoMessageConverter x:Key="HeaderToBrushIfNoMessageConverter"/>
     </UserControl.Resources>
 
@@ -30,13 +29,21 @@
                     TextOptions.TextRenderingMode="ClearType"
                     VirtualizingStackPanel.IsVirtualizing="True"
                     VirtualizingStackPanel.VirtualizationMode="Recycling"
+                    VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                    VirtualizingPanel.ScrollUnit="Pixel"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    ScrollViewer.CanContentScroll="True"
                     SelectionMode="Single"
                     Focusable="True"
                     IsHitTestVisible="True"
                     PreviewMouseWheel="ProtocolListBox_PreviewMouseWheel"
                  >
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock TextWrapping="Wrap"
@@ -45,15 +52,6 @@
                                    SnapsToDevicePixels="True"
                                    TextOptions.TextFormattingMode="Display"
                                    Margin="{Binding IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
-                            <Run>
-                                <Run.Text>
-                                    <MultiBinding Converter="{StaticResource MessageToLeadingNewLineConverter}">
-                                        <Binding Path="Header"/>
-                                        <Binding Path="Message"/>
-                                    </MultiBinding>
-                                </Run.Text>
-                            </Run>
-
                             <Run Text="{Binding Header}">
                                 <Run.Foreground>
                                     <MultiBinding Converter="{StaticResource HeaderToBrushIfNoMessageConverter}">
@@ -74,11 +72,28 @@
 
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
                         <Setter Property="Focusable" Value="False" />
                         <Setter Property="IsHitTestVisible" Value="False" />
                         <Setter Property="Background" Value="{Binding HeaderBackgroundColor, Converter={StaticResource ColorToBrushConverter}}" />
                         <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="0" />
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}"
+                                            SnapsToDevicePixels="True">
+                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
                 </ListBox.ItemContainerStyle>
 

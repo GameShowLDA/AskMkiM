@@ -319,9 +319,9 @@ namespace Ask.UI.Controls.ProtocolNew
       MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    public ObservableCollection<ShowMessageModel> GetShowMessageModels()
+    public IReadOnlyList<ShowMessageModel> GetShowMessageModels()
     {
-      return protocolTextBox.GetShowMessageModels();
+      return protocolTextBox.GetMessagesSnapshot();
     }
 
     private void ArrowButton_Click(object sender, RoutedEventArgs e)

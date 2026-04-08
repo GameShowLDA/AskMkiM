@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Ask.Core.Shared.DTO.Protocol
@@ -6,7 +8,7 @@ namespace Ask.Core.Shared.DTO.Protocol
   /// <summary>
   /// Модель сообщения.
   /// </summary>
-  public class ShowMessageModel
+  public class ShowMessageModel : INotifyPropertyChanged
   {
     /// <summary>
     /// Перечисление, определяющее тип сообщения для вывода или логирования.
@@ -53,6 +55,20 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// </summary>
     static public (string Title, Color TitleColor) ErrorMessage => ("БРАК", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageErrorForeground"]).Color);
 
+    private Color? _headerBackgroundColor;
+    public Color? HeaderBackgroundColor
+    {
+      get => _headerBackgroundColor;
+      set
+      {
+        if (_headerBackgroundColor != value)
+        {
+          _headerBackgroundColor = value;
+          OnPropertyChanged();
+        }
+      }
+    }
+
     /// <summary>
     /// Получает или задает заголовок сообщения.
     /// </summary>
@@ -70,11 +86,6 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// Получает или задает цвет заголовка сообщения.
     /// </summary>
     public Color? HeaderColor { get; set; }
-
-    /// <summary>
-    /// Получает или задает цвет фона заголовка сообщения.
-    /// </summary>
-    public Color? HeaderBackgroundColor { get; set; }
 
     /// <summary>
     /// Получает или задает цвет текста сообщения.
@@ -109,6 +120,12 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// только на старте следующей команды.
     /// </summary>
     public bool IsControlProgramCommandHeader { get; set; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
     /// <summary>
     /// Размер табуляции перед строкой.

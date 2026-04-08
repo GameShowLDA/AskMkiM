@@ -4,6 +4,9 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using Message;
+using MigraDoc.DocumentObjectModel.Tables;
+using SQLitePCL;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -12,6 +15,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -19,10 +23,13 @@ using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
+using static Ask.LogLib.LoggerUtility;
 using Button = System.Windows.Controls.Button;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
+using Table = System.Windows.Documents.Table;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Controls.Archive
@@ -50,6 +57,7 @@ namespace UI.Controls.Archive
     private string _lastSelectedArchivePath;
     private string _lastSelectedEntryName;
     private ArchiveTreeNode _contextMenuNode;
+    private ArchiveClipboardEntry? _archiveClipboardEntry;
 
     private readonly Dictionary<string, Dictionary<string, DateTime>> _manifestCache = new();
 
@@ -652,7 +660,106 @@ namespace UI.Controls.Archive
         return;
       }
 
-      ArchiveFilesDataGrid.ItemsSource = _currentGridEntries;
+      _suppressGridSelection = true;
+      try
+      {
+        ArchiveFilesDataGrid.ItemsSource = _currentGridEntries;
+      }
+      finally
+      {
+        _suppressGridSelection = false;
+      }
+    }
+
+    private bool HasArchiveClipboardEntry()
+    {
+      return _archiveClipboardEntry != null;
+    }
+
+    private void StoreArchiveClipboardEntry(string archivePath, string entryName, string displayName, ArchiveClipboardOperation operation)
+    {
+      var normalizedArchivePath = Path.GetFullPath(archivePath);
+      var normalizedEntryName = NormalizeEntryName(entryName);
+      var normalizedDisplayName = Path.GetFileName(string.IsNullOrWhiteSpace(displayName) ? normalizedEntryName : displayName);
+
+      _archiveClipboardEntry = new ArchiveClipboardEntry(
+        normalizedArchivePath,
+        normalizedEntryName,
+        normalizedDisplayName,
+        operation);
+
+      LogInformation(
+        $"Файл '{normalizedDisplayName}' помещён в буфер архива. Режим: {(operation == ArchiveClipboardOperation.Cut ? "вырезать" : "копировать")}. Источник: '{Path.GetFileNameWithoutExtension(normalizedArchivePath)}'.");
+
+      UpdateActionButtons();
+    }
+
+    private void ClearArchiveClipboardEntry(bool wasConsumed)
+    {
+      if (_archiveClipboardEntry == null)
+      {
+        return;
+      }
+
+      if (wasConsumed)
+      {
+        LogInformation($"Буфер архива очищен после вставки файла '{_archiveClipboardEntry.DisplayName}'.");
+      }
+
+      _archiveClipboardEntry = null;
+      UpdateActionButtons();
+    }
+
+    private async Task PasteArchiveClipboardToAsync(string targetArchivePath)
+    {
+      var clipboardEntry = _archiveClipboardEntry;
+      if (clipboardEntry == null)
+      {
+        return;
+      }
+
+      var fullTargetArchivePath = Path.GetFullPath(targetArchivePath);
+      var sourceArchiveDisplayName = Path.GetFileNameWithoutExtension(clipboardEntry.SourceArchivePath);
+      var targetArchiveDisplayName = Path.GetFileNameWithoutExtension(fullTargetArchivePath);
+
+      try
+      {
+        LogInformation(
+          $"Начата вставка файла '{clipboardEntry.DisplayName}' из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}'. Режим: {(clipboardEntry.Operation == ArchiveClipboardOperation.Cut ? "вырезать" : "копировать")}.");
+
+        var insertedEntryName = await Task.Run(() =>
+        {
+          lock (_archiveManagerSync)
+          {
+            return clipboardEntry.Operation == ArchiveClipboardOperation.Cut
+              ? _archiveManager.MoveFileBetweenArchives(clipboardEntry.SourceArchivePath, clipboardEntry.EntryName, fullTargetArchivePath)
+              : _archiveManager.CopyFileBetweenArchives(clipboardEntry.SourceArchivePath, clipboardEntry.EntryName, fullTargetArchivePath);
+          }
+        });
+
+        var successMessage = clipboardEntry.Operation == ArchiveClipboardOperation.Cut
+          ? $"Файл '{Path.GetFileName(insertedEntryName)}' успешно перемещён из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}'."
+          : $"Файл '{Path.GetFileName(insertedEntryName)}' успешно скопирован из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}'.";
+
+        LogInformation(successMessage);
+        ShowArchiveNotification("Вставка файла", successMessage, NotificationType.Success);
+
+        if (clipboardEntry.Operation == ArchiveClipboardOperation.Cut)
+        {
+          ClearArchiveClipboardEntry(wasConsumed: true);
+        }
+        else
+        {
+          UpdateActionButtons();
+        }
+      }
+      catch (Exception ex)
+      {
+        LogError(
+          $"Ошибка вставки файла '{clipboardEntry.DisplayName}' из архива '{sourceArchiveDisplayName}' в архив '{targetArchiveDisplayName}': {ex}");
+        ShowArchiveNotification("Вставка файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+        UpdateActionButtons();
+      }
     }
 
     private void UpdateActionButtons()
@@ -660,10 +767,15 @@ namespace UI.Controls.Archive
       UpdatePanelTitles();
 
       var hasArchive = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && File.Exists(_lastSelectedArchivePath);
+      var hasSelectedFile = hasArchive && !string.IsNullOrWhiteSpace(_lastSelectedEntryName);
+      var hasClipboardEntry = HasArchiveClipboardEntry();
+
       ArchiveActionsPanel.Visibility = hasArchive ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveFileButton.Visibility = hasArchive && !string.IsNullOrWhiteSpace(_lastSelectedEntryName)
-        ? Visibility.Visible
-        : Visibility.Collapsed;
+      PasteIntoArchiveButton.Visibility = hasArchive && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      CopyArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      CutArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
+      PasteArchiveFileButton.Visibility = hasSelectedFile && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void UpdatePanelTitles()
@@ -711,7 +823,9 @@ namespace UI.Controls.Archive
       if (clearEditor)
       {
         _lastSelectedEntryName = null;
+        _suppressGridSelection = true;
         ArchiveFilesDataGrid.SelectedItem = null;
+        _suppressGridSelection = false;
         FileContentTextBox.Content = null;
         FileContentTextBox.Text = string.Empty;
         EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра..";
@@ -730,6 +844,7 @@ namespace UI.Controls.Archive
     {
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
+      var normalizedEntryName = NormalizeEntryName(entryName);
 
       var textEditor = new TextEditorUI(FileType.OPKW);
       textEditor.Text = text;
@@ -745,18 +860,18 @@ namespace UI.Controls.Archive
       }
 
       FileContentTextBox.Content = textEditor;
+      _lastSelectedArchivePath = archivePath;
+      _lastSelectedEntryName = normalizedEntryName;
 
       EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
       UpdateActionButtons();
       UpdateRightPanels(true, true);
       if (!fromGrid)
       {
-        var normalized = NormalizeEntryName(entryName);
-
         var selectedRow = ArchiveFilesDataGrid.Items
             .Cast<ArchiveEntryInfo>()
             .FirstOrDefault(x =>
-                string.Equals(x.EntryName, normalized, StringComparison.OrdinalIgnoreCase));
+                string.Equals(x.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
 
         await SelectGridRow(selectedRow);
       }
@@ -778,14 +893,36 @@ namespace UI.Controls.Archive
     {
       _suppressGridSelection = true;
 
-      ArchiveFilesDataGrid.SelectedItem = selectedRow;
-      ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+      try
+      {
+        ArchiveFilesDataGrid.SelectedItem = selectedRow;
 
-      await Task.Yield();
+        if (selectedRow is ArchiveEntryInfo selectedEntry)
+        {
+          _lastSelectedArchivePath = selectedEntry.ArchivePath;
+          _lastSelectedEntryName = selectedEntry.EntryName;
+        }
 
-      _suppressGridSelection = false;
+        if (selectedRow != null)
+        {
+          ArchiveFilesDataGrid.ScrollIntoView(selectedRow);
+        }
+
+        await Task.Yield();
+      }
+      finally
+      {
+        _suppressGridSelection = false;
+      }
     }
 
+    /// <summary>
+    /// Открывает диалог создания нового архива.
+    /// </summary>
+    /// <remarks>
+    /// Если вызов происходит не из UI-потока, выполнение будет перенаправлено в диспетчер.
+    /// Запускает процесс создания архива с пользовательским вводом имени.
+    /// </remarks>
     public void ShowCreateArchiveDialog()
     {
       if (!Dispatcher.CheckAccess())
@@ -846,17 +983,274 @@ namespace UI.Controls.Archive
       return _contextMenuNode ?? (ArchivesTreeView.SelectedItem as ArchiveTreeNode);
     }
 
+    private ArchiveTreeNode GetNodeForPrint()
+    {
+      return _contextMenuNode ?? ArchivesTreeView.SelectedItem as ArchiveTreeNode;
+    }
+
+    private void ArchivesTreeContextMenu_Closed(object sender, RoutedEventArgs e)
+    {
+      _contextMenuNode = null;
+    }
+
+    private async Task<(IReadOnlyList<ArchiveEntryInfo> entries, string archivePath)> EnsureEntriesForPrintAsync()
+    {
+      var node = GetNodeForPrint();
+
+      if (node == null || node.Kind != ArchiveTreeNodeKind.Archive || node.ArchivePath == null)
+        return (null, null);
+
+      var archivePath = node.ArchivePath;
+
+      // Если уже открыт нужный архив и есть данные — используем их
+      if (_lastSelectedArchivePath == archivePath &&
+          _currentGridEntries != null &&
+          _currentGridEntries.Count > 0)
+      {
+        return (_currentGridEntries, archivePath);
+      }
+
+      // Иначе — загружаем
+      var entries = await GetArchiveEntriesAsync(archivePath);
+
+      return (entries, archivePath);
+    }
+
+    private async Task PrintArchiveCatalogAsync()
+    {
+      var (entries, archivePath) = await EnsureEntriesForPrintAsync();
+
+      if (entries == null || entries.Count == 0)
+      {
+        MessageBoxCustom.Show("Нет данных для печати", "Ошибка печати", MessageBoxButton.OK, MessageBoxImage.Warning);
+        return;
+      }
+
+      var archiveName = System.IO.Path.GetFileName(archivePath);
+
+      var printDialog = new PrintDialog();
+
+      var printCapabilities = printDialog.PrintQueue.GetPrintCapabilities(printDialog.PrintTicket);
+
+      double hardMarginX = printCapabilities.PageImageableArea.OriginWidth;
+      double hardMarginY = printCapabilities.PageImageableArea.OriginHeight;
+
+
+      if (printDialog.ShowDialog() == true)
+      {
+        var document = CreatePrintDocument(
+          entries,
+          archiveName,
+          hardMarginX,
+          hardMarginY,
+          printDialog.PrintableAreaWidth,
+          printDialog.PrintableAreaHeight);
+        IDocumentPaginatorSource idpSource = document;
+        printDialog.PrintDocument(idpSource.DocumentPaginator, "Каталог архива");
+      }
+    }
+
+    private FlowDocument CreatePrintDocument(
+      IReadOnlyList<ArchiveEntryInfo> entries,
+      string archiveName,
+      double hardMarginX,
+      double hardMarginY,
+      double printableAreaWidth,
+      double printableAreaHeight)
+    {
+      var cellPadding = new Thickness(2);
+      
+      var doc = new FlowDocument
+      {
+        FontFamily = new FontFamily("Segoe UI"),
+        FontSize = 9.5,
+        PagePadding = new Thickness(
+          hardMarginX,
+          hardMarginY,
+          hardMarginX,
+          hardMarginY),
+        PageWidth = printableAreaWidth + hardMarginX * 2,
+        PageHeight = printableAreaHeight + hardMarginY * 2,
+        ColumnWidth = double.PositiveInfinity
+      };
+      
+      var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
+
+      // Заголовок
+      doc.Blocks.Add(new Paragraph(new Run($"Каталог архива {archiveName}"))
+      {
+        FontSize = 14,
+        FontWeight = FontWeights.Bold,
+        TextAlignment = TextAlignment.Center,
+        Margin = new Thickness(0, 0, 0, 12)
+      });
+
+      var table = new Table
+      {
+        CellSpacing = 0
+      };
+
+      double MeasureColumnWidth(string sampleText, FontWeight fontWeight)
+      {
+        var formattedText = new FormattedText(
+          sampleText,
+          CultureInfo.CurrentCulture,
+          FlowDirection.LeftToRight,
+          new Typeface(doc.FontFamily, FontStyles.Normal, fontWeight, FontStretches.Normal),
+          doc.FontSize,
+          Brushes.Black,
+          VisualTreeHelper.GetDpi(this).PixelsPerDip);
+
+        var horizontalPadding = cellPadding.Left + cellPadding.Right;
+        const double bordersWidth = 2;
+
+        return Math.Ceiling(formattedText.WidthIncludingTrailingWhitespace + horizontalPadding + bordersWidth);
+      }
+
+      double MeasureCharactersWidth(int characterCount, char sampleChar)
+      {
+        return MeasureColumnWidth(new string(sampleChar, characterCount), FontWeights.Normal);
+      }
+
+      var designationColumnWidth = Math.Max(
+        MeasureColumnWidth("Обозначение", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var nameOkColumnWidth = Math.Max(
+        MeasureColumnWidth("Наименование ОК", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var opkColumnWidth = Math.Max(
+        MeasureColumnWidth("ОПК", FontWeights.Bold),
+        MeasureCharactersWidth(24, 'A'));
+
+      var orderColumnWidth = Math.Max(
+        MeasureColumnWidth("Заказ", FontWeights.Bold),
+        MeasureCharactersWidth(8, '0'));
+
+      var opkFileColumnWidth = Math.Max(
+        MeasureColumnWidth("Файл ОПК", FontWeights.Bold),
+        MeasureCharactersWidth(16, 'A'));
+
+      var createdColumnWidth = Math.Max(
+        MeasureColumnWidth("Создан", FontWeights.Bold),
+        MeasureCharactersWidth(10, '0'));
+
+      var departmentColumnWidth = Math.Max(
+        MeasureColumnWidth("Цех", FontWeights.Bold),
+        MeasureCharactersWidth(4, '0'));
+
+      var commentColumnWidth = MeasureColumnWidth("Примечание", FontWeights.Bold);
+      var columnWidths = new[]
+      {
+        designationColumnWidth,
+        nameOkColumnWidth,
+        opkColumnWidth,
+        orderColumnWidth,
+        opkFileColumnWidth,
+        createdColumnWidth,
+        departmentColumnWidth,
+        commentColumnWidth
+      };
+
+      var requiredWidth = columnWidths.Sum();
+      if (requiredWidth > availableTableWidth && availableTableWidth > 0)
+      {
+        var scale = availableTableWidth / requiredWidth;
+        for (int i = 0; i < columnWidths.Length; i++)
+        {
+          columnWidths[i] = Math.Floor(columnWidths[i] * scale);
+        }
+      }
+
+      var fixedColumnsWidth = columnWidths.Take(7).Sum();
+      columnWidths[7] = Math.Max(columnWidths[7], Math.Max(0, availableTableWidth - fixedColumnsWidth));
+
+      foreach (var columnWidth in columnWidths)
+      {
+        table.Columns.Add(new TableColumn { Width = new GridLength(columnWidth) });
+      }
+
+      // Заголовки
+      var headerRow = new TableRow();
+      headerRow.Cells.Add(new TableCell(CreateCell("Обозначение")));
+      headerRow.Cells.Add(new TableCell(CreateCell("Наименование ОК")));
+      headerRow.Cells.Add(new TableCell(CreateCell("ОПК")));
+      headerRow.Cells.Add(new TableCell(CreateCell("Заказ")));
+      headerRow.Cells.Add(new TableCell(CreateCell("Файл ОПК")));
+      headerRow.Cells.Add(new TableCell(CreateCell("Создан")));
+      headerRow.Cells.Add(new TableCell(CreateCell("Цех")));
+      headerRow.Cells.Add(new TableCell(CreateCell("Примечание")));
+
+      foreach (var cell in headerRow.Cells)
+      {
+        cell.BorderBrush = Brushes.Black;
+        cell.BorderThickness = new Thickness(0.5);
+        cell.Padding = cellPadding;
+        cell.FontWeight = FontWeights.Bold;
+      }
+
+      var rowGroup = new TableRowGroup();
+      rowGroup.Rows.Add(headerRow);
+
+      // Данные
+      foreach (var item in entries)
+      {
+        var row = new TableRow();
+
+        row.Cells.Add(new TableCell(CreateCell(item.Name)));
+        row.Cells.Add(new TableCell(CreateCell(item.NameOK)));
+        row.Cells.Add(new TableCell(CreateCell(item.OPK)));
+        row.Cells.Add(new TableCell(CreateCell(item.Order)));
+        row.Cells.Add(new TableCell(CreateCell(item.OpkFileName)));
+        row.Cells.Add(new TableCell(CreateCell(item.CreationDate.ToString("dd.MM.yyyy"))));
+        row.Cells.Add(new TableCell(CreateCell(item.Department)));
+        row.Cells.Add(new TableCell(CreateCell(item.Comment)));
+
+        foreach (var cell in row.Cells)
+        {
+          cell.BorderBrush = Brushes.Black;
+          cell.BorderThickness = new Thickness(0.5);
+          cell.Padding = cellPadding;
+        }
+
+        rowGroup.Rows.Add(row);
+      }
+
+      table.RowGroups.Add(rowGroup);
+      doc.Blocks.Add(table);
+
+      return doc;
+    }
+
+    Paragraph CreateCell(string text) =>
+    new Paragraph(new Run(text ?? ""))
+    {
+      Margin = new Thickness(0),
+      TextAlignment = TextAlignment.Left
+    };
+
     private void ArchivesTreeContextMenu_Opened(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
       var isRoot = node?.Kind == ArchiveTreeNodeKind.Root;
       var isArchive = node?.Kind == ArchiveTreeNodeKind.Archive;
       var isFile = node?.Kind == ArchiveTreeNodeKind.File;
+      var hasClipboardEntry = HasArchiveClipboardEntry();
+      var canManageArchives = isRoot;
 
       CreateArchiveMenuItem.Visibility = isRoot ? Visibility.Visible : Visibility.Collapsed;
+      PrintArchiveCatalogMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      UploadArchiveMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
+      DownloadArchivesMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      SaveArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      AddFileToArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      CopyArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      CutArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      PasteArchiveFileMenuItem.Visibility = (isFile || isArchive) && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
       DeleteArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
 
       if (!isRoot && !isArchive && !isFile)
@@ -869,14 +1263,19 @@ namespace UI.Controls.Archive
       }
     }
 
-    private void ArchivesTreeContextMenu_Closed(object sender, RoutedEventArgs e)
-    {
-      _contextMenuNode = null;
-    }
-
     private void CreateArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       BeginCreateArchiveWorkflow();
+    }
+
+    private void UploadArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      ArchiveTransferUiService.UploadArchive();
+    }
+
+    private void DownloadArchivesMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      ArchiveTransferUiService.DownloadArchives();
     }
 
     private async void OpenArchiveMenuItem_Click(object sender, RoutedEventArgs e)
@@ -888,6 +1287,19 @@ namespace UI.Controls.Archive
       }
 
       await OpenArchiveAsync(node.ArchivePath);
+    }
+
+    private void SaveArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
+      {
+        return;
+      }
+
+      _lastSelectedArchivePath = node.ArchivePath;
+      _lastSelectedEntryName = null;
+      SaveSelectedArchiveToDisk();
     }
 
     private void AddFileToArchiveMenuItem_Click(object sender, RoutedEventArgs e)
@@ -938,12 +1350,56 @@ namespace UI.Controls.Archive
       DeleteArchiveFile(node.ArchivePath, node.EntryName, node.DisplayName);
     }
 
+    private void CopyArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node?.Kind != ArchiveTreeNodeKind.File ||
+          string.IsNullOrWhiteSpace(node.ArchivePath) ||
+          string.IsNullOrWhiteSpace(node.EntryName))
+      {
+        return;
+      }
+
+      StoreArchiveClipboardEntry(node.ArchivePath, node.EntryName, node.DisplayName, ArchiveClipboardOperation.Copy);
+    }
+
+    private void CutArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node?.Kind != ArchiveTreeNodeKind.File ||
+          string.IsNullOrWhiteSpace(node.ArchivePath) ||
+          string.IsNullOrWhiteSpace(node.EntryName))
+      {
+        return;
+      }
+
+      StoreArchiveClipboardEntry(node.ArchivePath, node.EntryName, node.DisplayName, ArchiveClipboardOperation.Cut);
+    }
+
+    private async void PasteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if ((node?.Kind != ArchiveTreeNodeKind.File && node?.Kind != ArchiveTreeNodeKind.Archive) ||
+          string.IsNullOrWhiteSpace(node.ArchivePath))
+      {
+        return;
+      }
+
+      await PasteArchiveClipboardToAsync(node.ArchivePath);
+    }
+
     private void AddFileToArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
       {
         AddFileToArchive(_lastSelectedArchivePath);
       }
+    }
+
+    private void SaveArchiveToDiskButton_Click(object sender, RoutedEventArgs e)
+    {
+      SaveSelectedArchiveToDisk();
+      ResetArchiveActionButtonFocus();
     }
 
     private void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
@@ -954,6 +1410,14 @@ namespace UI.Controls.Archive
       }
     }
 
+    private async void PasteIntoArchiveButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
+      {
+        await PasteArchiveClipboardToAsync(_lastSelectedArchivePath);
+      }
+    }
+
     private void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
@@ -961,6 +1425,59 @@ namespace UI.Controls.Archive
       {
         DeleteArchiveFile(_lastSelectedArchivePath, _lastSelectedEntryName, Path.GetFileName(_lastSelectedEntryName));
       }
+    }
+
+    private void CopyArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
+          !string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        StoreArchiveClipboardEntry(
+          _lastSelectedArchivePath,
+          _lastSelectedEntryName,
+          Path.GetFileName(_lastSelectedEntryName),
+          ArchiveClipboardOperation.Copy);
+      }
+    }
+
+    private void CutArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
+          !string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        StoreArchiveClipboardEntry(
+          _lastSelectedArchivePath,
+          _lastSelectedEntryName,
+          Path.GetFileName(_lastSelectedEntryName),
+          ArchiveClipboardOperation.Cut);
+      }
+    }
+
+    private async void PasteArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
+      {
+        await PasteArchiveClipboardToAsync(_lastSelectedArchivePath);
+      }
+    }
+    
+    private async void PrintArchiveCatalogButton_Click(object sender, RoutedEventArgs e)
+    {
+      await PrintArchiveCatalogAsync();
+      ResetArchiveActionButtonFocus();
+    }
+
+    private void ResetArchiveActionButtonFocus()
+    {
+      Dispatcher.BeginInvoke(new Action(() =>
+      {
+        Keyboard.ClearFocus();
+      }), DispatcherPriority.Background);
+    }
+
+    private async void PrintArchiveCatalogMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      await PrintArchiveCatalogAsync();
     }
 
     private void BeginCreateArchiveWorkflow()
@@ -1047,6 +1564,43 @@ namespace UI.Controls.Archive
       catch (Exception ex)
       {
         ShowArchiveNotification("Добавление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private void SaveSelectedArchiveToDisk()
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
+      {
+        ShowArchiveNotification("Сохранение архива", "Выберите архив для сохранения на диск.", NotificationType.Warning);
+        return;
+      }
+
+      var saveFileDialog = new SaveFileDialog
+      {
+        Title = "Сохранить архив на диск",
+        Filter = "Архив ASK (*.apkw)|*.apkw",
+        DefaultExt = ".apkw",
+        AddExtension = true,
+        FileName = Path.GetFileName(_lastSelectedArchivePath),
+        OverwritePrompt = true,
+      };
+
+      if (saveFileDialog.ShowDialog(Window.GetWindow(this)) != true)
+      {
+        return;
+      }
+
+      try
+      {
+        var savedArchivePath = ArchiveTransferService.ExportArchive(_lastSelectedArchivePath, saveFileDialog.FileName);
+        ShowArchiveNotification(
+          "Сохранение архива",
+          $"Архив '{Path.GetFileName(savedArchivePath)}' успешно сохранён на диск.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Сохранение архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -1191,7 +1745,6 @@ namespace UI.Controls.Archive
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontSize = 15,
         HorizontalContentAlignment = HorizontalAlignment.Stretch,
-        VerticalContentAlignment = VerticalAlignment.Center,
       };
       ScrollViewer.SetHorizontalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Disabled);
       ScrollViewer.SetVerticalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Auto);
@@ -1303,20 +1856,21 @@ namespace UI.Controls.Archive
 
     private string PromptForArchiveName(string suggestedArchiveName)
     {
+      var archivesRootPath = ArchiveDirectoryService.ResolveArchivesRootPath();
       var dialog = CreateDialogWindow("Создание архива");
       var shell = CreateDialogShell();
 
       var layout = new Grid
       {
-        MinWidth = 420,
+        MinWidth = 460,
       };
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-      var label = new TextBlock
+      var listLabel = new TextBlock
       {
-        Text = "Введите название нового архива:",
+        Text = "Доступные архивы:",
         Margin = new Thickness(0, 0, 0, 4),
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontFamily = Application.Current?.Resources["WinstonMedium"] as FontFamily,
@@ -1324,27 +1878,32 @@ namespace UI.Controls.Archive
         TextWrapping = TextWrapping.Wrap,
       };
 
-      var inputBorder = new Border
+      var archivesListBorder = new Border
       {
         Background = GetThemeBrush("PrimarySolidColorBrush", Color.FromRgb(239, 239, 224)),
         BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromArgb(120, 0, 0, 0)),
         BorderThickness = new Thickness(1),
         CornerRadius = new CornerRadius(10),
         Margin = new Thickness(0, 8, 0, 0),
-        Padding = new Thickness(10, 8, 10, 8),
+        Padding = new Thickness(6),
       };
 
-      var inputBox = new TextBox
+      var archivesListBox = new ListBox
       {
-        MinWidth = 360,
+        MinWidth = 400,
+        MinHeight = 180,
+        MaxHeight = 260,
         Background = Brushes.Transparent,
         BorderThickness = new Thickness(0),
-        Text = string.IsNullOrWhiteSpace(suggestedArchiveName) ? "new_archive" : suggestedArchiveName,
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontSize = 15,
+        HorizontalContentAlignment = HorizontalAlignment.Stretch,
+        //VerticalContentAlignment = VerticalAlignment.Center,
       };
-
-      inputBorder.Child = inputBox;
+      ScrollViewer.SetHorizontalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Disabled);
+      ScrollViewer.SetVerticalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Auto);
+      ApplyArchiveListItemStyle(archivesListBox);
+      archivesListBorder.Child = archivesListBox;
 
       var buttonsPanel = new StackPanel
       {
@@ -1353,15 +1912,14 @@ namespace UI.Controls.Archive
         Margin = new Thickness(0, 12, 0, 0),
       };
 
-      var createButton = new Button
+      var createArchiveButton = new Button
       {
-        Content = "Создать",
-        MinWidth = 140,
+        Content = "Создать архив",
+        MinWidth = 160,
         IsDefault = true,
         Margin = new Thickness(0, 0, 8, 0),
       };
-      ApplyDialogButtonStyle(createButton);
-      createButton.Click += (_, _) => dialog.DialogResult = true;
+      ApplyDialogButtonStyle(createArchiveButton);
 
       var cancelButton = new Button
       {
@@ -1371,29 +1929,85 @@ namespace UI.Controls.Archive
       };
       ApplyDialogButtonStyle(cancelButton);
 
-      buttonsPanel.Children.Add(createButton);
+      buttonsPanel.Children.Add(createArchiveButton);
       buttonsPanel.Children.Add(cancelButton);
 
-      Grid.SetRow(label, 0);
-      Grid.SetRow(inputBorder, 1);
+      Grid.SetRow(listLabel, 0);
+      Grid.SetRow(archivesListBorder, 1);
       Grid.SetRow(buttonsPanel, 2);
-      layout.Children.Add(label);
-      layout.Children.Add(inputBorder);
+      layout.Children.Add(listLabel);
+      layout.Children.Add(archivesListBorder);
       layout.Children.Add(buttonsPanel);
       shell.Child = layout;
       dialog.Content = shell;
 
+      void RefreshArchivesList(string? selectedArchivePath = null)
+      {
+        PopulateArchiveList(archivesListBox, archivesRootPath);
+
+        if (string.IsNullOrWhiteSpace(selectedArchivePath))
+        {
+          return;
+        }
+
+        var selectedItem = archivesListBox.Items
+          .OfType<ListBoxItem>()
+          .FirstOrDefault(item => string.Equals(item.Tag as string, selectedArchivePath, StringComparison.OrdinalIgnoreCase));
+
+        if (selectedItem != null)
+        {
+          archivesListBox.SelectedItem = selectedItem;
+          archivesListBox.ScrollIntoView(selectedItem);
+        }
+      }
+
+      createArchiveButton.Click += (_, _) =>
+      {
+        var suggestedArchiveName = "new_archive";
+
+        while (true)
+        {
+          var archiveName = PromptForArchiveName(suggestedArchiveName);
+          if (string.IsNullOrWhiteSpace(archiveName))
+          {
+            return;
+          }
+
+          suggestedArchiveName = archiveName;
+
+          try
+          {
+            string createdArchivePath;
+            lock (_archiveManagerSync)
+            {
+              createdArchivePath = _archiveManager.CreateArchive(archiveName);
+            }
+
+            RefreshArchivesList(createdArchivePath);
+            dialog.Tag = createdArchivePath;
+            dialog.DialogResult = true;
+            return;
+          }
+          catch (Exception ex)
+          {
+            ShowArchiveNotification(
+              "Создание архива",
+              GetUserFriendlyCreateArchiveErrorMessage(ex),
+              NotificationType.Error);
+          }
+        }
+      };
+
       dialog.Loaded += (_, _) =>
       {
-        inputBox.Focus();
-        inputBox.SelectAll();
+        RefreshArchivesList(_lastSelectedArchivePath);
       };
 
       return dialog.ShowDialog() == true
-        ? inputBox.Text?.Trim()
+        ? dialog.Tag as string
         : null;
     }
-
+        
     private async void ArchivesTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
       var node = e.NewValue as ArchiveTreeNode;
@@ -1484,7 +2098,6 @@ namespace UI.Controls.Archive
         ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
-
     private Window CreateDialogWindow(string title)
     {
       return new Window
@@ -1616,9 +2229,17 @@ namespace UI.Controls.Archive
     private static string GetUserFriendlyArchiveErrorMessage(Exception ex)
     {
       if (ex is InvalidOperationException invalidOperation &&
-          invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+          !string.IsNullOrWhiteSpace(invalidOperation.Message))
       {
-        return "Файл или архив с таким именем уже существует.";
+        return invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase)
+          ? "Файл или архив с таким именем уже существует."
+          : invalidOperation.Message;
+      }
+
+      if (ex is InvalidOperationException invalidOperationWithMessage &&
+          !string.IsNullOrWhiteSpace(invalidOperationWithMessage.Message))
+      {
+        return invalidOperationWithMessage.Message;
       }
 
       if (ex is FileNotFoundException)
@@ -1626,10 +2247,21 @@ namespace UI.Controls.Archive
         return "Архив или файл не найден.";
       }
 
+      if (ex is DirectoryNotFoundException directoryNotFoundException)
+      {
+        return directoryNotFoundException.Message;
+      }
+
       if (ex is IOException ioException &&
           ioException.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase))
       {
         return "Архив сейчас используется другим процессом. Повторите попытку.";
+      }
+
+      if (ex is IOException ioExceptionWithMessage &&
+          !string.IsNullOrWhiteSpace(ioExceptionWithMessage.Message))
+      {
+        return ioExceptionWithMessage.Message;
       }
 
       if (ex is InvalidDataException invalidDataException)
@@ -1643,6 +2275,28 @@ namespace UI.Controls.Archive
       }
 
       return "Не удалось выполнить операцию с архивом.";
+    }
+
+    private enum ArchiveClipboardOperation
+    {
+      Copy,
+      Cut
+    }
+
+    private sealed class ArchiveClipboardEntry
+    {
+      public ArchiveClipboardEntry(string sourceArchivePath, string entryName, string displayName, ArchiveClipboardOperation operation)
+      {
+        SourceArchivePath = sourceArchivePath;
+        EntryName = entryName;
+        DisplayName = displayName;
+        Operation = operation;
+      }
+
+      public string SourceArchivePath { get; }
+      public string EntryName { get; }
+      public string DisplayName { get; }
+      public ArchiveClipboardOperation Operation { get; }
     }
 
     private sealed class TreeRefreshState
