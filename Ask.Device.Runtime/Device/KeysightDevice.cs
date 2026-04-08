@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -68,6 +69,7 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
+    public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
@@ -95,6 +97,7 @@ namespace Ask.Device.Runtime.Device
       AcVoltageManager = new Function.Keysight3466new.AcVoltageMeasurement(this);
       DcVoltageManager = new Function.Keysight3466new.DcVoltageMeasurement(this);
       DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
+      SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, Port);
       MaxContinuityResistance = 100000;
     }
