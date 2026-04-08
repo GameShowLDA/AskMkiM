@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.FastMeter
 {
@@ -100,14 +101,16 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
             {
               var createdDevice = await FastMeters.CreateAsync(fastMeter);
               deviceDto.Id = createdDevice.Id;
+              ShowCreated(deviceDto);
             }
             else
             {
               await FastMeters.UpdateAsync(fastMeter);
+              ShowUpdated(deviceDto);
             }
 
-            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
+            RequestSave?.Invoke(s, deviceDto);
           }
           catch (DuplicateEntityException ex)
           {

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.ChassisManager
 {
@@ -82,8 +83,9 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
             var chassi = ChassisManagers.Build(deviceDto);
             var createdDevice = await ChassisManagers.CreateAsync(chassi);
             deviceDto.Id = createdDevice.Id;
-            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
+            ShowCreated(deviceDto);
+            RequestSave?.Invoke(s, deviceDto);
           }
           catch (DuplicateEntityException ex)
           {

@@ -18,6 +18,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Builder;
 using Ask.DataBase.Engine.Contracts;
+using Ask.DataBase.Engine.Mapping;
 using Ask.DataBase.Engine.Mapping.Device;
 using Ask.DataBase.Provider.Services.Base;
 using Ask.DataBase.Provider.Services.Devices;
@@ -359,6 +360,15 @@ public class DeviceEngine : IDeviceEngine
     {
       if (cached is TDevice typedCached)
       {
+        if (!string.Equals(cached.GetType().FullName, dto.DeviceClass, StringComparison.Ordinal))
+        {
+          _cache.Remove(typeof(TDevice), dto.Id);
+          var rebuiltDevice = DeviceBuilder.Build<TDevice>(dto);
+          _cache.Set(typeof(TDevice), dto.Id, rebuiltDevice);
+          return rebuiltDevice;
+        }
+
+        DeviceMapperRegistry.Apply(typedCached, dto);
         return typedCached;
       }
 

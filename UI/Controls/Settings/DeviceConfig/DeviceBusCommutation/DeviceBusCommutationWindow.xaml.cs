@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
 {
@@ -98,14 +99,16 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceBusCommutation
             {
               var createdDevice = await SwitchingDevices.CreateAsync(switching);
               deviceDto.Id = createdDevice.Id;
+              ShowCreated(deviceDto);
             }
             else
             {
               await SwitchingDevices.UpdateAsync(switching);
+              ShowUpdated(deviceDto);
             }
 
-            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
+            RequestSave?.Invoke(s, deviceDto);
           }
           catch (DuplicateEntityException ex)
           {

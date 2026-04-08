@@ -13,7 +13,8 @@ namespace Ask.Core.Services.Config.Base
       Language = "ru"
     };
 
-    static public Action<UserInterfaceDto> SaveUserInterfaceEvent;
+    public static Action<UserInterfaceDto>? SaveUserInterfaceEvent;
+    public static Func<UserInterfaceDto, Task>? SaveUserInterfaceAsyncEvent;
 
 
     #region Set.
@@ -116,6 +117,7 @@ namespace Ask.Core.Services.Config.Base
       await SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
       await SetTopMenuIcons(parametrModel.UseTopMenuIcons);
       await SetCommandAutoCollapse(parametrModel.UseCommandAutoCollapse);
+      await InvokeSaveUserInterfaceAsync(parametrModel);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
 
 
@@ -128,5 +130,18 @@ namespace Ask.Core.Services.Config.Base
 
 
     #endregion
+
+    private static async Task InvokeSaveUserInterfaceAsync(UserInterfaceDto parametrModel)
+    {
+      if (SaveUserInterfaceAsyncEvent == null)
+      {
+        return;
+      }
+
+      foreach (Func<UserInterfaceDto, Task> handler in SaveUserInterfaceAsyncEvent.GetInvocationList())
+      {
+        await handler(parametrModel);
+      }
+    }
   }
 }

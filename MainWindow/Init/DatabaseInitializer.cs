@@ -68,7 +68,7 @@ namespace MainWindowProgram.Init
           await ExecutionSettings.SaveAsync(model);
         };
 
-        UserInterfaceConfig.SaveUserInterfaceEvent += async model =>
+        UserInterfaceConfig.SaveUserInterfaceAsyncEvent += async model =>
         {
           await UserInterfaceSettings.SaveAsync(model);
         };
