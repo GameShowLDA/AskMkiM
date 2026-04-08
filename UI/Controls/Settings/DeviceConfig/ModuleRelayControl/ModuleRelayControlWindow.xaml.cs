@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
 {
@@ -103,14 +104,16 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
             {
               var createdDevice = await RelaySwitchModules.CreateAsync(relaySwitchModule);
               deviceEntity.Id = createdDevice.Id;
+              ShowCreated(deviceEntity);
             }
             else
             {
               await RelaySwitchModules.UpdateAsync(relaySwitchModule);
+              ShowUpdated(deviceEntity);
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
             RequestCloseWindow();
+            RequestSave?.Invoke(s, deviceEntity);
           }
           catch (DuplicateEntityException ex)
           {

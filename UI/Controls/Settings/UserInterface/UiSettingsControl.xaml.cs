@@ -7,9 +7,11 @@ using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Infrastructure.Localization;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.UserInterface
 {
@@ -55,12 +57,20 @@ namespace UI.Controls.Settings.UserInterface
 
     public async Task SaveData()
     {
-      await UserInterfaceConfig.SaveProtocolModel(GetModel());
-      _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
+      try
+      {
+        await UserInterfaceConfig.SaveProtocolModel(GetModel());
+        _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
 
-      Error.Visibility = Visibility.Collapsed;
-      Success.Visibility = Visibility.Collapsed;
-      HasUnsavedChanges = false;
+        Error.Visibility = Visibility.Collapsed;
+        Success.Visibility = Visibility.Collapsed;
+        HasUnsavedChanges = false;
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка сохранения настроек интерфейса", ex);
+        MessageBoxCustom.Show($"Ошибка сохранения настроек интерфейса: {ex.Message}", image: MessageBoxImage.Error);
+      }
     }
 
     private void ValueChanged(object? sender, object? e)

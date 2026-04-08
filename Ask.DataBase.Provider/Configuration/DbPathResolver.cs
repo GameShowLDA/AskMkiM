@@ -12,7 +12,8 @@ namespace Ask.DataBase.Provider.Configuration
     /// <returns>Полный путь к <c>app.db</c>.</returns>
     internal static string Resolve()
     {
-      var path = Path.Combine("D:\\AskMkiM", "Bin", "Resources", "app.db");
+      var path = Path.Combine(AppContext.BaseDirectory, "Resources", "app.db");
+      path = Path.GetFullPath(path);
       EnsureDirectory(path);
       return path;
     }

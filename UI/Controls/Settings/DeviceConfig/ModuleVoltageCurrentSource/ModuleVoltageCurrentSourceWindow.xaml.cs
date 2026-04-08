@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
 {
@@ -98,14 +99,16 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
             {
               var createdDevice = await PowerSourceModules.CreateAsync(powerSourceModule);
               deviceDto.Id = createdDevice.Id;
+              ShowCreated(deviceDto);
             }
             else
             {
               await PowerSourceModules.UpdateAsync(powerSourceModule);
+              ShowUpdated(deviceDto);
             }
 
-            RequestSave?.Invoke(s, deviceDto);
             RequestCloseWindow();
+            RequestSave?.Invoke(s, deviceDto);
           }
           catch (DuplicateEntityException ex)
           {
