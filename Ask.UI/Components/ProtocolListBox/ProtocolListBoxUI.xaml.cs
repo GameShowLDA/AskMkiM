@@ -2,6 +2,7 @@ using Ask.Core.Services.FilesUtility;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Collections.Generic;
@@ -37,6 +38,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private ProtocolCommandGroup? _currentGroup;
     private ProtocolCommandGroup? _pendingGroup;
     private bool _scrollToEndRequested;
+    private bool _settingsSubscribed;
     private bool _themeSubscribed;
     private int _visibleRowCount;
 
@@ -89,13 +91,17 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
 
-      if (_themeSubscribed)
+      if (!_themeSubscribed)
       {
-        return;
+        ThemeSettings.ThemeChanged += ProtocolListBoxUI_ThemeChanged;
+        _themeSubscribed = true;
       }
 
-      ThemeSettings.ThemeChanged += ProtocolListBoxUI_ThemeChanged;
-      _themeSubscribed = true;
+      if (!_settingsSubscribed)
+      {
+        UserInterfaceConfig.SaveUserInterfaceEvent += ProtocolListBoxUI_UserInterfaceSettingsSaved;
+        _settingsSubscribed = true;
+      }
     }
 
     private void ProtocolListBoxUI_Unloaded(object sender, RoutedEventArgs e)
@@ -107,12 +113,25 @@ namespace Ask.UI.Components.ProtocolListBox
 
       ThemeSettings.ThemeChanged -= ProtocolListBoxUI_ThemeChanged;
       _themeSubscribed = false;
+
+      if (_settingsSubscribed)
+      {
+        UserInterfaceConfig.SaveUserInterfaceEvent -= ProtocolListBoxUI_UserInterfaceSettingsSaved;
+        _settingsSubscribed = false;
+      }
     }
 
     private void ProtocolListBoxUI_ThemeChanged(ThemeMode theme)
     {
       Dispatcher.BeginInvoke(
         new Action(RefreshThemeColors),
+        DispatcherPriority.Loaded);
+    }
+
+    private void ProtocolListBoxUI_UserInterfaceSettingsSaved(UserInterfaceDto _)
+    {
+      Dispatcher.BeginInvoke(
+        new Action(RefreshVisibleState),
         DispatcherPriority.Loaded);
     }
 
@@ -332,7 +351,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
         if (lastMessage)
         {
-          CollapseLatestCommandGroup();
+          FinalizeLatestCommandGroup();
         }
 
         TrimVisibleItemsIfNeeded();
@@ -379,7 +398,7 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       model.Header = model.Header?.TrimStart() ?? string.Empty;
 
-      CollapseLatestCommandGroup();
+      FinalizeLatestCommandGroup();
 
       var group = new ProtocolCommandGroup(model);
       _pendingGroup = group;
@@ -399,17 +418,27 @@ namespace Ask.UI.Components.ProtocolListBox
       _pendingGroup = null;
     }
 
-    private void CollapseLatestCommandGroup()
+    private void FinalizeLatestCommandGroup()
     {
+      bool useCommandAutoCollapse = UserInterfaceConfig.GetCommandAutoCollapse();
+
       if (_currentGroup != null)
       {
-        CollapseGroup(_currentGroup);
+        if (useCommandAutoCollapse)
+        {
+          CollapseGroup(_currentGroup);
+        }
+
         _currentGroup = null;
       }
 
       if (_pendingGroup != null)
       {
-        _pendingGroup.SetExpanded(false);
+        if (useCommandAutoCollapse)
+        {
+          _pendingGroup.SetExpanded(false);
+        }
+
         _pendingGroup = null;
       }
     }
@@ -499,6 +528,8 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         AppendVisibleMessage(_historyMessages[i]);
       }
+
+      FinalizeLatestCommandGroup();
     }
 
     private void RefreshThemeColors()
@@ -517,6 +548,12 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       RestoreVisibleItems();
+    }
+
+    private void RefreshVisibleState()
+    {
+      RestoreVisibleItems();
+      RequestScrollToEnd();
     }
 
     private static void ApplyThemeColors(

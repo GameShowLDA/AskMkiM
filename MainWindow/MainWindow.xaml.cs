@@ -1,17 +1,15 @@
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
-using Ask.Core.Services.Usb;
-using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
-using Ask.UI.Shared.Components.Icons;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.UI.Shared.Components.Icons;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
-using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
@@ -59,7 +57,7 @@ namespace MainWindowProgram
     /// </summary>
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
-    private Action<UserInterfaceModel>? _onUserInterfaceSaved;
+    private Action<UserInterfaceDto>? _onUserInterfaceSaved;
 
     /// <summary>
     /// Показывает, активен ли в данный момент текстовый редактор.

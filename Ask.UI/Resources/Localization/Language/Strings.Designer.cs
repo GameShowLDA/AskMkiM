@@ -1213,6 +1213,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми..
+        /// </summary>
+        internal static string settings_userinterface_commandAutoCollapse_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.commandAutoCollapse.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Автоскрытие блоков в протоколе.
+        /// </summary>
+        internal static string settings_userinterface_commandAutoCollapse_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.commandAutoCollapse.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Включает или отключает фоновое выделение строк команд в протоколе выполнения..
         /// </summary>
         internal static string settings_userinterface_commandBodyBackground_description {
@@ -1308,6 +1326,24 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_userinterface_theme_title {
             get {
                 return ResourceManager.GetString("settings.userinterface.theme.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Заменяет текстовые пункты верхнего меню на иконки..
+        /// </summary>
+        internal static string settings_userinterface_topMenuIcons_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.topMenuIcons.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Иконки в верхнем меню.
+        /// </summary>
+        internal static string settings_userinterface_topMenuIcons_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.topMenuIcons.title", resourceCulture);
             }
         }
         

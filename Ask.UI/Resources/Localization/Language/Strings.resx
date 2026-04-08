@@ -555,4 +555,10 @@
   <data name="settings.userinterface.section.title" xml:space="preserve">
     <value>Интерфейс</value>
   </data>
+  <data name="settings.userinterface.commandAutoCollapse.title" xml:space="preserve">
+    <value>Автоскрытие блоков в протоколе</value>
+  </data>
+  <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
+    <value>Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми.</value>
+  </data>
 </root>
