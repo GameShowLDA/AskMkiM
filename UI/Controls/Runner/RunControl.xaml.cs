@@ -384,9 +384,11 @@ namespace UI.Controls.Runner
         var translatorEditor = ChildTextEditorContainer.DockManager.DockItems
           .FirstOrDefault(item => item.Content is TranslatorEditor)?
           .Content as TranslatorEditor;
-
-        translatorEditor?.SetArchiveButtonVisibility(ErrorCount == 0);
-        translatorEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
+        if (translatorEditor != null)
+        {
+          translatorEditor.SetArchiveButtonVisibility(ErrorCount == 0);
+          translatorEditor.SetSaveToDiskVisible(CanSaveTranslatedFileToDisk());
+        }
       });
     }
 
