@@ -74,7 +74,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       int numberLine,
       List<string> lines)
     {
-      var breakdown = BreakdownTesters.GetAllAsync();
+      var breakdown = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (breakdown == null)
       {
         model.Errors.Add(GeneralErrors.FastMeterNotFound(numberLine, $"{commandNumber} {mnemonic}"));
@@ -96,7 +96,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       string mnemonic,
       int numberLine,
       SiCommandModel model)
-      => new(commandNumber, mnemonic, numberLine, ServiceLocator.GetRequired<IBreakdownTester>());
+      => new(commandNumber, mnemonic, numberLine, BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault());
 
     /// <summary>
     /// Выполняет разбор параметров команды СИ через конвейер обработчиков.
