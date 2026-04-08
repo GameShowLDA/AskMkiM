@@ -555,4 +555,10 @@
   <data name="settings.userinterface.section.title" xml:space="preserve">
     <value>Interface</value>
   </data>
+  <data name="settings.userinterface.commandAutoCollapse.title" xml:space="preserve">
+    <value>Auto-collapse blocks in the protocol</value>
+  </data>
+  <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
+    <value>Automatically collapses completed command blocks in the execution log. If disabled, the blocks remain expanded.</value>
+  </data>
 </root>

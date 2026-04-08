@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Entity.Settings;
 
 namespace Ask.Core.Services.Config.Base
@@ -39,7 +40,7 @@ namespace Ask.Core.Services.Config.Base
     /// Устанавливает текущую модель протокола (ProtocolModel).
     /// </summary>
     /// <param name="executionModel">Модель протокола.</param>
-    static public async Task SerParametrModelAsync(UserInterfaceModel executionModel)
+    static public async Task SerParametrModelAsync(UserInterfaceDto executionModel)
     {
       await UserInterfaceConfig.SetLanguage(executionModel.Language);
       await UserInterfaceConfig.SetTheme(executionModel.Theme);
@@ -47,6 +48,7 @@ namespace Ask.Core.Services.Config.Base
       await UserInterfaceConfig.SetCommandBodyBackgroundHighlighting(executionModel.UseCommandBodyBackgroundHighlighting);
       await UserInterfaceConfig.SetChainPointBodyBackgroundHighlighting(executionModel.UseChainPointBodyBackgroundHighlighting);
       await UserInterfaceConfig.SetTopMenuIcons(executionModel.UseTopMenuIcons);
+      await UserInterfaceConfig.SetCommandAutoCollapse(executionModel.UseCommandAutoCollapse);
     }
   }
 }

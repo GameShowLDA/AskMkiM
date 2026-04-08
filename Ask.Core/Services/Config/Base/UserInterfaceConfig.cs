@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 
@@ -7,12 +8,12 @@ namespace Ask.Core.Services.Config.Base
 {
   public static class UserInterfaceConfig
   {
-    private static UserInterfaceModel UserInterfaceModel = new UserInterfaceModel
+    private static UserInterfaceDto UserInterfaceModel = new UserInterfaceDto
     {
       Language = "ru"
     };
 
-    static public Action<UserInterfaceModel> SaveUserInterfaceEvent;
+    static public Action<UserInterfaceDto> SaveUserInterfaceEvent;
 
 
     #region Set.
@@ -56,7 +57,13 @@ namespace Ask.Core.Services.Config.Base
       UserInterfaceModel.UseTopMenuIcons = enable;
     }
 
-    public static async Task SetUserInterfaceModel(UserInterfaceModel user)
+    public static async Task SetCommandAutoCollapse(bool enable)
+    {
+      UserInterfaceModel.UseCommandAutoCollapse = enable;
+    }
+
+
+    public static async Task SetUserInterfaceModel(UserInterfaceDto user)
     {
       await Task.Run(async () =>
       {
@@ -66,6 +73,7 @@ namespace Ask.Core.Services.Config.Base
         await SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
         await SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
         await SetTopMenuIcons(user.UseTopMenuIcons);
+        await SetCommandAutoCollapse(user.UseCommandAutoCollapse);
       });
     }
 
@@ -83,21 +91,23 @@ namespace Ask.Core.Services.Config.Base
     public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
     public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
     public static bool GetTopMenuIcons() => UserInterfaceModel.UseTopMenuIcons;
+    public static bool GetCommandAutoCollapse() => UserInterfaceModel.UseCommandAutoCollapse;
 
 
-    public static async Task<UserInterfaceModel> GetParameterModel()
+    public static async Task<UserInterfaceDto> GetParameterModel()
     {
-      UserInterfaceModel parametrModel = new UserInterfaceModel();
+      UserInterfaceDto parametrModel = new UserInterfaceDto();
       parametrModel.Language = UserInterfaceModel.Language;
       parametrModel.Theme = UserInterfaceModel.Theme;
       parametrModel.UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting;
       parametrModel.UseCommandBodyBackgroundHighlighting = UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
       parametrModel.UseChainPointBodyBackgroundHighlighting = UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
       parametrModel.UseTopMenuIcons = UserInterfaceModel.UseTopMenuIcons;
+      parametrModel.UseCommandAutoCollapse = UserInterfaceModel.UseCommandAutoCollapse;
       return parametrModel;
     }
 
-    public static async Task SaveProtocolModel(UserInterfaceModel parametrModel)
+    public static async Task SaveProtocolModel(UserInterfaceDto parametrModel)
     {
       await SetLanguage(parametrModel.Language);
       await SetTheme(parametrModel.Theme);
@@ -105,6 +115,7 @@ namespace Ask.Core.Services.Config.Base
       await SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
       await SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
       await SetTopMenuIcons(parametrModel.UseTopMenuIcons);
+      await SetCommandAutoCollapse(parametrModel.UseCommandAutoCollapse);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
 
 
