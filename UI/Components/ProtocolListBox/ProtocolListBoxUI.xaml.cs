@@ -220,91 +220,9 @@ namespace UI.Components.ProtocolListBox
     {
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
-        var displayLines = ExpandMessageForDisplay(showMessageModel);
-
-        foreach (var line in displayLines)
-        {
-          Messages.Add(line);
-        }
-
-        ProtocolListBox.ScrollIntoView(displayLines.LastOrDefault() ?? showMessageModel);
+        Messages.Add(showMessageModel);
+        ProtocolListBox.ScrollIntoView(showMessageModel);
       });
-    }
-
-    /// <summary>
-    /// Разбивает многострочный заголовок на отдельные строки для корректной заливки фона.
-    /// Пустые строки сохраняются, но отображаются без подсветки.
-    /// </summary>
-    private static IReadOnlyList<ShowMessageModel> ExpandMessageForDisplay(ShowMessageModel source)
-    {
-      if (!source.HeaderBackgroundColor.HasValue || string.IsNullOrEmpty(source.Header))
-      {
-        return new[] { source };
-      }
-
-      string normalized = source.Header.Replace("\r\n", "\n").Replace('\r', '\n');
-      if (!normalized.Contains('\n'))
-      {
-        return new[] { source };
-      }
-
-      string[] headerLines = normalized.Split('\n');
-      var result = new List<ShowMessageModel>(headerLines.Length);
-
-      for (int i = 0; i < headerLines.Length; i++)
-      {
-        string line = headerLines[i];
-        bool hasText = !string.IsNullOrWhiteSpace(line);
-
-        var model = CloneForDisplay(source);
-        model.Header = hasText ? line : " ";
-        model.Message = string.Empty;
-        model.Time = string.Empty;
-        model.Debug = string.Empty;
-        model.HeaderBackgroundColor = hasText ? source.HeaderBackgroundColor : null;
-
-        if (!hasText)
-        {
-          model.HeaderColor = Colors.Transparent;
-          model.MessageColor = Colors.Transparent;
-        }
-
-        result.Add(model);
-      }
-
-      // Хвост сообщения (message/time/debug) привязываем к последней строке.
-      var last = result[^1];
-      last.Message = source.Message;
-      last.Time = source.Time;
-      last.Debug = source.Debug;
-
-      return result;
-    }
-
-    /// <summary>
-    /// Создаёт копию сообщения для построчного отображения в списке.
-    /// </summary>
-    private static ShowMessageModel CloneForDisplay(ShowMessageModel source)
-    {
-      var clone = new ShowMessageModel
-      {
-        Status = source.Status,
-        Header = source.Header,
-        Message = source.Message,
-        Time = source.Time,
-        Debug = source.Debug,
-        HeaderColor = source.HeaderColor,
-        HeaderBackgroundColor = source.HeaderBackgroundColor,
-        MessageColor = source.MessageColor,
-        TimeColor = source.TimeColor,
-        ExecutionError = source.ExecutionError,
-        CanBeDeleted = source.CanBeDeleted,
-        IsDeviceMessage = source.IsDeviceMessage,
-        IsControlProgramCommandHeader = source.IsControlProgramCommandHeader,
-        IndentLevel = source.IndentLevel
-      };
-
-      return clone;
     }
 
     public Task AppendEmptyLineAsync(int indentLevel = 0)

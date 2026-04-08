@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using System.IO;
 using System.Reflection.Metadata;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
@@ -92,6 +93,16 @@ namespace UI.Services.Archive
       }
     }
 
+    public string CopyFileBetweenArchives(string sourceArchivePath, string archiveEntryName, string targetArchivePath)
+    {
+      return TransferFileBetweenArchives(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource: false);
+    }
+
+    public string MoveFileBetweenArchives(string sourceArchivePath, string archiveEntryName, string targetArchivePath)
+    {
+      return TransferFileBetweenArchives(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource: true);
+    }
+
     public void DeleteArchive(string archivePath = null)
     {
       var pathToDelete = string.IsNullOrWhiteSpace(archivePath)
@@ -129,6 +140,32 @@ namespace UI.Services.Archive
       }
 
       return OpenedArchivePath;
+    }
+
+    private string TransferFileBetweenArchives(string sourceArchivePath, string archiveEntryName, string targetArchivePath, bool removeSource)
+    {
+      var operationName = removeSource ? "перемещён" : "скопирован";
+
+      try
+      {
+        _archiveOpening.Close();
+        var transferredEntryName = _archiveFileAdder.TransferFile(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource);
+
+        LogInformation(
+          $"Файл '{transferredEntryName}' {operationName} из архива '{Path.GetFileNameWithoutExtension(sourceArchivePath)}' в архив '{Path.GetFileNameWithoutExtension(targetArchivePath)}'.");
+
+        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, targetArchivePath));
+        if (removeSource)
+        {
+          EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, sourceArchivePath));
+        }
+
+        return transferredEntryName;
+      }
+      finally
+      {
+        _archiveOpening.Close();
+      }
     }
   }
 }

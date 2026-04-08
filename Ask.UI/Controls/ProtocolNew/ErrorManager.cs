@@ -13,7 +13,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        ErrorListBoxVertical.Items.Add(errorItem);
+        ErrorListBoxVertical.AddError(errorItem);
         ErrorCount++;
 
         if (ErrorCount > 0)
@@ -27,7 +27,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        ErrorListBoxVertical.Items.Clear();
+        ErrorListBoxVertical.ClearAll();
         ErrorCount = 0;
       });
     }
