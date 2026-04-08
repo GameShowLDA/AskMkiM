@@ -1,4 +1,12 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
+using Ask.Core.Shared.DTO.Devices.Rack;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -9,6 +17,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.DataBase.Provider.Services.Devices;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows;
@@ -122,49 +131,49 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     {
       switch (device)
       {
-        case ISwitchingDevice:
+        case SwitchingDeviceDto:
           var switchingDevice = SwitchingDevices.Build(device);
           await SwitchingDevices.DeleteAsync(switchingDevice);
           LogInformation("Удаляем устройство из SwitchingDeviceTable");
           break;
 
-        case IFastMeter:
+        case FastMeterDto:
           var fastMeter = FastMeters.Build(device);
           await FastMeters.DeleteAsync(fastMeter);
           LogInformation("Удаляем устройство из FastMeterTable");
           break;
 
-        case IRelaySwitchModule:
+        case RelaySwitchModuleDto:
           var relaySwitchModule = RelaySwitchModules.Build(device);
           await RelaySwitchModules.DeleteAsync(relaySwitchModule);
           LogInformation("Удаляем устройство из RelaySwitchModuleTable");
           break;
 
-        case IBreakdownTester:
+        case BreakdownTesterDto:
           var breakdownTester = BreakdownTesters.Build(device);
           await BreakdownTesters.DeleteAsync(breakdownTester);
           LogInformation("Удаляем устройство из BreakdownTesterTable");
           break;
 
-        case IChassisManager:
+        case ChassisManagerDto:
           var chassisManager = ChassisManagers.Build(device);
           await ChassisManagers.DeleteAsync(chassisManager);
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
-        case IRack:
+        case RackDto:
           var rack = Racks.Build(device);
           await Racks.DeleteAsync(rack);
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
-        case IPowerSourceModule:
+        case PowerSourceModuleDto:
           var powerSourceModule = PowerSourceModules.Build(device);
           await PowerSourceModules.DeleteAsync(powerSourceModule);
           LogInformation("Удаляем устройство из ChassisManagerTable");
           break;
 
-        case IUninterruptiblePowerSupply:
+        case UninterruptiblePowerSupplyDto:
           var uninterruptiblePowerSupply = UninterruptiblePowerSupplies.Build(device);
           await UninterruptiblePowerSupplies.DeleteAsync(uninterruptiblePowerSupply);
           LogInformation("Удаляем устройство из UninterruptiblePowerSuppliesTable");

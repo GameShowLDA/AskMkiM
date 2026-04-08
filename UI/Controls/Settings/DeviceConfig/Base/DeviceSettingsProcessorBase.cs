@@ -31,6 +31,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         throw new ArgumentNullException(nameof(deviceModel));
       }
 
+      deviceModel.Number = BaseHandler<IDevice>.GetNumber(control);
+      deviceModel.ConnectionDetails = connectString;
       SetChassisNumber(deviceModel, control);
       return deviceModel;
     }
@@ -62,7 +64,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
     {
       if (deviceModel.DeviceType != DeviceType.ChassisManager)
       {
-        IAttachableDevice attachableDevice = (IAttachableDevice)deviceModel;
+        AttachableDeviceDto attachableDevice = (AttachableDeviceDto)deviceModel;
         attachableDevice.NumberChassis = control.NumberChassis;
       }
     }
