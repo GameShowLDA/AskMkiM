@@ -22,6 +22,7 @@ using Ask.DataBase.Engine.Mapping;
 using Ask.DataBase.Engine.Mapping.Device;
 using Ask.DataBase.Provider.Services.Base;
 using Ask.DataBase.Provider.Services.Devices;
+using System.Collections.Concurrent;
 
 namespace Ask.DataBase.Engine.Services;
 
@@ -33,6 +34,8 @@ namespace Ask.DataBase.Engine.Services;
 /// </summary>
 public class DeviceEngine : IDeviceEngine
 {
+  private readonly record struct ChassisQueryCacheKey(Type DeviceType, int NumberChassis);
+
   private readonly DeviceCache _cache;
   private readonly BreakdownTesterDtoService _breakdownTesterService;
   private readonly ChassisManagerDtoService _chassisManagerService;
@@ -42,6 +45,8 @@ public class DeviceEngine : IDeviceEngine
   private readonly RelaySwitchModuleDtoService _relaySwitchModuleService;
   private readonly SwitchingDeviceDtoService _switchingDeviceService;
   private readonly UninterruptiblePowerSupplyDtoService _uninterruptiblePowerSupplyService;
+  private readonly ConcurrentDictionary<Type, int[]> _allQueryCache = new();
+  private readonly ConcurrentDictionary<ChassisQueryCacheKey, int[]> _chassisQueryCache = new();
 
   /// <summary>
   /// Инициализирует новый экземпляр движка устройств.
@@ -385,6 +390,7 @@ public class DeviceEngine : IDeviceEngine
   public void ClearCache()
   {
     _cache.Clear();
+    ClearQueryCaches();
   }
 
   private async Task<TDevice?> GetByIdInternalAsync<TDevice, TDto>(
@@ -415,8 +421,15 @@ public class DeviceEngine : IDeviceEngine
     where TDevice : class, IDevice
     where TDto : DeviceDto
   {
+    if (TryGetCachedDevices(_allQueryCache, typeof(TDevice), out List<TDevice>? cachedDevices))
+    {
+      return cachedDevices;
+    }
+
     var dtoList = await service.GetAllAsync(cancellationToken);
-    return dtoList.Select(Build<TDevice>).ToList();
+    var devices = dtoList.Select(Build<TDevice>).ToList();
+    _allQueryCache[typeof(TDevice)] = dtoList.Select(dto => dto.Id).ToArray();
+    return devices;
   }
 
   private async Task<TDevice?> GetByNumberInternalAsync<TDevice, TDto>(
@@ -445,8 +458,16 @@ public class DeviceEngine : IDeviceEngine
     where TDevice : class, IDevice
     where TDto : AttachableDeviceDto
   {
+    var cacheKey = new ChassisQueryCacheKey(typeof(TDevice), numberChassis);
+    if (TryGetCachedDevices(_chassisQueryCache, cacheKey, out List<TDevice>? cachedDevices))
+    {
+      return cachedDevices;
+    }
+
     var dtoList = await service.FindByPropertyAsync(x => x.NumberChassis, numberChassis, cancellationToken);
-    return dtoList.Select(Build<TDevice>).ToList();
+    var devices = dtoList.Select(Build<TDevice>).ToList();
+    _chassisQueryCache[cacheKey] = dtoList.Select(dto => dto.Id).ToArray();
+    return devices;
   }
 
   private async Task<TDevice?> GetByChassisAndNumberInternalAsync<TDevice, TDto>(
@@ -483,6 +504,7 @@ public class DeviceEngine : IDeviceEngine
 
     var created = await service.CreateAsync(dto, cancellationToken);
     _cache.Remove(typeof(TDevice), created.Id);
+    InvalidateQueryCaches(typeof(TDevice));
     return Build<TDevice>(created);
   }
 
@@ -506,6 +528,7 @@ public class DeviceEngine : IDeviceEngine
       var created = await service.CreateAsync(dto, cancellationToken);
 
       _cache.Remove(typeof(TDevice), created.Id);
+      InvalidateQueryCaches(typeof(TDevice));
 
       var built = Build<TDevice>(created);
       result.Add(built);
@@ -526,6 +549,7 @@ public class DeviceEngine : IDeviceEngine
 
     var updated = await service.UpdateAsync(dto, cancellationToken);
     _cache.Remove(typeof(TDevice), updated.Id);
+    InvalidateQueryCaches(typeof(TDevice));
     return Build<TDevice>(updated);
   }
 
@@ -545,6 +569,7 @@ public class DeviceEngine : IDeviceEngine
     if (deleted)
     {
       _cache.Remove(typeof(TDevice), id);
+      InvalidateQueryCaches(typeof(TDevice));
     }
 
     return deleted;
@@ -567,6 +592,56 @@ public class DeviceEngine : IDeviceEngine
       _cache.Remove(typeof(TDevice), dto.Id);
     }
 
+    InvalidateQueryCaches(typeof(TDevice));
+    return true;
+  }
+
+  private void ClearQueryCaches()
+  {
+    _allQueryCache.Clear();
+    _chassisQueryCache.Clear();
+  }
+
+  private void InvalidateQueryCaches(Type deviceType)
+  {
+    _allQueryCache.TryRemove(deviceType, out _);
+
+    foreach (var entry in _chassisQueryCache.Keys)
+    {
+      if (entry.DeviceType == deviceType)
+      {
+        _chassisQueryCache.TryRemove(entry, out _);
+      }
+    }
+  }
+
+  private bool TryGetCachedDevices<TCacheKey, TDevice>(
+    ConcurrentDictionary<TCacheKey, int[]> queryCache,
+    TCacheKey cacheKey,
+    out List<TDevice>? devices)
+    where TCacheKey : notnull
+    where TDevice : class, IDevice
+  {
+    devices = null;
+
+    if (!queryCache.TryGetValue(cacheKey, out int[]? ids))
+    {
+      return false;
+    }
+
+    var result = new List<TDevice>(ids.Length);
+    foreach (int id in ids)
+    {
+      if (!_cache.TryGet(typeof(TDevice), id, out var cached) || cached is not TDevice typedCached)
+      {
+        queryCache.TryRemove(cacheKey, out _);
+        return false;
+      }
+
+      result.Add(typedCached);
+    }
+
+    devices = result;
     return true;
   }
 

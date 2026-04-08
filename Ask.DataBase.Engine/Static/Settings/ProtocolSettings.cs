@@ -15,23 +15,23 @@ public static class ProtocolSettings
   /// <summary>
   /// Возвращает сохранённые настройки протокола в виде доменной модели.
   /// </summary>
-  public static async Task<SettingsProtocolModel?> GetAsync(CancellationToken cancellationToken = default)
+  public static async Task<SettingsProtocolDto?> GetAsync(CancellationToken cancellationToken = default)
   {
     var dto = await Service.GetProtocolAsync(cancellationToken);
-    return dto == null ? null : ReflectionMapper.Map<SettingsProtocolDto, SettingsProtocolModel>(dto);
+    return dto == null ? null : ReflectionMapper.Map<SettingsProtocolDto, SettingsProtocolDto>(dto);
   }
 
   /// <summary>
   /// Сохраняет настройки протокола и возвращает актуальную доменную модель.
   /// </summary>
-  public static async Task<SettingsProtocolModel> SaveAsync(
-    SettingsProtocolModel model,
+  public static async Task<SettingsProtocolDto> SaveAsync(
+    SettingsProtocolDto model,
     CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(model);
 
-    var dto = ReflectionMapper.Map<SettingsProtocolModel, SettingsProtocolDto>(model);
+    var dto = ReflectionMapper.Map<SettingsProtocolDto, SettingsProtocolDto>(model);
     var saved = await Service.SaveProtocolAsync(dto, cancellationToken);
-    return ReflectionMapper.Map<SettingsProtocolDto, SettingsProtocolModel>(saved);
+    return ReflectionMapper.Map<SettingsProtocolDto, SettingsProtocolDto>(saved);
   }
 }

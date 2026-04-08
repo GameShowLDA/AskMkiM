@@ -93,6 +93,7 @@ namespace UI.Controls.Settings.UserInterface
     {
       _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
       DefalultData();
+      UpdateCommandAutoCollapseVisibility();
 
       LanguageSelect.ValueChanged += ValueChanged;
       ThemeSelect.ValueChanged += ValueChanged;
@@ -113,11 +114,13 @@ namespace UI.Controls.Settings.UserInterface
       LoadThemeOptions(_baseParameterModel.Theme);
 
       EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
+      ProtocolConfig.SaveProtocolEvent += ProtocolConfig_SaveProtocolEvent;
     }
 
     private void UiSettingsControl_Unloaded(object sender, RoutedEventArgs e)
     {
       EventAggregator.Unsubscribe<ThemeEvent.Change>(OnThemeChanged);
+      ProtocolConfig.SaveProtocolEvent -= ProtocolConfig_SaveProtocolEvent;
     }
 
     /// <summary>
@@ -171,6 +174,18 @@ namespace UI.Controls.Settings.UserInterface
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
+    }
+
+    private void ProtocolConfig_SaveProtocolEvent(SettingsProtocolDto _)
+    {
+      Dispatcher.Invoke(UpdateCommandAutoCollapseVisibility);
+    }
+
+    private void UpdateCommandAutoCollapseVisibility()
+    {
+      bool isAvailable = ProtocolConfig.GetCommandHeadersInProtocol();
+      CommandAutoCollapsing.Visibility = isAvailable ? Visibility.Visible : Visibility.Collapsed;
+      CommandAutoCollapsing.IsEnabled = isAvailable;
     }
 
     /// <summary>

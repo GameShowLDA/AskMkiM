@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Section_Title" Key="settings.userinterface.section.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Language_Title" Key="settings.userinterface.language.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Language_Description" Key="settings.userinterface.language.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Title" Key="settings.userinterface.theme.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Description" Key="settings.userinterface.theme.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Title" Key="settings.userinterface.syntaxHighlighting.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Description" Key="settings.userinterface.syntaxHighlighting.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Title" Key="settings.userinterface.highlightsGroup.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Description" Key="settings.userinterface.highlightsGroup.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Title" Key="settings.userinterface.commandBodyBackground.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Description" Key="settings.userinterface.commandBodyBackground.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Title" Key="settings.userinterface.chainPointBodyBackground.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Description" Key="settings.userinterface.chainPointBodyBackground.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Title" Key="settings.userinterface.topMenuIcons.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Description" Key="settings.userinterface.topMenuIcons.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandAutoCollapse_Title" Key="settings.userinterface.commandAutoCollapse.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandAutoCollapse_Description" Key="settings.userinterface.commandAutoCollapse.description" />
+</ResourceDictionary>

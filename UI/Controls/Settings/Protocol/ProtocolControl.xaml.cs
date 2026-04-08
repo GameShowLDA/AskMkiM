@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Entity.Settings;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +17,7 @@ namespace UI.Controls.Settings.Protocol
     /// Базовая (сохранённая) модель протокола, считанная при загрузке.
     /// Используется как эталон для сравнения с текущими значениями UI.
     /// </summary>
-    private SettingsProtocolModel _baseProtocolModel { get; set; }
+    private SettingsProtocolDto _baseProtocolModel { get; set; }
     private bool _isInitialized;
     private bool _hasProtocolChanges;
     private bool _hasDeviceDisplayChanges;
@@ -50,6 +51,7 @@ namespace UI.Controls.Settings.Protocol
       if (!_isInitialized)
       {
         AutoSave.CheckedChanged += CheckedChanged;
+        CommandHeadersCheckBox.CheckedChanged += CheckedChanged;
         AutoPrint.CheckedChanged += CheckedChanged;
         OperationTime.CheckedChanged += CheckedChanged;
         ProtocolFromPO.CheckedChanged += CheckedChanged;
@@ -81,14 +83,14 @@ namespace UI.Controls.Settings.Protocol
     /// Клик по галочке «сохранить»: сохраняет текущую модель,
     /// перечитывает базу и скрывает индикаторы изменений.
     /// </summary>
-    private void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e) => SaveData();
-    public void SaveData()
+    private async void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await SaveData();
+    public async Task SaveData()
     {
       DeviceDisplaySettingsModel model = DeviceDisplaySettingsCon.GetModel();
 
       DeviceDisplayConfig.SaveSettings(model);
       DeviceDisplaySettingsCon.SetBaseModel();
-      ProtocolConfig.SaveProtocolModel(GetModel());
+      await ProtocolConfig.SaveProtocolModel(GetModel());
       _baseProtocolModel = ProtocolConfig.GetProtocolModel();
       _hasProtocolChanges = false;
       _hasDeviceDisplayChanges = false;
@@ -147,9 +149,9 @@ namespace UI.Controls.Settings.Protocol
     /// <summary>
     /// Формирует модель протокола из текущих значений элементов UI.
     /// </summary>
-    private SettingsProtocolModel GetModel()
+    private SettingsProtocolDto GetModel()
     {
-      var model = new SettingsProtocolModel
+      var model = new SettingsProtocolDto
       {
         AutoSaveProtocol = AutoSave.IsChecked,
         AutoPrintProtocol = AutoPrint.IsChecked,
@@ -159,6 +161,7 @@ namespace UI.Controls.Settings.Protocol
         ShowHeaderInfo = Header.IsChecked,
         CleanTextProtocol = BaseTextProtocol.Text,
         CleanTextErrorsProtocol = BaseTextProtocolErrors.Text,
+        UseCommandHeadersInProtocol = CommandHeadersCheckBox.IsChecked,
       };
 
       return model;
@@ -167,7 +170,7 @@ namespace UI.Controls.Settings.Protocol
     /// <summary>
     /// Сравнивает две модели протокола по всем флагам.
     /// </summary>
-    private static bool ProtocolEquals(SettingsProtocolModel a, SettingsProtocolModel b) =>
+    private static bool ProtocolEquals(SettingsProtocolDto a, SettingsProtocolDto b) =>
       a.ShowDeviceInfo == b.ShowDeviceInfo &&
       a.ShowHeaderInfo == b.ShowHeaderInfo &&
       a.AutoSaveProtocol == b.AutoSaveProtocol &&
@@ -176,6 +179,7 @@ namespace UI.Controls.Settings.Protocol
       a.GenerateProtocol == b.GenerateProtocol &&
       a.CleanTextProtocol == b.CleanTextProtocol &&
       a.CleanTextErrorsProtocol == b.CleanTextErrorsProtocol &&
+      a.UseCommandHeadersInProtocol == b.UseCommandHeadersInProtocol &&
       a.DisplayOperationTime == b.DisplayOperationTime;
 
     /// <summary>
@@ -184,6 +188,7 @@ namespace UI.Controls.Settings.Protocol
     private void DefalultData()
     {
       AutoSave.IsChecked = _baseProtocolModel.AutoSaveProtocol;
+      CommandHeadersCheckBox.IsChecked = _baseProtocolModel.UseCommandHeadersInProtocol;
       AutoPrint.IsChecked = _baseProtocolModel.AutoPrintProtocol;
       OperationTime.IsChecked = _baseProtocolModel.DisplayOperationTime;
       ProtocolFromPO.IsChecked = _baseProtocolModel.ShowProtocolInSoftware;

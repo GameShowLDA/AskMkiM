@@ -561,4 +561,10 @@
   <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
     <value>Automatically collapses completed command blocks in the execution log. If disabled, the blocks remain expanded.</value>
   </data>
+  <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
+    <value>Command headers</value>
+  </data>
+  <data name="settings.protocol.commandHeaders.description" xml:space="preserve">
+    <value>Shows command headers during test program execution.</value>
+  </data>
 </root>
