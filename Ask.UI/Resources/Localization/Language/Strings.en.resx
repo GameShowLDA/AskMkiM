@@ -567,4 +567,10 @@
   <data name="settings.protocol.commandHeaders.description" xml:space="preserve">
     <value>Shows command headers during test program execution.</value>
   </data>
+  <data name="settings.protocol.testStepMessages.title" xml:space="preserve">
+    <value>Test step messages</value>
+  </data>
+  <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
+    <value>Shows test step messages in the execution protocol.</value>
+  </data>
 </root>

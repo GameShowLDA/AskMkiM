@@ -30,4 +30,7 @@
     
     <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_CommandHeaders_Title" Key="settings.protocol.commandHeaders.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_CommandHeaders_Description" Key="settings.protocol.commandHeaders.description" />
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_TestStepMessages_Title" Key="settings.protocol.testStepMessages.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_TestStepMessages_Description" Key="settings.protocol.testStepMessages.description" />
 </ResourceDictionary>

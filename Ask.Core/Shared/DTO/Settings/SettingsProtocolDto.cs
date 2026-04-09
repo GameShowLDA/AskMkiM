@@ -74,5 +74,10 @@ public class SettingsProtocolDto
   /// <summary>
   /// Получает или задаёт значение, указывающее, отображаются ли заголовки команд в протоколе.
   /// </summary>
-  public bool UseCommandHeadersInProtocol { get; set; }
+  public bool ShowCommandHeadersInProtocol { get; set; }
+
+  /// <summary>
+  /// Получает или задаёт значение, указывающее, отображаются ли шаги проверки в протоколе.
+  /// </summary>
+  public bool ShowTestStepMessagesInProtocol { get; set; }
 }

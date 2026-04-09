@@ -120,6 +120,14 @@
                         VerticalAlignment="Top"/>
 
                     <Components:SettingsCard
+                        Title="{Binding Source={StaticResource Settings_Protocol_TestStepMessages_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_Protocol_TestStepMessages_Description}, Path=Value}"
+                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                        Margin="10,10"
+                        x:Name="TestStepChecker"
+                        VerticalAlignment="Top"/>
+
+                    <Components:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_AutoSave_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_AutoSave_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
