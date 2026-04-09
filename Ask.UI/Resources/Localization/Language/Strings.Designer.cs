@@ -1213,6 +1213,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает сообщения об этапах проверки в протоколе выполнения..
+        /// </summary>
+        internal static string settings_protocol_testStepMessages_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.testStepMessages.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображение этапов проверки.
+        /// </summary>
+        internal static string settings_protocol_testStepMessages_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.testStepMessages.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Включает или отключает фоновое выделение строк проверки цепей и точек в протоколе выполнения..
         /// </summary>
         internal static string settings_userinterface_chainPointBodyBackground_description {

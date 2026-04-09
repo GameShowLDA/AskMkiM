@@ -8,6 +8,7 @@ namespace Ask.Core.Services.Config.AppSettings
   public static class ProtocolConfig
   {
     public static Action<SettingsProtocolDto>? SaveProtocolEvent;
+    public static Action<bool>? TestStepMessagesInProtocolChanged;
     public static Func<SettingsProtocolDto, Task>? SaveProtocolAsyncEvent;
 
     private static SettingsProtocolDto ProtocolModel = new SettingsProtocolDto();
@@ -65,7 +66,8 @@ namespace Ask.Core.Services.Config.AppSettings
     public static void SetErrorTextProtocol(string text) => ProtocolModel.ErrorTextProtocol = text;
     public static void SetProtocolModel(SettingsProtocolDto protocolModel) => ProtocolModel = protocolModel;
 
-    public static void SetCommandHeadersInProtocol(bool enable) => ProtocolModel.UseCommandHeadersInProtocol = enable;
+    public static void SetCommandHeadersInProtocol(bool enable) => ProtocolModel.ShowCommandHeadersInProtocol = enable;
+    public static void SetTestStepMessagesInProtocol(bool enable) => ProtocolModel.ShowTestStepMessagesInProtocol = enable;
 
 
     #endregion
@@ -109,7 +111,8 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetTimeStart() => ProtocolModel.DisplayOperationTime;
     public static bool GetShowProtocolInSoftware() => ProtocolModel.ShowProtocolInSoftware;
     public static bool GetGenerateProtocol() => ProtocolModel.GenerateProtocol;
-    public static bool GetCommandHeadersInProtocol() => ProtocolModel.UseCommandHeadersInProtocol;
+    public static bool GetCommandHeadersInProtocol() => ProtocolModel.ShowCommandHeadersInProtocol;
+    public static bool GetTestStepMessagesInProtocol() => ProtocolModel.ShowTestStepMessagesInProtocol;
     public static string GetCleanTextProtocol() => ProtocolModel.CleanTextProtocol;
     public static string GetCleanTextProtocolError() => ProtocolModel.CleanTextErrorsProtocol;
     public static string GetErrorTextProtocol() => ProtocolModel.ErrorTextProtocol;
@@ -118,6 +121,7 @@ namespace Ask.Core.Services.Config.AppSettings
     {
       SettingsProtocolDto protocolModel = new SettingsProtocolDto
       {
+        Id = ProtocolModel.Id,
         ShowDeviceInfo = ProtocolModel.ShowDeviceInfo,
         ShowHeaderInfo = ProtocolModel.ShowHeaderInfo,
         ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol,
@@ -128,7 +132,9 @@ namespace Ask.Core.Services.Config.AppSettings
         GenerateProtocol = ProtocolModel.GenerateProtocol,
         CleanTextProtocol = ProtocolModel.CleanTextProtocol,
         CleanTextErrorsProtocol = ProtocolModel.CleanTextErrorsProtocol,
-        UseCommandHeadersInProtocol = ProtocolModel.UseCommandHeadersInProtocol
+        ErrorTextProtocol = ProtocolModel.ErrorTextProtocol,
+        ShowTestStepMessagesInProtocol = ProtocolModel.ShowTestStepMessagesInProtocol,
+        ShowCommandHeadersInProtocol = ProtocolModel.ShowCommandHeadersInProtocol
       };
       return protocolModel;
     }
@@ -137,6 +143,9 @@ namespace Ask.Core.Services.Config.AppSettings
 
     public static async Task SaveProtocolModel(SettingsProtocolDto protocolModel)
     {
+      bool testStepMessagesChanged = ProtocolModel.ShowTestStepMessagesInProtocol != protocolModel.ShowTestStepMessagesInProtocol;
+
+      ProtocolModel.Id = protocolModel.Id;
       ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
       ProtocolModel.ShowHeaderInfo = protocolModel.ShowHeaderInfo;
       ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
@@ -147,9 +156,16 @@ namespace Ask.Core.Services.Config.AppSettings
       ProtocolModel.GenerateProtocol = protocolModel.GenerateProtocol;
       ProtocolModel.CleanTextProtocol = protocolModel.CleanTextProtocol;
       ProtocolModel.CleanTextErrorsProtocol = protocolModel.CleanTextErrorsProtocol;
-      ProtocolModel.UseCommandHeadersInProtocol = protocolModel.UseCommandHeadersInProtocol;
+      ProtocolModel.ErrorTextProtocol = protocolModel.ErrorTextProtocol;
+      ProtocolModel.ShowCommandHeadersInProtocol = protocolModel.ShowCommandHeadersInProtocol;
+      ProtocolModel.ShowTestStepMessagesInProtocol = protocolModel.ShowTestStepMessagesInProtocol;
 
       await InvokeSaveProtocolAsync(protocolModel);
+      if (testStepMessagesChanged)
+      {
+        TestStepMessagesInProtocolChanged?.Invoke(protocolModel.ShowTestStepMessagesInProtocol);
+      }
+
       SaveProtocolEvent?.Invoke(protocolModel);
     }
 

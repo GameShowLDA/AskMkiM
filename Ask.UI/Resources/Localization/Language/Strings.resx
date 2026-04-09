@@ -567,4 +567,10 @@
   <data name="settings.protocol.commandHeaders.description" xml:space="preserve">
     <value>Отображает заголовки команд в ходе выполнения программ контроля.</value>
   </data>
+  <data name="settings.protocol.testStepMessages.title" xml:space="preserve">
+    <value>Сообщения шагов проверки</value>
+  </data>
+  <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
+    <value>Отображает сообщения о шагах проверки в протоколе выполнения.</value>
+  </data>
 </root>

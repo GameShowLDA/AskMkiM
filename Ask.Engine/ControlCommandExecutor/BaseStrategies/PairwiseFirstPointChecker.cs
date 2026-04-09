@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -33,7 +34,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       _basePoint = groupChains.ChainModels.FirstOrDefault();
       var messageService = context.MessageService;
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      {
+        await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+      }
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 
@@ -54,7 +58,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         str = str.Remove(str.Length - 1);
         str += "*";
 
-        await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
+        if (ProtocolConfig.GetTestStepMessagesInProtocol())
+        {
+          await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
+        }
+
         await DeviceManager.RelayModule.ChainManager.ConnectChainToBusAAsync(chain, messageService, context.IsPolarityReversed);
 
         var module = EquipmentService.GetModuleByPoint(chain.PointModels.FirstOrDefault());
@@ -70,9 +78,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           errorsMessage.Add(err);
           context.CommandManager.AddErrorMethod(
-            context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}", 
-            chainStr, 
-            context.MessageService.GetLastLineNumber(), 
+            context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
+            chainStr,
+            context.MessageService.GetLastLineNumber(),
             context.CommandModel.FormattedStartLineNumber));
         }
 

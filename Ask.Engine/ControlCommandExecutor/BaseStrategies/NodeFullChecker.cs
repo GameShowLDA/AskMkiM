@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -36,7 +37,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
       ErrorsPoints = new List<ChainModel>();
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      { 
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
+      }
 
       foreach (var chainModels in groupChains.ChainModels)
       {

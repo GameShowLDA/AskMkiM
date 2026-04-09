@@ -34,7 +34,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errorsMessgae, infoMessage);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      {
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+      }
 
       foreach (var groups in pointsListSource)
       {
@@ -50,7 +53,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
           str = str.Remove(str.Length - 1);
 
-          await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str));
+          if (ProtocolConfig.GetTestStepMessagesInProtocol())
+          {
+            await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str));
+          }
 
           var _basePoint = chains.PointModels.First();
           await ConnectToBusAAndBAsync(context.MessageService, _basePoint);

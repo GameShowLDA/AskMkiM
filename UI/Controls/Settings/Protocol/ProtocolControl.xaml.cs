@@ -56,6 +56,7 @@ namespace UI.Controls.Settings.Protocol
         ProtocolFromPO.CheckedChanged += CheckedChanged;
         ProtocolGeneration.CheckedChanged += CheckedChanged;
         Header.CheckedChanged += CheckedChanged;
+        TestStepChecker.CheckedChanged += CheckedChanged;
         BaseTextProtocol.TextChanged += (s, ev) => CheckedChanged(s, true);
         BaseTextProtocolErrors.TextChanged += (s, ev) => CheckedChanged(s, true);
 
@@ -150,18 +151,17 @@ namespace UI.Controls.Settings.Protocol
     /// </summary>
     private SettingsProtocolDto GetModel()
     {
-      var model = new SettingsProtocolDto
-      {
-        AutoSaveProtocol = AutoSave.IsChecked,
-        AutoPrintProtocol = AutoPrint.IsChecked,
-        DisplayOperationTime = OperationTime.IsChecked,
-        ShowProtocolInSoftware = ProtocolFromPO.IsChecked,
-        GenerateProtocol = ProtocolGeneration.IsChecked,
-        ShowHeaderInfo = Header.IsChecked,
-        CleanTextProtocol = BaseTextProtocol.Text,
-        CleanTextErrorsProtocol = BaseTextProtocolErrors.Text,
-        UseCommandHeadersInProtocol = CommandHeadersCheckBox.IsChecked,
-      };
+      var model = ProtocolConfig.GetProtocolModel();
+      model.AutoSaveProtocol = AutoSave.IsChecked;
+      model.AutoPrintProtocol = AutoPrint.IsChecked;
+      model.DisplayOperationTime = OperationTime.IsChecked;
+      model.ShowProtocolInSoftware = ProtocolFromPO.IsChecked;
+      model.GenerateProtocol = ProtocolGeneration.IsChecked;
+      model.ShowHeaderInfo = Header.IsChecked;
+      model.CleanTextProtocol = BaseTextProtocol.Text;
+      model.CleanTextErrorsProtocol = BaseTextProtocolErrors.Text;
+      model.ShowCommandHeadersInProtocol = CommandHeadersCheckBox.IsChecked;
+      model.ShowTestStepMessagesInProtocol = TestStepChecker.IsChecked;
 
       return model;
     }
@@ -178,7 +178,8 @@ namespace UI.Controls.Settings.Protocol
       a.GenerateProtocol == b.GenerateProtocol &&
       a.CleanTextProtocol == b.CleanTextProtocol &&
       a.CleanTextErrorsProtocol == b.CleanTextErrorsProtocol &&
-      a.UseCommandHeadersInProtocol == b.UseCommandHeadersInProtocol &&
+      a.ShowTestStepMessagesInProtocol == b.ShowTestStepMessagesInProtocol &&
+      a.ShowCommandHeadersInProtocol == b.ShowCommandHeadersInProtocol &&
       a.DisplayOperationTime == b.DisplayOperationTime;
 
     /// <summary>
@@ -187,12 +188,13 @@ namespace UI.Controls.Settings.Protocol
     private void DefalultData()
     {
       AutoSave.IsChecked = _baseProtocolModel.AutoSaveProtocol;
-      CommandHeadersCheckBox.IsChecked = _baseProtocolModel.UseCommandHeadersInProtocol;
+      CommandHeadersCheckBox.IsChecked = _baseProtocolModel.ShowCommandHeadersInProtocol;
       AutoPrint.IsChecked = _baseProtocolModel.AutoPrintProtocol;
       OperationTime.IsChecked = _baseProtocolModel.DisplayOperationTime;
       ProtocolFromPO.IsChecked = _baseProtocolModel.ShowProtocolInSoftware;
       ProtocolGeneration.IsChecked = _baseProtocolModel.GenerateProtocol;
       Header.IsChecked = _baseProtocolModel.ShowHeaderInfo;
+      TestStepChecker.IsChecked = _baseProtocolModel.ShowTestStepMessagesInProtocol;
       BaseTextProtocol.Text = _baseProtocolModel.CleanTextProtocol;
       BaseTextProtocolErrors.Text = _baseProtocolModel.CleanTextErrorsProtocol;
     }

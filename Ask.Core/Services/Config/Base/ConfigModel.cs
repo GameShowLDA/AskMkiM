@@ -32,7 +32,13 @@ namespace Ask.Core.Services.Config.Base
       ProtocolConfig.SetPrintProtocol(executionModel.AutoPrintProtocol);
       ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
       ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
-      ProtocolConfig.SetCommandHeadersInProtocol(executionModel.UseCommandHeadersInProtocol);
+      ProtocolConfig.SetShowProtocolInSoftware(executionModel.ShowProtocolInSoftware);
+      ProtocolConfig.SetGenerateProtocol(executionModel.GenerateProtocol);
+      ProtocolConfig.SetCleanTextProtocol(executionModel.CleanTextProtocol);
+      ProtocolConfig.SetCleanTextErrorProtocol(executionModel.CleanTextErrorsProtocol);
+      ProtocolConfig.SetErrorTextProtocol(executionModel.ErrorTextProtocol);
+      ProtocolConfig.SetCommandHeadersInProtocol(executionModel.ShowCommandHeadersInProtocol);
+      ProtocolConfig.SetTestStepMessagesInProtocol(executionModel.ShowTestStepMessagesInProtocol);
     }
 
 
