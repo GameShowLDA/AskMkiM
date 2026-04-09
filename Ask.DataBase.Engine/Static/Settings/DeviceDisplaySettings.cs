@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 using Ask.DataBase.Engine.Mapping;
 using Ask.DataBase.Provider.Services.Settings;
 
@@ -15,23 +14,23 @@ public static class DeviceDisplaySettings
   /// <summary>
   /// Возвращает сохранённые настройки отображения устройств.
   /// </summary>
-  public static async Task<DeviceDisplaySettingsModel?> GetAsync(CancellationToken cancellationToken = default)
+  public static async Task<DeviceDisplaySettingsDto?> GetAsync(CancellationToken cancellationToken = default)
   {
     var dto = await Service.GetDeviceDisplayAsync(cancellationToken);
-    return dto == null ? null : ReflectionMapper.Map<DeviceDisplaySettingsDto, DeviceDisplaySettingsModel>(dto);
+    return dto == null ? null : ReflectionMapper.Map<DeviceDisplaySettingsDto, DeviceDisplaySettingsDto>(dto);
   }
 
   /// <summary>
   /// Сохраняет настройки отображения устройств.
   /// </summary>
-  public static async Task<DeviceDisplaySettingsModel> SaveAsync(
-    DeviceDisplaySettingsModel model,
+  public static async Task<DeviceDisplaySettingsDto> SaveAsync(
+    DeviceDisplaySettingsDto model,
     CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(model);
 
-    var dto = ReflectionMapper.Map<DeviceDisplaySettingsModel, DeviceDisplaySettingsDto>(model);
+    var dto = ReflectionMapper.Map<DeviceDisplaySettingsDto, DeviceDisplaySettingsDto>(model);
     var saved = await Service.SaveDeviceDisplayAsync(dto, cancellationToken);
-    return ReflectionMapper.Map<DeviceDisplaySettingsDto, DeviceDisplaySettingsModel>(saved);
+    return ReflectionMapper.Map<DeviceDisplaySettingsDto, DeviceDisplaySettingsDto>(saved);
   }
 }

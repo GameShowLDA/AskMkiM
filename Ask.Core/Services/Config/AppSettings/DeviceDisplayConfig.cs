@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Entity.Settings;
+﻿using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -14,13 +14,13 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Событие, возникающее при сохранении набора настроек отображения.
     /// Предоставляет внешний доступ к итоговой модели настроек.
     /// </summary>
-    public static Action<DeviceDisplaySettingsModel>? DeviceDisplaySettingsSaved;
+    public static Action<DeviceDisplaySettingsDto>? DeviceDisplaySettingsSaved;
 
     /// <summary>
     /// Текущая модель настроек отображения.
     /// Хранит значения параметров визуализации.
     /// </summary>
-    private static DeviceDisplaySettingsModel _settingsModel = new();
+    private static DeviceDisplaySettingsDto _settingsModel = new();
 
     #region Set.
 
@@ -52,7 +52,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static void SetIntermediateMeasurementResultsVisibility(bool isVisible) => _settingsModel.ShowIntermediateMeasurementResults = isVisible;
 
-    public static async Task SetDeviceDisplaySettingsModel(DeviceDisplaySettingsModel model)
+    public static async Task SetDeviceDisplaySettingsModel(DeviceDisplaySettingsDto model)
     {
       SetMachineAddressVisibility(model.ShowMachineAddresses);
       SetConnectionInfoVisibility(model.ShowConnectionInfo);
@@ -89,9 +89,9 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static bool GetIntermediateMeasurementResultsVisibility() => _settingsModel.ShowIntermediateMeasurementResults;
 
-    public static DeviceDisplaySettingsModel GetDeviceDisplayModel()
+    public static DeviceDisplaySettingsDto GetDeviceDisplayModel()
     {
-      DeviceDisplaySettingsModel protocolModel = new DeviceDisplaySettingsModel();
+      DeviceDisplaySettingsDto protocolModel = new DeviceDisplaySettingsDto();
       protocolModel.ShowMachineAddresses = _settingsModel.ShowMachineAddresses;
       protocolModel.ShowConnectionInfo = _settingsModel.ShowConnectionInfo;
       protocolModel.ShowDeviceExecutionParameters = _settingsModel.ShowDeviceExecutionParameters;
@@ -107,7 +107,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// и вызывает внешний обработчик сохранения.
     /// </summary>
     /// <param name="model">Модель с новыми значениями настроек.</param>
-    public static void SaveSettings(DeviceDisplaySettingsModel model)
+    public static void SaveSettings(DeviceDisplaySettingsDto model)
     {
       SetMachineAddressVisibility(model.ShowMachineAddresses);
       SetConnectionInfoVisibility(model.ShowConnectionInfo);

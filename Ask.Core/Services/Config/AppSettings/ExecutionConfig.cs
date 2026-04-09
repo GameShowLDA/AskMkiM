@@ -1,5 +1,5 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -10,9 +10,9 @@ namespace Ask.Core.Services.Config.AppSettings
   /// </summary>
   public static class ExecutionConfig
   {
-    static public Action<SettingsExecutionModel> SaveExecutionEvent;
+    static public Action<SettingsExecutionDto> SaveExecutionEvent;
 
-    private static SettingsExecutionModel SettingsExecutionModel = new SettingsExecutionModel();
+    private static SettingsExecutionDto SettingsExecutionModel = new SettingsExecutionDto();
 
     /// <summary>
     /// Событие на изменение холостого режима
@@ -53,7 +53,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetIsErrorSimulationMode(bool enable) => SettingsExecutionModel.IsErrorSimulationMode = enable;
 
-    public static async Task SetExecutionModel(SettingsExecutionModel protocolModel)
+    public static async Task SetExecutionModel(SettingsExecutionDto protocolModel)
     {
       SetIdleMode(protocolModel.IdleModeExecution);
       SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
@@ -89,21 +89,23 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>true, если включен; false, если выключена.</returns>
     public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
 
-    public static async Task<SettingsExecutionModel> GetExecitonModel()
+    public static async Task<SettingsExecutionDto> GetExecitonModel()
     {
       return await Task.Run(() =>
       {
-        SettingsExecutionModel executionModel = new SettingsExecutionModel();
-        executionModel.IdleModeExecution = SettingsExecutionModel.IdleModeExecution;
-        executionModel.IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode;
-        executionModel.StepByStepMode = SettingsExecutionModel.StepByStepMode;
-        executionModel.StopOnError = SettingsExecutionModel.StopOnError;
+        var executionModel = new SettingsExecutionDto
+        {
+          IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
+          IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
+          StepByStepMode = SettingsExecutionModel.StepByStepMode,
+          StopOnError = SettingsExecutionModel.StopOnError
+        };
         return executionModel;
       });
     }
     #endregion
 
-    public static async Task SaveExecutionModel(SettingsExecutionModel execution)
+    public static async Task SaveExecutionModel(SettingsExecutionDto execution)
     {
       SetIdleMode(execution.IdleModeExecution);
       SetIsErrorSimulationMode(execution.IsErrorSimulationMode);

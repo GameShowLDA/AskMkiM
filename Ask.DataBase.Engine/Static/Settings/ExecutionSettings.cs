@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 using Ask.DataBase.Engine.Mapping;
 using Ask.DataBase.Provider.Services.Settings;
 
@@ -15,23 +14,23 @@ public static class ExecutionSettings
   /// <summary>
   /// Возвращает сохранённые настройки выполнения.
   /// </summary>
-  public static async Task<SettingsExecutionModel?> GetAsync(CancellationToken cancellationToken = default)
+  public static async Task<SettingsExecutionDto?> GetAsync(CancellationToken cancellationToken = default)
   {
     var dto = await Service.GetExecutionAsync(cancellationToken);
-    return dto == null ? null : ReflectionMapper.Map<SettingsExecutionDto, SettingsExecutionModel>(dto);
+    return dto == null ? null : ReflectionMapper.Map<SettingsExecutionDto, SettingsExecutionDto>(dto);
   }
 
   /// <summary>
   /// Сохраняет настройки выполнения и возвращает актуальную доменную модель.
   /// </summary>
-  public static async Task<SettingsExecutionModel> SaveAsync(
-    SettingsExecutionModel model,
+  public static async Task<SettingsExecutionDto> SaveAsync(
+    SettingsExecutionDto model,
     CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(model);
 
-    var dto = ReflectionMapper.Map<SettingsExecutionModel, SettingsExecutionDto>(model);
+    var dto = ReflectionMapper.Map<SettingsExecutionDto, SettingsExecutionDto>(model);
     var saved = await Service.SaveExecutionAsync(dto, cancellationToken);
-    return ReflectionMapper.Map<SettingsExecutionDto, SettingsExecutionModel>(saved);
+    return ReflectionMapper.Map<SettingsExecutionDto, SettingsExecutionDto>(saved);
   }
 }

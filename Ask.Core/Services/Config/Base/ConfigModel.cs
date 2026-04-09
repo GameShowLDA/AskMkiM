@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 
 namespace Ask.Core.Services.Config.Base
 {
@@ -13,7 +12,7 @@ namespace Ask.Core.Services.Config.Base
     /// Устанавливает текущую модель выполнения (ExecutionModel).
     /// </summary>
     /// <param name="executionModel">Модель выполнения.</param>
-    static public void SetExecutionModelAsync(SettingsExecutionModel executionModel)
+    static public void SetExecutionModelAsync(SettingsExecutionDto executionModel)
     {
       ExecutionConfig.SetStopOnError(executionModel.StopOnError);
       ExecutionConfig.SetIsErrorSimulationMode(executionModel.IsErrorSimulationMode);
