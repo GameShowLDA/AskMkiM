@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -86,7 +85,7 @@ namespace UI.Controls.Settings.Protocol
     private async void Success_PreviewMouseDown(object sender, MouseButtonEventArgs e) => await SaveData();
     public async Task SaveData()
     {
-      DeviceDisplaySettingsModel model = DeviceDisplaySettingsCon.GetModel();
+      DeviceDisplaySettingsDto model = DeviceDisplaySettingsCon.GetModel();
 
       DeviceDisplayConfig.SaveSettings(model);
       DeviceDisplaySettingsCon.SetBaseModel();

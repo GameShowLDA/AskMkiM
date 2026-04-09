@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 using Ask.DataBase.Engine.Mapping;
 using Ask.DataBase.Provider.Services.Settings;
 

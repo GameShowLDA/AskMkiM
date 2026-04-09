@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 
 namespace Ask.Core.Services.Config.AppSettings
 {

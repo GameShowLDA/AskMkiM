@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Infrastructure.Localization;
 using Message;
