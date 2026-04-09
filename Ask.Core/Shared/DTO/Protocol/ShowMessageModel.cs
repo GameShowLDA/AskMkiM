@@ -121,6 +121,13 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// </summary>
     public bool IsControlProgramCommandHeader { get; set; }
 
+    /// <summary>
+    /// Итоговый результат выполнения команды протокола.
+    /// <see langword="null"/> означает, что команда ещё не завершена
+    /// или результат для неё не определён.
+    /// </summary>
+    public bool? CommandExecutionHasErrors { get; set; }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
@@ -184,6 +191,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       CanBeDeleted = false;
       IsDeviceMessage = false;
       IsControlProgramCommandHeader = false;
+      CommandExecutionHasErrors = null;
       IndentLevel = 0;
 
       try
