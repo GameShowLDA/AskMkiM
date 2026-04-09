@@ -561,4 +561,10 @@
   <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
     <value>Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми.</value>
   </data>
+  <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
+    <value>Заголовки команд</value>
+  </data>
+  <data name="settings.protocol.commandHeaders.description" xml:space="preserve">
+    <value>Отображает заголовки команд в ходе выполнения программ контроля.</value>
+  </data>
 </root>

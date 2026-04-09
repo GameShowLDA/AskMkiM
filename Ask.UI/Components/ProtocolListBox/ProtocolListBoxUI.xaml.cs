@@ -100,6 +100,7 @@ namespace Ask.UI.Components.ProtocolListBox
       if (!_settingsSubscribed)
       {
         UserInterfaceConfig.SaveUserInterfaceEvent += ProtocolListBoxUI_UserInterfaceSettingsSaved;
+        ProtocolConfig.SaveProtocolEvent += ProtocolListBoxUI_ProtocolSettingsSaved;
         _settingsSubscribed = true;
       }
     }
@@ -117,6 +118,7 @@ namespace Ask.UI.Components.ProtocolListBox
       if (_settingsSubscribed)
       {
         UserInterfaceConfig.SaveUserInterfaceEvent -= ProtocolListBoxUI_UserInterfaceSettingsSaved;
+        ProtocolConfig.SaveProtocolEvent -= ProtocolListBoxUI_ProtocolSettingsSaved;
         _settingsSubscribed = false;
       }
     }
@@ -129,6 +131,13 @@ namespace Ask.UI.Components.ProtocolListBox
     }
 
     private void ProtocolListBoxUI_UserInterfaceSettingsSaved(UserInterfaceDto _)
+    {
+      Dispatcher.BeginInvoke(
+        new Action(RefreshVisibleState),
+        DispatcherPriority.Loaded);
+    }
+
+    private void ProtocolListBoxUI_ProtocolSettingsSaved(SettingsProtocolDto _)
     {
       Dispatcher.BeginInvoke(
         new Action(RefreshVisibleState),
@@ -400,6 +409,11 @@ namespace Ask.UI.Components.ProtocolListBox
 
       FinalizeLatestCommandGroup();
 
+      if (!ProtocolConfig.GetCommandHeadersInProtocol())
+      {
+        return;
+      }
+
       var group = new ProtocolCommandGroup(model);
       _pendingGroup = group;
 
@@ -420,7 +434,9 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void FinalizeLatestCommandGroup()
     {
-      bool useCommandAutoCollapse = UserInterfaceConfig.GetCommandAutoCollapse();
+      bool useCommandAutoCollapse =
+        ProtocolConfig.GetCommandHeadersInProtocol() &&
+        UserInterfaceConfig.GetCommandAutoCollapse();
 
       if (_currentGroup != null)
       {
@@ -742,7 +758,9 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public string GetText()
     {
-      return string.Join(Environment.NewLine, _historyMessages.Select(m =>
+      return string.Join(Environment.NewLine, _historyMessages
+        .Where(message => ProtocolConfig.GetCommandHeadersInProtocol() || message.Status != ShowMessageModel.MessageType.Command)
+        .Select(m =>
       {
         string indent = new string(' ', m.IndentLevel * 2);
         string header = string.IsNullOrWhiteSpace(m.Header) ? string.Empty : $"{m.Header}: ";

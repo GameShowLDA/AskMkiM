@@ -25,7 +25,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <summary>
     /// Устанавливает новый язык и сохраняет его в конфигурации.
     /// </summary>
-    public static async Task SetLanguageAsync(string lang)
+    public static void SetLanguageAsync(string lang)
     {
       var normalized = NormalizeLanguageCode(lang);
       if (string.Equals(_currentLanguage, normalized, StringComparison.OrdinalIgnoreCase))

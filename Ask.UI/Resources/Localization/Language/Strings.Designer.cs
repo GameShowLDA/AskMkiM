@@ -988,6 +988,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает заголовки команд в ходе выполнения программ контроля..
+        /// </summary>
+        internal static string settings_protocol_commandHeaders_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.commandHeaders.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Заголовки команд.
+        /// </summary>
+        internal static string settings_protocol_commandHeaders_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.commandHeaders.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Отображает информацию о подключении точек и шин на устройствах..
         /// </summary>
         internal static string settings_protocol_deviceInfo_connectionInfo_description {
