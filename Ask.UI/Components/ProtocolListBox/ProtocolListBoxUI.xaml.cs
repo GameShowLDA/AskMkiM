@@ -744,6 +744,15 @@ namespace Ask.UI.Components.ProtocolListBox
       return AppendLineAsync(emptyLine);
     }
 
+    public Task CompleteCommandAsync(bool hasErrors)
+    {
+      return Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        var activeGroup = _currentGroup ?? _pendingGroup;
+        activeGroup?.SetExecutionResult(hasErrors);
+      }).Task;
+    }
+
     public async Task ShowMessageAsync(
       ShowMessageModel model,
       bool IsBlockStart = false,

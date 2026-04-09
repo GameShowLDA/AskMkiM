@@ -150,7 +150,9 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
             jumpToIndex = ResolveJumpIndex(targetLabel);
           };
 
-          if (_executorRegistry.TryGet(command.Mnemonic, out var executor))
+          bool hasExecutor = _executorRegistry.TryGet(command.Mnemonic, out var executor);
+
+          if (hasExecutor)
           {
             await executor.ExecuteAsync(context, _protocolModel);
           }
@@ -162,9 +164,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
                     type: ShowMessageModel.MessageType.Error));
           }
 
+          bool hasExecutionErrors =
+            !hasExecutor ||
+            HasExecutionErrors(command);
+
+          await _console.CompleteCommandAsync(hasExecutionErrors);
+
           if (command is not UpCommandModel and not CuCommandModel)
           {
-            CommandExecutionState.LastRejectFlag = HasExecutionErrors(command);
+            CommandExecutionState.LastRejectFlag = hasExecutionErrors;
           }
 
           if (jumpToIndex.HasValue)
@@ -175,6 +183,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
         catch (Exception ex)
         {
+          await _console.CompleteCommandAsync(true);
           await ExecuteKscOnExceptionAsync(command, ex);
           throw;
         }

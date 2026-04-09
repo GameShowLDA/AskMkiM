@@ -240,6 +240,25 @@ namespace UI.Components.ProtocolListBox
       return AppendLineAsync(emptyLine);
     }
 
+    public Task CompleteCommandAsync(bool hasErrors)
+    {
+      return Application.Current.Dispatcher.InvokeAsync(() =>
+      {
+        var lastCommandMessage = Messages.LastOrDefault(message => message.Status == ShowMessageModel.MessageType.Command);
+        if (lastCommandMessage == null)
+        {
+          return;
+        }
+
+        lastCommandMessage.CommandExecutionHasErrors = hasErrors;
+        lastCommandMessage.HeaderBackgroundColor = GetThemeColorOrFallback(
+          hasErrors ? "TestsProtocolCommandErrorBackgroundBrush" : "TestsProtocolCommandSuccessBackgroundBrush",
+          hasErrors
+            ? Color.FromArgb(128, 168, 93, 93)
+            : Color.FromArgb(128, 94, 127, 107));
+      }).Task;
+    }
+
     public async Task ShowMessageAsync(ShowMessageModel model, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
@@ -286,6 +305,16 @@ namespace UI.Components.ProtocolListBox
           ProtocolListBox.ScrollIntoView(item);
         });
       }
+    }
+
+    private static Color GetThemeColorOrFallback(string resourceKey, Color fallbackColor)
+    {
+      if (Application.Current?.Resources[resourceKey] is SolidColorBrush brush)
+      {
+        return brush.Color;
+      }
+
+      return fallbackColor;
     }
 
 

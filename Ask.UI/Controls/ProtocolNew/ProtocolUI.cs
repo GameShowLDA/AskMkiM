@@ -328,6 +328,11 @@ namespace Ask.UI.Controls.ProtocolNew
       await protocolTextBox.AppendEmptyLineAsync();
     }
 
+    public async Task CompleteCommandAsync(bool hasErrors)
+    {
+      await protocolTextBox.CompleteCommandAsync(hasErrors);
+    }
+
     public int GetLastLineNumber()
     {
       return protocolTextBox.GetLastLineNumber();

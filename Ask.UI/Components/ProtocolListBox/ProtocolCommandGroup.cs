@@ -12,16 +12,31 @@ namespace Ask.UI.Components.ProtocolListBox
   /// </summary>
   internal sealed class ProtocolCommandGroup
   {
+    private enum CommandExecutionVisualState
+    {
+      Pending,
+      Success,
+      Error
+    }
+
     private const string SuccessBackgroundResourceKey = "TestsProtocolCommandSuccessBackgroundBrush";
     private const string ErrorBackgroundResourceKey = "TestsProtocolCommandErrorBackgroundBrush";
     private static readonly Color SuccessBackgroundFallback = Color.FromArgb(128, 94, 127, 107);
     private static readonly Color ErrorBackgroundFallback = Color.FromArgb(128, 168, 93, 93);
 
-    private bool _hasErrors;
+    private CommandExecutionVisualState _executionState;
 
     public ProtocolCommandGroup(ShowMessageModel headerModel)
     {
       HeaderItem = ProtocolDisplayItem.CreateCommandHeader(headerModel, this);
+      _executionState = headerModel.CommandExecutionHasErrors switch
+      {
+        true => CommandExecutionVisualState.Error,
+        false => CommandExecutionVisualState.Success,
+        _ => CommandExecutionVisualState.Pending
+      };
+
+      UpdateHeaderBackground();
     }
 
     /// <summary>
@@ -61,10 +76,21 @@ namespace Ask.UI.Components.ProtocolListBox
       item.OuterMargin = new System.Windows.Thickness(0, 0, 0, 6);
       BodyItems.Add(item);
 
-      if (item.Message.Status == ShowMessageModel.MessageType.Error)
+      if (item.Message.Status == ShowMessageModel.MessageType.Error &&
+          _executionState == CommandExecutionVisualState.Pending)
       {
-        _hasErrors = true;
+        _executionState = CommandExecutionVisualState.Error;
       }
+
+      UpdateHeaderBackground();
+    }
+
+    public void SetExecutionResult(bool hasErrors)
+    {
+      HeaderItem.Message.CommandExecutionHasErrors = hasErrors;
+      _executionState = hasErrors
+        ? CommandExecutionVisualState.Error
+        : CommandExecutionVisualState.Success;
 
       UpdateHeaderBackground();
     }
@@ -85,9 +111,12 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
-      HeaderItem.Message.HeaderBackgroundColor = _hasErrors
-        ? GetThemeColorOrFallback(ErrorBackgroundResourceKey, ErrorBackgroundFallback)
-        : GetThemeColorOrFallback(SuccessBackgroundResourceKey, SuccessBackgroundFallback);
+      HeaderItem.Message.HeaderBackgroundColor = _executionState switch
+      {
+        CommandExecutionVisualState.Error => GetThemeColorOrFallback(ErrorBackgroundResourceKey, ErrorBackgroundFallback),
+        CommandExecutionVisualState.Success => GetThemeColorOrFallback(SuccessBackgroundResourceKey, SuccessBackgroundFallback),
+        _ => null
+      };
     }
 
     private static Color GetThemeColorOrFallback(string resourceKey, Color fallbackColor)
