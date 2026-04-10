@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.Protocol"
              xmlns:Components ="clr-namespace:UI.Components"
+             xmlns:SharedComponents="clr-namespace:Ask.UI.Shared.Components;assembly=Ask.UI"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:DeviceInfo="clr-namespace:UI.Controls.Settings.DeviceInfo"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
@@ -95,7 +96,7 @@
                         </Style>
                     </WrapPanel.Style>
                     
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                       Title="{Binding Source={StaticResource Settings_Protocol_CommandHeaders_Title}, Path=Value}"
                       Description="{Binding Source={StaticResource Settings_Protocol_CommandHeaders_Description}, Path=Value}"
                       IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -103,7 +104,7 @@
                       Margin="10,10"
                       VerticalAlignment="Top"/>
                     
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_OperationTime_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_OperationTime_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -111,7 +112,7 @@
                         x:Name="OperationTime"
                         VerticalAlignment="Top"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_ShowActionHeaders_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_ShowActionHeaders_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -119,7 +120,7 @@
                         x:Name="Header"
                         VerticalAlignment="Top"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_TestStepMessages_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_TestStepMessages_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -127,7 +128,7 @@
                         x:Name="TestStepChecker"
                         VerticalAlignment="Top"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_AutoSave_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_AutoSave_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -135,7 +136,7 @@
                         x:Name="AutoSave"
                         VerticalAlignment="Top"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_AutoPrint_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_AutoPrint_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -143,7 +144,7 @@
                         Margin="10,10"
                         VerticalAlignment="Top"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_ShowInSoftware_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_ShowInSoftware_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -151,7 +152,7 @@
                         Margin="10,10"
                         VerticalAlignment="Top"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_Generate_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_Generate_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
