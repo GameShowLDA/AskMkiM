@@ -404,7 +404,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
     private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
     {
-      if (!await ProtocolConfig.GetShowDetailedProtocol())
+      if (!ProtocolConfig.GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
         {

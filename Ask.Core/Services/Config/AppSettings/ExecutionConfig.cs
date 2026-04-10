@@ -10,7 +10,7 @@ namespace Ask.Core.Services.Config.AppSettings
   /// </summary>
   public static class ExecutionConfig
   {
-    static public Action<SettingsExecutionDto> SaveExecutionEvent;
+    static public Func<SettingsExecutionDto, Task>? SaveExecutionAsyncEvent;
 
     private static SettingsExecutionDto SettingsExecutionModel = new SettingsExecutionDto();
 
@@ -53,12 +53,14 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetIsErrorSimulationMode(bool enable) => SettingsExecutionModel.IsErrorSimulationMode = enable;
 
-    public static async Task SetExecutionModel(SettingsExecutionDto protocolModel)
+    public static Task SetExecutionModel(SettingsExecutionDto protocolModel)
     {
       SetIdleMode(protocolModel.IdleModeExecution);
       SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
+
+      return Task.CompletedTask;
     }
 
     #endregion
@@ -89,19 +91,17 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>true, если включен; false, если выключена.</returns>
     public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
 
-    public static async Task<SettingsExecutionDto> GetExecitonModel()
+    public static Task<SettingsExecutionDto> GetExecitonModel()
     {
-      return await Task.Run(() =>
+      var executionModel = new SettingsExecutionDto
       {
-        var executionModel = new SettingsExecutionDto
-        {
-          IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
-          IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
-          StepByStepMode = SettingsExecutionModel.StepByStepMode,
-          StopOnError = SettingsExecutionModel.StopOnError
-        };
-        return executionModel;
-      });
+        IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
+        IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
+        StepByStepMode = SettingsExecutionModel.StepByStepMode,
+        StopOnError = SettingsExecutionModel.StopOnError
+      };
+
+      return Task.FromResult(executionModel);
     }
     #endregion
 
@@ -112,7 +112,20 @@ namespace Ask.Core.Services.Config.AppSettings
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);
 
-      SaveExecutionEvent?.Invoke(execution);
+      await InvokeSaveExecutionAsync(execution);
+    }
+
+    private static async Task InvokeSaveExecutionAsync(SettingsExecutionDto execution)
+    {
+      if (SaveExecutionAsyncEvent == null)
+      {
+        return;
+      }
+
+      foreach (Func<SettingsExecutionDto, Task> handler in SaveExecutionAsyncEvent.GetInvocationList())
+      {
+        await handler(execution);
+      }
     }
   }
 }

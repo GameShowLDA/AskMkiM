@@ -88,7 +88,7 @@ namespace UI.Controls.Settings.Protocol
     {
       DeviceDisplaySettingsDto model = DeviceDisplaySettingsCon.GetModel();
 
-      DeviceDisplayConfig.SaveSettings(model);
+      await DeviceDisplayConfig.SaveSettingsAsync(model);
       DeviceDisplaySettingsCon.SetBaseModel();
       await ProtocolConfig.SaveProtocolModel(GetModel());
       _baseProtocolModel = ProtocolConfig.GetProtocolModel();

@@ -20,6 +20,7 @@ namespace UI.Controls.Settings.UserInterface
   public partial class UiSettingsControl : UserControl
   {
     private UserInterfaceDto _baseParameterModel { get; set; }
+    private bool _isInitialized;
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
 
@@ -94,16 +95,20 @@ namespace UI.Controls.Settings.UserInterface
       DefalultData();
       UpdateCommandAutoCollapseVisibility();
 
-      LanguageSelect.ValueChanged += ValueChanged;
-      ThemeSelect.ValueChanged += ValueChanged;
-      SyntaxHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      CommandBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      ChainPointBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      TopMenuIcons.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      CommandAutoCollapsing.CheckedChanged += (s, ev) => ValueChanged(s, ev);
+      if (!_isInitialized)
+      {
+        LanguageSelect.ValueChanged += ValueChanged;
+        ThemeSelect.ValueChanged += ValueChanged;
+        SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
+        CommandAutoCollapsing.CheckedChanged += SettingsCard_CheckedChanged;
 
-      Success.PreviewMouseDown += Success_PreviewMouseDown;
-      Error.PreviewMouseDown += Error_PreviewMouseDown;
+        Success.PreviewMouseDown += Success_PreviewMouseDown;
+        Error.PreviewMouseDown += Error_PreviewMouseDown;
+        _isInitialized = true;
+      }
 
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
@@ -120,6 +125,11 @@ namespace UI.Controls.Settings.UserInterface
     {
       EventAggregator.Unsubscribe<ThemeEvent.Change>(OnThemeChanged);
       ProtocolConfig.SaveProtocolEvent -= ProtocolConfig_SaveProtocolEvent;
+    }
+
+    private void SettingsCard_CheckedChanged(object? sender, bool e)
+    {
+      ValueChanged(sender, e);
     }
 
     /// <summary>
