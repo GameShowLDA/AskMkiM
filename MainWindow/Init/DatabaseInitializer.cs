@@ -29,7 +29,7 @@ namespace MainWindowProgram.Init
         var userInterfaceTask = UserInterfaceSettings.GetAsync();
         var deviceDisplayTask = DeviceDisplaySettings.GetAsync();
 
-        Task.WaitAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
+        await Task.WhenAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
 
         var protocol = protocolTask.Result;
         var execution = executionTask.Result;
@@ -65,7 +65,7 @@ namespace MainWindowProgram.Init
           ProtocolModel.SetErrorsTemplate(model.CleanTextErrorsProtocol);
         };
 
-        ExecutionConfig.SaveExecutionEvent += async model =>
+        ExecutionConfig.SaveExecutionAsyncEvent += async model =>
         {
           await ExecutionSettings.SaveAsync(model);
         };
@@ -75,7 +75,7 @@ namespace MainWindowProgram.Init
           await UserInterfaceSettings.SaveAsync(model);
         };
 
-        DeviceDisplayConfig.DeviceDisplaySettingsSaved += async model =>
+        DeviceDisplayConfig.SaveDeviceDisplayAsyncEvent += async model =>
         {
           await DeviceDisplaySettings.SaveAsync(model);
         };

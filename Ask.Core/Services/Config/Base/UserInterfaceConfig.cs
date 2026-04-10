@@ -45,18 +45,17 @@ namespace Ask.Core.Services.Config.Base
     public static void SetCommandAutoCollapse(bool enable) => UserInterfaceModel.UseCommandAutoCollapse = enable;
 
 
-    public static async Task SetUserInterfaceModel(UserInterfaceDto user)
+    public static Task SetUserInterfaceModel(UserInterfaceDto user)
     {
-      await Task.Run(async () =>
-      {
-        SetLanguage(user.Language);
-        SetTheme(user.Theme);
-        SetSyntaxHighlighting(user.UseSyntaxHighlighting);
-        SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
-        SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
-        SetTopMenuIcons(user.UseTopMenuIcons);
-        SetCommandAutoCollapse(user.UseCommandAutoCollapse);
-      });
+      SetLanguage(user.Language);
+      SetTheme(user.Theme);
+      SetSyntaxHighlighting(user.UseSyntaxHighlighting);
+      SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
+      SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
+      SetTopMenuIcons(user.UseTopMenuIcons);
+      SetCommandAutoCollapse(user.UseCommandAutoCollapse);
+
+      return Task.CompletedTask;
     }
 
     #endregion
@@ -67,15 +66,15 @@ namespace Ask.Core.Services.Config.Base
     /// Возвращает язык интерфейса программы.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<string> GetLanguage() => UserInterfaceModel.Language;
-    public static async Task<ThemeMode> GetTheme() => UserInterfaceModel.Theme;
+    public static Task<string> GetLanguage() => Task.FromResult(UserInterfaceModel.Language);
+    public static Task<ThemeMode> GetTheme() => Task.FromResult(UserInterfaceModel.Theme);
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
     public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
     public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
     public static bool GetTopMenuIcons() => UserInterfaceModel.UseTopMenuIcons;
     public static bool GetCommandAutoCollapse() => UserInterfaceModel.UseCommandAutoCollapse;
 
-    public static async Task<UserInterfaceDto> GetParameterModel()
+    public static Task<UserInterfaceDto> GetParameterModel()
     {
       UserInterfaceDto parametrModel = new UserInterfaceDto
       {
@@ -87,7 +86,7 @@ namespace Ask.Core.Services.Config.Base
         UseTopMenuIcons = UserInterfaceModel.UseTopMenuIcons,
         UseCommandAutoCollapse = UserInterfaceModel.UseCommandAutoCollapse
       };
-      return parametrModel;
+      return Task.FromResult(parametrModel);
     }
 
     public static async Task SaveProtocolModel(UserInterfaceDto parametrModel)
@@ -100,7 +99,7 @@ namespace Ask.Core.Services.Config.Base
       SetTopMenuIcons(parametrModel.UseTopMenuIcons);
       SetCommandAutoCollapse(parametrModel.UseCommandAutoCollapse);
 
-      InvokeSaveUserInterfaceAsync(parametrModel).GetAwaiter();
+      await InvokeSaveUserInterfaceAsync(parametrModel);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
 
       LanguageSettings.SetLanguageAsync(UserInterfaceModel.Language);

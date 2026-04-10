@@ -78,7 +78,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает статус отображения информации об устройствах в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetDeviceInfo() => await Task.Run(() => ProtocolModel.ShowDeviceInfo);
+    public static bool GetDeviceInfo() => ProtocolModel.ShowDeviceInfo;
 
     /// <summary>
     /// Возвращает статус отоображения заголовков.
@@ -90,19 +90,19 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает статус отображения подробной информации в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetShowDetailedProtocol() => await Task.Run(() => ProtocolModel.ShowDetailedProtocol);
+    public static bool GetShowDetailedProtocol() => ProtocolModel.ShowDetailedProtocol;
 
     /// <summary>
     /// Возвращает статус автосохранения протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static async Task<bool> GetSaveProtocol() => await Task.Run(() => ProtocolModel.AutoSaveProtocol);
+    public static bool GetSaveProtocol() => ProtocolModel.AutoSaveProtocol;
 
     /// <summary>
     /// Возвращает статус авто печати протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static async Task<bool> GetPrintProtocol() => await Task.Run(() => ProtocolModel.AutoPrintProtocol);
+    public static bool GetPrintProtocol() => ProtocolModel.AutoPrintProtocol;
 
     /// <summary>
     /// Возвращает статус отображения времени в протоколе.
