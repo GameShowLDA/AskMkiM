@@ -87,6 +87,8 @@
                               BorderThickness="0"
                               ColumnHeaderHeight="30"
                               MouseDoubleClick="DataGrid_MouseDoubleClick"
+                              KeyDown="DataGrid_KeyDown"
+                              MouseEnter="DataGrid_MouseEnter"
                               ScrollViewer.VerticalScrollBarVisibility="Auto">
 
                         <DataGrid.Resources>

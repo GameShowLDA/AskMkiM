@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ask.UI.Controls.ErrorList
 {
@@ -281,6 +282,59 @@ namespace Ask.UI.Controls.ErrorList
     private void ErrorListControl_Loaded(object sender, RoutedEventArgs e)
     {
       ApplyInitialButtonState();
+    }
+
+    private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.Key != Key.F8 || sender is not DataGrid grid)
+        return;
+
+      if (TryGetIssueUnderMouse(grid) is { } hoveredIssue)
+      {
+        ItemDoubleClicked?.Invoke(hoveredIssue);
+        e.Handled = true;
+
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+          grid.Focus();
+          Keyboard.Focus(grid);
+        }), System.Windows.Threading.DispatcherPriority.Input);
+
+        return;
+      }
+
+      if (grid.SelectedItem is IDisplayIssue selectedIssue)
+      {
+        ItemDoubleClicked?.Invoke(selectedIssue);
+        e.Handled = true;
+
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+          grid.Focus();
+          Keyboard.Focus(grid);
+        }), System.Windows.Threading.DispatcherPriority.Input);
+      }
+    }
+
+    private static IDisplayIssue? TryGetIssueUnderMouse(DataGrid grid)
+    {
+      var mousePos = Mouse.GetPosition(grid);
+      DependencyObject? visual = VisualTreeHelper.HitTest(grid, mousePos)?.VisualHit;
+
+      while (visual != null && visual is not DataGridRow)
+        visual = VisualTreeHelper.GetParent(visual);
+
+      return visual is DataGridRow { Item: IDisplayIssue issue }
+        ? issue
+        : null;
+    }
+
+    private void DataGrid_MouseEnter(object sender, MouseEventArgs e)
+    {
+      if (sender is DataGrid grid)
+      {
+        grid.Focus();
+      }
     }
 
     private void RecalculateTotals()
