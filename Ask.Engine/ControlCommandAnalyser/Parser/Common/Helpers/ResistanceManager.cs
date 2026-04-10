@@ -180,7 +180,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
           LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) нижняя граница меньше минимальной.");
 
-          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+          model.Errors.Add(KsErrors.ResistanceLimitsConflict(
               numberLine,
               $"{commandNumber} {mnemonic}",
               $"Нижняя граница сопротивления ({lowerValue.Item1} {lowerValue.Item2}) меньше минимально измеряемого ({minValue.Item1} {minValue.Item2})."));
@@ -194,7 +194,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
           LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) нижняя граница больше максимальной.");
 
-          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+          model.Errors.Add(KsErrors.ResistanceLimitsConflict(
               numberLine,
               $"{commandNumber} {mnemonic}",
               $"Нижняя граница сопротивления ({lowerValue.Item1} {lowerValue.Item2}) больше максимально возможной ({maxValue.Item1} {maxValue.Item2})."));
@@ -213,7 +213,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
           LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) верхняя граница больше максимальной.");
 
-          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+          model.Errors.Add(KsErrors.ResistanceLimitsConflict(
               numberLine,
               $"{commandNumber} {mnemonic}",
               $"Верхняя граница сопротивления ({higherValue.Item1} {higherValue.Item2}) больше максимально возможной ({maxValue.Item1} {maxValue.Item2})."));
@@ -227,7 +227,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
           LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) верхняя граница меньше минимальной.");
 
-          model.Errors.Add(IeErrors.CapacityLimitsConflict(
+          model.Errors.Add(KsErrors.ResistanceLimitsConflict(
               numberLine,
               $"{commandNumber} {mnemonic}",
               $"Верхняя граница сопротивления ({higherValue.Item1} {higherValue.Item2}) меньше минимально измеряемого ({minValue.Item1} {minValue.Item2})."));

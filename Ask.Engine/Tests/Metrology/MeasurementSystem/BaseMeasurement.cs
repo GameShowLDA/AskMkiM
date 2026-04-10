@@ -1,4 +1,3 @@
-﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors;
 using Ask.Core.Services.Errors.Device.Adapters;
@@ -13,7 +12,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using DataBaseConfiguration.Services.Device;
+using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
 
@@ -54,7 +55,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="point1">Первая точка (в формате A.B.C).</param>
     /// <param name="point2">Вторая точка (в формате A.B.C).</param>
     /// <param name="mode">Метрологический режим, для которого выполняется алгоритм.</param>
-    protected virtual void CollectDevices(PointModel point1, PointModel point2, MeasurementTypeCommand mode)
+    protected virtual async Task CollectDevices(PointModel point1, PointModel point2, MeasurementTypeCommand mode)
     {
       Devices.Clear();
 
@@ -63,26 +64,26 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         throw MetrologyValidationErrors.PointParsingFailed();
       }
 
-      var relayRepo = new RelaySwitchModuleServices();
-      var ukshRepo = new SwitchingDeviceServices();
-
-      var mkr1 = relayRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault(m => m.Number == point1.ModuleNumber);
+      var relayModules1 = await RelaySwitchModules.GetDevicesByNumberChassisAsync(point1.DeviceNumber);
+      var mkr1 = relayModules1.FirstOrDefault(m => m.Number == point1.ModuleNumber);
       AddUniqueDevice(mode, mkr1);
 
       if (point1.DeviceNumber != point2.DeviceNumber || point1.ModuleNumber != point2.ModuleNumber)
       {
-        var mkr2 = relayRepo.GetDevicesByNumberChassis(point2.DeviceNumber).FirstOrDefault(m => m.Number == point2.ModuleNumber);
+        var relayModules2 = point1.DeviceNumber == point2.DeviceNumber
+          ? relayModules1
+          : await RelaySwitchModules.GetDevicesByNumberChassisAsync(point2.DeviceNumber);
+        var mkr2 = relayModules2.FirstOrDefault(m => m.Number == point2.ModuleNumber);
         AddUniqueDevice(mode, mkr2);
       }
 
-      var uksh = ukshRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+      var uksh = (await SwitchingDevices.GetDevicesByNumberChassisAsync(point1.DeviceNumber)).FirstOrDefault();
       AddUniqueDevice(mode, uksh);
 
       var modeDevice = GetDeviceTypeForMode(mode);
       if (modeDevice == MetrologicalDeviceType.FastMeter || modeDevice == MetrologicalDeviceType.Mint)
       {
-        var fastRepo = new FastMeterServices();
-        var fast = fastRepo.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        var fast = FastMeters.GetDevicesByNumberChassisAsync(point1.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
         if (fast == null)
         {
           throw ConnectionExceptionAdapter.NotFoundInConfiguration("Мультиметр");
@@ -92,15 +93,13 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
 
         if (modeDevice == MetrologicalDeviceType.Mint)
         {
-          var power = new PowerSourceModuleServices();
-          var mint = power.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+          var mint = PowerSourceModules.GetDevicesByNumberChassisAsync(point1.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
           AddUniqueDevice(mode, mint);
         }
       }
       else if (modeDevice == MetrologicalDeviceType.BreakdownTester)
       {
-        var svc = ServiceLocator.GetRequired<BreakdownTesterServices>();
-        var breakdown = svc.GetDevicesByNumberChassis(point1.DeviceNumber).FirstOrDefault();
+        var breakdown = BreakdownTesters.GetDevicesByNumberChassisAsync(point1.DeviceNumber).GetAwaiter().GetResult().FirstOrDefault();
         AddUniqueDevice(mode, breakdown);
       }
       else
@@ -222,7 +221,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeMeasurement(IUserInteractionService messageService)
     {
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
     }
 
     /// <summary>
@@ -291,8 +290,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       string unit = info?.Unit ?? "";
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Результаты режима {displayName}"), skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: $"{min:F5} {unit}", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: $"{max:F5} {unit}", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: MeasurementValueFormatter.FormatWithUnit(min, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: MeasurementValueFormatter.FormatWithUnit(max, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
 
       Measurements = new();
     }

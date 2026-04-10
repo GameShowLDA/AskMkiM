@@ -1,9 +1,8 @@
-using System;
+using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
-using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
-using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Controls
 {
@@ -30,6 +29,11 @@ namespace UI.Controls
     public event EventHandler? SaveRequested;
 
     /// <summary>
+    /// Raised when saving the translated file to disk is requested.
+    /// </summary>
+    public event EventHandler? SaveToDiskRequested;
+
+    /// <summary>
     /// Gets the underlying text editor control.
     /// </summary>
     public TextEditorUI Editor => _activeEditor ?? TranslatorTextEditor;
@@ -52,13 +56,37 @@ namespace UI.Controls
       set => Editor.IsReadOnly = value;
     }
 
+    public void SetArchiveButtonVisibility(bool isVisible)
+    {
+      if (SaveButton == null)
+      {
+        return;
+      }
+
+      SaveButton.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void BackButton_Click(object sender, RoutedEventArgs e) =>
       BackRequested?.Invoke(this, EventArgs.Empty);
 
     private void SaveButton_Click(object sender, RoutedEventArgs e) =>
       SaveRequested?.Invoke(this, EventArgs.Empty);
 
+    private void SaveToDiskButton_Click(object sender, RoutedEventArgs e) =>
+      SaveToDiskRequested?.Invoke(this, EventArgs.Empty);
+
     public TextEditorUI GetTextEditor() => Editor;
+
+    public void SetSaveToDiskVisible(bool isVisible)
+    {
+      SaveToDiskButton.Visibility = isVisible
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+      if (isVisible)
+      {
+        SaveToDiskButton.ToolTip = "��������� �� ����";
+      }
+    }
 
     public void SetEditor(ITextEditorView editor)
     {

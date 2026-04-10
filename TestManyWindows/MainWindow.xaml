@@ -1,10 +1,10 @@
-﻿<Window x:Class="TestDocking.MainWindow"
+﻿<Window x:Class="TestManyWindows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:dz="http://schemas.devzest.com/presentation/docking"
         xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
-        xmlns:Controls="clr-namespace:UI.Controls.TextEditor;assembly=UI"
+        xmlns:Controls="clr-namespace:UI.Controls.TextEditorControl;assembly=UI"
         Background="{StaticResource PrimarySolidColorBrush}"
         Height="450" Width="800">
 

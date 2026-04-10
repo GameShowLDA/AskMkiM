@@ -1,7 +1,5 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -9,15 +7,11 @@ using Message;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls;
-using UI.Controls.Runner;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
-using static UI.Components.Invoke.OpenFileButton;
-using Application = System.Windows.Application;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components
@@ -36,7 +30,7 @@ namespace UI.Components
     /// Список пользовательских элементов управления, соответствующих открытым вкладкам. Каждый элемент управления представляет собой экземпляр <see cref="UserControl"/>.
     /// </summary>
     internal List<UserControl> userControls = new List<UserControl>();
-    
+
     public IRunService RunService => MultiEditor.RunService;
 
     public IEditorDocumentService EditorDocumentService => MultiEditor.EditorDocumentService;
@@ -161,10 +155,12 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Получает активный текстовый редактор.
+    /// Возвращает активный текстовый редактор указанного типа.
     /// </summary>
+    /// <param name="editorType">Тип редактора (например, основной или транслятор).</param>
     /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// Активный экземпляр <see cref="TextEditorUI"/>.
+    /// Если редактор отсутствует — может вернуть <c>null</c>.
     /// </returns>
     public TextEditorUI GetActiveTextEditor(EditorType editorType)
     {
@@ -172,10 +168,24 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Получает активный текстовый редактор.
+    /// Возвращает текущий активный пользовательский элемент в рабочей области.
     /// </summary>
     /// <returns>
-    /// Возвращает активный экземпляр <see cref="TextEditorUI"/>.
+    /// Экземпляр <see cref="UserControl"/>, отображаемый в данный момент,
+    /// либо <c>null</c>, если активный элемент отсутствует.
+    /// </returns>
+    public UserControl? GetActiveWorkspaceControl()
+    {
+      return MultiEditor.ContentPanel.Children
+        .OfType<UserControl>()
+        .FirstOrDefault(control => control.Visibility == Visibility.Visible);
+    }
+
+    /// <summary>
+    /// Возвращает активный текстовый редактор независимо от его типа.
+    /// </summary>
+    /// <returns>
+    /// Активный экземпляр <see cref="TextEditorUI"/> или <c>null</c>, если редактор не найден.
     /// </returns>
     public TextEditorUI GetActiveTextEditor()
     {
@@ -192,30 +202,42 @@ namespace UI.Components
       return MultiEditor.RemoveActiveTextEditor(isTranslation);
     }
 
+    /// <summary>
+    /// Пытается асинхронно закрыть текущую активную вкладку.
+    /// </summary>
+    /// <param name="eventAlreadyHandled">
+    /// Указывает, было ли событие закрытия уже обработано ранее.
+    /// Используется для предотвращения повторной обработки.
+    /// </param>
+    /// <returns>
+    /// Задача, возвращающая <c>true</c>, если вкладка была закрыта;
+    /// иначе <c>false</c>.
+    /// </returns>
     public Task<bool> TryCloseActiveTabAsync(bool eventAlreadyHandled = false)
     {
       return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
     }
 
 
-    /// <summary>
-    /// Выполняет поиск по тексту в редакторе.
     /// </summary>
-    /// <param name="searchText">
-    /// Текст, который нужно найти.
-    /// </param>
+    /// <param name="searchText">Искомый текст.</param>
     /// <param name="wholeWord">
-    /// Если true - ищем только слово целиком, иначе ищем все вхождения.
+    /// Если <c>true</c> — поиск выполняется только по целым словам;
+    /// если <c>false</c> — по всем вхождениям.
     /// </param>
     /// <param name="caseWord">
-    /// Если true - учитываем регистр, иначе не учитываем.
+    /// Если <c>true</c> — поиск чувствителен к регистру;
+    /// если <c>false</c> — регистр игнорируется.
     /// </param>
     /// <param name="searchArea">
-    /// Параметры поиска: найти далее, найти предыдущее, найти все.
+    /// Режим поиска (например: далее, назад, все вхождения).
     /// </param>
     /// <param name="searchParameters">
-    /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
+    /// Область поиска (текущий документ, все документы, файл и т.д.).
     /// </param>
+    /// <remarks>
+    /// В случае, если редактор не инициализирован, выводится сообщение об ошибке.
+    /// </remarks>
     public async void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       if (MultiEditor == null)
@@ -390,11 +412,17 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Добавляет элемент управления и кнопку в соответствующие панели поиска.
+    /// Добавляет новую вкладку с пользовательским элементом управления в область результатов поиска.
     /// </summary>
-    /// <param name="header">Заголовок для кнопки.</param>
-    /// <param name="control">Элемент управления для отображения.</param>
-    /// <param name="description">Описание для вкладки, если оно есть.</param>
+    /// <param name="header">Заголовок вкладки.</param>
+    /// <param name="control">Элемент управления для отображения содержимого.</param>
+    /// <param name="description">
+    /// Дополнительное описание вкладки (используется для идентификации и предотвращения дубликатов).
+    /// </param>
+    /// <remarks>
+    /// Если вкладка с таким описанием или заголовком уже существует — она будет активирована,
+    /// а не создана заново.
+    /// </remarks>
     public void AddControlInSearchArea(string header, UserControl control, string description = null)
     {
       OpenFileButton tabButton = CreateTabButton(header, description);
@@ -548,28 +576,39 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Получает активный контейнер с вкладками.
+    /// Возвращает активный контейнер вкладок редактора указанного типа.
     /// </summary>
-    /// <param name="editorType">Тип вкладок.</param>
-    /// <returns>Найденный контейнер.</returns>
+    /// <param name="editorType">Тип редактора.</param>
+    /// <returns>
+    /// Экземпляр <see cref="TextEditorContainer"/> для активной области.
+    /// </returns>
     public TextEditorContainer GetActiveTextEditorContainer(EditorType editorType)
     {
       return MultiEditor.GetActiveTextEditorContainer(editorType);
     }
 
     /// <summary>
-    /// Добавляет вкладку с транслятором.
+    /// Добавляет вкладку транслятора (связанную пару редакторов: исходный и результат).
     /// </summary>
-    /// <param name="editor">Текстовый редактор с транслируемым файлом.</param>
-    /// <param name="translateEditor">Текстовый редактор с странслированным файлом.</param>
+    /// <param name="editor">Редактор исходного файла.</param>
+    /// <param name="translateEditor">Редактор результата трансляции.</param>
     /// <param name="editorType">Тип вкладки.</param>
-    /// <returns>Асинхронная задача, представляющая результат добавления вкладки с <see cref="TranslatorItem"/>.</returns>
+    /// <returns>
+    /// Задача, возвращающая созданный <see cref="TranslatorItem"/>.
+    /// </returns>
     public Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType)
     {
       return MultiEditor.AddTranslatorItem(editor, translateEditor, editorType);
     }
 
-
+    /// <summary>
+    /// Удаляет вкладку транслятора указанного типа.
+    /// </summary>
+    /// <param name="translatorItem">Элемент транслятора, который необходимо удалить.</param>
+    /// <param name="editorType">Тип редактора, к которому относится вкладка.</param>
+    /// <returns>
+    /// Асинхронная задача, представляющая операцию удаления.
+    /// </returns>
     public async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType)
     {
       await MultiEditor.DeleteTranslatorItem(translatorItem, editorType);

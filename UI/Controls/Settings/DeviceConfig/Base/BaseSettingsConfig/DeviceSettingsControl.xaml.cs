@@ -1,9 +1,14 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using NewCore.Base;
-using NewCore.Base.Device;
-using NewCore.Device;
+using Ask.Device.Communication.Com;
+using Ask.Device.Communication.Com.Configuration;
+using Ask.Device.Communication.Ethernet;
+using Ask.Device.Communication.Usb;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Device;
 using System.IO.Ports;
 using System.Management;
 using System.Net;
@@ -273,7 +278,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       e.Handled = true;
     }
 
-    public void LoadFromDevice(IDevice device)
+    public void LoadFromDevice(DeviceDto device)
     {
       if (device == null)
       {
@@ -290,7 +295,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         DeviceModelSelectionBox.SelectedItem = model.Key;
       }
 
-      if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.IRelaySwitchModule relayDevice)
+      if (device is RelaySwitchModuleDto relayDevice)
       {
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);

@@ -7,15 +7,13 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.Runner;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Services.FileManager;
 using UI.Windows.WpfDocking.Windows.Docking;
-using static UI.Components.Invoke.OpenFileButton;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace UI.Components.MultiEditorMethods
@@ -82,7 +80,10 @@ namespace UI.Components.MultiEditorMethods
         }
         else if (control is TextEditorContainer foundContainer) // если контрол сам является контейнером
         {
-          CloseContainer(tabButton, control, ref index, ref editorType, foundContainer);
+          if (!CloseContainer(tabButton, control, ref index, ref editorType, foundContainer))
+          {
+            return;
+          }
         }
         else
         {
@@ -130,7 +131,11 @@ namespace UI.Components.MultiEditorMethods
 
     private bool CloseContainer(OpenFileButton tabButton, UserControl control, ref int index, ref EditorType editorType, TextEditorContainer foundContainer)
     {
-      CloseContainerItems(foundContainer);
+      if (!CloseContainerItems(foundContainer))
+      {
+        return false;
+      }
+
       var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
       if (foundDockItem != null && foundDockItem.Content is RunControl runControl)
       {
@@ -153,56 +158,33 @@ namespace UI.Components.MultiEditorMethods
       return true;
     }
 
-    private void CloseContainerItems(TextEditorContainer foundContainer)
+    private bool CloseContainerItems(TextEditorContainer foundContainer)
     {
       if (foundContainer.DockManager.DockItems.Count > 0)
       {
-        foreach (var item in foundContainer.DockManager.DockItems)
+        foreach (var item in foundContainer.DockManager.DockItems.ToList())
         {
-          var foundDockItemType = EditorType.TextEditor;
-          var path = string.Empty;
-          var content = string.Empty;
-          SetPathAndContent(item, ref foundDockItemType, ref path, ref content);
-          if (Path.Exists(path))
+          if (!ShowSaveDialogForControl(item))
           {
-            CheckNeedSave(item, path, content);
+            return false;
           }
+
+          fileManager.EditorWorkspaceModel.FilePaths.Remove(item.TabText);
+          EditorEventAdapter.RaiseTextEditorContainerClosing(true, item.TabText);
         }
       }
-    }
 
-    private void CheckNeedSave(DockItem item, string path, string content)
-    {
-      var fileService = new FileOpenService(fileManager);
-      var text = fileService.ReadFileContent(path);
-      if (content != text.Item1)
-      {
-        ShowSaveDialogForControl(item);
-      }
+      return true;
     }
 
     private void CloseDockItem(OpenFileButton tabButton, TextEditorContainer foundContainer, DockItem foundDockItem)
     {
-      var foundDockItemType = EditorType.TextEditor;
-      var path = string.Empty;
-      var content = string.Empty;
-      SetPathAndContent(foundDockItem, ref foundDockItemType, ref path, ref content);
-      if (Path.Exists(path))
+      if (!ShowSaveDialogForControl(foundDockItem))
       {
-        CheckNeedSave(foundDockItem, path, content);
-        if (foundDockItemType == EditorType.Translator)
-        {
-          var translator = foundDockItem.Content as TranslatorItem;
-          foundDockItem.Close();
-          if (foundContainer.DockManager.DockItems.Count == 0)
-          {
-            RemoveControl(tabButton, foundContainer);
-            return;
-          }
-        }
         return;
       }
-      return;
+
+      foundDockItem.PerformClose();
     }
 
     private static EditorType SetEditorType(OpenFileButton tabButton)
@@ -247,15 +229,8 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
     private bool ShowSaveDialogForControl(DockItem control)
     {
-      var result = MessageBoxResult.No;
-      var saveFileResult = false;
-      if (control.Content is TextEditorUI || control.Content is TranslatorItem)
-      {
-        var saveFileManager = new SaveFileManager(fileManager);
-        saveFileManager.SaveFileDialog(ref result, ref saveFileResult, control);
-      }
-
-      return saveFileResult;
+      var saveFileManager = new SaveFileManager(fileManager);
+      return saveFileManager.ConfirmClose(control);
     }
 
     /// <summary>
@@ -323,10 +298,7 @@ namespace UI.Components.MultiEditorMethods
         EditorEventAdapter.RaiseTextEditorActivated(control);
       }
 
-      bool isTextEditorContainer = control is TextEditorContainer;
-
-      EditorEventAdapter.RaiseTextEditorActive(isTextEditorContainer);
-      EditorEventAdapter.RaiseActiveEditorChanged(isTextEditorContainer);
+      bool isTextEditorActive = control is TextEditorUI;
 
       var isControlProgramActive = false;
       if (openPage.Text == EditorType.Run.ToString() || openPage.Text == EditorType.Translator.ToString() || openPage.Text == EditorType.TextEditor.ToString())
@@ -340,6 +312,7 @@ namespace UI.Components.MultiEditorMethods
         if (foundDockItem != null)
         {
           foundDockItem.Focus();
+          isTextEditorActive = foundDockItem.Content is TextEditorUI || foundDockItem.Content is TranslatorItem;
           if (foundDockItem.Title.Contains(".pk") || foundDockItem.Title.Contains(".opk"))
           {
             isControlProgramActive = true;
@@ -349,7 +322,15 @@ namespace UI.Components.MultiEditorMethods
             isControlProgramActive = false;
           }
         }
+
+        container.SyncActiveEditorState();
       }
+      else
+      {
+        EditorEventAdapter.RaiseTextEditorActive(isTextEditorActive);
+      }
+
+      EditorEventAdapter.RaiseActiveEditorChanged(isTextEditorActive);
 
       SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
     }

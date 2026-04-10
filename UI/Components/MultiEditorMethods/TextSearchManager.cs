@@ -9,7 +9,7 @@ using System.Windows.Media;
 using UI.Components.Invoke;
 using UI.Components.SearchControls;
 using UI.Controls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
@@ -209,7 +209,7 @@ namespace UI.Components.MultiEditorMethods
                 return;
               }
               var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
-              
+
 
               if (allOccurrences != null)
               {

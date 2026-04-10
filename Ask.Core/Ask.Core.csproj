@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Remove="Services\EventCore\Interfaces\**" />
+    <Compile Remove="Shared\Entity\Devices\**" />
     <EmbeddedResource Remove="Services\EventCore\Interfaces\**" />
+    <EmbeddedResource Remove="Shared\Entity\Devices\**" />
     <None Remove="Services\EventCore\Interfaces\**" />
+    <None Remove="Shared\Entity\Devices\**" />
     <Page Remove="Services\EventCore\Interfaces\**" />
+    <Page Remove="Shared\Entity\Devices\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,7 +7,7 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
 using System.Globalization;
 
 namespace Ask.Engine.Tests.Base
@@ -346,13 +346,13 @@ namespace Ask.Engine.Tests.Base
     /// </remarks>
     private static bool TryIsValidPointExists(PointModel point)
     {
-      var chassisExists = new ChassisManagerServices().GetEntityById(point.DeviceNumber) != null;
+      var chassisExists = ChassisManagers.GetByNumberAsync(1).GetAwaiter().GetResult() != null;
       if (!chassisExists)
       {
         throw ChassisValidationErrors.NotFound(point.DeviceNumber);
       }
 
-      var modules = new RelaySwitchModuleServices().GetEntitiesByNumberChassis(point.DeviceNumber);
+      var modules = RelaySwitchModules.GetDevicesByNumberChassisAsync(point.DeviceNumber).GetAwaiter().GetResult();
       var module = modules.FirstOrDefault(m => m.Number == point.ModuleNumber);
 
       if (module == null)

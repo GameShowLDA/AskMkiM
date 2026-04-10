@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
@@ -59,9 +60,34 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// </returns>
     protected static string BuildSourceLinesMessage(BaseCommandModel command)
     {
-      return command.SourceLines.Count == 0
+      var sourceLines = new List<string>();
+      foreach (var sourceLine in command.SourceLines)
+      {
+        if (!string.IsNullOrWhiteSpace(sourceLine))
+        {
+          sourceLines.Add(sourceLine);
+        }
+      }
+
+      return sourceLines.Count == 0
           ? string.Empty
-          : "\r\n  " + string.Join("\r\n  ", command.SourceLines);
+          : "  " + string.Join("\r\n  ", sourceLines);
+    }
+
+    /// <summary>
+    /// Завершает текущий заголовок команды в протоколе
+    /// по факту наличия ошибок у конкретной команды.
+    /// </summary>
+    protected static async Task CompleteProtocolCommandAsync(
+      CommandExecutionContext context,
+      ProtocolModel protocolModel,
+      string commandKey)
+    {
+      bool hasErrors =
+        protocolModel.Errors.TryGetValue(commandKey, out var errors) &&
+        errors is { Count: > 0 };
+
+      await context.Console.CompleteCommandAsync(hasErrors);
     }
   }
 }

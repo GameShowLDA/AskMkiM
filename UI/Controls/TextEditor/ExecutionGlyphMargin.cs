@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using UI.Controls.TextEditor;
 
 public class ExecutionGlyphMargin : AbstractMargin
 {
@@ -57,6 +56,12 @@ public class ExecutionGlyphMargin : AbstractMargin
   public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
 
   /// <summary>
+  /// Цвет накладываемого кружка для отключённой точки остановки.
+  /// </summary>
+  private static readonly Brush BreakpointHoleBrush =
+    (Brush)new BrushConverter().ConvertFromString("#303843");
+
+  /// <summary>
   /// Кисть фоновой заливки диапазона команды с точкой останова.
   /// </summary>
   public Brush BreakpointRangeBackgroundBrush { get; private set; } = Brushes.Transparent;
@@ -86,8 +91,9 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// </summary>
   public Brush BreakpointBrush { get; set; } = (Brush)Application.Current.Resources["RedColorSolidColorBrush"];
 
-  private readonly HashSet<int> _rightBreakpoints = new();        
+  private readonly HashSet<int> _rightBreakpoints = new();
   private readonly Dictionary<int, TextAnchor> _bpByCommand = new();
+  private readonly HashSet<int> _disabledBreakpoints = new();
   private readonly ActiveCommandRangeBackgroundRenderer _activeRangeBackgroundRenderer;
   private readonly BreakpointRangeBackgroundRenderer _breakpointRangeBackgroundRenderer;
   private int _activeRangeStartLine = -1; // 0-based line number
@@ -116,6 +122,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       BreakpointLines.Clear();
       BreakpointCommandsNumbers.Clear();
       _bpByCommand.Clear();
+      _disabledBreakpoints.Clear();
       ActiveLines.Clear();
       _activeRangeStartLine = -1;
       _activeRangeEndLine = -1;
@@ -167,6 +174,8 @@ public class ExecutionGlyphMargin : AbstractMargin
     set => SetRightBreakpoints(value);
   }
 
+  public Dictionary<int, string> NumCommandWithMnemonic;
+
   /// <summary>
   /// Создаёт марджин номеров строк с заливкой активного диапазона команды.
   /// </summary>
@@ -190,6 +199,8 @@ public class ExecutionGlyphMargin : AbstractMargin
   public void SetRightBreakpoints(List<int> lines)
   {
     _rightBreakpoints.Clear();
+    if (lines == null) return;
+
     for (int i = 0; i < lines.Count; i++)
       _rightBreakpoints.Add(lines[i]);
   }
@@ -215,7 +226,7 @@ public class ExecutionGlyphMargin : AbstractMargin
   public void EnsureBreakpoint(int lineNumber, int commandNumber, bool isSet, bool raiseEvents)
   {
     if (isSet) SetBreakpoint(lineNumber, commandNumber, raiseEvents);
-    else RemoveBreakpoint(commandNumber, raiseEvents);
+    else RemoveBreakpoint(lineNumber, commandNumber, raiseEvents);
   }
 
   /// <summary>
@@ -238,6 +249,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     _bpByCommand.Add(commandNumber, anchor);
     BreakpointLines.Add(anchor);
     BreakpointCommandsNumbers.Add(commandNumber);
+    _disabledBreakpoints.Remove(commandNumber);
 
     anchor.Deleted += (_, __) =>
     {
@@ -260,28 +272,77 @@ public class ExecutionGlyphMargin : AbstractMargin
   }
 
   /// <summary>
-  /// Снимает точку остановки для указанной команды.
+  /// Снимает точку остановки для указанной команды, привязанной к указанной строке.
   /// </summary>
+  /// <param name="lineNumber">Номер строки в текущем документе.</param>
   /// <param name="commandNumber">Номер команды.</param>
   /// <param name="raiseEvents">Нужно ли поднять событие снятия точки остановки.</param>
-  private void RemoveBreakpoint(int commandNumber, bool raiseEvents)
+  private void RemoveBreakpoint(int lineNumber, int commandNumber, bool raiseEvents)
   {
     if (!_bpByCommand.TryGetValue(commandNumber, out var anchor)) return;
 
     _bpByCommand.Remove(commandNumber);
+    _disabledBreakpoints.Remove(commandNumber);
 
     int idx = BreakpointCommandsNumbers.IndexOf(commandNumber);
-    BreakpointCommandsNumbers.RemoveAt(idx);
-    BreakpointLines.RemoveAt(idx);
+    if (idx >= 0)
+    {
+      BreakpointCommandsNumbers.RemoveAt(idx);
+      BreakpointLines.RemoveAt(idx);
+    }
 
     RebuildBreakpointLineHighlights();
     InvalidateVisual();
 
     if (raiseEvents)
-    {
-      int lineNumber = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
       BreakpointEventAdapter.RaiseBreakpointRemoved(lineNumber, commandNumber);
-    }
+  }
+
+  /// <summary>
+  /// Проверяет, включена ли точка остановки на команде.
+  /// </summary>
+  /// <remarks>Если точки нет — вернёт <see langword="false"/>.</remarks>
+  public bool IsBreakpointEnabled(int commandNumber)
+  {
+    return _bpByCommand.ContainsKey(commandNumber) && !_disabledBreakpoints.Contains(commandNumber);
+  }
+
+  /// <summary>
+  /// Включает точку остановки для команды.
+  /// </summary>
+  public void EnableBreakpoint(int commandNumber, bool raiseEvents)
+  {
+    if (!_bpByCommand.TryGetValue(commandNumber, out var anchor))
+      return;
+
+    _disabledBreakpoints.Remove(commandNumber);
+
+    RebuildBreakpointLineHighlights();
+    InvalidateVisual();
+
+    if (!raiseEvents) return;
+
+    int line0 = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
+    BreakpointEventAdapter.RaiseBreakpointOn(line0, commandNumber);
+  }
+
+  /// <summary>
+  /// Выключает точку остановки для команды (точка должна существовать).
+  /// </summary>
+  public void DisableBreakpoint(int commandNumber, bool raiseEvents)
+  {
+    if (!_bpByCommand.TryGetValue(commandNumber, out var anchor))
+      return;
+
+    _disabledBreakpoints.Add(commandNumber);
+
+    RebuildBreakpointLineHighlights();
+    InvalidateVisual();
+
+    if (!raiseEvents) return;
+
+    int line0 = _textEditor.Document.GetLineByOffset(anchor.Offset).LineNumber;
+    BreakpointEventAdapter.RaiseBreakpointOff(line0, commandNumber);
   }
 
   /// <summary>
@@ -380,25 +441,32 @@ public class ExecutionGlyphMargin : AbstractMargin
   /// <summary>
   /// Отрисовывает одиночный маркер напротив строки документа.
   /// </summary>
+  /// <remarks>Дополнительно может отрисовать поверх ещё один маркер.</remarks>
   /// <param name="lineNumber">Номер строки.</param>
   /// <param name="textView">Текущее представление AvalonEdit.</param>
   /// <param name="verticalOffset">Текущая координата по вертикали.</param>
   /// <param name="lineHeight">Высота строки.</param>
   /// <param name="drawingContext">Контекст рисования.</param>
   /// <param name="brush">Кисть для отрисовки.</param>
-  private static void RenderMarginSingle(
+  /// <param name="isEnabled">Отрисовка дополнительного маркера.</param>
+  private static void RenderBreakpointMarker(
     int lineNumber,
     TextView textView,
     double verticalOffset,
     double lineHeight,
     DrawingContext drawingContext,
-    Brush brush)
+    Brush brush,
+    bool isEnabled)
   {
     double top = textView.GetVisualTopByDocumentLine(lineNumber);
     if (double.IsNaN(top)) return;
 
-    double centerY = top - verticalOffset + lineHeight * 0.5;
+    double centerY = top - verticalOffset + (lineHeight * 0.5);
+
     drawingContext.DrawEllipse(brush, null, new Point(MarkerCenterX, centerY), 8, 8);
+
+    if (!isEnabled)
+      drawingContext.DrawEllipse(BreakpointHoleBrush, null, new Point(MarkerCenterX, centerY), 7, 7);
   }
 
   /// <summary>
@@ -430,9 +498,9 @@ public class ExecutionGlyphMargin : AbstractMargin
     var transform = new TransformGroup();
     transform.Children.Add(new ScaleTransform(scale, scale));
     transform.Children.Add(new TranslateTransform(
-      MarkerCenterX - (bounds.X + bounds.Width * 0.5) * scale,
-      centerY - (bounds.Y + bounds.Height * 0.5) * scale));
-     
+      MarkerCenterX - ((bounds.X + (bounds.Width * 0.5)) * scale),
+      centerY - ((bounds.Y + (bounds.Height * 0.5)) * scale)));
+
     drawingContext.PushTransform(transform);
     drawingContext.DrawGeometry(brush, pen, ActiveArrowGeometry);
     drawingContext.Pop();
@@ -456,7 +524,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     {
       int d = text[i] - '0';
       if ((uint)d > 9) break;
-      value = value * 10 + d;
+      value = (value * 10) + d;
     }
     return value;
   }
@@ -476,7 +544,7 @@ public class ExecutionGlyphMargin : AbstractMargin
 
     if (_bpByCommand.ContainsKey(commandNumber))
     {
-      RemoveBreakpoint(commandNumber, raiseEvents: true);
+      RemoveBreakpoint(lineNumber, commandNumber, raiseEvents: true);
       return;
     }
 
@@ -1068,10 +1136,15 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (BreakpointsVisible && BreakpointLines.Count != 0)
     {
       var doc = _textEditor.Document;
+
       for (int i = 0; i < BreakpointLines.Count; i++)
       {
         int lineNumber = doc.GetLineByOffset(BreakpointLines[i].Offset).LineNumber;
-        RenderMarginSingle(lineNumber, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush);
+
+        int cmd = BreakpointCommandsNumbers[i];
+        bool enabled = !_disabledBreakpoints.Contains(cmd);
+
+        RenderBreakpointMarker(lineNumber, TextView, verticalOffset, lineHeight, drawingContext, BreakpointBrush, enabled);
       }
     }
 
@@ -1101,7 +1174,7 @@ public class ExecutionGlyphMargin : AbstractMargin
       double top = textView.GetVisualTopByDocumentLine(margin[i] + 1);
       if (double.IsNaN(top)) continue;
 
-      double centerY = top - verticalOffset + lineHeight * 0.5;
+      double centerY = top - verticalOffset + (lineHeight * 0.5);
       DrawActiveArrow(drawingContext, brush, centerY);
     }
   }
@@ -1153,6 +1226,14 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (!TryResolveCommandHeaderLine(lineNumber, out int commandHeaderLine))
       return;
 
+    var headerLine = doc.GetLineByNumber(commandHeaderLine);
+    int commandNumber = ParseLeadingInt(doc.GetText(headerLine).AsSpan());
+    if (commandNumber <= 0)
+      return;
+
+    if (NumCommandWithMnemonic == null || !NumCommandWithMnemonic.ContainsKey(commandNumber))
+      return;
+
     if (!IsBreakpointAllowedLine(commandHeaderLine))
       return;
 
@@ -1169,8 +1250,7 @@ public class ExecutionGlyphMargin : AbstractMargin
     if (_rightBreakpoints.Count == 0)
       return true;
 
-    return _rightBreakpoints.Contains(commandHeaderLine)
-      || _rightBreakpoints.Contains(commandHeaderLine - 1);
+    return _rightBreakpoints.Contains(commandHeaderLine);
   }
 
   /// <summary>

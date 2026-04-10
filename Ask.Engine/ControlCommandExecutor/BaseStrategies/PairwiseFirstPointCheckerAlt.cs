@@ -34,7 +34,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return (errorsMessgae, infoMessage);
       }
 
-      await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      {
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+      }
 
       foreach (var groups in pointsListSource)
       {
@@ -50,7 +53,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
           str = str.Remove(str.Length - 1);
 
-          await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str));
+          if (ProtocolConfig.GetTestStepMessagesInProtocol())
+          {
+            await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str));
+          }
 
           var _basePoint = chains.PointModels.First();
           await ConnectToBusAAndBAsync(context.MessageService, _basePoint);
@@ -79,7 +85,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
             if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
             {
-              await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({_basePoint.Mnemonic}{machineAdress})", message: $"{Rt1:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
+              await context.MessageService.ShowMessageAsync(
+                new ShowMessageModel(
+                  $"Результат измерений ({_basePoint.Mnemonic}{machineAdress})",
+                  message: MeasurementValueFormatter.FormatWithUnit(Rt1, "Ом"),
+                  type: ShowMessageModel.MessageType.Info)
+                { IndentLevel = 1 });
             }
           }
 
@@ -115,7 +126,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
               if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
               {
-                await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({point.Mnemonic}{machineAdress})", message: $"{Rt2:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
+                await context.MessageService.ShowMessageAsync(
+                  new ShowMessageModel(
+                    $"Результат измерений ({point.Mnemonic}{machineAdress})",
+                    message: MeasurementValueFormatter.FormatWithUnit(Rt2, "Ом"),
+                    type: ShowMessageModel.MessageType.Info)
+                  { IndentLevel = 1 });
               }
             }
 
@@ -155,7 +171,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               {
                 if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
                 {
-                  await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Результат измерений ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond})", message: $"{Rt:F5} Ом", type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 });
+                  await context.MessageService.ShowMessageAsync(
+                    new ShowMessageModel(
+                      $"Результат измерений ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond})",
+                      message: MeasurementValueFormatter.FormatWithUnit(Rt, "Ом"),
+                      type: ShowMessageModel.MessageType.Info)
+                    { IndentLevel = 1 });
                 }
               }
             }
@@ -205,7 +226,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               var message = new ShowMessageModel(
                 $"Результат измерения сопротивления ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond} ({LowerBound} - {UpperBound} Ом)",
-                message: $"Rизм = {result:F5} Ом",
+                message: $"Rизм = {MeasurementValueFormatter.Format(result)} Ом",
                 type: succes ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error);
 
               if (DeviceDisplayConfig.GetMeasurementResultsVisibility() || !succes)

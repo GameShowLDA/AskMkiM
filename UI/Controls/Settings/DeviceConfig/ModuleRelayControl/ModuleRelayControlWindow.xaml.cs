@@ -1,12 +1,14 @@
 ﻿using Ask.Core.Services.Errors.DataBase;
-using Ask.Core.Shared.Entity.Devices;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
+using static UI.Controls.Settings.DeviceConfig.DeviceConfigNotifications;
 
 namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
 {
@@ -16,7 +18,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
     public Action? CloseActionOverride { get; set; }
-    private RelaySwitchModuleEntity? _editingEntity;
+    private RelaySwitchModuleDto? _editingDto;
 
     /// <summary>
     /// Событие, вызываемое при закрытии окна.
@@ -26,7 +28,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// <summary>
     /// Событие, вызываемое при сохранении данных модуля источника питания.
     /// </summary>
-    public event EventHandler<RelaySwitchModuleEntity> RequestSave;
+    public event EventHandler<RelaySwitchModuleDto> RequestSave;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControlWindow"/>.
@@ -62,9 +64,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Экземпляр головного устройства.</param>
-    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleEntity? editingEntity = null)
+    public void SetSettings(object? sender, IHeadUnit e, RelaySwitchModuleDto? editingEntity = null)
     {
-      _editingEntity = editingEntity;
+      _editingDto = editingEntity;
       deviceSettingsWindow.NameDevice = "МКР";
       deviceSettingsWindow.LoadDeviceModels<IRelaySwitchModule>();
       deviceSettingsWindow.SetHeadUnit(e);
@@ -73,12 +75,12 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
         deviceSettingsWindow.LoadFromDevice(editingEntity);
       }
 
-      deviceSettingsWindow.SaveEvent += (s, a) =>
+      deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
         var processor = new DeviceSettingsProcessorBase();
         var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-        RelaySwitchModuleEntity deviceEntity = processor.ProcessDevice<RelaySwitchModuleEntity>(
+        RelaySwitchModuleDto deviceEntity = processor.ProcessDevice<RelaySwitchModuleDto>(
             selectedDevice: baseDevice as IDevice,
             control: deviceSettingsWindow,
             additionalDataProcessor: this);
@@ -91,18 +93,27 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
           deviceEntity.SwitchCapacitance = deviceSettingsWindow.GetCapacitance();
           try
           {
-            if (_editingEntity == null)
+            if (_editingDto != null)
             {
-              new RelaySwitchModuleServices().Create(deviceEntity);
+              deviceEntity.Id = _editingDto.Id;
+            }
+
+            var relaySwitchModule = RelaySwitchModules.Build(deviceEntity);
+
+            if (_editingDto == null)
+            {
+              var createdDevice = await RelaySwitchModules.CreateAsync(relaySwitchModule);
+              deviceEntity.Id = createdDevice.Id;
+              ShowCreated(deviceEntity);
             }
             else
             {
-              deviceEntity.Id = _editingEntity.Id;
-              new RelaySwitchModuleServices().Update(deviceEntity);
+              await RelaySwitchModules.UpdateAsync(relaySwitchModule);
+              ShowUpdated(deviceEntity);
             }
 
-            RequestSave?.Invoke(s, deviceEntity);
             RequestCloseWindow();
+            RequestSave?.Invoke(s, deviceEntity);
           }
           catch (DuplicateEntityException ex)
           {

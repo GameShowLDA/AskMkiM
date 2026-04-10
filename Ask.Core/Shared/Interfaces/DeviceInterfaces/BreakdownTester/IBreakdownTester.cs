@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
@@ -7,7 +8,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester
   /// <summary>
   /// Интерфейс для пробойной установки.
   /// </summary>
-  public interface IBreakdownTester : IAttachableDevice
+  public interface IBreakdownTester : IAttachableDevice, IDeviceToDtoConverter<BreakdownTesterDto>
   {
     /// <summary>
     /// Активный режим ППУ.

@@ -1,13 +1,26 @@
-﻿using Ask.Core.Services.App;
-using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
+using Ask.Core.Shared.DTO.Devices.Rack;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.DataBase.Engine.Static.Devices;
+using Ask.DataBase.Provider.Services.Devices;
 using Ask.Support;
-using DataBaseConfiguration.Services.Device;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using UI.Controls.Settings.DeviceConfig.BreakDown;
@@ -27,6 +40,16 @@ namespace UI.Controls.Settings.DeviceConfig
   public partial class DeviceConfigControl : UserControl
   {
     private const double DeviceConfigDrawerPanelWidth = 470d;
+    private readonly BreakdownTesterDtoService _breakdownTesterDtoService = new();
+    private readonly FastMeterDtoService _fastMeterDtoService = new();
+    private readonly PowerSourceModuleDtoService _powerSourceModuleDtoService = new();
+    private readonly RelaySwitchModuleDtoService _relaySwitchModuleDtoService = new();
+    private readonly SwitchingDeviceDtoService _switchingDeviceDtoService = new();
+    private readonly UninterruptiblePowerSupplyDtoService _uninterruptiblePowerSupplyDtoService = new();
+    private Task? _initializationTask;
+    private CancellationTokenSource? _selectedChassisCancellation;
+    private readonly SemaphoreSlim _reloadSemaphore = new(1, 1);
+    private bool _isInitialized;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceConfigControl"/>.
@@ -35,9 +58,7 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       InitializeComponent();
       chassisManager.NewSystem += (s, a) => NewSystem();
-      chassisManager.SystemSelected += (s, a) => SelectedChassis(a);
-
-      ReloadConfiguration();
+      chassisManager.SystemSelected += async (s, a) => await SelectedChassisAsync(a);
 
       MouseMove += (s, e) =>
       {
@@ -58,32 +79,21 @@ namespace UI.Controls.Settings.DeviceConfig
     /// Обрабатывает выбор шасси.
     /// </summary>
     /// <param name="system">Выбранное шасси.</param>
-    private void SelectedChassis(IChassisManager system)
+    private async Task SelectedChassisAsync(IChassisManager system)
     {
-      var devices = new DeviceManagerControl();
-      devices.SetHeadUnit(system);
+      try
+      {
+        var devices = new DeviceManagerControl();
+        deviceBorder.Child = devices;
+        ConfigureDeviceManagerControl(devices, system);
 
-      LoadBreakdownTesters(system, devices);
-      LoadFastMeters(system, devices);
-      LoadPowerSources(system, devices);
-      LoadRelaySwitchModules(system, devices);
-      LoadSwitchingDevices(system, devices);
-      LoadUninterruptiblePowerSupplies(system, devices);
-      deviceBorder.Child = devices;
-
-      devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
-      devices.DeviceBusCommutationSelected += (s, a) => Devices_DeviceBusCommutationSelected(s, a, system, devices);
-      devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
-      devices.ModuleRelayEvent += (s, a) => Devices_ModuleRalayEvent(s, a, system, devices);
-      devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
-      devices.EditBreakdownEvent += (s, a) => Devices_EditBreakdownEvent(system, devices, a);
-      devices.EditDeviceBusCommutationEvent += (s, a) => Devices_EditSwitchingEvent(system, devices, a);
-      devices.EditPowerModuleEvent += (s, a) => Devices_EditPowerModuleEvent(system, devices, a);
-      devices.EditModuleRelayEvent += (s, a) => Devices_EditRelayEvent(system, devices, a);
-      devices.EditFastMeterEvent += (s, a) => Devices_EditFastMeterEvent(system, devices, a);
-      devices.UninterruptiblePowerSupplyEvent += (s, a) => Devices_UninterruptiblePowerSupplyEvent(s, a, system, devices);
-      devices.EditUninterruptiblePowerSupplyEvent += (s, a) => Devices_EditUninterruptiblePowerSupplyEvent(system, devices, a);
-      devices.ExitEvent += Devices_ExitEvent;
+        ReplaceCancellationTokenSource(ref _selectedChassisCancellation);
+        var cancellationToken = _selectedChassisCancellation.Token;
+        await PopulateDevicesAsync(devices, system.Number, cancellationToken);
+      }
+      catch (OperationCanceledException)
+      {
+      }
     }
 
     /// <summary>
@@ -93,7 +103,7 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       FastMeterWindow fastMeterWindow = new FastMeterWindow();
       fastMeterWindow.SetSettings(sender, e);
-      fastMeterWindow.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
@@ -104,7 +114,7 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       ModuleVoltageCurrentSourceWindow fastMeterWindow = new ModuleVoltageCurrentSourceWindow();
       fastMeterWindow.SetSettings(sender, e);
-      fastMeterWindow.RequestSave += (s, a) => LoadPowerSources(system, devices);
+      fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
@@ -115,7 +125,7 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       ModuleRelayControlWindow fastMeterWindow = new ModuleRelayControlWindow();
       fastMeterWindow.SetSettings(sender, e);
-      fastMeterWindow.RequestSave += (s, a) => LoadRelaySwitchModules(system, devices);
+      fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
@@ -126,7 +136,7 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
       deviceSettingsWindow.SetSettings(sender, e);
-      deviceSettingsWindow.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
+      deviceSettingsWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(deviceSettingsWindow, "Добавление устройства", "F4 - закрыть");
     }
 
@@ -147,47 +157,47 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       BreakDownWindow fastMeterWindow = new BreakDownWindow();
       fastMeterWindow.SetSettings(sender, e);
-      fastMeterWindow.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
+      fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterEntity entity)
+    private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterDto entity)
     {
       BreakDownWindow window = new BreakDownWindow();
       window.SetSettings(this, system, entity);
-      window.RequestSave += (s, a) => LoadBreakdownTesters(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceEntity entity)
+    private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceDto entity)
     {
       DeviceBusCommutationWindow window = new DeviceBusCommutationWindow();
       window.SetSettings(this, system, entity);
-      window.RequestSave += (s, a) => LoadSwitchingDevices(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleEntity entity)
+    private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleDto entity)
     {
       ModuleVoltageCurrentSourceWindow window = new ModuleVoltageCurrentSourceWindow();
       window.SetSettings(this, system, entity);
-      window.RequestSave += (s, a) => LoadPowerSources(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleEntity entity)
+    private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleDto entity)
     {
       ModuleRelayControlWindow window = new ModuleRelayControlWindow();
       window.SetSettings(this, system, entity);
-      window.RequestSave += (s, a) => LoadRelaySwitchModules(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterEntity entity)
+    private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterDto entity)
     {
       FastMeterWindow window = new FastMeterWindow();
       window.SetSettings(this, system, entity);
-      window.RequestSave += (s, a) => LoadFastMeters(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
@@ -195,15 +205,15 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(sender, e);
-      window.RequestSave += (s, a) => LoadUninterruptiblePowerSupplies(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Добавление устройства", "F4 - закрыть");
     }
 
-    private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyEntity entity)
+    private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyDto entity)
     {
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(this, system, entity);
-      window.RequestSave += (s, a) => LoadUninterruptiblePowerSupplies(system, devices);
+      window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
@@ -232,114 +242,20 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     /// <param name="chassis">Менеджер шасси.</param>
     /// <param name="devicesControl">Контрол для отображения устройств.</param>
-    private void LoadBreakdownTesters(IChassisManager chassis, DeviceManagerControl devicesControl)
-    {
-      devicesControl.ClearDevice(new BreakdownTesterEntity());
-
-      var breakdownTesters = ServiceLocator.GetRequired<BreakdownTesterServices>().GetEntitiesByNumberChassis(chassis.Number);
-      foreach (var device in breakdownTesters)
-      {
-        devicesControl.AddDevice(device);
-      }
-    }
-
-    /// <summary>
-    /// Загружает все быстрые измерители, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.
-    /// </summary>
-    /// <param name="chassis">Менеджер шасси.</param>
-    /// <param name="devicesControl">Контрол для отображения устройств.</param>
-    private void LoadFastMeters(IChassisManager chassis, DeviceManagerControl devicesControl)
-    {
-      devicesControl.ClearDevice(new FastMeterEntity());
-
-      var fastMeters = new FastMeterServices().GetEntitiesByNumberChassis(chassis.Number);
-
-      foreach (var device in fastMeters)
-      {
-        devicesControl.AddDevice(device);
-      }
-    }
-
-    /// <summary>
-    /// Загружает все модули источников питания, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.
-    /// </summary>
-    /// <param name="chassis">Менеджер шасси.</param>
-    /// <param name="devicesControl">Контрол для отображения устройств.</param>
-    private void LoadPowerSources(IChassisManager chassis, DeviceManagerControl devicesControl)
-    {
-      devicesControl.ClearDevice(new PowerSourceModuleEntity());
-
-      var powerSources = new PowerSourceModuleServices().GetEntitiesByNumberChassis(chassis.Number);
-
-      foreach (var device in powerSources)
-      {
-        devicesControl.AddDevice(device);
-      }
-    }
-
-    /// <summary>
-    /// Загружает все модули релейных коммутаторов, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.
-    /// </summary>
-    /// <param name="chassis">Менеджер шасси.</param>
-    /// <param name="devicesControl">Контрол для отображения устройств.</param>
-    private void LoadRelaySwitchModules(IChassisManager chassis, DeviceManagerControl devicesControl)
-    {
-      devicesControl.ClearDevice(new RelaySwitchModuleEntity());
-
-      var relaySwitchModules = new RelaySwitchModuleServices().GetEntitiesByNumberChassis(chassis.Number);
-
-      foreach (var device in relaySwitchModules)
-      {
-        devicesControl.AddDevice(device);
-      }
-    }
-
-    /// <summary>
-    /// Загружает все устройства коммутации, привязанные к указанному шасси, и добавляет их в контрол управления устройствами.
-    /// </summary>
-    /// <param name="chassis">Менеджер шасси.</param>
-    /// <param name="devicesControl">Контрол для отображения устройств.</param>
-    private void LoadSwitchingDevices(IChassisManager chassis, DeviceManagerControl devicesControl)
-    {
-      devicesControl.ClearDevice(new SwitchingDeviceEntity());
-
-      var switchingDevices = new SwitchingDeviceServices().GetEntitiesByNumberChassis(chassis.Number);
-
-      foreach (var device in switchingDevices)
-      {
-        devicesControl.AddDevice(device);
-      }
-    }
-
-    /// <summary>
-    /// Loads UPS devices bound to selected chassis.
-    /// </summary>
-    private void LoadUninterruptiblePowerSupplies(IChassisManager chassis, DeviceManagerControl devicesControl)
-    {
-      devicesControl.ClearDevice(new UninterruptiblePowerSupplyEntity());
-
-      var uninterruptiblePowerSupplies = new UninterruptiblePowerSupplyServices().GetEntitiesByNumberChassis(chassis.Number);
-
-      foreach (var device in uninterruptiblePowerSupplies)
-      {
-        devicesControl.AddDevice(device);
-      }
-    }
-
     /// <summary>
     /// Добавляет систему в список.
     /// </summary>
     /// <param name="data">Данные системы.</param>
     public void AddSystem(IChassisManager data)
     {
-      chassisManager.AddSystem(data);
+      chassisManager.AddSystem(data.Convert());
     }
 
     /// <summary>
     /// Добавляет стойку в список.
     /// </summary>
     /// <param name="data">Данные стойки.</param>
-    public void AddRack(RackEntity data)
+    public void AddRack(RackDto data)
     {
       chassisManager.AddRack(data);
     }
@@ -347,39 +263,81 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <summary>
     /// Перечитывает конфигурацию устройств из БД и обновляет отображение.
     /// </summary>
+    public async Task EnsureInitializedAsync()
+    {
+      if (_isInitialized)
+      {
+        return;
+      }
+
+      if (_initializationTask != null)
+      {
+        await _initializationTask;
+        return;
+      }
+
+      _initializationTask = ReloadConfigurationAsync();
+      await _initializationTask;
+    }
+
+    public async Task ReloadConfigurationAsync(CancellationToken cancellationToken = default)
+    {
+      await _reloadSemaphore.WaitAsync(cancellationToken);
+
+      try
+      {
+        deviceBorder.Child = null;
+        settingsBorder.Child = null;
+        ToggleThirdColumn(false);
+
+        chassisManager.Reset();
+
+        var chassisTask = ChassisManagers.GetAllAsync(cancellationToken);
+        var racksTask = Racks.GetAllAsync(cancellationToken);
+        await Task.WhenAll(chassisTask, racksTask);
+
+        var chassisData = await chassisTask;
+        var racksData = await racksTask;
+
+        var chassisList = chassisData
+          .OrderBy(chassis => chassis.Number)
+          .ToList();
+
+        foreach (var chassis in chassisList)
+        {
+          AddSystem(chassis);
+        }
+
+        var racks = racksData
+          .Select(ToRackEntity)
+          .OrderBy(rack => rack.NumberChassis)
+          .ThenBy(rack => rack.Number)
+          .ToList();
+
+        foreach (var rack in racks)
+        {
+          AddRack(rack);
+        }
+
+        _isInitialized = true;
+
+        if (chassisList.Count > 0)
+        {
+          await SelectedChassisAsync(chassisList[0]);
+        }
+      }
+      catch (OperationCanceledException)
+      {
+      }
+      finally
+      {
+        _reloadSemaphore.Release();
+      }
+    }
+
     public void ReloadConfiguration()
     {
-      deviceBorder.Child = null;
-      settingsBorder.Child = null;
-      ToggleThirdColumn(false);
-
-      chassisManager.Reset();
-
-      var chassisList = new ChassisManagerServices()
-        .GetAll()
-        .OrderBy(chassis => chassis.Number)
-        .ToList();
-
-      foreach (var chassis in chassisList)
-      {
-        AddSystem(chassis);
-      }
-
-      var racks = new RackServices()
-        .GetAllEntities()
-        .OrderBy(rack => rack.NumberChassis)
-        .ThenBy(rack => rack.Number)
-        .ToList();
-
-      foreach (var rack in racks)
-      {
-        AddRack(rack);
-      }
-
-      if (chassisList.Count > 0)
-      {
-        SelectedChassis(chassisList[0]);
-      }
+      _ = ReloadConfigurationAsync();
     }
 
     /// <summary>
@@ -397,7 +355,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <summary>
     /// Обрабатывает сохранение конфигурации шасси.
     /// </summary>
-    private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerEntity device)
+    private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerDto device)
     {
       deviceBorder.Child = null;
       chassisManager.Visibility = Visibility.Visible;
@@ -466,6 +424,146 @@ namespace UI.Controls.Settings.DeviceConfig
       var content = window.DetachSettingsControl();
       await DrawerHostService.Instance.OpenContentAsync(content, title, subtitle, onClose, DeviceConfigDrawerPanelWidth);
     }
+
+    private void ConfigureDeviceManagerControl(DeviceManagerControl devices, IChassisManager system)
+    {
+      devices.SetHeadUnit(system);
+      devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
+      devices.DeviceBusCommutationSelected += (s, a) => Devices_DeviceBusCommutationSelected(s, a, system, devices);
+      devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
+      devices.ModuleRelayEvent += (s, a) => Devices_ModuleRalayEvent(s, a, system, devices);
+      devices.FastMeterEvent += (s, a) => Devices_FastMeterEvent(s, a, system, devices);
+      devices.EditBreakdownEvent += (s, a) => Devices_EditBreakdownEvent(system, devices, a);
+      devices.EditDeviceBusCommutationEvent += (s, a) => Devices_EditSwitchingEvent(system, devices, a);
+      devices.EditPowerModuleEvent += (s, a) => Devices_EditPowerModuleEvent(system, devices, a);
+      devices.EditModuleRelayEvent += (s, a) => Devices_EditRelayEvent(system, devices, a);
+      devices.EditFastMeterEvent += (s, a) => Devices_EditFastMeterEvent(system, devices, a);
+      devices.UninterruptiblePowerSupplyEvent += (s, a) => Devices_UninterruptiblePowerSupplyEvent(s, a, system, devices);
+      devices.EditUninterruptiblePowerSupplyEvent += (s, a) => Devices_EditUninterruptiblePowerSupplyEvent(system, devices, a);
+      devices.ExitEvent += Devices_ExitEvent;
+    }
+
+    private async Task PopulateDevicesAsync(
+      DeviceManagerControl devices,
+      int chassisNumber,
+      CancellationToken cancellationToken)
+    {
+      var breakdownTask = _breakdownTesterDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
+      var fastMetersTask = _fastMeterDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
+      var powerSourcesTask = _powerSourceModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
+      var relaySwitchModulesTask = _relaySwitchModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
+      var switchingDevicesTask = _switchingDeviceDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
+      var uninterruptiblePowerSuppliesTask = _uninterruptiblePowerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
+
+      await Task.WhenAll(
+        breakdownTask,
+        fastMetersTask,
+        powerSourcesTask,
+        relaySwitchModulesTask,
+        switchingDevicesTask,
+        uninterruptiblePowerSuppliesTask);
+
+      if (cancellationToken.IsCancellationRequested || deviceBorder.Child != devices)
+      {
+        return;
+      }
+
+      AddDevices(devices, await breakdownTask);
+      AddDevices(devices, await fastMetersTask);
+      AddDevices(devices, await powerSourcesTask);
+      AddDevices(devices, await relaySwitchModulesTask);
+      AddDevices(devices, await switchingDevicesTask);
+      AddDevices(devices, await uninterruptiblePowerSuppliesTask);
+    }
+
+    private async Task RefreshDeviceAsync(DeviceManagerControl devices, int chassisNumber, DeviceDto device)
+    {
+      if (deviceBorder.Child != devices)
+      {
+        return;
+      }
+
+      switch (device)
+      {
+        case BreakdownTesterDto breakdownTester:
+          await RefreshDeviceListAsync(
+            devices,
+            breakdownTester,
+            _breakdownTesterDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+
+        case FastMeterDto fastMeter:
+          await RefreshDeviceListAsync(
+            devices,
+            fastMeter,
+            _fastMeterDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+
+        case PowerSourceModuleDto powerSourceModule:
+          await RefreshDeviceListAsync(
+            devices,
+            powerSourceModule,
+            _powerSourceModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+
+        case RelaySwitchModuleDto relaySwitchModule:
+          await RefreshDeviceListAsync(
+            devices,
+            relaySwitchModule,
+            _relaySwitchModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+
+        case SwitchingDeviceDto switchingDevice:
+          await RefreshDeviceListAsync(
+            devices,
+            switchingDevice,
+            _switchingDeviceDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+
+        case UninterruptiblePowerSupplyDto uninterruptiblePowerSupply:
+          await RefreshDeviceListAsync(
+            devices,
+            uninterruptiblePowerSupply,
+            _uninterruptiblePowerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+      }
+    }
+
+    private async Task RefreshDeviceListAsync<TDevice>(
+      DeviceManagerControl devices,
+      TDevice marker,
+      Task<List<TDevice>> loadTask)
+      where TDevice : DeviceDto
+    {
+      var deviceList = (await loadTask)
+        .OrderBy(device => device.Number)
+        .ToList();
+
+      if (deviceBorder.Child != devices)
+      {
+        return;
+      }
+
+      devices.ClearDevice(marker);
+      AddDevices(devices, deviceList);
+    }
+
+    private static void AddDevices<TDevice>(DeviceManagerControl devices, IEnumerable<TDevice> deviceList)
+      where TDevice : DeviceDto
+    {
+      foreach (var device in deviceList)
+      {
+        devices.AddDevice(device);
+      }
+    }
+
+    private static RackDto ToRackEntity(IRack device) => device.Convert();
+
+    private static void ReplaceCancellationTokenSource(ref CancellationTokenSource? cancellationTokenSource)
+    {
+      cancellationTokenSource?.Cancel();
+      cancellationTokenSource?.Dispose();
+      cancellationTokenSource = new CancellationTokenSource();
+    }
   }
 }
-

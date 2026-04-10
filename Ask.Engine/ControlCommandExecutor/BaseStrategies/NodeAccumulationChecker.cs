@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -46,7 +47,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var messageService = context.MessageService;
       var cancellationToken = messageService.GetCancellationToken();
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      {
+        await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
+      }
 
       foreach (var chain in groupChains.ChainModels)
       {
@@ -59,7 +63,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
         str = str.Remove(str.Length - 1);
 
-        await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
+        if (ProtocolConfig.GetTestStepMessagesInProtocol())
+        {
+          await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
+        }
 
         foreach (var point in chain.PointModels)
         {
@@ -89,7 +96,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
                 PointModel.ConvertToPointStrings(chain.PointModels),
                 PointModel.ConvertToPointStrings(localized.PointModels),
-                measured.Value.ToString(),
+                MeasurementValueFormatter.Format(measured.Value),
                 messageService.GetLastLineNumber(),
                 context.CommandModel.FormattedStartLineNumber));
             }

@@ -1,7 +1,9 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
@@ -61,7 +63,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     {
       try
       {
-        _deviceCollector.Collect(point1, point2);
+        _deviceCollector.CollectAsync(point1, point2);
         _commutationManager = new CommutationManager(_deviceCollector.Devices);
         _binaryPointMapper = new BinaryPointMapper(_deviceCollector.Devices.OfType<IRelaySwitchModule>());
         _pointGroupingService = new PointGroupingService(_deviceCollector.Devices.OfType<IRelaySwitchModule>());
@@ -128,7 +130,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
     }
 
     /// <summary>

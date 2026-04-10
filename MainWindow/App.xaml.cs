@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.Support;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Init;
@@ -61,6 +62,7 @@ namespace MainWindowProgram
       ApplicationClockService.Start();
 
       SplashScreenManager.ShowSplash();
+      Console.SetOut(new ConsoleRedirector());
 
       await Task.Run(async () =>
       {
@@ -69,8 +71,6 @@ namespace MainWindowProgram
       });
 
       base.OnStartup(e);
-
-      Console.SetOut(new ConsoleRedirector());
 
       try
       {
@@ -198,7 +198,7 @@ namespace MainWindowProgram
 
       try
       {
-        var svc = ServiceLocator.GetRequired<IBreakdownTester>();
+        var svc = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
         LogInformation($"OnExit: IBreakdownTester instance = {svc.GetHashCode()} | {svc.GetType().FullName}");
 
         svc?.ConnectableManager?.DisconnectAsync();

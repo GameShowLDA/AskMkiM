@@ -1,8 +1,8 @@
-﻿using Ask.Core.Shared.Entity.Devices;
+﻿using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using DataBaseConfiguration.Services.Device;
-using NewCore.Base.DeviceResponses;
-using NewCore.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.Runtime.Device;
 using System.Text.Json;
 
 namespace TestConsole.MINT
@@ -13,8 +13,7 @@ namespace TestConsole.MINT
     {
       Console.WriteLine("=== Редактор калибровки сопротивления ===");
 
-      var service = new PowerSourceModuleServices();
-      var modules = service.GetAllEntities().OfType<PowerSourceModuleEntity>().ToList();
+      var modules = PowerSourceModules.GetAllAsync().GetAwaiter().GetResult().OfType<PowerSourceModuleDto>().ToList(); ;
 
       if (modules == null || !modules.Any())
       {
@@ -27,15 +26,14 @@ namespace TestConsole.MINT
 
       var editableModule = new ModuleVoltageCurrentSource();
       CopyProperties(selected, editableModule);
-      EditResistanceCalibration(selected, service);
+      EditResistanceCalibration(selected);
     }
 
     /// <summary>
     /// Запускает цикл редактирования диапазонов сопротивления с калибровочными коэффициентами.
     /// </summary>
     /// <param name="selected">Сущность модуля из базы.</param>
-    /// <param name="service">Сервис для сохранения изменений.</param>
-    private static void EditResistanceCalibration(PowerSourceModuleEntity selected, PowerSourceModuleServices service)
+    private static void EditResistanceCalibration(PowerSourceModuleDto selected)
     {
       while (true)
       {
@@ -82,11 +80,13 @@ namespace TestConsole.MINT
 
         editableModule.ResistanceCalibration.Add(updatedRange);
         selected.ResistanceCalibrationJson = JsonSerializer.Serialize(editableModule.ResistanceCalibration);
-        service.Update(selected);
+
+        var device = PowerSourceModules.Build(selected);
+        PowerSourceModules.UpdateAsync(device).GetAwaiter().GetResult();
       }
     }
 
-    private static PowerSourceModuleEntity SelectModule(List<PowerSourceModuleEntity> modules)
+    private static PowerSourceModuleDto SelectModule(List<PowerSourceModuleDto> modules)
     {
       Console.WriteLine("Выберите модуль:");
       for (int i = 0; i < modules.Count; i++)

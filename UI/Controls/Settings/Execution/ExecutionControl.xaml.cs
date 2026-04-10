@@ -1,12 +1,11 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.DTO.Settings;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Ask.Core.Services.EventCore.Events.SystemStateEvents;
 
 namespace UI.Controls.Settings.Execution
 {
@@ -15,12 +14,13 @@ namespace UI.Controls.Settings.Execution
   /// </summary>
   public partial class ExecutionControl : UserControl
   {
+    private bool _isInitialized;
 
     /// <summary>
     /// Базовая (сохранённая) модель выполнения, считанная при загрузке.
     /// Используется как эталон для сравнения с текущими значениями UI.
     /// </summary>
-    private SettingsExecutionModel _baseExecutionModel { get; set; }
+    private SettingsExecutionDto _baseExecutionModel { get; set; }
 
     /// <summary>
     /// Глобальный флаг наличия несохранённых изменений в разделе.
@@ -58,13 +58,17 @@ namespace UI.Controls.Settings.Execution
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
       DefalultData();
 
-      StopInError.CheckedChanged += CheckedChanged;
-      StepByStepMode.CheckedChanged += CheckedChanged;
-      ErrorSimulation.CheckedChanged += CheckedChanged;
-      IdleMode.CheckedChanged += IdleMode_CheckedChanged;
+      if (!_isInitialized)
+      {
+        StopInError.CheckedChanged += CheckedChanged;
+        StepByStepMode.CheckedChanged += CheckedChanged;
+        ErrorSimulation.CheckedChanged += CheckedChanged;
+        IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
-      Success.PreviewMouseDown += Success_PreviewMouseDown;
-      Error.PreviewMouseDown += Error_PreviewMouseDown;
+        Success.PreviewMouseDown += Success_PreviewMouseDown;
+        Error.PreviewMouseDown += Error_PreviewMouseDown;
+        _isInitialized = true;
+      }
 
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
@@ -99,18 +103,16 @@ namespace UI.Controls.Settings.Execution
       HasUnsavedChanges = false;
     }
 
-    private async void IdleMode_CheckedChanged(object? sender, bool e)
+    private void IdleMode_CheckedChanged(object? sender, bool e)
     {
-      if (SystemStateManager.GetIsActivePower() && (sender as CheckBox).IsChecked == true)
+      if (SystemStateManager.GetIsActivePower() && IdleMode.IsChecked)
       {
         MessageBoxCustom.Show("Отключите питание системы для перехода в холостой режим!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        (sender as CheckBox).IsChecked = !(sender as CheckBox).IsChecked;
+        IdleMode.IsChecked = false;
         return;
       }
-      else
-      {
-        CheckedChanged(sender, e);
-      }
+
+      CheckedChanged(sender, e);
     }
 
     /// <summary>
@@ -136,9 +138,9 @@ namespace UI.Controls.Settings.Execution
     /// <summary>
     /// Формирует модель протокола из текущих значений элементов UI.
     /// </summary>
-    private SettingsExecutionModel GetModel()
+    private SettingsExecutionDto GetModel()
     {
-      var model = new SettingsExecutionModel()
+      var model = new SettingsExecutionDto()
       {
         StopOnError = StopInError.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
@@ -151,7 +153,7 @@ namespace UI.Controls.Settings.Execution
     /// <summary>
     /// Сравнивает две модели протокола по всем флагам.
     /// </summary>
-    private static bool ProtocolEquals(SettingsExecutionModel a, SettingsExecutionModel b) =>
+    private static bool ProtocolEquals(SettingsExecutionDto a, SettingsExecutionDto b) =>
       a.IdleModeExecution == b.IdleModeExecution &&
       a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&

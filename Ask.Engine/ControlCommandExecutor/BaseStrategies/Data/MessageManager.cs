@@ -8,23 +8,32 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
   internal class MessageManager
   {
-    public static async Task<(bool, double)> ShowMeasurementResultAsync(IUserInteractionService messageService, MeasurementTypeCommand measurementTypeCommand, double lowerLimit, double upperLimit, double value, string? chains = null)
+    public static async Task<(bool, double)> ShowMeasurementResultAsync(
+      IUserInteractionService messageService,
+      MeasurementTypeCommand measurementTypeCommand,
+      double lowerLimit,
+      double upperLimit,
+      double value,
+      string? chains = null,
+      bool isOverloadExpected = false)
     {
-
+      var random = new Random();
 
       if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
         if (upperLimit != -1)
         {
-          value = new Random().Next(0, (int)upperLimit * 2);
+          value = random.NextDouble() * ((upperLimit + 1) * 2);
         }
         else
         {
-          value = new Random().Next();
+          value = random.NextDouble();
         }
       }
 
-      bool result = upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
+      bool result = isOverloadExpected
+        ? IsOverloadValue(value)
+        : upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
 
       if (messageService != null && (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility()))
       {
@@ -37,5 +46,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       return (result, value);
     }
+
+    /// <summary>
+    /// Определяет, соответствует ли измеренное значение перегрузке прибора.
+    /// </summary>
+    private static bool IsOverloadValue(double value) => MeasurementValueFormatter.IsOverloadValue(value);
   }
 }

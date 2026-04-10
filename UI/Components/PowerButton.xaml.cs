@@ -4,7 +4,8 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using DataBaseConfiguration.Services.Device;
+using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -234,7 +235,7 @@ namespace UI.Components
     /// </summary>
     private async Task StopPowerSequenceAsync()
     {
-      await NewCore.Communication.DeviceCommandSender.ResetAllSystem();
+      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
       await Task.Delay(500);
 
       bool power = true;
@@ -260,9 +261,9 @@ namespace UI.Components
         return;
       }
 
-      if (!await ups.VerifyPowerAsync())
+      if (!await ups.PowerManager.VerifyPowerAsync())
       {
-        await ups.StartPowerAsync();
+        await ups.PowerManager.StartPowerAsync();
       }
     }
 
@@ -271,9 +272,7 @@ namespace UI.Components
     /// </summary>
     private IUninterruptiblePowerSupply? GetConfiguredUps()
     {
-      return new UninterruptiblePowerSupplyServices()
-        .GetAll()
-        .FirstOrDefault(device => device.NumberChassis == model.Number);
+      return UninterruptiblePowerSupplies.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault(device => device.NumberChassis == model.Number);
     }
 
     /// <summary>
@@ -426,7 +425,7 @@ namespace UI.Components
     /// </summary>
     private bool TryResolveChassisManager()
     {
-      model = new ChassisManagerServices().GetAll().FirstOrDefault();
+      model = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (model != null)
       {
         return true;

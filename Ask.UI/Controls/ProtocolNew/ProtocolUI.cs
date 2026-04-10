@@ -36,6 +36,11 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
+    /// <summary>
+    /// Флаг, указывающий, что текущее сообщение является последним.
+    /// </summary>
+    public bool LastMessage { get; set; } = false;
+
     public IButtonService ButtonService { get; set; }
 
     /// <summary>
@@ -248,12 +253,15 @@ namespace Ask.UI.Controls.ProtocolNew
       await ShouldShowDetailedProtocol(showMessageModel);
       await CheckStatus(showMessageModel);
 
-      if (string.IsNullOrEmpty(showMessageModel.Message) && !ProtocolConfig.GetHeaderInfo())
+      if (string.IsNullOrEmpty(showMessageModel.Message) &&
+          showMessageModel.Status != MessageType.Command &&
+          !ProtocolConfig.GetHeaderInfo())
       {
         return;
       }
 
-      await protocolTextBox.AppendLineAsync(showMessageModel);
+      await protocolTextBox.AppendLineAsync(showMessageModel, LastMessage);
+      LastMessage = false;
 
       if (ActionExecutor.IsPaused)
       {
@@ -269,13 +277,9 @@ namespace Ask.UI.Controls.ProtocolNew
       {
         if (ShouldWaitStepKey(showMessageModel, IsBlockStart))
         {
-          // Остановились на шаге: показываем режим "Продолжить/Завершить".
           ShowButtonsOnPause(repeatVisible: false);
           await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
 
-          // После шага выполнение снова "бежит":
-          // для F10 показываем только Пауза/Завершить,
-          // для F11 оставляем шаговые кнопки.
           bool showStepButtons = StepControlManager.IsStepInto && !StepControlManager.StepOverUntilNextControlCommand;
           ShowOnlyStopAndFinishButtons(showStepButtons);
         }
@@ -322,6 +326,11 @@ namespace Ask.UI.Controls.ProtocolNew
     public async Task AppendEmptyLineAsync(int indentLevel = 0)
     {
       await protocolTextBox.AppendEmptyLineAsync();
+    }
+
+    public async Task CompleteCommandAsync(bool hasErrors)
+    {
+      await protocolTextBox.CompleteCommandAsync(hasErrors);
     }
 
     public int GetLastLineNumber()
@@ -395,7 +404,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
     private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
     {
-      if (!await ProtocolConfig.GetShowDetailedProtocol())
+      if (!ProtocolConfig.GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
         {
@@ -457,7 +466,7 @@ namespace Ask.UI.Controls.ProtocolNew
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
       }
 
-      var lines = protocolTextBox.Messages
+      var lines = protocolTextBox.GetMessagesSnapshot()
         .Select(FormatProtocolLineForSave)
         .Where(static line => !string.IsNullOrWhiteSpace(line));
 

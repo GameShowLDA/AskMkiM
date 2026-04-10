@@ -555,4 +555,22 @@
   <data name="settings.userinterface.section.title" xml:space="preserve">
     <value>Интерфейс</value>
   </data>
+  <data name="settings.userinterface.commandAutoCollapse.title" xml:space="preserve">
+    <value>Автоскрытие блоков в протоколе</value>
+  </data>
+  <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
+    <value>Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми.</value>
+  </data>
+  <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
+    <value>Заголовки команд</value>
+  </data>
+  <data name="settings.protocol.commandHeaders.description" xml:space="preserve">
+    <value>Отображает заголовки команд в ходе выполнения программ контроля.</value>
+  </data>
+  <data name="settings.protocol.testStepMessages.title" xml:space="preserve">
+    <value>Сообщения шагов проверки</value>
+  </data>
+  <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
+    <value>Отображает сообщения о шагах проверки в протоколе выполнения.</value>
+  </data>
 </root>

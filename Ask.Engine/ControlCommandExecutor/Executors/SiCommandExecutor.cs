@@ -90,6 +90,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         protocolModel.AddErrors(nameCommand, errorMessage);
       }
+
+      await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
     }
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
     {

@@ -3,7 +3,7 @@ using Ask.Core.Shared.Metadata.Static;
 using System.Windows.Controls;
 using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services

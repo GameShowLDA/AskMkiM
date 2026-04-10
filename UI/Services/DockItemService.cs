@@ -1,20 +1,16 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
-using ICSharpCode.AvalonEdit;
 using Message;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using UI.Components.FileComparerControls;
-using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.Runner;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -137,26 +133,13 @@ namespace UI.Services
           Content = translatorItem
         };
 
-
-        dockItem.CloseItem += (sender) =>
-        {
-          LogDebug($"Закрытие файла {nameFile}.");
-
-          if (textEditorContainer != null)
-          {
-            var controlManager = new ControlManager(_fileManager.EditorWorkspaceModel);
-            var foundPage = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Text == EditorType.Translator.ToString());
-            controlManager.RemoveControl(foundPage, translatorItem).ConfigureAwait(true);
-            _fileManager.EditorWorkspaceModel.FilePaths.Remove(dockItem.TabText);
-            if (textEditorContainer != null && textEditorContainer.DockManager.DockItems.Count(item => item.DockPosition != DockPosition.Hidden) == 0)
-            {
-              LogDebug($"Закрытие контейнера типа \"{EditorType.Translator.ToString()}\".");
-              _fileManager.ContainerService.RemoveEditorContainer(textEditorContainer, EditorType.Translator);
-            }
-
-            EditorEventAdapter.RaiseTextEditorContainerClosing(true, nameFile);
-          }
-        };
+        ConfigureDockItemClosing(
+          dockItem,
+          textEditorContainer,
+          EditorType.Translator,
+          nameFile,
+          confirmBeforeClose: true,
+          removeFilePath: true);
 
         await Task.Delay(1).ConfigureAwait(true);
 
@@ -264,17 +247,15 @@ namespace UI.Services
     /// </summary>
     private EditorType InitializeWithoutSave(DockItem dockItem, EditorType editorType)
     {
-      dockItem.ItemClosed += (sender) =>
-      {
-        var controlManager = new ControlManager(_fileManager.EditorWorkspaceModel);
-        var foundPage = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Text == editorType.ToString());
-        TextEditorContainer translatorContainer = _fileManager.ContainerService.GetEditorContainer(editorType);
-        if (translatorContainer != null && translatorContainer.DockManager.DockItems.Count(item => item.DockPosition != DockPosition.Hidden) == 0)
-        {
-          _fileManager.ContainerService.RemoveEditorContainer(translatorContainer, editorType);
-        }
-        SystemStateManager.SetIsControlProgramActive(false);
-      };
+      var container = _fileManager.ContainerService.GetEditorContainer(editorType);
+      ConfigureDockItemClosing(
+        dockItem,
+        container,
+        editorType,
+        dockItem.TabText,
+        confirmBeforeClose: false,
+        removeFilePath: false);
+
       return editorType;
     }
 
@@ -285,26 +266,61 @@ namespace UI.Services
     {
       LogDebug($"Тип редактора для файла {nameFile}: {editorType.ToString()}");
 
-      dockItem.CloseItem += (sender) =>
+      ConfigureDockItemClosing(
+        dockItem,
+        textEditorContainer,
+        editorType,
+        nameFile,
+        confirmBeforeClose: textEditor is TextEditorUI,
+        removeFilePath: true);
+    }
+
+    private void ConfigureDockItemClosing(
+      DockItem dockItem,
+      TextEditorContainer textEditorContainer,
+      EditorType editorType,
+      string nameFile,
+      bool confirmBeforeClose,
+      bool removeFilePath)
+    {
+      dockItem.HideOnPerformClose = false;
+      dockItem.Closing += (sender, e) =>
       {
         LogDebug($"Закрытие файла {nameFile}.");
 
-        if (textEditorContainer != null && editorType != null)
+        if (confirmBeforeClose && !_fileManager.FileService.SaveFileManager.ConfirmClose(dockItem))
         {
-          var controlManager = new ControlManager(_fileManager.EditorWorkspaceModel);
-          var foundPage = _fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.Text == editorType.ToString());
-          controlManager.RemoveControl(foundPage, textEditor).ConfigureAwait(true);
-          _fileManager.EditorWorkspaceModel.FilePaths.Remove(dockItem.TabText);
-          if (_fileManager.EditorWorkspaceModel.FilePaths.Count == 0)
-          {
-            LogDebug($"Закрытие контейнера типа \"{editorType.ToString()}\".");
-            _fileManager.ContainerService.RemoveEditorContainer(textEditorContainer, editorType);
-          }
-
-          EditorEventAdapter.RaiseTextEditorContainerClosing(true, nameFile);
-          SystemStateManager.SetIsControlProgramActive(false);
+          e.Cancel = true;
+          return;
         }
+
+        Application.Current.Dispatcher.BeginInvoke(
+          DispatcherPriority.Background,
+          new Action(() => FinalizeDockItemClose(textEditorContainer, editorType, nameFile, dockItem, removeFilePath)));
       };
+    }
+
+    private void FinalizeDockItemClose(
+      TextEditorContainer textEditorContainer,
+      EditorType editorType,
+      string nameFile,
+      DockItem dockItem,
+      bool removeFilePath)
+    {
+      if (removeFilePath)
+      {
+        _fileManager.EditorWorkspaceModel.FilePaths.Remove(dockItem.TabText);
+        EditorEventAdapter.RaiseTextEditorContainerClosing(true, nameFile);
+      }
+
+      if (textEditorContainer != null
+        && textEditorContainer.DockManager.DockItems.Count(item => item.DockPosition != DockPosition.Hidden) == 0)
+      {
+        LogDebug($"Закрытие контейнера типа \"{editorType}\".");
+        _fileManager.ContainerService.RemoveEditorContainer(textEditorContainer, editorType);
+      }
+
+      SystemStateManager.SetIsControlProgramActive(false);
     }
   }
 }

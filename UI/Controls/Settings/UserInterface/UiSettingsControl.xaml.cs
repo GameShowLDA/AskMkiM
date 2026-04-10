@@ -3,12 +3,14 @@ using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
-using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Infrastructure.Localization;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.UserInterface
 {
@@ -17,7 +19,8 @@ namespace UI.Controls.Settings.UserInterface
   /// </summary>
   public partial class UiSettingsControl : UserControl
   {
-    private UserInterfaceModel _baseParameterModel { get; set; }
+    private UserInterfaceDto _baseParameterModel { get; set; }
+    private bool _isInitialized;
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
 
@@ -54,12 +57,20 @@ namespace UI.Controls.Settings.UserInterface
 
     public async Task SaveData()
     {
-      await UserInterfaceConfig.SaveProtocolModel(GetModel());
-      _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
+      try
+      {
+        await UserInterfaceConfig.SaveProtocolModel(GetModel());
+        _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
 
-      Error.Visibility = Visibility.Collapsed;
-      Success.Visibility = Visibility.Collapsed;
-      HasUnsavedChanges = false;
+        Error.Visibility = Visibility.Collapsed;
+        Success.Visibility = Visibility.Collapsed;
+        HasUnsavedChanges = false;
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка сохранения настроек интерфейса", ex);
+        MessageBoxCustom.Show($"Ошибка сохранения настроек интерфейса: {ex.Message}", image: MessageBoxImage.Error);
+      }
     }
 
     private void ValueChanged(object? sender, object? e)
@@ -82,16 +93,22 @@ namespace UI.Controls.Settings.UserInterface
     {
       _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
       DefalultData();
+      UpdateCommandAutoCollapseVisibility();
 
-      LanguageSelect.ValueChanged += ValueChanged;
-      ThemeSelect.ValueChanged += ValueChanged;
-      SyntaxHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      CommandBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      ChainPointBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      TopMenuIcons.CheckedChanged += (s, ev) => ValueChanged(s, ev);
+      if (!_isInitialized)
+      {
+        LanguageSelect.ValueChanged += ValueChanged;
+        ThemeSelect.ValueChanged += ValueChanged;
+        SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
+        CommandAutoCollapsing.CheckedChanged += SettingsCard_CheckedChanged;
 
-      Success.PreviewMouseDown += Success_PreviewMouseDown;
-      Error.PreviewMouseDown += Error_PreviewMouseDown;
+        Success.PreviewMouseDown += Success_PreviewMouseDown;
+        Error.PreviewMouseDown += Error_PreviewMouseDown;
+        _isInitialized = true;
+      }
 
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
@@ -101,11 +118,18 @@ namespace UI.Controls.Settings.UserInterface
       LoadThemeOptions(_baseParameterModel.Theme);
 
       EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
+      ProtocolConfig.SaveProtocolEvent += ProtocolConfig_SaveProtocolEvent;
     }
 
     private void UiSettingsControl_Unloaded(object sender, RoutedEventArgs e)
     {
       EventAggregator.Unsubscribe<ThemeEvent.Change>(OnThemeChanged);
+      ProtocolConfig.SaveProtocolEvent -= ProtocolConfig_SaveProtocolEvent;
+    }
+
+    private void SettingsCard_CheckedChanged(object? sender, bool e)
+    {
+      ValueChanged(sender, e);
     }
 
     /// <summary>
@@ -155,15 +179,28 @@ namespace UI.Controls.Settings.UserInterface
       ThemeSelect.SelectedValue = currentTheme;
 
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
+      CommandAutoCollapsing.IsChecked = _baseParameterModel.UseCommandAutoCollapse;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
     }
 
+    private void ProtocolConfig_SaveProtocolEvent(SettingsProtocolDto _)
+    {
+      Dispatcher.Invoke(UpdateCommandAutoCollapseVisibility);
+    }
+
+    private void UpdateCommandAutoCollapseVisibility()
+    {
+      bool isAvailable = ProtocolConfig.GetCommandHeadersInProtocol();
+      CommandAutoCollapsing.Visibility = isAvailable ? Visibility.Visible : Visibility.Collapsed;
+      CommandAutoCollapsing.IsEnabled = isAvailable;
+    }
+
     /// <summary>
     /// Формирует модель параметров из текущих значений элементов UI.
     /// </summary>
-    private UserInterfaceModel GetModel()
+    private UserInterfaceDto GetModel()
     {
       var languageCode =
           LanguageSelect.SelectedValue as string
@@ -173,26 +210,28 @@ namespace UI.Controls.Settings.UserInterface
       var themeValue = ThemeSelect.SelectedValue as string ?? "Dark";
       var parsedTheme = Enum.TryParse<ThemeMode>(themeValue, out var theme) ? theme : ThemeMode.Dark;
 
-      return new UserInterfaceModel
+      return new UserInterfaceDto
       {
         Language = languageCode,
         Theme = parsedTheme,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
         UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
         UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked,
-        UseTopMenuIcons = TopMenuIcons.IsChecked
+        UseTopMenuIcons = TopMenuIcons.IsChecked,
+        UseCommandAutoCollapse = CommandAutoCollapsing.IsChecked
       };
     }
 
     /// <summary>
     /// Сравнивает две модели параметров.
     /// </summary>
-    private static bool ProtocolEquals(UserInterfaceModel a, UserInterfaceModel b) =>
+    private static bool ProtocolEquals(UserInterfaceDto a, UserInterfaceDto b) =>
       a.Language == b.Language &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
       a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
       a.UseTopMenuIcons == b.UseTopMenuIcons &&
+      a.UseCommandAutoCollapse == b.UseCommandAutoCollapse &&
       b.Theme == a.Theme;
 
     /// <summary>

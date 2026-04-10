@@ -1,5 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.Base
 {
@@ -12,7 +12,7 @@ namespace Ask.Core.Services.Config.Base
     /// Устанавливает текущую модель выполнения (ExecutionModel).
     /// </summary>
     /// <param name="executionModel">Модель выполнения.</param>
-    static public void SetExecutionModelAsync(SettingsExecutionModel executionModel)
+    static public void SetExecutionModelAsync(SettingsExecutionDto executionModel)
     {
       ExecutionConfig.SetStopOnError(executionModel.StopOnError);
       ExecutionConfig.SetIsErrorSimulationMode(executionModel.IsErrorSimulationMode);
@@ -24,7 +24,7 @@ namespace Ask.Core.Services.Config.Base
     /// Устанавливает текущую модель протокола (ProtocolModel).
     /// </summary>
     /// <param name="executionModel">Модель протокола.</param>
-    static public void SetProtocolModelAsync(SettingsProtocolModel executionModel)
+    static public void SetProtocolModelAsync(SettingsProtocolDto executionModel)
     {
       ProtocolConfig.SetDeviceInfo(executionModel.ShowDeviceInfo);
       ProtocolConfig.SetHeaderInfo(executionModel.ShowHeaderInfo);
@@ -32,6 +32,13 @@ namespace Ask.Core.Services.Config.Base
       ProtocolConfig.SetPrintProtocol(executionModel.AutoPrintProtocol);
       ProtocolConfig.SetTimeStart(executionModel.DisplayOperationTime);
       ProtocolConfig.SetShowDetailedProtocol(executionModel.ShowDetailedProtocol);
+      ProtocolConfig.SetShowProtocolInSoftware(executionModel.ShowProtocolInSoftware);
+      ProtocolConfig.SetGenerateProtocol(executionModel.GenerateProtocol);
+      ProtocolConfig.SetCleanTextProtocol(executionModel.CleanTextProtocol);
+      ProtocolConfig.SetCleanTextErrorProtocol(executionModel.CleanTextErrorsProtocol);
+      ProtocolConfig.SetErrorTextProtocol(executionModel.ErrorTextProtocol);
+      ProtocolConfig.SetCommandHeadersInProtocol(executionModel.ShowCommandHeadersInProtocol);
+      ProtocolConfig.SetTestStepMessagesInProtocol(executionModel.ShowTestStepMessagesInProtocol);
     }
 
 
@@ -39,14 +46,15 @@ namespace Ask.Core.Services.Config.Base
     /// Устанавливает текущую модель протокола (ProtocolModel).
     /// </summary>
     /// <param name="executionModel">Модель протокола.</param>
-    static public async Task SerParametrModelAsync(UserInterfaceModel executionModel)
+    static public async Task SerParametrModelAsync(UserInterfaceDto executionModel)
     {
-      await UserInterfaceConfig.SetLanguage(executionModel.Language);
-      await UserInterfaceConfig.SetTheme(executionModel.Theme);
-      await UserInterfaceConfig.SetSyntaxHighlighting(executionModel.UseSyntaxHighlighting);
-      await UserInterfaceConfig.SetCommandBodyBackgroundHighlighting(executionModel.UseCommandBodyBackgroundHighlighting);
-      await UserInterfaceConfig.SetChainPointBodyBackgroundHighlighting(executionModel.UseChainPointBodyBackgroundHighlighting);
-      await UserInterfaceConfig.SetTopMenuIcons(executionModel.UseTopMenuIcons);
+      UserInterfaceConfig.SetLanguage(executionModel.Language);
+      UserInterfaceConfig.SetTheme(executionModel.Theme);
+      UserInterfaceConfig.SetSyntaxHighlighting(executionModel.UseSyntaxHighlighting);
+      UserInterfaceConfig.SetCommandBodyBackgroundHighlighting(executionModel.UseCommandBodyBackgroundHighlighting);
+      UserInterfaceConfig.SetChainPointBodyBackgroundHighlighting(executionModel.UseChainPointBodyBackgroundHighlighting);
+      UserInterfaceConfig.SetTopMenuIcons(executionModel.UseTopMenuIcons);
+      UserInterfaceConfig.SetCommandAutoCollapse(executionModel.UseCommandAutoCollapse);
     }
   }
 }

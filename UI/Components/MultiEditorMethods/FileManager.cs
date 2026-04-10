@@ -1,9 +1,7 @@
 ﻿using Ask.Core.Shared.Metadata.View.EditorHost;
-using UI.Controls.TextEditor;
 using UI.Services;
 using UI.Services.FileManager;
 using UI.Services.ProtocolManager;
-using UI.Services.Services;
 
 namespace UI.Components.MultiEditorMethods
 {

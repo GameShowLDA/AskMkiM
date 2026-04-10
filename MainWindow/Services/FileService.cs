@@ -5,13 +5,14 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.UI.Controls.ProtocolNew;
 using Microsoft.Win32;
 using System.Windows;
 using UI.Components.FileComparerControls;
-using Ask.UI.Controls.ProtocolNew;
-using UI.Controls.Search;
-using UI.Controls.TextEditor;
 using UI.Controls.Archive;
+using UI.Controls.Search;
+using UI.Controls.TextEditorControl;
+using UI.Services.Archive;
 
 
 namespace MainWindowProgram.Services
@@ -103,6 +104,14 @@ namespace MainWindowProgram.Services
       }
     }
 
+    /// <summary>
+    /// Открывает протокол для просмотра.
+    /// </summary>
+    /// <param name="protocol">Модель протокола, содержащая данные для отображения.</param>
+    /// <remarks>
+    /// Если приложение находится в заблокированном состоянии — операция не выполняется,
+    /// и пользователю отображается сообщение об ошибке.
+    /// </remarks>
     public void ViewProtocol(ProtocolModel protocol)
     {
       if (_isLockedProvider())
@@ -116,8 +125,9 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает диалог выбора файла и загружает его в редактор.
+    /// Открывает указанный файл в редакторе.
     /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
     public void OpenFileAsync(string filePath)
     {
       if (_isLockedProvider())
@@ -146,7 +156,7 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Открывает экран работы с архивами.
+    /// Открывает интерфейс работы с архивами.
     /// </summary>
     public void OpenArchive()
     {
@@ -158,6 +168,63 @@ namespace MainWindowProgram.Services
       {
         _multiWindow.WorkspaceService.AddControl("Архив", new ArchiveControl(), TypeWindow.Files);
       }
+    }
+
+    /// <summary>
+    /// Инициирует создание нового архива в активном окне архивов.
+    /// </summary>
+    /// <remarks>
+    /// Метод работает только если активный элемент рабочей области — <see cref="ArchiveControl"/>.
+    /// Если приложение заблокировано — операция не выполняется.
+    /// </remarks>
+    public void CreateArchive()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      if (_multiWindow.GetActiveWorkspaceControl() is ArchiveControl archiveControl)
+      {
+        archiveControl.ShowCreateArchiveDialog();
+      }
+    }
+
+    /// <summary>
+    /// Запускает процесс скачивания всех архивов на диск через UI.
+    /// </summary>
+    /// <remarks>
+    /// Открывает диалог выбора папки и выполняет экспорт архивов.
+    /// Если приложение заблокировано — операция не выполняется.
+    /// </remarks>
+    public void DownloadArchives()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      ArchiveTransferUiService.DownloadArchives();
+    }
+
+    /// <summary>
+    /// Запускает процесс загрузки архива в систему через UI.
+    /// </summary>
+    /// <remarks>
+    /// Открывает диалог выбора файла и выполняет импорт архива.
+    /// Если приложение заблокировано — операция не выполняется.
+    /// </remarks>
+    public void UploadArchive()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      ArchiveTransferUiService.UploadArchive();
     }
 
     /// <summary>
@@ -316,4 +383,3 @@ namespace MainWindowProgram.Services
     }
   }
 }
-

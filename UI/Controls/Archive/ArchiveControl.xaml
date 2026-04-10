@@ -4,9 +4,70 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:UI.Controls.Archive"
-             xmlns:TextEditor="clr-namespace:UI.Controls.TextEditor"
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
+             xmlns:TextEditor="clr-namespace:UI.Controls.TextEditorControl"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="ArchiveToolbarIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource ActionButtonStyle}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+        </Style>
+
+        <Style x:Key="ArchiveToolbarPasteIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource SaveButtonStyle}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+        </Style>
+
+        <Style x:Key="ArchiveToolbarNeutralIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+        </Style>
+
+        <Style x:Key="ArchiveToolbarDeleteIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+            <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonBorderBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonForegroundBrush}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonHoverBackgroundBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonHoverBorderBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonHoverForegroundBrush}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonPressedBackgroundBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonPressedBorderBrush}" />
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonPressedForegroundBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid Margin="12">
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="40" Width="320" MaxWidth="800" />
@@ -29,30 +90,51 @@
                           Cursor="Hand"
                 SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
                     <TreeView.ContextMenu>
-                        <ContextMenu x:Name="ArchivesTreeContextMenu"
+                            <ContextMenu x:Name="ArchivesTreeContextMenu"
                        Style="{DynamicResource AppContextMenuStyle}"
                        Opened="ArchivesTreeContextMenu_Opened"
                        Closed="ArchivesTreeContextMenu_Closed">
-                            <MenuItem x:Name="CreateArchiveMenuItem"
+                                <MenuItem x:Name="CreateArchiveMenuItem"
                       Header="Создать архив"
                       Click="CreateArchiveMenuItem_Click" />
-                            <MenuItem x:Name="OpenArchiveMenuItem"
+                                <MenuItem x:Name="UploadArchiveMenuItem"
+                      Header="Загрузить архив"
+                      Click="UploadArchiveMenuItem_Click" />
+                                <MenuItem x:Name="DownloadArchivesMenuItem"
+                      Header="Скачать архивы"
+                      Click="DownloadArchivesMenuItem_Click" />
+                                <MenuItem x:Name="OpenArchiveMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveMenuItem_Click" />
-                            <MenuItem x:Name="DeleteArchiveMenuItem"
+                                <MenuItem x:Name="SaveArchiveMenuItem"
+                      Header="Сохранить архив на диск"
+                      Click="SaveArchiveMenuItem_Click" />
+                                <MenuItem x:Name="PrintArchiveCatalogMenuItem"
+                      Header="Распечатать каталог архива"
+                      Click="PrintArchiveCatalogMenuItem_Click" />
+                                <MenuItem x:Name="DeleteArchiveMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveMenuItem_Click" />
-                            <!--MenuItem x:Name="AddFileToArchiveMenuItem"
+                            <MenuItem x:Name="AddFileToArchiveMenuItem"
                       Header="Добавить файл"
-                      Click="AddFileToArchiveMenuItem_Click" /-->
+                      Click="AddFileToArchiveMenuItem_Click" />
                             <MenuItem x:Name="OpenArchiveFileMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveFileMenuItem_Click" />
+                            <MenuItem x:Name="CopyArchiveFileMenuItem"
+                      Header="Копировать"
+                      Click="CopyArchiveFileMenuItem_Click" />
+                            <MenuItem x:Name="CutArchiveFileMenuItem"
+                      Header="Вырезать"
+                      Click="CutArchiveFileMenuItem_Click" />
+                            <MenuItem x:Name="PasteArchiveFileMenuItem"
+                      Header="Вставить"
+                      Click="PasteArchiveFileMenuItem_Click" />
                             <MenuItem x:Name="DeleteArchiveFileMenuItem"
                       Header="Удалить"
                       Click="DeleteArchiveFileMenuItem_Click" />
-                        </ContextMenu>
-                    </TreeView.ContextMenu>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                     <TreeView.Resources>
                         <Style x:Key="ArchiveTreeExpandToggleStyle"
                                TargetType="{x:Type ToggleButton}">
@@ -237,6 +319,157 @@
             Padding="10"
                     >
                 <Grid>
+                    <Grid.Resources>
+                        <Style x:Key="ArchiveFilesDataGridCellStyle"
+                               TargetType="{x:Type DataGridCell}"
+                               BasedOn="{StaticResource ModernDataGridCellStyle}">
+                            <Setter Property="FontSize" Value="16" />
+                            <Setter Property="Padding" Value="16,8" />
+                            <Setter Property="ClipToBounds" Value="True" />
+                        </Style>
+
+                        <Style x:Key="ArchiveFilesDataGridTextStyle"
+                               TargetType="{x:Type TextBlock}"
+                               BasedOn="{StaticResource ModernDataGridTextStyle}">
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="TextWrapping" Value="NoWrap" />
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+
+                        <Style x:Key="ArchiveFilesScrollBarButtonStyle"
+                               TargetType="{x:Type RepeatButton}">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Width" Value="22" />
+                            <Setter Property="Height" Value="22" />
+                            <Setter Property="Cursor" Value="SizeWE" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                        <Border x:Name="ButtonBorder"
+                                                Margin="1"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{DynamicResource ForegrounfBrushes35}"
+                                                BorderThickness="1"
+                                                CornerRadius="7">
+                                            <Path x:Name="ArrowPath"
+                                                  Width="6"
+                                                  Height="10"
+                                                  Fill="{DynamicResource ForegrounfBrushes45}"
+                                                  Stretch="Fill"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Data="M 0 0 L 6 5 L 0 10 Z" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="Tag" Value="Left">
+                                                <Setter TargetName="ArrowPath"
+                                                        Property="Data"
+                                                        Value="M 6 0 L 0 5 L 6 10 Z" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="Background"
+                                                        Value="{DynamicResource SecondarySolidColorBrush}" />
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="BorderBrush"
+                                                        Value="{DynamicResource ForegrounfBrushes45}" />
+                                                <Setter TargetName="ArrowPath"
+                                                        Property="Fill"
+                                                        Value="{DynamicResource ForegrounfBrushes}" />
+                                            </Trigger>
+
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="Background"
+                                                        Value="{DynamicResource PrimarySolidColorBrush}" />
+                                                <Setter TargetName="ButtonBorder"
+                                                        Property="BorderBrush"
+                                                        Value="{DynamicResource ActiveBorderSolidColorBrush}" />
+                                                <Setter TargetName="ArrowPath"
+                                                        Property="Fill"
+                                                        Value="{DynamicResource ForegrounfBrushes}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <Style x:Key="ArchiveFilesScrollBarThumbStyle"
+                               TargetType="{x:Type Thumb}">
+                            <Setter Property="Background" Value="{DynamicResource ScrollBarThumbBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="MinWidth" Value="42" />
+                            <Setter Property="Height" Value="16" />
+                            <Setter Property="Cursor" Value="SizeWE" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Thumb}">
+                                        <Border x:Name="ThumbBorder"
+                                                Margin="1"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                CornerRadius="8" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <ControlTemplate x:Key="ArchiveFilesHorizontalScrollBarTemplate"
+                                         TargetType="{x:Type ScrollBar}">
+                            <Border Margin="0,8,0,0"
+                                    Padding="0,1"
+                                    BorderThickness="1"
+                                    CornerRadius="9"
+                                    SnapsToDevicePixels="True">
+                                <Track x:Name="PART_Track"
+                                       Margin="0"
+                                       Focusable="False"
+                                       Orientation="Horizontal"
+                                       Minimum="{TemplateBinding Minimum}"
+                                       Maximum="{TemplateBinding Maximum}"
+                                       Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, Mode=TwoWay}"
+                                       ViewportSize="{TemplateBinding ViewportSize}"
+                                       IsDirectionReversed="False">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageLeftCommand"
+                                                      Focusable="False"
+                                                      IsTabStop="False"
+                                                      Opacity="0" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource ArchiveFilesScrollBarThumbStyle}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageRightCommand"
+                                                      Focusable="False"
+                                                      IsTabStop="False"
+                                                      Opacity="0" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Border>
+                        </ControlTemplate>
+
+                        <Style x:Key="ArchiveFilesDataGridScrollBarStyle"
+                               TargetType="{x:Type ScrollBar}"
+                               BasedOn="{StaticResource {x:Type ScrollBar}}">
+                            <Style.Triggers>
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter Property="Cursor" Value="SizeWE" />
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="Background" Value="Red" />
+                                    <Setter Property="Template"
+                                            Value="{StaticResource ArchiveFilesHorizontalScrollBarTemplate}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Resources>
                     
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -244,21 +477,89 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock 
-                        x:Name="ArchiveFilesTextBlock"
-                        Text="Файлы архива"
-                   FontWeight="SemiBold"
-                   FontSize="14"
-                   Foreground="{DynamicResource ForegrounfBrushes}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock 
+                                x:Name="ArchiveFilesTextBlock"
+                                Text="Файлы архива"
+                                FontWeight="SemiBold"
+                                FontSize="14"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource ForegrounfBrushes}"/>
+                            <TextBlock x:Name="SelectedArchiveNameTextBlock"
+                                       Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ForegrounfBrushes45}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="Collapsed" />
+                        </Grid>
+                        <StackPanel x:Name="ArchiveActionsPanel"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Visibility="Collapsed">
+                            <Button x:Name="SaveArchiveButton"
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Сохранить архив на диск"
+                                    Click="SaveArchiveToDiskButton_Click">
+                                <askUiIcons:SaveIcon Size="16"
+                                                     Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="PrintArchiveCatalogButton"
+                                    Style="{StaticResource ArchiveToolbarNeutralIconButtonStyle}"
+                                    ToolTip="Распечатать каталог архива"
+                                    Click="PrintArchiveCatalogButton_Click">
+                                <askUiIcons:PrintIcon Size="16"
+                                                      Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="AddFileToArchiveButton"
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Добавить файл в архив"
+                                    Click="AddFileToArchiveButton_Click">
+                                <askUiIcons:PlusCircleIcon Size="16"
+                                                           IsMagnetized="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="PasteIntoArchiveButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Вставить файл в архив"
+                                    Click="PasteIntoArchiveButton_Click">
+                                <askUiIcons:PasteIcon Size="16"
+                                                      Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="DeleteArchiveButton"
+                                    Style="{StaticResource ArchiveToolbarDeleteIconButtonStyle}"
+                                    ToolTip="Удалить архив"
+                                    Click="DeleteArchiveButton_Click">
+                                <askUiIcons:TrashDeleteIcon Size="16"
+                                                            IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
 
                     <DataGrid x:Name="ArchiveFilesDataGrid"
                         Grid.Row="1"
                         Margin="0,8,0,0"
+                        MinWidth="0"
+                        HorizontalAlignment="Stretch"
                         Style="{StaticResource ModernDataGridStyle}"
+                        CellStyle="{StaticResource ArchiveFilesDataGridCellStyle}"
                         AutoGenerateColumns="False"
                         IsReadOnly="True"
-                        FontSize="13"
-                        CanUserReorderColumns="True"
+                        FontSize="16"
+                        ColumnWidth="Auto"
+                        CanUserReorderColumns="False"
                         CanUserResizeColumns="True"
                         CanUserSortColumns="True"
                         HeadersVisibility="Column"
@@ -266,38 +567,61 @@
                         SelectionUnit="FullRow"
                         CanUserAddRows="False"
                         CanUserDeleteRows="False"
+                        ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
                         SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type ScrollBar}"
+                                   BasedOn="{StaticResource ArchiveFilesDataGridScrollBarStyle}" >
+                                <Style.Triggers>
+
+                                <!-- ГОРИЗОНТАЛЬНЫЙ -->
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter Property="Cursor" Value="SizeWE" />
+                                    <Setter Property="Height" Value="Auto" />
+                                    <Setter Property="Width" Value="Auto" />
+                                        <Setter Property="Template"
+                        Value="{StaticResource ArchiveFilesHorizontalScrollBarTemplate}" />
+                                    </Trigger>
+
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Обозначение"
                                 Binding="{Binding Name}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*"/>
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="150"
+                                Width="15*"
+                                />
                             <DataGridTextColumn Header="Наименование ОК"
                                 Binding="{Binding NameOK}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="190"
+                                Width="19*" />
                             <DataGridTextColumn Header="ОПК"
                                 Binding="{Binding OPK}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
-                            <DataGridTextColumn Header="ИК"
-                                Binding="{Binding IK}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="90"
+                                Width="9*" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="110"
+                                Width="11*" />
                             <DataGridTextColumn Header="Файл ОПК"
                                 Binding="{Binding OpkFileName}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="*" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="180"
+                                Width="18*" />
                             <DataGridTemplateColumn Header="Создан"
                                 SortMemberPath="CreationDate"
-                                Width="190">
+                                MinWidth="120"
+                                Width="12*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Margin="8,0,0,0"
+                                        <TextBlock Style="{StaticResource ArchiveFilesDataGridTextStyle}"
                                             VerticalAlignment="Center"
                                             Text="{Binding CreationDate, StringFormat={}{0:dd.MM.yyyy}}" />
                                     </DataTemplate>
@@ -305,13 +629,14 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Цех"
                                 Binding="{Binding Department}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="90" />
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="80"
+                                Width="8*" />
                             <DataGridTextColumn Header="Примечание"
                                 Binding="{Binding Comment}"
-                                ElementStyle="{StaticResource ModernDataGridTextStyle}"
-                                Width="130" />
-
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="200"
+                                Width="20*" />
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -352,25 +677,75 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock 
-                            x:Name="SelectFileContentTextBlock"
-                            Text="Содержимое выбранного файла"
-                            FontWeight="SemiBold"
-                            FontSize="14"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource ForegrounfBrushes}"/>
-                        <Button x:Name="ConvertToPkwButton"
-                                Grid.Column="1"
-                                Margin="12,0,0,0"
-                                Padding="10,4"
-                                MinWidth="220"
-                                HorizontalAlignment="Right"
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock 
+                                x:Name="SelectFileContentTextBlock"
+                                Text="Содержимое выбранного файла"
+                                FontWeight="SemiBold"
+                                FontSize="14"
                                 VerticalAlignment="Center"
-                                Cursor="Hand"
-                                FontSize="16"
-                                Style="{DynamicResource ButtonStyleV8}"
-                                Content="Конвертировать в pkw"
-                                Click="ConvertToPkwButton_Click" />
+                                Foreground="{DynamicResource ForegrounfBrushes}"/>
+                            <TextBlock x:Name="SelectedArchiveFileNameTextBlock"
+                                       Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ForegrounfBrushes45}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Visibility="Collapsed" />
+                        </Grid>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                            <Button x:Name="CopyArchiveFileButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarIconButtonStyle}"
+                                    ToolTip="Копировать файл"
+                                    Click="CopyArchiveFileButton_Click">
+                                <askUiIcons:CopyIcon Size="16"
+                                                     Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="CutArchiveFileButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarNeutralIconButtonStyle}"
+                                    ToolTip="Вырезать файл"
+                                    Click="CutArchiveFileButton_Click">
+                                <askUiIcons:CutIcon Size="16"
+                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="PasteArchiveFileButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Вставить файл"
+                                    Click="PasteArchiveFileButton_Click">
+                                <askUiIcons:PasteIcon Size="16"
+                                                      Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="DeleteArchiveFileButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarDeleteIconButtonStyle}"
+                                    ToolTip="Удалить файл"
+                                    Click="DeleteArchiveFileButton_Click">
+                                <askUiIcons:TrashDeleteIcon Size="16"
+                                                            IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="ConvertToPkwButton"
+                                    Margin="12,0,0,0"
+                                    Padding="10,4"
+                                    MinWidth="220"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Cursor="Hand"
+                                    FontSize="16"
+                                    Style="{DynamicResource ButtonStyleV8}"
+                                    Content="Конвертировать в pkw"
+                                    Click="ConvertToPkwButton_Click" />
+                        </StackPanel>
                     </Grid>
                     <TextEditor:TextEditorUI x:Name="FileContentTextBox"
                  Grid.Row="1"

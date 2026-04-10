@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.Execution"
              xmlns:Components ="clr-namespace:UI.Components"
+             xmlns:SharedComponents="clr-namespace:Ask.UI.Shared.Components;assembly=Ask.UI"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
@@ -97,7 +98,7 @@
                     </Style>
                 </WrapPanel.Style>
 
-                <Components:SettingsCard
+                <SharedComponents:SettingsCard
                     Title="{Binding Source={StaticResource Settings_Execution_StopOnError_Title}, Path=Value}"
                     Description="{Binding Source={StaticResource Settings_Execution_StopOnError_Description}, Path=Value}"
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
@@ -106,7 +107,7 @@
                     x:Name="StopInError"
                  />
 
-                <Components:SettingsCard
+                <SharedComponents:SettingsCard
                      Title="{Binding Source={StaticResource Settings_Execution_StepByStepMode_Title}, Path=Value}"
                      Description="{Binding Source={StaticResource Settings_Execution_StepByStepMode_Description}, Path=Value}"
                      IsChecked="{Binding IdleMode, Mode=TwoWay}" 
@@ -115,7 +116,7 @@
                     x:Name="StepByStepMode"
                      />
 
-                <Components:SettingsCard 
+                <SharedComponents:SettingsCard 
                     Title="{Binding Source={StaticResource Settings_Execution_IdleMode_Title}, Path=Value}" 
                     Description="{Binding Source={StaticResource Settings_Execution_IdleMode_Description}, Path=Value}"
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
@@ -124,7 +125,7 @@
                     x:Name="IdleMode"
                     />
 
-                <Components:SettingsCard
+                <SharedComponents:SettingsCard
                     Title="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Title}, Path=Value}"
                     Description="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Description}, Path=Value}"
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 

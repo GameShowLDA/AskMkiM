@@ -988,6 +988,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает заголовки команд в ходе выполнения программ контроля..
+        /// </summary>
+        internal static string settings_protocol_commandHeaders_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.commandHeaders.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Заголовки команд.
+        /// </summary>
+        internal static string settings_protocol_commandHeaders_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.commandHeaders.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Отображает информацию о подключении точек и шин на устройствах..
         /// </summary>
         internal static string settings_protocol_deviceInfo_connectionInfo_description {
@@ -1195,6 +1213,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображает сообщения об этапах проверки в протоколе выполнения..
+        /// </summary>
+        internal static string settings_protocol_testStepMessages_description {
+            get {
+                return ResourceManager.GetString("settings.protocol.testStepMessages.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отображение этапов проверки.
+        /// </summary>
+        internal static string settings_protocol_testStepMessages_title {
+            get {
+                return ResourceManager.GetString("settings.protocol.testStepMessages.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Включает или отключает фоновое выделение строк проверки цепей и точек в протоколе выполнения..
         /// </summary>
         internal static string settings_userinterface_chainPointBodyBackground_description {
@@ -1209,6 +1245,24 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_userinterface_chainPointBodyBackground_title {
             get {
                 return ResourceManager.GetString("settings.userinterface.chainPointBodyBackground.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми..
+        /// </summary>
+        internal static string settings_userinterface_commandAutoCollapse_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.commandAutoCollapse.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Автоскрытие блоков в протоколе.
+        /// </summary>
+        internal static string settings_userinterface_commandAutoCollapse_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.commandAutoCollapse.title", resourceCulture);
             }
         }
         
@@ -1308,6 +1362,24 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_userinterface_theme_title {
             get {
                 return ResourceManager.GetString("settings.userinterface.theme.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Заменяет текстовые пункты верхнего меню на иконки..
+        /// </summary>
+        internal static string settings_userinterface_topMenuIcons_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.topMenuIcons.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Иконки в верхнем меню.
+        /// </summary>
+        internal static string settings_userinterface_topMenuIcons_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.topMenuIcons.title", resourceCulture);
             }
         }
         

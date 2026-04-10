@@ -24,7 +24,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <summary>
     /// Устанавливает новый язык и сохраняет его в конфигурации.
     /// </summary>
-    public static async Task SetThemeAsync(ThemeMode theme)
+    public static void SetThemeAsync(ThemeMode theme)
     {
       if (theme == _currentTheme)
         return;

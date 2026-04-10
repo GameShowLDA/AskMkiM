@@ -36,6 +36,15 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     Task AppendEmptyLineAsync(int indentLevel = 0);
 
     /// <summary>
+    /// Завершает текущую команду протокола и передаёт её итоговый результат.
+    /// Используется для подсветки заголовка команды независимо от видимости внутренних строк.
+    /// </summary>
+    /// <param name="hasErrors">
+    /// <see langword="true"/>, если команда завершилась с ошибками; иначе <see langword="false"/>.
+    /// </param>
+    Task CompleteCommandAsync(bool hasErrors);
+
+    /// <summary>
     /// Заголовок текущего сообщения.
     /// </summary>
     string Header { get; set; }

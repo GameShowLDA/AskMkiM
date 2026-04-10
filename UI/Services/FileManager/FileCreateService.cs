@@ -2,7 +2,7 @@
 using Ask.Core.Shared.Metadata.Static;
 using System.Windows;
 using UI.Components.SearchControls;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 
 namespace UI.Services.FileManager
 {
@@ -77,7 +77,8 @@ namespace UI.Services.FileManager
     /// </summary>
     private TextEditorUI CreateTextEditor(string fileName)
     {
-      var textEditorModel = new TextEditorModel(fileName);
+      var textEditorModel = new TextEditorModel(string.Empty, fileName);
+      textEditorModel.SavedTextSnapshot = string.Empty;
       var textEditor = new TextEditorUI
       {
         TextEditorModel = textEditorModel

@@ -1,5 +1,4 @@
 ﻿using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
@@ -7,15 +6,15 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
-using ICSharpCode.AvalonEdit;
-using System;
 using System.Windows;
 using System.Windows.Controls;
+using Ask.UI.Controls.ErrorList;
 using System.Windows.Media;
 using UI.Components;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using UI.Services;
 using UI.Services.Archive;
+using Ask.Core.Services.EventCore.Adapters;
 
 namespace UI.Controls
 {
@@ -49,15 +48,36 @@ namespace UI.Controls
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
+    private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
 
     public List<BaseCommandModel> TranslationModels
     {
-      get
-      {
-        return translationModels;
-      }
+      get => translationModels;
       set
       {
+        translationModels = value;
+
+        ErrorClear();
+        ErrorListBoxVertical.ClearAll();
+
+        foreach (var model in value)
+        {
+          if (model.Errors.Count > 0)
+          {
+            ErrorListBoxVertical.AddErrors(model.Errors);
+            ErrorCount += model.Errors.Count;
+          }
+
+          if (model.Warnings.Count > 0)
+          {
+            ErrorListBoxVertical.AddWarnings(model.Warnings);
+            WarningCount += model.Warnings.Count;
+          }
+        }
+
+        Ask.Core.Services.EventCore.Adapters.MessageEventAdapter.RaiseInfoMessage(
+          $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+		  
         ApplyTranslationModels(value, BuildIssuesSnapshot(value));
       }
     }
@@ -65,10 +85,18 @@ namespace UI.Controls
     public TranslatorItem()
     {
       InitializeComponent();
+
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
 
+      // Новое: вкладка "Точки остановки"
+      ErrorListBoxVertical.BreakpointItemDoubleClicked += ErrorListBoxVertical_BreakpointItemDoubleClicked;
+      ErrorListBoxVertical.BreakpointEnabledChanged += ErrorListBoxVertical_BreakpointEnabledChanged;
+
+      // События брейкпоинтов
       EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => BreakpointOn(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => BreakpointOff(e));
     }
 
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(IDisplayIssue item)
@@ -118,9 +146,12 @@ namespace UI.Controls
       WarningCount = issuesSnapshot.WarningCount;
 
       ErrorListBoxVertical.SetIssues(issuesSnapshot.Issues);
+      UpdateArchiveButtonVisibility();
+      UpdateRightEditorActions();
 
       MessageEventAdapter.RaiseInfoMessage(
              $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+      UpdateRightEditorActions();
     }
 
     public void SetLeftEditor(ITextEditorView editor)
@@ -158,9 +189,7 @@ namespace UI.Controls
     public void SetRightEditor(ITextEditorView textEditorUI)
     {
       if (RightBox == null || textEditorUI == null)
-      {
         return;
-      }
 
       var rightEditor = GetRightBox();
       if (rightEditor == null)
@@ -175,6 +204,34 @@ namespace UI.Controls
       rightEditor.BackRequested += RightEditor_BackRequestedAsync;
       rightEditor.SaveRequested -= RightEditor_SaveRequestedAsync;
       rightEditor.SaveRequested += RightEditor_SaveRequestedAsync;
+      rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
+      rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
+      UpdateRightEditorActions();
+      rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
+    }
+
+    private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
+    {
+      SaveTranslatedFileToDisk();
+    }
+
+    private bool SaveTranslatedFileToDisk()
+    {
+      var rightBox = GetRightBox();
+      var rightTextEditor = rightBox?.GetTextEditor();
+      if (rightTextEditor?.TextEditorModel == null)
+      {
+        NotificationHostService.Instance.Show(
+          "Сохранение на диск",
+          "Редактор не готов к сохранению на диск.",
+          NotificationType.Error);
+        return false;
+      }
+
+      return _translatedFileSaveService.SaveToDisk(
+        this,
+        rightTextEditor.Text,
+        rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
@@ -208,6 +265,17 @@ namespace UI.Controls
       }
 
       return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
+    }
+
+    private void UpdateRightEditorActions()
+    {
+      var rightEditor = GetRightBox();
+      if (rightEditor == null)
+      {
+        return;
+      }
+
+      rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
     }
 
     private void LeftEditor_SaveRequested(object? sender, EventArgs e)
@@ -297,25 +365,61 @@ namespace UI.Controls
       return LeftBox.Children[0] as TranslatorTextEditor;
     }
 
-    public string GetLeftEditorName()
+    public string GetLeftEditorName() => GetLeftBox().FileName.Text;
+    public string GetRightEditorName() => GetRightBox().TranslationFileName.Text;
+
+    public void SetRightEditorName(string newText) => GetRightBox().TranslationFileName.Text = newText;
+    public void SetLeftEditorName(string newText) => GetLeftBox().FileName.Text = newText;
+
+    private void UpdateArchiveButtonVisibility()
     {
-      return GetLeftBox().FileName.Text;
+      var rightEditor = GetRightBox();
+      rightEditor?.SetArchiveButtonVisibility(ErrorCount == 0);
     }
 
-    public string GetRightEditorName()
-    {
-      return GetRightBox().TranslationFileName.Text;
-    }
+    private void ErrorListBoxVertical_BreakpointItemDoubleClicked(BreakpointListItem bp)
+	  {
+      var model = GetCommandByNumber(bp.CommandNumber);
+      if (model == null) return;
 
-    public void SetRightEditorName(string newText)
-    {
-      GetRightBox().TranslationFileName.Text = newText;
-    }
+      var left = GetLeftBox().GetTextEditor();
+      var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
 
-    public void SetLeftEditorName(string newText)
-    {
-      GetLeftBox().FileName.Text = newText;
-    }
+	    int leftLine = model.StartLineNumber;
+	    int rightLine = model.FormattedStartLineNumber + 1;
+
+	    left.GoToLine(leftLine);
+	    right.GoToLine(rightLine);
+	  }
+
+    private void ErrorListBoxVertical_BreakpointEnabledChanged(BreakpointListItem bp, bool enabled)
+	  {
+	    var left = GetLeftBox().GetTextEditor();
+	    var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
+
+	    if (!left.HasBreakpointCommand(bp.CommandNumber) && !right.HasBreakpointCommand(bp.CommandNumber))
+		    return;
+
+	    bool current = left.HasBreakpointCommand(bp.CommandNumber)
+		    ? left.IsBreakpointEnabled(bp.CommandNumber)
+		    : right.IsBreakpointEnabled(bp.CommandNumber);
+
+	    if (current == enabled)
+		    return;
+
+	    if (enabled)
+	    {
+		    left.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
+		    right.EnableBreakpoint(bp.CommandNumber, raiseEvents: false);
+	    }
+	    else
+	    {
+		    left.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
+		    right.DisableBreakpoint(bp.CommandNumber, raiseEvents: false);
+	    }
+	  }
 
     private static void DetachFromParent(UIElement element)
     {
@@ -347,19 +451,22 @@ namespace UI.Controls
       if (model == null) return;
 
       model.HasBreakpoint = true;
+      model.IsBreakpointEnabled = true;
 
       var left = GetLeftBox().GetTextEditor();
       var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
 
-      int leftLine = model.StartLineNumber + 1;
+      int leftLine = model.StartLineNumber;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: true, raiseEvents: false);
-
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: true, raiseEvents: false);
 
-      if (obj.LineNumber == leftLine - 1)
-        right.GoToLineWithoutSelection(rightLine);
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: true);
+
+      if (obj.LineNumber == leftLine)
+        right.ScrollToLine(rightLine);
     }
 
     /// <summary>
@@ -374,26 +481,76 @@ namespace UI.Controls
       if (model == null) return;
 
       model.HasBreakpoint = false;
+      model.IsBreakpointEnabled = true;
 
       var left = GetLeftBox().GetTextEditor();
       var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
 
-      int leftLine = model.StartLineNumber + 1;
+      int leftLine = model.StartLineNumber;
       int rightLine = model.FormattedStartLineNumber + 1;
 
       left.EnsureBreakpoint(leftLine, obj.CommandNumber, isSet: false, raiseEvents: false);
       right.EnsureBreakpoint(rightLine, obj.CommandNumber, isSet: false, raiseEvents: false);
 
-      if (obj.LineNumber == leftLine - 1)
-        right.GoToLineWithoutSelection(rightLine);
+      ErrorListBoxVertical.RemoveBreakpoint(obj.CommandNumber);
+
+      if (obj.LineNumber == leftLine)
+		    right.ScrollToLine(rightLine);
+    }
+
+    private void BreakpointOn(BreakpointEvents.BreakpointOn obj)
+    {
+      var model = GetCommandByNumber(obj.CommandNumber);
+      if (model == null) return;
+
+      model.HasBreakpoint = true;
+      model.IsBreakpointEnabled = true;
+
+      var left = GetLeftBox().GetTextEditor();
+      var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
+
+      int leftLine = model.StartLineNumber;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
+      right.EnableBreakpoint(obj.CommandNumber, raiseEvents: false);
+
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: true);
+
+      right.ScrollToLine(rightLine);
+    }
+
+    private void BreakpointOff(BreakpointEvents.BreakpointOff obj)
+    {
+      var model = GetCommandByNumber(obj.CommandNumber);
+      if (model == null) return;
+
+      model.HasBreakpoint = true;
+      model.IsBreakpointEnabled = false;
+
+      var left = GetLeftBox().GetTextEditor();
+      var right = GetRightBox().GetTextEditor();
+	    if (left == null || right == null) return;
+
+      int leftLine = model.StartLineNumber;
+      int rightLine = model.FormattedStartLineNumber + 1;
+
+      left.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
+      right.DisableBreakpoint(obj.CommandNumber, raiseEvents: false);
+
+      ErrorListBoxVertical.UpsertBreakpoint(obj.CommandNumber, rightLine, model.Mnemonic, isEnabled: false);
+
+      right.ScrollToLine(rightLine);
     }
 
     private BaseCommandModel? GetCommandByNumber(int commandNumber)
     {
       return translationModels
-          .FirstOrDefault(x =>
-              int.TryParse(x.CommandNumber, out var num) &&
-              num == commandNumber);
+        .FirstOrDefault(x =>
+          int.TryParse(x.CommandNumber, out var num) &&
+          num == commandNumber);
     }
   }
 }

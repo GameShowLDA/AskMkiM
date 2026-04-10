@@ -1,7 +1,7 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
 using UI.Components.Invoke;
 using UI.Components.MultiEditorMethods;
-using UI.Controls.TextEditor;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services

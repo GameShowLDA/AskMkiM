@@ -7,8 +7,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using UI.Components.SearchControls;
-using UI.Controls.TextEditor;
-using Utilities.Services;
+using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.FileManager
@@ -112,6 +111,7 @@ namespace UI.Services.FileManager
       var uniqueName = _fileManager.FileService.Name.EnsureUniqueFileName(path, fileName);
       var textEditorModel = new TextEditorModel(path, uniqueName, encoding);
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, fileContent, fileType);
+      textEditor.ConfigureBreakpoints(interactive: false, visible: false);
       textEditor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
       CancellationTokenSource redrawToken = null;
 
@@ -170,7 +170,7 @@ namespace UI.Services.FileManager
       //var encoding = EncodingService.DetectEncodingFromFile(path);
       var extention = Path.GetExtension(path).ToLowerInvariant();
       Encoding encoding;
-      if (extention == ".pkw" || extention == ".txt" || extention == ".lstw"|| extention == ".lst")
+      if (extention == ".pkw" || extention == ".txt" || extention == ".lstw" || extention == ".lst")
       {
         encoding = Encoding.UTF8;
       }
