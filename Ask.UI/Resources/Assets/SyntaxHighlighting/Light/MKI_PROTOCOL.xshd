@@ -40,7 +40,7 @@
 		<Rule color="CommandNumber">^DOC\d+\s*\d+</Rule>
 
 		<!-- Мнемоника -->
-		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ)\b</Rule>
+		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ|ОС)\b</Rule>
 
 		<!-- Между двоеточиями -->
 		<Rule>:\s*[^:]+:</Rule>
