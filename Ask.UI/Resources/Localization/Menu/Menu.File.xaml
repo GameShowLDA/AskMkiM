@@ -12,5 +12,14 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_OpenFolder" Key="menu.file.openfolder" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Print" Key="menu.file.print" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Search" Key="menu.file.search" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_SearchReplace" Key="menu.file.searchreplace" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_OpenArchive" Key="menu.file.openArchive" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_CreateArchive" Key="menu.file.createArchive" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_DownloadArchives" Key="menu.file.downloadArchives" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_UploadArchive" Key="menu.file.uploadArchive" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion" Key="menu.file.legacyConversion" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_OpkToPkw" Key="menu.file.legacyConversion.opkToPkw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_OpkToOpkw" Key="menu.file.legacyConversion.opkToOpkw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_ApkToApkw" Key="menu.file.legacyConversion.apkToApkw" />
 </ResourceDictionary>
