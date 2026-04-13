@@ -199,7 +199,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     private static (List<ErrorItem>, ChainModel) CreateChain(List<string> tokens, BaseCommandModel model, RmCommandModel rm)
     {
-      var (errors, pts) = CommandPostAnalyzer.GetPointsModel(tokens, model, rm.PointsMap);
+      var (errors, pts) = CommandPostAnalyzer.GetPointsModel(tokens, model, rm);
       if (errors.Count > 0)
       {
         return (errors, null);
@@ -215,7 +215,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     private static (List<ErrorItem>, GroupModel) CreateSinglePointGroup(string token, BaseCommandModel model, RmCommandModel rm)
     {
-      var (errors, pts) = CommandPostAnalyzer.GetPointsModel(new List<string> { token }, model, rm.PointsMap);
+      var (errors, pts) = CommandPostAnalyzer.GetPointsModel(new List<string> { token }, model, rm);
       if (errors.Count > 0)
       {
         return (errors, null);
@@ -555,7 +555,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     {
       foreach (var token in tokens)
       {
-        if (!rm.PointsMap.TryGetValue(token, out var address))
+        if (!rm.TryGetAddressByKey(token, out var address))
         {
           errors.Add(GeneralErrors.UnknownPoint(token, lineNumber, command));
           continue;

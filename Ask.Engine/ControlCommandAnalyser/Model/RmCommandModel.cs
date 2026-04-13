@@ -53,5 +53,70 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 
       return true;
     }
+
+    /// <summary>
+    /// Ищет адрес точки по её мнемонике.
+    /// Сначала выполняет точный поиск, затем — поиск по нормализованному ключу,
+    /// который сглаживает типичные кириллические/латинские визуальные дубликаты.
+    /// </summary>
+    public bool TryGetAddressByKey(string pointKey, out string address)
+    {
+      address = string.Empty;
+
+      if (string.IsNullOrWhiteSpace(pointKey))
+        return false;
+
+      if (PointsMap.TryGetValue(pointKey, out address))
+        return true;
+
+      string normalizedKey = NormalizePointKey(pointKey);
+      foreach (var kv in PointsMap)
+      {
+        if (string.Equals(NormalizePointKey(kv.Key), normalizedKey, StringComparison.OrdinalIgnoreCase))
+        {
+          address = kv.Value;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    internal static string NormalizePointKey(string value)
+    {
+      if (string.IsNullOrWhiteSpace(value))
+        return string.Empty;
+
+      return new string(value
+        .Trim()
+        .Select(NormalizePointKeyChar)
+        .ToArray());
+    }
+
+    private static char NormalizePointKeyChar(char ch) => ch switch
+    {
+      'А' => 'A',
+      'В' => 'B',
+      'С' => 'C',
+      'Е' => 'E',
+      'К' => 'K',
+      'М' => 'M',
+      'О' => 'O',
+      'Р' => 'P',
+      'Т' => 'T',
+      'У' => 'Y',
+      'Х' => 'X',
+      'а' => 'a',
+      'е' => 'e',
+      'к' => 'k',
+      'м' => 'm',
+      'о' => 'o',
+      'р' => 'p',
+      'с' => 'c',
+      'т' => 't',
+      'у' => 'y',
+      'х' => 'x',
+      _ => ch
+    };
   }
 }

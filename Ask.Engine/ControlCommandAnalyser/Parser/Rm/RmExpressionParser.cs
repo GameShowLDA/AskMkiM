@@ -321,20 +321,34 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
     /// </summary>
     private static bool TryExpandLetterRanges(string prefix, string from, string to, int step, List<string> result)
     {
-      var rg = new Regex(@"^([А-ЯA-Z]+)(\d+)$");
+      var rg = new Regex(@"^([\p{L}]+)(\d+)$");
       var mFrom = rg.Match(from);
+      if (!mFrom.Success)
+        return false;
+
+      var letter = mFrom.Groups[1].Value;
+      int nFrom = int.Parse(mFrom.Groups[2].Value);
+      int nTo;
+
       var mTo = rg.Match(to);
-      if (mFrom.Success && mTo.Success)
+      if (mTo.Success)
       {
-        var letter = mFrom.Groups[1].Value;
-        int nFrom = int.Parse(mFrom.Groups[2].Value);
-        int nTo = int.Parse(mTo.Groups[2].Value);
-        int sign = nTo >= nFrom ? 1 : -1;
-        for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
-          result.Add($"{prefix}{letter}{n}");
-        return true;
+        var toLetter = mTo.Groups[1].Value;
+        if (!string.Equals(letter, toLetter, StringComparison.OrdinalIgnoreCase))
+          return false;
+
+        nTo = int.Parse(mTo.Groups[2].Value);
       }
-      return false;
+      else if (!int.TryParse(to, out nTo))
+      {
+        return false;
+      }
+
+      int sign = nTo >= nFrom ? 1 : -1;
+      for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
+        result.Add($"{prefix}{letter}{n}");
+
+      return true;
     }
 
     /// <summary>
