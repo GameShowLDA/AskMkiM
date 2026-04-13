@@ -2,19 +2,45 @@ using System.IO;
 
 namespace Ask.Core.Services.FileFormats.Opk
 {
+  /// <summary>
+  /// Выполняет чтение OPK-файла и извлечение его основных VR-блоков.
+  /// </summary>
   internal sealed class OpkFileReader
   {
+    /// <summary>
+    /// Хранит маркер VR-блока с записями фиксированного размера.
+    /// </summary>
     private static readonly byte[] VrMarkerRecord = { 0x02, 0x02, 0x00 };
+
+    /// <summary>
+    /// Хранит маркер обычного VR-блока.
+    /// </summary>
     private static readonly byte[] VrMarkerOrdinary = { 0x02, 0x15, 0x00 };
+
+    /// <summary>
+    /// Хранит маркер завершения VR-блока.
+    /// </summary>
     private static readonly byte[] VrMarkerEnd = { 0x01, 0x21, 0x00 };
 
+    /// <summary>
+    /// Хранит сигнатуру OPK-файла, используемую по умолчанию при определении смещения VR-блоков.
+    /// </summary>
     private readonly byte[] _defaultSignature;
 
+    /// <summary>
+    /// Инициализирует новый экземпляр читателя OPK-файлов.
+    /// </summary>
+    /// <param name="defaultSignature">Сигнатура OPK-файла по умолчанию.</param>
     public OpkFileReader(byte[] defaultSignature)
     {
       _defaultSignature = defaultSignature;
     }
 
+    /// <summary>
+    /// Считывает OPK-файл и извлекает из него текстовые и бинарные блоки.
+    /// </summary>
+    /// <param name="path">Путь к OPK-файлу.</param>
+    /// <returns>Извлечённое содержимое OPK-файла.</returns>
     public OpkFileContent Read(string path)
     {
       var bytes = File.ReadAllBytes(path);
@@ -53,6 +79,13 @@ namespace Ask.Core.Services.FileFormats.Opk
         ParseTextRecords(vtxtBlock.PayloadBytes));
     }
 
+    /// <summary>
+    /// Определяет сигнатуру OPK-файла и смещение первого VR-блока.
+    /// </summary>
+    /// <param name="bytes">Байты исходного OPK-файла.</param>
+    /// <param name="offset">Смещение первого VR-блока.</param>
+    /// <param name="signature">Определённая сигнатура файла.</param>
+    /// <returns><see langword="true"/>, если сигнатура и смещение определены; иначе <see langword="false"/>.</returns>
     private bool TryResolveSignatureAndOffset(byte[] bytes, out int offset, out byte[] signature)
     {
       if (bytes.Length > _defaultSignature.Length + 1 && LooksLikeVrMarker(bytes, _defaultSignature.Length))
@@ -66,6 +99,13 @@ namespace Ask.Core.Services.FileFormats.Opk
       return TryFindFirstVrOffset(bytes, out offset, out signature);
     }
 
+    /// <summary>
+    /// Пытается найти смещение первого VR-блока методом перебора допустимых позиций.
+    /// </summary>
+    /// <param name="bytes">Байты исходного OPK-файла.</param>
+    /// <param name="offset">Найденное смещение первого VR-блока.</param>
+    /// <param name="signature">Сигнатура, предшествующая первому VR-блоку.</param>
+    /// <returns><see langword="true"/>, если смещение найдено; иначе <see langword="false"/>.</returns>
     private static bool TryFindFirstVrOffset(byte[] bytes, out int offset, out byte[] signature)
     {
       var limit = Math.Min(bytes.Length - sizeof(uint), 512);
@@ -104,6 +144,12 @@ namespace Ask.Core.Services.FileFormats.Opk
       return false;
     }
 
+    /// <summary>
+    /// Считывает один VR-блок из массива байтов, начиная с указанного смещения.
+    /// </summary>
+    /// <param name="fileBytes">Байты OPK-файла.</param>
+    /// <param name="offset">Текущее смещение чтения, которое обновляется после завершения метода.</param>
+    /// <returns>Сырые и распакованные данные VR-блока.</returns>
     private static VrBlock ReadVrBlock(byte[] fileBytes, ref int offset)
     {
       var start = offset;
@@ -119,6 +165,11 @@ namespace Ask.Core.Services.FileFormats.Opk
       return new VrBlock(rawBytes, payloadBytes);
     }
 
+    /// <summary>
+    /// Считывает полезную нагрузку VR-блока с сохранением исходной структуры.
+    /// </summary>
+    /// <param name="reader">Читатель бинарных данных.</param>
+    /// <returns>Полезная нагрузка VR-блока.</returns>
     private static byte[] ReadVrPayload(BinaryReader reader)
     {
       using var capture = new MemoryStream();
@@ -216,6 +267,11 @@ namespace Ask.Core.Services.FileFormats.Opk
       return capture.ToArray();
     }
 
+    /// <summary>
+    /// Извлекает текстовые записи из блока vtxt.
+    /// </summary>
+    /// <param name="vtxtPayload">Полезная нагрузка блока vtxt.</param>
+    /// <returns>Коллекция текстовых записей.</returns>
     private static IReadOnlyList<byte[]> ParseTextRecords(byte[] vtxtPayload)
     {
       using var stream = new MemoryStream(vtxtPayload, writable: false);
@@ -303,6 +359,10 @@ namespace Ask.Core.Services.FileFormats.Opk
       return records;
     }
 
+    /// <summary>
+    /// Пропускает вложенный VR-блок без сохранения его содержимого.
+    /// </summary>
+    /// <param name="reader">Читатель бинарных данных.</param>
     private static void SkipVr(BinaryReader reader)
     {
       var marker = reader.ReadBytes(3);
@@ -349,6 +409,12 @@ namespace Ask.Core.Services.FileFormats.Opk
       }
     }
 
+    /// <summary>
+    /// Проверяет, начинается ли указанный участок массива байтов с допустимого маркера VR-блока.
+    /// </summary>
+    /// <param name="bytes">Проверяемый массив байтов.</param>
+    /// <param name="offset">Смещение, с которого выполняется проверка.</param>
+    /// <returns><see langword="true"/>, если по смещению найден маркер VR-блока; иначе <see langword="false"/>.</returns>
     private static bool LooksLikeVrMarker(byte[] bytes, int offset)
     {
       if (offset + 2 >= bytes.Length)
@@ -366,6 +432,11 @@ namespace Ask.Core.Services.FileFormats.Opk
       return isRecord || isOrdinary;
     }
 
+    /// <summary>
+    /// Вычисляет контрольную сумму CRC32 для указанного массива байтов.
+    /// </summary>
+    /// <param name="bytes">Байты, для которых требуется вычислить CRC32.</param>
+    /// <returns>Значение CRC32.</returns>
     private static uint ComputeCrc32(byte[] bytes)
     {
       const uint polynomial = 0xEDB88320u;
@@ -388,22 +459,47 @@ namespace Ask.Core.Services.FileFormats.Opk
       return ~crc;
     }
 
+    /// <summary>
+    /// Представляет VR-блок в сыром и распакованном виде.
+    /// </summary>
     private sealed class VrBlock
     {
+      /// <summary>
+      /// Инициализирует новый экземпляр описания VR-блока.
+      /// </summary>
+      /// <param name="rawBytes">Сырые байты VR-блока.</param>
+      /// <param name="payloadBytes">Полезная нагрузка VR-блока.</param>
       public VrBlock(byte[] rawBytes, byte[] payloadBytes)
       {
         RawBytes = rawBytes;
         PayloadBytes = payloadBytes;
       }
 
+      /// <summary>
+      /// Получает сырое байтовое представление VR-блока.
+      /// </summary>
       public byte[] RawBytes { get; }
 
+      /// <summary>
+      /// Получает полезную нагрузку VR-блока.
+      /// </summary>
       public byte[] PayloadBytes { get; }
     }
   }
 
+  /// <summary>
+  /// Содержит данные, извлечённые из OPK-файла.
+  /// </summary>
   internal sealed class OpkFileContent
   {
+    /// <summary>
+    /// Инициализирует новый экземпляр данных OPK-файла.
+    /// </summary>
+    /// <param name="signatureBytes">Сигнатура OPK-файла.</param>
+    /// <param name="vkeyBlock">Блок vkey.</param>
+    /// <param name="vbinBlock">Блок vbin.</param>
+    /// <param name="vtxtBlock">Блок vtxt.</param>
+    /// <param name="textRecords">Текстовые записи из блока vtxt.</param>
     public OpkFileContent(
       byte[] signatureBytes,
       byte[] vkeyBlock,
@@ -418,14 +514,29 @@ namespace Ask.Core.Services.FileFormats.Opk
       TextRecords = textRecords;
     }
 
+    /// <summary>
+    /// Получает сигнатуру исходного OPK-файла.
+    /// </summary>
     public byte[] SignatureBytes { get; }
 
+    /// <summary>
+    /// Получает блок vkey.
+    /// </summary>
     public byte[] VkeyBlock { get; }
 
+    /// <summary>
+    /// Получает блок vbin.
+    /// </summary>
     public byte[] VbinBlock { get; }
 
+    /// <summary>
+    /// Получает блок vtxt.
+    /// </summary>
     public byte[] VtxtBlock { get; }
 
+    /// <summary>
+    /// Получает текстовые записи, извлечённые из блока vtxt.
+    /// </summary>
     public IReadOnlyList<byte[]> TextRecords { get; }
   }
 }

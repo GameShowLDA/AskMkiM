@@ -7,10 +7,19 @@ using OpenFolderDialog = Microsoft.Win32.OpenFolderDialog;
 
 namespace MainWindowProgram.Windows
 {
+  /// <summary>
+  /// Представляет окно выбора OPK-файлов и папки для сохранения результатов конвертации.
+  /// </summary>
   public partial class OpkToPkConversionWindow : Window
   {
+    /// <summary>
+    /// Хранит список выбранных пользователем OPK-файлов.
+    /// </summary>
     private readonly ObservableCollection<string> _selectedFiles = [];
 
+    /// <summary>
+    /// Инициализирует новый экземпляр окна конвертации OPK в PK.
+    /// </summary>
     public OpkToPkConversionWindow()
     {
       InitializeComponent();
@@ -18,10 +27,21 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
+    /// <summary>
+    /// Получает список выбранных OPK-файлов.
+    /// </summary>
     public IReadOnlyList<string> SelectedFiles => _selectedFiles;
 
+    /// <summary>
+    /// Получает путь к папке, в которую будут сохранены результаты конвертации.
+    /// </summary>
     public string OutputDirectory => OutputDirectoryTextBox.Text.Trim();
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки выбора OPK-файлов.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void SelectFilesButton_Click(object sender, RoutedEventArgs e)
     {
       var dialog = new OpenFileDialog
@@ -53,12 +73,22 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки очистки списка выбранных файлов.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void ClearFilesButton_Click(object sender, RoutedEventArgs e)
     {
       _selectedFiles.Clear();
       UpdateState();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки выбора папки для сохранения.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void SelectOutputDirectoryButton_Click(object sender, RoutedEventArgs e)
     {
       var dialog = new OpenFolderDialog
@@ -79,11 +109,21 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
+    /// <summary>
+    /// Обрабатывает изменение текста в поле папки сохранения.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void OutputDirectoryTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
       UpdateState();
     }
 
+    /// <summary>
+    /// Обрабатывает подтверждение параметров конвертации.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void ConvertButton_Click(object sender, RoutedEventArgs e)
     {
       if (_selectedFiles.Count == 0)
@@ -102,6 +142,9 @@ namespace MainWindowProgram.Windows
       Close();
     }
 
+    /// <summary>
+    /// Обновляет состояние элементов интерфейса в зависимости от выбранных параметров.
+    /// </summary>
     private void UpdateState()
     {
       SelectedFilesSummaryTextBlock.Text = _selectedFiles.Count switch
@@ -114,6 +157,11 @@ namespace MainWindowProgram.Windows
       ConvertButton.IsEnabled = _selectedFiles.Count > 0 && !string.IsNullOrWhiteSpace(OutputDirectory);
     }
 
+    /// <summary>
+    /// Открывает системовый диалог с учётом владельца текущего окна.
+    /// </summary>
+    /// <param name="dialog">Диалог, который требуется отобразить.</param>
+    /// <returns><see langword="true"/>, если пользователь подтвердил выбор; иначе <see langword="false"/>.</returns>
     private bool ShowDialog(CommonDialog dialog)
     {
       return Owner != null
