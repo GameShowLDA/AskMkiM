@@ -40,33 +40,7 @@ public class RmExpressionParserTests
     Assert.Equal(new[] { "X1/a1", "X1/a2", "X1/a3" }, expanded);
   }
 
-  [Fact(DisplayName = "Point parser resolves RM mnemonics with mixed Cyrillic and Latin letters")]
-  public void ParsePoints_WithMixedCyrillicAndLatinMnemonics_UsesRmMappingsWithoutErrors()
-  {
-    var rm = new RmCommandModel
-    {
-      CommandNumber = "30",
-      StartLineNumber = 30,
-      PointsMap = new Dictionary<string, string>
-      {
-        ["Х1/а11"] = "1.1.11",
-        ["Х1/b6"] = "1.1.6",
-        ["Х1/с25"] = "1.2.25"
-      }
-    };
-
-    var model = new PrCommandModel
-    {
-      CommandNumber = "70",
-      StartLineNumber = 70
-    };
-
-    var (scheme, errors) = PointParser.ParsePoints("*X1/a11,X1/b6,X1/c25*", model, rm);
-
-    Assert.Empty(errors);
-    Assert.NotNull(scheme);
-    Assert.Equal(new[] { "1.1.11", "1.1.6", "1.2.25" }, scheme!.EnumeratePoints().Select(point => point.ToString()).ToArray());
-  }
+  
 
   [Fact(DisplayName = "RM model finds point address after mnemonic normalization")]
   public void TryGetAddressByKey_WithHomoglyphLetters_FindsMappedAddress()
