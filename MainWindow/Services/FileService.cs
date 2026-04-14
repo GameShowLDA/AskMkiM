@@ -7,11 +7,15 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
+using MainWindowProgram.Services.LegacyConversion;
 using MainWindowProgram.Windows;
 using Microsoft.Win32;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media.Effects;
+using System.Windows.Threading;
+using UI.Components;
 using UI.Components.FileComparerControls;
 using UI.Controls.Archive;
 using UI.Controls.Search;
@@ -39,6 +43,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
     private readonly IOpkToPkConverter _opkToPkConverter;
+    private readonly ApkToApkwConverter _apkToApkwConverter;
 
     private bool _isSearchWindowOpen;
     private bool _selectFileHandlerAttached;
@@ -55,6 +60,7 @@ namespace MainWindowProgram.Services
       _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
       _opkToPkConverter = new OpkToPkConverter();
+      _apkToApkwConverter = new ApkToApkwConverter();
 
       EventAggregator.Subscribe<SearchEvents.SearchWindowClosing>(e => OnSearchWindowClosing(e.IsClosing));
 
@@ -204,18 +210,53 @@ namespace MainWindowProgram.Services
 
     /// <summary>
     /// Заглушка команды конвертации OPK в OPKW.
-    /// Алгоритм будет добавлен позже.
     /// </summary>
     public void ConvertOpkToOpkw()
     {
     }
 
     /// <summary>
-    /// Заглушка команды конвертации APK в APKW.
-    /// Алгоритм будет добавлен позже.
+    /// Запускает конвертацию старого APK-архива в новый APKW-архив.
     /// </summary>
-    public void ConvertApkToApkw()
+    public async void ConvertApkToApkw()
     {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      var dialog = new ApkToApkwConversionWindow
+      {
+        Owner = _mainWindow,
+      };
+
+      try
+      {
+        _mainWindow.Effect = new BlurEffect { Radius = 8 };
+        if (dialog.ShowDialog() != true)
+        {
+          return;
+        }
+      }
+      finally
+      {
+        _mainWindow.Effect = null;
+      }
+
+      var result = await RunApkToApkwConversionAsync(dialog.InputFilePath);
+      if (!result.Success)
+      {
+        ShowApkToApkwFailure(result);
+        return;
+      }
+
+      if (!string.IsNullOrWhiteSpace(result.CreatedArchivePath))
+      {
+        OpenArchiveControlAndArchive(result.CreatedArchivePath);
+      }
+
+      ShowApkToApkwSummary(result);
     }
 
     /// <summary>
@@ -409,6 +450,140 @@ namespace MainWindowProgram.Services
         "Конвертация OPK в PK",
         MessageBoxButton.OK,
         icon);
+    }
+
+    private async Task<ApkToApkwConversionResult> RunApkToApkwConversionAsync(string inputFilePath)
+    {
+      var owner = Application.Current?.MainWindow;
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
+
+      try
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+
+        progressWindow.Configure(
+          "Конвертация APK в APKW",
+          "Подготовка конвертации",
+          "Проверяем архив, собираем список записей и готовим промежуточные файлы.");
+
+        if (owner != null)
+        {
+          owner.Effect = new BlurEffect { Radius = 8 };
+        }
+
+        progressWindow.Show();
+        await WaitForProgressWindowAsync(progressWindow);
+
+        var progress = new Progress<ApkToApkwProgressInfo>(info =>
+        {
+          progressWindow.SetProgress(info.Percent);
+
+          var status = info.TotalEntries > 0
+            ? $"{info.Stage} ({System.Math.Min(info.ProcessedEntries, info.TotalEntries)}/{info.TotalEntries})"
+            : info.Stage;
+
+          progressWindow.SetStage(status, info.Hint);
+        });
+
+        return await _apkToApkwConverter.ConvertAsync(inputFilePath, progress);
+      }
+      finally
+      {
+        progressWindow?.Close();
+
+        if (owner != null)
+        {
+          owner.Effect = previousEffect;
+        }
+      }
+    }
+
+    private static async Task WaitForProgressWindowAsync(ProgressWindow progressWindow)
+    {
+      await progressWindow.Dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Background);
+
+      await progressWindow.Dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Render);
+
+      await progressWindow.Dispatcher.InvokeAsync(
+        () => { },
+        DispatcherPriority.ContextIdle);
+    }
+
+    private void OpenArchiveControlAndArchive(string archivePath)
+    {
+      if (_multiWindow.GetActiveWorkspaceControl() is not ArchiveControl archiveControl)
+      {
+        _multiWindow.WorkspaceService.AddControl("Архив", new ArchiveControl(), TypeWindow.Files);
+        archiveControl = _multiWindow.GetActiveWorkspaceControl() as ArchiveControl;
+      }
+
+      if (archiveControl == null)
+      {
+        return;
+      }
+
+      _ = archiveControl.OpenArchivePathAsync(archivePath);
+    }
+
+    private static void ShowApkToApkwSummary(ApkToApkwConversionResult result)
+    {
+      var summaryLines = new List<string>
+      {
+        $"Создан архив: {Path.GetFileName(result.CreatedArchivePath)}",
+        $"Записей перенесено: {result.EntriesCount}",
+      };
+
+      Message.MessageBoxCustom.Show(
+        string.Join(Environment.NewLine, summaryLines),
+        "Конвертация APK в APKW",
+        MessageBoxButton.OK,
+        MessageBoxImage.Information);
+    }
+
+    private void ShowApkToApkwFailure(ApkToApkwConversionResult result)
+    {
+      foreach (var pkPath in result.ProblemPkPaths.Where(File.Exists))
+      {
+        _multiWindow.EditorDocumentService.OpenFile(pkPath);
+      }
+
+      var message = result.ErrorMessage ?? "Не удалось выполнить конвертацию APK в APKW.";
+      var hasIntermediateDirectory = !string.IsNullOrWhiteSpace(result.IntermediateDirectoryPath)
+        && Directory.Exists(result.IntermediateDirectoryPath);
+
+      if (hasIntermediateDirectory)
+      {
+        message += Environment.NewLine
+          + Environment.NewLine
+          + $"Открыть эту папку в проводнике?{Environment.NewLine}{result.IntermediateDirectoryPath}";
+      }
+
+      var dialogResult = Message.MessageBoxCustom.Show(
+        message,
+        "Конвертация APK в APKW",
+        hasIntermediateDirectory ? MessageBoxButton.YesNo : MessageBoxButton.OK,
+        MessageBoxImage.Error);
+
+      if (dialogResult == MessageBoxResult.Yes && hasIntermediateDirectory)
+      {
+        Process.Start(new ProcessStartInfo
+        {
+          FileName = "explorer.exe",
+          Arguments = $"\"{result.IntermediateDirectoryPath}\"",
+          UseShellExecute = true
+        });
+      }
     }
 
     /// <summary>

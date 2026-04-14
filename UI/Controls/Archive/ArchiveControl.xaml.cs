@@ -934,6 +934,55 @@ namespace UI.Controls.Archive
       BeginCreateArchiveWorkflow();
     }
 
+    public Task OpenArchivePathAsync(string archivePath)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        return Dispatcher.InvokeAsync(() => OpenArchivePathAsync(archivePath)).Task.Unwrap();
+      }
+
+      return OpenArchivePathCoreAsync(archivePath);
+    }
+
+    private async Task OpenArchivePathCoreAsync(string archivePath)
+    {
+      if (string.IsNullOrWhiteSpace(archivePath))
+      {
+        throw new ArgumentException("Требуется указать путь к архиву.", nameof(archivePath));
+      }
+
+      var fullArchivePath = Path.GetFullPath(archivePath);
+      if (!File.Exists(fullArchivePath))
+      {
+        throw new FileNotFoundException("Архив не найден.", fullArchivePath);
+      }
+
+      var rootNode = GetRootNode();
+      if (rootNode == null)
+      {
+        ResetTree();
+        rootNode = GetRootNode();
+      }
+
+      if (rootNode != null)
+      {
+        rootNode.IsExpanded = true;
+        await LoadArchivesIntoRootAsync(rootNode);
+
+        var archiveNode = rootNode.Children.FirstOrDefault(node =>
+          node.Kind == ArchiveTreeNodeKind.Archive &&
+          IsSameArchivePath(node.ArchivePath, fullArchivePath));
+
+        if (archiveNode != null)
+        {
+          archiveNode.IsExpanded = true;
+          await LoadArchiveFilesIntoTreeAsync(archiveNode);
+        }
+      }
+
+      await OpenArchiveAsync(fullArchivePath);
+    }
+
     private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
     {
       if (!ReferenceEquals(sender, e.OriginalSource))
