@@ -5,7 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   /// <summary>
-  /// Модель команды УП (условный переход).
+  /// Модель команды ОС (общий сброс).
   /// </summary>
   public class OcCommandModel : BaseCommandModel
   {

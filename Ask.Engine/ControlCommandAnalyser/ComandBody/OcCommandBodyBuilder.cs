@@ -1,10 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandAnalyser.ComandBody
 {
