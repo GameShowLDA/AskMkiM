@@ -55,17 +55,21 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
 
       await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
-      // cancellationToken.ThrowIfCancellationRequested();
-      // Здесь должен быть метод подключения реле на УКШ.
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.EnableRelay(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(userMessageService:  userMessageService);
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.DisableRelay(userMessageService);
       await SelfTestHelper.IsCorrectRangeAsync(-0.02, 0.02, result, "напряжения", userMessageService);
 
       await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
-      // cancellationToken.ThrowIfCancellationRequested();
-      // Здесь должен быть метод подключения реле на УКШ.
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.EnableRelay(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       result = await meter.AcVoltageManager.MeasureACVoltageAsync(userMessageService: userMessageService);
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.DisableRelay(userMessageService);
       await SelfTestHelper.IsCorrectRangeAsync(0.97, 1.03, result, "напряжения", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB1, userMessageService);
@@ -77,10 +81,12 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB2, userMessageService);
 
       await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
-      // cancellationToken.ThrowIfCancellationRequested();
-      // Здесь должен быть метод подключения реле на УКШ.
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.EnableRelay(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       double result = await meter.ResistanceManager.MeasureResistanceAsync(userMessageService: userMessageService);
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.DisableRelay(userMessageService);
       await SelfTestHelper.IsCorrectRangeAsync(-0.02, 0.02, result, "сопротивления", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB2, userMessageService);
@@ -92,10 +98,12 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB4, userMessageService);
 
       await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
-      // cancellationToken.ThrowIfCancellationRequested();
-      // Здесь должен быть метод подключения реле на УКШ.
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.EnableRelay(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       double result = await meter.CapacitanceManager.MeasureCapacitanceAsync(userMessageService: userMessageService);
+      cancellationToken.ThrowIfCancellationRequested();
+      await device.RelayManager.DisableRelay(userMessageService);
       await SelfTestHelper.IsCorrectRangeAsync(-0.02, 0.02, result, "емкости", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB4, userMessageService);

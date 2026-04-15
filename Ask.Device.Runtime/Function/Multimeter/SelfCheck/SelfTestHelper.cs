@@ -25,7 +25,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
             header: $"Тест {param}",
-            message: "[НОРМА]",
+            message: $"{result} [НОРМА]",
             type: ShowMessageModel.MessageType.Success)
           );
       }
@@ -34,7 +34,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
             header: $"Тест {param}",
-            message: "[БРАК]",
+            message: $"{result} [БРАК]",
             type: ShowMessageModel.MessageType.Error)
           );
       }
