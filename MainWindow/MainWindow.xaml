@@ -179,7 +179,7 @@
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}">
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPkw" Command="{Binding File.ConvertOpkToPkwCommand}"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}"/>
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToOpkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToOpkw" Command="{Binding File.ConvertOpkToOpkwCommand}"/>
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}"/>
                         </MenuItem>

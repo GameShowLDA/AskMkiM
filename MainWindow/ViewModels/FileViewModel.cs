@@ -75,9 +75,9 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void CreateNewFile() => _fileService.CreateNewFileAsync();
 
-    /// <summary>Команда конвертации OPK в PKW.</summary>
+    /// <summary>Команда конвертации OPK в PK.</summary>
     [RelayCommand]
-    private void ConvertOpkToPkw() => _fileService.ConvertOpkToPkw();
+    private void ConvertOpkToPk() => _fileService.ConvertOpkToPk();
 
     /// <summary>Команда конвертации OPK в OPKW.</summary>
     [RelayCommand]

@@ -148,7 +148,7 @@
     <value>Conversion</value>
   </data>
   <data name="menu.file.legacyConversion.opkToPkw" xml:space="preserve">
-    <value>OPK to PKW</value>
+    <value>OPK to PK</value>
   </data>
   <data name="menu.file.legacyConversion.opkToOpkw" xml:space="preserve">
     <value>OPK to OPKW</value>

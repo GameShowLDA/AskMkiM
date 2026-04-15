@@ -148,7 +148,7 @@
     <value>Конвертация</value>
   </data>
   <data name="menu.file.legacyConversion.opkToPkw" xml:space="preserve">
-    <value>OPK в PKW</value>
+    <value>OPK в PK</value>
   </data>
   <data name="menu.file.legacyConversion.opkToOpkw" xml:space="preserve">
     <value>OPK в OPKW</value>
