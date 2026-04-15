@@ -472,15 +472,6 @@ namespace Ask.UI.Controls.ProtocolNew
 
       await File.WriteAllLinesAsync(fullPath, lines);
       _lastSavedProtocolPath = Path.GetFullPath(fullPath);
-
-      if (Dispatcher.CheckAccess())
-      {
-        FileName.Text = Path.GetFileName(_lastSavedProtocolPath);
-      }
-      else
-      {
-        await Dispatcher.InvokeAsync(() => FileName.Text = Path.GetFileName(_lastSavedProtocolPath));
-      }
     }
 
     private static string FormatProtocolLineForSave(ShowMessageModel message)
