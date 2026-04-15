@@ -258,7 +258,7 @@ namespace MainWindowProgram.Services.LegacyConversion
         {
           InputPath = sourcePath,
           CreatedArchivePath = createdArchivePath,
-          IntermediateDirectoryPath = intermediateDirectory,
+          IntermediateDirectoryPath = null,
           EntriesCount = successfulEntries.Count,
           Success = true,
         };
@@ -275,6 +275,7 @@ namespace MainWindowProgram.Services.LegacyConversion
       finally
       {
         TryDeleteDirectory(stagingDirectory);
+        TryDeleteDirectory(intermediateDirectory);
       }
     }
 
@@ -346,10 +347,9 @@ namespace MainWindowProgram.Services.LegacyConversion
 
     private static string CreateIntermediateOutputDirectory(string sourcePath)
     {
-      var sourceDirectory = Path.GetDirectoryName(sourcePath)
-        ?? throw new DirectoryNotFoundException("Не удалось определить каталог исходного APK-архива.");
-      var baseDirectoryName = Path.GetFileNameWithoutExtension(sourcePath) + "_intermediate";
-      var candidatePath = Path.Combine(sourceDirectory, baseDirectoryName);
+      var reviewRootPath = ArchiveDirectoryService.ResolveReviewArchivesRootPath();
+      var baseDirectoryName = SanitizeFileName(Path.GetFileNameWithoutExtension(sourcePath), "apk_review") + "_review";
+      var candidatePath = Path.Combine(reviewRootPath, baseDirectoryName);
 
       if (!Directory.Exists(candidatePath))
       {
@@ -360,7 +360,7 @@ namespace MainWindowProgram.Services.LegacyConversion
       var suffix = 1;
       while (true)
       {
-        candidatePath = Path.Combine(sourceDirectory, $"{baseDirectoryName}_{suffix}");
+        candidatePath = Path.Combine(reviewRootPath, $"{baseDirectoryName}_{suffix}");
         if (!Directory.Exists(candidatePath))
         {
           Directory.CreateDirectory(candidatePath);

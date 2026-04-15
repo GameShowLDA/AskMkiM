@@ -533,7 +533,16 @@ namespace MainWindowProgram.Services
         return;
       }
 
-      _ = archiveControl.OpenArchivePathAsync(archivePath);
+      if (File.Exists(archivePath))
+      {
+        _ = archiveControl.OpenArchivePathAsync(archivePath);
+        return;
+      }
+
+      if (Directory.Exists(archivePath))
+      {
+        _ = archiveControl.OpenReviewArchivePathAsync(archivePath);
+      }
     }
 
     private static void ShowApkToApkwSummary(ApkToApkwConversionResult result)
@@ -553,17 +562,21 @@ namespace MainWindowProgram.Services
 
     private void ShowApkToApkwFailure(ApkToApkwConversionResult result)
     {
-      foreach (var pkPath in result.ProblemPkPaths.Where(File.Exists))
-      {
-        _multiWindow.EditorDocumentService.OpenFile(pkPath);
-      }
-
       var message = result.ErrorMessage ?? "Не удалось выполнить конвертацию APK в APKW.";
       var hasIntermediateDirectory = !string.IsNullOrWhiteSpace(result.IntermediateDirectoryPath)
         && Directory.Exists(result.IntermediateDirectoryPath);
 
       if (hasIntermediateDirectory)
       {
+        OpenArchiveControlAndArchive(result.IntermediateDirectoryPath!);
+      }
+
+      if (hasIntermediateDirectory)
+      {
+        message += Environment.NewLine
+          + Environment.NewLine
+          + "Архив на проверке открыт во вкладке архивов.";
+
         message += Environment.NewLine
           + Environment.NewLine
           + $"Открыть эту папку в проводнике?{Environment.NewLine}{result.IntermediateDirectoryPath}";

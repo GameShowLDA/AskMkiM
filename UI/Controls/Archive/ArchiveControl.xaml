@@ -121,6 +121,9 @@
                             <MenuItem x:Name="OpenArchiveFileMenuItem"
                       Header="Открыть"
                       Click="OpenArchiveFileMenuItem_Click" />
+                            <MenuItem x:Name="OpenInTextEditorMenuItem"
+                      Header="Открыть в редакторе"
+                      Click="OpenInTextEditorMenuItem_Click" />
                             <MenuItem x:Name="CopyArchiveFileMenuItem"
                       Header="Копировать"
                       Click="CopyArchiveFileMenuItem_Click" />
@@ -180,16 +183,61 @@
 
                         <HierarchicalDataTemplate DataType="{x:Type local:ArchiveTreeNode}"
                                     ItemsSource="{Binding Children}">
-                            <Grid Margin="2,1">
-                                <TextBlock x:Name="NodeTextNormal"
-                                           Text="{Binding DisplayName}"
-                                           Foreground="{DynamicResource ForegrounfBrushes}" />
-                                <TextBlock x:Name="NodeTextAccent"
-                                           Text="{Binding DisplayName}"
-                                           Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
-                                           Opacity="0" />
-                            </Grid>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="2,1">
+                                <Grid Width="18"
+                                      Height="18"
+                                      Margin="0,0,6,0"
+                                      VerticalAlignment="Center">
+                                    <askUiIcons:FolderOpenIcon x:Name="RootNodeIcon"
+                                                               Size="14"
+                                                               Visibility="Collapsed"
+                                                               Foreground="{DynamicResource ForegrounfBrushes}" />
+                                    <askUiIcons:ArchiveIcon x:Name="ArchiveNodeIcon"
+                                                            Size="14"
+                                                            Visibility="Collapsed"
+                                                            Foreground="{DynamicResource ForegrounfBrushes}" />
+                                    <askUiIcons:FileDocumentIcon x:Name="FileNodeIcon"
+                                                                 Size="14"
+                                                                 Visibility="Collapsed"
+                                                                 Foreground="{DynamicResource ForegrounfBrushes}" />
+                                    <Ellipse Width="8"
+                                             Height="8"
+                                             HorizontalAlignment="Right"
+                                             VerticalAlignment="Bottom"
+                                             StrokeThickness="0"
+                                             Fill="{Binding StatusBrush}"
+                                             Visibility="{Binding StatusVisibility}" />
+                                </Grid>
+                                <Grid>
+                                    <TextBlock x:Name="NodeTextNormal"
+                                               Text="{Binding DisplayName}"
+                                               Foreground="{DynamicResource ForegrounfBrushes}" />
+                                    <TextBlock x:Name="NodeTextAccent"
+                                               Text="{Binding DisplayName}"
+                                               Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                                               Opacity="0" />
+                                </Grid>
+                            </StackPanel>
                             <HierarchicalDataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ArchiveTreeNodeKind.Root}">
+                                    <Setter TargetName="RootNodeIcon" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ArchiveTreeNodeKind.ReviewRoot}">
+                                    <Setter TargetName="RootNodeIcon" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ArchiveTreeNodeKind.Archive}">
+                                    <Setter TargetName="ArchiveNodeIcon" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ArchiveTreeNodeKind.ReviewArchive}">
+                                    <Setter TargetName="ArchiveNodeIcon" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ArchiveTreeNodeKind.File}">
+                                    <Setter TargetName="FileNodeIcon" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:ArchiveTreeNodeKind.ReviewFile}">
+                                    <Setter TargetName="FileNodeIcon" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="True">
                                     <Setter TargetName="NodeTextAccent" Property="Opacity" Value="1" />
                                 </DataTrigger>
@@ -589,6 +637,11 @@
                             </Style>
                         </DataGrid.Resources>
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header="Ош."
+                                Binding="{Binding ErrorCountDisplay}"
+                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
+                                MinWidth="60"
+                                Width="6*" />
                             <DataGridTextColumn Header="Обозначение"
                                 Binding="{Binding Name}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
@@ -701,6 +754,22 @@
                         <StackPanel Grid.Column="1"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right">
+                            <Button x:Name="RecheckReviewFileButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Проверить файл ещё раз"
+                                    Click="RecheckReviewFileButton_Click">
+                                <askUiIcons:TestFlaskIcon Size="16"
+                                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="OpenInEditorButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarNeutralIconButtonStyle}"
+                                    ToolTip="Открыть файл в текстовом редакторе"
+                                    Click="OpenInEditorButton_Click">
+                                <askUiIcons:EditIcon Size="16"
+                                                     Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
                             <Button x:Name="CopyArchiveFileButton"
                                     Visibility="Collapsed"
                                     Style="{StaticResource ArchiveToolbarIconButtonStyle}"
