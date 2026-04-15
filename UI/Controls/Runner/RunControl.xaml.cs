@@ -239,10 +239,9 @@ namespace UI.Controls.Runner
       rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
-      var fileName = textEditorUI.TextEditorModel.FileName;
+      var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.FileName);
       var filePath = textEditorUI.TextEditorModel.FilePath;
-      rightEditor.TranslationFileName.Text = string.IsNullOrEmpty(fileName) ?
-        Path.GetFileName(filePath) : fileName;
+      rightEditor.TranslationFileName.Text = fileName;
       rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
       var dockItemPk = new DockItem
       {
@@ -318,13 +317,12 @@ namespace UI.Controls.Runner
       ProtocolUI.MenuButtonVisibility(false);
       ControlProgram = models;
 
-      var ok = models[0];
-      if (ok.Mnemonic != "ОК")
+      if (models.Count == 0 || models[0].Mnemonic != "ОК")
       {
         return;
       }
 
-      ProtocolUI.Header = (ok as OkCommandModel).ObjectCode;
+      ProtocolUI.Header = GetDisplayFileName(OpkFilePath, FileName);
       ProtocolUI.SetSettings(StartDelegate: StartTest, false);
       this.FileName = ProtocolUI.Header;
 
@@ -455,6 +453,16 @@ namespace UI.Controls.Runner
     private bool CanSaveTranslatedFileToDisk()
     {
       return translationModels.Count > 0 && TranslationErrorCount == 0;
+    }
+
+    private static string GetDisplayFileName(string? filePath, string? fileName)
+    {
+      if (!string.IsNullOrWhiteSpace(filePath))
+      {
+        return Path.GetFileName(filePath);
+      }
+
+      return fileName ?? string.Empty;
     }
 
     private TranslatorEditor? GetTranslatorEditor()
