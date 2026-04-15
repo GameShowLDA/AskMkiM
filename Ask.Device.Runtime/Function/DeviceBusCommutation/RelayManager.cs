@@ -79,7 +79,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return true;
       }
 
-      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync("9.1.0.0.");
+      var cmd = new DeviceCommand(9, 1);
+      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+
       await Task.Delay(10);
 
       if (answer == null || answer.Length == 0) return false;
@@ -99,8 +101,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return true;
       }
 
-      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync("9.2.0.0.");
-      await Task.Delay(10);
+      var cmd = new DeviceCommand(9, 2);
+      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 
       if (answer == null || answer.Length == 0) return false;
       if (!answer.Contains("disconnect")) return false;
