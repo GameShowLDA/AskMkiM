@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Settings;
-using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Infrastructure.Localization;
 using Message;
@@ -21,6 +20,7 @@ namespace UI.Controls.Settings.UserInterface
   public partial class UiSettingsControl : UserControl
   {
     private UserInterfaceDto _baseParameterModel { get; set; }
+    private bool _isInitialized;
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
 
@@ -93,17 +93,22 @@ namespace UI.Controls.Settings.UserInterface
     {
       _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
       DefalultData();
+      UpdateCommandAutoCollapseVisibility();
 
-      LanguageSelect.ValueChanged += ValueChanged;
-      ThemeSelect.ValueChanged += ValueChanged;
-      SyntaxHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      CommandBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      ChainPointBodyBackgroundHighlighting.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      TopMenuIcons.CheckedChanged += (s, ev) => ValueChanged(s, ev);
-      CommandAutoCollapsing.CheckedChanged += (s, ev) => ValueChanged(s, ev);
+      if (!_isInitialized)
+      {
+        LanguageSelect.ValueChanged += ValueChanged;
+        ThemeSelect.ValueChanged += ValueChanged;
+        SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
+        CommandAutoCollapsing.CheckedChanged += SettingsCard_CheckedChanged;
 
-      Success.PreviewMouseDown += Success_PreviewMouseDown;
-      Error.PreviewMouseDown += Error_PreviewMouseDown;
+        Success.PreviewMouseDown += Success_PreviewMouseDown;
+        Error.PreviewMouseDown += Error_PreviewMouseDown;
+        _isInitialized = true;
+      }
 
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
@@ -113,11 +118,18 @@ namespace UI.Controls.Settings.UserInterface
       LoadThemeOptions(_baseParameterModel.Theme);
 
       EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
+      ProtocolConfig.SaveProtocolEvent += ProtocolConfig_SaveProtocolEvent;
     }
 
     private void UiSettingsControl_Unloaded(object sender, RoutedEventArgs e)
     {
       EventAggregator.Unsubscribe<ThemeEvent.Change>(OnThemeChanged);
+      ProtocolConfig.SaveProtocolEvent -= ProtocolConfig_SaveProtocolEvent;
+    }
+
+    private void SettingsCard_CheckedChanged(object? sender, bool e)
+    {
+      ValueChanged(sender, e);
     }
 
     /// <summary>
@@ -171,6 +183,18 @@ namespace UI.Controls.Settings.UserInterface
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
+    }
+
+    private void ProtocolConfig_SaveProtocolEvent(SettingsProtocolDto _)
+    {
+      Dispatcher.Invoke(UpdateCommandAutoCollapseVisibility);
+    }
+
+    private void UpdateCommandAutoCollapseVisibility()
+    {
+      bool isAvailable = ProtocolConfig.GetCommandHeadersInProtocol();
+      CommandAutoCollapsing.Visibility = isAvailable ? Visibility.Visible : Visibility.Collapsed;
+      CommandAutoCollapsing.IsEnabled = isAvailable;
     }
 
     /// <summary>

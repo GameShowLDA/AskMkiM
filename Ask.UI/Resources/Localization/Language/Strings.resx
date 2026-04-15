@@ -144,6 +144,18 @@
   <data name="menu.file.compare" xml:space="preserve">
     <value>Сравнить</value>
   </data>
+  <data name="menu.file.legacyConversion" xml:space="preserve">
+    <value>Конвертация</value>
+  </data>
+  <data name="menu.file.legacyConversion.opkToPkw" xml:space="preserve">
+    <value>OPK в PKW</value>
+  </data>
+  <data name="menu.file.legacyConversion.opkToOpkw" xml:space="preserve">
+    <value>OPK в OPKW</value>
+  </data>
+  <data name="menu.file.legacyConversion.apkToApkw" xml:space="preserve">
+    <value>APK в APKW</value>
+  </data>
   <data name="menu.file.exit" xml:space="preserve">
     <value>Выход</value>
   </data>
@@ -159,6 +171,9 @@
   <data name="menu.file.print" xml:space="preserve">
     <value>Печать</value>
   </data>
+  <data name="menu.file.searchreplace" xml:space="preserve">
+    <value>Замена</value>
+  </data>
   <data name="menu.file.save" xml:space="preserve">
     <value>Сохранить</value>
   </data>
@@ -167,6 +182,18 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Поиск и замена</value>
+  </data>
+  <data name="menu.file.openArchive" xml:space="preserve">
+    <value>Открыть архив</value>
+  </data>
+  <data name="menu.file.createArchive" xml:space="preserve">
+    <value>Создать архив</value>
+  </data>
+  <data name="menu.file.downloadArchives" xml:space="preserve">
+    <value>Скачать архивы</value>
+  </data>
+  <data name="menu.file.uploadArchive" xml:space="preserve">
+    <value>Загрузить архив</value>
   </data>
   <data name="menu.settings" xml:space="preserve">
     <value>Настройки</value>
@@ -236,6 +263,9 @@
   </data>
   <data name="menu.test.selfcontrol.module" xml:space="preserve">
     <value>Модуль</value>
+  </data>
+  <data name="menu.test.selfcontrol.system" xml:space="preserve">
+    <value>Система</value>
   </data>
   <data name="menu.test.tests" xml:space="preserve">
     <value>Тесты</value>
@@ -560,5 +590,17 @@
   </data>
   <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
     <value>Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми.</value>
+  </data>
+  <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
+    <value>Заголовки команд</value>
+  </data>
+  <data name="settings.protocol.commandHeaders.description" xml:space="preserve">
+    <value>Отображает заголовки команд в ходе выполнения программ контроля.</value>
+  </data>
+  <data name="settings.protocol.testStepMessages.title" xml:space="preserve">
+    <value>Сообщения шагов проверки</value>
+  </data>
+  <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
+    <value>Отображает сообщения о шагах проверки в протоколе выполнения.</value>
   </data>
 </root>

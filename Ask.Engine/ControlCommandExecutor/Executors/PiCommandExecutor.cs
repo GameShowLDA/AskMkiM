@@ -134,6 +134,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         protocolModel.AddErrors(nameCommand, errorMessage);
       }
 
+      await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
+
       if (command.SiCommand != null)
       {
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);

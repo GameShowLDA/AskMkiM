@@ -156,6 +156,30 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
+    /// Заглушка команды конвертации OPK в PKW.
+    /// Алгоритм будет добавлен позже.
+    /// </summary>
+    public void ConvertOpkToPkw()
+    {
+    }
+
+    /// <summary>
+    /// Заглушка команды конвертации OPK в OPKW.
+    /// Алгоритм будет добавлен позже.
+    /// </summary>
+    public void ConvertOpkToOpkw()
+    {
+    }
+
+    /// <summary>
+    /// Заглушка команды конвертации APK в APKW.
+    /// Алгоритм будет добавлен позже.
+    /// </summary>
+    public void ConvertApkToApkw()
+    {
+    }
+
+    /// <summary>
     /// Открывает интерфейс работы с архивами.
     /// </summary>
     public void OpenArchive()

@@ -193,10 +193,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var chainDisplay = BuildChainDisplayString(chain);
       LogDebug($"[ConnectedPointChecker] Start chain check. Points={chain.PointModels.Count}. Chain={chainDisplay}");
 
-      await context.MessageService.AppendEmptyLineAsync();
-      await context.MessageService.ShowMessageAsync(
-        ExecutorMessageBuilder.BuildChainCheckBlock(chainDisplay),
-        IsBlockStart: true);
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      {
+        await context.MessageService.AppendEmptyLineAsync();
+        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(chainDisplay), IsBlockStart: true);
+      }
     }
 
     /// <summary>
@@ -564,10 +565,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Показывает заголовок проверки пары точек.
     /// </summary>
-    private static Task ShowPointCheckHeaderAsync(PointModel basePoint, PointModel point, IUserInteractionService messageService) =>
-      messageService.ShowMessageAsync(
+    private static async Task ShowPointCheckHeaderAsync(PointModel basePoint, PointModel point, IUserInteractionService messageService)
+    {
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      {
+        await messageService.ShowMessageAsync(
         ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(basePoint, point, CircuitFaultType.ShortCircuit),
         IsBlockStart: true);
+      }
+    }
 
     /// <summary>
     /// Выполняет измерение для точки с учётом типа команды и параметров модуля.

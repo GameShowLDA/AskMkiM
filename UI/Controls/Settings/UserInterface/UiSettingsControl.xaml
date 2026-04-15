@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.Settings.UserInterface"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:Components ="clr-namespace:UI.Components"
+             xmlns:SharedComponents="clr-namespace:Ask.UI.Shared.Components;assembly=Ask.UI"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -107,7 +108,7 @@
                         Visibility="Visible"
                         SelectedValuePath="Key"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_UserInterface_CommandAutoCollapse_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_UserInterface_CommandAutoCollapse_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -115,7 +116,7 @@
                         VerticalAlignment="Top"
                         x:Name="CommandAutoCollapsing"/>
 
-                    <Components:SettingsCard
+                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_UserInterface_TopMenuIcons_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_UserInterface_TopMenuIcons_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -178,7 +179,7 @@
                                        Margin="0,0,0,8"/>
 
                             <WrapPanel Orientation="Horizontal">
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                         Title="{Binding Source={StaticResource Settings_UserInterface_SyntaxHighlighting_Title}, Path=Value}"
                                         Description="{Binding Source={StaticResource Settings_UserInterface_SyntaxHighlighting_Description}, Path=Value}"
                                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -186,7 +187,7 @@
                                         VerticalAlignment="Top"
                                         x:Name="SyntaxHighlighting"/>
 
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                         Title="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Title}, Path=Value}"
                                         Description="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Description}, Path=Value}"
                                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -194,7 +195,7 @@
                                         VerticalAlignment="Top"
                                         x:Name="CommandBodyBackgroundHighlighting"/>
 
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                         Title="{Binding Source={StaticResource Settings_UserInterface_ChainPointBodyBackground_Title}, Path=Value}"
                                         Description="{Binding Source={StaticResource Settings_UserInterface_ChainPointBodyBackground_Description}, Path=Value}"
                                         IsChecked="{Binding IdleMode, Mode=TwoWay}"

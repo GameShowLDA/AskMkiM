@@ -70,4 +70,14 @@ public class SettingsProtocolDto
   /// Текст протокола с ошибками (формируемый или пользовательский).
   /// </summary>
   public string ErrorTextProtocol { get; set; } = string.Empty;
+
+  /// <summary>
+  /// Получает или задаёт значение, указывающее, отображаются ли заголовки команд в протоколе.
+  /// </summary>
+  public bool ShowCommandHeadersInProtocol { get; set; }
+
+  /// <summary>
+  /// Получает или задаёт значение, указывающее, отображаются ли шаги проверки в протоколе.
+  /// </summary>
+  public bool ShowTestStepMessagesInProtocol { get; set; }
 }

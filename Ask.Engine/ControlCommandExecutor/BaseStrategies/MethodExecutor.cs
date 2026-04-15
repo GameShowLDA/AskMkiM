@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -32,7 +33,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return showMessageModels;
       }
 
-      await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
+      if (ProtocolConfig.GetTestStepMessagesInProtocol())
+      { 
+        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
+      }
 
       HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
       var binaryPoints = ConvertToReversedBinaryRange(groupChains, HighestBitCount);
@@ -48,7 +52,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         string stepStr = new string(bits);
 
-        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
+        if (ProtocolConfig.GetTestStepMessagesInProtocol())
+        {
+          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
+        }
 
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 

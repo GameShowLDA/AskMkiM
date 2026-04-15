@@ -253,7 +253,9 @@ namespace Ask.UI.Controls.ProtocolNew
       await ShouldShowDetailedProtocol(showMessageModel);
       await CheckStatus(showMessageModel);
 
-      if (string.IsNullOrEmpty(showMessageModel.Message) && !ProtocolConfig.GetHeaderInfo())
+      if (string.IsNullOrEmpty(showMessageModel.Message) &&
+          showMessageModel.Status != MessageType.Command &&
+          !ProtocolConfig.GetHeaderInfo())
       {
         return;
       }
@@ -275,13 +277,9 @@ namespace Ask.UI.Controls.ProtocolNew
       {
         if (ShouldWaitStepKey(showMessageModel, IsBlockStart))
         {
-          // Остановились на шаге: показываем режим "Продолжить/Завершить".
           ShowButtonsOnPause(repeatVisible: false);
           await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
 
-          // После шага выполнение снова "бежит":
-          // для F10 показываем только Пауза/Завершить,
-          // для F11 оставляем шаговые кнопки.
           bool showStepButtons = StepControlManager.IsStepInto && !StepControlManager.StepOverUntilNextControlCommand;
           ShowOnlyStopAndFinishButtons(showStepButtons);
         }
@@ -328,6 +326,11 @@ namespace Ask.UI.Controls.ProtocolNew
     public async Task AppendEmptyLineAsync(int indentLevel = 0)
     {
       await protocolTextBox.AppendEmptyLineAsync();
+    }
+
+    public async Task CompleteCommandAsync(bool hasErrors)
+    {
+      await protocolTextBox.CompleteCommandAsync(hasErrors);
     }
 
     public int GetLastLineNumber()
@@ -401,7 +404,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
     private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
     {
-      if (!await ProtocolConfig.GetShowDetailedProtocol())
+      if (!ProtocolConfig.GetShowDetailedProtocol())
       {
         if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
         {

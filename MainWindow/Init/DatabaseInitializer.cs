@@ -3,6 +3,7 @@ using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.DataBase.Engine.Static.Settings;
 using static Ask.LogLib.LoggerUtility;
 
@@ -16,18 +17,19 @@ namespace MainWindowProgram.Init
       {
         var newDatabaseReport = await DatabaseEngineInitializer.InitializeAsync();
         LogInformation(
-          $"Новая БД инициализирована. Применено миграций: {newDatabaseReport.AppliedMigrations}, " +
-          $"использован EnsureCreated: {newDatabaseReport.UsedEnsureCreated}, " +
-          $"добавлено горячих клавиш: {newDatabaseReport.SeededHotkeys}, " +
-          $"создано строк настроек: {newDatabaseReport.CreatedDefaultSettingsRows}.");
-        WarmUpDeviceCaches();
+          $"New DB initialized. Applied migrations: {newDatabaseReport.AppliedMigrations}, " +
+          $"used EnsureCreated: {newDatabaseReport.UsedEnsureCreated}, " +
+          $"seeded hotkeys: {newDatabaseReport.SeededHotkeys}, " +
+          $"created default settings rows: {newDatabaseReport.CreatedDefaultSettingsRows}.");
+
+        await WarmUpDeviceCachesAsync();
 
         var protocolTask = ProtocolSettings.GetAsync();
         var executionTask = ExecutionSettings.GetAsync();
         var userInterfaceTask = UserInterfaceSettings.GetAsync();
         var deviceDisplayTask = DeviceDisplaySettings.GetAsync();
 
-        Task.WaitAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
+        await Task.WhenAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
 
         var protocol = protocolTask.Result;
         var execution = executionTask.Result;
@@ -56,14 +58,14 @@ namespace MainWindowProgram.Init
           await DeviceDisplayConfig.SetDeviceDisplaySettingsModel(deviceDisplay);
         }
 
-        ProtocolConfig.SaveProtocolEvent += async model =>
+        ProtocolConfig.SaveProtocolAsyncEvent += async model =>
         {
           await ProtocolSettings.SaveAsync(model);
           ProtocolModel.SetTemplate(model.CleanTextProtocol);
           ProtocolModel.SetErrorsTemplate(model.CleanTextErrorsProtocol);
         };
 
-        ExecutionConfig.SaveExecutionEvent += async model =>
+        ExecutionConfig.SaveExecutionAsyncEvent += async model =>
         {
           await ExecutionSettings.SaveAsync(model);
         };
@@ -73,7 +75,7 @@ namespace MainWindowProgram.Init
           await UserInterfaceSettings.SaveAsync(model);
         };
 
-        DeviceDisplayConfig.DeviceDisplaySettingsSaved += async model =>
+        DeviceDisplayConfig.SaveDeviceDisplayAsyncEvent += async model =>
         {
           await DeviceDisplaySettings.SaveAsync(model);
         };
@@ -85,19 +87,48 @@ namespace MainWindowProgram.Init
     }
 
     /// <summary>
-    /// Прогревает кэш всех сервисов устройств при старте приложения.
+    /// Warms up the device cache for all device services at application startup.
     /// </summary>
-    private static void WarmUpDeviceCaches()
+    private static async Task WarmUpDeviceCachesAsync()
     {
       try
       {
         DeviceRuntime.ClearCache();
 
-        LogInformation("Кэш устройств прогрет при старте приложения.");
+        var chassisTask = ChassisManagers.GetAllAsync();
+        var racksTask = Racks.GetAllAsync();
+        var fastMetersTask = FastMeters.GetAllAsync();
+        var breakdownTask = BreakdownTesters.GetAllAsync();
+        var powerSourcesTask = PowerSourceModules.GetAllAsync();
+        var relaySwitchModulesTask = RelaySwitchModules.GetAllAsync();
+        var switchingDevicesTask = SwitchingDevices.GetAllAsync();
+        var uninterruptiblePowerSuppliesTask = UninterruptiblePowerSupplies.GetAllAsync();
+
+        await Task.WhenAll(
+          chassisTask,
+          racksTask,
+          fastMetersTask,
+          breakdownTask,
+          powerSourcesTask,
+          relaySwitchModulesTask,
+          switchingDevicesTask,
+          uninterruptiblePowerSuppliesTask);
+
+        int totalDevices =
+          chassisTask.Result.Count +
+          racksTask.Result.Count +
+          fastMetersTask.Result.Count +
+          breakdownTask.Result.Count +
+          powerSourcesTask.Result.Count +
+          relaySwitchModulesTask.Result.Count +
+          switchingDevicesTask.Result.Count +
+          uninterruptiblePowerSuppliesTask.Result.Count;
+
+        LogInformation($"Device cache warmed up on startup. Loaded devices: {totalDevices}.");
       }
       catch (Exception ex)
       {
-        LogException(ex, "Ошибка прогрева кэша устройств.");
+        LogException(ex, "Device cache warm-up failed.");
       }
     }
   }

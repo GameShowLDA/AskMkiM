@@ -1,5 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.DTO.Settings;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,7 +14,7 @@ namespace UI.Controls.Settings.DeviceInfo
     /// Базовая (сохранённая) модель протокола, считанная при загрузке.
     /// Используется как эталон для сравнения с текущими значениями UI.
     /// </summary>
-    private DeviceDisplaySettingsModel _baseModel { get; set; }
+    private DeviceDisplaySettingsDto _baseModel { get; set; }
     private bool _isInitialized;
 
     public event Action<bool> DeviceDisplayModelChanged;
@@ -64,9 +64,9 @@ namespace UI.Controls.Settings.DeviceInfo
     /// <summary>
     /// Формирует модель протокола из текущих значений элементов UI.
     /// </summary>
-    internal DeviceDisplaySettingsModel GetModel()
+    internal DeviceDisplaySettingsDto GetModel()
     {
-      var model = new DeviceDisplaySettingsModel
+      var model = new DeviceDisplaySettingsDto
       {
         ShowMachineAddresses = MachineAddressesCard.IsChecked,
         ShowConnectionInfo = ConnectionInfo.IsChecked,
@@ -98,7 +98,7 @@ namespace UI.Controls.Settings.DeviceInfo
     /// <summary>
     /// Сравнивает две модели протокола по всем флагам.
     /// </summary>
-    private static bool ProtocolEquals(DeviceDisplaySettingsModel a, DeviceDisplaySettingsModel b) =>
+    private static bool ProtocolEquals(DeviceDisplaySettingsDto a, DeviceDisplaySettingsDto b) =>
       a.ShowMachineAddresses == b.ShowMachineAddresses &&
       a.ShowConnectionInfo == b.ShowConnectionInfo &&
       a.ShowDeviceExecutionParameters == b.ShowDeviceExecutionParameters &&

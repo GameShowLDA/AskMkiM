@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Entity.Settings;
+﻿using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -7,9 +7,11 @@ namespace Ask.Core.Services.Config.AppSettings
   /// </summary>
   public static class ProtocolConfig
   {
-    static public Action<SettingsProtocolModel> SaveProtocolEvent;
+    public static Action<SettingsProtocolDto>? SaveProtocolEvent;
+    public static Action<bool>? TestStepMessagesInProtocolChanged;
+    public static Func<SettingsProtocolDto, Task>? SaveProtocolAsyncEvent;
 
-    private static SettingsProtocolModel ProtocolModel = new SettingsProtocolModel();
+    private static SettingsProtocolDto ProtocolModel = new SettingsProtocolDto();
 
     #region Set.
 
@@ -62,7 +64,11 @@ namespace Ask.Core.Services.Config.AppSettings
     public static void SetCleanTextProtocol(string text) => ProtocolModel.CleanTextProtocol = text;
     public static void SetCleanTextErrorProtocol(string text) => ProtocolModel.CleanTextErrorsProtocol = text;
     public static void SetErrorTextProtocol(string text) => ProtocolModel.ErrorTextProtocol = text;
-    public static void SetProtocolModel(SettingsProtocolModel protocolModel) => ProtocolModel = protocolModel;
+    public static void SetProtocolModel(SettingsProtocolDto protocolModel) => ProtocolModel = protocolModel;
+
+    public static void SetCommandHeadersInProtocol(bool enable) => ProtocolModel.ShowCommandHeadersInProtocol = enable;
+    public static void SetTestStepMessagesInProtocol(bool enable) => ProtocolModel.ShowTestStepMessagesInProtocol = enable;
+
 
     #endregion
 
@@ -72,7 +78,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает статус отображения информации об устройствах в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetDeviceInfo() => await Task.Run(() => ProtocolModel.ShowDeviceInfo);
+    public static bool GetDeviceInfo() => ProtocolModel.ShowDeviceInfo;
 
     /// <summary>
     /// Возвращает статус отоображения заголовков.
@@ -84,19 +90,19 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает статус отображения подробной информации в протоколе.
     /// </summary>
     /// <returns>true, если отображается; false, если скрывается.</returns>
-    public static async Task<bool> GetShowDetailedProtocol() => await Task.Run(() => ProtocolModel.ShowDetailedProtocol);
+    public static bool GetShowDetailedProtocol() => ProtocolModel.ShowDetailedProtocol;
 
     /// <summary>
     /// Возвращает статус автосохранения протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static async Task<bool> GetSaveProtocol() => await Task.Run(() => ProtocolModel.AutoSaveProtocol);
+    public static bool GetSaveProtocol() => ProtocolModel.AutoSaveProtocol;
 
     /// <summary>
     /// Возвращает статус авто печати протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static async Task<bool> GetPrintProtocol() => await Task.Run(() => ProtocolModel.AutoPrintProtocol);
+    public static bool GetPrintProtocol() => ProtocolModel.AutoPrintProtocol;
 
     /// <summary>
     /// Возвращает статус отображения времени в протоколе.
@@ -105,31 +111,41 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetTimeStart() => ProtocolModel.DisplayOperationTime;
     public static bool GetShowProtocolInSoftware() => ProtocolModel.ShowProtocolInSoftware;
     public static bool GetGenerateProtocol() => ProtocolModel.GenerateProtocol;
+    public static bool GetCommandHeadersInProtocol() => ProtocolModel.ShowCommandHeadersInProtocol;
+    public static bool GetTestStepMessagesInProtocol() => ProtocolModel.ShowTestStepMessagesInProtocol;
     public static string GetCleanTextProtocol() => ProtocolModel.CleanTextProtocol;
     public static string GetCleanTextProtocolError() => ProtocolModel.CleanTextErrorsProtocol;
     public static string GetErrorTextProtocol() => ProtocolModel.ErrorTextProtocol;
 
-    public static SettingsProtocolModel GetProtocolModel()
+    public static SettingsProtocolDto GetProtocolModel()
     {
-      SettingsProtocolModel protocolModel = new SettingsProtocolModel();
-      protocolModel.ShowDeviceInfo = ProtocolModel.ShowDeviceInfo;
-      protocolModel.ShowHeaderInfo = ProtocolModel.ShowHeaderInfo;
-      protocolModel.ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol;
-      protocolModel.AutoSaveProtocol = ProtocolModel.AutoSaveProtocol;
-      protocolModel.AutoPrintProtocol = ProtocolModel.AutoPrintProtocol;
-      protocolModel.DisplayOperationTime = ProtocolModel.DisplayOperationTime;
-      protocolModel.ShowProtocolInSoftware = ProtocolModel.ShowProtocolInSoftware;
-      protocolModel.GenerateProtocol = ProtocolModel.GenerateProtocol;
-      protocolModel.CleanTextProtocol = ProtocolModel.CleanTextProtocol;
-      protocolModel.CleanTextErrorsProtocol = ProtocolModel.CleanTextErrorsProtocol;
+      SettingsProtocolDto protocolModel = new SettingsProtocolDto
+      {
+        Id = ProtocolModel.Id,
+        ShowDeviceInfo = ProtocolModel.ShowDeviceInfo,
+        ShowHeaderInfo = ProtocolModel.ShowHeaderInfo,
+        ShowDetailedProtocol = ProtocolModel.ShowDetailedProtocol,
+        AutoSaveProtocol = ProtocolModel.AutoSaveProtocol,
+        AutoPrintProtocol = ProtocolModel.AutoPrintProtocol,
+        DisplayOperationTime = ProtocolModel.DisplayOperationTime,
+        ShowProtocolInSoftware = ProtocolModel.ShowProtocolInSoftware,
+        GenerateProtocol = ProtocolModel.GenerateProtocol,
+        CleanTextProtocol = ProtocolModel.CleanTextProtocol,
+        CleanTextErrorsProtocol = ProtocolModel.CleanTextErrorsProtocol,
+        ErrorTextProtocol = ProtocolModel.ErrorTextProtocol,
+        ShowTestStepMessagesInProtocol = ProtocolModel.ShowTestStepMessagesInProtocol,
+        ShowCommandHeadersInProtocol = ProtocolModel.ShowCommandHeadersInProtocol
+      };
       return protocolModel;
     }
 
     #endregion
 
-    public static void SaveProtocolModel(SettingsProtocolModel protocolModel)
+    public static async Task SaveProtocolModel(SettingsProtocolDto protocolModel)
     {
+      bool testStepMessagesChanged = ProtocolModel.ShowTestStepMessagesInProtocol != protocolModel.ShowTestStepMessagesInProtocol;
 
+      ProtocolModel.Id = protocolModel.Id;
       ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
       ProtocolModel.ShowHeaderInfo = protocolModel.ShowHeaderInfo;
       ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
@@ -140,8 +156,30 @@ namespace Ask.Core.Services.Config.AppSettings
       ProtocolModel.GenerateProtocol = protocolModel.GenerateProtocol;
       ProtocolModel.CleanTextProtocol = protocolModel.CleanTextProtocol;
       ProtocolModel.CleanTextErrorsProtocol = protocolModel.CleanTextErrorsProtocol;
+      ProtocolModel.ErrorTextProtocol = protocolModel.ErrorTextProtocol;
+      ProtocolModel.ShowCommandHeadersInProtocol = protocolModel.ShowCommandHeadersInProtocol;
+      ProtocolModel.ShowTestStepMessagesInProtocol = protocolModel.ShowTestStepMessagesInProtocol;
+
+      await InvokeSaveProtocolAsync(protocolModel);
+      if (testStepMessagesChanged)
+      {
+        TestStepMessagesInProtocolChanged?.Invoke(protocolModel.ShowTestStepMessagesInProtocol);
+      }
 
       SaveProtocolEvent?.Invoke(protocolModel);
+    }
+
+    private static async Task InvokeSaveProtocolAsync(SettingsProtocolDto protocolModel)
+    {
+      if (SaveProtocolAsyncEvent == null)
+      {
+        return;
+      }
+
+      foreach (Func<SettingsProtocolDto, Task> handler in SaveProtocolAsyncEvent.GetInvocationList())
+      {
+        await handler(protocolModel);
+      }
     }
 
 

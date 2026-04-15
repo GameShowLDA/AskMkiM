@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.DeviceInfo"
              xmlns:Components ="clr-namespace:UI.Components"
+             xmlns:SharedComponents="clr-namespace:Ask.UI.Shared.Components;assembly=Ask.UI"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
@@ -81,7 +82,7 @@
                                        Margin="0,0,0,8"/>
 
                             <WrapPanel Orientation="Horizontal">
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MachineAddresses_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MachineAddresses_Description}, Path=Value}"
                                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
@@ -89,28 +90,28 @@
                                     VerticalAlignment="Top"
                                     x:Name="MachineAddressesCard"/>
 
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_ConnectionInfo_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_ConnectionInfo_Description}, Path=Value}"
                                     Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="ConnectionInfo"/>
 
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_DeviceExecutionParameters_Description}, Path=Value}"
                                     Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="DeviceExecutionParameters"/>
 
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MeasurementResults_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_MeasurementResults_Description}, Path=Value}"
                                     Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="MeasurementResults"/>
 
-                                <Components:SettingsCard
+                                <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Description}, Path=Value}"
                                     Margin="0,6,0,0"
