@@ -67,5 +67,45 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       await Task.Delay(10);
       return true;
     }
+
+    /// <summary>
+    /// Включение реле.
+    /// </summary>
+    /// <returns>Результат проверки и выполнения команды.</returns>
+    public async Task<bool> EnableRelay(IUserInteractionService? userMessageService = null)
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync("9.1.0.0.");
+      await Task.Delay(10);
+
+      if (answer == null || answer.Length == 0) return false;
+      if (!answer.Contains("disconnect")) return true;
+
+      return true;
+    }
+
+    /// <summary>
+    /// Выключение реле.
+    /// </summary>
+    /// <returns>Результат проверки и выполнения команды.</returns>
+    public async Task<bool> DisableRelay(IUserInteractionService? userMessageService = null)
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync("9.2.0.0.");
+      await Task.Delay(10);
+
+      if (answer == null || answer.Length == 0) return false;
+      if (!answer.Contains("disconnect")) return false;
+
+      return true;
+    }
   }
 }

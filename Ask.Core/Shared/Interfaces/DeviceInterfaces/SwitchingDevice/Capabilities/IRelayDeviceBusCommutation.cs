@@ -20,5 +20,17 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabiliti
     /// <param name="numberRelay">Номер реле, которое необходимо отключить.</param>
     /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
     Task<bool> DisconnectRelay(int numberRelay, IUserInteractionService? userMessageService = null);
+
+    /// <summary>
+    /// Включить реле.
+    /// </summary>
+    /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
+    Task<bool> EnableRelay(IUserInteractionService? userMessageService = null);
+
+    /// <summary>
+    /// Выключить реле.
+    /// </summary>
+    /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
+    Task<bool> DisableRelay(IUserInteractionService? userMessageService = null);
   }
 }

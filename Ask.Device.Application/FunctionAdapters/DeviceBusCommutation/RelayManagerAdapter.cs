@@ -68,5 +68,47 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
       return result;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> EnableRelay(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _relayManager.EnableRelay();
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Включение реле", $"Общий", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw RelayControlExceptionFactory.EnableFailed();
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisableRelay(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _relayManager.DisableRelay();
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Выключение реле", $"Общий", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+        throw RelayControlExceptionFactory.DisableFailed();
+
+      return result;
+    }
   }
 }
