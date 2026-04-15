@@ -62,6 +62,12 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// Тип команды CK.
     /// </summary>
     CK,
+
+    [CommandOrganizationalAttribute("ОС")]
+    /// <summary>
+    /// Тип команды ОС.
+    /// </summary>
+    OC,
   }
 }
 
