@@ -6,7 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
+using UI.Controls.Calendar;
 
 namespace UI.Controls.EmptyWorkspace
 {
@@ -15,8 +17,12 @@ namespace UI.Controls.EmptyWorkspace
     private DateTime _currentDateTime;
     private string _buildDate = string.Empty;
     private string _appVersion = string.Empty;
+    private string _todayNoteText = string.Empty;
     private bool _hasAnimatedClock;
+    private bool _hasTodayNote;
+    private bool _isTodayNoteExpanded;
     private bool _isSubscribed;
+    private readonly CalendarNoteStore _calendarNoteStore = new();
 
     private static Assembly AppAssembly => Assembly.GetEntryAssembly() ?? throw new InvalidOperationException("EntryAssembly not found");
 
@@ -66,6 +72,49 @@ namespace UI.Controls.EmptyWorkspace
         }
       }
     }
+
+    public string TodayNoteText
+    {
+      get => _todayNoteText;
+      set
+      {
+        if (_todayNoteText != value)
+        {
+          _todayNoteText = value;
+          OnPropertyChanged(nameof(TodayNoteText));
+          OnPropertyChanged(nameof(TodayNoteBarText));
+        }
+      }
+    }
+
+    public bool HasTodayNote
+    {
+      get => _hasTodayNote;
+      set
+      {
+        if (_hasTodayNote != value)
+        {
+          _hasTodayNote = value;
+          OnPropertyChanged(nameof(HasTodayNote));
+        }
+      }
+    }
+
+    public bool IsTodayNoteExpanded
+    {
+      get => _isTodayNoteExpanded;
+      set
+      {
+        if (_isTodayNoteExpanded != value)
+        {
+          _isTodayNoteExpanded = value;
+          OnPropertyChanged(nameof(IsTodayNoteExpanded));
+          OnPropertyChanged(nameof(TodayNoteBarText));
+        }
+      }
+    }
+
+    public string TodayNoteBarText => IsTodayNoteExpanded ? "Свернуть" : GetTodayNotePreviewText();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -118,15 +167,18 @@ namespace UI.Controls.EmptyWorkspace
     {
       UpdateCurrentDateTime(ApplicationClockService.CurrentDateTime);
       SubscribeToClock();
+      CalendarNoteStore.NotesChanged += CalendarNoteStore_NotesChanged;
     }
 
     private void EmptyWorkspaceView_Unloaded(object sender, RoutedEventArgs e)
     {
       UnsubscribeFromClock();
+      CalendarNoteStore.NotesChanged -= CalendarNoteStore_NotesChanged;
     }
 
     private void UpdateCurrentDateTime(DateTime now)
     {
+      var previousDate = CurrentDateTime.Date;
       var truncatedNow = new DateTime(
         now.Year,
         now.Month,
@@ -136,6 +188,12 @@ namespace UI.Controls.EmptyWorkspace
         now.Second);
 
       CurrentDateTime = truncatedNow;
+
+      if (previousDate != truncatedNow.Date)
+      {
+        SetTodayNoteExpanded(false, animate: false);
+        RefreshTodayNote();
+      }
     }
 
     private void OnClockTimeChanged(DateTime currentDateTime)
@@ -209,6 +267,133 @@ namespace UI.Controls.EmptyWorkspace
 
       ApplicationClockService.TimeChanged -= OnClockTimeChanged;
       _isSubscribed = false;
+    }
+
+    private void RefreshTodayNote()
+    {
+      var notes = _calendarNoteStore.Load();
+      var today = CurrentDateTime.Date;
+      var hasNote = notes.TryGetValue(today, out var noteText) && !string.IsNullOrWhiteSpace(noteText);
+
+      HasTodayNote = hasNote;
+      TodayNoteText = hasNote ? noteText! : string.Empty;
+
+      if (!hasNote && IsTodayNoteExpanded)
+      {
+        SetTodayNoteExpanded(false, animate: false);
+      }
+    }
+
+    private void CalendarNoteStore_NotesChanged(object? sender, EventArgs e)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(new Action(RefreshTodayNote));
+        return;
+      }
+
+      RefreshTodayNote();
+    }
+
+    private void TodayNoteBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (!HasTodayNote)
+      {
+        return;
+      }
+
+      SetTodayNoteExpanded(!IsTodayNoteExpanded, animate: true);
+      e.Handled = true;
+    }
+
+    private void SetTodayNoteExpanded(bool isExpanded, bool animate)
+    {
+      IsTodayNoteExpanded = isExpanded;
+
+      if (!animate)
+      {
+        TodayNotePreviewPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
+        TodayNotePreviewPanel.Opacity = isExpanded ? 1 : 0;
+        TodayNotePreviewTransform.Y = isExpanded ? 0 : 18;
+        return;
+      }
+
+      AnimateTodayNotePreview(isExpanded);
+    }
+
+    private void AnimateTodayNotePreview(bool isExpanded)
+    {
+      var duration = TimeSpan.FromMilliseconds(180);
+      var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+      TodayNotePreviewPanel.BeginAnimation(OpacityProperty, null);
+      TodayNotePreviewTransform.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, null);
+
+      if (isExpanded)
+      {
+        TodayNotePreviewPanel.Visibility = Visibility.Visible;
+        TodayNotePreviewPanel.BeginAnimation(OpacityProperty, new DoubleAnimation
+        {
+          From = 0,
+          To = 1,
+          Duration = duration,
+          EasingFunction = easing,
+        });
+        TodayNotePreviewTransform.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, new DoubleAnimation
+        {
+          From = 18,
+          To = 0,
+          Duration = duration,
+          EasingFunction = easing,
+        });
+        return;
+      }
+
+      var opacityAnimation = new DoubleAnimation
+      {
+        From = TodayNotePreviewPanel.Opacity,
+        To = 0,
+        Duration = duration,
+        EasingFunction = easing,
+      };
+      opacityAnimation.Completed += (_, _) =>
+      {
+        if (!IsTodayNoteExpanded)
+        {
+          TodayNotePreviewPanel.Visibility = Visibility.Collapsed;
+        }
+      };
+
+      TodayNotePreviewPanel.BeginAnimation(OpacityProperty, opacityAnimation);
+      TodayNotePreviewTransform.BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, new DoubleAnimation
+      {
+        From = TodayNotePreviewTransform.Y,
+        To = 18,
+        Duration = duration,
+        EasingFunction = easing,
+      });
+    }
+
+    private string GetTodayNotePreviewText()
+    {
+      if (string.IsNullOrWhiteSpace(TodayNoteText))
+      {
+        return string.Empty;
+      }
+
+      var lines = TodayNoteText
+        .Replace("\r\n", "\n")
+        .Split('\n');
+
+      var firstLine = lines.FirstOrDefault() ?? string.Empty;
+      var hasMoreLines = lines.Skip(1).Any(line => !string.IsNullOrWhiteSpace(line));
+
+      if (hasMoreLines && !firstLine.EndsWith("...", StringComparison.Ordinal))
+      {
+        return $"{firstLine}...";
+      }
+
+      return firstLine;
     }
   }
 }

@@ -136,28 +136,69 @@
             </Grid>
         </Border>
 
-        <!-- ===== ПЛАШКА ПРИВЕТСТВИЯ ВНИЗУ ===== -->
-        <Border x:Name="GreetingBar"
-            HorizontalAlignment="Center"
-            Cursor="Hand"
-            VerticalAlignment="Bottom"
-            Margin="0,0,0,20"
-            Padding="20,10"
-            CornerRadius="10"
-                
-            Background="{DynamicResource MainGreetingBackgroundBrush}"
-            BorderBrush="{DynamicResource MainGreetingBorderBrush}"
-                
-            BorderThickness="1"
-            Panel.ZIndex="100">
-            <TextBlock Text="{Binding CurrentDateTime,
-                                RelativeSource={RelativeSource AncestorType=UserControl},
-                                Converter={StaticResource TimeOfDayGreeting}}"
-                 Foreground="{DynamicResource MainTitleSolidColorBrush}"
-                 FontFamily="{DynamicResource WinstonBold}"
-                 FontSize="18"
-                 TextAlignment="Center"/>
-        </Border>
+        <!-- ===== ПЛАШКА ЗАМЕТКИ НА СЕГОДНЯ ===== -->
+        <StackPanel x:Name="TodayNoteHost"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,20"
+                    Panel.ZIndex="100">
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasTodayNote, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <Border x:Name="TodayNotePreviewPanel"
+                    Margin="0,0,0,8"
+                    Padding="16,14"
+                    MaxWidth="520"
+                    Visibility="Collapsed"
+                    CornerRadius="12"
+                    Background="{DynamicResource MainGreetingBackgroundBrush}"
+                    BorderBrush="{DynamicResource MainGreetingBorderBrush}"
+                    BorderThickness="1"
+                    Opacity="0">
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="TodayNotePreviewTransform" Y="18"/>
+                </Border.RenderTransform>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              MaxHeight="160">
+                    <TextBlock Text="{Binding TodayNoteText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Foreground="{DynamicResource MainTitleSolidColorBrush}"
+                               FontFamily="{DynamicResource WinstonLight}"
+                               FontSize="17"
+                               TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Border>
+
+            <Border x:Name="TodayNoteBar"
+                    HorizontalAlignment="Center"
+                    Cursor="Hand"
+                    Padding="20,10"
+                    CornerRadius="10"
+                    Background="{DynamicResource MainGreetingBackgroundBrush}"
+                    BorderBrush="{DynamicResource MainGreetingBorderBrush}"
+                    BorderThickness="1"
+                    MouseLeftButtonDown="TodayNoteBar_MouseLeftButtonDown">
+                <TextBlock Text="{Binding TodayNoteBarText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Foreground="{DynamicResource MainTitleSolidColorBrush}"
+                           FontFamily="{DynamicResource WinstonBold}"
+                           FontSize="18"
+                           TextAlignment="Center"
+                           TextWrapping="NoWrap"
+                           LineStackingStrategy="BlockLineHeight"
+                           LineHeight="22"
+                           MaxHeight="22"
+                           TextTrimming="CharacterEllipsis"
+                           MaxWidth="420"/>
+            </Border>
+        </StackPanel>
 
         <!-- ===== ВЕРСИЯ ПО / ДАТА СБОРКИ (внизу справа) ===== -->
         <TextBlock HorizontalAlignment="Right"

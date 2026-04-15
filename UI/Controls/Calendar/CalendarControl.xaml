@@ -63,6 +63,52 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
+        <Style x:Key="CalendarNoteToolTipStyle"
+       TargetType="{x:Type ToolTip}">
+            <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="MaxWidth" Value="260"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToolTip}">
+                        <Border Background="Transparent"
+                        SnapsToDevicePixels="True">
+                            <Border CornerRadius="12"
+                            Padding="1.2">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="1,1">
+                                        <GradientStop Color="{DynamicResource LightPrimaryColor}" Offset="0"/>
+                                        <GradientStop Color="{DynamicResource ActiveColor}" Offset="0.45"/>
+                                        <GradientStop Color="{DynamicResource ActiveColor80}" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+
+                                <Border CornerRadius="11"
+                                Padding="10,7">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0"
+                                                     EndPoint="1,1">
+                                            <GradientStop Color="#2D2950" Offset="0"/>
+                                            <GradientStop Color="#262347" Offset="0.55"/>
+                                            <GradientStop Color="#1E1C3B" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+
+                                    <ContentPresenter HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="CalendarDayButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="40"/>
             <Setter Property="Height" Value="40"/>
@@ -87,6 +133,14 @@
                             <Grid>
                                 <ContentPresenter HorizontalAlignment="Center"
                                                   VerticalAlignment="Center"/>
+                                <Ellipse x:Name="NoteDot"
+                                         Width="6"
+                                         Height="6"
+                                         Fill="{DynamicResource NotificationWarningIconBrush}"
+                                         HorizontalAlignment="Right"
+                                         VerticalAlignment="Top"
+                                         Margin="0,7,7,0"
+                                         Visibility="Collapsed"/>
                                 <Ellipse x:Name="TodayDot"
                                          Width="4"
                                          Height="4"
@@ -116,6 +170,9 @@
                                 <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
                                 <Setter TargetName="DaySurface" Property="BorderThickness" Value="1.5"/>
                                 <Setter TargetName="TodayDot" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding HasNote}" Value="True">
+                                <Setter TargetName="NoteDot" Property="Visibility" Value="Visible"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                 <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
@@ -254,9 +311,23 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Button Style="{StaticResource CalendarDayButtonStyle}"
-                                Command="{Binding DataContext.SelectDateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding}"
-                                Content="{Binding DayNumber}"/>
+                                Content="{Binding DayNumber}"
+                                ToolTipService.IsEnabled="{Binding HasTooltip}"
+                                ToolTipService.ShowDuration="60000"
+                                PreviewMouseLeftButtonDown="DayButton_PreviewMouseLeftButtonDown"
+                                MouseEnter="DayButton_PreviewMouseEnter"
+                                PreviewMouseLeftButtonUp="DayButton_PreviewMouseLeftButtonUp"
+                                PreviewMouseRightButtonDown="DayButton_PreviewMouseRightButtonDown">
+                            <Button.ToolTip>
+                                <ToolTip Style="{StaticResource CalendarNoteToolTipStyle}"
+                                     Placement="Top"
+                                     VerticalOffset="-6">
+                                    <TextBlock Text="{Binding NoteText}"
+                                               MaxWidth="240"
+                                               TextWrapping="Wrap"/>
+                                </ToolTip>
+                            </Button.ToolTip>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
