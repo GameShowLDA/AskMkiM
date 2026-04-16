@@ -1,10 +1,12 @@
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace UI.Controls.Archive
 {
-  internal sealed class ArchiveEntryInfo
+  internal sealed class ArchiveEntryInfo : INotifyPropertyChanged
   {
     public string ArchivePath { get; }
     public string EntryName { get; }
@@ -48,9 +50,28 @@ namespace UI.Controls.Archive
     public DateTime CreationDate { get; }
     public string? SourceFilePath { get; }
     public bool IsReviewEntry { get; }
-    public int ErrorCount { get; }
+    private int _errorCount;
+
+    public int ErrorCount
+    {
+      get => _errorCount;
+      private set
+      {
+        if (_errorCount == value)
+        {
+          return;
+        }
+
+        _errorCount = value;
+        OnPropertyChanged();
+        OnPropertyChanged(nameof(ErrorCountDisplay));
+      }
+    }
+
     public string ErrorCountDisplay => ErrorCount > 0 ? ErrorCount.ToString(CultureInfo.InvariantCulture) : string.Empty;
     public FileType FileType { get; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public ArchiveEntryInfo(
       string archivePath,
@@ -84,8 +105,18 @@ namespace UI.Controls.Archive
       CreationDate = creationDate;
       SourceFilePath = sourceFilePath;
       IsReviewEntry = isReviewEntry;
-      ErrorCount = errorCount;
+      _errorCount = errorCount;
       FileType = fileType;
+    }
+
+    public void UpdateReviewState(int errorCount)
+    {
+      ErrorCount = errorCount;
+    }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
   }
 }

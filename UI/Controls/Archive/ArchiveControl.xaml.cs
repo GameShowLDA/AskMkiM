@@ -55,6 +55,9 @@ namespace UI.Controls.Archive
     private readonly DispatcherTimer _autoRefreshTimer;
     private readonly ArchiveManager _archiveManager = new ArchiveManager();
     private readonly object _archiveManagerSync = new object();
+    private readonly object _reviewRefreshSuppressionSync = new object();
+    private readonly Dictionary<string, DateTime> _recentlyMutatedReviewPaths =
+      new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
     private IReadOnlyList<ArchiveEntryInfo> _currentGridEntries = Array.Empty<ArchiveEntryInfo>();
     private bool _suppressGridSelection;
@@ -190,6 +193,11 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherChanged(object sender, FileSystemEventArgs e)
     {
+      if (WasRecentlyMutatedReviewPath(e.FullPath))
+      {
+        return;
+      }
+
       if (e.ChangeType == WatcherChangeTypes.Changed &&
           ArchiveEncryptionSession.WasRecentlyMutatedBySession(e.FullPath))
       {
@@ -201,7 +209,55 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherRenamed(object sender, RenamedEventArgs e)
     {
+      if (WasRecentlyMutatedReviewPath(e.OldFullPath) || WasRecentlyMutatedReviewPath(e.FullPath))
+      {
+        return;
+      }
+
       ScheduleAutoRefresh();
+    }
+
+    private void MarkReviewPathAsRecentlyMutated(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      lock (_reviewRefreshSuppressionSync)
+      {
+        _recentlyMutatedReviewPaths[fullPath] = DateTime.UtcNow.AddSeconds(3);
+      }
+    }
+
+    private bool WasRecentlyMutatedReviewPath(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return false;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      var now = DateTime.UtcNow;
+
+      lock (_reviewRefreshSuppressionSync)
+      {
+        if (_recentlyMutatedReviewPaths.Count > 0)
+        {
+          var expiredPaths = _recentlyMutatedReviewPaths
+            .Where(pair => pair.Value <= now)
+            .Select(pair => pair.Key)
+            .ToList();
+
+          foreach (var expiredPath in expiredPaths)
+          {
+            _recentlyMutatedReviewPaths.Remove(expiredPath);
+          }
+        }
+
+        return _recentlyMutatedReviewPaths.TryGetValue(fullPath, out var expiresAt) && expiresAt > now;
+      }
     }
 
     private void ScheduleAutoRefresh()
@@ -600,6 +656,77 @@ namespace UI.Controls.Archive
       if (refreshedNode.IsExpanded)
       {
         await LoadReviewFilesIntoTreeAsync(refreshedNode);
+      }
+    }
+
+    private ArchiveTreeNode? FindReviewArchiveNode(string reviewArchivePath)
+    {
+      var reviewRootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
+      if (reviewRootNode == null)
+      {
+        return null;
+      }
+
+      return reviewRootNode.Children.FirstOrDefault(node =>
+        node.Kind == ArchiveTreeNodeKind.ReviewArchive &&
+        IsSameArchivePath(node.ArchivePath, reviewArchivePath));
+    }
+
+    private ArchiveTreeNode? FindReviewFileNode(string reviewArchivePath, string entryName)
+    {
+      var reviewArchiveNode = FindReviewArchiveNode(reviewArchivePath);
+      if (reviewArchiveNode == null)
+      {
+        return null;
+      }
+
+      var normalizedEntryName = NormalizeEntryName(entryName);
+      return reviewArchiveNode.Children.FirstOrDefault(node =>
+        node.Kind == ArchiveTreeNodeKind.ReviewFile &&
+        string.Equals(node.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private ArchiveEntryInfo? FindReviewGridEntry(string reviewArchivePath, string entryName)
+    {
+      var normalizedEntryName = NormalizeEntryName(entryName);
+      return _currentGridEntries.FirstOrDefault(entry =>
+        entry.IsReviewEntry &&
+        IsSameArchivePath(entry.ArchivePath, reviewArchivePath) &&
+        string.Equals(entry.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void UpdateReviewStateInPlace(string reviewArchivePath, string entryName, int errorCount)
+    {
+      var normalizedReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+      var normalizedEntryName = NormalizeEntryName(entryName);
+
+      var reviewEntry = FindReviewGridEntry(normalizedReviewArchivePath, normalizedEntryName);
+      reviewEntry?.UpdateReviewState(errorCount);
+
+      if (_archiveEntriesCache.TryGetValue(normalizedReviewArchivePath, out var cachedEntries))
+      {
+        var cachedEntry = cachedEntries.FirstOrDefault(entry =>
+          entry.IsReviewEntry &&
+          string.Equals(entry.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+        cachedEntry?.UpdateReviewState(errorCount);
+      }
+
+      var reviewFileNode = FindReviewFileNode(normalizedReviewArchivePath, normalizedEntryName);
+      reviewFileNode?.UpdateReviewState(errorCount > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success, errorCount);
+
+      var reviewArchiveNode = FindReviewArchiveNode(normalizedReviewArchivePath);
+      if (reviewArchiveNode != null)
+      {
+        var reviewEntries = _currentGridEntries
+          .Where(entry => entry.IsReviewEntry && IsSameArchivePath(entry.ArchivePath, normalizedReviewArchivePath))
+          .ToList();
+
+        var totalErrors = reviewEntries.Sum(entry => entry.ErrorCount);
+        var status = reviewEntries.Count == 0
+          ? ArchiveNodeStatus.None
+          : totalErrors > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+
+        reviewArchiveNode.UpdateReviewState(status, totalErrors);
       }
     }
 
@@ -2364,40 +2491,33 @@ namespace UI.Controls.Archive
       {
         var reviewArchivePath = _lastSelectedArchivePath;
         var entryName = _lastSelectedEntryName;
-        var result = await Task.Run(() => RecheckReviewFile(_lastSelectedReviewFilePath));
-        InvalidateArchiveCaches(reviewArchivePath);
-        await RefreshReviewArchiveNodeAsync(reviewArchivePath);
+        var reviewFilePath = _lastSelectedReviewFilePath;
+        MarkReviewPathAsRecentlyMutated(reviewFilePath);
+        MarkReviewPathAsRecentlyMutated(Path.ChangeExtension(reviewFilePath, ".opkw"));
 
-        var entries = await GetReviewEntriesAsync(reviewArchivePath);
-        ApplyGridItemsSource(entries);
+        var selectedEntry = FindReviewGridEntry(reviewArchivePath, entryName);
+        var fileType = selectedEntry?.FileType ?? DeterminePreviewFileType(reviewFilePath);
 
-        var selectedEntry = entries.FirstOrDefault(item =>
-          string.Equals(item.EntryName, NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase));
+        var result = await Task.Run(() => RecheckReviewFile(reviewFilePath));
+        var text = await Task.Run(() => ReadReviewFileText(reviewFilePath, fileType));
 
-        if (selectedEntry != null)
-        {
-          await SelectGridRow(selectedEntry);
-          var text = await Task.Run(() => ReadReviewFileText(selectedEntry.SourceFilePath!, selectedEntry.FileType));
-          var textEditor = CreatePreviewEditor(text, selectedEntry.FileType);
-          FileContentTextBox.Content = textEditor;
-          textEditor.TextArea.TextView.Redraw();
+        UpdateReviewStateInPlace(reviewArchivePath, entryName, result.ErrorCount);
 
-          _lastSelectedArchivePath = reviewArchivePath;
-          _lastSelectedEntryName = selectedEntry.EntryName;
-          _lastSelectedReviewFilePath = selectedEntry.SourceFilePath;
-          _lastSelectedIsReviewEntry = true;
+        var textEditor = CreatePreviewEditor(text, fileType);
+        FileContentTextBox.Content = textEditor;
+        textEditor.TextArea.TextView.Redraw();
 
-          FilesHintTextBlock.Text = entries.Count == 0
-            ? "Архив на проверке пуст."
-            : "Выберите файл на проверке для просмотра.";
-          EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
-          UpdateActionButtons();
-          UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
-        }
-        else
-        {
-          await ShowReviewArchiveInGridAsync(reviewArchivePath, clearEditor: false);
-        }
+        _lastSelectedArchivePath = reviewArchivePath;
+        _lastSelectedEntryName = NormalizeEntryName(entryName);
+        _lastSelectedReviewFilePath = reviewFilePath;
+        _lastSelectedIsReviewEntry = true;
+
+        FilesHintTextBlock.Text = _currentGridEntries.Count == 0
+          ? "Архив на проверке пуст."
+          : "Выберите файл на проверке для просмотра.";
+        EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
+        UpdateActionButtons();
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
 
         if (result.ErrorCount > 0)
         {
