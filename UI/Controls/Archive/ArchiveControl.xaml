@@ -555,6 +555,14 @@
                                     Grid.Column="1"
                                     Orientation="Horizontal"
                                     Visibility="Collapsed">
+                            <Button x:Name="RecheckReviewArchiveButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Проверить все файлы ещё раз"
+                                    Click="RecheckReviewArchiveButton_Click">
+                                <askUiIcons:TestFlaskIcon Size="16"
+                                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
                             <Button x:Name="SaveArchiveButton"
                                     Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
                                     ToolTip="Сохранить архив на диск"

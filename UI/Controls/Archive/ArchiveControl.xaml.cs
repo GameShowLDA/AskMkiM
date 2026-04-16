@@ -21,8 +21,10 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components.MultiEditorMethods;
+using UI.Components;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
@@ -1338,14 +1340,22 @@ namespace UI.Controls.Archive
     {
       UpdatePanelTitles();
 
-      var hasArchive = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && File.Exists(_lastSelectedArchivePath);
+      var hasArchive =
+        !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
+        (File.Exists(_lastSelectedArchivePath) || IsReviewArchivePath(_lastSelectedArchivePath));
+      var isReviewArchive = hasArchive && IsReviewArchivePath(_lastSelectedArchivePath);
       var hasSelectedFile = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && !string.IsNullOrWhiteSpace(_lastSelectedEntryName);
       var hasClipboardEntry = HasArchiveClipboardEntry();
       var canManageArchiveFiles = hasSelectedFile && !_lastSelectedIsReviewEntry;
+      var canDeleteReviewFile = hasSelectedFile && _lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath);
 
       ArchiveActionsPanel.Visibility = hasArchive ? Visibility.Visible : Visibility.Collapsed;
+      RecheckReviewArchiveButton.Visibility = isReviewArchive ? Visibility.Visible : Visibility.Collapsed;
+      SaveArchiveButton.Visibility = isReviewArchive ? Visibility.Collapsed : Visibility.Visible;
+      PrintArchiveCatalogButton.Visibility = isReviewArchive ? Visibility.Collapsed : Visibility.Visible;
+      AddFileToArchiveButton.Visibility = isReviewArchive ? Visibility.Collapsed : Visibility.Visible;
       PasteIntoArchiveButton.Visibility = hasArchive && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveFileButton.Visibility = (canManageArchiveFiles || canDeleteReviewFile) ? Visibility.Visible : Visibility.Collapsed;
       CopyArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
       CutArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
       PasteArchiveFileButton.Visibility = canManageArchiveFiles && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
@@ -2028,9 +2038,9 @@ namespace UI.Controls.Archive
       PrintArchiveCatalogMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       UploadArchiveMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
       DownloadArchivesMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
-      OpenArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      OpenArchiveMenuItem.Visibility = (isArchive || isReviewArchive) ? Visibility.Visible : Visibility.Collapsed;
       SaveArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveMenuItem.Visibility = (isArchive || isReviewArchive) ? Visibility.Visible : Visibility.Collapsed;
       AddFileToArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveFileMenuItem.Visibility = (isFile || isReviewFile || isReviewArchive) ? Visibility.Visible : Visibility.Collapsed;
       OpenArchiveFileMenuItem.Header = isReviewArchive ? "Открыть" : "Открыть";
@@ -2038,7 +2048,7 @@ namespace UI.Controls.Archive
       CopyArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
       CutArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
       PasteArchiveFileMenuItem.Visibility = (isFile || isArchive) && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveFileMenuItem.Visibility = (isFile || isReviewFile) ? Visibility.Visible : Visibility.Collapsed;
 
       if (!isRoot && !isArchive && !isFile && !isReviewArchive && !isReviewFile)
       {
@@ -2103,15 +2113,24 @@ namespace UI.Controls.Archive
       AddFileToArchive(node.ArchivePath);
     }
 
-    private void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
+      if (node == null || string.IsNullOrWhiteSpace(node.ArchivePath))
       {
         return;
       }
 
-      DeleteArchive(node.ArchivePath, Path.GetFileNameWithoutExtension(node.ArchivePath));
+      if (node.Kind == ArchiveTreeNodeKind.Archive)
+      {
+        DeleteArchive(node.ArchivePath, Path.GetFileNameWithoutExtension(node.ArchivePath));
+        return;
+      }
+
+      if (node.Kind == ArchiveTreeNodeKind.ReviewArchive)
+      {
+        await DeleteReviewArchiveAsync(node.ArchivePath, Path.GetFileName(node.ArchivePath));
+      }
     }
 
     private async void OpenArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
@@ -2146,17 +2165,26 @@ namespace UI.Controls.Archive
       FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(node.FilePath);
     }
 
-    private void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      if (node?.Kind != ArchiveTreeNodeKind.File ||
+      if (node == null ||
           string.IsNullOrWhiteSpace(node.ArchivePath) ||
           string.IsNullOrWhiteSpace(node.EntryName))
       {
         return;
       }
 
-      DeleteArchiveFile(node.ArchivePath, node.EntryName, node.DisplayName);
+      if (node.Kind == ArchiveTreeNodeKind.File)
+      {
+        DeleteArchiveFile(node.ArchivePath, node.EntryName, node.DisplayName);
+        return;
+      }
+
+      if (node.Kind == ArchiveTreeNodeKind.ReviewFile)
+      {
+        await DeleteReviewFileAsync(node.ArchivePath, node.EntryName, node.DisplayName, node.FilePath);
+      }
     }
 
     private void CopyArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
@@ -2211,10 +2239,16 @@ namespace UI.Controls.Archive
       ResetArchiveActionButtonFocus();
     }
 
-    private void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
       {
+        if (IsReviewArchivePath(_lastSelectedArchivePath))
+        {
+          await DeleteReviewArchiveAsync(_lastSelectedArchivePath, Path.GetFileName(_lastSelectedArchivePath));
+          return;
+        }
+
         DeleteArchive(_lastSelectedArchivePath, Path.GetFileNameWithoutExtension(_lastSelectedArchivePath));
       }
     }
@@ -2227,11 +2261,21 @@ namespace UI.Controls.Archive
       }
     }
 
-    private void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
           !string.IsNullOrWhiteSpace(_lastSelectedEntryName))
       {
+        if (_lastSelectedIsReviewEntry)
+        {
+          await DeleteReviewFileAsync(
+            _lastSelectedArchivePath,
+            _lastSelectedEntryName,
+            Path.GetFileName(_lastSelectedEntryName),
+            _lastSelectedReviewFilePath);
+          return;
+        }
+
         DeleteArchiveFile(_lastSelectedArchivePath, _lastSelectedEntryName, Path.GetFileName(_lastSelectedEntryName));
       }
     }
@@ -2476,6 +2520,104 @@ namespace UI.Controls.Archive
       }
     }
 
+    private async Task DeleteReviewArchiveAsync(string reviewArchivePath, string displayName)
+    {
+      var confirmation = Message.MessageBoxCustom.Show(
+        $"Удалить архив на проверке '{displayName}'?",
+        "Удаление архива",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
+
+      if (confirmation != MessageBoxResult.Yes)
+      {
+        return;
+      }
+
+      try
+      {
+        var fullReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+        Directory.Delete(fullReviewArchivePath, recursive: true);
+        InvalidateArchiveCaches(fullReviewArchivePath);
+
+        var deletedSelectedArchive = IsSameArchivePath(_lastSelectedArchivePath, fullReviewArchivePath);
+        if (deletedSelectedArchive)
+        {
+          _lastSelectedArchivePath = null;
+          _lastSelectedEntryName = null;
+          _lastSelectedReviewFilePath = null;
+          _lastSelectedIsReviewEntry = false;
+        }
+
+        await RefreshTreePreservingStateAsync(preservePanels: !deletedSelectedArchive);
+
+        ShowArchiveNotification(
+          "Удаление архива",
+          $"Архив на проверке '{displayName}' успешно удалён.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Удаление архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private async Task DeleteReviewFileAsync(string reviewArchivePath, string entryName, string displayName, string? filePath)
+    {
+      var confirmation = Message.MessageBoxCustom.Show(
+        $"Удалить файл '{displayName}' из архива на проверке?",
+        "Удаление файла",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
+
+      if (confirmation != MessageBoxResult.Yes)
+      {
+        return;
+      }
+
+      try
+      {
+        var fullReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+        var fullFilePath = !string.IsNullOrWhiteSpace(filePath)
+          ? Path.GetFullPath(filePath)
+          : Path.Combine(fullReviewArchivePath, Path.GetFileName(entryName));
+
+        if (File.Exists(fullFilePath))
+        {
+          File.Delete(fullFilePath);
+        }
+
+        var companionOpkwPath = Path.ChangeExtension(fullFilePath, ".opkw");
+        if (!string.Equals(companionOpkwPath, fullFilePath, StringComparison.OrdinalIgnoreCase) && File.Exists(companionOpkwPath))
+        {
+          File.Delete(companionOpkwPath);
+        }
+
+        InvalidateArchiveCaches(fullReviewArchivePath);
+
+        var deletedSelectedFile =
+          IsSameArchivePath(_lastSelectedArchivePath, fullReviewArchivePath) &&
+          string.Equals(NormalizeEntryName(_lastSelectedEntryName), NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase);
+
+        if (deletedSelectedFile)
+        {
+          _lastSelectedEntryName = null;
+          _lastSelectedReviewFilePath = null;
+          _lastSelectedIsReviewEntry = false;
+        }
+
+        await RefreshTreePreservingStateAsync(preservePanels: !deletedSelectedFile);
+
+        ShowArchiveNotification(
+          "Удаление файла",
+          $"Файл '{displayName}' успешно удалён из архива на проверке '{Path.GetFileName(fullReviewArchivePath)}'.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Удаление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
     private void ConvertToPkwButton_Click(object sender, RoutedEventArgs e)
     {
       var fileText = GetFileContentText();
@@ -2497,6 +2639,151 @@ namespace UI.Controls.Archive
       }
 
       FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(_lastSelectedReviewFilePath);
+    }
+
+    private async void RecheckReviewArchiveButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !IsReviewArchivePath(_lastSelectedArchivePath))
+      {
+        return;
+      }
+
+      try
+      {
+        var reviewArchivePath = _lastSelectedArchivePath;
+        var reviewEntries = _currentGridEntries
+          .Where(entry => entry.IsReviewEntry && IsSameArchivePath(entry.ArchivePath, reviewArchivePath))
+          .ToList();
+
+        if (reviewEntries.Count == 0)
+        {
+          reviewEntries = (await GetReviewEntriesAsync(reviewArchivePath)).ToList();
+        }
+
+        if (reviewEntries.Count == 0)
+        {
+          ShowArchiveNotification("Повторная проверка архива", "В архиве на проверке нет файлов для проверки.", NotificationType.Warning);
+          return;
+        }
+
+        var owner = Window.GetWindow(this);
+        var previousEffect = owner?.Effect;
+        ProgressWindow? progressWindow = null;
+        var totalErrors = 0;
+        var filesWithErrors = 0;
+        try
+        {
+          progressWindow = new ProgressWindow
+          {
+            Owner = owner,
+            WindowStartupLocation = owner == null
+              ? WindowStartupLocation.CenterScreen
+              : WindowStartupLocation.CenterOwner,
+          };
+
+          progressWindow.Configure(
+            "Повторная проверка архива",
+            "Подготовка проверки",
+            $"Готовим повторную проверку {reviewEntries.Count} файлов.");
+
+          if (owner != null)
+          {
+            owner.Effect = new BlurEffect { Radius = 8 };
+          }
+
+          progressWindow.Show();
+          await WaitForProgressWindowAsync(progressWindow);
+
+          for (var index = 0; index < reviewEntries.Count; index++)
+          {
+            var reviewEntry = reviewEntries[index];
+            if (string.IsNullOrWhiteSpace(reviewEntry.SourceFilePath) || !File.Exists(reviewEntry.SourceFilePath))
+            {
+              continue;
+            }
+
+            var processed = index + 1;
+            var fileName = Path.GetFileName(reviewEntry.SourceFilePath);
+            progressWindow.SetProgress(processed * 100d / reviewEntries.Count);
+            progressWindow.SetStage(
+              $"Проверка файла {processed}/{reviewEntries.Count}",
+              fileName);
+
+            MarkReviewPathAsRecentlyMutated(reviewEntry.SourceFilePath);
+            MarkReviewPathAsRecentlyMutated(Path.ChangeExtension(reviewEntry.SourceFilePath, ".opkw"));
+
+            var result = await Task.Run(() => RecheckReviewFile(reviewEntry.SourceFilePath));
+            UpdateReviewStateInPlace(reviewArchivePath, reviewEntry.EntryName, result.ErrorCount);
+
+            totalErrors += result.ErrorCount;
+            if (result.ErrorCount > 0)
+            {
+              filesWithErrors++;
+            }
+          }
+        }
+        finally
+        {
+          progressWindow?.Close();
+
+          if (owner != null)
+          {
+            owner.Effect = previousEffect;
+          }
+        }
+
+        if (_lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath) && File.Exists(_lastSelectedReviewFilePath))
+        {
+          var selectedEntry = FindReviewGridEntry(reviewArchivePath, _lastSelectedEntryName);
+          var fileType = selectedEntry?.FileType ?? DeterminePreviewFileType(_lastSelectedReviewFilePath);
+          var text = await Task.Run(() => ReadReviewFileText(_lastSelectedReviewFilePath, fileType));
+          var textEditor = CreatePreviewEditor(text, fileType);
+          FileContentTextBox.Content = textEditor;
+          textEditor.TextArea.TextView.Redraw();
+        }
+
+        FilesHintTextBlock.Text = _currentGridEntries.Count == 0
+          ? "Архив на проверке пуст."
+          : "Выберите файл на проверке для просмотра.";
+        EditorHintTextBlock.Text = _lastSelectedIsReviewEntry
+          ? "Содержимое файла доступно только для чтения."
+          : "Выберите файл на проверке для просмотра.";
+        UpdateActionButtons();
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: _lastSelectedIsReviewEntry);
+
+        if (totalErrors > 0)
+        {
+          ShowArchiveNotification(
+            "Повторная проверка архива",
+            $"Архив проверен повторно. Найдено ошибок: {totalErrors} в {filesWithErrors} файлах.",
+            NotificationType.Warning);
+          return;
+        }
+
+        ShowArchiveNotification(
+          "Повторная проверка архива",
+          $"Архив проверен повторно. Ошибок не найдено. Файлов проверено: {reviewEntries.Count}.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Повторная проверка архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private static async Task WaitForProgressWindowAsync(ProgressWindow progressWindow)
+    {
+      await progressWindow.Dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Background);
+
+      await progressWindow.Dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Render);
+
+      await progressWindow.Dispatcher.InvokeAsync(
+        () => { },
+        DispatcherPriority.ContextIdle);
     }
 
     private async void RecheckReviewFileButton_Click(object sender, RoutedEventArgs e)
