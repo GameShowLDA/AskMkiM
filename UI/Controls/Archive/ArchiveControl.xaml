@@ -232,10 +232,9 @@
                                             Width="24"
                                             Height="24"
                                             Margin="0,0,8,0"
-                                            CornerRadius="8"
-                                            Background="{DynamicResource ArchiveShellSecondaryBackgroundBrush}"
-                                            BorderBrush="{DynamicResource ArchiveShellBorderBrush}"
-                                            BorderThickness="1">
+                                            Background="Transparent"
+                                            BorderBrush="Transparent"
+                                            BorderThickness="0">
                                         <Grid>
                                             <askUiIcons:FolderOpenIcon x:Name="RootNodeIcon"
                                                                        Size="13"
