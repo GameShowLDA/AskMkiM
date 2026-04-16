@@ -193,6 +193,11 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherChanged(object sender, FileSystemEventArgs e)
     {
+      if (IsUnderReviewWorkspace(e.FullPath))
+      {
+        return;
+      }
+
       if (WasRecentlyMutatedReviewPath(e.FullPath))
       {
         return;
@@ -209,6 +214,11 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherRenamed(object sender, RenamedEventArgs e)
     {
+      if (IsUnderReviewWorkspace(e.OldFullPath) || IsUnderReviewWorkspace(e.FullPath))
+      {
+        return;
+      }
+
       if (WasRecentlyMutatedReviewPath(e.OldFullPath) || WasRecentlyMutatedReviewPath(e.FullPath))
       {
         return;
@@ -258,6 +268,17 @@ namespace UI.Controls.Archive
 
         return _recentlyMutatedReviewPaths.TryGetValue(fullPath, out var expiresAt) && expiresAt > now;
       }
+    }
+
+    private bool IsUnderReviewWorkspace(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return false;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      return fullPath.StartsWith(_reviewArchivesFolderPath, StringComparison.OrdinalIgnoreCase);
     }
 
     private void ScheduleAutoRefresh()
