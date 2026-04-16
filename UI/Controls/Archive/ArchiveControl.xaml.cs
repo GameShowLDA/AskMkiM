@@ -18,6 +18,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -1760,6 +1761,60 @@ namespace UI.Controls.Archive
       }
     }
 
+    private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      var item = sender as TreeViewItem;
+      var node = item?.DataContext as ArchiveTreeNode;
+
+      LogInformation(
+        $"Archive UI: PreviewMouseLeftButtonDown kind='{node?.Kind}', display='{node?.DisplayName}', button='{e.ChangedButton}', original='{e.OriginalSource?.GetType().Name}', selectedBefore='{item?.IsSelected}'.");
+
+      if (e.OriginalSource is DependencyObject originalSource)
+      {
+        var toggleButton = FindVisualAncestor<ToggleButton>(originalSource);
+        if (toggleButton != null)
+        {
+          LogInformation(
+            $"Archive UI: PreviewMouseLeftButtonDown ignored expander for '{node?.DisplayName}'.");
+          return;
+        }
+
+        var hitTreeViewItem = FindVisualAncestor<TreeViewItem>(originalSource);
+        if (item != null && hitTreeViewItem != null && !ReferenceEquals(item, hitTreeViewItem))
+        {
+          LogInformation(
+            $"Archive UI: PreviewMouseLeftButtonDown ignored ancestor sender='{node?.DisplayName}', hit='{(hitTreeViewItem.DataContext as ArchiveTreeNode)?.DisplayName}'.");
+          return;
+        }
+      }
+
+      if (item == null)
+      {
+        LogInformation("Archive UI: PreviewMouseLeftButtonDown sender is not TreeViewItem.");
+        return;
+      }
+
+      var canToggleExpansion =
+        node?.Kind == ArchiveTreeNodeKind.Root ||
+        node?.Kind == ArchiveTreeNodeKind.ReviewRoot ||
+        node?.Kind == ArchiveTreeNodeKind.Archive ||
+        node?.Kind == ArchiveTreeNodeKind.ReviewArchive;
+
+      if (canToggleExpansion)
+      {
+        item.IsExpanded = !item.IsExpanded;
+
+        LogInformation(
+          $"Archive UI: PreviewMouseLeftButtonDown toggled expansion kind='{node?.Kind}', display='{node?.DisplayName}', expandedAfter='{item.IsExpanded}'.");
+      }
+
+      item.IsSelected = true;
+      item.Focus();
+
+      LogInformation(
+        $"Archive UI: PreviewMouseLeftButtonDown selected kind='{node?.Kind}', display='{node?.DisplayName}', selectedAfter='{item.IsSelected}'.");
+    }
+
     private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
       var item = sender as TreeViewItem;
@@ -1774,6 +1829,22 @@ namespace UI.Controls.Archive
     private ArchiveTreeNode? GetContextNode()
     {
       return _contextMenuNode ?? (ArchivesTreeView.SelectedItem as ArchiveTreeNode);
+    }
+
+    private static T? FindVisualAncestor<T>(DependencyObject? current)
+      where T : DependencyObject
+    {
+      while (current != null)
+      {
+        if (current is T typed)
+        {
+          return typed;
+        }
+
+        current = VisualTreeHelper.GetParent(current);
+      }
+
+      return null;
     }
 
     private ArchiveTreeNode GetNodeForPrint()
@@ -2362,6 +2433,7 @@ namespace UI.Controls.Archive
     {
       try
       {
+        LogInformation($"Archive UI: OpenArchiveAsync archive='{archivePath}'.");
         _lastSelectedArchivePath = archivePath;
         _lastSelectedEntryName = null;
         await ShowArchiveInGridAsync(archivePath, clearEditor: true);
@@ -2376,6 +2448,7 @@ namespace UI.Controls.Archive
     {
       try
       {
+        LogInformation($"Archive UI: OpenArchiveFileAsync archive='{archivePath}', entry='{entryName}'.");
         _lastSelectedArchivePath = archivePath;
         _lastSelectedEntryName = entryName;
         await ShowFileAsync(archivePath, entryName, false);
@@ -3011,6 +3084,11 @@ namespace UI.Controls.Archive
     private async void ArchivesTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
       var node = e.NewValue as ArchiveTreeNode;
+      var previousNode = e.OldValue as ArchiveTreeNode;
+
+      LogInformation(
+        $"Archive UI: SelectedItemChanged oldKind='{previousNode?.Kind}', oldDisplay='{previousNode?.DisplayName}', newKind='{node?.Kind}', newDisplay='{node?.DisplayName}'.");
+
       if (node == null)
       {
         return;
