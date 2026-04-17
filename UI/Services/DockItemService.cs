@@ -6,6 +6,7 @@ using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.IO;
 using UI.Components.FileComparerControls;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
@@ -124,7 +125,7 @@ namespace UI.Services
         translatorItem.IsHitTestVisible = false;
         translatorItem.SetLeftEditor(textEditor);
         translatorItem.SetRightEditor(translatorEditor);
-        translatorItem.SetRightEditorName(translatorEditor.TextEditorModel.FileName);
+        translatorItem.SetRightEditorName(GetDisplayFileName(textEditor.TextEditorModel.FilePath, textEditor.TextEditorModel.FileName));
         translatorItem.SetLeftEditorName(textEditor.TextEditorModel.FileName);
         var dockItem = new DockItem
         {
@@ -321,6 +322,18 @@ namespace UI.Services
       }
 
       SystemStateManager.SetIsControlProgramActive(false);
+    }
+
+    private static string GetDisplayFileName(string? filePath, string? fileName)
+    {
+      if (!string.IsNullOrWhiteSpace(fileName))
+      {
+        return fileName;
+      }
+
+      return string.IsNullOrWhiteSpace(filePath)
+        ? string.Empty
+        : Path.GetFileName(filePath);
     }
   }
 }

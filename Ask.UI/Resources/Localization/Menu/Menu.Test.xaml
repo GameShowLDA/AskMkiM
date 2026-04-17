@@ -17,6 +17,7 @@
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl" Key="menu.test.selfcontrol" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl_Module" Key="menu.test.selfcontrol.module" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_SelfControl_System" Key="menu.test.selfcontrol.system" />
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests" Key="menu.test.tests" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Test_Tests_CI" Key="menu.test.tests.ci" />
