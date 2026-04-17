@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
+using System.IO;
 using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
@@ -556,13 +557,8 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
+      runControl.FileName = GetDisplayFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.FileName);
       runControl.SetLeftEditor(editor);
-
-      var foundItem = runControl.TranslationModels.FirstOrDefault(item => item.GetType() == typeof(OkCommandModel));
-      if (foundItem != null && foundItem is OkCommandModel okCommandModel)
-      {
-        runControl.FileName = okCommandModel.ObjectCode;
-      }
 
       if (runContainer == null)
       {
@@ -580,6 +576,16 @@ namespace MainWindowProgram.Services
       }
 
       await runControl.Start(runControl.TranslationModels);
+    }
+
+    private static string GetDisplayFileName(string? filePath, string? fileName)
+    {
+      if (!string.IsNullOrWhiteSpace(filePath))
+      {
+        return Path.GetFileName(filePath);
+      }
+
+      return fileName ?? string.Empty;
     }
 
     /// <summary>

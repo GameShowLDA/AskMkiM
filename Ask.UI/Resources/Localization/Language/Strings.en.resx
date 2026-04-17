@@ -144,6 +144,18 @@
   <data name="menu.file.compare" xml:space="preserve">
     <value>Compare</value>
   </data>
+  <data name="menu.file.legacyConversion" xml:space="preserve">
+    <value>Conversion</value>
+  </data>
+  <data name="menu.file.legacyConversion.opkToPkw" xml:space="preserve">
+    <value>OPK to PK</value>
+  </data>
+  <data name="menu.file.legacyConversion.opkToOpkw" xml:space="preserve">
+    <value>OPK to OPKW</value>
+  </data>
+  <data name="menu.file.legacyConversion.apkToApkw" xml:space="preserve">
+    <value>APK to APKW</value>
+  </data>
   <data name="menu.file.exit" xml:space="preserve">
     <value>Exit</value>
   </data>
@@ -159,6 +171,9 @@
   <data name="menu.file.print" xml:space="preserve">
     <value>Print</value>
   </data>
+  <data name="menu.file.searchreplace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
   <data name="menu.file.save" xml:space="preserve">
     <value>Save</value>
   </data>
@@ -167,6 +182,18 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Search and replace</value>
+  </data>
+  <data name="menu.file.openArchive" xml:space="preserve">
+    <value>Open Archive</value>
+  </data>
+  <data name="menu.file.createArchive" xml:space="preserve">
+    <value>Create Archive</value>
+  </data>
+  <data name="menu.file.downloadArchives" xml:space="preserve">
+    <value>Download Archives</value>
+  </data>
+  <data name="menu.file.uploadArchive" xml:space="preserve">
+    <value>Upload Archive</value>
   </data>
   <data name="menu.settings" xml:space="preserve">
     <value>Settings</value>
@@ -236,6 +263,9 @@
   </data>
   <data name="menu.test.selfcontrol.module" xml:space="preserve">
     <value>Module</value>
+  </data>
+  <data name="menu.test.selfcontrol.system" xml:space="preserve">
+    <value>System</value>
   </data>
   <data name="menu.test.tests" xml:space="preserve">
     <value>Tests</value>

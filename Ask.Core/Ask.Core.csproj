@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Services\FileFormats\Opk\" />
     <Folder Include="Shared\Entity\MeasurementError\" />
     <Folder Include="Shared\Interfaces\DeviceInterfaces\Rack\Capabilities\" />
   </ItemGroup>

@@ -1703,21 +1703,21 @@ namespace UI.Controls.Archive
 
     private string? ShowArchiveCreationDialog()
     {
-      var archivesRootPath = ArchiveDirectoryService.ResolveArchivesRootPath();
       var dialog = CreateDialogWindow("Создание архива");
       var shell = CreateDialogShell();
 
       var layout = new Grid
       {
-        MinWidth = 460,
+        MinWidth = 420,
       };
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
       layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-      var listLabel = new TextBlock
+      var label = new TextBlock
       {
-        Text = "Доступные архивы:",
+        Text = "Введите название нового архива:",
         Margin = new Thickness(0, 0, 0, 4),
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontFamily = Application.Current?.Resources["WinstonMedium"] as FontFamily,
@@ -1725,47 +1725,51 @@ namespace UI.Controls.Archive
         TextWrapping = TextWrapping.Wrap,
       };
 
-      var archivesListBorder = new Border
+      var inputBorder = new Border
       {
         Background = GetThemeBrush("PrimarySolidColorBrush", Color.FromRgb(239, 239, 224)),
         BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromArgb(120, 0, 0, 0)),
         BorderThickness = new Thickness(1),
         CornerRadius = new CornerRadius(10),
         Margin = new Thickness(0, 8, 0, 0),
-        Padding = new Thickness(6),
+        Padding = new Thickness(10, 8, 10, 8),
       };
 
-      var archivesListBox = new ListBox
+      var inputBox = new TextBox
       {
-        MinWidth = 400,
-        MinHeight = 180,
-        MaxHeight = 260,
+        MinWidth = 360,
         Background = Brushes.Transparent,
         BorderThickness = new Thickness(0),
+        Text = "new_archive",
         Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
         FontSize = 15,
-        HorizontalContentAlignment = HorizontalAlignment.Stretch,
       };
-      ScrollViewer.SetHorizontalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Disabled);
-      ScrollViewer.SetVerticalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Auto);
-      ApplyArchiveListItemStyle(archivesListBox);
-      archivesListBorder.Child = archivesListBox;
+      inputBorder.Child = inputBox;
+
+      var errorTextBlock = new TextBlock
+      {
+        Margin = new Thickness(0, 10, 0, 0),
+        Foreground = GetThemeBrush("RedColorSolidColorBrush", Color.FromRgb(178, 58, 72)),
+        FontSize = 14,
+        TextWrapping = TextWrapping.Wrap,
+        Visibility = Visibility.Collapsed,
+      };
 
       var buttonsPanel = new StackPanel
       {
         Orientation = Orientation.Horizontal,
         HorizontalAlignment = HorizontalAlignment.Right,
-        Margin = new Thickness(0, 12, 0, 0),
+        Margin = new Thickness(0, 14, 0, 0),
       };
 
-      var createArchiveButton = new Button
+      var createButton = new Button
       {
-        Content = "Создать архив",
-        MinWidth = 160,
+        Content = "Создать",
+        MinWidth = 140,
         IsDefault = true,
         Margin = new Thickness(0, 0, 8, 0),
       };
-      ApplyDialogButtonStyle(createArchiveButton);
+      ApplyDialogButtonStyle(createButton);
 
       var cancelButton = new Button
       {
@@ -1775,232 +1779,61 @@ namespace UI.Controls.Archive
       };
       ApplyDialogButtonStyle(cancelButton);
 
-      buttonsPanel.Children.Add(createArchiveButton);
+      buttonsPanel.Children.Add(createButton);
       buttonsPanel.Children.Add(cancelButton);
 
-      Grid.SetRow(listLabel, 0);
-      Grid.SetRow(archivesListBorder, 1);
-      Grid.SetRow(buttonsPanel, 2);
-      layout.Children.Add(listLabel);
-      layout.Children.Add(archivesListBorder);
+      Grid.SetRow(label, 0);
+      Grid.SetRow(inputBorder, 1);
+      Grid.SetRow(errorTextBlock, 2);
+      Grid.SetRow(buttonsPanel, 3);
+      layout.Children.Add(label);
+      layout.Children.Add(inputBorder);
+      layout.Children.Add(errorTextBlock);
       layout.Children.Add(buttonsPanel);
       shell.Child = layout;
       dialog.Content = shell;
 
-      void RefreshArchivesList(string? selectedArchivePath = null)
+      void ClearError()
       {
-        PopulateArchiveList(archivesListBox, archivesRootPath);
+        errorTextBlock.Text = string.Empty;
+        errorTextBlock.Visibility = Visibility.Collapsed;
+      }
 
-        if (string.IsNullOrWhiteSpace(selectedArchivePath))
+      void ShowValidationError(Exception ex)
+      {
+        errorTextBlock.Text = GetUserFriendlyCreateArchiveErrorMessage(ex);
+        errorTextBlock.Visibility = Visibility.Visible;
+        inputBox.Focus();
+        inputBox.SelectAll();
+      }
+
+      void TryCreateArchive()
+      {
+        ClearError();
+
+        try
         {
-          return;
+          string createdArchivePath;
+          lock (_archiveManagerSync)
+          {
+            createdArchivePath = _archiveManager.CreateArchive(inputBox.Text);
+          }
+
+          dialog.Tag = createdArchivePath;
+          dialog.DialogResult = true;
         }
-
-        var selectedItem = archivesListBox.Items
-          .OfType<ListBoxItem>()
-          .FirstOrDefault(item => string.Equals(item.Tag as string, selectedArchivePath, StringComparison.OrdinalIgnoreCase));
-
-        if (selectedItem != null)
+        catch (Exception ex)
         {
-          archivesListBox.SelectedItem = selectedItem;
-          archivesListBox.ScrollIntoView(selectedItem);
+          ShowValidationError(ex);
         }
       }
 
-      createArchiveButton.Click += (_, _) =>
-      {
-        var suggestedArchiveName = "new_archive";
-
-        while (true)
-        {
-          var archiveName = PromptForArchiveName(suggestedArchiveName);
-          if (string.IsNullOrWhiteSpace(archiveName))
-          {
-            return;
-          }
-
-          suggestedArchiveName = archiveName;
-
-          try
-          {
-            string createdArchivePath;
-            lock (_archiveManagerSync)
-            {
-              createdArchivePath = _archiveManager.CreateArchive(archiveName);
-            }
-
-            RefreshArchivesList(createdArchivePath);
-            dialog.Tag = createdArchivePath;
-            dialog.DialogResult = true;
-            return;
-          }
-          catch (Exception ex)
-          {
-            ShowArchiveNotification(
-              "Создание архива",
-              GetUserFriendlyCreateArchiveErrorMessage(ex),
-              NotificationType.Error);
-          }
-        }
-      };
-
+      createButton.Click += (_, _) => TryCreateArchive();
+      inputBox.TextChanged += (_, _) => ClearError();
       dialog.Loaded += (_, _) =>
       {
-        RefreshArchivesList(_lastSelectedArchivePath);
-      };
-
-      return dialog.ShowDialog() == true
-        ? dialog.Tag as string
-        : null;
-    }
-
-    private string PromptForArchiveName(string suggestedArchiveName)
-    {
-      var archivesRootPath = ArchiveDirectoryService.ResolveArchivesRootPath();
-      var dialog = CreateDialogWindow("Создание архива");
-      var shell = CreateDialogShell();
-
-      var layout = new Grid
-      {
-        MinWidth = 460,
-      };
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-      var listLabel = new TextBlock
-      {
-        Text = "Доступные архивы:",
-        Margin = new Thickness(0, 0, 0, 4),
-        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
-        FontFamily = Application.Current?.Resources["WinstonMedium"] as FontFamily,
-        FontSize = 16,
-        TextWrapping = TextWrapping.Wrap,
-      };
-
-      var archivesListBorder = new Border
-      {
-        Background = GetThemeBrush("PrimarySolidColorBrush", Color.FromRgb(239, 239, 224)),
-        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromArgb(120, 0, 0, 0)),
-        BorderThickness = new Thickness(1),
-        CornerRadius = new CornerRadius(10),
-        Margin = new Thickness(0, 8, 0, 0),
-        Padding = new Thickness(6),
-      };
-
-      var archivesListBox = new ListBox
-      {
-        MinWidth = 400,
-        MinHeight = 180,
-        MaxHeight = 260,
-        Background = Brushes.Transparent,
-        BorderThickness = new Thickness(0),
-        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
-        FontSize = 15,
-        HorizontalContentAlignment = HorizontalAlignment.Stretch,
-        //VerticalContentAlignment = VerticalAlignment.Center,
-      };
-      ScrollViewer.SetHorizontalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Disabled);
-      ScrollViewer.SetVerticalScrollBarVisibility(archivesListBox, ScrollBarVisibility.Auto);
-      ApplyArchiveListItemStyle(archivesListBox);
-      archivesListBorder.Child = archivesListBox;
-
-      var buttonsPanel = new StackPanel
-      {
-        Orientation = Orientation.Horizontal,
-        HorizontalAlignment = HorizontalAlignment.Right,
-        Margin = new Thickness(0, 12, 0, 0),
-      };
-
-      var createArchiveButton = new Button
-      {
-        Content = "Создать архив",
-        MinWidth = 160,
-        IsDefault = true,
-        Margin = new Thickness(0, 0, 8, 0),
-      };
-      ApplyDialogButtonStyle(createArchiveButton);
-
-      var cancelButton = new Button
-      {
-        Content = "Отмена",
-        MinWidth = 120,
-        IsCancel = true,
-      };
-      ApplyDialogButtonStyle(cancelButton);
-
-      buttonsPanel.Children.Add(createArchiveButton);
-      buttonsPanel.Children.Add(cancelButton);
-
-      Grid.SetRow(listLabel, 0);
-      Grid.SetRow(archivesListBorder, 1);
-      Grid.SetRow(buttonsPanel, 2);
-      layout.Children.Add(listLabel);
-      layout.Children.Add(archivesListBorder);
-      layout.Children.Add(buttonsPanel);
-      shell.Child = layout;
-      dialog.Content = shell;
-
-      void RefreshArchivesList(string? selectedArchivePath = null)
-      {
-        PopulateArchiveList(archivesListBox, archivesRootPath);
-
-        if (string.IsNullOrWhiteSpace(selectedArchivePath))
-        {
-          return;
-        }
-
-        var selectedItem = archivesListBox.Items
-          .OfType<ListBoxItem>()
-          .FirstOrDefault(item => string.Equals(item.Tag as string, selectedArchivePath, StringComparison.OrdinalIgnoreCase));
-
-        if (selectedItem != null)
-        {
-          archivesListBox.SelectedItem = selectedItem;
-          archivesListBox.ScrollIntoView(selectedItem);
-        }
-      }
-
-      createArchiveButton.Click += (_, _) =>
-      {
-        var suggestedArchiveName = "new_archive";
-
-        while (true)
-        {
-          var archiveName = PromptForArchiveName(suggestedArchiveName);
-          if (string.IsNullOrWhiteSpace(archiveName))
-          {
-            return;
-          }
-
-          suggestedArchiveName = archiveName;
-
-          try
-          {
-            string createdArchivePath;
-            lock (_archiveManagerSync)
-            {
-              createdArchivePath = _archiveManager.CreateArchive(archiveName);
-            }
-
-            RefreshArchivesList(createdArchivePath);
-            dialog.Tag = createdArchivePath;
-            dialog.DialogResult = true;
-            return;
-          }
-          catch (Exception ex)
-          {
-            ShowArchiveNotification(
-              "Создание архива",
-              GetUserFriendlyCreateArchiveErrorMessage(ex),
-              NotificationType.Error);
-          }
-        }
-      };
-
-      dialog.Loaded += (_, _) =>
-      {
-        RefreshArchivesList(_lastSelectedArchivePath);
+        inputBox.Focus();
+        inputBox.SelectAll();
       };
 
       return dialog.ShowDialog() == true
@@ -2126,47 +1959,6 @@ namespace UI.Controls.Archive
       };
     }
 
-    private void PopulateArchiveList(ListBox listBox, string? directoryPath)
-    {
-      listBox.Items.Clear();
-
-      if (string.IsNullOrWhiteSpace(directoryPath))
-      {
-        return;
-      }
-
-      foreach (var archivePath in ArchiveDirectoryService.GetArchivesInDirectory(directoryPath))
-      {
-        listBox.Items.Add(new ListBoxItem
-        {
-          Content = Path.GetFileName(archivePath),
-          Tag = archivePath,
-        });
-      }
-    }
-
-    private void ApplyArchiveListItemStyle(ListBox listBox)
-    {
-      var accentBrush = GetThemeBrush("ActiveForegroundSolidColorBrush80", Color.FromArgb(120, 164, 235, 158));
-      var itemStyle = new Style(typeof(ListBoxItem));
-      itemStyle.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(10, 8, 10, 8)));
-      itemStyle.Setters.Add(new Setter(Control.MarginProperty, new Thickness(0, 2, 0, 2)));
-      itemStyle.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
-      itemStyle.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-      itemStyle.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
-
-      var hoverTrigger = new Trigger { Property = ListBoxItem.IsMouseOverProperty, Value = true };
-      hoverTrigger.Setters.Add(new Setter(Control.BackgroundProperty, accentBrush));
-      itemStyle.Triggers.Add(hoverTrigger);
-
-      var selectedTrigger = new Trigger { Property = ListBoxItem.IsSelectedProperty, Value = true };
-      selectedTrigger.Setters.Add(new Setter(Control.BackgroundProperty, accentBrush));
-      selectedTrigger.Setters.Add(new Setter(Control.FontWeightProperty, FontWeights.SemiBold));
-      itemStyle.Triggers.Add(selectedTrigger);
-
-      listBox.ItemContainerStyle = itemStyle;
-    }
-
     private void ApplyDialogButtonStyle(Button button)
     {
       if (TryFindResource("ButtonStyleV10") is Style style)
@@ -2202,13 +1994,26 @@ namespace UI.Controls.Archive
     private static string GetUserFriendlyCreateArchiveErrorMessage(Exception ex)
     {
       if (ex is InvalidOperationException invalidOperation &&
-          invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+          (invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase) ||
+           invalidOperation.Message.Contains("уже существует", StringComparison.OrdinalIgnoreCase)))
       {
         return "Архив с таким именем уже существует. Выберите другое имя.";
       }
 
-      if (ex is ArgumentException)
+      if (ex is ArgumentException argumentException)
       {
+        if (!string.IsNullOrWhiteSpace(argumentException.Message) &&
+            argumentException.Message.Contains("Требуется указать имя архива", StringComparison.OrdinalIgnoreCase))
+        {
+          return "Введите имя архива.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(argumentException.Message) &&
+            argumentException.Message.Contains("только недопустимые символы", StringComparison.OrdinalIgnoreCase))
+        {
+          return "Имя архива содержит только недопустимые символы.";
+        }
+
         return "Имя архива содержит недопустимые символы.";
       }
 
@@ -2217,8 +2022,14 @@ namespace UI.Controls.Archive
         return directoryNotFoundException.Message;
       }
 
+      if (ex is UnauthorizedAccessException)
+      {
+        return "Нет доступа к папке архивов.";
+      }
+
       if (ex is IOException ioException &&
-          ioException.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase))
+          (ioException.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+           ioException.Message.Contains("доступ к файлу", StringComparison.OrdinalIgnoreCase)))
       {
         return "Архив сейчас используется другим процессом. Повторите попытку.";
       }

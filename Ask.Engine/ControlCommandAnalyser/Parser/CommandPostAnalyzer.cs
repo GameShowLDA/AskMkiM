@@ -97,15 +97,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <item><description>список моделей точек.</description></item>
     /// </list>
     /// </returns>
-    public static (List<ErrorItem>, List<PointModel>) GetPointsModel(List<string> points, BaseCommandModel model, Dictionary<string, string> pointsMap)
+    public static (List<ErrorItem>, List<PointModel>) GetPointsModel(List<string> points, BaseCommandModel model, RmCommandModel rmCommandModel)
     {
       List<PointModel> pointModels = new List<PointModel>();
       List<ErrorItem> error = new();
 
       foreach (var point in points)
       {
-        string pointPart = pointsMap.GetValueOrDefault(point, string.Empty);
-        if (string.IsNullOrEmpty(pointPart))
+        if (!rmCommandModel.TryGetAddressByKey(point, out string pointPart))
         {
           error.Add(GeneralErrors.UnknownPoint(point, model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
           continue;

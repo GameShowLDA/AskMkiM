@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
+using Ask.DataBase.Provider.Migrations;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
@@ -24,8 +25,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
     /// <returns>Строка без обработанного параметра времени.</returns>
     public string Process(TModel model, string remainder, ParameterContext ctx)
     {
+      int starIndex = remainder.IndexOf('*');
+
+      string header = starIndex >= 0 ? remainder.Substring(0, starIndex) : remainder;
+      string tail = starIndex >= 0 ? remainder.Substring(starIndex) : "";
+
       var (timeRaw, unitRaw, rest) =
-          CommonParameterParser.TimeParser.ParseTime(remainder);
+          CommonParameterParser.TimeParser.ParseTime(header);
 
       double? timeValue = TimeManager.GetTime(model, timeRaw, unitRaw);
 
@@ -39,7 +45,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
         model.TimeSource = "5C";
       }
 
-      return rest;
+      return $"{rest}{tail}";
     }
   }
 }

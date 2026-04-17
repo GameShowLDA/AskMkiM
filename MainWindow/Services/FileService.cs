@@ -2,12 +2,16 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.FileFormats.Opk;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
+using MainWindowProgram.Windows;
 using Microsoft.Win32;
+using System.IO;
 using System.Windows;
+using System.Windows.Media.Effects;
 using UI.Components.FileComparerControls;
 using UI.Controls.Archive;
 using UI.Controls.Search;
@@ -34,6 +38,7 @@ namespace MainWindowProgram.Services
     /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
+    private readonly IOpkToPkConverter _opkToPkConverter;
 
     private bool _isSearchWindowOpen;
     private bool _selectFileHandlerAttached;
@@ -49,6 +54,7 @@ namespace MainWindowProgram.Services
       _mainWindow = mainWindow;
       _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
+      _opkToPkConverter = new OpkToPkConverter();
 
       EventAggregator.Subscribe<SearchEvents.SearchWindowClosing>(e => OnSearchWindowClosing(e.IsClosing));
 
@@ -153,6 +159,63 @@ namespace MainWindowProgram.Services
       {
         _multiWindow.EditorDocumentService.CreateNewFile();
       }
+    }
+
+    /// <summary>
+    /// Запускает пакетную конвертацию OPK-файлов в PK.
+    /// </summary>
+    public void ConvertOpkToPk()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      var dialog = new OpkToPkConversionWindow
+      {
+        Owner = _mainWindow,
+      };
+
+      try
+      {
+        _mainWindow.Effect = new BlurEffect { Radius = 8 };
+        if (dialog.ShowDialog() != true)
+        {
+          return;
+        }
+      }
+      finally
+      {
+        _mainWindow.Effect = null;
+      }
+
+      var results = dialog.SelectedFiles
+        .Select(path => _opkToPkConverter.Convert(path, dialog.OutputDirectory))
+        .ToList();
+
+      foreach (var result in results.Where(item => item.Success && !string.IsNullOrWhiteSpace(item.OutputPath)))
+      {
+        _multiWindow.EditorDocumentService.OpenFile(result.OutputPath!);
+      }
+
+      ShowOpkToPkSummary(results);
+    }
+
+    /// <summary>
+    /// Заглушка команды конвертации OPK в OPKW.
+    /// Алгоритм будет добавлен позже.
+    /// </summary>
+    public void ConvertOpkToOpkw()
+    {
+    }
+
+    /// <summary>
+    /// Заглушка команды конвертации APK в APKW.
+    /// Алгоритм будет добавлен позже.
+    /// </summary>
+    public void ConvertApkToApkw()
+    {
     }
 
     /// <summary>
@@ -295,6 +358,57 @@ namespace MainWindowProgram.Services
     private async void Dialog_Closed(object sender, EventArgs e)
     {
       _mainWindow.Effect = null;
+    }
+
+    private static void ShowOpkToPkSummary(IReadOnlyCollection<ConversionResult> results)
+    {
+      if (results.Count == 0)
+      {
+        return;
+      }
+
+      var successCount = results.Count(result => result.Success);
+      var failedResults = results.Where(result => !result.Success).ToList();
+
+      var summaryLines = new List<string>
+      {
+        $"Успешно: {successCount}",
+        $"С ошибками: {failedResults.Count}",
+      };
+
+      var createdFiles = results
+        .Where(result => result.Success && !string.IsNullOrWhiteSpace(result.OutputPath))
+        .Select(result => $"  {Path.GetFileName(result.OutputPath)}")
+        .Take(10)
+        .ToList();
+
+      if (createdFiles.Count > 0)
+      {
+        summaryLines.Add(string.Empty);
+        summaryLines.Add("Созданы файлы:");
+        summaryLines.AddRange(createdFiles);
+      }
+
+      if (failedResults.Count > 0)
+      {
+        summaryLines.Add(string.Empty);
+        summaryLines.Add("Ошибки:");
+        summaryLines.AddRange(failedResults
+          .Take(10)
+          .Select(result => $"  {Path.GetFileName(result.InputPath)}: {result.ErrorMessage}"));
+      }
+
+      var icon = successCount == 0
+        ? MessageBoxImage.Error
+        : failedResults.Count == 0
+          ? MessageBoxImage.Information
+          : MessageBoxImage.Warning;
+
+      Message.MessageBoxCustom.Show(
+        string.Join(Environment.NewLine, summaryLines),
+        "Конвертация OPK в PK",
+        MessageBoxButton.OK,
+        icon);
     }
 
     /// <summary>

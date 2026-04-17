@@ -21,7 +21,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
     {
       var match = Regex.Match(
           input,
-          @"(?:(?<val>\d+(?:[.,]\d+)?)\s*)?(?<unit>(?:м[сc]|ms|с|c))\b",
+          @"(?<=^|\s)(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>(?:м[сc]|ms|с|c))\b",
           RegexOptions.IgnoreCase
           );
 
@@ -30,12 +30,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         string? value = match.Groups["val"].Success ? match.Groups["val"].Value : null;
         string unit = match.Groups["unit"].Value;
 
-        var remainder = Regex.Replace(
-            input,
-            $@"\b{Regex.Escape(match.Value)}\s*,?",
-            "",
-            RegexOptions.IgnoreCase
-        ).Trim();
+        var remainder = input.Remove(match.Index, match.Length).Trim();
 
         return (value, unit, remainder);
       }

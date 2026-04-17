@@ -74,5 +74,17 @@ namespace MainWindowProgram.ViewModels
     /// <summary>Команда создания нового файла.</summary>
     [RelayCommand]
     private void CreateNewFile() => _fileService.CreateNewFileAsync();
+
+    /// <summary>Команда конвертации OPK в PK.</summary>
+    [RelayCommand]
+    private void ConvertOpkToPk() => _fileService.ConvertOpkToPk();
+
+    /// <summary>Команда конвертации OPK в OPKW.</summary>
+    [RelayCommand]
+    private void ConvertOpkToOpkw() => _fileService.ConvertOpkToOpkw();
+
+    /// <summary>Команда конвертации APK в APKW.</summary>
+    [RelayCommand]
+    private void ConvertApkToApkw() => _fileService.ConvertApkToApkw();
   }
 }
