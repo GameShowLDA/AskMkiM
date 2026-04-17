@@ -289,31 +289,27 @@ namespace Ask.UI.Controls.ErrorList
       if (e.Key != Key.F8 || sender is not DataGrid grid)
         return;
 
-      if (TryGetIssueUnderMouse(grid) is { } hoveredIssue)
-      {
-        ItemDoubleClicked?.Invoke(hoveredIssue);
-        e.Handled = true;
+      int direction = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? -1 : 1;
 
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-          grid.Focus();
-          Keyboard.Focus(grid);
-        }), System.Windows.Threading.DispatcherPriority.Input);
+      IDisplayIssue? targetIssue = TryGetIssueUnderMouse(grid);
 
+      if (targetIssue == null)
+        targetIssue = GetAdjacentIssue(grid, direction);
+
+      if (targetIssue == null)
         return;
-      }
 
-      if (grid.SelectedItem is IDisplayIssue selectedIssue)
+      grid.SelectedItem = targetIssue;
+      grid.ScrollIntoView(targetIssue);
+
+      ItemDoubleClicked?.Invoke(targetIssue);
+      e.Handled = true;
+
+      Dispatcher.BeginInvoke(new Action(() =>
       {
-        ItemDoubleClicked?.Invoke(selectedIssue);
-        e.Handled = true;
-
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-          grid.Focus();
-          Keyboard.Focus(grid);
-        }), System.Windows.Threading.DispatcherPriority.Input);
-      }
+        grid.Focus();
+        Keyboard.Focus(grid);
+      }), System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private static IDisplayIssue? TryGetIssueUnderMouse(DataGrid grid)
@@ -327,6 +323,24 @@ namespace Ask.UI.Controls.ErrorList
       return visual is DataGridRow { Item: IDisplayIssue issue }
         ? issue
         : null;
+    }
+
+    private static IDisplayIssue? GetAdjacentIssue(DataGrid grid, int direction)
+    {
+      if (grid.Items.Count == 0)
+        return null;
+
+      int currentIndex = grid.SelectedIndex;
+
+      if (currentIndex < 0)
+        currentIndex = direction > 0 ? -1 : grid.Items.Count;
+
+      int nextIndex = currentIndex + direction;
+
+      if (nextIndex < 0 || nextIndex >= grid.Items.Count)
+        return grid.Items[0] as IDisplayIssue;
+
+      return grid.Items[nextIndex] as IDisplayIssue;
     }
 
     private void DataGrid_MouseEnter(object sender, MouseEventArgs e)
