@@ -719,8 +719,8 @@
                     <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" SnapsToDevicePixels="True">
                         <Border x:Name="Box"
                                 Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                                BorderBrush="#415163"
-                                BorderThickness="1"
+                                BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                BorderThickness="2"
                                 CornerRadius="4"
                                 SnapsToDevicePixels="True"
                                 RenderOptions.EdgeMode="Aliased"/>
@@ -728,18 +728,22 @@
                         <Border x:Name="Inset"
                                 CornerRadius="4"
                                 BorderThickness="1"
-                                BorderBrush="#20FFFFFF"
+                                BorderBrush="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                Opacity="0.65"
                                 IsHitTestVisible="False"/>
                     </Grid>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
-                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                            <Setter TargetName="Inset" Property="BorderBrush" Value="#55FFFFFF"/>
+                            <Setter TargetName="Inset" Property="Opacity" Value="1"/>
                         </Trigger>
 
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                            <Setter TargetName="Inset" Property="Opacity" Value="0.85"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
