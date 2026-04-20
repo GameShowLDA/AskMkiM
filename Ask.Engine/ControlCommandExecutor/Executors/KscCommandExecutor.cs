@@ -35,35 +35,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
 
-      var relayModules = EquipmentService.ValidRelayModules;
-      var switchingDevice = EquipmentService.ValidSwitchingDevice;
-      var unique = context.GetUniqueMeasurementDevices();
-
-      if (relayModules == null)
-        return;
-
-      foreach (var item in relayModules)
+      var devices = EquipmentService.GetAllDevices();
+      foreach (var device in devices)
       {
-        await item.ConnectableManager.ResetAsync(context.Console);
+        await device.ConnectableManager.ResetAsync(context.Console);
       }
-
-      if (switchingDevice != null)
-      {
-        await switchingDevice.ConnectableManager.ResetAsync(context.Console);
-      }
-
-      if (unique.Contains(MeasurementDevice.Multimeter))
-      {
-        var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
-        await meter.ConnectableManager.ResetAsync(context.Console);
-      }
-
-      if (unique.Contains(MeasurementDevice.BreakdownTester))
-      {
-        var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-        await breakDown.ConnectableManager.ResetAsync(context.Console);
-      }
-
 
       GetProtocol(context, command, protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
