@@ -9,6 +9,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenArchiveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\contextMenuArchiveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createArchiveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\enteringArchiveNameImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\openContentsArchiveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Content Include="AppHelp\content.css">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -777,6 +791,15 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabExecutionChapter\TranslationPKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\contextMenuArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -852,6 +875,9 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\enteringArchiveNameImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncArchivePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -880,6 +906,30 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSearchAndReplacePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\choiceArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\openContentsArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.1_custom.png">
