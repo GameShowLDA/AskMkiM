@@ -35,6 +35,13 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly FileService _fileService;
 
+    private static readonly HashSet<string> SupportedExecutionSourceExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+      ".pk",
+      ".pkw",
+      ".acs",
+    };
+
     private TextEditorUI _actualTextEditor;
 
     /// <summary>
@@ -430,6 +437,11 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var translationContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
+      if (editor != null && !EnsureSupportedExecutionSource(editor))
+      {
+        return;
+      }
+
       if (editor == null && translationContainer != null)
       {
         await TryUpdateExistingTranslator(translationContainer);
@@ -455,6 +467,11 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
+
+      if (editor != null && !EnsureSupportedExecutionSource(editor))
+      {
+        return;
+      }
 
       if (runContainer != null)
       {
@@ -524,6 +541,18 @@ namespace MainWindowProgram.Services
       }
       else
       {
+        var sourceEditor = translator.GetLeftBox().GetTextEditor();
+        if (sourceEditor == null)
+        {
+          ShowEditorNotFoundError();
+          return;
+        }
+
+        if (!EnsureSupportedExecutionSource(sourceEditor))
+        {
+          return;
+        }
+
         _actualTextEditor = translator.GetRightBox().GetTextEditor();
         if (_actualTextEditor == null)
         {
@@ -628,7 +657,42 @@ namespace MainWindowProgram.Services
         return;
       }
 
+      if (!EnsureSupportedExecutionSource(editor))
+      {
+        return;
+      }
+
       await EditExistingTranslator(editor, foundDockItem);
+    }
+
+    private static bool EnsureSupportedExecutionSource(TextEditorUI editor)
+    {
+      if (IsSupportedExecutionSource(editor))
+      {
+        return true;
+      }
+
+      MessageBoxCustom.Show(
+          "Неподдерживаемый тип файла для исполнителя и трансляции. Поддерживаются файлы .pk, .pkw и .acs.",
+          "Неподдерживаемый тип файла",
+          MessageBoxButton.OK,
+          image: MessageBoxImage.Warning);
+
+      return false;
+    }
+
+    private static bool IsSupportedExecutionSource(TextEditorUI editor)
+    {
+      var filePath = editor.TextEditorModel?.FilePath;
+      if (!string.IsNullOrWhiteSpace(filePath)
+          && SupportedExecutionSourceExtensions.Contains(Path.GetExtension(filePath)))
+      {
+        return true;
+      }
+
+      var fileName = editor.TextEditorModel?.FileName;
+      return !string.IsNullOrWhiteSpace(fileName)
+          && SupportedExecutionSourceExtensions.Contains(Path.GetExtension(fileName));
     }
 
     /// <summary>
