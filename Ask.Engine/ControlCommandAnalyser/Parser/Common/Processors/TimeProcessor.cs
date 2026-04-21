@@ -39,7 +39,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
         model.Time = timeValue.Value;
 
       model.TimeSource = timeRaw + unitRaw;
-      if (model is SiCommandModel siCommandModel && timeValue.Value < 0)
+      if ((model is SiCommandModel || model is PiCommandModel)
+          && timeValue.GetValueOrDefault(-1) < 0)
       {
         model.Time = 5;
         model.TimeSource = "5C";
