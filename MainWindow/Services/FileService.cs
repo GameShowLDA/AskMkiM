@@ -44,6 +44,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
     private readonly IOpkToPkConverter _opkToPkConverter;
+    private readonly OpkToOpkwConverter _opkToOpkwConverter;
     private readonly PkToOpkwConverter _pkToOpkwConverter;
     private readonly ApkToApkwConverter _apkToApkwConverter;
 
@@ -63,6 +64,19 @@ namespace MainWindowProgram.Services
       _isLockedProvider = isLockedProvider;
       _opkToPkConverter = new OpkToPkConverter();
       _pkToOpkwConverter = new PkToOpkwConverter();
+      _opkToOpkwConverter = new OpkToOpkwConverter(
+        _opkToPkConverter,
+        (inputPath, outputDirectory) =>
+        {
+          var result = _pkToOpkwConverter.Convert(inputPath, outputDirectory);
+          return new OpkToOpkwTranslationResult
+          {
+            OutputPath = result.OutputPath,
+            Success = result.Success,
+            ErrorMessage = result.ErrorMessage,
+            ErrorCount = result.ErrorCount,
+          };
+        });
       _apkToApkwConverter = new ApkToApkwConverter(
         _opkToPkConverter,
         (inputPath, outputDirectory) =>
@@ -198,66 +212,18 @@ namespace MainWindowProgram.Services
         return null;
       }
 
-      var intermediateDirectory = CreateTemporaryConversionDirectory("OpkToOpkw");
-
-      try
+      var result = _opkToOpkwConverter.Convert(inputFilePath, outputDirectory);
+      if (!result.Success || string.IsNullOrWhiteSpace(result.OutputPath))
       {
-        var pkResult = _opkToPkConverter.Convert(inputFilePath, intermediateDirectory);
-        if (!pkResult.Success || string.IsNullOrWhiteSpace(pkResult.OutputPath))
-        {
-          Message.MessageBoxCustom.Show(
-            pkResult.ErrorMessage ?? "Не удалось преобразовать OPK в промежуточный PK-файл.",
-            "Открытие OPK",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-          return null;
-        }
-
-        var opkwResult = _pkToOpkwConverter.Convert(pkResult.OutputPath, outputDirectory);
-        if (!opkwResult.Success || string.IsNullOrWhiteSpace(opkwResult.OutputPath))
-        {
-          Message.MessageBoxCustom.Show(
-            opkwResult.ErrorMessage ?? "Не удалось преобразовать OPK в OPKW.",
-            "Открытие OPK",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-          return null;
-        }
-
-        return opkwResult.OutputPath;
-      }
-      finally
-      {
-        TryDeleteDirectory(intermediateDirectory);
-      }
-    }
-
-    private static string CreateTemporaryConversionDirectory(string operationName)
-    {
-      var directoryPath = Path.Combine(
-        Path.GetTempPath(),
-        "AskMkiM",
-        operationName,
-        Guid.NewGuid().ToString("N"));
-
-      Directory.CreateDirectory(directoryPath);
-      return directoryPath;
-    }
-
-    private static void TryDeleteDirectory(string? path)
-    {
-      if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
-      {
-        return;
+        Message.MessageBoxCustom.Show(
+          result.ErrorMessage ?? "Не удалось преобразовать OPK в OPKW.",
+          "Открытие OPK",
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+        return null;
       }
 
-      try
-      {
-        Directory.Delete(path, recursive: true);
-      }
-      catch
-      {
-      }
+      return result.OutputPath;
     }
 
     /// <summary>
@@ -317,10 +283,44 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Заглушка команды конвертации OPK в OPKW.
+    /// Запускает пакетную конвертацию OPK-файлов в OPKW.
     /// </summary>
     public void ConvertOpkToOpkw()
     {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      var dialog = new OpkToPkConversionWindow("OPKW")
+      {
+        Owner = _mainWindow,
+      };
+
+      try
+      {
+        _mainWindow.Effect = new BlurEffect { Radius = 8 };
+        if (dialog.ShowDialog() != true)
+        {
+          return;
+        }
+      }
+      finally
+      {
+        _mainWindow.Effect = null;
+      }
+
+      var results = dialog.SelectedFiles
+        .Select(path => _opkToOpkwConverter.Convert(path, dialog.OutputDirectory))
+        .ToList();
+
+      foreach (var result in results.Where(item => item.Success && !string.IsNullOrWhiteSpace(item.OutputPath)))
+      {
+        _multiWindow.EditorDocumentService.OpenFile(result.OutputPath!);
+      }
+
+      ShowOpkToOpkwSummary(results);
     }
 
     /// <summary>
@@ -556,6 +556,57 @@ namespace MainWindowProgram.Services
       Message.MessageBoxCustom.Show(
         string.Join(Environment.NewLine, summaryLines),
         "Конвертация OPK в PK",
+        MessageBoxButton.OK,
+        icon);
+    }
+
+    private static void ShowOpkToOpkwSummary(IReadOnlyCollection<OpkToOpkwConversionResult> results)
+    {
+      if (results.Count == 0)
+      {
+        return;
+      }
+
+      var successCount = results.Count(result => result.Success);
+      var failedResults = results.Where(result => !result.Success).ToList();
+
+      var summaryLines = new List<string>
+      {
+        $"Успешно: {successCount}",
+        $"С ошибками: {failedResults.Count}",
+      };
+
+      var createdFiles = results
+        .Where(result => result.Success && !string.IsNullOrWhiteSpace(result.OutputPath))
+        .Select(result => $"  {Path.GetFileName(result.OutputPath)}")
+        .Take(10)
+        .ToList();
+
+      if (createdFiles.Count > 0)
+      {
+        summaryLines.Add(string.Empty);
+        summaryLines.Add("Созданы файлы:");
+        summaryLines.AddRange(createdFiles);
+      }
+
+      if (failedResults.Count > 0)
+      {
+        summaryLines.Add(string.Empty);
+        summaryLines.Add("Ошибки:");
+        summaryLines.AddRange(failedResults
+          .Take(10)
+          .Select(result => $"  {Path.GetFileName(result.InputPath)}: {result.ErrorMessage}"));
+      }
+
+      var icon = successCount == 0
+        ? MessageBoxImage.Error
+        : failedResults.Count == 0
+          ? MessageBoxImage.Information
+          : MessageBoxImage.Warning;
+
+      Message.MessageBoxCustom.Show(
+        string.Join(Environment.NewLine, summaryLines),
+        "Конвертация OPK в OPKW",
         MessageBoxButton.OK,
         icon);
     }
