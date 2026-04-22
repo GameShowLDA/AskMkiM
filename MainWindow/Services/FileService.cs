@@ -2,12 +2,13 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.FileFormats.Apk;
 using Ask.Core.Services.FileFormats.Opk;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
-using MainWindowProgram.Services.LegacyConversion;
+using MainWindowProgram.Services.Conversion;
 using MainWindowProgram.Windows;
 using Microsoft.Win32;
 using System.Diagnostics;
@@ -43,6 +44,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
     private readonly IOpkToPkConverter _opkToPkConverter;
+    private readonly PkToOpkwConverter _pkToOpkwConverter;
     private readonly ApkToApkwConverter _apkToApkwConverter;
 
     private bool _isSearchWindowOpen;
@@ -60,7 +62,21 @@ namespace MainWindowProgram.Services
       _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
       _opkToPkConverter = new OpkToPkConverter();
-      _apkToApkwConverter = new ApkToApkwConverter();
+      _pkToOpkwConverter = new PkToOpkwConverter();
+      _apkToApkwConverter = new ApkToApkwConverter(
+        _opkToPkConverter,
+        (inputPath, outputDirectory) =>
+        {
+          var result = _pkToOpkwConverter.Convert(inputPath, outputDirectory);
+          return new ApkToApkwPkConversionResult
+          {
+            OutputPath = result.OutputPath,
+            Success = result.Success,
+            ErrorCount = result.ErrorCount,
+          };
+        },
+        () => new ApkwArchiveWriter(),
+        ArchiveDirectoryService.ResolveReviewArchivesRootPath);
 
       EventAggregator.Subscribe<SearchEvents.SearchWindowClosing>(e => OnSearchWindowClosing(e.IsClosing));
 
@@ -110,7 +126,7 @@ namespace MainWindowProgram.Services
         {
           foreach (string filePath in openFileDialog.FileNames)
           {
-            _multiWindow.EditorDocumentService.OpenFile(filePath);
+            OpenFileWithLegacyConversion(filePath);
           }
         }
       }
@@ -148,7 +164,99 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        _multiWindow.EditorDocumentService.OpenFile(filePath);
+        OpenFileWithLegacyConversion(filePath);
+      }
+    }
+
+    private void OpenFileWithLegacyConversion(string filePath)
+    {
+      if (string.Equals(Path.GetExtension(filePath), ".opk", StringComparison.OrdinalIgnoreCase))
+      {
+        var convertedPath = ConvertOpkToOpkwForOpen(filePath);
+        if (string.IsNullOrWhiteSpace(convertedPath))
+        {
+          return;
+        }
+
+        _multiWindow.EditorDocumentService.OpenFile(convertedPath);
+        return;
+      }
+
+      _multiWindow.EditorDocumentService.OpenFile(filePath);
+    }
+
+    private string? ConvertOpkToOpkwForOpen(string inputFilePath)
+    {
+      var outputDirectory = Path.GetDirectoryName(Path.GetFullPath(inputFilePath));
+      if (string.IsNullOrWhiteSpace(outputDirectory))
+      {
+        Message.MessageBoxCustom.Show(
+          "Не удалось определить папку для сохранения OPKW-файла.",
+          "Открытие OPK",
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+        return null;
+      }
+
+      var intermediateDirectory = CreateTemporaryConversionDirectory("OpkToOpkw");
+
+      try
+      {
+        var pkResult = _opkToPkConverter.Convert(inputFilePath, intermediateDirectory);
+        if (!pkResult.Success || string.IsNullOrWhiteSpace(pkResult.OutputPath))
+        {
+          Message.MessageBoxCustom.Show(
+            pkResult.ErrorMessage ?? "Не удалось преобразовать OPK в промежуточный PK-файл.",
+            "Открытие OPK",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+          return null;
+        }
+
+        var opkwResult = _pkToOpkwConverter.Convert(pkResult.OutputPath, outputDirectory);
+        if (!opkwResult.Success || string.IsNullOrWhiteSpace(opkwResult.OutputPath))
+        {
+          Message.MessageBoxCustom.Show(
+            opkwResult.ErrorMessage ?? "Не удалось преобразовать OPK в OPKW.",
+            "Открытие OPK",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+          return null;
+        }
+
+        return opkwResult.OutputPath;
+      }
+      finally
+      {
+        TryDeleteDirectory(intermediateDirectory);
+      }
+    }
+
+    private static string CreateTemporaryConversionDirectory(string operationName)
+    {
+      var directoryPath = Path.Combine(
+        Path.GetTempPath(),
+        "AskMkiM",
+        operationName,
+        Guid.NewGuid().ToString("N"));
+
+      Directory.CreateDirectory(directoryPath);
+      return directoryPath;
+    }
+
+    private static void TryDeleteDirectory(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+      {
+        return;
+      }
+
+      try
+      {
+        Directory.Delete(path, recursive: true);
+      }
+      catch
+      {
       }
     }
 

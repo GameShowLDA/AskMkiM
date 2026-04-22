@@ -1,14 +1,12 @@
 using Ask.Core.Services.FileFormats.Opk;
-using MainWindowProgram.Services.Conversion;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using UI.Services.Archive;
 
-namespace MainWindowProgram.Services.LegacyConversion
+namespace Ask.Core.Services.FileFormats.Apk
 {
   /// <summary>
   /// Converts a legacy APK archive index plus legacy OPK files on disk into a modern APKW archive.
@@ -21,8 +19,22 @@ namespace MainWindowProgram.Services.LegacyConversion
     private static readonly byte[] VrMarkerEnd = { 0x01, 0x21, 0x00 };
     private static readonly Encoding OemEncoding = CreateOemEncoding();
 
-    private readonly OpkToPkConverter _opkToPkConverter = new OpkToPkConverter();
-    private readonly PkToOpkwConverter _pkToOpkwConverter = new PkToOpkwConverter();
+    private readonly IOpkToPkConverter _opkToPkConverter;
+    private readonly Func<string, string, ApkToApkwPkConversionResult> _pkToOpkwConverter;
+    private readonly Func<IApkwArchiveWriter> _archiveWriterFactory;
+    private readonly Func<string> _reviewArchivesRootPathResolver;
+
+    public ApkToApkwConverter(
+      IOpkToPkConverter opkToPkConverter,
+      Func<string, string, ApkToApkwPkConversionResult> pkToOpkwConverter,
+      Func<IApkwArchiveWriter> archiveWriterFactory,
+      Func<string> reviewArchivesRootPathResolver)
+    {
+      _opkToPkConverter = opkToPkConverter ?? throw new ArgumentNullException(nameof(opkToPkConverter));
+      _pkToOpkwConverter = pkToOpkwConverter ?? throw new ArgumentNullException(nameof(pkToOpkwConverter));
+      _archiveWriterFactory = archiveWriterFactory ?? throw new ArgumentNullException(nameof(archiveWriterFactory));
+      _reviewArchivesRootPathResolver = reviewArchivesRootPathResolver ?? throw new ArgumentNullException(nameof(reviewArchivesRootPathResolver));
+    }
 
     public ApkToApkwConversionResult Convert(string inputPath)
       => ConvertAsync(inputPath).GetAwaiter().GetResult();
@@ -131,7 +143,7 @@ namespace MainWindowProgram.Services.LegacyConversion
             totalEntries,
             currentProgressBase + 14d);
 
-          var opkwResult = _pkToOpkwConverter.Convert(pkResult.OutputPath, intermediateDirectory);
+          var opkwResult = _pkToOpkwConverter(pkResult.OutputPath, intermediateDirectory);
           if (!opkwResult.Success)
           {
             failedEntriesCount++;
@@ -223,13 +235,13 @@ namespace MainWindowProgram.Services.LegacyConversion
       string intermediateDirectory,
       IProgress<ApkToApkwProgressInfo>? progress)
     {
-      using var archiveManager = new ArchiveManager();
+      using var archiveWriter = _archiveWriterFactory();
       var stagingDirectory = CreateTemporaryWorkingDirectory();
       string? createdArchivePath = null;
 
       try
       {
-        createdArchivePath = CreateUniqueArchive(archiveManager, Path.GetFileNameWithoutExtension(sourcePath));
+        createdArchivePath = CreateUniqueArchive(archiveWriter, Path.GetFileNameWithoutExtension(sourcePath));
         var usedFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         for (var index = 0; index < successfulEntries.Count; index++)
@@ -250,8 +262,8 @@ namespace MainWindowProgram.Services.LegacyConversion
             successfulEntries.Count,
             progressValue);
 
-          archiveManager.OpenArchive(createdArchivePath);
-          archiveManager.AddFileToOpenedArchive(archiveSourceFilePath);
+          archiveWriter.OpenArchive(createdArchivePath);
+          archiveWriter.AddFileToOpenedArchive(archiveSourceFilePath);
         }
 
         return new ApkToApkwConversionResult
@@ -345,9 +357,9 @@ namespace MainWindowProgram.Services.LegacyConversion
       });
     }
 
-    private static string CreateIntermediateOutputDirectory(string sourcePath)
+    private string CreateIntermediateOutputDirectory(string sourcePath)
     {
-      var reviewRootPath = ArchiveDirectoryService.ResolveReviewArchivesRootPath();
+      var reviewRootPath = _reviewArchivesRootPathResolver();
       var baseDirectoryName = SanitizeFileName(Path.GetFileNameWithoutExtension(sourcePath), "apk_review") + "_review";
       var candidatePath = Path.Combine(reviewRootPath, baseDirectoryName);
 
@@ -371,7 +383,7 @@ namespace MainWindowProgram.Services.LegacyConversion
       }
     }
 
-    private static string CreateUniqueArchive(ArchiveManager archiveManager, string preferredName)
+    private static string CreateUniqueArchive(IApkwArchiveWriter archiveWriter, string preferredName)
     {
       var normalizedBaseName = SanitizeFileName(preferredName, "converted_archive");
       var candidateName = normalizedBaseName;
@@ -381,7 +393,7 @@ namespace MainWindowProgram.Services.LegacyConversion
       {
         try
         {
-          return archiveManager.CreateArchive(candidateName);
+          return archiveWriter.CreateArchive(candidateName);
         }
         catch (InvalidOperationException)
         {
