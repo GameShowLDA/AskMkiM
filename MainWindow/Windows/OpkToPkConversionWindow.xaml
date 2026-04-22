@@ -23,13 +23,15 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
+        <TextBlock x:Name="DescriptionTextBlock"
+                   Grid.Row="0"
                    Text="Выберите один или несколько файлов OPK и папку, в которую нужно сохранить результаты конвертации."
                    TextWrapping="Wrap"
                    FontSize="15"
                    Margin="0,0,0,16" />
 
-        <TextBlock Grid.Row="1"
+        <TextBlock x:Name="OutputDirectoryLabelTextBlock"
+                   Grid.Row="1"
                    Text="Папка для сохранения PK"
                    Margin="0,0,0,8"
                    FontWeight="SemiBold" />

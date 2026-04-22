@@ -1,4 +1,4 @@
-namespace MainWindowProgram.Services.LegacyConversion
+namespace Ask.Core.Services.FileFormats.Apk
 {
   /// <summary>
   /// Progress snapshot for APK to APKW conversion.
