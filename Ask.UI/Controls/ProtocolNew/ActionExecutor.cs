@@ -227,7 +227,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       StartProcessing?.Invoke(false);
 
-      await ProtocolSelfCheck.SaveProtocolAsync(ProtocolSelfCheck.Header, ".lstw");
+      await ProtocolSelfCheck.SaveProtocolAsync(ProtocolSelfCheck.Header, ".lst");
       ProtocolSelfCheck.ShowProtocolManager();
     }
 

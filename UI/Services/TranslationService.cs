@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Message;
+using System.IO;
 using System.Windows;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
@@ -41,7 +42,7 @@ namespace UI.Services
     /// <returns>Экземпляр <see cref="TextEditorUI"/> с предзаполненным сообщением и режимом только для чтения
     public ITextEditorView CreateTranslationFile(string parentFilePath)
     {
-      string fileName = $"Трансляция_{DateTime.Now:HHmmss}.opkw";
+      string fileName = BuildDerivedFileName(parentFilePath, ".opkw", "translation.opkw");
       var textEditorModel = new TextEditorModel(parentFilePath, fileName);
 
       var textEditor = new TextEditorUI(FileType.OPKW, textEditorModel)
@@ -92,7 +93,8 @@ namespace UI.Services
 
         }
 
-        var item = await _fileManager.DockItemService.ShowTranslatorDockItemAsync($"Трансляция {editor.TextEditorModel.FileName}", textEditorContainer, editor, translateEditor);
+        var translationFileName = GetDisplayFileName(translateEditor.TextEditorModel?.FilePath, translateEditor.TextEditorModel?.FileName);
+        var item = await _fileManager.DockItemService.ShowTranslatorDockItemAsync(translationFileName, textEditorContainer, editor, translateEditor);
 
         _fileManager.ControlManagerService.ShowEditorContainer(textEditorContainer, EditorType.Translator);
         return item;
@@ -136,6 +138,26 @@ namespace UI.Services
         LogException($"Ошибка при чтении файла", ex);
         return;
       }
+    }
+
+    private static string BuildDerivedFileName(string? sourceFilePath, string extension, string fallbackFileName)
+    {
+      string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
+      return string.IsNullOrWhiteSpace(baseName)
+        ? fallbackFileName
+        : $"{baseName}{extension}";
+    }
+
+    private static string GetDisplayFileName(string? filePath, string? fileName)
+    {
+      if (!string.IsNullOrWhiteSpace(fileName))
+      {
+        return fileName;
+      }
+
+      return string.IsNullOrWhiteSpace(filePath)
+        ? string.Empty
+        : Path.GetFileName(filePath);
     }
   }
 }

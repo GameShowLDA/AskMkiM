@@ -586,7 +586,7 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
-      runControl.FileName = GetDisplayFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.FileName);
+      runControl.FileName = BuildDerivedFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.FileName, ".lst", "protocol.lst");
       runControl.SetLeftEditor(editor);
 
       if (runContainer == null)
@@ -615,6 +615,19 @@ namespace MainWindowProgram.Services
       }
 
       return fileName ?? string.Empty;
+    }
+
+    private static string BuildDerivedFileName(string? sourceFilePath, string? sourceFileName, string extension, string fallbackFileName)
+    {
+      string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = Path.GetFileNameWithoutExtension(sourceFileName);
+      }
+
+      return string.IsNullOrWhiteSpace(baseName)
+        ? fallbackFileName
+        : $"{baseName}{extension}";
     }
 
     /// <summary>

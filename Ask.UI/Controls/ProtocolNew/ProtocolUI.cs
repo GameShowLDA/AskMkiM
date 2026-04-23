@@ -457,8 +457,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public async Task SaveProtocolAsync(string name, string extention)
     {
-      string dateTime = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss", CultureInfo.CurrentCulture);
-      string filename = $"{name}_{dateTime}{extention}";
+      string filename = BuildDerivedFileName(name, extention);
       string datePath = $"{DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture)}";
       string fullPath = Path.Combine($"..\\{FileLocations.DataSaveDirectory}", $"{datePath}", filename);
       if (!Directory.Exists(Path.GetDirectoryName(fullPath)))
@@ -472,6 +471,17 @@ namespace Ask.UI.Controls.ProtocolNew
 
       await File.WriteAllLinesAsync(fullPath, lines);
       _lastSavedProtocolPath = Path.GetFullPath(fullPath);
+    }
+
+    private static string BuildDerivedFileName(string? sourceName, string extension)
+    {
+      string baseName = Path.GetFileNameWithoutExtension(sourceName);
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = "protocol";
+      }
+
+      return $"{baseName}{extension}";
     }
 
     private static string FormatProtocolLineForSave(ShowMessageModel message)
