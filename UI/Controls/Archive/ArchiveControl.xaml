@@ -38,18 +38,29 @@
             <Setter Property="SnapsToDevicePixels" Value="True" />
         </Style>
 
-        <Style x:Key="ArchiveToolbarIconButtonStyle"
+        <Style x:Key="ArchiveToolbarCommonIconButtonStyle"
                TargetType="Button"
-               BasedOn="{StaticResource ActionButtonStyle}">
+               BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
             <Setter Property="Width" Value="32" />
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="32" />
             <Setter Property="MinHeight" Value="32" />
             <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="12,0,0,0" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
+            <Setter Property="ToolTipService.ShowDuration" Value="60000" />
+            <Setter Property="ToolTipService.BetweenShowDelay" Value="100" />
         </Style>
 
+        <Style x:Key="ArchiveToolbarIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource ArchiveToolbarCommonIconButtonStyle}" />
+
         <Style x:Key="ArchiveToolbarPasteIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource ArchiveToolbarCommonIconButtonStyle}" />
+
+        <Style x:Key="ArchiveToolbarAccentIconButtonStyle"
                TargetType="Button"
                BasedOn="{StaticResource SaveButtonStyle}">
             <Setter Property="Width" Value="32" />
@@ -57,29 +68,19 @@
             <Setter Property="MinWidth" Value="32" />
             <Setter Property="MinHeight" Value="32" />
             <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="12,0,0,0" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="ToolTipService.InitialShowDelay" Value="250" />
+            <Setter Property="ToolTipService.ShowDuration" Value="60000" />
+            <Setter Property="ToolTipService.BetweenShowDelay" Value="100" />
         </Style>
 
         <Style x:Key="ArchiveToolbarNeutralIconButtonStyle"
                TargetType="Button"
-               BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="MinWidth" Value="32" />
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="12,0,0,0" />
-        </Style>
+               BasedOn="{StaticResource ArchiveToolbarCommonIconButtonStyle}" />
 
         <Style x:Key="ArchiveToolbarDeleteIconButtonStyle"
                TargetType="Button"
-               BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="MinWidth" Value="32" />
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="5" />
-            <Setter Property="Margin" Value="12,0,0,0" />
+               BasedOn="{StaticResource ArchiveToolbarCommonIconButtonStyle}">
             <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonBackgroundBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonBorderBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonForegroundBrush}" />
@@ -633,6 +634,8 @@
                         <StackPanel x:Name="ArchiveActionsPanel"
                                     Grid.Column="1"
                                     Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    Margin="-8,0,0,0"
                                     Visibility="Collapsed">
                             <Button x:Name="RecheckReviewArchiveButton"
                                     Visibility="Collapsed"
@@ -657,7 +660,7 @@
                                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                             <Button x:Name="AddFileToArchiveButton"
-                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    Style="{StaticResource ArchiveToolbarAccentIconButtonStyle}"
                                     ToolTip="Добавить файл в архив"
                                     Click="AddFileToArchiveButton_Click">
                                 <askUiIcons:PlusCircleIcon Size="16"
@@ -836,6 +839,7 @@
                         </Grid>
                         <StackPanel Grid.Column="1"
                                     Orientation="Horizontal"
+                                    Margin="-8,0,0,0"
                                     HorizontalAlignment="Right">
                             <Button x:Name="RecheckReviewFileButton"
                                     Visibility="Collapsed"
@@ -879,6 +883,14 @@
                                 <askUiIcons:PasteIcon Size="16"
                                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
+                            <Button x:Name="ConvertToPkwButton"
+                                    Style="{StaticResource ArchiveToolbarAccentIconButtonStyle}"
+                                    ToolTip="Конвертировать в pkw"
+                                    Click="ConvertToPkwButton_Click">
+                                <askUiIcons:ExportConfigIcon Size="16"
+                                                             IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
                             <Button x:Name="DeleteArchiveFileButton"
                                     Visibility="Collapsed"
                                     Style="{StaticResource ArchiveToolbarDeleteIconButtonStyle}"
@@ -887,14 +899,6 @@
                                 <askUiIcons:TrashDeleteIcon Size="16"
                                                             IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
-                            </Button>
-                            <Button x:Name="ConvertToPkwButton"
-                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
-                                    ToolTip="Конвертировать в pkw"
-                                    Click="ConvertToPkwButton_Click">
-                                <askUiIcons:ExportConfigIcon Size="16"
-                                                             IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
-                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                         </StackPanel>
                     </Grid>
