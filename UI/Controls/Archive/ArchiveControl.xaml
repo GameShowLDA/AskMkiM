@@ -893,6 +893,7 @@
                                     ToolTip="Конвертировать в pkw"
                                     Click="ConvertToPkwButton_Click">
                                 <askUiIcons:ExportConfigIcon Size="16"
+                                                             IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                         </StackPanel>

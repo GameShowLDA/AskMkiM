@@ -19,42 +19,42 @@
                                      Storyboard.TargetProperty="X">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="1.4" />
         <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="2.5" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="2.1" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackSheetTranslate"
                                      Storyboard.TargetProperty="Y">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="-1.1" />
         <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="-2.1" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="-1.75" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackSheetOpacity"
                                      Storyboard.TargetProperty="Opacity">
         <EasingDoubleKeyFrame KeyTime="0:0:0.10" Value="0.85" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.20" Value="1" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.20" Value="0.92" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetScale"
                                      Storyboard.TargetProperty="ScaleX">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.96" />
         <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1.03" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.01" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetScale"
                                      Storyboard.TargetProperty="ScaleY">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.96" />
         <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1.03" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.01" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetTranslate"
                                      Storyboard.TargetProperty="X">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="-0.4" />
         <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="0.3" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="0.12" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetTranslate"
                                      Storyboard.TargetProperty="Y">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.4" />
         <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="-0.2" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="-0.08" />
       </DoubleAnimationUsingKeyFrames>
     </Storyboard>
 

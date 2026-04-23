@@ -18,18 +18,18 @@
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LowerBladeRotate"
                                      Storyboard.TargetProperty="Angle">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="-7" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="-5.5" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="UpperBladeRotate"
                                      Storyboard.TargetProperty="Angle">
         <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="12" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="9.5" />
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconTranslate"
                        Storyboard.TargetProperty="Y"
                        Duration="0:0:0.18">
         <EasingDoubleKeyFrame KeyTime="0:0:0.06" Value="-0.6" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="0" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="-0.35" />
       </DoubleAnimationUsingKeyFrames>
     </Storyboard>
 

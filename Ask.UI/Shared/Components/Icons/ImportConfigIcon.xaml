@@ -6,59 +6,91 @@
              Height="{Binding Size, ElementName=Root}"
              IsHitTestVisible="False">
   <UserControl.Resources>
-    <StreamGeometry x:Key="SemiIconImport">
+    <StreamGeometry x:Key="SemiIconImportArrow">
       M10.5 7V2.5a1.5 1.5 0 0 1 3 0V7h-.09a1.5 1.5 0 0 0-2.82 0h-.09Z
-      M10.5 7H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V10a3 3 0 0 0-3-3h-5.5v6.38l1.44-1.44a1.5 1.5 0 0 1 2.12 2.12l-4 4a1.5 1.5 0 0 1-2.12 0l-4-4a1.5 1.5 0 0 1 2.12-2.12l1.44 1.44V7Z
+      M13.5 7v6.38l1.44-1.44a1.5 1.5 0 0 1 2.12 2.12l-4 4a1.5 1.5 0 0 1-2.12 0l-4-4a1.5 1.5 0 0 1 2.12-2.12l1.44 1.44V7Z
+    </StreamGeometry>
+
+    <StreamGeometry x:Key="SemiIconImportBox">
+      M10.5 7H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V10a3 3 0 0 0-3-3h-5.5Z
     </StreamGeometry>
 
     <Storyboard x:Key="HoverInStoryboard">
-      <DoubleAnimation Storyboard.TargetName="IconScale"
-                       Storyboard.TargetProperty="ScaleX"
-                       To="1.08"
-                       Duration="0:0:0.12" />
-      <DoubleAnimation Storyboard.TargetName="IconScale"
-                       Storyboard.TargetProperty="ScaleY"
-                       To="1.08"
-                       Duration="0:0:0.12" />
-      <DoubleAnimation Storyboard.TargetName="IconTranslate"
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArrowTranslate"
+                                     Storyboard.TargetProperty="Y">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="1.2" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="2.8" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.30" Value="2.3" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ArrowScale"
+                                     Storyboard.TargetProperty="ScaleY">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="1.04" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="0.96" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.30" Value="0.98" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BoxScale"
+                                     Storyboard.TargetProperty="ScaleY">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.12" Value="1.03" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.22" Value="0.985" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.30" Value="1.02" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BoxTranslate"
                        Storyboard.TargetProperty="Y"
-                       To="-0.4"
-                       Duration="0:0:0.12" />
+                       Duration="0:0:0.30">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.10" Value="0.15" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.20" Value="0.45" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.30" Value="0.28" />
+      </DoubleAnimationUsingKeyFrames>
     </Storyboard>
 
     <Storyboard x:Key="HoverOutStoryboard">
-      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconScale"
-                                     Storyboard.TargetProperty="ScaleX">
-        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.99" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1" />
-      </DoubleAnimationUsingKeyFrames>
-      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="IconScale"
-                                     Storyboard.TargetProperty="ScaleY">
-        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.99" />
-        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1" />
-      </DoubleAnimationUsingKeyFrames>
-      <DoubleAnimation Storyboard.TargetName="IconTranslate"
+      <DoubleAnimation Storyboard.TargetName="ArrowTranslate"
                        Storyboard.TargetProperty="Y"
                        To="0"
-                       Duration="0:0:0.18" />
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="ArrowScale"
+                       Storyboard.TargetProperty="ScaleY"
+                       To="1"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="BoxScale"
+                       Storyboard.TargetProperty="ScaleY"
+                       To="1"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="BoxTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="0"
+                       Duration="0:0:0.16" />
     </Storyboard>
   </UserControl.Resources>
 
   <Viewbox Stretch="Uniform">
     <Grid Width="24"
-          Height="24"
-          RenderTransformOrigin="0.5,0.5">
-      <Grid.RenderTransform>
-        <TransformGroup>
-          <ScaleTransform x:Name="IconScale"
-                          ScaleX="1"
-                          ScaleY="1" />
-          <TranslateTransform x:Name="IconTranslate"
-                              Y="0" />
-        </TransformGroup>
-      </Grid.RenderTransform>
-      <Path Fill="{Binding Foreground, ElementName=Root}"
-            Data="{StaticResource SemiIconImport}" />
+          Height="24">
+      <Grid RenderTransformOrigin="0.5,0.82">
+        <Grid.RenderTransform>
+          <TransformGroup>
+            <ScaleTransform x:Name="BoxScale"
+                            ScaleY="1" />
+            <TranslateTransform x:Name="BoxTranslate"
+                                Y="0" />
+          </TransformGroup>
+        </Grid.RenderTransform>
+        <Path Fill="{Binding Foreground, ElementName=Root}"
+              Data="{StaticResource SemiIconImportBox}" />
+      </Grid>
+
+      <Grid RenderTransformOrigin="0.5,0.35">
+        <Grid.RenderTransform>
+          <TransformGroup>
+            <ScaleTransform x:Name="ArrowScale"
+                            ScaleY="1" />
+            <TranslateTransform x:Name="ArrowTranslate"
+                                Y="0" />
+          </TransformGroup>
+        </Grid.RenderTransform>
+        <Path Fill="{Binding Foreground, ElementName=Root}"
+              Data="{StaticResource SemiIconImportArrow}" />
+      </Grid>
     </Grid>
   </Viewbox>
 </UserControl>
