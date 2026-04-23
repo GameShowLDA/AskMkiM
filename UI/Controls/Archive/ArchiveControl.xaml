@@ -887,16 +887,12 @@
                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                             <Button x:Name="ConvertToPkwButton"
-                                    Margin="12,0,0,0"
-                                    Padding="10,4"
-                                    MinWidth="220"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Cursor="Hand"
-                                    FontSize="16"
-                                    Style="{DynamicResource ButtonStyleV8}"
-                                    Content="Конвертировать в pkw"
-                                    Click="ConvertToPkwButton_Click" />
+                                    Style="{StaticResource ArchiveToolbarPasteIconButtonStyle}"
+                                    ToolTip="Конвертировать в pkw"
+                                    Click="ConvertToPkwButton_Click">
+                                <askUiIcons:ExportConfigIcon Size="16"
+                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <TextEditor:TextEditorUI x:Name="FileContentTextBox"
