@@ -75,13 +75,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
         textLines.AddRange(lines.Skip(1).Select(l => l.TrimEnd()));
       }
 
-      model.MessageText = string.Join(Environment.NewLine, textLines).Trim();
+      var rawMessageText = string.Join(Environment.NewLine, textLines).Trim();
+      model.MessageText = rawMessageText;
 
-      if (model.MessageText.EndsWith("??"))
+      if (rawMessageText.EndsWith("??"))
       {
         model.CuType = CuCommandType.Question;
       }
-      else if (model.MessageText.EndsWith("?"))
+      else if (rawMessageText.EndsWith("?"))
       {
         model.CuType = CuCommandType.Question;
       }
@@ -90,7 +91,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
         model.CuType = CuCommandType.Information;
       }
 
+      if (model.CuType == CuCommandType.Question)
+      {
+        model.MessageText = TrimTrailingQuestionMarks(rawMessageText);
+      }
+
       return model;
+    }
+
+    private static string TrimTrailingQuestionMarks(string messageText)
+    {
+      return messageText.TrimEnd().TrimEnd('?').TrimEnd();
     }
   }
 }
