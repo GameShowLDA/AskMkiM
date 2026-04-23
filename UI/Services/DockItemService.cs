@@ -125,8 +125,8 @@ namespace UI.Services
         translatorItem.IsHitTestVisible = false;
         translatorItem.SetLeftEditor(textEditor);
         translatorItem.SetRightEditor(translatorEditor);
-        translatorItem.SetRightEditorName(GetDisplayFileName(textEditor.TextEditorModel.FilePath, textEditor.TextEditorModel.FileName));
-        translatorItem.SetLeftEditorName(textEditor.TextEditorModel.FileName);
+        translatorItem.SetRightEditorName(GetDisplayFileName(translatorEditor.TextEditorModel?.FilePath, translatorEditor.TextEditorModel?.FileName));
+        translatorItem.SetLeftEditorName(GetDisplayFileName(textEditor.TextEditorModel?.FilePath, textEditor.TextEditorModel?.FileName));
         var dockItem = new DockItem
         {
           Title = nameFile,

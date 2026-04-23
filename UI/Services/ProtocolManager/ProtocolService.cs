@@ -125,7 +125,15 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     private string BuildProtocolFileName(ProtocolModel protocol)
     {
-      return $"{Path.GetFileNameWithoutExtension(protocol.ProgramName)} от {DateTime.Now:dd-MM-yyyy HH-mm-ss}.lstw";
+      string baseName = Path.GetFileNameWithoutExtension(protocol.ProgramName);
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = Path.GetFileNameWithoutExtension(protocol.ProgramPath);
+      }
+
+      return string.IsNullOrWhiteSpace(baseName)
+        ? "protocol.lst"
+        : $"{baseName}.lst";
     }
 
     /// <summary>
@@ -142,7 +150,7 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     private TextEditorUI CreateReadOnlyProtocolEditor(string filePath, string protocolText)
     {
-      var textEditorModel = new TextEditorModel(filePath);
+      var textEditorModel = new TextEditorModel(filePath, Path.GetFileName(filePath));
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, protocolText, FileType.Protocol);
       textEditor.IsReadOnly = true;
       EditorEventAdapter.RaiseTextEditorActivated(textEditor);

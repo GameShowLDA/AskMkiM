@@ -518,6 +518,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       return Directory
         .EnumerateFiles(historyDirectory, "*.lstw", SearchOption.AllDirectories)
+        .Concat(Directory.EnumerateFiles(historyDirectory, "*.lst", SearchOption.AllDirectories))
         .OrderByDescending(File.GetLastWriteTimeUtc)
         .FirstOrDefault();
     }
