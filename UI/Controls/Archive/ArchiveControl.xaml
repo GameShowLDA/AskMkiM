@@ -859,6 +859,7 @@
                                     ToolTip="Копировать файл"
                                     Click="CopyArchiveFileButton_Click">
                                 <askUiIcons:CopyIcon Size="16"
+                                                     IsCopying="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                      Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                             <Button x:Name="CutArchiveFileButton"
