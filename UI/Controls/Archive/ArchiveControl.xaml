@@ -867,6 +867,7 @@
                                     ToolTip="Вырезать файл"
                                     Click="CutArchiveFileButton_Click">
                                 <askUiIcons:CutIcon Size="16"
+                                                    IsCutting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                     Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                             <Button x:Name="PasteArchiveFileButton"
