@@ -5,56 +5,99 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <Style x:Key="DiffListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <ContentPresenter/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/UI;component/Windows/WpfDocking/Themes/Generic/TabControl.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <DataTemplate x:Key="DiffLineTemplate">
-            <Border Background="{Binding BackgroundBrush}"
-                    BorderBrush="{Binding BorderBrush}"
-                    BorderThickness="0,0,0,1"
-                    Padding="6,2">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="58"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0"
-                               Text="{Binding Prefix}"
-                               FontFamily="Consolas"
-                               FontSize="14"
-                               FontWeight="Bold"
-                               Foreground="{Binding ForegroundBrush}"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Grid.Column="1"
-                               Text="{Binding LineNumberText}"
-                               FontFamily="Consolas"
-                               FontSize="13"
-                               Opacity="0.75"
-                               TextAlignment="Right"
-                               Foreground="{Binding ForegroundBrush}"/>
-                    <TextBlock Grid.Column="2"
-                               Text="{Binding Text}"
-                               Margin="10,0,0,0"
-                               FontFamily="Consolas"
-                               FontSize="14"
-                               TextWrapping="NoWrap"
-                               Foreground="{Binding ForegroundBrush}"/>
-                </Grid>
-            </Border>
-        </DataTemplate>
+            <Style x:Key="DiffListBoxItemStyle" TargetType="ListBoxItem">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="CompareCardBorderStyle" TargetType="Border" BasedOn="{StaticResource SettingCardStyle}">
+                <Setter Property="Padding" Value="12"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+            </Style>
+
+            <Style x:Key="CompareCardTitleStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonBold}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="CompareItemTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            </Style>
+
+            <Style x:Key="ComparePathTextStyle" TargetType="TextBlock" BasedOn="{StaticResource CompareItemTextStyle}">
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="Opacity" Value="0.75"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="CompareBodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                <Setter Property="FontSize" Value="15"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="CompareTabControlStyle" TargetType="{x:Type TabControl}" BasedOn="{StaticResource BottomTabControlStyle}">
+                <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                <Setter Property="Padding" Value="0"/>
+            </Style>
+
+            <DataTemplate x:Key="DiffLineTemplate">
+                <Border Background="{Binding BackgroundBrush}"
+                        BorderBrush="{Binding BorderBrush}"
+                        BorderThickness="0"
+                        Padding="6,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="58"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Prefix}"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="{Binding ForegroundBrush}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding LineNumberText}"
+                                   FontFamily="Consolas"
+                                   FontSize="13"
+                                   Opacity="0.75"
+                                   TextAlignment="Right"
+                                   Foreground="{Binding ForegroundBrush}"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding Text}"
+                                   Margin="10,0,0,0"
+                                   FontFamily="Consolas"
+                                   FontSize="14"
+                                   TextWrapping="NoWrap"
+                                   Foreground="{Binding ForegroundBrush}"/>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Margin="16">
@@ -70,7 +113,7 @@
                 <Button Content="Обновить список"
                         Padding="10,6"
                         FontFamily="{DynamicResource WinstonBold}"
-                        FontSize="18"
+                        FontSize="16"
                         Style="{DynamicResource SaveButtonStyle}"
                         IsEnabled="{Binding CanRefresh}"
                         Click="RefreshButton_Click" />
@@ -80,7 +123,7 @@
                         Margin="10,0,0,0"
                         IsEnabled="{Binding CanStartCompare}"
                         FontFamily="{DynamicResource WinstonBold}"
-                        FontSize="18"
+                        FontSize="16"
                         Style="{DynamicResource SaveButtonStyle}"
                         Click="StartCompareButton_Click" />
             </StackPanel>
@@ -107,15 +150,11 @@
 
             <Border Grid.Row="0"
                     Margin="0,0,0,12"
-                    Padding="12"
-                    Background="{DynamicResource BackgroundBrushes}"
-                    BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8">
+                    Style="{StaticResource CompareCardBorderStyle}">
                 <StackPanel>
                     <TextBlock Text="Исходный файл"
                                Margin="0,0,0,8"
-                               Style="{DynamicResource ConfigInfoStyle}"
+                               Style="{StaticResource CompareCardTitleStyle}"
                                Foreground="{DynamicResource MainTitleSolidColorBrush}" />
                     <ComboBox ItemsSource="{Binding OpenFiles}"
                               SelectedItem="{Binding SelectedSourceFile, Mode=TwoWay}"
@@ -133,15 +172,11 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
-                        Padding="12"
-                        Background="{DynamicResource BackgroundBrushes}"
-                        BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                        Style="{StaticResource CompareCardBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="Файлы для сравнения"
                                    Margin="0,0,0,8"
-                                   Style="{DynamicResource ConfigInfoStyle}"/>
+                                   Style="{StaticResource CompareCardTitleStyle}"/>
 
                         <ListBox ItemsSource="{Binding TargetFiles}"
                                  BorderThickness="0"
@@ -157,15 +192,9 @@
                                               Style="{DynamicResource SettingsCheckBox2}">
                                         <StackPanel>
                                             <TextBlock Text="{Binding File.DisplayName}"
-                                                       FontFamily="{DynamicResource WinstonRegular}"
-                                                       FontSize="15"
-                                                       Foreground="{DynamicResource ForegrounfBrushes}" />
+                                                       Style="{StaticResource CompareItemTextStyle}" />
                                             <TextBlock Text="{Binding File.FilePath}"
-                                                       FontSize="13"
-                                                       Opacity="0.75"
-                                                       FontFamily="{DynamicResource WinstonRegular}"
-                                                       Foreground="{DynamicResource ForegrounfBrushes}"
-                                                       TextWrapping="Wrap" />
+                                                       Style="{StaticResource ComparePathTextStyle}" />
                                         </StackPanel>
                                     </CheckBox>
                                 </DataTemplate>
@@ -175,21 +204,14 @@
                 </Border>
 
                 <Border Grid.Column="2"
-                        Padding="12"
-                        Background="{DynamicResource BackgroundBrushes}"
-                        BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                        Style="{StaticResource CompareCardBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="Текущий список"
                                    Margin="0,0,0,8"
-                                   Style="{DynamicResource ConfigInfoStyle}"/>
+                                   Style="{StaticResource CompareCardTitleStyle}"/>
                         <TextBlock Margin="0,0,0,8"
                                    Text="{Binding SelectionSummary}"
-                                   TextWrapping="Wrap"
-                                   FontFamily="{DynamicResource WinstonRegular}"
-                                   FontSize="15"
-                                   Foreground="{DynamicResource ForegrounfBrushes}" />
+                                   Style="{StaticResource CompareBodyTextStyle}" />
                         <ListBox ItemsSource="{Binding SelectedTargetFiles}"
                                  BorderThickness="0"
                                  Background="Transparent"
@@ -201,15 +223,9 @@
                                 <DataTemplate>
                                     <StackPanel Margin="0,4">
                                         <TextBlock Text="{Binding DisplayName}"
-                                                   FontFamily="{DynamicResource WinstonRegular}"
-                                                   FontSize="15"
-                                                   Foreground="{DynamicResource ForegrounfBrushes}" />
+                                                   Style="{StaticResource CompareItemTextStyle}" />
                                         <TextBlock Text="{Binding FilePath}"
-                                                   FontSize="13"
-                                                   Opacity="0.75"
-                                                   FontFamily="{DynamicResource WinstonRegular}"
-                                                   Foreground="{DynamicResource ForegrounfBrushes}"
-                                                   TextWrapping="Wrap" />
+                                                   Style="{StaticResource ComparePathTextStyle}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -228,9 +244,7 @@
             <TextBlock Grid.Row="0"
                        Text="{Binding ComparisonSummary}"
                        Margin="0,0,0,10"
-                       TextWrapping="Wrap"
-                       Style="{DynamicResource ConfigInfoStyle}"
-                       Foreground="{DynamicResource ForegrounfBrushes}" />
+                       Style="{StaticResource CompareBodyTextStyle}" />
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -240,10 +254,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
-                        Background="{DynamicResource BackgroundBrushes}"
-                        BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
+                        Style="{StaticResource CompareCardBorderStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -255,12 +266,14 @@
                                    FontFamily="{DynamicResource WinstonBold}"
                                    FontSize="16"
                                    Foreground="{DynamicResource MainTitleSolidColorBrush}" />
-                        <ListBox Grid.Row="1"
+                        <ListBox x:Name="SourceLinesListBox"
+                                 Grid.Row="1"
                                  ItemsSource="{Binding ActiveComparison.SourceLines}"
                                  ItemTemplate="{StaticResource DiffLineTemplate}"
                                  ItemContainerStyle="{StaticResource DiffListBoxItemStyle}"
                                  BorderThickness="0"
                                  Background="Transparent"
+                                 ScrollViewer.ScrollChanged="SourceLinesListBox_ScrollChanged"
                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                                  VirtualizingPanel.IsVirtualizing="True"
@@ -269,17 +282,17 @@
                 </Border>
 
                 <Border Grid.Column="2"
-                        Background="{DynamicResource BackgroundBrushes}"
-                        BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
-                    <TabControl ItemsSource="{Binding ComparisonResults}"
+                        Style="{StaticResource CompareCardBorderStyle}">
+                    <TabControl x:Name="ComparisonTabControl"
+                                ItemsSource="{Binding ComparisonResults}"
+                                TabStripPlacement="Bottom"
+                                Style="{StaticResource CompareTabControlStyle}"
+                                ItemContainerStyle="{StaticResource BottomTabItemStyle}"
                                 SelectedItem="{Binding ActiveComparison, Mode=TwoWay}"
-                                Background="Transparent"
-                                BorderThickness="0">
+                                Background="Transparent">
                         <TabControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding TargetTitle}" />
+                                <TextBlock Text="{Binding TargetTitle}" FontFamily="{DynamicResource WinstonRegular}" />
                             </DataTemplate>
                         </TabControl.ItemTemplate>
                         <TabControl.ContentTemplate>
@@ -295,12 +308,14 @@
                                                FontFamily="{DynamicResource WinstonBold}"
                                                FontSize="16"
                                                Foreground="{DynamicResource MainTitleSolidColorBrush}" />
-                                    <ListBox Grid.Row="1"
+                                    <ListBox x:Name="TargetLinesListBox"
+                                             Grid.Row="1"
                                              ItemsSource="{Binding TargetLines}"
                                              ItemTemplate="{StaticResource DiffLineTemplate}"
                                              ItemContainerStyle="{StaticResource DiffListBoxItemStyle}"
                                              BorderThickness="0"
                                              Background="Transparent"
+                                             ScrollViewer.ScrollChanged="TargetLinesListBox_ScrollChanged"
                                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
                                              VirtualizingPanel.IsVirtualizing="True"
@@ -315,17 +330,11 @@
 
         <Border Grid.Row="3"
                 Margin="0,12,0,0"
-                Padding="12"
-                Background="{DynamicResource BackgroundBrushes}"
-                BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
-                BorderThickness="1"
-                CornerRadius="8">
+                Style="{StaticResource CompareCardBorderStyle}">
             <TextBlock Text="{Binding StateText}"
                        VerticalAlignment="Center"
-                       TextWrapping="Wrap"
-                       Style="{DynamicResource ConfigInfoStyle}"
-                       FontSize="15"
-                       Foreground="{DynamicResource ForegrounfBrushes}" />
+                       Style="{StaticResource CompareBodyTextStyle}" />
         </Border>
     </Grid>
 </UserControl>
+

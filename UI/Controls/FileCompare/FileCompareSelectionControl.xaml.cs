@@ -12,6 +12,7 @@ namespace UI.Controls.FileCompare
   {
     private readonly Func<IReadOnlyList<OpenTextEditorDescriptor>> _openFilesProvider;
     private CancellationTokenSource? _compareCancellation;
+    private bool _isSynchronizingScroll;
     private OpenTextEditorDescriptor? _selectedSourceFile;
     private FileComparisonResult? _activeComparison;
     private bool _hasEnoughFiles;
@@ -391,6 +392,112 @@ namespace UI.Controls.FileCompare
         + $"Файлов с изменениями: {changedFiles}. Добавлено строк: {added}, удалено: {removed}, изменено: {modified}.";
     }
 
+    private void SourceLinesListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+      if (_isSynchronizingScroll || (e.VerticalChange == 0 && e.HorizontalChange == 0))
+      {
+        return;
+      }
+
+      SyncScroll(SourceLinesListBox, GetVisibleTargetLinesListBox());
+    }
+
+    private void TargetLinesListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+      if (_isSynchronizingScroll || (e.VerticalChange == 0 && e.HorizontalChange == 0))
+      {
+        return;
+      }
+
+      if (sender is not ListBox targetListBox)
+      {
+        return;
+      }
+
+      SyncScroll(targetListBox, SourceLinesListBox);
+    }
+
+    private void SyncScroll(DependencyObject source, DependencyObject? target)
+    {
+      if (target == null)
+      {
+        return;
+      }
+
+      var sourceViewer = FindScrollViewer(source);
+      var targetViewer = FindScrollViewer(target);
+      if (sourceViewer == null || targetViewer == null)
+      {
+        return;
+      }
+
+      _isSynchronizingScroll = true;
+      try
+      {
+        targetViewer.ScrollToVerticalOffset(sourceViewer.VerticalOffset);
+        targetViewer.ScrollToHorizontalOffset(sourceViewer.HorizontalOffset);
+      }
+      finally
+      {
+        _isSynchronizingScroll = false;
+      }
+    }
+
+    private ListBox? GetVisibleTargetLinesListBox()
+    {
+      return FindVisualChildren<ListBox>(ComparisonTabControl)
+        .FirstOrDefault(listBox => string.Equals(listBox.Name, "TargetLinesListBox", StringComparison.Ordinal) && listBox.IsVisible);
+    }
+
+    private static ScrollViewer? FindScrollViewer(DependencyObject? root)
+    {
+      if (root == null)
+      {
+        return null;
+      }
+
+      if (root is ScrollViewer viewer)
+      {
+        return viewer;
+      }
+
+      for (var childIndex = 0; childIndex < VisualTreeHelper.GetChildrenCount(root); childIndex++)
+      {
+        var child = VisualTreeHelper.GetChild(root, childIndex);
+        var result = FindScrollViewer(child);
+        if (result != null)
+        {
+          return result;
+        }
+      }
+
+      return null;
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject? root)
+      where T : DependencyObject
+    {
+      if (root == null)
+      {
+        yield break;
+      }
+
+      var count = VisualTreeHelper.GetChildrenCount(root);
+      for (var childIndex = 0; childIndex < count; childIndex++)
+      {
+        var child = VisualTreeHelper.GetChild(root, childIndex);
+        if (child is T result)
+        {
+          yield return result;
+        }
+
+        foreach (var nested in FindVisualChildren<T>(child))
+        {
+          yield return nested;
+        }
+      }
+    }
+
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -471,11 +578,13 @@ namespace UI.Controls.FileCompare
 
   public sealed class DiffLineViewModel
   {
-    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int? lineNumber, string text)
+    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int displayLineNumber, int? originalLineNumber, string text)
     {
       Kind = kind;
       PaneSide = paneSide;
-      LineNumberText = lineNumber?.ToString() ?? string.Empty;
+      DisplayLineNumber = displayLineNumber;
+      OriginalLineNumber = originalLineNumber;
+      LineNumberText = originalLineNumber?.ToString() ?? string.Empty;
       Text = text;
       Prefix = DiffPresentation.GetPrefix(kind, paneSide);
       BackgroundBrush = DiffPresentation.GetBackground(kind, paneSide);
@@ -486,6 +595,10 @@ namespace UI.Controls.FileCompare
     public DiffLineKind Kind { get; }
 
     public DiffPaneSide PaneSide { get; }
+
+    public int DisplayLineNumber { get; }
+
+    public int? OriginalLineNumber { get; }
 
     public string Prefix { get; }
 
@@ -526,85 +639,54 @@ namespace UI.Controls.FileCompare
     {
       var sourceLines = SplitLines(sourceFile.TextContent);
       var targetLines = SplitLines(targetFile.TextContent);
-      var operations = BuildOperations(sourceLines, targetLines, cancellationToken);
 
       var sourceViewLines = new List<DiffLineViewModel>();
       var targetViewLines = new List<DiffLineViewModel>();
-
-      for (int i = 0; i < operations.Count;)
+      var maxLineCount = Math.Max(sourceLines.Count, targetLines.Count);
+      for (int index = 0; index < maxLineCount; index++)
       {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (operations[i].Kind == RawDiffKind.Equal)
+        var hasSource = index < sourceLines.Count;
+        var hasTarget = index < targetLines.Count;
+        var sourceText = hasSource ? sourceLines[index] : string.Empty;
+        var targetText = hasTarget ? targetLines[index] : string.Empty;
+        var lineNumber = index + 1;
+
+        if (hasSource)
         {
-          AddPair(
-            sourceViewLines,
-            targetViewLines,
-            DiffLineKind.Unchanged,
-            operations[i].OldLineNumber,
-            operations[i].NewLineNumber,
-            operations[i].Text,
-            operations[i].Text);
-          i++;
-          continue;
+          var sourceKind = !hasTarget
+            ? DiffLineKind.Removed
+            : sourceText == targetText
+              ? DiffLineKind.Unchanged
+              : DiffLineKind.Modified;
+
+          sourceViewLines.Add(new DiffLineViewModel(
+            sourceKind,
+            DiffPaneSide.Source,
+            lineNumber,
+            lineNumber,
+            sourceText));
         }
 
-        var deleted = new List<RawDiffLine>();
-        var inserted = new List<RawDiffLine>();
-        while (i < operations.Count && operations[i].Kind != RawDiffKind.Equal)
+        if (hasTarget)
         {
-          if (operations[i].Kind == RawDiffKind.Delete)
-          {
-            deleted.Add(operations[i]);
-          }
-          else
-          {
-            inserted.Add(operations[i]);
-          }
+          var targetKind = !hasSource
+            ? DiffLineKind.Added
+            : sourceText == targetText
+              ? DiffLineKind.Unchanged
+              : DiffLineKind.Modified;
 
-          i++;
-        }
-
-        var pairedCount = Math.Min(deleted.Count, inserted.Count);
-        for (int pairIndex = 0; pairIndex < pairedCount; pairIndex++)
-        {
-          AddPair(
-            sourceViewLines,
-            targetViewLines,
-            DiffLineKind.Modified,
-            deleted[pairIndex].OldLineNumber,
-            inserted[pairIndex].NewLineNumber,
-            deleted[pairIndex].Text,
-            inserted[pairIndex].Text);
-        }
-
-        for (int deleteIndex = pairedCount; deleteIndex < deleted.Count; deleteIndex++)
-        {
-          sourceViewLines.Add(new DiffLineViewModel(DiffLineKind.Removed, DiffPaneSide.Source, deleted[deleteIndex].OldLineNumber, deleted[deleteIndex].Text));
-          targetViewLines.Add(new DiffLineViewModel(DiffLineKind.Empty, DiffPaneSide.Target, null, string.Empty));
-        }
-
-        for (int insertIndex = pairedCount; insertIndex < inserted.Count; insertIndex++)
-        {
-          sourceViewLines.Add(new DiffLineViewModel(DiffLineKind.Empty, DiffPaneSide.Source, null, string.Empty));
-          targetViewLines.Add(new DiffLineViewModel(DiffLineKind.Added, DiffPaneSide.Target, inserted[insertIndex].NewLineNumber, inserted[insertIndex].Text));
+          targetViewLines.Add(new DiffLineViewModel(
+            targetKind,
+            DiffPaneSide.Target,
+            lineNumber,
+            lineNumber,
+            targetText));
         }
       }
 
       return new FileComparisonResult(sourceFile, targetFile, sourceViewLines, targetViewLines);
-    }
-
-    private static void AddPair(
-      ICollection<DiffLineViewModel> sourceViewLines,
-      ICollection<DiffLineViewModel> targetViewLines,
-      DiffLineKind kind,
-      int? sourceLineNumber,
-      int? targetLineNumber,
-      string sourceText,
-      string targetText)
-    {
-      sourceViewLines.Add(new DiffLineViewModel(kind, DiffPaneSide.Source, sourceLineNumber, sourceText));
-      targetViewLines.Add(new DiffLineViewModel(kind, DiffPaneSide.Target, targetLineNumber, targetText));
     }
 
     private static List<RawDiffLine> BuildOperations(
@@ -739,6 +821,7 @@ namespace UI.Controls.FileCompare
     private static readonly Brush UnchangedBackground = Brushes.Transparent;
     private static readonly Brush PresentBackground = CreateBrush(220, 252, 231);
     private static readonly Brush MissingBackground = CreateBrush(254, 226, 226);
+    private static readonly Brush EmptyFallbackBackground = CreateBrush(235, 240, 246);
     private static readonly Brush DefaultForeground = CreateBrush(30, 41, 59);
     private static readonly Brush PresentForeground = CreateBrush(22, 101, 52);
     private static readonly Brush MissingForeground = CreateBrush(153, 27, 27);
@@ -751,9 +834,27 @@ namespace UI.Controls.FileCompare
 
     public static Brush GetDefaultForeground() => DefaultForeground;
 
+    public static Brush GetThemeForegroundOrDefault()
+    {
+      var resource = Application.Current?.TryFindResource("ForegrounfBrushes");
+      return resource as Brush ?? DefaultForeground;
+    }
+
+    public static Brush GetMutedThemeForegroundOrDefault()
+    {
+      var resource = Application.Current?.TryFindResource("ForegrounfBrushes45");
+      return resource as Brush ?? DefaultForeground;
+    }
+
     public static Brush GetPresentForeground() => PresentForeground;
 
     public static Brush GetMissingForeground() => MissingForeground;
+
+    public static Brush GetEmptyBackgroundOrFallback()
+    {
+      var resource = Application.Current?.TryFindResource("SettingsNestedGroupBackgroundSolidColorBrush");
+      return resource as Brush ?? EmptyFallbackBackground;
+    }
 
     private static Brush CreateBrush(byte red, byte green, byte blue)
     {
@@ -768,9 +869,9 @@ namespace UI.Controls.FileCompare
     public static string GetPrefix(DiffLineKind kind, DiffPaneSide paneSide) => kind switch
     {
       DiffLineKind.Unchanged => string.Empty,
-      DiffLineKind.Empty => "-",
+      DiffLineKind.Empty => string.Empty,
       DiffLineKind.Added => "+",
-      DiffLineKind.Removed => "+",
+      DiffLineKind.Removed => "-",
       DiffLineKind.Modified when paneSide == DiffPaneSide.Source => "-",
       DiffLineKind.Modified => "+",
       _ => string.Empty,
@@ -783,30 +884,41 @@ namespace UI.Controls.FileCompare
         return DiffBrushes.GetUnchangedBackground();
       }
 
-      return IsPresent(kind, paneSide)
-        ? DiffBrushes.GetPresentBackground()
-        : DiffBrushes.GetMissingBackground();
+      if (kind == DiffLineKind.Empty)
+      {
+        return DiffBrushes.GetEmptyBackgroundOrFallback();
+      }
+
+      return kind switch
+      {
+        DiffLineKind.Added => DiffBrushes.GetPresentBackground(),
+        DiffLineKind.Removed => DiffBrushes.GetMissingBackground(),
+        DiffLineKind.Modified when paneSide == DiffPaneSide.Source => DiffBrushes.GetMissingBackground(),
+        DiffLineKind.Modified => DiffBrushes.GetPresentBackground(),
+        _ => DiffBrushes.GetUnchangedBackground(),
+      };
     }
 
     public static Brush GetForeground(DiffLineKind kind, DiffPaneSide paneSide)
     {
       if (kind == DiffLineKind.Unchanged)
       {
-        return DiffBrushes.GetDefaultForeground();
+        return DiffBrushes.GetThemeForegroundOrDefault();
       }
 
-      return IsPresent(kind, paneSide)
-        ? DiffBrushes.GetPresentForeground()
-        : DiffBrushes.GetMissingForeground();
-    }
+      if (kind == DiffLineKind.Empty)
+      {
+        return DiffBrushes.GetMutedThemeForegroundOrDefault();
+      }
 
-    private static bool IsPresent(DiffLineKind kind, DiffPaneSide paneSide) => kind switch
-    {
-      DiffLineKind.Added => paneSide == DiffPaneSide.Target,
-      DiffLineKind.Removed => paneSide == DiffPaneSide.Source,
-      DiffLineKind.Empty => false,
-      DiffLineKind.Modified => paneSide == DiffPaneSide.Target,
-      _ => true,
-    };
+      return kind switch
+      {
+        DiffLineKind.Added => DiffBrushes.GetPresentForeground(),
+        DiffLineKind.Removed => DiffBrushes.GetMissingForeground(),
+        DiffLineKind.Modified when paneSide == DiffPaneSide.Source => DiffBrushes.GetMissingForeground(),
+        DiffLineKind.Modified => DiffBrushes.GetPresentForeground(),
+        _ => DiffBrushes.GetThemeForegroundOrDefault(),
+      };
+    }
   }
 }
