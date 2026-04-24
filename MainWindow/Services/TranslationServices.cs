@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -6,6 +7,8 @@ using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Message;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
@@ -25,6 +28,9 @@ namespace MainWindowProgram.Services
   /// </summary>
   public class TranslationServices
   {
+    private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
+    private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
+
     /// <summary>
     /// Сервис для управления многооконным интерфейсом.
     /// </summary>
@@ -636,7 +642,10 @@ namespace MainWindowProgram.Services
     /// <param name="editor">Редактор с исходным текстом.</param>
     private async Task TryCreateNewTranslator(TextEditorUI editor)
     {
-      string text = editor.Text;
+      if (!TryPrepareTextForTranslation(editor, out var text))
+      {
+        return;
+      }
 
       if (_multiWindow.RemoveActiveTextEditor(true))
       {
@@ -734,7 +743,10 @@ namespace MainWindowProgram.Services
     /// <param name="foundDockItem">Док-элемент, содержащий компонент транслятора.</param>
     private async Task EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
-      string text = editor.Text;
+      if (!TryPrepareTextForTranslation(editor, out var text))
+      {
+        return;
+      }
       var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
       if (translateEditor == null)
       {
@@ -998,5 +1010,44 @@ namespace MainWindowProgram.Services
         await RevealDeferredElementsAsync(createdItem, translateEditor?.View);
       }
     }
+
+    private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
+    {
+      text = editor.Text ?? string.Empty;
+      if (!LatinLettersRegex.IsMatch(text))
+      {
+        return true;
+      }
+
+      var replaceDecision = MessageBoxCustom.Show(
+        "В тексте найдены английские буквы.\nЗаменить их на русские аналоги перед трансляцией?\nЕсли не заменить, возможны ошибки локализации, и часть параметров может быть не распознана.",
+        "Проверка текста перед трансляцией",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Warning);
+
+      if (replaceDecision == MessageBoxResult.Yes)
+      {
+        var normalizedText = _lookalikeNormalizer.Normalize(text);
+        if (!string.Equals(normalizedText, text, StringComparison.Ordinal))
+        {
+          editor.Text = normalizedText;
+          text = normalizedText;
+        }
+
+        return true;
+      }
+
+      MessageBoxCustom.Show(
+        "Трансляция будет выполнена без замены английских букв. Возможны ошибки локализации, и часть параметров может быть не распознана.",
+        "Предупреждение",
+        MessageBoxButton.OK,
+        MessageBoxImage.Warning);
+
+      return true;
+    }
   }
 }
+
+
+
+
