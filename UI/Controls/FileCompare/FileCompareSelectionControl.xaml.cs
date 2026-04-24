@@ -471,24 +471,21 @@ namespace UI.Controls.FileCompare
 
   public sealed class DiffLineViewModel
   {
-    public DiffLineViewModel(DiffLineKind kind, int? lineNumber, string text)
+    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int? lineNumber, string text)
     {
       Kind = kind;
+      PaneSide = paneSide;
       LineNumberText = lineNumber?.ToString() ?? string.Empty;
       Text = text;
-      Prefix = kind switch
-      {
-        DiffLineKind.Added => "+",
-        DiffLineKind.Removed => "-",
-        DiffLineKind.Modified => "~",
-        _ => string.Empty,
-      };
-      BackgroundBrush = DiffBrushes.GetBackground(kind);
-      ForegroundBrush = DiffBrushes.GetForeground(kind);
+      Prefix = DiffPresentation.GetPrefix(kind, paneSide);
+      BackgroundBrush = DiffPresentation.GetBackground(kind, paneSide);
+      ForegroundBrush = DiffPresentation.GetForeground(kind, paneSide);
       BorderBrush = DiffBrushes.Border;
     }
 
     public DiffLineKind Kind { get; }
+
+    public DiffPaneSide PaneSide { get; }
 
     public string Prefix { get; }
 
@@ -510,6 +507,12 @@ namespace UI.Controls.FileCompare
     Removed,
     Modified,
     Empty
+  }
+
+  public enum DiffPaneSide
+  {
+    Source,
+    Target
   }
 
   internal static class FileDiffEngine
@@ -577,14 +580,14 @@ namespace UI.Controls.FileCompare
 
         for (int deleteIndex = pairedCount; deleteIndex < deleted.Count; deleteIndex++)
         {
-          sourceViewLines.Add(new DiffLineViewModel(DiffLineKind.Removed, deleted[deleteIndex].OldLineNumber, deleted[deleteIndex].Text));
-          targetViewLines.Add(new DiffLineViewModel(DiffLineKind.Empty, null, string.Empty));
+          sourceViewLines.Add(new DiffLineViewModel(DiffLineKind.Removed, DiffPaneSide.Source, deleted[deleteIndex].OldLineNumber, deleted[deleteIndex].Text));
+          targetViewLines.Add(new DiffLineViewModel(DiffLineKind.Empty, DiffPaneSide.Target, null, string.Empty));
         }
 
         for (int insertIndex = pairedCount; insertIndex < inserted.Count; insertIndex++)
         {
-          sourceViewLines.Add(new DiffLineViewModel(DiffLineKind.Empty, null, string.Empty));
-          targetViewLines.Add(new DiffLineViewModel(DiffLineKind.Added, inserted[insertIndex].NewLineNumber, inserted[insertIndex].Text));
+          sourceViewLines.Add(new DiffLineViewModel(DiffLineKind.Empty, DiffPaneSide.Source, null, string.Empty));
+          targetViewLines.Add(new DiffLineViewModel(DiffLineKind.Added, DiffPaneSide.Target, inserted[insertIndex].NewLineNumber, inserted[insertIndex].Text));
         }
       }
 
@@ -600,8 +603,8 @@ namespace UI.Controls.FileCompare
       string sourceText,
       string targetText)
     {
-      sourceViewLines.Add(new DiffLineViewModel(kind, sourceLineNumber, sourceText));
-      targetViewLines.Add(new DiffLineViewModel(kind, targetLineNumber, targetText));
+      sourceViewLines.Add(new DiffLineViewModel(kind, DiffPaneSide.Source, sourceLineNumber, sourceText));
+      targetViewLines.Add(new DiffLineViewModel(kind, DiffPaneSide.Target, targetLineNumber, targetText));
     }
 
     private static List<RawDiffLine> BuildOperations(
@@ -734,31 +737,23 @@ namespace UI.Controls.FileCompare
   {
     public static readonly Brush Border = CreateBrush(218, 225, 233);
     private static readonly Brush UnchangedBackground = Brushes.Transparent;
-    private static readonly Brush EmptyBackground = CreateBrush(248, 250, 252);
-    private static readonly Brush AddedBackground = CreateBrush(220, 252, 231);
-    private static readonly Brush RemovedBackground = CreateBrush(254, 226, 226);
-    private static readonly Brush ModifiedBackground = CreateBrush(254, 243, 199);
+    private static readonly Brush PresentBackground = CreateBrush(220, 252, 231);
+    private static readonly Brush MissingBackground = CreateBrush(254, 226, 226);
     private static readonly Brush DefaultForeground = CreateBrush(30, 41, 59);
-    private static readonly Brush AddedForeground = CreateBrush(22, 101, 52);
-    private static readonly Brush RemovedForeground = CreateBrush(153, 27, 27);
-    private static readonly Brush ModifiedForeground = CreateBrush(146, 64, 14);
+    private static readonly Brush PresentForeground = CreateBrush(22, 101, 52);
+    private static readonly Brush MissingForeground = CreateBrush(153, 27, 27);
 
-    public static Brush GetBackground(DiffLineKind kind) => kind switch
-    {
-      DiffLineKind.Added => AddedBackground,
-      DiffLineKind.Removed => RemovedBackground,
-      DiffLineKind.Modified => ModifiedBackground,
-      DiffLineKind.Empty => EmptyBackground,
-      _ => UnchangedBackground,
-    };
+    public static Brush GetPresentBackground() => PresentBackground;
 
-    public static Brush GetForeground(DiffLineKind kind) => kind switch
-    {
-      DiffLineKind.Added => AddedForeground,
-      DiffLineKind.Removed => RemovedForeground,
-      DiffLineKind.Modified => ModifiedForeground,
-      _ => DefaultForeground,
-    };
+    public static Brush GetMissingBackground() => MissingBackground;
+
+    public static Brush GetUnchangedBackground() => UnchangedBackground;
+
+    public static Brush GetDefaultForeground() => DefaultForeground;
+
+    public static Brush GetPresentForeground() => PresentForeground;
+
+    public static Brush GetMissingForeground() => MissingForeground;
 
     private static Brush CreateBrush(byte red, byte green, byte blue)
     {
@@ -766,5 +761,52 @@ namespace UI.Controls.FileCompare
       brush.Freeze();
       return brush;
     }
+  }
+
+  internal static class DiffPresentation
+  {
+    public static string GetPrefix(DiffLineKind kind, DiffPaneSide paneSide) => kind switch
+    {
+      DiffLineKind.Unchanged => string.Empty,
+      DiffLineKind.Empty => "-",
+      DiffLineKind.Added => "+",
+      DiffLineKind.Removed => "+",
+      DiffLineKind.Modified when paneSide == DiffPaneSide.Source => "-",
+      DiffLineKind.Modified => "+",
+      _ => string.Empty,
+    };
+
+    public static Brush GetBackground(DiffLineKind kind, DiffPaneSide paneSide)
+    {
+      if (kind == DiffLineKind.Unchanged)
+      {
+        return DiffBrushes.GetUnchangedBackground();
+      }
+
+      return IsPresent(kind, paneSide)
+        ? DiffBrushes.GetPresentBackground()
+        : DiffBrushes.GetMissingBackground();
+    }
+
+    public static Brush GetForeground(DiffLineKind kind, DiffPaneSide paneSide)
+    {
+      if (kind == DiffLineKind.Unchanged)
+      {
+        return DiffBrushes.GetDefaultForeground();
+      }
+
+      return IsPresent(kind, paneSide)
+        ? DiffBrushes.GetPresentForeground()
+        : DiffBrushes.GetMissingForeground();
+    }
+
+    private static bool IsPresent(DiffLineKind kind, DiffPaneSide paneSide) => kind switch
+    {
+      DiffLineKind.Added => paneSide == DiffPaneSide.Target,
+      DiffLineKind.Removed => paneSide == DiffPaneSide.Source,
+      DiffLineKind.Empty => false,
+      DiffLineKind.Modified => paneSide == DiffPaneSide.Target,
+      _ => true,
+    };
   }
 }
