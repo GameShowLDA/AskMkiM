@@ -140,7 +140,7 @@ namespace UI.Services
         }
 
         var filePath = textEditor.TextEditorModel?.FilePath ?? string.Empty;
-        result.Add(new OpenTextEditorDescriptor(displayName ?? string.Empty, filePath));
+        result.Add(new OpenTextEditorDescriptor(displayName ?? string.Empty, filePath, textEditor.Text));
       }
 
       return result

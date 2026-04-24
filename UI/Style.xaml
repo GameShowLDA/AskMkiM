@@ -759,6 +759,99 @@
         </Setter>
     </Style>
 
+    <Style x:Key="SettingsCheckBox2" TargetType="CheckBox">
+
+        <!-- Общие настройки -->
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+
+                    <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Top">
+
+                        <!-- КВАДРАТ -->
+                        <Grid Width="18"
+                          Height="18"
+                          Margin="0,2,8,0"
+                          SnapsToDevicePixels="True">
+
+                            <Border x:Name="Box"
+                                Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                BorderThickness="2"
+                                CornerRadius="4"/>
+
+                            <Border x:Name="Inset"
+                                CornerRadius="4"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                Opacity="0.65"
+                                IsHitTestVisible="False"/>
+
+                            <TextBlock x:Name="CheckMark"
+                                       Text="✓"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                        </Grid>
+
+                        <!-- КОНТЕНТ -->
+                        <ContentPresenter
+                        VerticalAlignment="Top"
+                        RecognizesAccessKey="True"/>
+
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+
+                        <!-- Checked -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background"
+                                Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                            <Setter TargetName="Box" Property="BorderBrush"
+                                Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                            <Setter TargetName="Inset" Property="BorderBrush"
+                                Value="#55FFFFFF"/>
+                            <Setter TargetName="Inset" Property="Opacity"
+                                Value="1"/>
+                            <Setter TargetName="CheckMark" Property="Visibility"
+                                Value="Visible"/>
+                        </Trigger>
+
+                        <!-- Hover -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush"
+                                Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                            <Setter TargetName="Inset" Property="Opacity"
+                                Value="0.85"/>
+                        </Trigger>
+
+                        <!-- Pressed -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Box" Property="Background"
+                                Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
+                        </Trigger>
+
+                        <!-- Disabled -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Box" Property="Opacity" Value="0.6"/>
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="MarkingCheckBox" TargetType="{x:Type CheckBox}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Focusable" Value="True"/>
