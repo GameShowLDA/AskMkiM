@@ -22,6 +22,7 @@
         { "PrintFile", "Ctrl+P" },
         { "SearchFile", "Ctrl+F" },
         { "SearchReplace", "Ctrl+H" },
+        { "CompareFile", "Ctrl+K" },
         { "Build", "Ctrl+B" },
         { "Run", "Ctrl+F5" },
         { "RunStepByStepMode", "Ctrl+F10" },

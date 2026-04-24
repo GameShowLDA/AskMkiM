@@ -1,0 +1,176 @@
+<UserControl x:Class="UI.Controls.FileCompare.FileCompareSelectionControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <Button Content="Обновить список"
+                    DockPanel.Dock="Right"
+                    Padding="10,6"
+                    FontFamily="{DynamicResource WinstonBold}"
+                    FontSize="18"
+                    Style="{DynamicResource SaveButtonStyle}"
+                    Click="RefreshButton_Click" />
+            <StackPanel>
+                <TextBlock Text="Сравнение файлов"
+                           FontSize="22"
+                           FontFamily="{DynamicResource WinstonBold}"
+                           Foreground="{DynamicResource MainTitleSolidColorBrush}" />
+                <TextBlock Text="Выберите один основной файл и любое количество других открытых файлов для сравнения."
+                           Margin="0,6,0,0"
+                           TextWrapping="Wrap"
+                           FontSize="15"
+                           Foreground="{DynamicResource ForegrounfBrushes}" 
+                           FontFamily="{DynamicResource WinstonRegular}"
+                           />
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="1"
+                Margin="0,0,0,12"
+                Padding="12"
+                Background="{DynamicResource BackgroundBrushes}"
+                BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+            <StackPanel>
+                <TextBlock Text="Основной файл"
+                           Margin="0,0,0,8"
+                           Style="{DynamicResource ConfigInfoStyle}"
+                           Foreground="{DynamicResource MainTitleSolidColorBrush}" />
+                <ComboBox ItemsSource="{Binding OpenFiles}"
+                          SelectedItem="{Binding SelectedSourceFile, Mode=TwoWay}"
+                          DisplayMemberPath="DisplayName"
+                          IsEnabled="{Binding HasEnoughFiles}" 
+                          Style="{DynamicResource CustomComboBoxStyle}"
+                          />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="18" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Padding="12"
+                    Background="{DynamicResource BackgroundBrushes}"
+                    BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="Файлы для сравнения"
+                               Margin="0,0,0,8"
+                               Style="{DynamicResource ConfigInfoStyle}"/>
+                    
+                    <ListBox ItemsSource="{Binding TargetFiles}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             ScrollViewer.CanContentScroll="True"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                          Margin="0,4"
+                                          >
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding File.DisplayName}"
+                                                   FontFamily="{DynamicResource WinstonRegular}"
+                                                   FontSize="15"
+                                                   Foreground="{DynamicResource ForegrounfBrushes}" />
+                                        <TextBlock Text="{Binding File.FilePath}"
+                                                   FontSize="13"
+                                                   Opacity="0.75"
+                                                   FontFamily="{DynamicResource WinstonRegular}"
+                                                   Foreground="{DynamicResource ForegrounfBrushes}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Padding="12"
+                    Background="{DynamicResource BackgroundBrushes}"
+                    BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="Текущий список"
+                               Margin="0,0,0,8"
+                               Style="{DynamicResource ConfigInfoStyle}"/>
+                    <TextBlock Margin="0,0,0,8"
+                               Text="{Binding SelectionSummary}"
+                               TextWrapping="Wrap"
+                               FontFamily="{DynamicResource WinstonRegular}"
+                               FontSize="15"
+                               Foreground="{DynamicResource ForegrounfBrushes}" />
+                    <ListBox ItemsSource="{Binding SelectedTargetFiles}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             ScrollViewer.CanContentScroll="True"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,4">
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               FontFamily="{DynamicResource WinstonRegular}"
+                                               FontSize="15"
+                                               Foreground="{DynamicResource ForegrounfBrushes}" />
+                                    <TextBlock Text="{Binding FilePath}"
+                                               FontSize="13"
+                                               Opacity="0.75"
+                                               FontFamily="{DynamicResource WinstonRegular}"
+                                               Foreground="{DynamicResource ForegrounfBrushes}"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="3"
+                Margin="0,12,0,0"
+                Padding="12"
+                Background="{DynamicResource BackgroundBrushes}"
+                BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+            <DockPanel LastChildFill="True">
+                <Button Content="Запустить сравнение"
+                        DockPanel.Dock="Right"
+                        MinWidth="170"
+                        Padding="12,7"
+                        Margin="12,0,0,0"
+                        IsEnabled="{Binding CanStartCompare}"
+                        FontFamily="{DynamicResource WinstonBold}"
+                        FontSize="18"
+                        Style="{DynamicResource SaveButtonStyle}"
+                        />
+                <TextBlock Text="{Binding StateText}"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource ForegrounfBrushes}" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

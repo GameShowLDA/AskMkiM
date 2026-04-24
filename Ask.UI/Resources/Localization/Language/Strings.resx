@@ -180,6 +180,9 @@
   <data name="menu.file.search" xml:space="preserve">
     <value>Поиск и замена</value>
   </data>
+  <data name="menu.file.compare" xml:space="preserve">
+    <value>Сравнить</value>
+  </data>
   <data name="menu.file.openArchive" xml:space="preserve">
     <value>Открыть архив</value>
   </data>

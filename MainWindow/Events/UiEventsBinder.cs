@@ -92,6 +92,7 @@ namespace MainWindowProgram.Events
       _mainWindow.printMenuItem.Visibility = visibility;
       _mainWindow.searchMenuItem.Visibility = visibility;
       _mainWindow.searchReplaceMenuItem.Visibility = visibility;
+      UpdateCompareMenuVisibility(isActive);
       UpdateArchiveMenuVisibility();
     }
 
@@ -118,6 +119,7 @@ namespace MainWindowProgram.Events
       _statusBarViewModel.Line = textEditor.TextArea.Caret.Line;
       _statusBarViewModel.Column = textEditor.TextArea.Caret.Column;
       _statusBarViewModel.EncodingName = textEditorUI.TextEditorModel.Encoding?.WebName.ToUpperInvariant() ?? "UTF-8";
+      UpdateCompareMenuVisibility(true);
 
       void OnTextChanged(object? sender, EventArgs e)
       {
@@ -207,6 +209,19 @@ namespace MainWindowProgram.Events
         ? Visibility.Visible
         : Visibility.Collapsed;
       _mainWindow.uploadArchiveMenuItem.Visibility = isArchiveControlActive
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+    }
+
+    private void UpdateCompareMenuVisibility(bool isTextEditorActive)
+    {
+      if (_mainWindow.compareMenuItem == null)
+      {
+        return;
+      }
+
+      var openTextEditorsCount = _multiWindow.GetOpenTextEditors().Count;
+      _mainWindow.compareMenuItem.Visibility = isTextEditorActive && openTextEditorsCount > 1
         ? Visibility.Visible
         : Visibility.Collapsed;
     }
