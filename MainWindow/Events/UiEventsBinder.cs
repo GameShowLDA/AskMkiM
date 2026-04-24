@@ -1,15 +1,12 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using ICSharpCode.AvalonEdit;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.ViewModels;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Components.FileComparerControls;
 using UI.Controls.Archive;
 using UI.Controls.TextEditorControl;
 
@@ -69,7 +66,6 @@ namespace MainWindowProgram.Events
 
       _mainWindow.SearchWindow.ClearHighlights += _multiWindow.OnSearchWindowClosing;
 
-      EventAggregator.Subscribe<FileInteractionEvents.CompareFiles>(e => OnCompareFiles(e.FirstFilePath, e.SecondFilePath));
       EventAggregator.Subscribe<EditorEvents.TranslatorActive>(e => EventAggregator_TranslatorActive(e.IsActive));
 
       MenuHotkeyBinder.BindAutoRenumbering(_mainWindow.mainMenu);
@@ -78,14 +74,6 @@ namespace MainWindowProgram.Events
     private void EventAggregator_TranslatorActive(bool obj)
     {
       _mainWindow.StatusBar.Visibility = obj ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void OnCompareFiles(string firstFilePath, string secondFilePath)
-    {
-      var firstFileName = Path.GetFileName(firstFilePath);
-      var secondFileName = Path.GetFileName(secondFilePath);
-      var fileCompareControl = new FileCompareControl(firstFilePath, secondFilePath);
-      _multiWindow.WorkspaceService.AddControl($"{firstFileName}/{secondFileName}", fileCompareControl, TypeWindow.Files);
     }
 
     /// <summary>

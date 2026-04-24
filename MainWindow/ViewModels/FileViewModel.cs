@@ -5,7 +5,7 @@ namespace MainWindowProgram.ViewModels
 {
   /// <summary>
   /// ViewModel для работы с файлами.
-  /// Содержит команды для открытия, создания, сохранения, печати, поиска, сравнения и выхода из приложения.
+  /// Содержит команды для открытия, создания, сохранения, печати, поиска и выхода из приложения.
   /// </summary>
   public partial class FileViewModel
   {
@@ -50,10 +50,6 @@ namespace MainWindowProgram.ViewModels
     /// <summary>Команда открытия окна поиска в режиме замены.</summary>
     [RelayCommand]
     private async Task SearchReplaceFile() => await _fileService.SearchReplaceFileAsync();
-
-    /// <summary>Команда сравнения файлов.</summary>
-    [RelayCommand]
-    private async Task CompareFile() => await _fileService.CompareFileAsync();
 
     /// <summary>Команда открытия экрана архива.</summary>
     [RelayCommand]

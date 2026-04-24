@@ -813,21 +813,6 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_2.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_3.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_4.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.4_custom_5.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.5_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -853,9 +838,6 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncArchivePart.html">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncComparePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncCreatePart.html">

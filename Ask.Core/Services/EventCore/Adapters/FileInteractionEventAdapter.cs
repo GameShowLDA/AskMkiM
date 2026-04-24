@@ -8,7 +8,7 @@ namespace Ask.Core.Services.EventCore.Adapters
   /// <summary>
   /// Адаптер для генерации событий <see cref="FileInteractionEvents"/>. 
   /// Предоставляет методы для вызова событий, связанных с файловыми операциями,
-  /// такими как открытие OPK-файлов, сравнение файлов и работа с протоколами.
+  /// такими как открытие OPK-файлов и работа с протоколами.
   /// </summary>
   public static class FileInteractionEventAdapter
   {
@@ -24,19 +24,6 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// </example>
     public static void RaiseOpenOpk(UserControl control, string fileName)
       => EventAggregator.Publish(new FileInteractionEvents.OpenOpk(control, fileName));
-
-    /// <summary>
-    /// Генерирует событие сравнения двух файлов.
-    /// </summary>
-    /// <param name="firstFilePath">Путь к первому файлу.</param>
-    /// <param name="secondFilePath">Путь ко второму файлу.</param>
-    /// <example>
-    /// <code>
-    /// FileInteractionEventAdapter.RaiseCompareFiles("old.txt", "new.txt");
-    /// </code>
-    /// </example>
-    public static void RaiseCompareFiles(string firstFilePath, string secondFilePath)
-      => EventAggregator.Publish(new FileInteractionEvents.CompareFiles(firstFilePath, secondFilePath));
 
     /// <summary>
     /// Генерирует событие повторного открытия файла в текстовом редакторе.

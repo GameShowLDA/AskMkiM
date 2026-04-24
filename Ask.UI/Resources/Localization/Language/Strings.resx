@@ -141,9 +141,6 @@
   <data name="menu.file.archive" xml:space="preserve">
     <value>Архив</value>
   </data>
-  <data name="menu.file.compare" xml:space="preserve">
-    <value>Сравнить</value>
-  </data>
   <data name="menu.file.legacyConversion" xml:space="preserve">
     <value>Конвертация</value>
   </data>

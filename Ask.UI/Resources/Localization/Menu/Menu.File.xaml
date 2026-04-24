@@ -13,7 +13,6 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Print" Key="menu.file.print" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Search" Key="menu.file.search" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_SearchReplace" Key="menu.file.searchreplace" />
-    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Compare" Key="menu.file.compare" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_OpenArchive" Key="menu.file.openArchive" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_CreateArchive" Key="menu.file.createArchive" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_DownloadArchives" Key="menu.file.downloadArchives" />

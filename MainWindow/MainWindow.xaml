@@ -175,8 +175,6 @@
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" utilities:HelpProvider.HelpKey="FuncCreate"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CompareFile" x:Name="compareMenuItem" Command="{Binding File.CompareFileCommand}" utilities:HelpProvider.HelpKey="FuncCompare"/>
-
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}">
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}"/>

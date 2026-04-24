@@ -17,7 +17,6 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Components.FileComparerControls;
 using UI.Controls.Archive;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
@@ -488,25 +487,6 @@ namespace MainWindowProgram.Services
       {
         SearchEventAdapter.RaiseSearchTextRequested(selectedText);
       }
-    }
-
-    /// <summary>
-    /// Выполняет операцию сравнения файлов.
-    /// </summary>
-    public async Task CompareFileAsync()
-    {
-      _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
-      var fileCompareWindow = new FileCompareWindow();
-      fileCompareWindow.DialogClosed += Dialog_Closed;
-      fileCompareWindow.Owner = _mainWindow;
-      fileCompareWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      fileCompareWindow.ShowDialog();
-      _mainWindow.Effect = null;
-    }
-
-    private async void Dialog_Closed(object sender, EventArgs e)
-    {
-      _mainWindow.Effect = null;
     }
 
     private static void ShowOpkToPkSummary(IReadOnlyCollection<ConversionResult> results)
