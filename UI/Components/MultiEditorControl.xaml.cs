@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -248,6 +249,11 @@ namespace UI.Components
     /// </summary>
     /// <returns>Если редатор найден возвращает экземпляр <see cref="TextEditorUI"/>, иначе возвраает null.</returns>
     public TextEditorUI GetActiveTextEditor() => fileManager.TextEditorService.GetActiveTextEditor();
+
+    /// <summary>
+    /// Возвращает список файлов, открытых в основном текстовом редакторе.
+    /// </summary>
+    public IReadOnlyList<OpenTextEditorDescriptor> GetOpenTextEditors() => fileManager.TextEditorService.GetOpenTextEditors();
 
     /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.

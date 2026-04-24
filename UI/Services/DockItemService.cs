@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.IO;
-using UI.Components.FileComparerControls;
 using UI.Components.MultiEditorMethods;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -162,7 +161,7 @@ namespace UI.Services
     /// </summary>
     /// <param name="nameFile">Имя вкладки.</param>
     /// <param name="textEditorContainer">Контейнер редактора.</param>
-    /// <param name="textEditor">Содержимое вкладки (например, редактор, архив, панель сравнения).</param>
+    /// <param name="textEditor">Содержимое вкладки (например, редактор или архив).</param>
     /// <param name="editorType">Тип редактора (по умолчанию — текстовый редактор).</param>
     internal async void ShowEditorDockItem(string nameFile, TextEditorContainer textEditorContainer, UserControl textEditor, EditorType editorType = null)
     {
@@ -183,7 +182,7 @@ namespace UI.Services
       {
         InitializeWithoutSave(dockItem, editorType);
       }
-      else if (dockItem.Content is TextEditorUI || dockItem.Content is FileCompareControl)
+      else if (dockItem.Content is TextEditorUI)
       {
         if (editorType != EditorType.Protocol)
         {
@@ -209,7 +208,7 @@ namespace UI.Services
     /// </summary>
     /// <param name="nameFile">Имя вкладки.</param>
     /// <param name="textEditorContainer">Контейнер редактора.</param>
-    /// <param name="textEditor">Содержимое вкладки (например, редактор, архив, панель сравнения).</param>
+    /// <param name="textEditor">Содержимое вкладки.</param>
     /// <param name="editorType">Тип редактора (по умолчанию — текстовый редактор).</param>
     internal async void ShowRunDockItem(string nameFile, TextEditorContainer textEditorContainer, UserControl runControl)
     {

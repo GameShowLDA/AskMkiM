@@ -17,8 +17,8 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Components.FileComparerControls;
 using UI.Controls.Archive;
+using UI.Controls.FileCompare;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
@@ -491,22 +491,20 @@ namespace MainWindowProgram.Services
     }
 
     /// <summary>
-    /// Выполняет операцию сравнения файлов.
+    /// Открывает единый контрол выбора уже открытых файлов для сравнения.
     /// </summary>
-    public async Task CompareFileAsync()
+    public void CompareFileAsync()
     {
-      _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
-      var fileCompareWindow = new FileCompareWindow();
-      fileCompareWindow.DialogClosed += Dialog_Closed;
-      fileCompareWindow.Owner = _mainWindow;
-      fileCompareWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-      fileCompareWindow.ShowDialog();
-      _mainWindow.Effect = null;
-    }
+      var openTextEditors = _multiWindow.GetOpenTextEditors();
+      if (openTextEditors.Count <= 1)
+      {
+        return;
+      }
 
-    private async void Dialog_Closed(object sender, EventArgs e)
-    {
-      _mainWindow.Effect = null;
+      _multiWindow.WorkspaceService.AddControl(
+        "Сравнение файлов",
+        new FileCompareSelectionControl(() => _multiWindow.GetOpenTextEditors()),
+        TypeWindow.Files);
     }
 
     private static void ShowOpkToPkSummary(IReadOnlyCollection<ConversionResult> results)
