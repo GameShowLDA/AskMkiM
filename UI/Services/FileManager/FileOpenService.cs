@@ -50,7 +50,7 @@ namespace UI.Services.FileManager
           var container = EnsureTextEditorContainer();
           var fileType = DetermineFileType(fileName);
 
-          if (TryActivateAlreadyOpenedFile(container, fileName, path))
+          if (TryActivateAlreadyOpenedFile(container, fileName, path, fileType))
             return;
 
           OpenNewFile(path, fileName, fileContent, encoding, fileType, container);
@@ -88,7 +88,7 @@ namespace UI.Services.FileManager
     /// <summary>
     /// Пытается активировать уже открытую вкладку с этим файлом.
     /// </summary>
-    private bool TryActivateAlreadyOpenedFile(TextEditorContainer container, string fileName, string path)
+    private bool TryActivateAlreadyOpenedFile(TextEditorContainer container, string fileName, string path, FileType fileType)
     {
       if (!_fileManager.EditorWorkspaceModel.FilePaths.ContainsValue(path))
         return false;
@@ -96,6 +96,11 @@ namespace UI.Services.FileManager
       var existingItem = container.DockManager.DockItems.FirstOrDefault(item => item.TabText == fileName);
       if (existingItem == null)
         return false;
+
+      if (existingItem.Content is TextEditorUI textEditor && IsReadOnlyFileType(fileType))
+      {
+        textEditor.IsReadOnly = true;
+      }
 
       existingItem.IsActiveDocument = true;
       _fileManager.DockItemService.ShowDockItem(container, existingItem);
@@ -140,7 +145,7 @@ namespace UI.Services.FileManager
       };
 
 
-      if (fileType == FileType.Protocol)
+      if (IsReadOnlyFileType(fileType))
         textEditor.IsReadOnly = true;
 
       EditorEventAdapter.RaiseTextEditorActivated(textEditor);
@@ -157,6 +162,9 @@ namespace UI.Services.FileManager
       LogException($"Ошибка при чтении файла {path}", ex);
     }
 
+    private static bool IsReadOnlyFileType(FileType fileType)
+      => fileType is FileType.Protocol or FileType.OPK or FileType.OPKW;
+
     #endregion
 
     #region 📂 Работа с содержимым файла
@@ -169,7 +177,7 @@ namespace UI.Services.FileManager
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
       var extention = Path.GetExtension(path).ToLowerInvariant();
       Encoding encoding;
-      if (extention == ".pkw" || extention == ".txt" || extention == ".lstw" || extention == ".lst")
+      if (extention == ".pkw" || extention == ".opkw" || extention == ".txt" || extention == ".lstw" || extention == ".lst")
       {
         encoding = Encoding.UTF8;
       }

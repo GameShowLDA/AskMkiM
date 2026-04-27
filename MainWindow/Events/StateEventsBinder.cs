@@ -257,17 +257,14 @@ namespace MainWindowProgram.Events
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        Visibility visibility = isControlProgramActive ? Visibility.Visible : Visibility.Collapsed;
-        bool enabled = isControlProgramActive;
-
-        _mainWindow.Translation.Visibility = visibility;
-        _mainWindow.Translation.IsEnabled = enabled;
-        _mainWindow.Build.Visibility = visibility;
-        _mainWindow.Build.IsEnabled = enabled;
-        _mainWindow.Run.Visibility = visibility;
-        _mainWindow.Run.IsEnabled = enabled;
-        _mainWindow.RunStepByStepMode.Visibility = visibility;
-        _mainWindow.RunStepByStepMode.IsEnabled = enabled;
+        _mainWindow.Translation.Visibility = Visibility.Visible;
+        _mainWindow.Translation.IsEnabled = true;
+        _mainWindow.Build.Visibility = Visibility.Visible;
+        _mainWindow.Build.IsEnabled = true;
+        _mainWindow.Run.Visibility = Visibility.Visible;
+        _mainWindow.Run.IsEnabled = true;
+        _mainWindow.RunStepByStepMode.Visibility = Visibility.Visible;
+        _mainWindow.RunStepByStepMode.IsEnabled = true;
       });
     }
 

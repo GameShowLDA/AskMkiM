@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -244,6 +245,33 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       return ValidRelayModules.FirstOrDefault(m =>
         m.NumberChassis == point.DeviceNumber &&
         m.Number == point.ModuleNumber);
+    }
+
+    public static List<IDevice> GetAllDevices()
+    {
+      var devices = new List<IDevice>();
+      
+      if (ValidRelayModules != null)
+      { 
+        devices.AddRange(ValidRelayModules);
+      }
+
+      if (ValidSwitchingDevice != null)
+      { 
+        devices.Add(ValidSwitchingDevice);
+      }
+
+      if (ValidBreakdownTester != null)
+      {
+        devices.Add(ValidBreakdownTester);
+      }
+
+      if (ValidFastMeter != null)
+      {
+        devices.Add(ValidFastMeter);
+      }
+
+      return devices;
     }
 
     /// <summary>

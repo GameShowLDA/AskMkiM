@@ -322,7 +322,7 @@ namespace UI.Controls.Runner
         return;
       }
 
-      ProtocolUI.Header = GetDisplayFileName(OpkFilePath, FileName);
+      ProtocolUI.Header = BuildDerivedFileName(OpkFilePath, FileName, ".lst", "protocol.lst");
       ProtocolUI.SetSettings(StartDelegate: StartTest, false);
       this.FileName = ProtocolUI.Header;
 
@@ -457,12 +457,27 @@ namespace UI.Controls.Runner
 
     private static string GetDisplayFileName(string? filePath, string? fileName)
     {
-      if (!string.IsNullOrWhiteSpace(filePath))
+      if (!string.IsNullOrWhiteSpace(fileName))
       {
-        return Path.GetFileName(filePath);
+        return fileName;
       }
 
-      return fileName ?? string.Empty;
+      return string.IsNullOrWhiteSpace(filePath)
+        ? string.Empty
+        : Path.GetFileName(filePath);
+    }
+
+    private static string BuildDerivedFileName(string? sourceFilePath, string? sourceFileName, string extension, string fallbackFileName)
+    {
+      string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = Path.GetFileNameWithoutExtension(sourceFileName);
+      }
+
+      return string.IsNullOrWhiteSpace(baseName)
+        ? fallbackFileName
+        : $"{baseName}{extension}";
     }
 
     private TranslatorEditor? GetTranslatorEditor()

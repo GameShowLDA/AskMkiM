@@ -6,7 +6,7 @@ namespace Ask.Core.Services.EventCore.Events
 {
   /// <summary>
   /// События, связанные с файловыми операциями, включая открытие файлов,
-  /// сравнение, повторное открытие в редакторе и работу с протоколами.
+  /// повторное открытие в редакторе и работу с протоколами.
   /// </summary>
   /// <remarks>
   /// Эти события используются для взаимодействия между пользовательским интерфейсом
@@ -26,21 +26,6 @@ namespace Ask.Core.Services.EventCore.Events
       {
         Control = control;
         FileName = fileName;
-      }
-    }
-
-    /// <summary>
-    /// Событие, генерируемое при сравнении двух файлов.
-    /// </summary>
-    public class CompareFiles : IEvent
-    {
-      public string FirstFilePath { get; }
-      public string SecondFilePath { get; }
-
-      public CompareFiles(string firstFilePath, string secondFilePath)
-      {
-        FirstFilePath = firstFilePath;
-        SecondFilePath = secondFilePath;
       }
     }
 

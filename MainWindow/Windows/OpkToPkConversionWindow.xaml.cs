@@ -12,6 +12,8 @@ namespace MainWindowProgram.Windows
   /// </summary>
   public partial class OpkToPkConversionWindow : Window
   {
+    private readonly string _targetFormatName;
+
     /// <summary>
     /// Хранит список выбранных пользователем OPK-файлов.
     /// </summary>
@@ -20,9 +22,14 @@ namespace MainWindowProgram.Windows
     /// <summary>
     /// Инициализирует новый экземпляр окна конвертации OPK в PK.
     /// </summary>
-    public OpkToPkConversionWindow()
+    public OpkToPkConversionWindow(string targetFormatName = "PK")
     {
+      _targetFormatName = string.IsNullOrWhiteSpace(targetFormatName)
+        ? "PK"
+        : targetFormatName.Trim().ToUpperInvariant();
+
       InitializeComponent();
+      ApplyTargetFormatText();
       SelectedFilesListBox.ItemsSource = _selectedFiles;
       UpdateState();
     }
@@ -51,6 +58,8 @@ namespace MainWindowProgram.Windows
         Multiselect = true,
         CheckFileExists = true,
       };
+
+      dialog.Title = "Выберите OPK-файлы";
 
       if (!ShowDialog(dialog))
       {
@@ -100,6 +109,8 @@ namespace MainWindowProgram.Windows
           : OutputDirectory,
       };
 
+      dialog.Title = $"Выберите папку для сохранения {_targetFormatName}-файлов";
+
       if (!ShowDialog(dialog))
       {
         return;
@@ -128,13 +139,13 @@ namespace MainWindowProgram.Windows
     {
       if (_selectedFiles.Count == 0)
       {
-        MessageBoxCustom.Show("Выберите хотя бы один файл OPK.", "Конвертация OPK в PK", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Выберите хотя бы один файл OPK.", GetDialogTitle(), MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
       if (string.IsNullOrWhiteSpace(OutputDirectory))
       {
-        MessageBoxCustom.Show("Укажите папку для сохранения результата.", "Конвертация OPK в PK", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Укажите папку для сохранения результата.", GetDialogTitle(), MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
@@ -156,6 +167,17 @@ namespace MainWindowProgram.Windows
 
       ConvertButton.IsEnabled = _selectedFiles.Count > 0 && !string.IsNullOrWhiteSpace(OutputDirectory);
     }
+
+    private void ApplyTargetFormatText()
+    {
+      Title = GetDialogTitle();
+      DescriptionTextBlock.Text =
+        $"Выберите один или несколько файлов OPK и папку, в которую нужно сохранить результаты конвертации в {_targetFormatName}.";
+      OutputDirectoryLabelTextBlock.Text = $"Папка для сохранения {_targetFormatName}";
+    }
+
+    private string GetDialogTitle()
+      => $"Конвертация OPK в {_targetFormatName}";
 
     /// <summary>
     /// Открывает системовый диалог с учётом владельца текущего окна.

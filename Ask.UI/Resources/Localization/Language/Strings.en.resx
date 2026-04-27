@@ -141,9 +141,6 @@
   <data name="menu.file.archive" xml:space="preserve">
     <value>Archive</value>
   </data>
-  <data name="menu.file.compare" xml:space="preserve">
-    <value>Compare</value>
-  </data>
   <data name="menu.file.legacyConversion" xml:space="preserve">
     <value>Conversion</value>
   </data>
@@ -182,6 +179,9 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Search and replace</value>
+  </data>
+  <data name="menu.file.compare" xml:space="preserve">
+    <value>Compare</value>
   </data>
   <data name="menu.file.openArchive" xml:space="preserve">
     <value>Open Archive</value>
