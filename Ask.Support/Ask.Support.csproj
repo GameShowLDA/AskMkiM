@@ -20,6 +20,7 @@
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png" />
+	  <None Remove="AppHelp\favicon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -1614,6 +1615,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\FastMenuCommand.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\favicon.ico">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\index.html">
