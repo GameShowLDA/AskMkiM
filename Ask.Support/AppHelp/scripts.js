@@ -23,6 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = $('.main-content');
 
     const FALLBACK_ID = 'GeneralInformation';
+    const BOOKMARKS_STORAGE_KEY = 'mki-help-bookmarks-v1';
+    const LEGACY_BOOKMARKS_STORAGE_KEY = 'mki-bookmarks';
+    const BOOKMARKS_COOKIE = 'mki_help_bookmarks';
+    const BOOKMARKS_PARAM = 'bookmarks';
     const SEARCH_PLACEHOLDERS = {
         title: 'Введите название раздела…',
         content: 'Введите текст для поиска по содержимому…'
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeItem = null;
     let isResizing = false;
     let searchToken = 0;
-    const bookmarks = new Set(JSON.parse(localStorage.getItem('mki-bookmarks') || '[]'));
+    const bookmarks = new Set(readBookmarks());
     const contentIndex = new Map();
     let contentIndexPromise = null;
     let searchFrame = null;
@@ -51,7 +55,102 @@ document.addEventListener('DOMContentLoaded', () => {
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
     const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
     const setBookmarkVisible = visible => { bookmarkBtn.style.visibility = visible ? 'visible' : 'hidden'; };
-    const saveBookmarks = () => localStorage.setItem('mki-bookmarks', JSON.stringify([...bookmarks]));
+    const bookmarkIds = () => [...bookmarks].filter(id => pageMap.get(id)?.isPage);
+
+    function readStoredJson(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        } catch {
+            return [];
+        }
+    }
+
+    function writeStoredJson(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+            // Остальные хранилища всё равно сохранят закладки.
+        }
+    }
+
+    function encodeBookmarks(ids) {
+        return ids.map(encodeURIComponent).join(',');
+    }
+
+    function decodeBookmarks(value) {
+        if (!value) return [];
+
+        return value.split(',')
+            .map(id => {
+                try {
+                    return decodeURIComponent(id);
+                } catch {
+                    return id;
+                }
+            })
+            .filter(Boolean);
+    }
+
+    function getCookie(name) {
+        try {
+            return document.cookie
+                .split('; ')
+                .find(row => row.startsWith(`${name}=`))
+                ?.slice(name.length + 1) || '';
+        } catch {
+            return '';
+        }
+    }
+
+    function setCookie(name, value) {
+        try {
+            const maxAge = 60 * 60 * 24 * 365 * 10;
+            document.cookie = `${name}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
+        } catch {
+            // В file:// cookie может быть недоступен, но URL и localStorage останутся.
+        }
+    }
+
+    function readBookmarks() {
+        const params = new URLSearchParams(location.search);
+        const ids = [
+            ...readStoredJson(BOOKMARKS_STORAGE_KEY),
+            ...readStoredJson(LEGACY_BOOKMARKS_STORAGE_KEY),
+            ...decodeBookmarks(getCookie(BOOKMARKS_COOKIE)),
+            ...decodeBookmarks(params.get(BOOKMARKS_PARAM))
+        ];
+
+        return [...new Set(ids)].filter(id => pageMap.get(id)?.isPage);
+    }
+
+    function updateAddress(id = currentPage, replace = false) {
+        const params = new URLSearchParams(location.search);
+        const encodedBookmarks = encodeBookmarks(bookmarkIds());
+
+        params.delete('cmd');
+        if (id) params.set('section', id);
+        encodedBookmarks ? params.set(BOOKMARKS_PARAM, encodedBookmarks) : params.delete(BOOKMARKS_PARAM);
+
+        const query = params.toString();
+        const url = `${location.pathname}${query ? `?${query}` : ''}${location.hash}`;
+        try {
+            history[replace ? 'replaceState' : 'pushState']({ id }, '', url);
+        } catch {
+            // Некоторые встроенные браузеры запрещают менять адрес, это не должно ломать закладки.
+        }
+    }
+
+    function saveBookmarks() {
+        const ids = bookmarkIds();
+
+        bookmarks.clear();
+        ids.forEach(id => bookmarks.add(id));
+
+        writeStoredJson(BOOKMARKS_STORAGE_KEY, ids);
+        writeStoredJson(LEGACY_BOOKMARKS_STORAGE_KEY, ids);
+        setCookie(BOOKMARKS_COOKIE, encodeBookmarks(ids));
+        updateAddress(currentPage, true);
+    }
 
     function showTab(name) {
         tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === name));
@@ -129,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         buildBreadcrumb(page.el);
         updateBookmarkIcon();
 
-        if (pushHistory) history.pushState({ id }, '', `?section=${encodeURIComponent(id)}`);
+        if (pushHistory) updateAddress(id);
     }
 
     function fitFrame() {
@@ -398,6 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('popstate', event => {
+        readBookmarks().forEach(id => bookmarks.add(id));
+        renderBookmarksTab();
         loadPage(event.state?.id || pageOrder[0], false);
     });
 
@@ -419,4 +520,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadPage(startId, false);
+    saveBookmarks();
 });
