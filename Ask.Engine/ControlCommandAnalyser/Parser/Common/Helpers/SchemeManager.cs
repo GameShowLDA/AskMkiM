@@ -1,9 +1,11 @@
 ﻿using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
@@ -24,30 +26,36 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     public static SchemeModel GetScheme(BaseCommandModel model, RmCommandModel rmCommandModel, int numberLine, ref string remainder)
     {
       string bodyNoWs = Regex.Replace(remainder ?? string.Empty, @"\s+", "");
+      string parseBody = ExtractDeletionList(bodyNoWs, out var deletionExpr, out var fullPointsSource);
       var scheme = new SchemeModel(new List<GroupModel>());
       if (model is PiCommandModel == false && model is PrCommandModel == false && model is SiCommandModel == false)
       {
-        if (!TryExtractPointsBlock(bodyNoWs, out var firstStar, out var lastStar))
+        if (!TryExtractPointsBlock(parseBody, out var firstStar, out var lastStar))
         {
           HandleNoPointsBlock(model, numberLine);
           return null;
         }
 
-        scheme = ParseScheme(model, bodyNoWs, rmCommandModel, firstStar, lastStar, numberLine);
+        scheme = ParseScheme(model, parseBody, rmCommandModel, firstStar, lastStar, numberLine);
       }
       if (model is PiCommandModel piCommandModel)
       {
-        piCommandModel = HandlePiCommandModel(bodyNoWs, piCommandModel, numberLine, ref scheme, rmCommandModel);
+        piCommandModel = HandlePiCommandModel(parseBody, piCommandModel, numberLine, ref scheme, rmCommandModel);
         scheme = piCommandModel.Scheme;
       }
       if (model is SiCommandModel siCommandModel)
       {
-        scheme = HandlePrCommandModel(bodyNoWs, siCommandModel, siCommandModel.Scheme, numberLine, ref scheme, rmCommandModel);
+        scheme = HandlePrCommandModel(parseBody, siCommandModel, siCommandModel.Scheme, numberLine, ref scheme, rmCommandModel);
       }
       if (model is PrCommandModel prCommandModel)
       {
-        scheme = HandlePrCommandModel(bodyNoWs, prCommandModel, prCommandModel.Scheme, numberLine, ref scheme, rmCommandModel);
+        scheme = HandlePrCommandModel(parseBody, prCommandModel, prCommandModel.Scheme, numberLine, ref scheme, rmCommandModel);
       }
+
+      scheme = ApplyDeletionList(model, scheme, rmCommandModel, numberLine, deletionExpr);
+      ApplyAlgorithmWarnings(model, scheme);
+      if (!string.IsNullOrEmpty(fullPointsSource))
+        model.PointsSourse = fullPointsSource;
 
       remainder = ClearLineFromPoints(remainder);
 
@@ -252,6 +260,32 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
     /// <summary>
+    /// Отделяет список исключения "~(...)*" от основного ССИРТ.
+    /// </summary>
+    private static string ExtractDeletionList(string body, out string deletionExpr, out string fullPointsSource)
+    {
+      deletionExpr = null;
+      fullPointsSource = null;
+
+      if (!TryExtractPointsBlock(body, out var firstStar, out var lastStar))
+        return body;
+
+      fullPointsSource = body.Substring(firstStar, lastStar - firstStar + 1);
+
+      int deletionStart = body.IndexOf("~(", firstStar, StringComparison.Ordinal);
+      if (deletionStart < 0 || deletionStart > lastStar)
+        return body;
+
+      int deletionEnd = body.IndexOf(')', deletionStart + 2);
+      if (deletionEnd < 0 || deletionEnd > lastStar)
+        return body;
+
+      deletionExpr = body.Substring(deletionStart + 2, deletionEnd - deletionStart - 2);
+
+      return body.Remove(deletionStart, lastStar - deletionStart + 1);
+    }
+
+    /// <summary>
     /// Обрабатывает ситуацию отсутствия блока точек.
     /// </summary>
     private static void HandleNoPointsBlock(BaseCommandModel model, int numberLine)
@@ -296,6 +330,75 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
 
       return scheme;
+    }
+
+    private static SchemeModel ApplyDeletionList(BaseCommandModel model, SchemeModel scheme, RmCommandModel rmCommandModel, int numberLine, string deletionExpr)
+    {
+      if (scheme == null || string.IsNullOrWhiteSpace(deletionExpr))
+        return scheme;
+
+      var (deletionPoints, deletionErrors) = PointParser.ParseDeletionPoints(deletionExpr, model, rmCommandModel);
+      CheckPointsErrors(model, numberLine, deletionErrors);
+
+      if (deletionErrors.Count > 0 || deletionPoints.Count == 0)
+        return scheme;
+
+      var deletionAddresses = deletionPoints
+        .Select(point => point.ToString())
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+      var filteredGroups = scheme.GroupModels
+        .Where(group => !GroupContainsAnyPoint(group, deletionAddresses))
+        .ToList();
+
+      return new SchemeModel(filteredGroups);
+    }
+
+    private static bool GroupContainsAnyPoint(GroupModel group, HashSet<string> deletionAddresses)
+    {
+      if (group?.ChainModels == null)
+        return false;
+
+      foreach (var chain in group.ChainModels)
+      {
+        if (chain?.PointModels == null)
+          continue;
+
+        foreach (var point in chain.PointModels)
+        {
+          if (point != null && deletionAddresses.Contains(point.ToString()))
+            return true;
+        }
+      }
+
+      return false;
+    }
+
+    /// <summary>
+    /// Для ПР отключает проверку разобщения, если после всех преобразований осталось меньше двух разобщенных цепей.
+    /// </summary>
+    private static void ApplyAlgorithmWarnings(BaseCommandModel model, SchemeModel scheme)
+    {
+      if (scheme?.GroupModels == null || scheme.GroupModels.Count == 0)
+        return;
+
+      if (model.Mnemonic != EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName)
+        return;
+
+      int disconnectedCount = 0;
+      foreach (var group in scheme.GroupModels)
+      {
+        if (scheme.GetPointsDisconnected(group) != null)
+          disconnectedCount++;
+      }
+
+      if (disconnectedCount < 2 &&
+          disconnectedCount != 0 &&
+          !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
+      {
+        model.AlgorithmKey.Add(AlgorithmKey.ЗР.ToString());
+        model.Warnings.Add(GeneralWarnings.KeyZR(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+      }
     }
 
     /// <summary>
@@ -372,3 +475,4 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
   }
 }
+
