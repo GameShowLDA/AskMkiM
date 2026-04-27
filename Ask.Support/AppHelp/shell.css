@@ -235,6 +235,31 @@ body {
     position: relative
 }
 
+.search-modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px
+}
+
+.search-mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 999px;
+    background: #f8f9fa;
+    cursor: pointer;
+    font-size: 13px;
+    color: #495057
+}
+
+.search-mode input {
+    margin: 0;
+    accent-color: #1a3a8f
+}
+
 .search-box {
     width: 100%;
     padding: 10px 35px 10px 15px;
@@ -271,6 +296,18 @@ body {
     .result-item:hover {
         background: #f8f9fa
     }
+
+.result-title {
+    font-weight: 500;
+    color: #1f2933
+}
+
+.result-snippet {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #6c757d
+}
 
 .bookmark-item {
     padding: 10px;
