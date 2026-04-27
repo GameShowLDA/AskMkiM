@@ -282,6 +282,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       LogDebug($"Парсинг точек из общего блока: '{pointsBlob}'");
 
+      pointsBlob = ResolveReference(pointsBlob, model, CommandsModel.CommandModels, model.Errors);
+
       var (scheme, pointErrors) = PointParser.ParsePoints(pointsBlob, model, rmCommandModel);
 
       CheckPointsErrors(model, numberLine, pointErrors);
@@ -296,6 +298,107 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           $"Схема распознана: цепей={scheme.GroupModels?.Count ?? 0}, частей={scheme.CountParts()}, точек={scheme.CountPoints()}");
 
       return scheme;
+    }
+
+    private static readonly Regex RefRegex = new(@"\^\d+");
+
+    private static string ResolveReference(
+    string expr,
+    BaseCommandModel current,
+    List<BaseCommandModel> allCommands,
+    List<ErrorItem> errors)
+    {
+      if (string.IsNullOrWhiteSpace(expr))
+        return expr;
+
+      var match = RefRegex.Match(expr);
+      if (!match.Success)
+        return expr;
+
+      int refNumber = int.Parse(match.Value.Substring(1));
+
+      var referenced = FindReferencedCommand(refNumber, current, allCommands, errors);
+      if (referenced == null)
+        return expr;
+
+      if (!ValidateReferencedCommand(referenced, errors))
+        return expr;
+
+      // ВАЖНО: берём ИСХОДНОЕ выражение ССИРТ
+      var referencedExpr = referenced.PointsSourse;
+
+      return expr.Replace(match.Value, referencedExpr);
+    }
+
+    private static BaseCommandModel FindReferencedCommand(
+    int number,
+    BaseCommandModel current,
+    List<BaseCommandModel> allCommands,
+    List<ErrorItem> errors)
+    {
+      var cmd = allCommands
+          .Where(c => int.Parse(c.CommandNumber) == number)
+          .OrderBy(c => c.StartLineNumber)
+          .LastOrDefault(c => c.StartLineNumber < current.StartLineNumber);
+
+      if (cmd == null)
+      {
+        errors.Add(new ErrorItem
+        {
+          Description = $"Команда с меткой {number} не найдена или находится ниже текущей.",
+          Code = ErrorCode.Gen_InvalidReference
+        });
+        return null;
+      }
+
+      return cmd;
+    }
+
+    private static bool ValidateReferencedCommand(
+    BaseCommandModel cmd,
+    List<ErrorItem> errors)
+    {
+      // 1. ССИРТ должен быть
+      if (string.IsNullOrWhiteSpace(cmd.PointsSourse))
+      {
+        AddRefError(errors, $"Команда {cmd.CommandNumber} не содержит ССИРТ.");
+        return false;
+      }
+
+      // 2. Запрещена вложенная ссылка
+      if (cmd.PointsSourse.Contains("^"))
+      {
+        AddRefError(errors,
+            $"Команда {cmd.CommandNumber} содержит ссылку на ССИРТ (цепочка ссылок запрещена).");
+        return false;
+      }
+
+      // 3. Запрещён '~'
+      if (cmd.PointsSourse.StartsWith("~"))
+      {
+        AddRefError(errors,
+            $"Команда {cmd.CommandNumber} содержит исключения (~), нельзя использовать в ссылке.");
+        return false;
+      }
+
+      // 4. Проверка успешного разбора
+      if (cmd.Errors.Count>0) // или аналогичное поле
+      {
+        AddRefError(errors,
+            $"Команда {cmd.CommandNumber} содержит ошибки и не может использоваться как ссылка.");
+        return false;
+      }
+
+      return true;
+    }
+
+    private static void AddRefError(List<ErrorItem> errors, string message)
+    {
+      errors.Add(new ErrorItem
+      {
+        Description = message,
+        Code = ErrorCode.Gen_InvalidReference
+      });
     }
 
     /// <summary>
