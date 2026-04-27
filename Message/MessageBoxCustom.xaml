@@ -3,106 +3,193 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Message"
         mc:Ignorable="d"
-        Title="MessageBox"  
-        Width="500"
-        WindowStyle="None" 
-        AllowsTransparency="True" 
-        Background="#303843" 
+        Title="MessageBox"
+        Width="560"
+        MinWidth="460"
+        MaxWidth="760"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
         ShowInTaskbar="False"
-        VerticalAlignment="Stretch"
-        Topmost="True" 
+        Topmost="True"
         WindowStartupLocation="CenterScreen"
-        FontSize="15"
+        FontSize="14"
         SizeToContent="Height">
     <Window.Resources>
-        <Style x:Key="OkButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#4CAF50"/>
+        <SolidColorBrush x:Key="WindowCardBackgroundBrush" Color="#212A36"/>
+        <SolidColorBrush x:Key="WindowBodyBackgroundBrush" Color="#1B2430"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E8EEF7"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B7C3D4"/>
+        <SolidColorBrush x:Key="ButtonNeutralBrush" Color="#334255"/>
+        <SolidColorBrush x:Key="ButtonNeutralHoverBrush" Color="#405268"/>
+        <SolidColorBrush x:Key="ButtonActionBrush" Color="#2A9D8F"/>
+        <SolidColorBrush x:Key="ButtonActionHoverBrush" Color="#34B5A5"/>
+        <SolidColorBrush x:Key="ButtonDangerBrush" Color="#D95757"/>
+        <SolidColorBrush x:Key="ButtonDangerHoverBrush" Color="#E26868"/>
+
+        <Style x:Key="BaseButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Padding" Value="6,2"/>
-            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Background" Value="{StaticResource ButtonNeutralBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                            CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,2"/>
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.95"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="OkButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource ButtonActionBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#45A049"/>
+                    <Setter Property="Background" Value="{StaticResource ButtonActionHoverBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="CancelButtonStyle" TargetType="Button" BasedOn="{StaticResource OkButtonStyle}">
-            <Setter Property="Background" Value="#9E9E9E"/>
+        <Style x:Key="CancelButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource ButtonNeutralBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#8E8E8E"/>
+                    <Setter Property="Background" Value="{StaticResource ButtonNeutralHoverBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="YesButtonStyle" TargetType="Button" BasedOn="{StaticResource OkButtonStyle}">
-            <Setter Property="Background" Value="#2196F3"/>
+        <Style x:Key="YesButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource ButtonActionBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1976D2"/>
+                    <Setter Property="Background" Value="{StaticResource ButtonActionHoverBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="NoButtonStyle" TargetType="Button" BasedOn="{StaticResource OkButtonStyle}">
-            <Setter Property="Background" Value="#F44336"/>
+        <Style x:Key="NoButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource ButtonDangerBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#D32F2F"/>
+                    <Setter Property="Background" Value="{StaticResource ButtonDangerHoverBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </Window.Resources>
 
-    <Border BorderThickness="2" BorderBrush="White" Name="BorderWin">
+    <Grid Margin="20">
+        <Border x:Name="BorderWin"
+                Background="{StaticResource WindowCardBackgroundBrush}"
+                BorderBrush="#4D5B70"
+                BorderThickness="1"
+                CornerRadius="16">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="0" Opacity="0.45"/>
+            </Border.Effect>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <StackPanel Name="TopPanel">
-                <TextBlock x:Name="Header" Text="Заголовок сообщения" Foreground="White" VerticalAlignment="Center" Padding="10" FontSize="20"/>
-            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <Border x:Name="TopPanel"
+                        Grid.Row="0"
+                        Background="#2B3B50"
+                        CornerRadius="16,16,0,0"
+                        Padding="22,14,22,14">
+                    <TextBlock x:Name="Header"
+                               Text="Заголовок сообщения"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               FontSize="19"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis"/>
+                </Border>
 
-                <StackPanel Name="IconContainer" Background="Transparent" Margin="10" Width="50" Height="50" HorizontalAlignment="Left"/>
+                <Border Grid.Row="1"
+                        Background="{StaticResource WindowBodyBackgroundBrush}"
+                        Padding="22,18,22,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="1" Margin="10" VerticalAlignment="Center" >
-                    <TextBox Name="MessageText" TextWrapping="Wrap" FontSize="18" Background="Transparent"
-                         BorderThickness="0" IsReadOnly="True" Foreground="White"/>
-                </StackPanel>
+                        <Border Width="56"
+                                Height="56"
+                                CornerRadius="28"
+                                Background="#223145"
+                                BorderBrush="#3C4F66"
+                                BorderThickness="1"
+                                VerticalAlignment="Top">
+                            <StackPanel x:Name="IconContainer"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock x:Name="MessageText"
+                                   Grid.Column="1"
+                                   Margin="16,2,0,0"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="15"
+                                   TextWrapping="Wrap"
+                                   MaxWidth="620"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="2"
+                        Background="{StaticResource WindowCardBackgroundBrush}"
+                        CornerRadius="0,0,16,16"
+                        Padding="14,14,14,14">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button x:Name="OkButton"
+                                Style="{StaticResource OkButtonStyle}"
+                                PreviewMouseDown="OkButton_PreviewMouseDown"
+                                Content="Ок [Enter]"/>
+                        <Button x:Name="CancelButton"
+                                Style="{StaticResource CancelButtonStyle}"
+                                PreviewMouseDown="CancelButton_PreviewMouseDown"
+                                Content="Отмена [Esc]"/>
+                        <Button x:Name="YesButton"
+                                Style="{StaticResource YesButtonStyle}"
+                                PreviewMouseDown="YesButton_PreviewMouseDown"
+                                Content="Да [Y]"/>
+                        <Button x:Name="NoButton"
+                                Style="{StaticResource NoButtonStyle}"
+                                PreviewMouseDown="NoButton_PreviewMouseDown"
+                                Content="Нет [N]"/>
+                    </StackPanel>
+                </Border>
             </Grid>
-
-            <StackPanel Grid.Row="2" HorizontalAlignment="Right" Margin="10" VerticalAlignment="Center" Orientation="Horizontal">
-                <Button Name="OkButton" Style="{StaticResource OkButtonStyle}" PreviewMouseDown="OkButton_PreviewMouseDown" Content="Ок [Enter]" Height="30" />
-                <Button Name="CancelButton" Style="{StaticResource CancelButtonStyle}" PreviewMouseDown="CancelButton_PreviewMouseDown" Content="Отмена [Esc]" Height="30" Margin="5"/>
-                <Button Name="YesButton" Style="{StaticResource YesButtonStyle}" PreviewMouseDown="YesButton_PreviewMouseDown" Content="Да [Y]" Height="30" Margin="5" />
-                <Button Name="NoButton" Style="{StaticResource NoButtonStyle}" PreviewMouseDown="NoButton_PreviewMouseDown" Content="Нет [N]" Height="30" Margin="5"/>
-            </StackPanel>
-
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </Window>
