@@ -169,47 +169,49 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
     {
       var rawLines = input.Replace("\r", "").Split('\n');
       var result = new List<string>();
-      foreach (var line in rawLines)
+
+      foreach (var lineRaw in rawLines)
       {
-        if (line.Contains(" "))
+        var line = lineRaw.Trim();
+
+        if (string.IsNullOrWhiteSpace(line))
+          continue;
+
+        // Нормализация пробелов вокруг "="
+        line = Regex.Replace(line, @"\s*=\s*", "=");
+
+        // Обработка ==
+        if (line.Contains("=="))
         {
-          var splitedLines = line.Split(' ');
-          foreach (var splitedLine in splitedLines)
-          {
-            if (!string.IsNullOrEmpty(splitedLine))
-            {
-              var lineMatches = Regex.Matches(splitedLine, @"[^=]+=[^=]+");
-              foreach (Match m in lineMatches)
-              {
-                var expr = m.Value.Trim();
-                if (!string.IsNullOrWhiteSpace(expr) && expr.Contains("=") && !expr.StartsWith("=") && !expr.EndsWith("="))
-                  result.Add(expr);
-              }
-              if (lineMatches.Count == 0)
-              {
-                baseCommandModel.Errors.Add(RmErrors.ExtraSpace(splitedLine, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-              }
-            }
-          }
+          result.Add(line);
           continue;
         }
-        var trimmed = line.Trim(' ');
-        if (string.IsNullOrWhiteSpace(trimmed)) continue;
-        // Если есть двойное ==, это отдельное выражение
-        if (trimmed.Contains("=="))
-        {
-          result.Add(trimmed);
-          continue;
-        }
-        // Обычные выражения
-        var matches = Regex.Matches(trimmed, @"[^=]+=[^=]+");
+
+        var matches = Regex.Matches(line, @"[^=\s]+=[^=\s]+");
+
         foreach (Match m in matches)
         {
           var expr = m.Value.Trim();
-          if (!string.IsNullOrWhiteSpace(expr) && expr.Contains("=") && !expr.StartsWith("=") && !expr.EndsWith("="))
+
+          if (!string.IsNullOrWhiteSpace(expr) &&
+              expr.Contains("=") &&
+              !expr.StartsWith("=") &&
+              !expr.EndsWith("="))
+          {
             result.Add(expr);
+          }
+        }
+
+        // Если ничего не нашли — ошибка
+        if (matches.Count == 0)
+        {
+          baseCommandModel.Errors.Add(
+            RmErrors.ExtraSpace(line, baseCommandModel.StartLineNumber,
+            $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}")
+          );
         }
       }
+
       return result;
     }
 

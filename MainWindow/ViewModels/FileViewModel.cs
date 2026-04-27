@@ -51,9 +51,9 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private async Task SearchReplaceFile() => await _fileService.SearchReplaceFileAsync();
 
-    /// <summary>Команда сравнения файлов.</summary>
+    /// <summary>Команда открытия выбора файлов для сравнения.</summary>
     [RelayCommand]
-    private async Task CompareFile() => await _fileService.CompareFileAsync();
+    private void CompareFile() => _fileService.CompareFileAsync();
 
     /// <summary>Команда открытия экрана архива.</summary>
     [RelayCommand]

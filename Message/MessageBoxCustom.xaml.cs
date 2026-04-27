@@ -129,15 +129,32 @@ namespace Message
          };
 
          var _mainWindow = Application.Current.MainWindow;
+         var previousEffect = _mainWindow?.Effect;
+         var previousOpacity = _mainWindow?.Opacity ?? 1.0;
 
          // можно настроить текст и заголовок, если нужно
          window.Header.Text = title;
          window.MessageText.Text = text;
 
-         _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
-         window.ShowDialog();
-         _mainWindow.Effect = null;
-         return window.Result;
+         try
+         {
+           if (_mainWindow != null)
+           {
+             _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 8 };
+             _mainWindow.Opacity = 0.88;
+           }
+
+           window.ShowDialog();
+           return window.Result;
+         }
+         finally
+         {
+           if (_mainWindow != null)
+           {
+             _mainWindow.Effect = previousEffect;
+             _mainWindow.Opacity = previousOpacity;
+           }
+         }
        });
     }
 

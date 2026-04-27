@@ -1,0 +1,83 @@
+<Window x:Class="MainWindowProgram.Windows.ApkToApkwConversionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Конвертация APK в APKW"
+        Width="760"
+        Height="280"
+        MinWidth="760"
+        MinHeight="280"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="{DynamicResource BackgroundBrushes}"
+        Foreground="{DynamicResource ForegrounfBrushes}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Выберите старый архив APK. Новый архив APKW будет создан во внутреннем хранилище Archives приложения и сразу открыт."
+                   TextWrapping="Wrap"
+                   FontSize="15"
+                   Margin="0,0,0,16" />
+
+        <TextBlock Grid.Row="1"
+                   Text="Исходный архив APK"
+                   Margin="0,0,0,8"
+                   FontWeight="SemiBold" />
+
+        <Grid Grid.Row="2"
+              Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="InputFileTextBox"
+                     Grid.Column="0"
+                     MinHeight="34"
+                     VerticalContentAlignment="Center"
+                     TextChanged="InputFileTextBox_TextChanged" />
+
+            <Button Grid.Column="1"
+                    Margin="12,0,0,0"
+                    MinWidth="150"
+                    Height="34"
+                    Content="Выбрать файл"
+                    Click="SelectInputFileButton_Click" />
+        </Grid>
+
+        <TextBlock Grid.Row="3"
+                   x:Name="StateTextBlock"
+                   Margin="0,4,0,0"
+                   Foreground="{DynamicResource ForegrounfBrushes45}"
+                   TextWrapping="Wrap"
+                   Text="Выберите исходный APK-архив." />
+
+        <StackPanel Grid.Row="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <Button MinWidth="120"
+                    Height="36"
+                    Content="Отмена"
+                    IsCancel="True" />
+            <Button x:Name="ConvertButton"
+                    MinWidth="180"
+                    Height="36"
+                    Margin="12,0,0,0"
+                    Content="Конвертировать"
+                    IsDefault="True"
+                    Click="ConvertButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

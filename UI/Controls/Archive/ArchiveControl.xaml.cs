@@ -1,7 +1,9 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Engine.ControlCommandAnalyser;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Message;
@@ -11,15 +13,19 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components.MultiEditorMethods;
+using UI.Components;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
@@ -47,15 +53,21 @@ namespace UI.Controls.Archive
     };
 
     private readonly string _archivesFolderPath;
+    private readonly string _reviewArchivesFolderPath;
     private readonly FileSystemWatcher _archivesWatcher;
     private readonly DispatcherTimer _autoRefreshTimer;
     private readonly ArchiveManager _archiveManager = new ArchiveManager();
     private readonly object _archiveManagerSync = new object();
+    private readonly object _reviewRefreshSuppressionSync = new object();
+    private readonly Dictionary<string, DateTime> _recentlyMutatedReviewPaths =
+      new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
     private IReadOnlyList<ArchiveEntryInfo> _currentGridEntries = Array.Empty<ArchiveEntryInfo>();
     private bool _suppressGridSelection;
     private string _lastSelectedArchivePath;
     private string _lastSelectedEntryName;
+    private string _lastSelectedReviewFilePath;
+    private bool _lastSelectedIsReviewEntry;
     private ArchiveTreeNode _contextMenuNode;
     private ArchiveClipboardEntry? _archiveClipboardEntry;
 
@@ -66,6 +78,7 @@ namespace UI.Controls.Archive
       InitializeComponent();
       EventAggregator.Subscribe<ArchiveEvents.Changed>(OnArchiveChanged);
       _archivesFolderPath = ArchiveDirectoryService.ResolveArchivesRootPath();
+      _reviewArchivesFolderPath = ArchiveDirectoryService.ResolveReviewArchivesRootPath();
 
       _autoRefreshTimer = new DispatcherTimer
       {
@@ -183,6 +196,16 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherChanged(object sender, FileSystemEventArgs e)
     {
+      if (IsUnderReviewWorkspace(e.FullPath))
+      {
+        return;
+      }
+
+      if (WasRecentlyMutatedReviewPath(e.FullPath))
+      {
+        return;
+      }
+
       if (e.ChangeType == WatcherChangeTypes.Changed &&
           ArchiveEncryptionSession.WasRecentlyMutatedBySession(e.FullPath))
       {
@@ -194,7 +217,71 @@ namespace UI.Controls.Archive
 
     private void OnArchivesWatcherRenamed(object sender, RenamedEventArgs e)
     {
+      if (IsUnderReviewWorkspace(e.OldFullPath) || IsUnderReviewWorkspace(e.FullPath))
+      {
+        return;
+      }
+
+      if (WasRecentlyMutatedReviewPath(e.OldFullPath) || WasRecentlyMutatedReviewPath(e.FullPath))
+      {
+        return;
+      }
+
       ScheduleAutoRefresh();
+    }
+
+    private void MarkReviewPathAsRecentlyMutated(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      lock (_reviewRefreshSuppressionSync)
+      {
+        _recentlyMutatedReviewPaths[fullPath] = DateTime.UtcNow.AddSeconds(3);
+      }
+    }
+
+    private bool WasRecentlyMutatedReviewPath(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return false;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      var now = DateTime.UtcNow;
+
+      lock (_reviewRefreshSuppressionSync)
+      {
+        if (_recentlyMutatedReviewPaths.Count > 0)
+        {
+          var expiredPaths = _recentlyMutatedReviewPaths
+            .Where(pair => pair.Value <= now)
+            .Select(pair => pair.Key)
+            .ToList();
+
+          foreach (var expiredPath in expiredPaths)
+          {
+            _recentlyMutatedReviewPaths.Remove(expiredPath);
+          }
+        }
+
+        return _recentlyMutatedReviewPaths.TryGetValue(fullPath, out var expiresAt) && expiresAt > now;
+      }
+    }
+
+    private bool IsUnderReviewWorkspace(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path))
+      {
+        return false;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      return fullPath.StartsWith(_reviewArchivesFolderPath, StringComparison.OrdinalIgnoreCase);
     }
 
     private void ScheduleAutoRefresh()
@@ -217,39 +304,64 @@ namespace UI.Controls.Archive
     private TreeRefreshState CaptureTreeRefreshState()
     {
       var state = new TreeRefreshState();
-      var rootNode = GetRootNode();
-      if (rootNode == null)
+      foreach (var rootNode in GetRootNodes())
       {
-        return state;
-      }
+        switch (rootNode.Kind)
+        {
+          case ArchiveTreeNodeKind.Root:
+            state.IsArchiveRootExpanded = rootNode.IsExpanded;
+            foreach (var archiveNode in GetExpandedNodes(rootNode, ArchiveTreeNodeKind.Archive))
+            {
+              state.ExpandedArchivePaths.Add(Path.GetFullPath(archiveNode.ArchivePath));
+            }
+            break;
 
-      state.IsRootExpanded = rootNode.IsExpanded;
-      foreach (var archiveNode in GetExpandedArchiveNodes(rootNode))
-      {
-        state.ExpandedArchivePaths.Add(Path.GetFullPath(archiveNode.ArchivePath));
+          case ArchiveTreeNodeKind.ReviewRoot:
+            state.IsReviewRootExpanded = rootNode.IsExpanded;
+            foreach (var reviewNode in GetExpandedNodes(rootNode, ArchiveTreeNodeKind.ReviewArchive))
+            {
+              state.ExpandedReviewArchivePaths.Add(Path.GetFullPath(reviewNode.ArchivePath));
+            }
+            break;
+        }
       }
 
       return state;
     }
 
-    private ArchiveTreeNode GetRootNode()
+    private IReadOnlyList<ArchiveTreeNode> GetRootNodes()
     {
       var roots = ArchivesTreeView.ItemsSource as IEnumerable<ArchiveTreeNode>;
-      return roots?.FirstOrDefault();
+      return roots?.ToList() ?? [];
+    }
+
+    private ArchiveTreeNode? GetRootNode(ArchiveTreeNodeKind rootKind)
+    {
+      return GetRootNodes().FirstOrDefault(node => node.Kind == rootKind);
     }
 
     private async Task RefreshTreePreservingStateAsync(bool preservePanels)
     {
       var state = CaptureTreeRefreshState();
 
-      var rootNode = ArchiveTreeNode.CreateRoot("Архивы");
-      rootNode.IsExpanded = state.IsRootExpanded;
-      rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
-      ArchivesTreeView.ItemsSource = new ObservableCollection<ArchiveTreeNode> { rootNode };
+      var archiveRootNode = ArchiveTreeNode.CreateRoot("Архивы");
+      archiveRootNode.IsExpanded = state.IsArchiveRootExpanded;
+      archiveRootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
 
-      if (state.IsRootExpanded || state.ExpandedArchivePaths.Count > 0)
+      var reviewRootNode = ArchiveTreeNode.CreateReviewRoot("Архивы на проверке");
+      reviewRootNode.IsExpanded = state.IsReviewRootExpanded;
+      reviewRootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
+
+      ArchivesTreeView.ItemsSource = new ObservableCollection<ArchiveTreeNode> { archiveRootNode, reviewRootNode };
+
+      if (state.IsArchiveRootExpanded || state.ExpandedArchivePaths.Count > 0)
       {
-        await LoadArchivesIntoRootAsync(rootNode, state);
+        await LoadArchivesIntoRootAsync(archiveRootNode, state);
+      }
+
+      if (state.IsReviewRootExpanded || state.ExpandedReviewArchivePaths.Count > 0)
+      {
+        await LoadReviewArchivesIntoRootAsync(reviewRootNode, state);
       }
 
       if (preservePanels)
@@ -263,7 +375,36 @@ namespace UI.Controls.Archive
 
     private async Task RestoreRightPanelsAfterRefreshAsync()
     {
-      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
+      {
+        return;
+      }
+
+      if (IsReviewArchivePath(_lastSelectedArchivePath))
+      {
+        if (!Directory.Exists(_lastSelectedArchivePath))
+        {
+          return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+        {
+          var entries = await GetReviewEntriesAsync(_lastSelectedArchivePath);
+          var hasFile = entries.Any(item =>
+            string.Equals(item.EntryName, NormalizeEntryName(_lastSelectedEntryName), StringComparison.OrdinalIgnoreCase));
+
+          if (hasFile)
+          {
+            await ShowReviewFileAsync(_lastSelectedArchivePath, _lastSelectedEntryName, false);
+            return;
+          }
+        }
+
+        await ShowReviewArchiveInGridAsync(_lastSelectedArchivePath, clearEditor: true);
+        return;
+      }
+
+      if (!File.Exists(_lastSelectedArchivePath))
       {
         return;
       }
@@ -330,9 +471,13 @@ namespace UI.Controls.Archive
 
     private void ResetTree()
     {
-      var rootNode = ArchiveTreeNode.CreateRoot("Архивы");
-      rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
-      ArchivesTreeView.ItemsSource = new ObservableCollection<ArchiveTreeNode> { rootNode };
+      var archiveRootNode = ArchiveTreeNode.CreateRoot("Архивы");
+      archiveRootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
+
+      var reviewRootNode = ArchiveTreeNode.CreateReviewRoot("Архивы на проверке");
+      reviewRootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Загрузка..."));
+
+      ArchivesTreeView.ItemsSource = new ObservableCollection<ArchiveTreeNode> { archiveRootNode, reviewRootNode };
       ClearFilePanels();
     }
 
@@ -344,6 +489,8 @@ namespace UI.Controls.Archive
       FilesHintTextBlock.Text = "Выберите архив для просмотра файлов.";
       FileContentTextBox.Text = string.Empty;
       EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра.";
+      _lastSelectedReviewFilePath = null;
+      _lastSelectedIsReviewEntry = false;
       UpdateActionButtons();
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
     }
@@ -380,14 +527,51 @@ namespace UI.Controls.Archive
       }
     }
 
-    private static IEnumerable<ArchiveTreeNode> GetExpandedArchiveNodes(ArchiveTreeNode rootNode)
+    private static IEnumerable<ArchiveTreeNode> GetExpandedNodes(ArchiveTreeNode rootNode, ArchiveTreeNodeKind expectedKind)
     {
       foreach (var node in rootNode.Children.Where(node =>
-                 node.Kind == ArchiveTreeNodeKind.Archive &&
+                 node.Kind == expectedKind &&
                  node.IsExpanded &&
                  !string.IsNullOrWhiteSpace(node.ArchivePath)))
       {
         yield return node;
+      }
+    }
+
+    private async Task LoadReviewArchivesIntoRootAsync(ArchiveTreeNode rootNode, TreeRefreshState? state = null)
+    {
+      if (!HasPlaceholder(rootNode))
+      {
+        return;
+      }
+
+      rootNode.Children.Clear();
+      var reviewDirectories = await Task.Run(() => ArchiveDirectoryService.GetReviewDirectories(_reviewArchivesFolderPath));
+      if (reviewDirectories.Count == 0)
+      {
+        rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Архивы на проверке не найдены."));
+        return;
+      }
+
+      foreach (var reviewDirectory in reviewDirectories)
+      {
+        var fullReviewDirectory = Path.GetFullPath(reviewDirectory);
+        var isExpanded = state?.ExpandedReviewArchivePaths.Contains(fullReviewDirectory) == true;
+        var entries = await GetReviewEntriesAsync(fullReviewDirectory);
+        var totalErrors = entries.Sum(entry => entry.ErrorCount);
+        var status = entries.Count == 0
+          ? ArchiveNodeStatus.None
+          : totalErrors > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+
+        var reviewNode = ArchiveTreeNode.CreateReviewArchive(Path.GetFileName(reviewDirectory), fullReviewDirectory, status, totalErrors);
+        reviewNode.IsExpanded = isExpanded;
+        reviewNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Разверните для загрузки файлов..."));
+        rootNode.Children.Add(reviewNode);
+
+        if (isExpanded)
+        {
+          await LoadReviewFilesIntoTreeAsync(reviewNode);
+        }
       }
     }
 
@@ -421,6 +605,155 @@ namespace UI.Controls.Archive
       }
     }
 
+    private async Task LoadReviewFilesIntoTreeAsync(ArchiveTreeNode reviewNode)
+    {
+      if (reviewNode.ArchivePath == null || !HasPlaceholder(reviewNode))
+      {
+        return;
+      }
+
+      reviewNode.Children.Clear();
+
+      try
+      {
+        var entries = await GetReviewEntriesAsync(reviewNode.ArchivePath);
+        if (entries.Count == 0)
+        {
+          reviewNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Файлы на проверке не найдены."));
+          return;
+        }
+
+        foreach (var entry in entries)
+        {
+          var status = entry.ErrorCount > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+          reviewNode.Children.Add(ArchiveTreeNode.CreateReviewFile(
+            entry.EntryName,
+            reviewNode.ArchivePath,
+            entry.EntryName,
+            entry.SourceFilePath ?? string.Empty,
+            status,
+            entry.ErrorCount));
+        }
+      }
+      catch (Exception ex)
+      {
+        reviewNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Ошибка чтения файлов."));
+        ShowArchiveNotification("Архивы на проверке", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private async Task RefreshReviewArchiveNodeAsync(string reviewArchivePath)
+    {
+      var reviewRootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
+      if (reviewRootNode == null || HasPlaceholder(reviewRootNode))
+      {
+        return;
+      }
+
+      var existingNodeIndex = reviewRootNode.Children
+        .Select((node, index) => new { node, index })
+        .FirstOrDefault(item =>
+          item.node.Kind == ArchiveTreeNodeKind.ReviewArchive &&
+          IsSameArchivePath(item.node.ArchivePath, reviewArchivePath));
+
+      if (existingNodeIndex == null)
+      {
+        return;
+      }
+
+      var entries = await GetReviewEntriesAsync(reviewArchivePath);
+      var totalErrors = entries.Sum(entry => entry.ErrorCount);
+      var status = entries.Count == 0
+        ? ArchiveNodeStatus.None
+        : totalErrors > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+
+      var refreshedNode = ArchiveTreeNode.CreateReviewArchive(
+        Path.GetFileName(reviewArchivePath),
+        reviewArchivePath,
+        status,
+        totalErrors);
+
+      refreshedNode.IsExpanded = existingNodeIndex.node.IsExpanded;
+      refreshedNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Разверните для загрузки файлов..."));
+      reviewRootNode.Children[existingNodeIndex.index] = refreshedNode;
+
+      if (refreshedNode.IsExpanded)
+      {
+        await LoadReviewFilesIntoTreeAsync(refreshedNode);
+      }
+    }
+
+    private ArchiveTreeNode? FindReviewArchiveNode(string reviewArchivePath)
+    {
+      var reviewRootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
+      if (reviewRootNode == null)
+      {
+        return null;
+      }
+
+      return reviewRootNode.Children.FirstOrDefault(node =>
+        node.Kind == ArchiveTreeNodeKind.ReviewArchive &&
+        IsSameArchivePath(node.ArchivePath, reviewArchivePath));
+    }
+
+    private ArchiveTreeNode? FindReviewFileNode(string reviewArchivePath, string entryName)
+    {
+      var reviewArchiveNode = FindReviewArchiveNode(reviewArchivePath);
+      if (reviewArchiveNode == null)
+      {
+        return null;
+      }
+
+      var normalizedEntryName = NormalizeEntryName(entryName);
+      return reviewArchiveNode.Children.FirstOrDefault(node =>
+        node.Kind == ArchiveTreeNodeKind.ReviewFile &&
+        string.Equals(node.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private ArchiveEntryInfo? FindReviewGridEntry(string reviewArchivePath, string entryName)
+    {
+      var normalizedEntryName = NormalizeEntryName(entryName);
+      return _currentGridEntries.FirstOrDefault(entry =>
+        entry.IsReviewEntry &&
+        IsSameArchivePath(entry.ArchivePath, reviewArchivePath) &&
+        string.Equals(entry.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void UpdateReviewStateInPlace(string reviewArchivePath, string entryName, int errorCount)
+    {
+      var normalizedReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+      var normalizedEntryName = NormalizeEntryName(entryName);
+
+      var reviewEntry = FindReviewGridEntry(normalizedReviewArchivePath, normalizedEntryName);
+      reviewEntry?.UpdateReviewState(errorCount);
+
+      if (_archiveEntriesCache.TryGetValue(normalizedReviewArchivePath, out var cachedEntries))
+      {
+        var cachedEntry = cachedEntries.FirstOrDefault(entry =>
+          entry.IsReviewEntry &&
+          string.Equals(entry.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
+        cachedEntry?.UpdateReviewState(errorCount);
+      }
+
+      var reviewFileNode = FindReviewFileNode(normalizedReviewArchivePath, normalizedEntryName);
+      reviewFileNode?.UpdateReviewState(errorCount > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success, errorCount);
+
+      var reviewArchiveNode = FindReviewArchiveNode(normalizedReviewArchivePath);
+      if (reviewArchiveNode != null)
+      {
+        var reviewEntries = _currentGridEntries
+          .Where(entry => entry.IsReviewEntry && IsSameArchivePath(entry.ArchivePath, normalizedReviewArchivePath))
+          .ToList();
+
+        var totalErrors = reviewEntries.Sum(entry => entry.ErrorCount);
+        var status = reviewEntries.Count == 0
+          ? ArchiveNodeStatus.None
+          : totalErrors > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+
+        reviewArchiveNode.UpdateReviewState(status, totalErrors);
+      }
+    }
+
     private async Task<IReadOnlyList<ArchiveEntryInfo>> GetArchiveEntriesAsync(string archivePath)
     {
       if (_archiveEntriesCache.TryGetValue(archivePath, out var cached))
@@ -430,6 +763,18 @@ namespace UI.Controls.Archive
 
       var entries = await Task.Run(() => ReadArchiveEntries(archivePath));
       _archiveEntriesCache[archivePath] = entries;
+      return entries;
+    }
+
+    private async Task<IReadOnlyList<ArchiveEntryInfo>> GetReviewEntriesAsync(string reviewDirectoryPath)
+    {
+      if (_archiveEntriesCache.TryGetValue(reviewDirectoryPath, out var cached))
+      {
+        return cached;
+      }
+
+      var entries = await Task.Run(() => ReadReviewEntries(reviewDirectoryPath));
+      _archiveEntriesCache[reviewDirectoryPath] = entries;
       return entries;
     }
 
@@ -494,7 +839,7 @@ namespace UI.Controls.Archive
             continue;
           }
 
-          ArchiveEntryInfo? info = GetEntryInfoAsync(archivePath, entry).GetAwaiter().GetResult();
+          ArchiveEntryInfo? info = GetArchiveEntryInfoAsync(archivePath, entry).GetAwaiter().GetResult();
           if (info != null)
           {
             items.Add(info);
@@ -507,7 +852,50 @@ namespace UI.Controls.Archive
         .ToList();
     }
 
-    private async Task<ArchiveEntryInfo?> GetEntryInfoAsync(string archivePath, ZipArchiveEntry entry)
+    private IReadOnlyList<ArchiveEntryInfo> ReadReviewEntries(string reviewDirectoryPath)
+    {
+      var directoryPath = Path.GetFullPath(reviewDirectoryPath);
+      if (!Directory.Exists(directoryPath))
+      {
+        return [];
+      }
+
+      var items = new List<ArchiveEntryInfo>();
+      foreach (var filePath in Directory.EnumerateFiles(directoryPath, "*.*", SearchOption.TopDirectoryOnly)
+                 .Where(IsSupportedReviewFilePath)
+                 .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
+      {
+        var fileType = DeterminePreviewFileType(filePath);
+        var text = ReadReviewFileText(filePath, fileType);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+          continue;
+        }
+
+        var entryInfo = BuildEntryInfoFromText(
+          archivePath: directoryPath,
+          entryName: Path.GetFileName(filePath),
+          opkFileName: Path.GetFileName(filePath),
+          text: text,
+          creationDate: File.GetLastWriteTime(filePath),
+          sourceFilePath: filePath,
+          isReviewEntry: true,
+          errorCount: ExtractErrorCount(text),
+          fileType: fileType);
+
+        if (entryInfo != null)
+        {
+          items.Add(entryInfo);
+        }
+      }
+
+      return items
+        .OrderByDescending(item => item.ErrorCount)
+        .ThenBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+        .ToList();
+    }
+
+    private async Task<ArchiveEntryInfo?> GetArchiveEntryInfoAsync(string archivePath, ZipArchiveEntry entry)
     {
       var manifest = await GetManifestCacheAsync(archivePath);
       manifest.TryGetValue(NormalizeEntryName(entry.FullName), out var creationDate);
@@ -516,56 +904,71 @@ namespace UI.Controls.Archive
         creationDate = entry.LastWriteTime.LocalDateTime;
       }
 
-      Regex CommandStartRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, NormalizeEntryName(entry.FullName)));
+      return BuildEntryInfoFromText(
+        archivePath,
+        NormalizeEntryName(entry.FullName),
+        entry.Name,
+        text,
+        creationDate,
+        sourceFilePath: null,
+        isReviewEntry: false,
+        errorCount: 0,
+        fileType: FileType.OPKW);
+    }
+
+    private ArchiveEntryInfo? BuildEntryInfoFromText(
+      string archivePath,
+      string entryName,
+      string opkFileName,
+      string text,
+      DateTime creationDate,
+      string? sourceFilePath,
+      bool isReviewEntry,
+      int errorCount,
+      FileType fileType)
+    {
+      Regex commandStartRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
       if (string.IsNullOrWhiteSpace(text))
+      {
         return null;
+      }
 
       var lines = text
-           .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
-           .Select(l => l.Trim())
-           .ToList();
+        .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+        .Select(line => line.Trim())
+        .ToList();
 
       if (lines.Count == 0)
+      {
         return null;
+      }
 
-      var startIndex = lines.FindIndex(l => CommandStartRegex.IsMatch(l));
-
+      var startIndex = lines.FindIndex(line => commandStartRegex.IsMatch(line));
       if (startIndex < 0)
+      {
         return null;
+      }
 
       var firstLine = Regex.Replace(lines[startIndex], @"^\s*\d+\s+\S+\s*", string.Empty);
       var starIndex = firstLine.IndexOf('*');
 
-      string? name = null;
-      string? nameOk = null;
+      var name = starIndex >= 0 ? firstLine[..starIndex].Trim() : firstLine.Trim();
+      var nameOk = starIndex >= 0 ? firstLine[(starIndex + 1)..].Trim() : string.Empty;
+
       string? opk = null;
-      string? opkFileName = null;
       string? ik = null;
       string? order = null;
       string? department = null;
       string? comment = null;
       List<string> kd = new();
 
-      if (starIndex >= 0)
-      {
-        name = firstLine.Substring(0, starIndex).Trim();
-        nameOk = firstLine[(starIndex + 1)..].Trim();
-      }
-      else
-      {
-        name = firstLine.Trim();
-      }
-
-      foreach (var line in lines.Skip(1))
+      foreach (var line in lines.Skip(startIndex + 1))
       {
         var temp = Regex.Replace(line.ToLowerInvariant(), @"\s+", string.Empty);
         var eqIndex = line.IndexOf('=');
-        var value = string.Empty;
-        if (eqIndex >= 0)
-        {
-          value = line[(eqIndex + 1)..].Trim();
-        }
+        var value = eqIndex >= 0 ? line[(eqIndex + 1)..].Trim() : string.Empty;
+
         if (temp.StartsWith("опк"))
         {
           opk = value;
@@ -590,11 +993,11 @@ namespace UI.Controls.Archive
         {
           comment = value;
         }
-        opkFileName = entry.Name;
       }
+
       return new ArchiveEntryInfo(
         archivePath,
-        NormalizeEntryName(entry.FullName),
+        NormalizeEntryName(entryName),
         name,
         nameOk,
         order,
@@ -604,7 +1007,11 @@ namespace UI.Controls.Archive
         comment,
         opk,
         ik,
-        creationDate);
+        creationDate,
+        sourceFilePath,
+        isReviewEntry,
+        errorCount,
+        fileType);
     }
 
     private static string NormalizeEntryName(string entryName)
@@ -612,9 +1019,177 @@ namespace UI.Controls.Archive
       return (entryName ?? string.Empty).Replace('\\', '/').TrimStart('/');
     }
 
+    private static bool IsSupportedReviewFilePath(string filePath)
+    {
+      var extension = Path.GetExtension(filePath);
+      return string.Equals(extension, ".pk", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(extension, ".pkw", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static FileType DeterminePreviewFileType(string filePath)
+    {
+      return Path.GetExtension(filePath).ToLowerInvariant() switch
+      {
+        ".pk" => FileType.PK,
+        ".pkw" => FileType.PKW,
+        ".opkw" => FileType.OPKW,
+        _ => FileType.None,
+      };
+    }
+
+    private static string ReadReviewFileText(string filePath, FileType fileType)
+    {
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+      var encoding = fileType == FileType.PKW || fileType == FileType.OPKW
+        ? Encoding.UTF8
+        : Encoding.GetEncoding(866);
+
+      return File.ReadAllText(filePath, encoding)
+        .Replace("\r\n", "\n")
+        .Replace('\r', '\n');
+    }
+
+    private static RecheckReviewFileResult RecheckReviewFile(string filePath)
+    {
+      if (string.IsNullOrWhiteSpace(filePath))
+      {
+        throw new ArgumentException("Не указан путь к файлу для повторной проверки.", nameof(filePath));
+      }
+
+      var fullFilePath = Path.GetFullPath(filePath);
+      if (!File.Exists(fullFilePath))
+      {
+        throw new FileNotFoundException("Файл для повторной проверки не найден.", fullFilePath);
+      }
+
+      var fileType = DeterminePreviewFileType(fullFilePath);
+      if (fileType != FileType.PK && fileType != FileType.PKW)
+      {
+        throw new InvalidOperationException("Повторная проверка поддерживается только для PK/PKW-файлов.");
+      }
+
+      var sourceText = ReadReviewFileText(fullFilePath, fileType);
+      var normalizedSourceText = RemoveExistingReviewErrorHeader(sourceText);
+      var manager = new CommandTranslationManager();
+      var translation = manager.BuildTranslation(normalizedSourceText);
+      var errorCount = translation.Models.Sum(model => model.Errors?.Count ?? 0);
+
+      WriteReviewFileText(
+        fullFilePath,
+        errorCount > 0 ? BuildReviewErrorAnnotatedText(normalizedSourceText, errorCount) : normalizedSourceText,
+        fileType);
+
+      var opkwPath = Path.ChangeExtension(fullFilePath, ".opkw");
+      if (errorCount > 0)
+      {
+        TryDeleteFile(opkwPath);
+      }
+      else
+      {
+        File.WriteAllText(opkwPath, translation.FormattedText, new UTF8Encoding(false));
+      }
+
+      return new RecheckReviewFileResult
+      {
+        FilePath = fullFilePath,
+        ErrorCount = errorCount,
+      };
+    }
+
+    private static string RemoveExistingReviewErrorHeader(string text)
+    {
+      if (string.IsNullOrWhiteSpace(text))
+      {
+        return string.Empty;
+      }
+
+      var lines = text
+        .Replace("\r\n", "\n")
+        .Replace('\r', '\n')
+        .Split('\n')
+        .ToList();
+
+      if (lines.Count == 0 || !Regex.IsMatch(lines[0], @"^\s*//=======\s*НАЙДЕНО\s+\d+\s+ОШИБ", RegexOptions.IgnoreCase))
+      {
+        return string.Join("\n", lines);
+      }
+
+      lines.RemoveAt(0);
+      if (lines.Count > 0 && string.IsNullOrWhiteSpace(lines[0]))
+      {
+        lines.RemoveAt(0);
+      }
+
+      return string.Join("\n", lines);
+    }
+
+    private static string BuildReviewErrorAnnotatedText(string sourceText, int errorCount)
+    {
+      var header = $"//=======НАЙДЕНО {errorCount} ОШИБОК";
+      if (string.IsNullOrWhiteSpace(sourceText))
+      {
+        return header + "\r\n";
+      }
+
+      return header + "\r\n\r\n" + sourceText.Replace("\n", "\r\n");
+    }
+
+    private static void WriteReviewFileText(string filePath, string text, FileType fileType)
+    {
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+      var encoding = fileType == FileType.PKW || fileType == FileType.OPKW
+        ? Encoding.UTF8
+        : Encoding.GetEncoding(866);
+
+      var normalizedText = text.Replace("\r\n", "\n").Replace('\r', '\n').Replace("\n", "\r\n");
+
+      if (encoding == Encoding.UTF8)
+      {
+        File.WriteAllText(filePath, normalizedText, new UTF8Encoding(false));
+        return;
+      }
+
+      File.WriteAllText(filePath, normalizedText, encoding);
+    }
+
+    private static int ExtractErrorCount(string text)
+    {
+      if (string.IsNullOrWhiteSpace(text))
+      {
+        return 0;
+      }
+
+      var firstLine = text
+        .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+        .FirstOrDefault() ?? string.Empty;
+
+      var match = Regex.Match(firstLine, @"НАЙДЕНО\s+(\d+)\s+ОШИБ", RegexOptions.IgnoreCase);
+      return match.Success && int.TryParse(match.Groups[1].Value, out var errorCount)
+        ? errorCount
+        : 0;
+    }
+
     private static bool HasPlaceholder(ArchiveTreeNode node)
     {
       return node.Children.Count == 1 && node.Children[0].Kind == ArchiveTreeNodeKind.Placeholder;
+    }
+
+    private static void TryDeleteFile(string? path)
+    {
+      if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+      {
+        return;
+      }
+
+      try
+      {
+        File.Delete(path);
+      }
+      catch
+      {
+      }
     }
 
     private void UpdateRightPanels(bool isFilesVisible, bool isEditorVisible)
@@ -766,16 +1341,32 @@ namespace UI.Controls.Archive
     {
       UpdatePanelTitles();
 
-      var hasArchive = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && File.Exists(_lastSelectedArchivePath);
-      var hasSelectedFile = hasArchive && !string.IsNullOrWhiteSpace(_lastSelectedEntryName);
+      var hasArchive =
+        !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
+        (File.Exists(_lastSelectedArchivePath) || IsReviewArchivePath(_lastSelectedArchivePath));
+      var isReviewArchive = hasArchive && IsReviewArchivePath(_lastSelectedArchivePath);
+      var hasSelectedFile = !string.IsNullOrWhiteSpace(_lastSelectedArchivePath) && !string.IsNullOrWhiteSpace(_lastSelectedEntryName);
       var hasClipboardEntry = HasArchiveClipboardEntry();
+      var canManageArchiveFiles = hasSelectedFile && !_lastSelectedIsReviewEntry;
+      var canDeleteReviewFile = hasSelectedFile && _lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath);
 
       ArchiveActionsPanel.Visibility = hasArchive ? Visibility.Visible : Visibility.Collapsed;
+      RecheckReviewArchiveButton.Visibility = isReviewArchive ? Visibility.Visible : Visibility.Collapsed;
+      SaveArchiveButton.Visibility = isReviewArchive ? Visibility.Collapsed : Visibility.Visible;
+      PrintArchiveCatalogButton.Visibility = isReviewArchive ? Visibility.Collapsed : Visibility.Visible;
+      AddFileToArchiveButton.Visibility = isReviewArchive ? Visibility.Collapsed : Visibility.Visible;
       PasteIntoArchiveButton.Visibility = hasArchive && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
-      CopyArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
-      CutArchiveFileButton.Visibility = hasSelectedFile ? Visibility.Visible : Visibility.Collapsed;
-      PasteArchiveFileButton.Visibility = hasSelectedFile && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveFileButton.Visibility = (canManageArchiveFiles || canDeleteReviewFile) ? Visibility.Visible : Visibility.Collapsed;
+      CopyArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
+      CutArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
+      PasteArchiveFileButton.Visibility = canManageArchiveFiles && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
+      ConvertToPkwButton.Visibility = _lastSelectedIsReviewEntry ? Visibility.Collapsed : Visibility.Visible;
+      RecheckReviewFileButton.Visibility = _lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath)
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+      OpenInEditorButton.Visibility = _lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath)
+        ? Visibility.Visible
+        : Visibility.Collapsed;
     }
 
     private void UpdatePanelTitles()
@@ -807,8 +1398,25 @@ namespace UI.Controls.Archive
       textBlock.Visibility = hasValue ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    private bool IsReviewArchivePath(string path)
+    {
+      if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+      {
+        return false;
+      }
+
+      var fullPath = Path.GetFullPath(path);
+      return fullPath.StartsWith(_reviewArchivesFolderPath, StringComparison.OrdinalIgnoreCase);
+    }
+
     private async Task ShowArchiveInGridAsync(string archivePath, bool clearEditor)
     {
+      if (IsReviewArchivePath(archivePath))
+      {
+        await ShowReviewArchiveInGridAsync(archivePath, clearEditor);
+        return;
+      }
+
       var integrityNotifications = await Task.Run(() => OpenArchiveInManager(archivePath));
       var entries = await GetArchiveEntriesAsync(archivePath);
 
@@ -828,6 +1436,8 @@ namespace UI.Controls.Archive
         _suppressGridSelection = false;
         FileContentTextBox.Content = null;
         FileContentTextBox.Text = string.Empty;
+        _lastSelectedReviewFilePath = null;
+        _lastSelectedIsReviewEntry = false;
         EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра..";
         UpdateRightPanels(isFilesVisible: true, isEditorVisible: false);
       }
@@ -842,26 +1452,21 @@ namespace UI.Controls.Archive
 
     private async Task ShowFileAsync(string archivePath, string entryName, bool fromGrid)
     {
+      if (IsReviewArchivePath(archivePath))
+      {
+        await ShowReviewFileAsync(archivePath, entryName, fromGrid);
+        return;
+      }
+
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
       var normalizedEntryName = NormalizeEntryName(entryName);
 
-      var textEditor = new TextEditorUI(FileType.OPKW);
-      textEditor.Text = text;
-      textEditor.IsReadOnly = true;
-
-      // подсветка
-      if (!textEditor.TextArea.TextView.LineTransformers
-          .OfType<BracesCommentColorizer>()
-          .Any())
-      {
-        textEditor.TextArea.TextView.LineTransformers
-            .Add(new BracesCommentColorizer());
-      }
-
-      FileContentTextBox.Content = textEditor;
+      FileContentTextBox.Content = CreatePreviewEditor(text, FileType.OPKW);
       _lastSelectedArchivePath = archivePath;
       _lastSelectedEntryName = normalizedEntryName;
+      _lastSelectedReviewFilePath = null;
+      _lastSelectedIsReviewEntry = false;
 
       EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
       UpdateActionButtons();
@@ -875,6 +1480,85 @@ namespace UI.Controls.Archive
 
         await SelectGridRow(selectedRow);
       }
+    }
+
+    private async Task ShowReviewArchiveInGridAsync(string reviewDirectoryPath, bool clearEditor)
+    {
+      var entries = await GetReviewEntriesAsync(reviewDirectoryPath);
+
+      ApplyGridItemsSource(entries);
+      FilesHintTextBlock.Text = entries.Count == 0
+        ? "Архив на проверке пуст."
+        : "Выберите файл на проверке для просмотра.";
+
+      if (clearEditor)
+      {
+        _lastSelectedEntryName = null;
+        _lastSelectedReviewFilePath = null;
+        _lastSelectedIsReviewEntry = false;
+        _suppressGridSelection = true;
+        ArchiveFilesDataGrid.SelectedItem = null;
+        _suppressGridSelection = false;
+        FileContentTextBox.Content = null;
+        FileContentTextBox.Text = string.Empty;
+        EditorHintTextBlock.Text = "Выберите файл на проверке для просмотра.";
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: false);
+      }
+      else
+      {
+        var hasEditorText = !string.IsNullOrWhiteSpace(FileContentTextBox.Text);
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: hasEditorText);
+      }
+
+      UpdateActionButtons();
+    }
+
+    private async Task ShowReviewFileAsync(string reviewDirectoryPath, string entryName, bool fromGrid)
+    {
+      await ShowReviewArchiveInGridAsync(reviewDirectoryPath, clearEditor: false);
+
+      var entries = await GetReviewEntriesAsync(reviewDirectoryPath);
+      var selectedEntry = entries.FirstOrDefault(item =>
+        string.Equals(item.EntryName, NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase));
+
+      if (selectedEntry == null || string.IsNullOrWhiteSpace(selectedEntry.SourceFilePath) || !File.Exists(selectedEntry.SourceFilePath))
+      {
+        return;
+      }
+
+      var text = await Task.Run(() => ReadReviewFileText(selectedEntry.SourceFilePath, selectedEntry.FileType));
+
+      FileContentTextBox.Content = CreatePreviewEditor(text, selectedEntry.FileType);
+      _lastSelectedArchivePath = reviewDirectoryPath;
+      _lastSelectedEntryName = NormalizeEntryName(entryName);
+      _lastSelectedReviewFilePath = selectedEntry.SourceFilePath;
+      _lastSelectedIsReviewEntry = true;
+
+      EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
+      UpdateActionButtons();
+      UpdateRightPanels(true, true);
+
+      if (!fromGrid)
+      {
+        await SelectGridRow(selectedEntry);
+      }
+    }
+
+    private static TextEditorUI CreatePreviewEditor(string text, FileType fileType)
+    {
+      var textEditor = new TextEditorUI(fileType);
+      textEditor.Text = text;
+      textEditor.IsReadOnly = true;
+
+      if (!textEditor.TextArea.TextView.LineTransformers
+          .OfType<BracesCommentColorizer>()
+          .Any())
+      {
+        textEditor.TextArea.TextView.LineTransformers
+            .Add(new BracesCommentColorizer());
+      }
+
+      return textEditor;
     }
 
     private async Task LoadFileAsync(string archivePath, string entryName)
@@ -934,6 +1618,104 @@ namespace UI.Controls.Archive
       BeginCreateArchiveWorkflow();
     }
 
+    public Task OpenArchivePathAsync(string archivePath)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        return Dispatcher.InvokeAsync(() => OpenArchivePathAsync(archivePath)).Task.Unwrap();
+      }
+
+      return OpenArchivePathCoreAsync(archivePath);
+    }
+
+    public Task OpenReviewArchivePathAsync(string reviewArchivePath)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        return Dispatcher.InvokeAsync(() => OpenReviewArchivePathAsync(reviewArchivePath)).Task.Unwrap();
+      }
+
+      return OpenReviewArchivePathCoreAsync(reviewArchivePath);
+    }
+
+    private async Task OpenArchivePathCoreAsync(string archivePath)
+    {
+      if (string.IsNullOrWhiteSpace(archivePath))
+      {
+        throw new ArgumentException("Требуется указать путь к архиву.", nameof(archivePath));
+      }
+
+      var fullArchivePath = Path.GetFullPath(archivePath);
+      if (!File.Exists(fullArchivePath))
+      {
+        throw new FileNotFoundException("Архив не найден.", fullArchivePath);
+      }
+
+      var rootNode = GetRootNode(ArchiveTreeNodeKind.Root);
+      if (rootNode == null)
+      {
+        ResetTree();
+        rootNode = GetRootNode(ArchiveTreeNodeKind.Root);
+      }
+
+      if (rootNode != null)
+      {
+        rootNode.IsExpanded = true;
+        await LoadArchivesIntoRootAsync(rootNode);
+
+        var archiveNode = rootNode.Children.FirstOrDefault(node =>
+          node.Kind == ArchiveTreeNodeKind.Archive &&
+          IsSameArchivePath(node.ArchivePath, fullArchivePath));
+
+        if (archiveNode != null)
+        {
+          archiveNode.IsExpanded = true;
+          await LoadArchiveFilesIntoTreeAsync(archiveNode);
+        }
+      }
+
+      await OpenArchiveAsync(fullArchivePath);
+    }
+
+    private async Task OpenReviewArchivePathCoreAsync(string reviewArchivePath)
+    {
+      if (string.IsNullOrWhiteSpace(reviewArchivePath))
+      {
+        throw new ArgumentException("Требуется указать путь к архиву на проверке.", nameof(reviewArchivePath));
+      }
+
+      var fullReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+      if (!Directory.Exists(fullReviewArchivePath))
+      {
+        throw new DirectoryNotFoundException($"Архив на проверке не найден: {fullReviewArchivePath}");
+      }
+
+      var rootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
+      if (rootNode == null)
+      {
+        ResetTree();
+        rootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
+      }
+
+      if (rootNode != null)
+      {
+        rootNode.IsExpanded = true;
+        await LoadReviewArchivesIntoRootAsync(rootNode);
+
+        var reviewNode = rootNode.Children.FirstOrDefault(node =>
+          node.Kind == ArchiveTreeNodeKind.ReviewArchive &&
+          IsSameArchivePath(node.ArchivePath, fullReviewArchivePath));
+
+        if (reviewNode != null)
+        {
+          reviewNode.IsExpanded = true;
+          await LoadReviewFilesIntoTreeAsync(reviewNode);
+        }
+      }
+
+      await OpenArchiveAsync(fullReviewArchivePath);
+    }
+
     private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
     {
       if (!ReferenceEquals(sender, e.OriginalSource))
@@ -956,15 +1738,81 @@ namespace UI.Controls.Archive
           return;
         }
 
+        if (node.Kind == ArchiveTreeNodeKind.ReviewRoot)
+        {
+          await LoadReviewArchivesIntoRootAsync(node);
+          return;
+        }
+
         if (node.Kind == ArchiveTreeNodeKind.Archive)
         {
           await LoadArchiveFilesIntoTreeAsync(node);
+          return;
+        }
+
+        if (node.Kind == ArchiveTreeNodeKind.ReviewArchive)
+        {
+          await LoadReviewFilesIntoTreeAsync(node);
         }
       }
       catch (Exception ex)
       {
         ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
+    }
+
+    private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      var item = sender as TreeViewItem;
+      var node = item?.DataContext as ArchiveTreeNode;
+
+      LogInformation(
+        $"Archive UI: PreviewMouseLeftButtonDown kind='{node?.Kind}', display='{node?.DisplayName}', button='{e.ChangedButton}', original='{e.OriginalSource?.GetType().Name}', selectedBefore='{item?.IsSelected}'.");
+
+      if (e.OriginalSource is DependencyObject originalSource)
+      {
+        var toggleButton = FindVisualAncestor<ToggleButton>(originalSource);
+        if (toggleButton != null)
+        {
+          LogInformation(
+            $"Archive UI: PreviewMouseLeftButtonDown ignored expander for '{node?.DisplayName}'.");
+          return;
+        }
+
+        var hitTreeViewItem = FindVisualAncestor<TreeViewItem>(originalSource);
+        if (item != null && hitTreeViewItem != null && !ReferenceEquals(item, hitTreeViewItem))
+        {
+          LogInformation(
+            $"Archive UI: PreviewMouseLeftButtonDown ignored ancestor sender='{node?.DisplayName}', hit='{(hitTreeViewItem.DataContext as ArchiveTreeNode)?.DisplayName}'.");
+          return;
+        }
+      }
+
+      if (item == null)
+      {
+        LogInformation("Archive UI: PreviewMouseLeftButtonDown sender is not TreeViewItem.");
+        return;
+      }
+
+      var canToggleExpansion =
+        node?.Kind == ArchiveTreeNodeKind.Root ||
+        node?.Kind == ArchiveTreeNodeKind.ReviewRoot ||
+        node?.Kind == ArchiveTreeNodeKind.Archive ||
+        node?.Kind == ArchiveTreeNodeKind.ReviewArchive;
+
+      if (canToggleExpansion)
+      {
+        item.IsExpanded = !item.IsExpanded;
+
+        LogInformation(
+          $"Archive UI: PreviewMouseLeftButtonDown toggled expansion kind='{node?.Kind}', display='{node?.DisplayName}', expandedAfter='{item.IsExpanded}'.");
+      }
+
+      item.IsSelected = true;
+      item.Focus();
+
+      LogInformation(
+        $"Archive UI: PreviewMouseLeftButtonDown selected kind='{node?.Kind}', display='{node?.DisplayName}', selectedAfter='{item.IsSelected}'.");
     }
 
     private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -981,6 +1829,22 @@ namespace UI.Controls.Archive
     private ArchiveTreeNode? GetContextNode()
     {
       return _contextMenuNode ?? (ArchivesTreeView.SelectedItem as ArchiveTreeNode);
+    }
+
+    private static T? FindVisualAncestor<T>(DependencyObject? current)
+      where T : DependencyObject
+    {
+      while (current != null)
+      {
+        if (current is T typed)
+        {
+          return typed;
+        }
+
+        current = VisualTreeHelper.GetParent(current);
+      }
+
+      return null;
     }
 
     private ArchiveTreeNode GetNodeForPrint()
@@ -1236,6 +2100,8 @@ namespace UI.Controls.Archive
       var isRoot = node?.Kind == ArchiveTreeNodeKind.Root;
       var isArchive = node?.Kind == ArchiveTreeNodeKind.Archive;
       var isFile = node?.Kind == ArchiveTreeNodeKind.File;
+      var isReviewFile = node?.Kind == ArchiveTreeNodeKind.ReviewFile;
+      var isReviewArchive = node?.Kind == ArchiveTreeNodeKind.ReviewArchive;
       var hasClipboardEntry = HasArchiveClipboardEntry();
       var canManageArchives = isRoot;
 
@@ -1243,17 +2109,19 @@ namespace UI.Controls.Archive
       PrintArchiveCatalogMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
       UploadArchiveMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
       DownloadArchivesMenuItem.Visibility = canManageArchives ? Visibility.Visible : Visibility.Collapsed;
-      OpenArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      OpenArchiveMenuItem.Visibility = (isArchive || isReviewArchive) ? Visibility.Visible : Visibility.Collapsed;
       SaveArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveMenuItem.Visibility = (isArchive || isReviewArchive) ? Visibility.Visible : Visibility.Collapsed;
       AddFileToArchiveMenuItem.Visibility = isArchive ? Visibility.Visible : Visibility.Collapsed;
-      OpenArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      OpenArchiveFileMenuItem.Visibility = (isFile || isReviewFile || isReviewArchive) ? Visibility.Visible : Visibility.Collapsed;
+      OpenArchiveFileMenuItem.Header = isReviewArchive ? "Открыть" : "Открыть";
+      OpenInTextEditorMenuItem.Visibility = isReviewFile ? Visibility.Visible : Visibility.Collapsed;
       CopyArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
       CutArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
       PasteArchiveFileMenuItem.Visibility = (isFile || isArchive) && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
-      DeleteArchiveFileMenuItem.Visibility = isFile ? Visibility.Visible : Visibility.Collapsed;
+      DeleteArchiveFileMenuItem.Visibility = (isFile || isReviewFile) ? Visibility.Visible : Visibility.Collapsed;
 
-      if (!isRoot && !isArchive && !isFile)
+      if (!isRoot && !isArchive && !isFile && !isReviewArchive && !isReviewFile)
       {
         var contextMenu = sender as ContextMenu;
         if (contextMenu != null)
@@ -1281,12 +2149,15 @@ namespace UI.Controls.Archive
     private async void OpenArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
+      if (node == null || string.IsNullOrWhiteSpace(node.ArchivePath))
       {
         return;
       }
 
-      await OpenArchiveAsync(node.ArchivePath);
+      if (node.Kind == ArchiveTreeNodeKind.Archive || node.Kind == ArchiveTreeNodeKind.ReviewArchive)
+      {
+        await OpenArchiveAsync(node.ArchivePath);
+      }
     }
 
     private void SaveArchiveMenuItem_Click(object sender, RoutedEventArgs e)
@@ -1313,41 +2184,78 @@ namespace UI.Controls.Archive
       AddFileToArchive(node.ArchivePath);
     }
 
-    private void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      if (node?.Kind != ArchiveTreeNodeKind.Archive || string.IsNullOrWhiteSpace(node.ArchivePath))
+      if (node == null || string.IsNullOrWhiteSpace(node.ArchivePath))
       {
         return;
       }
 
-      DeleteArchive(node.ArchivePath, Path.GetFileNameWithoutExtension(node.ArchivePath));
+      if (node.Kind == ArchiveTreeNodeKind.Archive)
+      {
+        DeleteArchive(node.ArchivePath, Path.GetFileNameWithoutExtension(node.ArchivePath));
+        return;
+      }
+
+      if (node.Kind == ArchiveTreeNodeKind.ReviewArchive)
+      {
+        await DeleteReviewArchiveAsync(node.ArchivePath, Path.GetFileName(node.ArchivePath));
+      }
     }
 
     private async void OpenArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      if (node?.Kind != ArchiveTreeNodeKind.File ||
-          string.IsNullOrWhiteSpace(node.ArchivePath) ||
-          string.IsNullOrWhiteSpace(node.EntryName))
+      if (node == null || string.IsNullOrWhiteSpace(node.ArchivePath))
       {
         return;
       }
 
-      await OpenArchiveFileAsync(node.ArchivePath, node.EntryName);
+      if ((node.Kind == ArchiveTreeNodeKind.File || node.Kind == ArchiveTreeNodeKind.ReviewFile) &&
+          !string.IsNullOrWhiteSpace(node.EntryName))
+      {
+        await OpenArchiveFileAsync(node.ArchivePath, node.EntryName);
+        return;
+      }
+
+      if (node.Kind == ArchiveTreeNodeKind.ReviewArchive)
+      {
+        await OpenArchiveAsync(node.ArchivePath);
+      }
     }
 
-    private void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    private void OpenInTextEditorMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      if (node?.Kind != ArchiveTreeNodeKind.File ||
+      if (node?.Kind != ArchiveTreeNodeKind.ReviewFile || string.IsNullOrWhiteSpace(node.FilePath))
+      {
+        return;
+      }
+
+      FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(node.FilePath);
+    }
+
+    private async void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+      var node = GetContextNode();
+      if (node == null ||
           string.IsNullOrWhiteSpace(node.ArchivePath) ||
           string.IsNullOrWhiteSpace(node.EntryName))
       {
         return;
       }
 
-      DeleteArchiveFile(node.ArchivePath, node.EntryName, node.DisplayName);
+      if (node.Kind == ArchiveTreeNodeKind.File)
+      {
+        DeleteArchiveFile(node.ArchivePath, node.EntryName, node.DisplayName);
+        return;
+      }
+
+      if (node.Kind == ArchiveTreeNodeKind.ReviewFile)
+      {
+        await DeleteReviewFileAsync(node.ArchivePath, node.EntryName, node.DisplayName, node.FilePath);
+      }
     }
 
     private void CopyArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
@@ -1402,10 +2310,16 @@ namespace UI.Controls.Archive
       ResetArchiveActionButtonFocus();
     }
 
-    private void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
       {
+        if (IsReviewArchivePath(_lastSelectedArchivePath))
+        {
+          await DeleteReviewArchiveAsync(_lastSelectedArchivePath, Path.GetFileName(_lastSelectedArchivePath));
+          return;
+        }
+
         DeleteArchive(_lastSelectedArchivePath, Path.GetFileNameWithoutExtension(_lastSelectedArchivePath));
       }
     }
@@ -1418,11 +2332,21 @@ namespace UI.Controls.Archive
       }
     }
 
-    private void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
+    private async void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
           !string.IsNullOrWhiteSpace(_lastSelectedEntryName))
       {
+        if (_lastSelectedIsReviewEntry)
+        {
+          await DeleteReviewFileAsync(
+            _lastSelectedArchivePath,
+            _lastSelectedEntryName,
+            Path.GetFileName(_lastSelectedEntryName),
+            _lastSelectedReviewFilePath);
+          return;
+        }
+
         DeleteArchiveFile(_lastSelectedArchivePath, _lastSelectedEntryName, Path.GetFileName(_lastSelectedEntryName));
       }
     }
@@ -1509,6 +2433,7 @@ namespace UI.Controls.Archive
     {
       try
       {
+        LogInformation($"Archive UI: OpenArchiveAsync archive='{archivePath}'.");
         _lastSelectedArchivePath = archivePath;
         _lastSelectedEntryName = null;
         await ShowArchiveInGridAsync(archivePath, clearEditor: true);
@@ -1523,6 +2448,7 @@ namespace UI.Controls.Archive
     {
       try
       {
+        LogInformation($"Archive UI: OpenArchiveFileAsync archive='{archivePath}', entry='{entryName}'.");
         _lastSelectedArchivePath = archivePath;
         _lastSelectedEntryName = entryName;
         await ShowFileAsync(archivePath, entryName, false);
@@ -1667,6 +2593,104 @@ namespace UI.Controls.Archive
       }
     }
 
+    private async Task DeleteReviewArchiveAsync(string reviewArchivePath, string displayName)
+    {
+      var confirmation = Message.MessageBoxCustom.Show(
+        $"Удалить архив на проверке '{displayName}'?",
+        "Удаление архива",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
+
+      if (confirmation != MessageBoxResult.Yes)
+      {
+        return;
+      }
+
+      try
+      {
+        var fullReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+        Directory.Delete(fullReviewArchivePath, recursive: true);
+        InvalidateArchiveCaches(fullReviewArchivePath);
+
+        var deletedSelectedArchive = IsSameArchivePath(_lastSelectedArchivePath, fullReviewArchivePath);
+        if (deletedSelectedArchive)
+        {
+          _lastSelectedArchivePath = null;
+          _lastSelectedEntryName = null;
+          _lastSelectedReviewFilePath = null;
+          _lastSelectedIsReviewEntry = false;
+        }
+
+        await RefreshTreePreservingStateAsync(preservePanels: !deletedSelectedArchive);
+
+        ShowArchiveNotification(
+          "Удаление архива",
+          $"Архив на проверке '{displayName}' успешно удалён.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Удаление архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private async Task DeleteReviewFileAsync(string reviewArchivePath, string entryName, string displayName, string? filePath)
+    {
+      var confirmation = Message.MessageBoxCustom.Show(
+        $"Удалить файл '{displayName}' из архива на проверке?",
+        "Удаление файла",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
+
+      if (confirmation != MessageBoxResult.Yes)
+      {
+        return;
+      }
+
+      try
+      {
+        var fullReviewArchivePath = Path.GetFullPath(reviewArchivePath);
+        var fullFilePath = !string.IsNullOrWhiteSpace(filePath)
+          ? Path.GetFullPath(filePath)
+          : Path.Combine(fullReviewArchivePath, Path.GetFileName(entryName));
+
+        if (File.Exists(fullFilePath))
+        {
+          File.Delete(fullFilePath);
+        }
+
+        var companionOpkwPath = Path.ChangeExtension(fullFilePath, ".opkw");
+        if (!string.Equals(companionOpkwPath, fullFilePath, StringComparison.OrdinalIgnoreCase) && File.Exists(companionOpkwPath))
+        {
+          File.Delete(companionOpkwPath);
+        }
+
+        InvalidateArchiveCaches(fullReviewArchivePath);
+
+        var deletedSelectedFile =
+          IsSameArchivePath(_lastSelectedArchivePath, fullReviewArchivePath) &&
+          string.Equals(NormalizeEntryName(_lastSelectedEntryName), NormalizeEntryName(entryName), StringComparison.OrdinalIgnoreCase);
+
+        if (deletedSelectedFile)
+        {
+          _lastSelectedEntryName = null;
+          _lastSelectedReviewFilePath = null;
+          _lastSelectedIsReviewEntry = false;
+        }
+
+        await RefreshTreePreservingStateAsync(preservePanels: !deletedSelectedFile);
+
+        ShowArchiveNotification(
+          "Удаление файла",
+          $"Файл '{displayName}' успешно удалён из архива на проверке '{Path.GetFileName(fullReviewArchivePath)}'.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Удаление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
     private void ConvertToPkwButton_Click(object sender, RoutedEventArgs e)
     {
       var fileText = GetFileContentText();
@@ -1678,6 +2702,222 @@ namespace UI.Controls.Archive
 
       var suggestedFileName = GetSuggestedPkwFileName();
       SaveFileManager.SaveFileAs(fileText, suggestedFileName);
+    }
+
+    private void OpenInEditorButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath))
+      {
+        return;
+      }
+
+      FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(_lastSelectedReviewFilePath);
+    }
+
+    private async void RecheckReviewArchiveButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !IsReviewArchivePath(_lastSelectedArchivePath))
+      {
+        return;
+      }
+
+      try
+      {
+        var reviewArchivePath = _lastSelectedArchivePath;
+        var reviewEntries = _currentGridEntries
+          .Where(entry => entry.IsReviewEntry && IsSameArchivePath(entry.ArchivePath, reviewArchivePath))
+          .ToList();
+
+        if (reviewEntries.Count == 0)
+        {
+          reviewEntries = (await GetReviewEntriesAsync(reviewArchivePath)).ToList();
+        }
+
+        if (reviewEntries.Count == 0)
+        {
+          ShowArchiveNotification("Повторная проверка архива", "В архиве на проверке нет файлов для проверки.", NotificationType.Warning);
+          return;
+        }
+
+        var owner = Window.GetWindow(this);
+        var previousEffect = owner?.Effect;
+        ProgressWindow? progressWindow = null;
+        var totalErrors = 0;
+        var filesWithErrors = 0;
+        try
+        {
+          progressWindow = new ProgressWindow
+          {
+            Owner = owner,
+            WindowStartupLocation = owner == null
+              ? WindowStartupLocation.CenterScreen
+              : WindowStartupLocation.CenterOwner,
+          };
+
+          progressWindow.Configure(
+            "Повторная проверка архива",
+            "Подготовка проверки",
+            $"Готовим повторную проверку {reviewEntries.Count} файлов.");
+
+          if (owner != null)
+          {
+            owner.Effect = new BlurEffect { Radius = 8 };
+          }
+
+          progressWindow.Show();
+          await WaitForProgressWindowAsync(progressWindow);
+
+          for (var index = 0; index < reviewEntries.Count; index++)
+          {
+            var reviewEntry = reviewEntries[index];
+            if (string.IsNullOrWhiteSpace(reviewEntry.SourceFilePath) || !File.Exists(reviewEntry.SourceFilePath))
+            {
+              continue;
+            }
+
+            var processed = index + 1;
+            var fileName = Path.GetFileName(reviewEntry.SourceFilePath);
+            progressWindow.SetProgress(processed * 100d / reviewEntries.Count);
+            progressWindow.SetStage(
+              $"Проверка файла {processed}/{reviewEntries.Count}",
+              fileName);
+
+            MarkReviewPathAsRecentlyMutated(reviewEntry.SourceFilePath);
+            MarkReviewPathAsRecentlyMutated(Path.ChangeExtension(reviewEntry.SourceFilePath, ".opkw"));
+
+            var result = await Task.Run(() => RecheckReviewFile(reviewEntry.SourceFilePath));
+            UpdateReviewStateInPlace(reviewArchivePath, reviewEntry.EntryName, result.ErrorCount);
+
+            totalErrors += result.ErrorCount;
+            if (result.ErrorCount > 0)
+            {
+              filesWithErrors++;
+            }
+          }
+        }
+        finally
+        {
+          progressWindow?.Close();
+
+          if (owner != null)
+          {
+            owner.Effect = previousEffect;
+          }
+        }
+
+        if (_lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath) && File.Exists(_lastSelectedReviewFilePath))
+        {
+          var selectedEntry = FindReviewGridEntry(reviewArchivePath, _lastSelectedEntryName);
+          var fileType = selectedEntry?.FileType ?? DeterminePreviewFileType(_lastSelectedReviewFilePath);
+          var text = await Task.Run(() => ReadReviewFileText(_lastSelectedReviewFilePath, fileType));
+          var textEditor = CreatePreviewEditor(text, fileType);
+          FileContentTextBox.Content = textEditor;
+          textEditor.TextArea.TextView.Redraw();
+        }
+
+        FilesHintTextBlock.Text = _currentGridEntries.Count == 0
+          ? "Архив на проверке пуст."
+          : "Выберите файл на проверке для просмотра.";
+        EditorHintTextBlock.Text = _lastSelectedIsReviewEntry
+          ? "Содержимое файла доступно только для чтения."
+          : "Выберите файл на проверке для просмотра.";
+        UpdateActionButtons();
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: _lastSelectedIsReviewEntry);
+
+        if (totalErrors > 0)
+        {
+          ShowArchiveNotification(
+            "Повторная проверка архива",
+            $"Архив проверен повторно. Найдено ошибок: {totalErrors} в {filesWithErrors} файлах.",
+            NotificationType.Warning);
+          return;
+        }
+
+        ShowArchiveNotification(
+          "Повторная проверка архива",
+          $"Архив проверен повторно. Ошибок не найдено. Файлов проверено: {reviewEntries.Count}.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Повторная проверка архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private static async Task WaitForProgressWindowAsync(ProgressWindow progressWindow)
+    {
+      await progressWindow.Dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Background);
+
+      await progressWindow.Dispatcher.InvokeAsync(
+        progressWindow.UpdateLayout,
+        DispatcherPriority.Render);
+
+      await progressWindow.Dispatcher.InvokeAsync(
+        () => { },
+        DispatcherPriority.ContextIdle);
+    }
+
+    private async void RecheckReviewFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath) ||
+          string.IsNullOrWhiteSpace(_lastSelectedArchivePath) ||
+          string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        return;
+      }
+
+      try
+      {
+        var reviewArchivePath = _lastSelectedArchivePath;
+        var entryName = _lastSelectedEntryName;
+        var reviewFilePath = _lastSelectedReviewFilePath;
+        MarkReviewPathAsRecentlyMutated(reviewFilePath);
+        MarkReviewPathAsRecentlyMutated(Path.ChangeExtension(reviewFilePath, ".opkw"));
+
+        var selectedEntry = FindReviewGridEntry(reviewArchivePath, entryName);
+        var fileType = selectedEntry?.FileType ?? DeterminePreviewFileType(reviewFilePath);
+
+        var result = await Task.Run(() => RecheckReviewFile(reviewFilePath));
+        var text = await Task.Run(() => ReadReviewFileText(reviewFilePath, fileType));
+
+        UpdateReviewStateInPlace(reviewArchivePath, entryName, result.ErrorCount);
+
+        var textEditor = CreatePreviewEditor(text, fileType);
+        FileContentTextBox.Content = textEditor;
+        textEditor.TextArea.TextView.Redraw();
+
+        _lastSelectedArchivePath = reviewArchivePath;
+        _lastSelectedEntryName = NormalizeEntryName(entryName);
+        _lastSelectedReviewFilePath = reviewFilePath;
+        _lastSelectedIsReviewEntry = true;
+
+        FilesHintTextBlock.Text = _currentGridEntries.Count == 0
+          ? "Архив на проверке пуст."
+          : "Выберите файл на проверке для просмотра.";
+        EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
+        UpdateActionButtons();
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: true);
+
+        if (result.ErrorCount > 0)
+        {
+          ShowArchiveNotification(
+            "Повторная проверка файла",
+            $"Файл проверен повторно. Найдено ошибок: {result.ErrorCount}.",
+            NotificationType.Warning);
+          return;
+        }
+
+        ShowArchiveNotification(
+          "Повторная проверка файла",
+          "Файл проверен повторно. Ошибок не найдено.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Повторная проверка файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
     }
 
     private string GetFileContentText()
@@ -1844,6 +3084,11 @@ namespace UI.Controls.Archive
     private async void ArchivesTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
       var node = e.NewValue as ArchiveTreeNode;
+      var previousNode = e.OldValue as ArchiveTreeNode;
+
+      LogInformation(
+        $"Archive UI: SelectedItemChanged oldKind='{previousNode?.Kind}', oldDisplay='{previousNode?.DisplayName}', newKind='{node?.Kind}', newDisplay='{node?.DisplayName}'.");
+
       if (node == null)
       {
         return;
@@ -1851,7 +3096,7 @@ namespace UI.Controls.Archive
 
       try
       {
-        if (node.Kind == ArchiveTreeNodeKind.Root)
+        if (node.Kind == ArchiveTreeNodeKind.Root || node.Kind == ArchiveTreeNodeKind.ReviewRoot)
         {
           lock (_archiveManagerSync)
           {
@@ -1860,17 +3105,20 @@ namespace UI.Controls.Archive
 
           _lastSelectedArchivePath = null;
           _lastSelectedEntryName = null;
+          _lastSelectedReviewFilePath = null;
+          _lastSelectedIsReviewEntry = false;
           ClearFilePanels();
           return;
         }
 
-        if (node.Kind == ArchiveTreeNodeKind.Archive && node.ArchivePath != null)
+        if ((node.Kind == ArchiveTreeNodeKind.Archive || node.Kind == ArchiveTreeNodeKind.ReviewArchive) &&
+            node.ArchivePath != null)
         {
           await OpenArchiveAsync(node.ArchivePath);
           return;
         }
 
-        if (node.Kind == ArchiveTreeNodeKind.File &&
+        if ((node.Kind == ArchiveTreeNodeKind.File || node.Kind == ArchiveTreeNodeKind.ReviewFile) &&
             node.ArchivePath != null &&
             !string.IsNullOrWhiteSpace(node.EntryName))
         {
@@ -1894,6 +3142,8 @@ namespace UI.Controls.Archive
       if (selected == null)
       {
         _lastSelectedEntryName = null;
+        _lastSelectedReviewFilePath = null;
+        _lastSelectedIsReviewEntry = false;
         UpdateActionButtons();
         return;
       }
@@ -1902,24 +3152,24 @@ namespace UI.Controls.Archive
       {
         _lastSelectedArchivePath = selected.ArchivePath;
         _lastSelectedEntryName = selected.EntryName;
+        _lastSelectedReviewFilePath = selected.SourceFilePath;
+        _lastSelectedIsReviewEntry = selected.IsReviewEntry;
 
-        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(selected.ArchivePath, selected.EntryName));
-
-        var textEditor = new TextEditorUI(FileType.OPKW);
-        textEditor.Text = text;
-
-
-        // Добавляем подсветку только один раз
-        if (!textEditor.TextArea.TextView.LineTransformers
-            .OfType<BracesCommentColorizer>()
-            .Any())
+        string text;
+        FileType fileType;
+        if (selected.IsReviewEntry && !string.IsNullOrWhiteSpace(selected.SourceFilePath))
         {
-          textEditor.TextArea.TextView.LineTransformers
-              .Add(new BracesCommentColorizer());
+          text = await Task.Run(() => ReadReviewFileText(selected.SourceFilePath, selected.FileType));
+          fileType = selected.FileType;
+        }
+        else
+        {
+          text = await Task.Run(() => ReadArchiveEntryTextWithManager(selected.ArchivePath, selected.EntryName));
+          fileType = FileType.OPKW;
         }
 
+        var textEditor = CreatePreviewEditor(text, fileType);
         FileContentTextBox.Content = textEditor;
-        textEditor.IsReadOnly = true;
         textEditor.TextArea.TextView.Redraw();
 
         EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
@@ -2110,10 +3360,18 @@ namespace UI.Controls.Archive
       public ArchiveClipboardOperation Operation { get; }
     }
 
+    private sealed class RecheckReviewFileResult
+    {
+      public string FilePath { get; init; } = string.Empty;
+      public int ErrorCount { get; init; }
+    }
+
     private sealed class TreeRefreshState
     {
-      public bool IsRootExpanded { get; set; }
+      public bool IsArchiveRootExpanded { get; set; }
+      public bool IsReviewRootExpanded { get; set; }
       public HashSet<string> ExpandedArchivePaths { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      public HashSet<string> ExpandedReviewArchivePaths { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
 
   }

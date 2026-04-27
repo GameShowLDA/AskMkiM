@@ -4,10 +4,8 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using UI.Components.FileComparerControls;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -351,12 +349,6 @@ namespace UI.Components.MultiEditorMethods
 
       OpenFileButton tabButton = CreateTabButton(header, description, tabType);
 
-      if (control is FileCompareControl)
-      {
-        AddFileCompareControl(header, control);
-        return;
-      }
-
       if (CheckExistingPage(tabButton, description))
       {
         return;
@@ -365,23 +357,6 @@ namespace UI.Components.MultiEditorMethods
       ConfigureTabEvents(tabButton, control);
       AddTabAndControl(tabButton, control);
       ShowControl(control, tabButton);
-    }
-
-    /// <summary>
-    /// Добавляет контрол сравнения файлов в панель и создает соответствующую вкладку.
-    /// </summary>
-    /// <param name="header">Название вкладки.</param>
-    /// <param name="control">Пользовательский элемент сранения файлов.</param>
-    private void AddFileCompareControl(string header, UserControl control)
-    {
-      var fileManager = new FileManager(multiEditorControl);
-      var textEditorContainer = fileManager.ContainerService.GetEditorContainer(EditorType.TextEditor);
-      if (textEditorContainer == null)
-      {
-        textEditorContainer = fileManager.ContainerService.CreateEditorContainer(EditorType.TextEditor);
-      }
-
-      fileManager.DockItemService.ShowEditorDockItem(header, textEditorContainer, control);
     }
 
     /// <summary>

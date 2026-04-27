@@ -266,16 +266,6 @@ namespace Ask.UI.Resources.Localization.Language {
                 return ResourceManager.GetString("menu.file.archive", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Сравнить.
-        /// </summary>
-        internal static string menu_file_compare {
-            get {
-                return ResourceManager.GetString("menu.file.compare", resourceCulture);
-            }
-        }
-        
         /// <summary>
         ///   Ищет локализованную строку, похожую на Выход.
         /// </summary>

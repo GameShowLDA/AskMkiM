@@ -30,7 +30,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (!isQuestion)
       {
-        CommandExecutionState.LastCuResult = ShowInformation(command.MessageText);
+        // CommandExecutionState.LastCuResult = ShowInformation(command.MessageText);
         CommandExecutionState.LastRejectFlag = false;
         return;
       }

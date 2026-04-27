@@ -417,3 +417,4 @@ tmpinspect_margin*/
 /.dotnet
 /.dotnet_home
 .dotnet/
+/_build_check
