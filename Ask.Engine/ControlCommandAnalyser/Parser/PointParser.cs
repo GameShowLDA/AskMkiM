@@ -61,9 +61,41 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         chainModels.AddRange(groups);
       }
 
-      ApplyAlgorithmWarnings(chainModels, model);
-
       return (new SchemeModel(chainModels), errors);
+    }
+
+    /// <summary>
+    /// Разбор списка исключения ССИРТ из конструкции ~(...) в точки АСК.
+    /// </summary>
+    public static (List<PointModel> Points, List<ErrorItem> Errors) ParseDeletionPoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
+    {
+      var errors = new List<ErrorItem>();
+      var points = new List<PointModel>();
+
+      if (!HasPointsMap(rmCommandModel))
+      {
+        errors.Add(GeneralErrors.MissingPointsMap(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+        return (points, errors);
+      }
+
+      expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
+      if (string.IsNullOrEmpty(expr))
+      {
+        errors.Add(GeneralErrors.EmptyPointsBody(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+        return (points, errors);
+      }
+
+      var expanded = ExpandDeletionTokens(expr, errors);
+      if (errors.Count > 0)
+        return (points, errors);
+
+      var (pointErrors, pointModels) = CommandPostAnalyzer.GetPointsModel(expanded, model, rmCommandModel);
+      errors.AddRange(pointErrors);
+
+      if (pointModels != null)
+        points.AddRange(pointModels);
+
+      return (points, errors);
     }
 
     /// <summary>
@@ -303,6 +335,34 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
 
       return (connected, disconnected);
+    }
+
+    private static List<string> ExpandDeletionTokens(string expr, List<ErrorItem> errors)
+    {
+      var result = new List<string>();
+
+      var rawTokens = expr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                          .Select(CleanToken)
+                          .Where(t => !string.IsNullOrEmpty(t))
+                          .ToList();
+
+      foreach (var tok in rawTokens)
+      {
+        if (tok.Contains("-*"))
+        {
+          AddRangeError(errors, $"В списке исключения ССИРТ недопустим разделитель разобщения: {tok}.");
+        }
+        else if (tok.Contains('-'))
+        {
+          result.AddRange(ExpandRangeToken(tok, errors));
+        }
+        else
+        {
+          result.Add(tok);
+        }
+      }
+
+      return result;
     }
 
     /// <summary>
@@ -677,41 +737,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return result;
     }
 
-    /// <summary>
-    /// Применяет бизнес-правило:
-    /// если найдено меньше двух разомкнутых цепей для PR/SI/PI,
-    /// автоматически добавляется алгоритм ЗР.
-    /// </summary>
-    private static void ApplyAlgorithmWarnings(List<GroupModel> chainModels, BaseCommandModel model)
-    {
-      if (chainModels == null || chainModels.Count == 0)
-        return;
-
-      int disconnectedCount = 0;
-      var scheme = new SchemeModel(chainModels);
-
-      foreach (var group in chainModels)
-      {
-        var points = scheme.GetPointsDisconnected(group);
-        if (points != null)
-          disconnectedCount++;
-      }
-
-      bool isMeasurementType =
-         model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName ||
-         model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName ||
-         model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
-
-      if (disconnectedCount < 2 &&
-          disconnectedCount != 0 &&
-          isMeasurementType &&
-          !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
-      {
-        model.AlgorithmKey.Add(AlgorithmKey.ЗР.ToString());
-        model.Warnings.Add(
-          GeneralWarnings.KeyZR(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}")
-        );
-      }
-    }
   }
 }
