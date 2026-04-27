@@ -433,6 +433,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         Description = message,
         Code = ErrorCode.Gen_InvalidReference
       });
+    }
+
     private static SchemeModel ApplyDeletionList(BaseCommandModel model, SchemeModel scheme, RmCommandModel rmCommandModel, int numberLine, string deletionExpr)
     {
       if (scheme == null || string.IsNullOrWhiteSpace(deletionExpr))
