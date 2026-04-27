@@ -374,6 +374,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       token = NormalizeRangeToken(token);
 
+      if (TryExtractContactSuffix(token, out var rangePart, out var suffix))
+      {
+        var baseRange = ExpandRangeToken(rangePart, errors);
+
+        return baseRange
+            .Select(x => x + suffix)
+            .ToList();
+      }
+
       if (!TrySplitRange(token, out var left, out var right))
         return result;
 
@@ -446,17 +455,43 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return true;
     }
 
+    private static bool TryExtractContactSuffix(string token, out string rangePart, out string suffix)
+    {
+      rangePart = token;
+      suffix = "";
+
+      int slashIndex = token.LastIndexOf('/');
+
+      if (slashIndex < 0)
+        return false;
+
+      var afterSlash = token.Substring(slashIndex + 1);
+
+      if (!int.TryParse(afterSlash, out _))
+        return false;
+
+      var leftPart = token.Substring(0, slashIndex);
+
+      if (!leftPart.Contains('-'))
+        return false;
+
+      rangePart = leftPart;
+      suffix = token.Substring(slashIndex); // включая "/"
+
+      return true;
+    }
+
     /// <summary>
     /// Проверяет корректность диапазона.
     /// </summary>
     private static bool ValidateRangeBounds(string token, int start, int end, List<ErrorItem> errors)
     {
-      if (end < start)
-      {
-        AddRangeError(errors,
-          $"Неверный диапазон точек (конец меньше начала): {token}.");
-        return false;
-      }
+      //if (end < start)
+      //{
+      //  AddRangeError(errors,
+      //    $"Неверный диапазон точек (конец меньше начала): {token}.");
+      //  return false;
+      //}
 
       return true;
     }
@@ -466,9 +501,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     private static List<string> GenerateRangeValues(string prefix, int start, int end)
     {
-      var result = new List<string>(end - start + 1);
+      var result = new List<string>();
 
-      for (int n = start; n <= end; n++)
+      int step = start <= end ? 1 : -1;
+
+      for (int n = start; step > 0 ? n <= end : n >= end; n += step)
         result.Add($"{prefix}{n}");
 
       return result;
@@ -502,10 +539,19 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         var tail = token.Substring(sep + 1);
         return int.TryParse(tail, out number);
       }
-      else
+      //else
+      //{
+      //  return int.TryParse(token, out number);
+      //}
+      var match = Regex.Match(token, @"^(.*?)(\d+)$");
+      if (match.Success)
       {
-        return int.TryParse(token, out number);
+        prefix = match.Groups[1].Value;
+        number = int.Parse(match.Groups[2].Value);
+        return true;
       }
+
+      return int.TryParse(token, out number);
     }
 
     private static string CleanToken(string t)
