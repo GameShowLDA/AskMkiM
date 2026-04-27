@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
     const setBookmarkVisible = visible => { bookmarkBtn.style.visibility = visible ? 'visible' : 'hidden'; };
     const bookmarkIds = () => [...bookmarks].filter(id => pageMap.get(id)?.isPage);
+    const getBranch = folder => folder?.nextElementSibling?.tagName === 'UL' ? folder.nextElementSibling : null;
 
     function readStoredJson(key) {
         try {
@@ -196,6 +197,25 @@ document.addEventListener('DOMContentLoaded', () => {
             .join('');
     }
 
+    function setFolderOpen(folder, isOpen) {
+        if (!folder?.classList.contains('folder')) return;
+
+        const branch = getBranch(folder);
+        const open = Boolean(branch && isOpen);
+        const toggle = $('.toggle', folder);
+
+        folder.classList.toggle('is-open', open);
+        folder.setAttribute('aria-expanded', branch ? String(open) : 'false');
+        if (toggle) toggle.textContent = branch ? (open ? '▼' : '▶') : '';
+        if (branch) branch.style.display = open ? 'block' : 'none';
+    }
+
+    function syncFolderToggles() {
+        $$('.tree-item.folder', navTree).forEach(folder => {
+            setFolderOpen(folder, getBranch(folder)?.style.display === 'block');
+        });
+    }
+
     function buildBreadcrumb(item) {
         const parts = [];
 
@@ -210,8 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function expandPathTo(item) {
         for (let node = item; node && node.id !== 'nav-tree'; node = node.parentElement) {
-            if (node.tagName === 'UL') node.style.display = 'block';
-            if (node.classList?.contains('folder')) $('.toggle', node).textContent = '▼';
+            if (node.tagName === 'UL') setFolderOpen(node.previousElementSibling, true);
         }
     }
 
@@ -407,12 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasPage = Boolean(item.dataset.src);
 
         if (item.classList.contains('folder')) {
-            const branch = item.nextElementSibling;
-            if (branch) {
-                const isOpen = branch.style.display === 'block';
-                branch.style.display = isOpen ? 'none' : 'block';
-                $('.toggle', item).textContent = isOpen ? '▶' : '▼';
-            }
+            setFolderOpen(item, !item.classList.contains('is-open'));
 
             if (hasPage && !isToggleClick) {
                 setBookmarkVisible(false);
@@ -503,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     $$('ul', navTree).forEach(branch => { branch.style.display = 'none'; });
-    $$('.folder .toggle', navTree).forEach(toggle => { toggle.textContent = '▶'; });
+    syncFolderToggles();
     renderBookmarksTab();
     updateSearchPlaceholder();
 
