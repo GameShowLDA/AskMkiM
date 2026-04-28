@@ -30,7 +30,12 @@ namespace Ask.UI.Controls.ErrorList
     /// <remarks>Должна обновляться сразу при появлении/удалении/переключении точки.</remarks>
     public ObservableCollection<BreakpointListItem> Breakpoints { get; } = new();
 
+    public ObservableCollection<PageButtonItem> PageButtons { get; } = new();
+
     private readonly List<IDisplayIssue> _allIssues = new();
+
+    private const int PageSize = 30;
+    private int _currentPageIndex = 0;
 
     private bool _warningsHidden = false;
     private bool _errorsHidden = false;
@@ -51,7 +56,7 @@ namespace Ask.UI.Controls.ErrorList
         DebugColumn.Visibility = Visibility.Visible;
       }
 
-      MouseMove += (s, e) =>
+      MouseEnter += (s, e) =>
       {
         HelpProvider.SetHelpKey(this, "DescriptionWorkTranslator");
       };
@@ -123,12 +128,9 @@ namespace Ask.UI.Controls.ErrorList
     {
       _allIssues.Add(error);
       _errorTotal++;
-      if (!_errorsHidden)
-        Items.Add(error);
 
+      RefreshPageIfNewItemIsVisibleOnCurrentPage(error);
       ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -138,12 +140,9 @@ namespace Ask.UI.Controls.ErrorList
     {
       _allIssues.Add(warning);
       _warningTotal++;
-      if (!_warningsHidden)
-        Items.Add(warning);
 
+      RefreshPageIfNewItemIsVisibleOnCurrentPage(warning);
       ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -151,17 +150,15 @@ namespace Ask.UI.Controls.ErrorList
     /// </summary>
     public void AddErrors(IEnumerable<ErrorItem> errors)
     {
-      foreach (var err in errors)
-      {
-        _allIssues.Add(err);
-        _errorTotal++;
-        if (!_errorsHidden)
-          Items.Add(err);
-      }
+      var errorList = errors?.ToList() ?? new List<ErrorItem>();
+      if (errorList.Count == 0)
+        return;
 
+      _allIssues.AddRange(errorList);
+      _errorTotal += errorList.Count;
+
+      RefreshCurrentPage();
       ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -169,17 +166,15 @@ namespace Ask.UI.Controls.ErrorList
     /// </summary>
     public void AddWarnings(IEnumerable<WarningItem> warnings)
     {
-      foreach (var warn in warnings)
-      {
-        _allIssues.Add(warn);
-        _warningTotal++;
-        if (!_warningsHidden)
-          Items.Add(warn);
-      }
+      var warningList = warnings?.ToList() ?? new List<WarningItem>();
+      if (warningList.Count == 0)
+        return;
 
+      _allIssues.AddRange(warningList);
+      _warningTotal += warningList.Count;
+
+      RefreshCurrentPage();
       ApplyInitialButtonState();
-
-      UpdateTabsVisibilityAndSelection();
     }
 
     /// <summary>
@@ -194,7 +189,8 @@ namespace Ask.UI.Controls.ErrorList
       _allIssues.AddRange(issueList);
 
       RecalculateTotals();
-      ReplaceVisibleItems();
+      _currentPageIndex = 0;
+      RefreshCurrentPage();
       ApplyInitialButtonState();
     }
 
@@ -205,8 +201,10 @@ namespace Ask.UI.Controls.ErrorList
 
       _errorTotal = 0;
       _warningTotal = 0;
+      _currentPageIndex = 0;
 
       UpdateButtons();
+      UpdatePagingControls();
 
       UpdateTabsVisibilityAndSelection();
     }
@@ -218,21 +216,10 @@ namespace Ask.UI.Controls.ErrorList
 
     private void ApplyFilter()
     {
-      Items.Clear();
-
-      foreach (var issue in _allIssues)
-      {
-        if (issue.IsWarning && _warningsHidden)
-          continue;
-
-        if (!issue.IsWarning && _errorsHidden)
-          continue;
-
-        Items.Add(issue);
-      }
+      _currentPageIndex = 0;
+      RefreshCurrentPage();
 
       UpdateButtons();
-
       UpdateTabsVisibilityAndSelection();
     }
 
@@ -305,17 +292,201 @@ namespace Ask.UI.Controls.ErrorList
       return !_errorsHidden;
     }
 
-    private void ReplaceVisibleItems()
+    private int GetVisibleCount()
     {
-      Items.ReplaceRange(_allIssues.Where(ShouldDisplay));
+      if (_warningsHidden && _errorsHidden)
+        return 0;
+
+      if (_warningsHidden)
+        return _errorTotal;
+
+      if (_errorsHidden)
+        return _warningTotal;
+
+      return _errorTotal + _warningTotal;
     }
 
+    private int GetMaxPageIndex()
+    {
+      var visibleCount = GetVisibleCount();
+      if (visibleCount == 0)
+        return 0;
+
+      return (visibleCount - 1) / PageSize;
+    }
+
+    private void NormalizeCurrentPage()
+    {
+      var maxPageIndex = GetMaxPageIndex();
+
+      if (_currentPageIndex < 0)
+        _currentPageIndex = 0;
+
+      if (_currentPageIndex > maxPageIndex)
+        _currentPageIndex = maxPageIndex;
+    }
+
+    private IEnumerable<IDisplayIssue> GetCurrentPageItems()
+    {
+      return _allIssues
+        .Where(ShouldDisplay)
+        .Skip(_currentPageIndex * PageSize)
+        .Take(PageSize);
+    }
+
+    private void RefreshCurrentPage()
+    {
+      NormalizeCurrentPage();
+      Items.ReplaceRange(GetCurrentPageItems());
+      UpdatePagingControls();
+      UpdateTabsVisibilityAndSelection();
+    }
+
+    private void RefreshPageIfNewItemIsVisibleOnCurrentPage(IDisplayIssue newIssue)
+    {
+      if (!ShouldDisplay(newIssue))
+      {
+        UpdatePagingControls();
+        UpdateTabsVisibilityAndSelection();
+        return;
+      }
+
+      var visibleCount = GetVisibleCount();
+      var newItemVisibleIndex = visibleCount - 1;
+      var pageStartIndex = _currentPageIndex * PageSize;
+      var pageEndIndex = pageStartIndex + PageSize - 1;
+
+      if (newItemVisibleIndex >= pageStartIndex && newItemVisibleIndex <= pageEndIndex)
+      {
+        RefreshCurrentPage();
+        return;
+      }
+
+      UpdatePagingControls();
+      UpdateTabsVisibilityAndSelection();
+    }
+
+    private void UpdatePagingControls()
+    {
+      if (PageInfoText == null || PrevPageButton == null || NextPageButton == null)
+        return;
+
+      var visibleCount = GetVisibleCount();
+      var maxPageIndex = GetMaxPageIndex();
+      var totalPages = visibleCount == 0 ? 0 : maxPageIndex + 1;
+
+      PrevPageButton.IsEnabled = visibleCount > 0 && _currentPageIndex > 0;
+      NextPageButton.IsEnabled = visibleCount > 0 && _currentPageIndex < maxPageIndex;
+
+      if (visibleCount == 0)
+      {
+        PageInfoText.Text = "0 из 0";
+        RebuildPageButtons(totalPages);
+        return;
+      }
+
+      var from = _currentPageIndex * PageSize + 1;
+      var to = Math.Min(from + PageSize - 1, visibleCount);
+      PageInfoText.Text = $"{from}-{to} из {visibleCount}";
+
+      RebuildPageButtons(totalPages);
+    }
+
+    private void RebuildPageButtons(int totalPages)
+    {
+      PageButtons.Clear();
+
+      if (totalPages <= 0)
+        return;
+
+      foreach (var page in BuildVisiblePageItems(totalPages))
+        PageButtons.Add(page);
+    }
+
+    private IEnumerable<PageButtonItem> BuildVisiblePageItems(int totalPages)
+    {
+      var pageIndexes = new SortedSet<int>();
+
+      if (totalPages <= 7)
+      {
+        for (var i = 0; i < totalPages; i++)
+          pageIndexes.Add(i);
+      }
+      else
+      {
+        pageIndexes.Add(0);
+        pageIndexes.Add(totalPages - 1);
+
+        for (var i = _currentPageIndex - 1; i <= _currentPageIndex + 1; i++)
+        {
+          if (i >= 0 && i < totalPages)
+            pageIndexes.Add(i);
+        }
+
+        if (_currentPageIndex <= 2)
+        {
+          pageIndexes.Add(1);
+          pageIndexes.Add(2);
+          pageIndexes.Add(3);
+        }
+
+        if (_currentPageIndex >= totalPages - 3)
+        {
+          pageIndexes.Add(totalPages - 2);
+          pageIndexes.Add(totalPages - 3);
+          pageIndexes.Add(totalPages - 4);
+        }
+      }
+
+      int? previous = null;
+      foreach (var index in pageIndexes.Where(i => i >= 0 && i < totalPages))
+      {
+        if (previous.HasValue && index - previous.Value > 1)
+        {
+          yield return new PageButtonItem
+          {
+            PageIndex = -1,
+            DisplayText = "...",
+            IsClickable = false,
+            IsCurrent = false
+          };
+        }
+
+        yield return new PageButtonItem
+        {
+          PageIndex = index,
+          DisplayText = (index + 1).ToString(),
+          IsClickable = true,
+          IsCurrent = index == _currentPageIndex
+        };
+
+        previous = index;
+      }
+    }
+
+    private void PrevPageButton_Click(object sender, RoutedEventArgs e)
+    {
+      _currentPageIndex--;
+      RefreshCurrentPage();
+    }
+
+    private void PageNumberButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (sender is not Button button || button.Tag is not int pageIndex || pageIndex < 0 || pageIndex == _currentPageIndex)
+        return;
+
+      _currentPageIndex = pageIndex;
+      RefreshCurrentPage();
+    }
+
+    private void NextPageButton_Click(object sender, RoutedEventArgs e)
+    {
+      _currentPageIndex++;
+      RefreshCurrentPage();
+    }
 
     private void ApplyInitialButtonState()
     {
-      _warningTotal = _allIssues.Count(i => i.IsWarning);
-      _errorTotal = _allIssues.Count(i => !i.IsWarning);
-
       if (_warningTotal == 0)
       {
         WarningButton.Visibility = Visibility.Collapsed;
@@ -339,6 +510,7 @@ namespace Ask.UI.Controls.ErrorList
       }
 
       UpdateButtons();
+      UpdatePagingControls();
 
       UpdateTabsVisibilityAndSelection();
     }
@@ -492,4 +664,15 @@ namespace Ask.UI.Controls.ErrorList
       OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
     }
   }
+  public sealed class PageButtonItem
+  {
+    public int PageIndex { get; init; }
+
+    public string DisplayText { get; init; } = string.Empty;
+
+    public bool IsCurrent { get; init; }
+
+    public bool IsClickable { get; init; } = true;
+  }
+
 }

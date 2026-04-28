@@ -33,6 +33,77 @@
             <local:IssueIconSelector x:Key="IssueIconSelector"
                                      ErrorTemplate="{StaticResource ErrorIconTemplate}"
                                      WarningTemplate="{StaticResource WarningIconTemplate}" />
+
+            <SolidColorBrush x:Key="PaginationAccentBrush" Color="#6B4BA3"/>
+            <SolidColorBrush x:Key="PaginationAccentForegroundBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="PaginationButtonBackgroundBrush" Color="#211A2E"/>
+            <SolidColorBrush x:Key="PaginationButtonBorderBrush" Color="#3B2E51"/>
+            <SolidColorBrush x:Key="PaginationButtonDisabledBrush" Color="#71667F"/>
+
+            <Style x:Key="PaginationBaseButtonStyle" TargetType="Button">
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                <Setter Property="Background" Value="{StaticResource PaginationButtonBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource PaginationButtonBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="7,2"/>
+                <Setter Property="Margin" Value="2,0"/>
+                <Setter Property="MinWidth" Value="26"/>
+                <Setter Property="Height" Value="21"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="RootBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="3"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.92"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.82"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{StaticResource PaginationButtonDisabledBrush}"/>
+                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.55"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PaginationNavButtonStyle" TargetType="Button" BasedOn="{StaticResource PaginationBaseButtonStyle}">
+                <Setter Property="MinWidth" Value="58"/>
+                <Setter Property="Padding" Value="7,1"/>
+            </Style>
+
+            <Style x:Key="PaginationPageButtonStyle" TargetType="Button" BasedOn="{StaticResource PaginationBaseButtonStyle}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource PaginationAccentBrush}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource PaginationAccentBrush}"/>
+                        <Setter Property="Foreground" Value="{StaticResource PaginationAccentForegroundBrush}"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsClickable}" Value="False">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{StaticResource PaginationButtonDisabledBrush}"/>
+                        <Setter Property="Cursor" Value="Arrow"/>
+                        <Setter Property="Focusable" Value="False"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -45,10 +116,10 @@
                     BorderThickness="0">
 
             <TabItem x:Name="ErrorsTab" Header="Ошибки">
-                <Grid>
+                <Grid ClipToBounds="True" Margin="0,14,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*" MinHeight="0"/>
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0"
@@ -70,7 +141,10 @@
                                       PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
                     </StackPanel>
 
-                    <DataGrid Grid.Row="1"
+                    <DataGrid x:Name="IssuesGrid"
+                              Grid.Row="1"
+                              MinHeight="0"
+                              Margin="0,0,0,34"
                               ItemsSource="{Binding Items, ElementName=root}"
                               AutoGenerateColumns="False"
                               HeadersVisibility="Column"
@@ -86,8 +160,15 @@
                               GridLinesVisibility="None"
                               BorderThickness="0"
                               ColumnHeaderHeight="30"
+                              RowHeight="25"
+                              EnableRowVirtualization="True"
+                              EnableColumnVirtualization="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              ScrollViewer.CanContentScroll="True"
+                              ScrollViewer.IsDeferredScrollingEnabled="True"
                               MouseDoubleClick="DataGrid_MouseDoubleClick"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto">
+                              ScrollViewer.VerticalScrollBarVisibility="Visible">
 
                         <DataGrid.Resources>
                             <Style x:Key="CellTextTrim" TargetType="TextBlock">
@@ -158,7 +239,7 @@
                                                 FontSize="14"/>
 
                             <DataGridTextColumn Header="Команда"
-                                                Width="Auto"
+                                                Width="2*"
                                                 Binding="{Binding Command}"
                                                 ElementStyle="{StaticResource CellTextTrim}"
                                                 FontFamily="{DynamicResource WinstonLight}"
@@ -173,7 +254,7 @@
                                                 Visibility="Collapsed"/>
 
                             <DataGridTextColumn Header="Описание"
-                                                Width="Auto"
+                                                Width="3*"
                                                 Binding="{Binding Description}"
                                                 ElementStyle="{StaticResource CellTextTrim}"
                                                 FontFamily="{DynamicResource WinstonLight}"
@@ -189,6 +270,62 @@
                                                 Visibility="Collapsed"/>
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <Border Grid.Row="1"
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Stretch"
+                            Height="32"
+                            Margin="8,0,8,8"
+                            Panel.ZIndex="100"
+                            Background="#D0101722"
+                            BorderBrush="#4D5B4480"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <Button x:Name="PrevPageButton"
+                                        Content="‹ Назад"
+                                        Style="{StaticResource PaginationNavButtonStyle}"
+                                        Click="PrevPageButton_Click"/>
+
+                                <ItemsControl x:Name="PageButtonsControl"
+                                              ItemsSource="{Binding PageButtons, ElementName=root}"
+                                              Margin="4,0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding DisplayText}"
+                                                    Tag="{Binding PageIndex}"
+                                                    IsEnabled="{Binding IsClickable}"
+                                                    Style="{StaticResource PaginationPageButtonStyle}"
+                                                    Click="PageNumberButton_Click"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Button x:Name="NextPageButton"
+                                        Content="Далее ›"
+                                        Style="{StaticResource PaginationNavButtonStyle}"
+                                        Click="NextPageButton_Click"/>
+                            </StackPanel>
+
+                            <TextBlock x:Name="PageInfoText"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource ForegrounfBrushes}"
+                                       FontFamily="{DynamicResource WinstonRegular}"
+                                       FontSize="12"
+                                       Opacity="0.68"
+                                       Text="0 из 0"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </TabItem>
 
@@ -208,6 +345,12 @@
                           BorderThickness="0"
                           ColumnHeaderHeight="28"
                           RowHeight="25"
+                          EnableRowVirtualization="True"
+                          EnableColumnVirtualization="True"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.IsDeferredScrollingEnabled="True"
                           MouseDoubleClick="BreakpointsGrid_MouseDoubleClick"
                           ScrollViewer.VerticalScrollBarVisibility="Auto">
 
