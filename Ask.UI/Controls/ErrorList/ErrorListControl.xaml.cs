@@ -34,7 +34,12 @@ namespace Ask.UI.Controls.ErrorList
 
     private readonly List<IDisplayIssue> _allIssues = new();
 
-    private const int PageSize = 30;
+    private const int MinPageSize = 3;
+    private const int MaxPageSize = 15;
+    private const double IssueRowHeight = 25.0;
+    private const double IssueHeaderHeight = 30.0;
+    private const double DesiredHeightChrome = 190.0;
+    private int _pageSize = MinPageSize;
     private int _currentPageIndex = 0;
 
     private bool _warningsHidden = false;
@@ -47,13 +52,14 @@ namespace Ask.UI.Controls.ErrorList
     {
       InitializeComponent();
       Loaded += ErrorListControl_Loaded;
+      SizeChanged += ErrorListControl_SizeChanged;
       DataContext = this;
 
       EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
 
       if (AdminConfig.GetDebugRights())
       {
-        DebugColumn.Visibility = Visibility.Visible;
+        IssuesTable.DebugVisible = Visibility.Visible;
       }
 
       MouseEnter += (s, e) =>
@@ -83,11 +89,20 @@ namespace Ask.UI.Controls.ErrorList
 
     #endregion
 
+    public event Action<double>? DesiredHeightChanged;
+
+    public void RefreshLayoutFromHost()
+    {
+      Dispatcher.BeginInvoke(
+        new Action(RefreshCurrentPage),
+        System.Windows.Threading.DispatcherPriority.Render);
+    }
+
     private void DebugChanged(bool isDebug)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        DebugColumn.Visibility = isDebug ? Visibility.Visible : Visibility.Collapsed;
+        IssuesTable.DebugVisible = isDebug ? Visibility.Visible : Visibility.Collapsed;
       });
     }
 
@@ -101,14 +116,14 @@ namespace Ask.UI.Controls.ErrorList
 
     public Visibility StringsNumberVisible
     {
-      get => StringsNumber.Visibility;
-      set => StringsNumber.Visibility = value;
+      get => IssuesTable.StringsNumberVisible;
+      set => IssuesTable.StringsNumberVisible = value;
     }
 
     public Visibility MeasureResultVisible
     {
-      get => MeasureResult.Visibility;
-      set => MeasureResult.Visibility = value;
+      get => IssuesTable.MeasureResultVisible;
+      set => IssuesTable.MeasureResultVisible = value;
     }
 
     #region Ошибки/предупреждения
@@ -204,9 +219,11 @@ namespace Ask.UI.Controls.ErrorList
       _currentPageIndex = 0;
 
       UpdateButtons();
+      UpdateIssueTableHeight();
       UpdatePagingControls();
 
       UpdateTabsVisibilityAndSelection();
+      UpdateDesiredHeight();
     }
 
     /// <summary>
@@ -268,6 +285,7 @@ namespace Ask.UI.Controls.ErrorList
     private void ErrorListControl_Loaded(object sender, RoutedEventArgs e)
     {
       ApplyInitialButtonState();
+      RefreshCurrentPage();
     }
 
     private void RecalculateTotals()
@@ -306,13 +324,76 @@ namespace Ask.UI.Controls.ErrorList
       return _errorTotal + _warningTotal;
     }
 
+    private void ErrorListControl_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      if (Math.Abs(e.NewSize.Height - e.PreviousSize.Height) < IssueRowHeight)
+        return;
+
+      RefreshCurrentPage();
+    }
+
+    private void UpdatePageSizeFromData()
+    {
+      var visibleCount = GetVisibleCount();
+      var calculatedPageSize = CalculatePageSize(visibleCount);
+
+      if (calculatedPageSize == _pageSize)
+        return;
+
+      var firstVisibleItemIndex = _currentPageIndex * _pageSize;
+      _pageSize = calculatedPageSize;
+      _currentPageIndex = firstVisibleItemIndex / _pageSize;
+    }
+
+    private void UpdateDesiredHeight()
+    {
+      var visibleRows = GetVisibleRowsForLayout();
+
+      DesiredHeightChanged?.Invoke(DesiredHeightChrome + visibleRows * IssueRowHeight);
+    }
+
+    private int GetVisibleRowsForLayout()
+    {
+      var visibleCount = GetVisibleCount();
+      return CalculatePageSize(visibleCount);
+    }
+
+    private int CalculatePageSize(int visibleCount)
+    {
+      if (visibleCount == 0)
+        return MinPageSize;
+
+      var rowsByHeight = GetRowsByCurrentHeight();
+      return Math.Clamp(rowsByHeight, MinPageSize, Math.Min(MaxPageSize, visibleCount));
+    }
+
+    private int GetRowsByCurrentHeight()
+    {
+      if (ActualHeight <= 0)
+        return MaxPageSize;
+
+      var rowsAreaHeight = ActualHeight - DesiredHeightChrome;
+      if (rowsAreaHeight <= 0)
+        return MinPageSize;
+
+      return Math.Clamp((int)Math.Floor(rowsAreaHeight / IssueRowHeight), MinPageSize, MaxPageSize);
+    }
+
+    private void UpdateIssueTableHeight()
+    {
+      if (IssuesTable == null)
+        return;
+
+      IssuesTable.Height = IssueHeaderHeight + GetVisibleRowsForLayout() * IssueRowHeight;
+    }
+
     private int GetMaxPageIndex()
     {
       var visibleCount = GetVisibleCount();
       if (visibleCount == 0)
         return 0;
 
-      return (visibleCount - 1) / PageSize;
+      return (visibleCount - 1) / _pageSize;
     }
 
     private void NormalizeCurrentPage()
@@ -330,16 +411,19 @@ namespace Ask.UI.Controls.ErrorList
     {
       return _allIssues
         .Where(ShouldDisplay)
-        .Skip(_currentPageIndex * PageSize)
-        .Take(PageSize);
+        .Skip(_currentPageIndex * _pageSize)
+        .Take(_pageSize);
     }
 
     private void RefreshCurrentPage()
     {
+      UpdatePageSizeFromData();
       NormalizeCurrentPage();
       Items.ReplaceRange(GetCurrentPageItems());
+      UpdateIssueTableHeight();
       UpdatePagingControls();
       UpdateTabsVisibilityAndSelection();
+      UpdateDesiredHeight();
     }
 
     private void RefreshPageIfNewItemIsVisibleOnCurrentPage(IDisplayIssue newIssue)
@@ -353,8 +437,8 @@ namespace Ask.UI.Controls.ErrorList
 
       var visibleCount = GetVisibleCount();
       var newItemVisibleIndex = visibleCount - 1;
-      var pageStartIndex = _currentPageIndex * PageSize;
-      var pageEndIndex = pageStartIndex + PageSize - 1;
+      var pageStartIndex = _currentPageIndex * _pageSize;
+      var pageEndIndex = pageStartIndex + _pageSize - 1;
 
       if (newItemVisibleIndex >= pageStartIndex && newItemVisibleIndex <= pageEndIndex)
       {
@@ -385,8 +469,8 @@ namespace Ask.UI.Controls.ErrorList
         return;
       }
 
-      var from = _currentPageIndex * PageSize + 1;
-      var to = Math.Min(from + PageSize - 1, visibleCount);
+      var from = _currentPageIndex * _pageSize + 1;
+      var to = Math.Min(from + _pageSize - 1, visibleCount);
       PageInfoText.Text = $"{from}-{to} из {visibleCount}";
 
       RebuildPageButtons(totalPages);
@@ -394,13 +478,37 @@ namespace Ask.UI.Controls.ErrorList
 
     private void RebuildPageButtons(int totalPages)
     {
-      PageButtons.Clear();
+      var nextButtons = totalPages <= 0
+        ? new List<PageButtonItem>()
+        : BuildVisiblePageItems(totalPages).ToList();
 
-      if (totalPages <= 0)
+      if (ArePageButtonsEqual(nextButtons))
         return;
 
-      foreach (var page in BuildVisiblePageItems(totalPages))
+      PageButtons.Clear();
+      foreach (var page in nextButtons)
         PageButtons.Add(page);
+    }
+
+    private bool ArePageButtonsEqual(IReadOnlyList<PageButtonItem> nextButtons)
+    {
+      if (PageButtons.Count != nextButtons.Count)
+        return false;
+
+      for (var i = 0; i < nextButtons.Count; i++)
+      {
+        var current = PageButtons[i];
+        var next = nextButtons[i];
+        if (current.PageIndex != next.PageIndex ||
+            current.DisplayText != next.DisplayText ||
+            current.IsClickable != next.IsClickable ||
+            current.IsCurrent != next.IsCurrent)
+        {
+          return false;
+        }
+      }
+
+      return true;
     }
 
     private IEnumerable<PageButtonItem> BuildVisiblePageItems(int totalPages)
@@ -515,12 +623,9 @@ namespace Ask.UI.Controls.ErrorList
       UpdateTabsVisibilityAndSelection();
     }
 
-    private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    private void IssuesTable_ItemDoubleClicked(IDisplayIssue selectedError)
     {
-      if (sender is DataGrid grid && grid.SelectedItem is IDisplayIssue selectedError)
-      {
-        ItemDoubleClicked?.Invoke(selectedError);
-      }
+      ItemDoubleClicked?.Invoke(selectedError);
     }
 
     #endregion

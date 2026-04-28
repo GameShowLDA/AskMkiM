@@ -1,0 +1,174 @@
+﻿<UserControl x:Class="Ask.UI.Controls.ErrorList.IssueTableControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Ask.UI.Controls.ErrorList"
+             xmlns:Icon="clr-namespace:Ask.UI.Shared.Components.Icons"
+             xmlns:DiagnosticsConv="clr-namespace:Ask.Core.Shared.Metadata.Converters;assembly=Ask.Core"
+             xmlns:help="clr-namespace:Ask.Support;assembly=Ask.Support"
+             x:Name="root"
+             Background="{DynamicResource ErrorListBackground}">
+
+    <UserControl.Resources>
+        <DiagnosticsConv:DiagnosticCodeToTagConverter x:Key="DiagnosticCodeToTagConverter"/>
+        <local:DiagnosticsCodeLinePairConverter x:Key="DiagnosticsCodeLinePairConverter"/>
+        <local:IssueDebugInfoConverter x:Key="IssueDebugInfoConverter"/>
+        <local:IssueSelectionConverter x:Key="IssueSelectionConverter"/>
+
+        <DataTemplate x:Key="ErrorIconTemplate">
+            <Icon:CrossIcon Size="13"
+                            CircleColor="{DynamicResource ErrorListErrorIconBrush}"
+                            IconStrokeColor="{DynamicResource ErrorListErrorIconForegroundBrush}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="WarningIconTemplate">
+            <Icon:TiangleWarningIcon Size="17"
+                                     TriangleColor="{DynamicResource ErrorListWarningIconBrush}"
+                                     IconStrokeColor="{DynamicResource ErrorListWarningIconForegroundBrush}"/>
+        </DataTemplate>
+
+        <local:IssueIconSelector x:Key="IssueIconSelector"
+                                 ErrorTemplate="{StaticResource ErrorIconTemplate}"
+                                 WarningTemplate="{StaticResource WarningIconTemplate}" />
+
+        <Style x:Key="IssueHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <Style x:Key="IssueCellTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource WinstonLight}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource ErrorListBackground}"
+          ClipToBounds="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{DynamicResource ErrorListHeaderBackground}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="{Binding LineColumnWidth, ElementName=root}"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="{Binding MeasureColumnWidth, ElementName=root}"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="{Binding DebugColumnWidth, ElementName=root}"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding ItemsSource.Count, ElementName=root}"
+                           HorizontalAlignment="Center"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+                <TextBlock Grid.Column="1"
+                           Text="Код"
+                           Margin="5,0"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+                <TextBlock Grid.Column="2"
+                           Text="Строка"
+                           Margin="5,0"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+                <TextBlock Grid.Column="3"
+                           Text="Команда"
+                           Margin="5,0"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+                <TextBlock Grid.Column="4"
+                           Text="Результат измерения"
+                           Margin="5,0"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+                <TextBlock Grid.Column="5"
+                           Text="Описание"
+                           Margin="5,0"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+                <TextBlock Grid.Column="6"
+                           Text="DEBUG"
+                           Margin="5,0"
+                           Style="{StaticResource IssueHeaderTextStyle}"/>
+            </Grid>
+        </Border>
+
+        <ItemsControl Grid.Row="1"
+                      ItemsSource="{Binding ItemsSource, ElementName=root}"
+                      Background="{DynamicResource ErrorListBackground}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Height="25"
+                            MouseLeftButtonDown="IssueRow_MouseLeftButtonDown"
+                            help:HelpProvider.HelpKey="{Binding ., Converter={StaticResource DiagnosticCodeToTagConverter}}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Value="True">
+                                        <DataTrigger.Binding>
+                                            <MultiBinding Converter="{StaticResource IssueSelectionConverter}">
+                                                <Binding/>
+                                                <Binding Path="SelectedIssue" RelativeSource="{RelativeSource AncestorType=local:IssueTableControl}"/>
+                                            </MultiBinding>
+                                        </DataTrigger.Binding>
+                                        <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="{Binding LineColumnWidth, RelativeSource={RelativeSource AncestorType=local:IssueTableControl}}"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="{Binding MeasureColumnWidth, RelativeSource={RelativeSource AncestorType=local:IssueTableControl}}"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="{Binding DebugColumnWidth, RelativeSource={RelativeSource AncestorType=local:IssueTableControl}}"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ContentControl Grid.Column="0"
+                                            Content="{Binding}"
+                                            ContentTemplateSelector="{StaticResource IssueIconSelector}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding ., Converter={StaticResource DiagnosticCodeToTagConverter}}"
+                                       Margin="5,0"
+                                       Style="{StaticResource IssueCellTextStyle}"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"
+                                       Margin="5,0"
+                                       Style="{StaticResource IssueCellTextStyle}"/>
+                            <TextBlock Grid.Column="3"
+                                       Text="{Binding Command}"
+                                       Margin="5,0"
+                                       Style="{StaticResource IssueCellTextStyle}"/>
+                            <TextBlock Grid.Column="4"
+                                       Text="{Binding MeasureResult}"
+                                       Margin="5,0"
+                                       Style="{StaticResource IssueCellTextStyle}"/>
+                            <TextBlock Grid.Column="5"
+                                       Text="{Binding Description}"
+                                       Margin="5,0"
+                                       Style="{StaticResource IssueCellTextStyle}"/>
+                            <TextBlock Grid.Column="6"
+                                       Text="{Binding ., Converter={StaticResource IssueDebugInfoConverter}}"
+                                       Margin="5,0"
+                                       Style="{StaticResource IssueCellTextStyle}"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

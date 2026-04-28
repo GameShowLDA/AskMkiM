@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Ask.UI.Controls.ErrorList;
 using System.Windows.Media;
+using System.Windows.Threading;
 using UI.Components;
 using UI.Controls.TextEditorControl;
 using UI.Services;
@@ -49,6 +50,8 @@ namespace UI.Controls
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
+    private bool _userResizing = false;
+    private bool _resizeRefreshQueued = false;
 
     public List<BaseCommandModel> TranslationModels
     {
@@ -85,8 +88,10 @@ namespace UI.Controls
     public TranslatorItem()
     {
       InitializeComponent();
+      Loaded += TranslatorItem_Loaded;
 
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
+      ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
 
       // Новое: вкладка "Точки остановки"
       ErrorListBoxVertical.BreakpointItemDoubleClicked += ErrorListBoxVertical_BreakpointItemDoubleClicked;
@@ -97,6 +102,95 @@ namespace UI.Controls
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => BreakpointOn(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => BreakpointOff(e));
+    }
+
+    private void TranslatorItem_Loaded(object sender, RoutedEventArgs e)
+    {
+      ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
+      ErrorListBoxVertical.RefreshLayoutFromHost();
+    }
+
+    private void ErrorListSplitter_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+    {
+      _userResizing = true;
+      ApplyErrorListBounds();
+      ErrorListRow.Height = new GridLength(ErrorListLayoutSettings.ClampHeight(ErrorListRow.ActualHeight));
+    }
+
+    private void ErrorListSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+    {
+      ClampErrorListRowDuringResize();
+      QueueErrorListResizeRefresh();
+    }
+
+    private void ErrorListSplitter_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+    {
+      _userResizing = false;
+
+      var height = ErrorListLayoutSettings.ClampHeight(ErrorListRow.ActualHeight);
+      ApplyErrorListHeight(height);
+      ErrorListLayoutSettings.SaveHeight(height);
+      ErrorListBoxVertical.RefreshLayoutFromHost();
+    }
+
+    private void QueueErrorListResizeRefresh()
+    {
+      if (_resizeRefreshQueued)
+        return;
+
+      _resizeRefreshQueued = true;
+      Dispatcher.BeginInvoke(
+        new Action(() =>
+        {
+          _resizeRefreshQueued = false;
+          ErrorListBoxVertical.RefreshLayoutFromHost();
+        }),
+        DispatcherPriority.Render);
+    }
+
+    private void ErrorListBoxVertical_DesiredHeightChanged(double height)
+    {
+      if (_userResizing)
+        return;
+
+      ApplyErrorListHeight(height);
+    }
+
+    private void ApplyErrorListHeight(double height)
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(height);
+
+      ApplyErrorListBounds();
+      ErrorListRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ClampErrorListRowDuringResize()
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(ErrorListRow.ActualHeight);
+      if (Math.Abs(ErrorListRow.ActualHeight - clampedHeight) < 0.5)
+        return;
+
+      ErrorListRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ApplyErrorListBounds()
+    {
+      var minHeight = ErrorListLayoutSettings.GetMinHeight();
+      var maxHeight = ErrorListLayoutSettings.GetMaxHeight();
+
+      ErrorListBoxVertical.MinHeight = minHeight;
+      ErrorListRow.MinHeight = minHeight;
+
+      if (double.IsInfinity(maxHeight))
+      {
+        ErrorListBoxVertical.ClearValue(MaxHeightProperty);
+        ErrorListRow.ClearValue(RowDefinition.MaxHeightProperty);
+      }
+      else
+      {
+        ErrorListBoxVertical.MaxHeight = maxHeight;
+        ErrorListRow.MaxHeight = maxHeight;
+      }
     }
 
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(IDisplayIssue item)
