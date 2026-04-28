@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentIndex = new Map();
     let contentIndexPromise = null;
     let searchFrame = null;
+    let pendingSelectionQuery = '';
 
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
     const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
@@ -234,13 +235,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loadPage(id, pushHistory = true) {
+    function loadPage(id, pushHistory = true, selectionQuery = '') {
         const page = pageMap.get(id);
         if (!page) return;
 
+        pendingSelectionQuery = selectionQuery.trim();
+
         currentPage = id;
         expandPathTo(page.el);
-        if (page.src) contentFrame.src = page.src;
+
+        if (page.src) {
+            contentFrame.src = page.src;
+        }
 
         updateActiveTreeItem(page.el);
         updateNavButtons();
@@ -404,16 +410,125 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
+    function createNormalizedTextMap(root) {
+        const walker = document.createTreeWalker(
+            root,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode(node) {
+                    const parent = node.parentElement;
+                    if (!parent) return NodeFilter.FILTER_REJECT;
+
+                    const tag = parent.tagName?.toLowerCase();
+                    if (tag === 'script' || tag === 'style' || tag === 'noscript') {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+
+                    if (!node.nodeValue.trim()) {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }
+        );
+
+        let normalized = '';
+        const map = [];
+        let node;
+
+        while ((node = walker.nextNode())) {
+            const text = node.nodeValue;
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+
+                if (/\s/.test(ch)) {
+                    if (normalized && !normalized.endsWith(' ')) {
+                        normalized += ' ';
+                        map.push({ node, offset: i });
+                    }
+                } else {
+                    normalized += ch.toLowerCase();
+                    map.push({ node, offset: i });
+                }
+            }
+        }
+
+        return { normalized: normalized.trim(), map };
+    }
+
+    function findTextRange(doc, query) {
+        if (!doc?.body || !query) return null;
+
+        const normalizedQuery = normalize(query);
+        if (!normalizedQuery) return null;
+
+        const { normalized, map } = createNormalizedTextMap(doc.body);
+        const index = normalized.indexOf(normalizedQuery);
+
+        if (index < 0) return null;
+
+        const start = map[index];
+        const end = map[index + normalizedQuery.length - 1];
+
+        if (!start || !end) return null;
+
+        const range = doc.createRange();
+        range.setStart(start.node, start.offset);
+        range.setEnd(end.node, end.offset + 1);
+
+        return range;
+    }
+
+    function scrollFrameSelectionIntoView(range) {
+        const rect = range.getBoundingClientRect();
+        const frameRect = contentFrame.getBoundingClientRect();
+
+        const targetTop = window.scrollY + frameRect.top + rect.top - window.innerHeight / 3;
+
+        window.scrollTo({
+            top: Math.max(0, targetTop),
+            behavior: 'smooth'
+        });
+    }
+
+    function selectTextInContentFrame(query) {
+        const doc = contentFrame.contentDocument;
+        const win = contentFrame.contentWindow;
+
+        if (!doc || !win) return;
+
+        const selection = win.getSelection();
+        selection?.removeAllRanges();
+
+        if (!query) return;
+
+        const range = findTextRange(doc, query);
+        if (!range) return;
+
+        selection.addRange(range);
+        scrollFrameSelectionIntoView(range);
+    }
+
     contentFrame.addEventListener('load', () => {
         fitFrame();
 
         const doc = contentFrame.contentDocument;
         if (!doc) return;
 
+        requestAnimationFrame(() => {
+            selectTextInContentFrame(pendingSelectionQuery);
+        });
+
         $$('img', doc).forEach(img => {
             if (!img.complete) img.addEventListener('load', fitFrame);
         });
-        doc.fonts?.ready.then(fitFrame);
+
+        doc.fonts?.ready.then(() => {
+            fitFrame();
+            selectTextInContentFrame(pendingSelectionQuery);
+        });
     });
 
     tabs.forEach(tab => tab.addEventListener('click', () => showTab(tab.dataset.tab)));
@@ -456,8 +571,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = event.target.closest('.result-item');
         if (!item) return;
 
+        const queryForSelection = getSearchMode() === 'content'
+            ? searchBox.value.trim()
+            : '';
+
         showTab('menu');
-        loadPage(item.dataset.id);
+        loadPage(item.dataset.id, true, queryForSelection);
     });
 
     bookmarkBtn.addEventListener('click', () => {
