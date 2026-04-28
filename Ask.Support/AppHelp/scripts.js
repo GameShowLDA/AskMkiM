@@ -482,15 +482,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function scrollFrameSelectionIntoView(range) {
-        const rect = range.getBoundingClientRect();
+        if (!range) return;
+
+        const rangeRect = range.getBoundingClientRect();
         const frameRect = contentFrame.getBoundingClientRect();
+        const scrollContainer = getScrollableParent(contentFrame);
 
-        const targetTop = window.scrollY + frameRect.top + rect.top - window.innerHeight / 3;
+        const targetTopInViewport = frameRect.top + rangeRect.top;
 
-        window.scrollTo({
-            top: Math.max(0, targetTop),
+        if (scrollContainer === document.scrollingElement || scrollContainer === document.documentElement) {
+            window.scrollTo({
+                top: Math.max(0, window.scrollY + targetTopInViewport - window.innerHeight / 3),
+                behavior: 'smooth'
+            });
+
+            return;
+        }
+
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const targetTopInContainer =
+            scrollContainer.scrollTop +
+            targetTopInViewport -
+            containerRect.top;
+
+        scrollContainer.scrollTo({
+            top: Math.max(0, targetTopInContainer - scrollContainer.clientHeight / 3),
             behavior: 'smooth'
         });
+    }
+
+    function getScrollableParent(element) {
+        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+            const style = getComputedStyle(parent);
+            const overflowY = style.overflowY;
+
+            const canScroll =
+                (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') &&
+                parent.scrollHeight > parent.clientHeight;
+
+            if (canScroll) {
+                return parent;
+            }
+        }
+
+        return document.scrollingElement || document.documentElement;
     }
 
     function selectTextInContentFrame(query) {
@@ -518,11 +553,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!doc) return;
 
         requestAnimationFrame(() => {
+            fitFrame();
             selectTextInContentFrame(pendingSelectionQuery);
         });
 
         $$('img', doc).forEach(img => {
-            if (!img.complete) img.addEventListener('load', fitFrame);
+            if (!img.complete) {
+                img.addEventListener('load', () => {
+                    fitFrame();
+                    selectTextInContentFrame(pendingSelectionQuery);
+                });
+            }
         });
 
         doc.fonts?.ready.then(() => {
