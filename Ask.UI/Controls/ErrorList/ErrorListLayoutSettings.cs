@@ -7,9 +7,9 @@ namespace Ask.UI.Controls.ErrorList;
 public static class ErrorListLayoutSettings
 {
   private const double DefaultScreenPart = 0.5;
-  private const double MinHeight = 230.0;
+  private const double MinHeight = 220.0;
   private const double FallbackHeight = 320.0;
-  private const double MaxHeight = 565.0;
+  private const double MaxHeight = 525.0;
   private const string FileName = "error-list-layout.json";
 
   private static readonly string SettingsPath = Path.Combine(

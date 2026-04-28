@@ -38,7 +38,7 @@ namespace Ask.UI.Controls.ErrorList
     private const int MaxPageSize = 15;
     private const double IssueRowHeight = 25.0;
     private const double IssueHeaderHeight = 30.0;
-    private const double DesiredHeightChrome = 190.0;
+    private const double DesiredHeightChrome = 130.0;
     private int _pageSize = MinPageSize;
     private int _currentPageIndex = 0;
 

@@ -110,7 +110,7 @@
                     BorderThickness="0">
 
             <TabItem x:Name="ErrorsTab" Header="Ошибки">
-                <Grid ClipToBounds="True" Margin="0,14,0,0">
+                <Grid ClipToBounds="True">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*" MinHeight="0"/>
@@ -119,7 +119,7 @@
 
                     <StackPanel Grid.Row="0"
                                 Orientation="Horizontal"
-                                Margin="8,8,8,6"
+                                Margin="8,4,8,6"
                                 HorizontalAlignment="Left">
 
                         <ToggleButton x:Name="WarningButton"
