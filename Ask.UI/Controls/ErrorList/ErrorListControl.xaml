@@ -35,17 +35,18 @@
                                      WarningTemplate="{StaticResource WarningIconTemplate}" />
 
             <Style x:Key="PaginationBaseButtonStyle" TargetType="Button">
-                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="Padding" Value="7,2"/>
-                <Setter Property="Margin" Value="2,0"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="Margin" Value="1,0"/>
                 <Setter Property="MinWidth" Value="26"/>
-                <Setter Property="Height" Value="21"/>
+                <Setter Property="Height" Value="22"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
                 <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
@@ -61,13 +62,16 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.92"/>
+                                    <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="RootBorder" Property="Opacity" Value="0.82"/>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
                                     <Setter TargetName="RootBorder" Property="Opacity" Value="0.55"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
@@ -78,14 +82,14 @@
 
             <Style x:Key="PaginationNavButtonStyle" TargetType="Button" BasedOn="{StaticResource PaginationBaseButtonStyle}">
                 <Setter Property="MinWidth" Value="58"/>
-                <Setter Property="Padding" Value="7,1"/>
+                <Setter Property="Padding" Value="9,2"/>
             </Style>
 
             <Style x:Key="PaginationPageButtonStyle" TargetType="Button" BasedOn="{StaticResource PaginationBaseButtonStyle}">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
-                        <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+                        <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
                         <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                     </DataTrigger>
@@ -142,15 +146,10 @@
                                              ItemsSource="{Binding Items, ElementName=root}"
                                              ItemDoubleClicked="IssuesTable_ItemDoubleClicked"/>
 
-                    <Border Grid.Row="2"
-                            HorizontalAlignment="Stretch"
-                            Height="32"
-                            Margin="8,0,8,8"
-                            Background="{DynamicResource ErrorListHeaderBackground}"
-                            BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4">
-                        <Grid>
+                    <Grid Grid.Row="2"
+                          HorizontalAlignment="Stretch"
+                          Height="28"
+                          Margin="8,0,8,6">
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
@@ -193,8 +192,7 @@
                                        FontSize="12"
                                        Opacity="0.68"
                                        Text="0 из 0"/>
-                        </Grid>
-                    </Border>
+                    </Grid>
                 </Grid>
             </TabItem>
 
