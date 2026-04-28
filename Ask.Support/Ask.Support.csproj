@@ -591,7 +591,7 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandVSh_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\drex_part3.5.3.7_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\drex_part3.5.3.7_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsPart.html">
@@ -672,49 +672,49 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandTsG_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.10_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.10_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.11_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.11_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom_2.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.14_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.14_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.1_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.1_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.3_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.3_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.4_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.4_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.5_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.5_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.6_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.6_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.7_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.7_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.8_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.8_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.9_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.9_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsPart.html">
@@ -723,13 +723,13 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguagePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\drex_part3.1_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.1_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\drex_part3.6_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.6_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\drex_part3.6_custom_2.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.6_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
@@ -747,19 +747,19 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\AllParameterPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlTimePart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlTimePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlVoltagePart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ControlVoltagePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ExposureTimePart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\ExposureTimePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\FlowCurrentPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\FlowCurrentPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\RangeValuesControlledParameterPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\RangeValuesControlledParameterPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\StructureYAPKCommandsChapter\ArgumentsCommandChapter\VerificationAlgorithmKeysPart.html">
@@ -1662,6 +1662,10 @@
 	  <None Update="WebView2Runtime\EBWebView\x86\EmbeddedBrowserWebView.dll">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\CommandsOrganizingControlProcessChapter\" />
 	</ItemGroup>
 
 </Project>
