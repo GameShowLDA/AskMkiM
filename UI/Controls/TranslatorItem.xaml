@@ -21,7 +21,7 @@
                 <!-- Редакторы (split) -->
                 <RowDefinition Height="Auto"/>
                 <!-- Сплиттер -->
-                <RowDefinition Height="Auto" MinHeight="50"/>
+                <RowDefinition x:Name="ErrorListRow" Height="Auto" MinHeight="50"/>
                 <!-- Окно ошибок -->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -57,10 +57,13 @@
 
             <GridSplitter  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                Height="5"
-               Background="Transparent"
-               HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch"
-               ResizeDirection="Rows"
+                           Background="Transparent"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Stretch"
+                           ResizeDirection="Rows"
+                           DragStarted="ErrorListSplitter_DragStarted"
+                           DragDelta="ErrorListSplitter_DragDelta"
+                           DragCompleted="ErrorListSplitter_DragCompleted"
                            BorderThickness="0,2,0,0"
                            BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
                            />
@@ -70,7 +73,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <ErrorList:ErrorListControl Grid.Row="1" x:Name="ErrorListBoxVertical"/>
+                <ErrorList:ErrorListControl Grid.Row="0" x:Name="ErrorListBoxVertical"/>
             </Grid>
         </Grid>
 

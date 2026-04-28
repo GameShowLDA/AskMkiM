@@ -13,6 +13,6 @@
         Title="MainWindow" Height="450" Width="800"
         xmlns:Error ="clr-namespace:TestWPF"
         >
-    <Components:InputField Name="testInput" IsTimeVisible="True" IsVoltageVisible="True" IsBusVisible="True"/>
+    <Border Background="#FFFF6363"></Border>
 </Window>
 

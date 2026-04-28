@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Threading;
 using UI.Controls.TextEditorControl;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
@@ -39,8 +40,7 @@ namespace UI.Controls.Runner
     private List<BaseCommandModel> ControlProgram = null;
 
     private bool _userResizing = false;
-
-    private const double MaxAutoHeight = 250.0;
+    private bool _resizeRefreshQueued = false;
 
     public int ErrorCount { get; private set; } = 0;
     public int TranslationErrorCount { get; private set; } = 0;
@@ -94,6 +94,7 @@ namespace UI.Controls.Runner
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
+      ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
       devicesStatus = new DevicesStatus();
 
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
@@ -164,6 +165,8 @@ namespace UI.Controls.Runner
 
     private void RunControl_Loaded(object sender, RoutedEventArgs e)
     {
+      ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
+      ErrorListBoxVertical.RefreshLayoutFromHost();
       FocusMainContent();
     }
     private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -427,27 +430,84 @@ namespace UI.Controls.Runner
     {
       _userResizing = true;
 
-      BottomRow.Height = new GridLength(ErrorListBoxVertical.ActualHeight);
-      ErrorListBoxVertical.MaxHeight = double.PositiveInfinity;
+      ApplyErrorListBounds();
+      BottomRow.Height = new GridLength(ErrorListLayoutSettings.ClampHeight(ErrorListBoxVertical.ActualHeight));
+    }
+
+    private void BottomSplitter_OnDragDelta(object sender, DragDeltaEventArgs e)
+    {
+      ClampErrorListRowDuringResize();
+      QueueErrorListResizeRefresh();
     }
 
     private void BottomSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
       _userResizing = false;
+
+      var height = ErrorListLayoutSettings.ClampHeight(ErrorListBoxVertical.ActualHeight);
+      ApplyErrorListHeight(height);
+      ErrorListLayoutSettings.SaveHeight(height);
+      ErrorListBoxVertical.RefreshLayoutFromHost();
     }
 
-    private void ErrorListBoxVertical_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    private void QueueErrorListResizeRefresh()
+    {
+      if (_resizeRefreshQueued)
+        return;
+
+      _resizeRefreshQueued = true;
+      Dispatcher.BeginInvoke(
+        new Action(() =>
+        {
+          _resizeRefreshQueued = false;
+          ErrorListBoxVertical.RefreshLayoutFromHost();
+        }),
+        DispatcherPriority.Render);
+    }
+
+    private void ErrorListBoxVertical_DesiredHeightChanged(double height)
     {
       if (_userResizing)
         return;
 
-      double desired = ErrorListBoxVertical.ActualHeight;
+      ApplyErrorListHeight(height);
+    }
 
-      if (desired > MaxAutoHeight)
-        desired = MaxAutoHeight;
+    private void ApplyErrorListHeight(double height)
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(height);
 
-      BottomRow.Height = GridLength.Auto;
-      ErrorListBoxVertical.MaxHeight = desired;
+      ApplyErrorListBounds();
+      BottomRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ClampErrorListRowDuringResize()
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(BottomRow.ActualHeight);
+      if (Math.Abs(BottomRow.ActualHeight - clampedHeight) < 0.5)
+        return;
+
+      BottomRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ApplyErrorListBounds()
+    {
+      var minHeight = ErrorListLayoutSettings.GetMinHeight();
+      var maxHeight = ErrorListLayoutSettings.GetMaxHeight();
+
+      ErrorListBoxVertical.MinHeight = minHeight;
+      BottomRow.MinHeight = minHeight;
+
+      if (double.IsInfinity(maxHeight))
+      {
+        ErrorListBoxVertical.ClearValue(MaxHeightProperty);
+        BottomRow.ClearValue(RowDefinition.MaxHeightProperty);
+      }
+      else
+      {
+        ErrorListBoxVertical.MaxHeight = maxHeight;
+        BottomRow.MaxHeight = maxHeight;
+      }
     }
 
     private bool CanSaveTranslatedFileToDisk()
