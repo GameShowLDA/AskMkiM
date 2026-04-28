@@ -636,6 +636,52 @@ namespace MainWindowProgram.Services
         : $"{baseName}{extension}";
     }
 
+    private static string BuildNormalizedPkwPath(TextEditorUI editor)
+    {
+      var sourcePath = editor.TextEditorModel?.FilePath;
+      var sourceFileName = editor.TextEditorModel?.FileName;
+
+      var directory = !string.IsNullOrWhiteSpace(sourcePath)
+        ? Path.GetDirectoryName(Path.GetFullPath(sourcePath))
+        : Environment.CurrentDirectory;
+
+      var baseName = Path.GetFileNameWithoutExtension(sourcePath);
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = Path.GetFileNameWithoutExtension(sourceFileName);
+      }
+
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = "normalized";
+      }
+
+      if (!baseName.EndsWith("-ru", StringComparison.OrdinalIgnoreCase))
+      {
+        baseName += "-ru";
+      }
+
+      return Path.Combine(directory ?? Environment.CurrentDirectory, $"{baseName}.pkw");
+    }
+
+    private static void SaveNormalizedSource(TextEditorUI editor, string normalizedText)
+    {
+      var normalizedPath = BuildNormalizedPkwPath(editor);
+      var normalizedDirectory = Path.GetDirectoryName(normalizedPath);
+      if (!string.IsNullOrWhiteSpace(normalizedDirectory))
+      {
+        Directory.CreateDirectory(normalizedDirectory);
+      }
+
+      File.WriteAllText(normalizedPath, normalizedText, new UTF8Encoding(false));
+
+      editor.Text = normalizedText;
+      editor.TextEditorModel.FilePath = normalizedPath;
+      editor.TextEditorModel.FileName = Path.GetFileName(normalizedPath);
+      editor.TextEditorModel.Encoding = Encoding.UTF8;
+      editor.TextEditorModel.SavedTextSnapshot = normalizedText;
+    }
+
     /// <summary>
     /// Пытается создать новый транслятор, используя текст из указанного редактора.
     /// </summary>
@@ -1028,11 +1074,8 @@ namespace MainWindowProgram.Services
       if (replaceDecision == MessageBoxResult.Yes)
       {
         var normalizedText = _lookalikeNormalizer.Normalize(text);
-        if (!string.Equals(normalizedText, text, StringComparison.Ordinal))
-        {
-          editor.Text = normalizedText;
-          text = normalizedText;
-        }
+        SaveNormalizedSource(editor, normalizedText);
+        text = normalizedText;
 
         return true;
       }
