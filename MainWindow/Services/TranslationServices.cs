@@ -30,6 +30,7 @@ namespace MainWindowProgram.Services
   {
     private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
     private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
+    private readonly HashSet<string> _acceptedNormalizationSources = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Сервис для управления многооконным интерфейсом.
@@ -636,52 +637,6 @@ namespace MainWindowProgram.Services
         : $"{baseName}{extension}";
     }
 
-    private static string BuildNormalizedPkwPath(TextEditorUI editor)
-    {
-      var sourcePath = editor.TextEditorModel?.FilePath;
-      var sourceFileName = editor.TextEditorModel?.FileName;
-
-      var directory = !string.IsNullOrWhiteSpace(sourcePath)
-        ? Path.GetDirectoryName(Path.GetFullPath(sourcePath))
-        : Environment.CurrentDirectory;
-
-      var baseName = Path.GetFileNameWithoutExtension(sourcePath);
-      if (string.IsNullOrWhiteSpace(baseName))
-      {
-        baseName = Path.GetFileNameWithoutExtension(sourceFileName);
-      }
-
-      if (string.IsNullOrWhiteSpace(baseName))
-      {
-        baseName = "normalized";
-      }
-
-      if (!baseName.EndsWith("-ru", StringComparison.OrdinalIgnoreCase))
-      {
-        baseName += "-ru";
-      }
-
-      return Path.Combine(directory ?? Environment.CurrentDirectory, $"{baseName}.pkw");
-    }
-
-    private static void SaveNormalizedSource(TextEditorUI editor, string normalizedText)
-    {
-      var normalizedPath = BuildNormalizedPkwPath(editor);
-      var normalizedDirectory = Path.GetDirectoryName(normalizedPath);
-      if (!string.IsNullOrWhiteSpace(normalizedDirectory))
-      {
-        Directory.CreateDirectory(normalizedDirectory);
-      }
-
-      File.WriteAllText(normalizedPath, normalizedText, new UTF8Encoding(false));
-
-      editor.Text = normalizedText;
-      editor.TextEditorModel.FilePath = normalizedPath;
-      editor.TextEditorModel.FileName = Path.GetFileName(normalizedPath);
-      editor.TextEditorModel.Encoding = Encoding.UTF8;
-      editor.TextEditorModel.SavedTextSnapshot = normalizedText;
-    }
-
     /// <summary>
     /// Пытается создать новый транслятор, используя текст из указанного редактора.
     /// </summary>
@@ -1065,6 +1020,21 @@ namespace MainWindowProgram.Services
         return true;
       }
 
+      var normalizedText = _lookalikeNormalizer.Normalize(text);
+      if (string.Equals(normalizedText, text, StringComparison.Ordinal))
+      {
+        return true;
+      }
+
+      var normalizationSource = GetNormalizationSourceKey(editor);
+      if (!string.IsNullOrWhiteSpace(normalizationSource)
+          && _acceptedNormalizationSources.Contains(normalizationSource))
+      {
+        editor.Text = normalizedText;
+        text = normalizedText;
+        return true;
+      }
+
       var replaceDecision = MessageBoxCustom.Show(
         "В тексте найдены английские буквы.\nЗаменить их на русские аналоги перед трансляцией?\nЕсли не заменить, возможны ошибки локализации, и часть параметров может быть не распознана.",
         "Проверка текста перед трансляцией",
@@ -1073,8 +1043,12 @@ namespace MainWindowProgram.Services
 
       if (replaceDecision == MessageBoxResult.Yes)
       {
-        var normalizedText = _lookalikeNormalizer.Normalize(text);
-        SaveNormalizedSource(editor, normalizedText);
+        if (!string.IsNullOrWhiteSpace(normalizationSource))
+        {
+          _acceptedNormalizationSources.Add(normalizationSource);
+        }
+
+        editor.Text = normalizedText;
         text = normalizedText;
 
         return true;
@@ -1087,6 +1061,17 @@ namespace MainWindowProgram.Services
         MessageBoxImage.Warning);
 
       return true;
+    }
+
+    private static string GetNormalizationSourceKey(TextEditorUI editor)
+    {
+      var filePath = editor.TextEditorModel?.FilePath;
+      if (!string.IsNullOrWhiteSpace(filePath))
+      {
+        return Path.GetFullPath(filePath);
+      }
+
+      return editor.TextEditorModel?.FileName ?? string.Empty;
     }
   }
 }
