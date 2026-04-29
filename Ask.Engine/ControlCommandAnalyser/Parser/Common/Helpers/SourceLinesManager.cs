@@ -25,6 +25,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     {
       if (LinesExist(model, lines, numberLine) == true)
       {
+        NormalizeIndentation(model, lines);
         return IndentationCheck(model, lines, numberLine);
       }
       else
@@ -63,6 +64,36 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           return false;
       }
       return true;
+    }
+
+    /// <summary>
+    /// Автоматически нормализует отступы:
+    /// убирает отступ перед заголовком команды и добавляет отступ у строк продолжения.
+    /// </summary>
+    private static void NormalizeIndentation(BaseCommandModel model, List<string> lines)
+    {
+      var expectedStart = $"{model.CommandNumber} {model.Mnemonic}";
+
+      for (int i = 0; i < lines.Count; i++)
+      {
+        var line = lines[i];
+        if (string.IsNullOrWhiteSpace(line))
+          continue;
+
+        var trimmed = line.TrimStart();
+        if (trimmed.StartsWith(expectedStart))
+        {
+          lines[i] = trimmed;
+          continue;
+        }
+
+        if (i > 0 && !char.IsWhiteSpace(line[0]) && line.Trim() != "*")
+        {
+          lines[i] = $" {line}";
+        }
+      }
+
+      model.SourceLines = new List<string>(lines);
     }
   }
 }

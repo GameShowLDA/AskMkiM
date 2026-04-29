@@ -14,9 +14,11 @@
         Grid.Row="0"
         ShowLineNumbers="True"
         Style="{DynamicResource StyleTextEditor}"
+        FontFamily="Consolas"
         FontSize="20"
-        WordWrap="True"
-        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+        WordWrap="False"
+        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+        ScrollViewer.VerticalScrollBarVisibility="Auto"
         AllowDrop="True" 
         Tag="hotkeys" 
         PreviewMouseWheel="TextEditor_PreviewMouseWheel">

@@ -1,4 +1,5 @@
 using Ask.Core.Services.FilesUtility;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 
 namespace UI.Controls.TextEditorControl
@@ -18,6 +19,7 @@ namespace UI.Controls.TextEditorControl
   /// </summary>
   public partial class TextEditorUI
   {
+    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
     private bool _ctrlMPressed = false;
     private DateTime _lastCtrlMTime = DateTime.MinValue;
     private const int CtrlMTimeoutMs = 1000;
@@ -28,6 +30,7 @@ namespace UI.Controls.TextEditorControl
     /// </summary>
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+      if (HandleAutoIndentOnEnter(e)) return;
       if (HandleBreakpointShortcut(e)) return;
       if (HandleCtrlM(e)) return;
       ResetCtrlMFlagIfNeeded(e);
@@ -143,6 +146,50 @@ namespace UI.Controls.TextEditorControl
 
       e.Handled = true;
       return true;
+    }
+
+    /// <summary>
+    /// Автоотступ при переносе строки:
+    /// копирует текущий отступ и добавляет Tab после заголовка команды.
+    /// </summary>
+    private bool HandleAutoIndentOnEnter(KeyEventArgs e)
+    {
+      if (e.Key != Key.Return && e.Key != Key.Enter)
+        return false;
+
+      if (textEditor.IsReadOnly || textEditor.Document == null)
+        return false;
+
+      var caret = textEditor.TextArea.Caret;
+      int lineNumber = caret.Line;
+      if (lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
+        return false;
+
+      var line = textEditor.Document.GetLineByNumber(lineNumber);
+      string lineText = textEditor.Document.GetText(line.Offset, line.Length);
+      string indent = GetLeadingWhitespace(lineText);
+
+      if (indent.Length == 0 && CommandHeaderRegex.IsMatch(lineText))
+      {
+        indent = "\t";
+      }
+
+      string newLine = textEditor.Document.GetLineByNumber(1).DelimiterLength > 0 ? "\r\n" : Environment.NewLine;
+      textEditor.Document.Insert(caret.Offset, $"{newLine}{indent}");
+      caret.Offset += newLine.Length + indent.Length;
+      e.Handled = true;
+      return true;
+    }
+
+    private static string GetLeadingWhitespace(string text)
+    {
+      int i = 0;
+      while (i < text.Length && char.IsWhiteSpace(text[i]))
+      {
+        i++;
+      }
+
+      return i == 0 ? string.Empty : text[..i];
     }
   }
 }
