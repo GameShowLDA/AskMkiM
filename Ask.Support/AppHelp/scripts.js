@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const FALLBACK_ID = 'GeneralInformation';
     const THEME_STORAGE_KEY = 'mki-help-theme';
+    const THEME_COOKIE = 'mki_help_theme';
     const BOOKMARKS_STORAGE_KEY = 'mki-help-bookmarks-v1';
     const LEGACY_BOOKMARKS_STORAGE_KEY = 'mki-bookmarks';
     const BOOKMARKS_COOKIE = 'mki_help_bookmarks';
@@ -80,19 +81,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function readStoredTheme() {
+        let storedTheme = '';
+
         try {
-            return localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+            storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || '';
         } catch {
-            return 'light';
+            storedTheme = '';
         }
+
+        if (storedTheme === 'dark' || storedTheme === 'light') return storedTheme;
+
+        const cookieTheme = getCookie(THEME_COOKIE);
+        return cookieTheme === 'dark' ? 'dark' : 'light';
     }
 
     function writeStoredTheme(theme) {
         try {
             localStorage.setItem(THEME_STORAGE_KEY, theme);
         } catch {
-            // Тема останется активной до перезагрузки страницы.
+            // Cookie ниже останется запасным вариантом хранения.
         }
+
+        setCookie(THEME_COOKIE, theme);
     }
 
     function applyThemeToFrame() {
