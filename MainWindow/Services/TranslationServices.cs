@@ -29,6 +29,7 @@ namespace MainWindowProgram.Services
   public class TranslationServices
   {
     private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
+    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
     private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
     private readonly HashSet<string> _acceptedNormalizationSources = new(StringComparer.OrdinalIgnoreCase);
 
@@ -1015,6 +1016,13 @@ namespace MainWindowProgram.Services
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
       text = editor.Text ?? string.Empty;
+      text = NormalizeIndentationForEditor(text);
+
+      if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
+      {
+        editor.Text = text;
+      }
+
       if (!LatinLettersRegex.IsMatch(text))
       {
         return true;
@@ -1061,6 +1069,45 @@ namespace MainWindowProgram.Services
         MessageBoxImage.Warning);
 
       return true;
+    }
+
+    private static string NormalizeIndentationForEditor(string sourceText)
+    {
+      if (string.IsNullOrEmpty(sourceText))
+      {
+        return sourceText;
+      }
+
+      var lines = sourceText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+      bool insideCommand = false;
+
+      for (int i = 0; i < lines.Length; i++)
+      {
+        var line = lines[i].Replace('\t', ' ');
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          lines[i] = line;
+          continue;
+        }
+
+        var trimmedStart = line.TrimStart();
+        if (CommandHeaderRegex.IsMatch(line))
+        {
+          insideCommand = true;
+          lines[i] = trimmedStart;
+          continue;
+        }
+
+        if (!insideCommand || char.IsWhiteSpace(line[0]) || line.Trim() == "*")
+        {
+          lines[i] = line;
+          continue;
+        }
+
+        lines[i] = $" {line}";
+      }
+
+      return string.Join("\r\n", lines);
     }
 
     private static string GetNormalizationSourceKey(TextEditorUI editor)

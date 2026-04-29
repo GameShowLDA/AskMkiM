@@ -364,7 +364,12 @@ namespace Ask.UI.Controls.ErrorList
         return MinPageSize;
 
       var rowsByHeight = GetRowsByCurrentHeight();
-      return Math.Clamp(rowsByHeight, MinPageSize, Math.Min(MaxPageSize, visibleCount));
+      var maxAllowed = Math.Min(MaxPageSize, visibleCount);
+
+      if (maxAllowed < MinPageSize)
+        return maxAllowed;
+
+      return Math.Clamp(rowsByHeight, MinPageSize, maxAllowed);
     }
 
     private int GetRowsByCurrentHeight()

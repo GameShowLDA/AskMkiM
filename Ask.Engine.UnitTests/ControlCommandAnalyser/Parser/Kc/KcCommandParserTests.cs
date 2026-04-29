@@ -54,10 +54,11 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   }
 
   /// <summary>
-  /// Проверяет, что ошибка отступа в строке продолжения останавливает разбор КС до парсинга диапазона и точек.
+  /// Проверяет, что строка продолжения без отступа автоматически нормализуется
+  /// и не ломает дальнейший разбор КС.
   /// </summary>
-  [Fact(DisplayName = "КС parser: ошибка отступа в строке продолжения прерывает дальнейший разбор")]
-  public void Parse_WithInvalidContinuationIndentation_StopsBeforeRangeAndSchemeParsing()
+  [Fact(DisplayName = "КС parser: строка продолжения без отступа автоисправляется и разбирается")]
+  public void Parse_WithInvalidContinuationIndentation_AutoFixesAndParses()
   {
     var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, new List<string>
     {
@@ -65,12 +66,10 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
       "*X1,X2*"
     }));
 
-    var error = Assert.Single(model.Errors);
-
-    Assert.Contains("отступ", error.Description);
-    Assert.Null(model.LowerLimitResistance);
-    Assert.Null(model.HigherLimitResistance);
-    Assert.Null(model.Scheme);
+    AssertErrorCodes(model);
+    Assert.Equal(10, model.LowerLimitResistance);
+    Assert.Equal(15, model.HigherLimitResistance);
+    Assert.NotNull(model.Scheme);
   }
 
   /// <summary>
