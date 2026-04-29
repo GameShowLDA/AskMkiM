@@ -82,3 +82,35 @@ body {
     background: #f3f3f3; /* лёгкая заливка для выделения */
     font-weight: 700;
 }
+
+body.dark-theme {
+    background: #111827;
+    color: #e5e7eb;
+    color-scheme: dark;
+}
+
+body.dark-theme .page-title,
+body.dark-theme .page-content h1,
+body.dark-theme .page-content h2 {
+    color: #93c5fd;
+    border-bottom-color: #334155;
+}
+
+body.dark-theme .page-content h3,
+body.dark-theme .page-content ul li[data-id] {
+    color: #bfdbfe;
+}
+
+body.dark-theme .page-content ul li[data-id]:hover {
+    background: #1e293b;
+}
+
+body.dark-theme .page-content table th,
+body.dark-theme .page-content table td {
+    border-color: #64748b;
+}
+
+body.dark-theme .page-content table thead th {
+    border-bottom-color: #cbd5e1;
+    background: #1f2937;
+}

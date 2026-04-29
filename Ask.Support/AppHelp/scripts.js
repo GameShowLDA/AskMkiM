@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const secondaryArea = $('.secondary-area');
     const contentFrame = $('#content-frame');
     const mainContent = $('.main-content');
+    const themeToggle = $('#theme-toggle');
 
     const FALLBACK_ID = 'GeneralInformation';
+    const THEME_STORAGE_KEY = 'mki-help-theme';
     const BOOKMARKS_STORAGE_KEY = 'mki-help-bookmarks-v1';
     const LEGACY_BOOKMARKS_STORAGE_KEY = 'mki-bookmarks';
     const BOOKMARKS_COOKIE = 'mki_help_bookmarks';
@@ -52,8 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let contentIndexPromise = null;
     let searchFrame = null;
     let pendingSelectionQuery = '';
+    let currentTheme = 'light';
 
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
+    const getTheme = () => currentTheme;
     const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
     const setBookmarkVisible = visible => { bookmarkBtn.style.visibility = visible ? 'visible' : 'hidden'; };
     const bookmarkIds = () => [...bookmarks].filter(id => pageMap.get(id)?.isPage);
@@ -73,6 +77,52 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch {
             // Остальные хранилища всё равно сохранят закладки.
         }
+    }
+
+    function readStoredTheme() {
+        try {
+            return localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+        } catch {
+            return 'light';
+        }
+    }
+
+    function writeStoredTheme(theme) {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, theme);
+        } catch {
+            // Тема останется активной до перезагрузки страницы.
+        }
+    }
+
+    function applyThemeToFrame() {
+        const doc = contentFrame.contentDocument;
+        if (!doc?.body) return;
+
+        doc.body.classList.toggle('dark-theme', getTheme() === 'dark');
+    }
+
+    function updateThemeButton(theme) {
+        if (!themeToggle) return;
+
+        const isDark = theme === 'dark';
+        $('.theme-toggle-icon', themeToggle).textContent = isDark ? '☀️' : '🌙';
+        $('.theme-toggle-text', themeToggle).textContent = isDark ? 'Светлая тема' : 'Темная тема';
+        themeToggle.setAttribute('aria-label', isDark ? 'Включить светлую тему' : 'Включить темную тему');
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+    }
+
+    function applyTheme(theme = getTheme()) {
+        currentTheme = theme;
+        document.body.classList.toggle('dark-theme', theme === 'dark');
+        updateThemeButton(theme);
+        applyThemeToFrame();
+    }
+
+    function toggleTheme() {
+        const theme = getTheme() === 'dark' ? 'light' : 'dark';
+        writeStoredTheme(theme);
+        applyTheme(theme);
     }
 
     function encodeBookmarks(ids) {
@@ -547,6 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     contentFrame.addEventListener('load', () => {
+        applyThemeToFrame();
         fitFrame();
 
         const doc = contentFrame.contentDocument;
@@ -648,6 +699,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (index < pageOrder.length - 1) loadPage(pageOrder[index + 1]);
     });
 
+    themeToggle?.addEventListener('click', toggleTheme);
+
     resizer.addEventListener('mousedown', event => {
         isResizing = true;
         document.body.style.cursor = 'col-resize';
@@ -680,6 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncFolderToggles();
     renderBookmarksTab();
     updateSearchPlaceholder();
+    applyTheme(readStoredTheme());
 
     const params = new URLSearchParams(location.search);
     const cmd = params.get('cmd');
