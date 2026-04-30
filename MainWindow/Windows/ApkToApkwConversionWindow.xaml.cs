@@ -2,6 +2,7 @@ using Message;
 using Microsoft.Win32;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 
 namespace MainWindowProgram.Windows
 {
@@ -75,6 +76,19 @@ namespace MainWindowProgram.Windows
       return Owner != null
         ? dialog.ShowDialog(Owner) == true
         : dialog.ShowDialog() == true;
+    }
+
+    private void HeaderBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.LeftButton == MouseButtonState.Pressed)
+      {
+        DragMove();
+      }
+    }
+
+    private void CloseButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      Close();
     }
   }
 }

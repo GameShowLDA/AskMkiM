@@ -1,0 +1,224 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Components="clr-namespace:UI.Components;assembly=UI">
+
+    <Style x:Key="ConversionDialogShellBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="18"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="30"
+                                  ShadowDepth="0"
+                                  Opacity="0.24"
+                                  Color="{DynamicResource EmptyWorkspaceBlockShadowColor}"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ConversionDialogHeaderBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource MainGreetingBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="CornerRadius" Value="18,18,0,0"/>
+        <Setter Property="Height" Value="54"/>
+        <Setter Property="Padding" Value="0,0,12,0"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogWindowButtonStyle"
+           TargetType="Components:WindowButtons"
+           BasedOn="{StaticResource WindowsButtonStyle}">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogTitleTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonBold}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogDescriptionTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogSectionCardStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource SettingCardStyle}">
+        <Setter Property="Padding" Value="18"/>
+        <Setter Property="Margin" Value="0,0,0,16"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogSectionTitleStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonBold}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogSummaryTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SettingsDescriptionSolidColorBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogHintBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="14,12"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogHintTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SettingsDescriptionSolidColorBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="MinHeight" Value="44"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="Chrome"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="12"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ConversionDialogListBoxStyle" TargetType="ListBox">
+        <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="6"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="14"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer Padding="{TemplateBinding Padding}"
+                                      Focusable="False">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ConversionDialogListBoxItemStyle" TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="Margin" Value="0,0,0,6"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Bg"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ConversionDialogListItemTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextWrapping" Value="NoWrap"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogSecondaryButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="Padding" Value="18,8"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogBrowseButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ActionButtonStyle}">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="Padding" Value="18,8"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="MinWidth" Value="156"/>
+    </Style>
+
+    <Style x:Key="ConversionDialogPrimaryButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource SaveButtonStyle}">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="Padding" Value="22,8"/>
+        <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="MinWidth" Value="190"/>
+    </Style>
+</ResourceDictionary>
