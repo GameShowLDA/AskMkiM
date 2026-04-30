@@ -179,7 +179,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       foreach (var part in parts)
       {
-        var (connected, disconnected) = ExpandTokens(part, errors);
+        var (connected, disconnected) = ExpandTokens(part, errors, model);
 
         ValidateSinglePoint(model, connected, part, errors);
 
@@ -308,7 +308,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// - обычные диапазоны > connected
     /// - диапазоны с "-*" > disconnected (отдельные группы)
     /// </summary>
-    private static (List<string> Connected, List<string> Disconnected) ExpandTokens(string part, List<ErrorItem> errors)
+    private static (List<string> Connected, List<string> Disconnected) ExpandTokens(string part, List<ErrorItem> errors, BaseCommandModel model)
     {
       var connected = new List<string>();
       var disconnected = new List<string>();
@@ -322,11 +322,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       {
         if (tok.Contains("-*"))
         {
-          disconnected.AddRange(ExpandRangeToken(tok, errors));
+          disconnected.AddRange(ExpandRangeToken(tok, errors, model));
         }
         else if (tok.Contains('-'))
         {
-          connected.AddRange(ExpandRangeToken(tok, errors));
+          connected.AddRange(ExpandRangeToken(tok, errors, model));
         }
         else
         {
@@ -368,7 +368,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <summary>
     /// Раскрывает диапазон точек в список значений.
     /// </summary>
-    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors)
+    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors, BaseCommandModel model = null)
     {
       var result = new List<string>();
 
@@ -376,7 +376,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (TryExtractContactSuffix(token, out var rangePart, out var suffix))
       {
-        var baseRange = ExpandRangeToken(rangePart, errors);
+        var baseRange = ExpandRangeToken(rangePart, errors, model);
 
         return baseRange
             .Select(x => x + suffix)
@@ -387,8 +387,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return result;
 
       if (!TryParseRangeBounds(token, left, right, errors,
-          out string prefix, out int start, out int end))
+          out string prefix, out int start, out int end, out bool wasCompleted))
         return result;
+
+      if (wasCompleted && model != null)
+        AddCompletedRangeWarning(model, token);
 
       if (!ValidateRangeBounds(token, start, end, errors))
         return result;
@@ -425,10 +428,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <summary>
     /// Парсит начало и конец диапазона.
     /// </summary>
-    private static bool TryParseRangeBounds(string token, string left, string right, List<ErrorItem> errors, out string prefix, out int start, out int end)
+    private static bool TryParseRangeBounds(string token, string left, string right, List<ErrorItem> errors, out string prefix, out int start, out int end, out bool wasCompleted)
     {
       prefix = "";
       start = end = 0;
+      wasCompleted = false;
 
       if (!TrySplitPrefixAndNumber(left, out prefix, out start))
       {
@@ -444,6 +448,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             $"Несовместимые префиксы в диапазоне: {token} (\"{prefix}\" vs \"{rightPrefix}\").");
           return false;
         }
+        wasCompleted = IsRangeCompletion(left, right, prefix, rightPrefix);
         end = rightNum;
       }
       else if (!int.TryParse(right, out end))
@@ -455,6 +460,29 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return true;
     }
 
+    private static bool IsRangeCompletion(string left, string right, string leftPrefix, string rightPrefix)
+    {
+      if (!string.IsNullOrEmpty(rightPrefix))
+        return false;
+
+      if (!Regex.IsMatch(right, @"^\d+$"))
+        return false;
+
+      var leftTailPrefix = GetTailPrefix(leftPrefix);
+      return !string.IsNullOrEmpty(leftTailPrefix)
+          && Regex.IsMatch(left, @"[/\.][^/\.\d]+\d+$");
+    }
+
+    private static void AddCompletedRangeWarning(BaseCommandModel model, string token)
+    {
+      model.Warnings.Add(new WarningItem
+      {
+        SourceLineNumber = model.StartLineNumber,
+        Command = $"{model.CommandNumber} {model.Mnemonic}",
+        Description = $"Запись диапазона ({token}) была дополнена. Убедитесь в правильности записи.",
+        Code = WarningCode.Unknown
+      });
+    }
     private static bool AreRangePrefixesCompatible(string leftPrefix, string rightPrefix)
     {
       if (string.IsNullOrEmpty(rightPrefix))
