@@ -347,6 +347,7 @@ namespace UI.Controls
 
     private bool SaveFileToArchive()
     {
+      var leftTextEditor = GetLeftBox()?.GetTextEditor();
       var rightBox = GetRightBox();
       var rightTextEditor = rightBox?.GetTextEditor();
       if (rightTextEditor?.TextEditorModel == null)
@@ -358,7 +359,19 @@ namespace UI.Controls
         return false;
       }
 
-      return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
+      var sourceText = leftTextEditor?.Text;
+      if (string.IsNullOrWhiteSpace(sourceText))
+      {
+        sourceText = rightTextEditor.Text;
+      }
+
+      var sourcePath = leftTextEditor?.TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(sourcePath))
+      {
+        sourcePath = rightTextEditor.TextEditorModel.FilePath;
+      }
+
+      return _archiveSaveService.SaveFileToArchive(this, sourceText ?? string.Empty, sourcePath);
     }
 
     private void UpdateRightEditorActions()
