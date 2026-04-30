@@ -47,6 +47,8 @@ namespace MainWindowProgram.Services
     {
       ".pk",
       ".pkw",
+      ".opk",
+      ".opkw",
       ".acs",
     };
 

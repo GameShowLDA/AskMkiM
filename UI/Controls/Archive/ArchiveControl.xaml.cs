@@ -1032,6 +1032,7 @@ namespace UI.Controls.Archive
       {
         ".pk" => FileType.PK,
         ".pkw" => FileType.PKW,
+        ".opk" => FileType.OPK,
         ".opkw" => FileType.OPKW,
         _ => FileType.None,
       };
@@ -1361,6 +1362,7 @@ namespace UI.Controls.Archive
       CutArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
       PasteArchiveFileButton.Visibility = canManageArchiveFiles && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
       ConvertToPkwButton.Visibility = _lastSelectedIsReviewEntry ? Visibility.Collapsed : Visibility.Visible;
+      RunInExecutorButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
       RecheckReviewFileButton.Visibility = _lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath)
         ? Visibility.Visible
         : Visibility.Collapsed;
@@ -2712,6 +2714,108 @@ namespace UI.Controls.Archive
       }
 
       FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(_lastSelectedReviewFilePath);
+    }
+
+    private async void RunInExecutorButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (_lastSelectedIsReviewEntry ||
+          string.IsNullOrWhiteSpace(_lastSelectedArchivePath) ||
+          string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        return;
+      }
+
+      try
+      {
+        var entryName = NormalizeEntryName(_lastSelectedEntryName);
+        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(_lastSelectedArchivePath, entryName));
+        if (string.IsNullOrWhiteSpace(text))
+        {
+          ShowArchiveNotification("Запуск в исполнителе", "Выбранный файл пустой.", NotificationType.Warning);
+          return;
+        }
+
+        var fileType = DeterminePreviewFileType(entryName);
+        var extension = GetExecutionExtension(fileType, entryName);
+        var tempFilePath = CreateExecutionTempFilePath(entryName, extension);
+        var encoding = (fileType == FileType.PKW || fileType == FileType.OPKW)
+          ? new UTF8Encoding(false)
+          : Encoding.GetEncoding(866);
+
+        await File.WriteAllTextAsync(tempFilePath, text, encoding);
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(tempFilePath);
+
+        await Task.Delay(120);
+        if (!TryExecuteRunCommand())
+        {
+          ShowArchiveNotification(
+            "Запуск в исполнителе",
+            "Файл открыт, но не удалось автоматически запустить исполнитель. Запустите через меню Выполнение -> Запуск.",
+            NotificationType.Warning);
+        }
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Запуск в исполнителе", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private static bool TryExecuteRunCommand()
+    {
+      var mainWindow = Application.Current?.MainWindow;
+      if (mainWindow?.DataContext == null)
+      {
+        return false;
+      }
+
+      var translationProp = mainWindow.DataContext.GetType().GetProperty("Translation");
+      var translationVm = translationProp?.GetValue(mainWindow.DataContext);
+      if (translationVm == null)
+      {
+        return false;
+      }
+
+      var runCommandProp = translationVm.GetType().GetProperty("RunCommand");
+      var runCommand = runCommandProp?.GetValue(translationVm) as ICommand;
+      if (runCommand == null || !runCommand.CanExecute(null))
+      {
+        return false;
+      }
+
+      runCommand.Execute(null);
+      return true;
+    }
+
+    private static string CreateExecutionTempFilePath(string entryName, string extension)
+    {
+      var tempRoot = Path.Combine(Path.GetTempPath(), "AskMkiM", "ArchiveExecution");
+      Directory.CreateDirectory(tempRoot);
+
+      var safeBase = Path.GetFileNameWithoutExtension(entryName);
+      if (string.IsNullOrWhiteSpace(safeBase))
+      {
+        safeBase = "archive_entry";
+      }
+
+      safeBase = string.Join("_", safeBase.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+      if (string.IsNullOrWhiteSpace(safeBase))
+      {
+        safeBase = "archive_entry";
+      }
+
+      return Path.Combine(tempRoot, $"{safeBase}_{Guid.NewGuid():N}{extension}");
+    }
+
+    private static string GetExecutionExtension(FileType fileType, string entryName)
+    {
+      return fileType switch
+      {
+        FileType.OPK => ".opk",
+        FileType.OPKW => ".opkw",
+        FileType.PK => ".pk",
+        FileType.PKW => ".pkw",
+        _ => string.IsNullOrWhiteSpace(Path.GetExtension(entryName)) ? ".opkw" : Path.GetExtension(entryName),
+      };
     }
 
     private async void RecheckReviewArchiveButton_Click(object sender, RoutedEventArgs e)

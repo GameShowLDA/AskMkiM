@@ -95,6 +95,71 @@ namespace UI.Services.Archive
       }
     }
 
+    public bool SaveFileToArchive(FrameworkElement ownerElement, string translatedText, string sourceFilePath)
+    {
+      if (ownerElement == null)
+      {
+        throw new ArgumentNullException(nameof(ownerElement));
+      }
+
+      try
+      {
+        if (string.IsNullOrWhiteSpace(translatedText))
+        {
+          LogWarning("Нет данных для сохранения в архив.");
+          ShowArchiveNotification(
+            "Сохранение в архив",
+            "Нет данных для сохранения в архив.",
+            NotificationType.Warning);
+
+          return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(sourceFilePath))
+        {
+          LogError("Не удалось определить имя файла для сохранения.");
+          ShowArchiveNotification(
+            "Сохранение в архив",
+            "Не удалось определить имя файла для сохранения.",
+            NotificationType.Error);
+          return false;
+        }
+
+        var normalizedText = translatedText.Replace("\r\n", "\n").Replace('\r', '\n');
+        var lines = normalizedText.Split('\n').ToList();
+        var sourceLines = new List<List<string>> { lines };
+
+        var fileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".opkw";
+        var archivePath = GetArchivePathForSave(ownerElement, Path.GetFileNameWithoutExtension(fileName));
+
+        if (string.IsNullOrWhiteSpace(archivePath))
+        {
+          return false;
+        }
+
+        using var archiveManager = new ArchiveManager();
+        archiveManager.OpenArchive(archivePath);
+        archiveManager.AddFileToArchive(sourceLines, archivePath, fileName);
+
+        LogInformation($"Файл {fileName} добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.");
+        ShowArchiveNotification(
+          "Сохранение в архив",
+          $"Файл {fileName} добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.",
+          NotificationType.Success);
+
+        return true;
+      }
+      catch (Exception ex)
+      {
+        LogError($"{GetUserFriendlySaveErrorMessage(ex)}");
+        ShowArchiveNotification(
+          "Сохранение в архив",
+          GetUserFriendlySaveErrorMessage(ex),
+          NotificationType.Error);
+        return false;
+      }
+    }
+
     private string GetArchivePathForSave(FrameworkElement ownerElement, string suggestedArchiveName)
     {
       var archivesFolderPath = ArchiveDirectoryService.ResolveArchivesRootPath();

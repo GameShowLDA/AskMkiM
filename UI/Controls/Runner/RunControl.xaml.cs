@@ -10,6 +10,7 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ProtocolNew;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -126,6 +127,7 @@ namespace UI.Controls.Runner
         if (translatorItem != null)
         {
           var translatorEditor = translatorItem.Content as TranslatorEditor;
+          var canReturnToSource = CanReturnToSourceFile();
           if (newValue)
           {
             translatorEditor.BackButton.Visibility = Visibility.Collapsed;
@@ -134,7 +136,7 @@ namespace UI.Controls.Runner
 
           else
           {
-            translatorEditor.BackButton.Visibility = Visibility.Visible;
+            translatorEditor.BackButton.Visibility = canReturnToSource ? Visibility.Visible : Visibility.Collapsed;
             isLocked = false;
           }
         }
@@ -242,6 +244,9 @@ namespace UI.Controls.Runner
       rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
+      rightEditor.BackButton.Visibility = CanReturnToSourceFile() && !isLocked
+        ? Visibility.Visible
+        : Visibility.Collapsed;
       var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.FileName);
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = fileName;
@@ -354,6 +359,17 @@ namespace UI.Controls.Runner
       await manager.ExecuteAllAsync();
     }
 
+    private bool CanReturnToSourceFile()
+    {
+      if (string.IsNullOrWhiteSpace(OpkFilePath))
+      {
+        return true;
+      }
+
+      var extension = Path.GetExtension(OpkFilePath);
+      return !string.Equals(extension, ".opk", StringComparison.OrdinalIgnoreCase);
+    }
+
     private void AddError(ErrorItem errorItem)
     {
       Application.Current.Dispatcher?.Invoke(() =>
@@ -410,7 +426,27 @@ namespace UI.Controls.Runner
         sourceFilePath = OpkFilePath;
       }
 
-      _archiveSaveService.SaveFileToArchive(this, this.TranslationModels, sourceFilePath);
+      var sourceText = TryReadSourceTextForArchive(sourceFilePath)
+        ?? rightEditor?.GetTextEditor()?.Text
+        ?? string.Empty;
+
+      _archiveSaveService.SaveFileToArchive(this, sourceText, sourceFilePath);
+    }
+
+    private static string? TryReadSourceTextForArchive(string? sourceFilePath)
+    {
+      if (string.IsNullOrWhiteSpace(sourceFilePath) || !File.Exists(sourceFilePath))
+      {
+        return null;
+      }
+
+      var ext = Path.GetExtension(sourceFilePath);
+      var encoding = string.Equals(ext, ".pkw", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(ext, ".opkw", StringComparison.OrdinalIgnoreCase)
+          ? new UTF8Encoding(false)
+          : Encoding.GetEncoding(866);
+
+      return File.ReadAllText(sourceFilePath, encoding);
     }
 
     private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
