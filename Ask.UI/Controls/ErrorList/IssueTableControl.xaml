@@ -6,6 +6,9 @@
              xmlns:DiagnosticsConv="clr-namespace:Ask.Core.Shared.Metadata.Converters;assembly=Ask.Core"
              xmlns:help="clr-namespace:Ask.Support;assembly=Ask.Support"
              x:Name="root"
+             Focusable="True"
+             KeyDown="IssueTable_KeyDown"
+             MouseEnter="IssueTable_MouseEnter"
              Background="{DynamicResource ErrorListBackground}">
 
     <UserControl.Resources>

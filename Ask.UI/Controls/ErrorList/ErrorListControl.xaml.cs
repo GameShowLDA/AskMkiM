@@ -11,7 +11,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Ask.UI.Controls.ErrorList
 {
@@ -55,6 +54,7 @@ namespace Ask.UI.Controls.ErrorList
       Loaded += ErrorListControl_Loaded;
       SizeChanged += ErrorListControl_SizeChanged;
       DataContext = this;
+      IssuesTable.IssueNavigationRequested += IssuesTable_IssueNavigationRequested;
 
       EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
 
@@ -289,71 +289,61 @@ namespace Ask.UI.Controls.ErrorList
       RefreshCurrentPage();
     }
 
-    private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+    private void IssuesTable_IssueNavigationRequested(object? sender, IssueNavigationRequestedEventArgs e)
     {
-      if (e.Key != Key.F8 || sender is not DataGrid grid)
-        return;
-
-      int direction = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? -1 : 1;
-
-      IDisplayIssue? targetIssue = TryGetIssueUnderMouse(grid);
+      IDisplayIssue? targetIssue = e.IssueUnderMouse;
 
       if (targetIssue == null)
-        targetIssue = GetAdjacentIssue(grid, direction);
+        targetIssue = GetAdjacentIssue(e.Direction);
 
       if (targetIssue == null)
         return;
 
-      grid.SelectedItem = targetIssue;
-      grid.ScrollIntoView(targetIssue);
-
-      ItemDoubleClicked?.Invoke(targetIssue);
-      e.Handled = true;
-
-      Dispatcher.BeginInvoke(new Action(() =>
-      {
-        grid.Focus();
-        Keyboard.Focus(grid);
-      }), System.Windows.Threading.DispatcherPriority.Input);
+      SelectAndActivateIssue(targetIssue);
     }
 
-    private static IDisplayIssue? TryGetIssueUnderMouse(DataGrid grid)
+    private IDisplayIssue? GetAdjacentIssue(int direction)
     {
-      var mousePos = Mouse.GetPosition(grid);
-      DependencyObject? visual = VisualTreeHelper.HitTest(grid, mousePos)?.VisualHit;
-
-      while (visual != null && visual is not DataGridRow)
-        visual = VisualTreeHelper.GetParent(visual);
-
-      return visual is DataGridRow { Item: IDisplayIssue issue }
-        ? issue
-        : null;
-    }
-
-    private static IDisplayIssue? GetAdjacentIssue(DataGrid grid, int direction)
-    {
-      if (grid.Items.Count == 0)
+      var visibleIssues = GetVisibleIssues().ToList();
+      if (visibleIssues.Count == 0)
         return null;
 
-      int currentIndex = grid.SelectedIndex;
+      var currentIndex = IssuesTable.SelectedIssue == null
+        ? -1
+        : visibleIssues.IndexOf(IssuesTable.SelectedIssue);
 
       if (currentIndex < 0)
-        currentIndex = direction > 0 ? -1 : grid.Items.Count;
+        return direction > 0 ? visibleIssues[0] : visibleIssues[^1];
 
-      int nextIndex = currentIndex + direction;
-
-      if (nextIndex < 0 || nextIndex >= grid.Items.Count)
-        return grid.Items[0] as IDisplayIssue;
-
-      return grid.Items[nextIndex] as IDisplayIssue;
+      var nextIndex = (currentIndex + direction + visibleIssues.Count) % visibleIssues.Count;
+      return visibleIssues[nextIndex];
     }
 
-    private void DataGrid_MouseEnter(object sender, MouseEventArgs e)
+    private void SelectAndActivateIssue(IDisplayIssue targetIssue)
     {
-      if (sender is DataGrid grid)
+      var visibleIndex = GetVisibleIssues()
+        .Select((issue, index) => new { issue, index })
+        .FirstOrDefault(x => ReferenceEquals(x.issue, targetIssue) || Equals(x.issue, targetIssue))
+        ?.index;
+
+      if (visibleIndex == null)
+        return;
+
+      var targetPageIndex = visibleIndex.Value / _pageSize;
+      if (targetPageIndex != _currentPageIndex)
       {
-        grid.Focus();
+        _currentPageIndex = targetPageIndex;
+        RefreshCurrentPage();
       }
+
+      IssuesTable.SelectedIssue = targetIssue;
+      ItemDoubleClicked?.Invoke(targetIssue);
+      Dispatcher.BeginInvoke(new Action(IssuesTable.FocusTable), System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    private IEnumerable<IDisplayIssue> GetVisibleIssues()
+    {
+      return _allIssues.Where(ShouldDisplay);
     }
 
     private void RecalculateTotals()
