@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+using Ask.UI.Shared.Formatting;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -45,13 +45,15 @@ namespace UI.Controls.Archive
 
         _errorCount = value;
         OnPropertyChanged();
+        OnPropertyChanged(nameof(ErrorCountDisplay));
       }
     }
 
+    public string ErrorCountDisplay => CountDisplayFormatter.FormatNonZero(ErrorCount);
     public Visibility StatusVisibility => Status.ToVisibility();
     public Brush StatusBrush => Status.ToBrush();
     public bool IsExpanded { get; set; }
-    public ObservableCollection<ArchiveTreeNode> Children { get; } = new ObservableCollection<ArchiveTreeNode>();
+    public RangeObservableCollection<ArchiveTreeNode> Children { get; } = new RangeObservableCollection<ArchiveTreeNode>();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -77,17 +79,27 @@ namespace UI.Controls.Archive
       };
     }
 
-    public static ArchiveTreeNode CreateArchive(string name, string archivePath)
+    public static ArchiveTreeNode CreateArchive(
+      string name,
+      string archivePath,
+      ArchiveNodeStatus status = ArchiveNodeStatus.None,
+      int errorCount = 0)
     {
       return new ArchiveTreeNode
       {
         DisplayName = name,
         Kind = ArchiveTreeNodeKind.Archive,
         ArchivePath = archivePath,
+        Status = status,
+        ErrorCount = errorCount,
       };
     }
 
-    public static ArchiveTreeNode CreateReviewArchive(string name, string archivePath, ArchiveNodeStatus status, int errorCount)
+    public static ArchiveTreeNode CreateReviewArchive(
+      string name,
+      string archivePath,
+      ArchiveNodeStatus status,
+      int errorCount)
     {
       return new ArchiveTreeNode
       {
@@ -99,7 +111,12 @@ namespace UI.Controls.Archive
       };
     }
 
-    public static ArchiveTreeNode CreateFile(string name, string archivePath, string entryName)
+    public static ArchiveTreeNode CreateFile(
+      string name,
+      string archivePath,
+      string entryName,
+      ArchiveNodeStatus status = ArchiveNodeStatus.None,
+      int errorCount = 0)
     {
       return new ArchiveTreeNode
       {
@@ -107,6 +124,8 @@ namespace UI.Controls.Archive
         Kind = ArchiveTreeNodeKind.File,
         ArchivePath = archivePath,
         EntryName = entryName,
+        Status = status,
+        ErrorCount = errorCount,
       };
     }
 
@@ -139,10 +158,15 @@ namespace UI.Controls.Archive
       };
     }
 
-    public void UpdateReviewState(ArchiveNodeStatus status, int errorCount)
+    public void UpdateState(ArchiveNodeStatus status, int errorCount)
     {
       Status = status;
       ErrorCount = errorCount;
+    }
+
+    public void UpdateReviewState(ArchiveNodeStatus status, int errorCount)
+    {
+      UpdateState(status, errorCount);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Shared.Formatting;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -203,7 +204,7 @@ namespace UI.Controls.Runner
 
       if (ErrorCount > 0)
       {
-        MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+        MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {CountDisplayFormatter.Format(ErrorCount)}");
       }
     }
 
@@ -379,7 +380,7 @@ namespace UI.Controls.Runner
 
         if (ErrorCount > 0)
         {
-          MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+          MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {CountDisplayFormatter.Format(ErrorCount)}");
         }
       });
     }

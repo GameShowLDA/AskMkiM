@@ -124,6 +124,9 @@
                           BorderThickness="0"
                           FontSize="15"
                           Cursor="Hand"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True"
                 SelectedItemChanged="ArchivesTreeView_SelectedItemChanged">
                     <TreeView.ContextMenu>
                             <ContextMenu x:Name="ArchivesTreeContextMenu"
@@ -281,7 +284,7 @@
                                             BorderThickness="1"
                                             Visibility="Collapsed">
                                         <TextBlock x:Name="NodeBadgeText"
-                                                   Text="{Binding ErrorCount}"
+                                                   Text="{Binding ErrorCountDisplay}"
                                                    FontSize="11"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource ArchiveShellTextSecondaryBrush}" />
@@ -705,7 +708,12 @@
                         SelectionUnit="FullRow"
                         CanUserAddRows="False"
                         CanUserDeleteRows="False"
+                        EnableRowVirtualization="True"
+                        EnableColumnVirtualization="True"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
                         ScrollViewer.CanContentScroll="True"
+                        ScrollViewer.IsDeferredScrollingEnabled="True"
                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
                         ScrollViewer.VerticalScrollBarVisibility="Auto"
                         SelectionChanged="ArchiveFilesDataGrid_SelectionChanged">
