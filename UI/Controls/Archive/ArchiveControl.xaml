@@ -884,12 +884,20 @@
                                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                             <Button x:Name="ConvertToPkwButton"
-                                    Style="{StaticResource ArchiveToolbarAccentIconButtonStyle}"
+                                    Style="{StaticResource ArchiveToolbarIconButtonStyle}"
                                     ToolTip="Конвертировать в pkw"
                                     Click="ConvertToPkwButton_Click">
                                 <askUiIcons:ExportConfigIcon Size="16"
                                                              IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
+                            <Button x:Name="RunInExecutorButton"
+                                    Visibility="Collapsed"
+                                    Style="{StaticResource ArchiveToolbarAccentIconButtonStyle}"
+                                    ToolTip="Запустить в исполнителе"
+                                    Click="RunInExecutorButton_Click">
+                                <askUiIcons:ExecutionPlayCircleIcon Size="16"
+                                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
                             <Button x:Name="DeleteArchiveFileButton"
                                     Visibility="Collapsed"
