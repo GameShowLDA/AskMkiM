@@ -86,7 +86,8 @@
                                 <TextBox x:Name="InputFileTextBox"
                                          Grid.Column="0"
                                          Style="{StaticResource ConversionDialogTextBoxStyle}"
-                                         TextChanged="InputFileTextBox_TextChanged" />
+                                         TextChanged="InputFileTextBox_TextChanged"
+                                         MouseDoubleClick="InputFileTextBox_MouseDoubleClick" />
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"

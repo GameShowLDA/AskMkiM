@@ -95,7 +95,8 @@
                                 <TextBox x:Name="OutputDirectoryTextBox"
                                          Grid.Column="0"
                                          Style="{StaticResource ConversionDialogTextBoxStyle}"
-                                         TextChanged="OutputDirectoryTextBox_TextChanged" />
+                                         TextChanged="OutputDirectoryTextBox_TextChanged"
+                                         MouseDoubleClick="OutputDirectoryTextBox_MouseDoubleClick" />
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"
@@ -151,7 +152,8 @@
                                      ItemTemplate="{StaticResource SelectedFileTemplate}"
                                      ItemContainerStyle="{StaticResource ConversionDialogListBoxItemStyle}"
                                      Style="{StaticResource ConversionDialogListBoxStyle}"
-                                     HorizontalContentAlignment="Stretch" />
+                                     HorizontalContentAlignment="Stretch"
+                                     MouseDoubleClick="SelectedFilesListBox_MouseDoubleClick" />
                         </Grid>
                     </Border>
 

@@ -105,7 +105,7 @@
                             CornerRadius="12"
                             SnapsToDevicePixels="True">
                         <ScrollViewer x:Name="PART_ContentHost"
-                                      Margin="{TemplateBinding Padding}"
+                                      Margin="0"
                                       VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>

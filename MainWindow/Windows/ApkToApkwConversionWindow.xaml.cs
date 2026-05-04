@@ -21,6 +21,17 @@ namespace MainWindowProgram.Windows
 
     private void SelectInputFileButton_Click(object sender, RoutedEventArgs e)
     {
+      SelectInputFile();
+    }
+
+    private void InputFileTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      SelectInputFile();
+      e.Handled = true;
+    }
+
+    private void SelectInputFile()
+    {
       var dialog = new OpenFileDialog
       {
         Title = "Выберите APK-архив",
