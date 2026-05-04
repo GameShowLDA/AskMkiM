@@ -26,13 +26,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           continue;
         }
 
-        if (i > 0 && !string.IsNullOrWhiteSpace(line) && !char.IsWhiteSpace(line[0]))
+        if (i > 0 && !string.IsNullOrWhiteSpace(line) && !char.IsWhiteSpace(line[0]) && !IsStandaloneChainSeparator(line))
         {
           errors.Add($"Строка {i + 1}: отсутствует отступ в строке продолжения.");
         }
       }
 
       return errors;
+    }
+
+    private static bool IsStandaloneChainSeparator(string line)
+    {
+      return line.Trim() == "*";
     }
   }
 }

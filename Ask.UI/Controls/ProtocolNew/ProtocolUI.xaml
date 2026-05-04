@@ -7,7 +7,6 @@
                           xmlns:TextEditor="clr-namespace:Ask.UI.Components.ProtocolListBox"
              xmlns:Icons="clr-namespace:Ask.UI.Shared.Components.Icons"
              xmlns:ErrorList="clr-namespace:Ask.UI.Controls.ErrorList"
-             xmlns:conv="clr-namespace:Ask.UI.Shared.Converters.Math"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
@@ -342,18 +341,11 @@
                 </Border>
 
                 <Grid Grid.Column="1" Margin="5">
-                    <Grid.Resources>
-                        <conv:MultiplyConverter x:Key="MultiplyConverter"/>
-                    </Grid.Resources>
-
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
 
-                        <RowDefinition Height="Auto" MaxHeight="{Binding RelativeSource={RelativeSource AncestorType=Grid},
-                                                                 Path=ActualHeight,
-                                                                 Converter={StaticResource MultiplyConverter},
-                                                                 ConverterParameter=0.5}"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />

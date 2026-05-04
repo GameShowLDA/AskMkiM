@@ -1,4 +1,6 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Shared.DTO.Executor;
+using System.Text.RegularExpressions;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
@@ -15,17 +17,39 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
   /// </summary>
   public static class UnparsedParametersManager
   {
+    private static void AddUnparsedParameters(BaseCommandModel model, int numberLine, string? remainder)
+    {
+      remainder = NormalizeUnparsedRemainder(remainder);
+
+      if (string.IsNullOrWhiteSpace(remainder))
+        return;
+
+      SetUnparsedParameters(model, remainder);
+      model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+    }
+
+    private static void SetUnparsedParameters(BaseCommandModel model, string remainder)
+    {
+      var property = model.GetType().GetProperty("UnparsedParameters");
+      if (property?.CanWrite == true)
+        property.SetValue(model, "! Не распознанные параметры: " + remainder);
+    }
+    private static string NormalizeUnparsedRemainder(string? remainder)
+    {
+      if (string.IsNullOrWhiteSpace(remainder))
+        return string.Empty;
+
+      var normalized = remainder.Trim();
+      return Regex.IsMatch(normalized, @"^[\s,;]+$")
+        ? string.Empty
+        : normalized;
+    }
     /// <summary>
     /// Обрабатывает нераспознанные параметры команды ЭТ.
     /// </summary>
     public static void HandleUnparsedParameters(EhtCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
 
       // Валидация
       if (string.IsNullOrWhiteSpace(model.LowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.HigherLimitResistanceSource))
@@ -40,12 +64,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(PtCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
 
       if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
       {
@@ -59,12 +78,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(OtCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
 
       if (string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(model.PointsSourse))
       {
@@ -77,12 +91,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(KsCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
 
       // Валидация
       if (string.IsNullOrWhiteSpace(model.LowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.HigherLimitResistanceSource))
@@ -97,12 +106,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(NeCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
 
       // Валидация
       if (string.IsNullOrWhiteSpace(model.HigherLimitVoltageSource) && string.IsNullOrWhiteSpace(model.LowerLimitVoltageSource))
@@ -120,12 +124,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(CkCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
     }
 
     /// <summary>
@@ -133,12 +132,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(SiCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      remainder = NormalizeSiUnparsedRemainder(remainder);
+
+      AddUnparsedParameters(model, numberLine, remainder);
+    }
+
+    private static string NormalizeSiUnparsedRemainder(string? remainder)
+    {
+      if (string.IsNullOrWhiteSpace(remainder))
+        return string.Empty;
+
+      var normalized = remainder.Trim();
+
+      normalized = Regex.Replace(
+        normalized,
+        @"(?<=^|[\s,;])\d+(?:[.,]\d+)?\s*(?:м[сc]|ms|с|c)(?=$|[\s,;])",
+        string.Empty,
+        RegexOptions.IgnoreCase);
+
+      return NormalizeUnparsedRemainder(normalized);
     }
 
     /// <summary>
@@ -146,12 +158,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     public static void HandleUnparsedParameters(PiCommandModel model, int numberLine, string? remainder)
     {
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
     }
 
     /// <summary>
@@ -160,12 +167,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     public static void HandleUnparsedParameters(IeCommandModel model, int numberLine, string? remainder)
     {
 
-      if (!string.IsNullOrEmpty(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
     }
 
     /// <summary>
@@ -174,12 +176,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     public static void HandleUnparsedParameters(PrCommandModel model, int numberLine, string? remainder)
     {
 
-      if (!string.IsNullOrEmpty(remainder) && !string.IsNullOrWhiteSpace(remainder))
-      {
-        model.UnparsedParameters = "! Не распознанные параметры: ";
-        model.UnparsedParameters += remainder;
-        model.Errors.Add(GeneralErrors.UnrecognizedParameters(remainder, numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
-      }
+      AddUnparsedParameters(model, numberLine, remainder);
 
       // Валидация
       if (string.IsNullOrWhiteSpace(model.DisconnectedLowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.DisconnectedHigherLimitResistanceSource)

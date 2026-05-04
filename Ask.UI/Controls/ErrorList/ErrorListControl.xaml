@@ -33,6 +33,75 @@
             <local:IssueIconSelector x:Key="IssueIconSelector"
                                      ErrorTemplate="{StaticResource ErrorIconTemplate}"
                                      WarningTemplate="{StaticResource WarningIconTemplate}" />
+
+            <Style x:Key="PaginationBaseButtonStyle" TargetType="Button">
+                <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="Margin" Value="1,0"/>
+                <Setter Property="MinWidth" Value="26"/>
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="RootBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="3"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.82"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.55"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PaginationNavButtonStyle" TargetType="Button" BasedOn="{StaticResource PaginationBaseButtonStyle}">
+                <Setter Property="MinWidth" Value="58"/>
+                <Setter Property="Padding" Value="9,2"/>
+            </Style>
+
+            <Style x:Key="PaginationPageButtonStyle" TargetType="Button" BasedOn="{StaticResource PaginationBaseButtonStyle}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsClickable}" Value="False">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+                        <Setter Property="Cursor" Value="Arrow"/>
+                        <Setter Property="Focusable" Value="False"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -45,15 +114,16 @@
                     BorderThickness="0">
 
             <TabItem x:Name="ErrorsTab" Header="Ошибки">
-                <Grid>
+                <Grid ClipToBounds="True">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*" MinHeight="0"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0"
                                 Orientation="Horizontal"
-                                Margin="8,8,8,6"
+                                Margin="8,4,8,6"
                                 HorizontalAlignment="Left">
 
                         <ToggleButton x:Name="WarningButton"
@@ -70,127 +140,59 @@
                                       PreviewMouseDown="ErrorsButton_PreviewMouseDown"/>
                     </StackPanel>
 
-                    <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding Items, ElementName=root}"
-                              AutoGenerateColumns="False"
-                              HeadersVisibility="Column"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              IsReadOnly="True"
-                              FontFamily="{DynamicResource WinstonRegular}"
-                              FontSize="13"
-                              Background="{DynamicResource ErrorListBackground}"
-                              Foreground="{DynamicResource ForegrounfBrushes}"
-                              RowBackground="{DynamicResource ErrorListBackground}"
-                              AlternatingRowBackground="{DynamicResource ErrorListBackground}"
-                              GridLinesVisibility="None"
-                              BorderThickness="0"
-                              ColumnHeaderHeight="30"
-                              MouseDoubleClick="DataGrid_MouseDoubleClick"
-                              KeyDown="DataGrid_KeyDown"
-                              MouseEnter="DataGrid_MouseEnter"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <local:IssueTableControl x:Name="IssuesTable"
+                                             Grid.Row="1"
+                                             VerticalAlignment="Top"
+                                             ItemsSource="{Binding Items, ElementName=root}"
+                                             ItemDoubleClicked="IssuesTable_ItemDoubleClicked"/>
 
-                        <DataGrid.Resources>
-                            <Style x:Key="CellTextTrim" TargetType="TextBlock">
-                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                <Setter Property="TextWrapping" Value="NoWrap"/>
-                            </Style>
+                    <Grid Grid.Row="2"
+                          HorizontalAlignment="Stretch"
+                          Height="28"
+                          Margin="8,0,8,6">
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <Button x:Name="PrevPageButton"
+                                        Content="&lt; Назад"
+                                        Style="{StaticResource PaginationNavButtonStyle}"
+                                        Click="PrevPageButton_Click"/>
 
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="{DynamicResource ErrorListHeaderBackground}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Style>
+                                <ItemsControl x:Name="PageButtonsControl"
+                                              ItemsSource="{Binding PageButtons, ElementName=root}"
+                                              Margin="4,0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding DisplayText}"
+                                                    Tag="{Binding PageIndex}"
+                                                    IsEnabled="{Binding IsClickable}"
+                                                    Style="{StaticResource PaginationPageButtonStyle}"
+                                                    Click="PageNumberButton_Click"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
 
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                <Setter Property="Margin" Value="5,0"/>
-                            </Style>
+                                <Button x:Name="NextPageButton"
+                                        Content="Далее &gt;"
+                                        Style="{StaticResource PaginationNavButtonStyle}"
+                                        Click="NextPageButton_Click"/>
+                            </StackPanel>
 
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="FontWeight" Value="Normal"/>
-                                <Setter Property="help:HelpProvider.HelpKey"
-                                        Value="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.Resources>
-
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="40" MaxWidth="40" MinWidth="40">
-                                <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="{Binding Items.Count, ElementName=root}"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Padding="10"/>
-                                </DataGridTemplateColumn.Header>
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <ContentControl Content="{Binding}"
-                                                        ContentTemplateSelector="{StaticResource IssueIconSelector}"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <DataGridTextColumn Header="Код"
-                                                Width="80"
-                                                Binding="{Binding Code, Converter={StaticResource DiagnosticCodeToTagConverter}}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn Header="Строка"
-                                                x:Name="StringsNumber"
-                                                Binding="{Binding ., Converter={StaticResource DiagnosticsCodeLinePairConverter}}"
-                                                Width="60"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn Header="Команда"
-                                                Width="Auto"
-                                                Binding="{Binding Command}"
-                                                ElementStyle="{StaticResource CellTextTrim}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn x:Name="MeasureResult"
-                                                Header="Результат измерения"
-                                                Binding="{Binding MeasureResult}"
-                                                Width="150"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"
-                                                Visibility="Collapsed"/>
-
-                            <DataGridTextColumn Header="Описание"
-                                                Width="Auto"
-                                                Binding="{Binding Description}"
-                                                ElementStyle="{StaticResource CellTextTrim}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"/>
-
-                            <DataGridTextColumn Header="DEBUG"
-                                                Width="*"
-                                                x:Name="DebugColumn"
-                                                Binding="{Binding DebugInfo}"
-                                                ElementStyle="{StaticResource CellTextTrim}"
-                                                FontFamily="{DynamicResource WinstonLight}"
-                                                FontSize="14"
-                                                Visibility="Collapsed"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                            <TextBlock x:Name="PageInfoText"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="{DynamicResource ForegrounfBrushes}"
+                                       FontFamily="{DynamicResource WinstonRegular}"
+                                       FontSize="12"
+                                       Opacity="0.68"
+                                       Text="0 из 0"/>
+                    </Grid>
                 </Grid>
             </TabItem>
 
@@ -210,6 +212,13 @@
                           BorderThickness="0"
                           ColumnHeaderHeight="28"
                           RowHeight="25"
+                          MinRowHeight="25"
+                          EnableRowVirtualization="True"
+                          EnableColumnVirtualization="True"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.IsDeferredScrollingEnabled="True"
                           MouseDoubleClick="BreakpointsGrid_MouseDoubleClick"
                           ScrollViewer.VerticalScrollBarVisibility="Auto">
 
@@ -233,6 +242,9 @@
                             <Setter Property="Background" Value="{DynamicResource ErrorListBackground}"/>
                             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                             <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Height" Value="25"/>
+                            <Setter Property="MinHeight" Value="25"/>
+                            <Setter Property="MaxHeight" Value="25"/>
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="{DynamicResource ErrorListSelection}"/>
