@@ -1,4 +1,4 @@
-п»їusing Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -17,15 +17,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
   public class PointParser
   {
     /// <summary>
-    /// Р Р°Р·Р±РѕСЂ Р±Р»РѕРєР° С‚РѕС‡РµРє '*...*' РІ SchemeModel.
-    /// РџСЂР°РІРёР»Р°:
-    /// - РћРґРЅР° '*' РІРЅСѓС‚СЂРё Р±Р»РѕРєР° СЂР°Р·РґРµР»СЏРµС‚ Р¦Р•РџР.
-    /// - '#': С‡Р°СЃС‚Рё РІРЅСѓС‚СЂРё РѕРґРЅРѕР№ С†РµРїРё.
-    /// - ',': РїРµСЂРµС‡РёСЃР»РµРЅРёРµ С‚РѕРєРµРЅРѕРІ (С‚РѕС‡РєР° РёР»Рё РґРёР°РїР°Р·РѕРЅ).
-    /// - Р”РёР°РїР°Р·РѕРЅС‹: 87-90, 1.2.7-10, 1.2.7-1.2.10, РҐ51/51-60.
-    /// - РЎРїРµС†-РєРµР№СЃ: С‚РѕРєРµРЅ, Р·Р°РєР°РЅС‡РёРІР°СЋС‰РёР№СЃСЏ '-' Рё СЃР»РµРґСѓСЋС‰РёР№ СЃРµРіРјРµРЅС‚ РїРѕСЃР»Рµ '*' вЂ” РєРѕРЅРµС† РґРёР°РїР°Р·РѕРЅР°
-    ///   (РїСЂРёРјРµСЂ 'РҐ51/51-*60') в†’ РєР°Р¶РґР°СЏ СЂР°СЃРєСЂС‹С‚Р°СЏ С‚РѕС‡РєР° = РѕС‚РґРµР»СЊРЅР°СЏ С†РµРїСЊ.
-    /// - Р”Р»СЏ РљРЎ: РѕРґРёРЅРѕС‡РЅР°СЏ С‚РѕС‡РєР° (РѕРґРёРЅ РёСЃС…РѕРґРЅС‹Р№ С‚РѕРєРµРЅ Р‘Р•Р— '-') РІ С‡Р°СЃС‚Рё Р·Р°РїСЂРµС‰РµРЅР°.
+    /// Разбор блока точек '*...*' в SchemeModel.
+    /// Правила:
+    /// - Одна '*' внутри блока разделяет ЦЕПИ.
+    /// - '#': части внутри одной цепи.
+    /// - ',': перечисление токенов (точка или диапазон).
+    /// - Диапазоны: 87-90, 1.2.7-10, 1.2.7-1.2.10, Х51/51-60.
+    /// - Спец-кейс: токен, заканчивающийся '-' и следующий сегмент после '*' — конец диапазона
+    ///   (пример 'Х51/51-*60') > каждая раскрытая точка = отдельная цепь.
+    /// - Для КС: одиночная точка (один исходный токен БЕЗ '-') в части запрещена.
     /// </summary>
     public static (SchemeModel?, List<ErrorItem>) ParsePoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
     {
@@ -65,7 +65,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р Р°Р·Р±РѕСЂ СЃРїРёСЃРєР° РёСЃРєР»СЋС‡РµРЅРёСЏ РЎРЎРР Рў РёР· РєРѕРЅСЃС‚СЂСѓРєС†РёРё ~(...) РІ С‚РѕС‡РєРё РђРЎРљ.
+    /// Разбор списка исключения ССИРТ из конструкции ~(...) в точки АСК.
     /// </summary>
     public static (List<PointModel> Points, List<ErrorItem> Errors) ParseDeletionPoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
     {
@@ -99,7 +99,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РЈРґР°Р»СЏРµС‚ РїСЂРѕР±РµР»С‹ Рё РІРЅРµС€РЅРёРµ '*'.
+    /// Удаляет пробелы и внешние '*'.
     /// </summary>
     private static string NormalizeExpression(string expr)
     {
@@ -108,12 +108,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РџСЂРѕРІРµСЂСЏРµС‚ РЅР°Р»РёС‡РёРµ РєР°СЂС‚С‹ С‚РѕС‡РµРє.
+    /// Проверяет наличие карты точек.
     /// </summary>
     private static bool HasPointsMap(RmCommandModel model) => model?.PointsMap != null && model.PointsMap.Count > 0;
 
     /// <summary>
-    /// Р”РµР»РёС‚ РІС‹СЂР°Р¶РµРЅРёРµ РЅР° СЃРµРіРјРµРЅС‚С‹ С†РµРїРµР№ СЃ СѓС‡С‘С‚РѕРј "-*".
+    /// Делит выражение на сегменты цепей с учётом "-*".
     /// </summary>
     private static List<string> SplitChainSegments(string expr)
     {
@@ -130,7 +130,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РґРёР°РїР°Р·РѕРЅ, РєРѕС‚РѕСЂС‹Р№ РїСЂРѕРґРѕР»Р¶Р°РµС‚СЃСЏ РІ СЃР»РµРґСѓСЋС‰РµРј СЃРµРіРјРµРЅС‚Рµ.
+    /// Обрабатывает диапазон, который продолжается в следующем сегменте.
     /// </summary>
     private static bool TryHandleCrossSegmentRange(string segment, BaseCommandModel model, List<string> allSegments, ref int index, RmCommandModel rm, List<GroupModel> chainModels, List<ErrorItem> errors)
     {
@@ -168,7 +168,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р Р°Р·Р±РёСЂР°РµС‚ СЃРµРіРјРµРЅС‚ С†РµРїРё РЅР° РіСЂСѓРїРїС‹.
+    /// Разбирает сегмент цепи на группы.
     /// </summary>
     private static List<GroupModel> ParseChainParts(string segment, BaseCommandModel model, RmCommandModel rm, List<ErrorItem> errors)
     {
@@ -179,7 +179,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       foreach (var part in parts)
       {
-        var (connected, disconnected) = ExpandTokens(part, errors);
+        var (connected, disconnected) = ExpandTokens(part, errors, model);
 
         ValidateSinglePoint(model, connected, part, errors);
 
@@ -227,7 +227,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           .ToList();
 
     /// <summary>
-    /// РЎРѕР·РґР°С‘С‚ С†РµРїСЊ РёР· С‚РѕРєРµРЅРѕРІ.
+    /// Создаёт цепь из токенов.
     /// </summary>
     private static (List<ErrorItem>, ChainModel) CreateChain(List<string> tokens, BaseCommandModel model, RmCommandModel rm)
     {
@@ -243,7 +243,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РЎРѕР·РґР°С‘С‚ РіСЂСѓРїРїСѓ РёР· РѕРґРЅРѕР№ С‚РѕС‡РєРё.
+    /// Создаёт группу из одной точки.
     /// </summary>
     private static (List<ErrorItem>, GroupModel) CreateSinglePointGroup(string token, BaseCommandModel model, RmCommandModel rm)
     {
@@ -262,7 +262,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р Р°СЃСЃС‚Р°РІР»СЏРµС‚ С‚РёРїС‹ СЃРѕРµРґРёРЅРµРЅРёР№ Рё РјРЅРµРјРѕРЅРёРєРё.
+    /// Расставляет типы соединений и мнемоники.
     /// </summary>
     private static void AssignPointTypes(List<GroupModel> groups, RmCommandModel rm)
     {
@@ -287,28 +287,28 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РџСЂРѕРІРµСЂСЏРµС‚ Р·Р°РїСЂРµС‚ РѕРґРёРЅРѕС‡РЅРѕР№ С‚РѕС‡РєРё РґР»СЏ РєРѕРјР°РЅРґС‹ РљРЎ.
+    /// Проверяет запрет одиночной точки для команды КС.
     /// </summary>
     private static void ValidateSinglePoint(BaseCommandModel model, List<string> expanded, string rawPart, List<ErrorItem> errors)
     {
       bool isSingle = !rawPart.Contains('-') && expanded.Count == 1;
 
-      if (model.Mnemonic.Equals("РљРЎ", StringComparison.OrdinalIgnoreCase) && isSingle)
+      if (model.Mnemonic.Equals("КС", StringComparison.OrdinalIgnoreCase) && isSingle)
       {
         errors.Add(new ErrorItem
         {
-          Description = $"РќРµР»СЊР·СЏ СѓРєР°Р·С‹РІР°С‚СЊ РѕРґРёРЅРѕС‡РЅСѓСЋ С‚РѕС‡РєСѓ ({expanded[0]}).",
+          Description = $"Нельзя указывать одиночную точку ({expanded[0]}).",
           Code = ErrorCode.Gen_InvalidOnePointUse
         });
       }
     }
 
     /// <summary>
-    /// Р Р°СЃРєСЂС‹РІР°РµС‚ С‚РѕРєРµРЅС‹ С‡Р°СЃС‚Рё С†РµРїРё:
-    /// - РѕР±С‹С‡РЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹ в†’ connected
-    /// - РґРёР°РїР°Р·РѕРЅС‹ СЃ "-*" в†’ disconnected (РѕС‚РґРµР»СЊРЅС‹Рµ РіСЂСѓРїРїС‹)
+    /// Раскрывает токены части цепи:
+    /// - обычные диапазоны > connected
+    /// - диапазоны с "-*" > disconnected (отдельные группы)
     /// </summary>
-    private static (List<string> Connected, List<string> Disconnected) ExpandTokens(string part, List<ErrorItem> errors)
+    private static (List<string> Connected, List<string> Disconnected) ExpandTokens(string part, List<ErrorItem> errors, BaseCommandModel model)
     {
       var connected = new List<string>();
       var disconnected = new List<string>();
@@ -322,11 +322,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       {
         if (tok.Contains("-*"))
         {
-          disconnected.AddRange(ExpandRangeToken(tok, errors));
+          disconnected.AddRange(ExpandRangeToken(tok, errors, model));
         }
         else if (tok.Contains('-'))
         {
-          connected.AddRange(ExpandRangeToken(tok, errors));
+          connected.AddRange(ExpandRangeToken(tok, errors, model));
         }
         else
         {
@@ -350,7 +350,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       {
         if (tok.Contains("-*"))
         {
-          AddRangeError(errors, $"Р’ СЃРїРёСЃРєРµ РёСЃРєР»СЋС‡РµРЅРёСЏ РЎРЎРР Рў РЅРµРґРѕРїСѓСЃС‚РёРј СЂР°Р·РґРµР»РёС‚РµР»СЊ СЂР°Р·РѕР±С‰РµРЅРёСЏ: {tok}.");
+          AddRangeError(errors, $"В списке исключения ССИРТ недопустим разделитель разобщения: {tok}.");
         }
         else if (tok.Contains('-'))
         {
@@ -366,9 +366,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р Р°СЃРєСЂС‹РІР°РµС‚ РґРёР°РїР°Р·РѕРЅ С‚РѕС‡РµРє РІ СЃРїРёСЃРѕРє Р·РЅР°С‡РµРЅРёР№.
+    /// Раскрывает диапазон точек в список значений.
     /// </summary>
-    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors)
+    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors, BaseCommandModel model = null)
     {
       var result = new List<string>();
 
@@ -376,7 +376,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (TryExtractContactSuffix(token, out var rangePart, out var suffix))
       {
-        var baseRange = ExpandRangeToken(rangePart, errors);
+        var baseRange = ExpandRangeToken(rangePart, errors, model);
 
         return baseRange
             .Select(x => x + suffix)
@@ -387,8 +387,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return result;
 
       if (!TryParseRangeBounds(token, left, right, errors,
-          out string prefix, out int start, out int end))
+          out string prefix, out int start, out int end, out bool wasCompleted))
         return result;
+
+      if (wasCompleted && model != null)
+        AddCompletedRangeWarning(model, token);
 
       if (!ValidateRangeBounds(token, start, end, errors))
         return result;
@@ -397,7 +400,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РЈРґР°Р»СЏРµС‚ СЃР»СѓР¶РµР±РЅС‹Рµ СЃРёРјРІРѕР»С‹ Рё РЅРѕСЂРјР°Р»РёР·СѓРµС‚ РґРёР°РїР°Р·РѕРЅ.
+    /// Удаляет служебные символы и нормализует диапазон.
     /// </summary>
     private static string NormalizeRangeToken(string token)
     {
@@ -406,7 +409,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р”РµР»РёС‚ РґРёР°РїР°Р·РѕРЅ РЅР° Р»РµРІСѓСЋ Рё РїСЂР°РІСѓСЋ С‡Р°СЃС‚Рё.
+    /// Делит диапазон на левую и правую части.
     /// </summary>
     private static bool TrySplitRange(string token, out string left, out string right)
     {
@@ -423,36 +426,85 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РџР°СЂСЃРёС‚ РЅР°С‡Р°Р»Рѕ Рё РєРѕРЅРµС† РґРёР°РїР°Р·РѕРЅР°.
+    /// Парсит начало и конец диапазона.
     /// </summary>
-    private static bool TryParseRangeBounds(string token, string left, string right, List<ErrorItem> errors, out string prefix, out int start, out int end)
+    private static bool TryParseRangeBounds(string token, string left, string right, List<ErrorItem> errors, out string prefix, out int start, out int end, out bool wasCompleted)
     {
       prefix = "";
       start = end = 0;
+      wasCompleted = false;
 
       if (!TrySplitPrefixAndNumber(left, out prefix, out start))
       {
-        AddRangeError(errors, $"РќРµРІРµСЂРЅРѕРµ РЅР°С‡Р°Р»Рѕ РґРёР°РїР°Р·РѕРЅР°: {left} (РІ {token}).");
+        AddRangeError(errors, $"Неверное начало диапазона: {left} (в {token}).");
         return false;
       }
 
       if (TrySplitPrefixAndNumber(right, out string rightPrefix, out int rightNum))
       {
-        if (!string.IsNullOrEmpty(rightPrefix) && rightPrefix != prefix)
+        if (!AreRangePrefixesCompatible(prefix, rightPrefix))
         {
           AddRangeError(errors,
-            $"РќРµСЃРѕРІРјРµСЃС‚РёРјС‹Рµ РїСЂРµС„РёРєСЃС‹ РІ РґРёР°РїР°Р·РѕРЅРµ: {token} (\"{prefix}\" vs \"{rightPrefix}\").");
+            $"Несовместимые префиксы в диапазоне: {token} (\"{prefix}\" vs \"{rightPrefix}\").");
           return false;
         }
+        wasCompleted = IsRangeCompletion(left, right, prefix, rightPrefix);
         end = rightNum;
       }
       else if (!int.TryParse(right, out end))
       {
-        AddRangeError(errors, $"РќРµРІРµСЂРЅС‹Р№ РєРѕРЅРµС† РґРёР°РїР°Р·РѕРЅР°: {right} (РІ {token}).");
+        AddRangeError(errors, $"Неверный конец диапазона: {right} (в {token}).");
         return false;
       }
 
       return true;
+    }
+
+    private static bool IsRangeCompletion(string left, string right, string leftPrefix, string rightPrefix)
+    {
+      if (!string.IsNullOrEmpty(rightPrefix))
+        return false;
+
+      if (!Regex.IsMatch(right, @"^\d+$"))
+        return false;
+
+      var leftTailPrefix = GetTailPrefix(leftPrefix);
+      return !string.IsNullOrEmpty(leftTailPrefix)
+          && Regex.IsMatch(left, @"[/\.][^/\.\d]+\d+$");
+    }
+
+    private static void AddCompletedRangeWarning(BaseCommandModel model, string token)
+    {
+      model.Warnings.Add(new WarningItem
+      {
+        SourceLineNumber = model.StartLineNumber,
+        Command = $"{model.CommandNumber} {model.Mnemonic}",
+        Description = $"Запись диапазона ({token}) была дополнена. Убедитесь в правильности записи.",
+        Code = WarningCode.Unknown
+      });
+    }
+    private static bool AreRangePrefixesCompatible(string leftPrefix, string rightPrefix)
+    {
+      if (string.IsNullOrEmpty(rightPrefix))
+        return true;
+
+      if (string.Equals(leftPrefix, rightPrefix, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      var leftTailPrefix = GetTailPrefix(leftPrefix);
+      return !string.IsNullOrEmpty(leftTailPrefix)
+          && string.Equals(leftTailPrefix, rightPrefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetTailPrefix(string prefix)
+    {
+      int dot = prefix.LastIndexOf('.');
+      int slash = prefix.LastIndexOf('/');
+      int sep = Math.Max(dot, slash);
+
+      return sep >= 0 && sep + 1 < prefix.Length
+          ? prefix.Substring(sep + 1)
+          : string.Empty;
     }
 
     private static bool TryExtractContactSuffix(string token, out string rangePart, out string suffix)
@@ -467,7 +519,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       var afterSlash = token.Substring(slashIndex + 1);
 
-      if (!int.TryParse(afterSlash, out _))
+      if (string.IsNullOrWhiteSpace(afterSlash))
         return false;
 
       var leftPart = token.Substring(0, slashIndex);
@@ -476,20 +528,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return false;
 
       rangePart = leftPart;
-      suffix = token.Substring(slashIndex); // РІРєР»СЋС‡Р°СЏ "/"
+      suffix = token.Substring(slashIndex); // включая "/"
 
       return true;
     }
 
     /// <summary>
-    /// РџСЂРѕРІРµСЂСЏРµС‚ РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚СЊ РґРёР°РїР°Р·РѕРЅР°.
+    /// Проверяет корректность диапазона.
     /// </summary>
     private static bool ValidateRangeBounds(string token, int start, int end, List<ErrorItem> errors)
     {
       //if (end < start)
       //{
       //  AddRangeError(errors,
-      //    $"РќРµРІРµСЂРЅС‹Р№ РґРёР°РїР°Р·РѕРЅ С‚РѕС‡РµРє (РєРѕРЅРµС† РјРµРЅСЊС€Рµ РЅР°С‡Р°Р»Р°): {token}.");
+      //    $"Неверный диапазон точек (конец меньше начала): {token}.");
       //  return false;
       //}
 
@@ -497,7 +549,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р“РµРЅРµСЂРёСЂСѓРµС‚ СЃРїРёСЃРѕРє Р·РЅР°С‡РµРЅРёР№ РґРёР°РїР°Р·РѕРЅР°.
+    /// Генерирует список значений диапазона.
     /// </summary>
     private static List<string> GenerateRangeValues(string prefix, int start, int end)
     {
@@ -521,7 +573,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// "РїСЂРµС„РёРєСЃ" + С‡РёСЃР»Рѕ. РџСЂРµС„РёРєСЃ = РІСЃС‘ РґРѕ РїРѕСЃР»РµРґРЅРµРіРѕ '.' РёР»Рё '/' РІРєР»СЋС‡РёС‚РµР»СЊРЅРѕ.
+    /// "префикс" + число. Префикс = всё до последнего '.' или '/' включительно.
     /// </summary>
     private static bool TrySplitPrefixAndNumber(string token, out string prefix, out int number)
     {
@@ -535,14 +587,26 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (sep >= 0)
       {
-        prefix = token.Substring(0, sep + 1);
+        var basePrefix = token.Substring(0, sep + 1);
         var tail = token.Substring(sep + 1);
-        return int.TryParse(tail, out number);
+
+        if (int.TryParse(tail, out number))
+        {
+          prefix = basePrefix;
+          return true;
+        }
+
+        var tailMatch = Regex.Match(tail, @"^(.*?)(\d+)$");
+        if (tailMatch.Success)
+        {
+          prefix = basePrefix + tailMatch.Groups[1].Value;
+          number = int.Parse(tailMatch.Groups[2].Value);
+          return true;
+        }
+
+        return false;
       }
-      //else
-      //{
-      //  return int.TryParse(token, out number);
-      //}
+
       var match = Regex.Match(token, @"^(.*?)(\d+)$");
       if (match.Success)
       {
@@ -567,8 +631,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РџР°СЂСЃРёС‚ РѕРїРёСЃР°РЅРёРµ С€РёРЅ РІРёРґР° "*A:1,2,3*B:4-6".
-    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ С‚РѕС‡РєРё, СЃРіСЂСѓРїРїРёСЂРѕРІР°РЅРЅС‹Рµ РїРѕ С€РёРЅР°Рј.
+    /// Парсит описание шин вида "*A:1,2,3*B:4-6".
+    /// Возвращает точки, сгруппированные по шинам.
     /// </summary>
     public static (Dictionary<SwitchingBus, List<PointModel>>, List<ErrorItem>)
     ParseBusPoints(string expr, RmCommandModel rmCommandModel,
@@ -599,13 +663,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р”РµР»РёС‚ СЃС‚СЂРѕРєСѓ РЅР° СЃРµРіРјРµРЅС‚С‹ РІРёРґР° "A:1,2".
+    /// Делит строку на сегменты вида "A:1,2".
     /// </summary>
     private static List<string> SplitBusSegments(string expr) =>
       expr.Split('*', StringSplitOptions.RemoveEmptyEntries).ToList();
 
     /// <summary>
-    /// РџР°СЂСЃРёС‚ СЃРµРіРјРµРЅС‚ "РЁРРќРђ:РўРћР§РљР".
+    /// Парсит сегмент "ШИНА:ТОЧКИ".
     /// </summary>
     private static bool TryParseBusSegment(string segment, out SwitchingBus bus, out string pointsPart, List<ErrorItem> errors)
     {
@@ -615,13 +679,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       var parts = segment.Split(':');
       if (parts.Length != 2)
       {
-        AddBusError(errors, $"РќРµРІРµСЂРЅС‹Р№ С„РѕСЂРјР°С‚ РѕРїРёСЃР°РЅРёСЏ С€РёРЅС‹: {segment}");
+        AddBusError(errors, $"Неверный формат описания шины: {segment}");
         return false;
       }
 
       if (!BusConverter.TryParseSwitchingBus(parts[0], out bus))
       {
-        AddBusError(errors, $"РќРµРёР·РІРµСЃС‚РЅР°СЏ С€РёРЅР°: {parts[0]}");
+        AddBusError(errors, $"Неизвестная шина: {parts[0]}");
         return false;
       }
 
@@ -630,7 +694,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// Р Р°Р·Р±РёРІР°РµС‚ С‚РѕС‡РєРё Рё СЂР°СЃРєСЂС‹РІР°РµС‚ РґРёР°РїР°Р·РѕРЅС‹.
+    /// Разбивает точки и раскрывает диапазоны.
     /// </summary>
     private static List<string> ExpandBusTokens(string pointsPart, List<ErrorItem> errors)
     {
@@ -654,7 +718,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РЎРѕР·РґР°С‘С‚ PointModel Рё РІС‹РїРѕР»РЅСЏРµС‚ Р±РёР·РЅРµСЃ-РІР°Р»РёРґР°С†РёСЋ.
+    /// Создаёт PointModel и выполняет бизнес-валидацию.
     /// </summary>
     private static void ProcessBusTokens(List<string> tokens, SwitchingBus bus, RmCommandModel rm, Dictionary<SwitchingBus, List<PointModel>> buses,
       List<ErrorItem> errors, int lineNumber, string command)
@@ -684,7 +748,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     }
 
     /// <summary>
-    /// РџСЂРѕРІРµСЂСЏРµС‚, РїРѕРґРґРµСЂР¶РёРІР°РµС‚ Р»Рё РјРѕРґСѓР»СЊ СѓРєР°Р·Р°РЅРЅСѓСЋ С€РёРЅСѓ.
+    /// Проверяет, поддерживает ли модуль указанную шину.
     /// </summary>
     private static bool TryValidateBusSupport(PointModel point, SwitchingBus bus, List<ErrorItem> errors)
     {
@@ -697,7 +761,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (module == null)
       {
         AddBusError(errors,
-          $"РњРѕРґСѓР»СЊ {point.DeviceNumber}.{point.ModuleNumber} РЅРµ РЅР°Р№РґРµРЅ РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРё.");
+          $"Модуль {point.DeviceNumber}.{point.ModuleNumber} не найден в конфигурации.");
         return false;
       }
 
@@ -706,7 +770,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (bus != busA && bus != busB)
       {
         AddBusError(errors,
-          $"РњРѕРґСѓР»СЊ {module.NumberChassis}.{module.Number} РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ С€РёРЅСѓ {bus}");
+          $"Модуль {module.NumberChassis}.{module.Number} не поддерживает шину {bus}");
         return false;
       }
 
