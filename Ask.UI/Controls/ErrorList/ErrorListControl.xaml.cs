@@ -2,6 +2,7 @@
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.UI.Shared.Formatting;
 using Ask.Support;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -255,10 +256,10 @@ namespace Ask.UI.Controls.ErrorList
     private void UpdateButtons()
     {
       WarningButton.Content =
-          $"{(_warningsHidden ? 0 : _warningTotal)} из {_warningTotal} предупреждений";
+          $"{CountDisplayFormatter.Format(_warningsHidden ? 0 : _warningTotal)} из {CountDisplayFormatter.Format(_warningTotal)} предупреждений";
 
       ErrorsButton.Content =
-          $"{(_errorsHidden ? 0 : _errorTotal)} из {_errorTotal} ошибок";
+          $"{CountDisplayFormatter.Format(_errorsHidden ? 0 : _errorTotal)} из {CountDisplayFormatter.Format(_errorTotal)} ошибок";
     }
 
     private void WarningButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -414,10 +415,31 @@ namespace Ask.UI.Controls.ErrorList
 
     private IEnumerable<IDisplayIssue> GetCurrentPageItems()
     {
-      return _allIssues
-        .Where(ShouldDisplay)
-        .Skip(_currentPageIndex * _pageSize)
-        .Take(_pageSize);
+      var skip = _currentPageIndex * _pageSize;
+      var skipped = 0;
+      var taken = 0;
+
+      foreach (var issue in _allIssues)
+      {
+        if (!ShouldDisplay(issue))
+        {
+          continue;
+        }
+
+        if (skipped < skip)
+        {
+          skipped++;
+          continue;
+        }
+
+        yield return issue;
+        taken++;
+
+        if (taken >= _pageSize)
+        {
+          yield break;
+        }
+      }
     }
 
     private void RefreshCurrentPage()
@@ -476,7 +498,7 @@ namespace Ask.UI.Controls.ErrorList
 
       var from = _currentPageIndex * _pageSize + 1;
       var to = Math.Min(from + _pageSize - 1, visibleCount);
-      PageInfoText.Text = $"{from}-{to} из {visibleCount}";
+      PageInfoText.Text = $"{from}-{to} из {CountDisplayFormatter.Format(visibleCount)}";
 
       RebuildPageButtons(totalPages);
     }

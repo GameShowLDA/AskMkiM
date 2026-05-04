@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.UI.Shared.Formatting;
 using System.ComponentModel;
-using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -68,7 +68,7 @@ namespace UI.Controls.Archive
       }
     }
 
-    public string ErrorCountDisplay => ErrorCount > 0 ? ErrorCount.ToString(CultureInfo.InvariantCulture) : string.Empty;
+    public string ErrorCountDisplay => CountDisplayFormatter.FormatNonZero(ErrorCount);
     public FileType FileType { get; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
