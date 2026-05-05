@@ -75,7 +75,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         var line = lines[i].Trim();
         if (i == 0)
         {
-          var match = System.Text.RegularExpressions.Regex.Match(line, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+          var match = System.Text.RegularExpressions.Regex.Match(
+            line,
+            @"^\s*\d+\s+[\p{L}_]{2,}(?=\s|$)\s*(.*)$",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
           if (match.Success) line = match.Groups[1].Value.Trim();
         }
         if (!string.IsNullOrWhiteSpace(line))

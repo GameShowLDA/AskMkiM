@@ -207,10 +207,47 @@ namespace Ask.Core.Services.FileFormats.Opk
           continue;
         }
 
-        normalizedRecords.Add(_lookalikeNormalizer.Normalize(trimmedLine));
+        var sanitizedLine = RemoveLegacyControlBytes(trimmedLine);
+        normalizedRecords.Add(_lookalikeNormalizer.Normalize(sanitizedLine));
       }
 
       return normalizedRecords;
+    }
+
+    private static byte[] RemoveLegacyControlBytes(byte[] bytes)
+    {
+      if (bytes.Length == 0)
+      {
+        return bytes;
+      }
+
+      var writeIndex = 0;
+      var result = new byte[bytes.Length];
+
+      for (var i = 0; i < bytes.Length; i++)
+      {
+        var current = bytes[i];
+        if (current is 0x02 or 0x03 or 0x0E or 0x0F)
+        {
+          continue;
+        }
+
+        result[writeIndex++] = current;
+      }
+
+      if (writeIndex == bytes.Length)
+      {
+        return bytes;
+      }
+
+      if (writeIndex == 0)
+      {
+        return [];
+      }
+
+      var trimmed = new byte[writeIndex];
+      Buffer.BlockCopy(result, 0, trimmed, 0, writeIndex);
+      return trimmed;
     }
 
     /// <summary>
