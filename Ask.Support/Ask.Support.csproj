@@ -13,6 +13,7 @@
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonExitImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveAsImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\contextMenuArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createArchiveImage.png" />
@@ -21,6 +22,7 @@
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\fileManagerReadModeImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\notificationSuccessfulSavingImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\openContentsArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
@@ -810,6 +812,9 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveAsImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -867,7 +872,7 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_2.png">
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\fileManagerWriteModeImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_3.png">
@@ -922,6 +927,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\choiceArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\notificationSuccessfulSavingImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\openContentsArchiveImage.png">
