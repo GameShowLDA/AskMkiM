@@ -919,14 +919,14 @@
                         </StackPanel>
                     </Grid>
                     <TextEditor:TextEditorUI x:Name="FileContentTextBox"
-                 Grid.Row="1"
-                 Margin="0,8,0,0"
-                 FontFamily="Consolas"
-                 FontSize="13"
-                 Background="{DynamicResource ModernDataGridBackgroundBrush}"
-                 Foreground="{DynamicResource ArchiveShellTextPrimaryBrush}"
-                 BorderBrush="{DynamicResource ArchiveShellBorderBrush}"
-                 IsReadOnly="True" />
+                        Grid.Row="1"
+                        Margin="0,8,0,0"
+                        FontFamily="Consolas"
+                        FontSize="13"
+                        Background="{DynamicResource ModernDataGridBackgroundBrush}"
+                        Foreground="{DynamicResource ArchiveShellTextPrimaryBrush}"
+                        BorderBrush="{DynamicResource ArchiveShellBorderBrush}"
+                        IsReadOnly="True" />
                     <TextBlock x:Name="EditorHintTextBlock"
                    Grid.Row="2"
                    Margin="0,8,0,0"

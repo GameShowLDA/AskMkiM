@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
@@ -474,6 +475,7 @@ namespace UI.Controls.Archive
       FilesHintTextBlock.Text = "Выберите архив для просмотра файлов.";
       FileContentTextBox.Text = string.Empty;
       EditorHintTextBlock.Text = "Выберите файл в архиве для просмотра.";
+
       _lastSelectedReviewFilePath = null;
       _lastSelectedIsReviewEntry = false;
       UpdateActionButtons();
@@ -808,7 +810,8 @@ namespace UI.Controls.Archive
         EnsureArchiveOpenedInManagerCore(archivePath);
         try
         {
-          return _archiveManager.GetFileText(entryName);
+          return CommandTranslationManager.NormalizeCommandMnemonics(
+            RemoveLegacyControlChars(_archiveManager.GetFileText(entryName)));
         }
         finally
         {
@@ -1053,9 +1056,24 @@ namespace UI.Controls.Archive
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
-      return File.ReadAllText(filePath, encoding)
+      return CommandTranslationManager.NormalizeCommandMnemonics(
+          RemoveLegacyControlChars(File.ReadAllText(filePath, encoding)))
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
+    }
+
+    private static string RemoveLegacyControlChars(string source)
+    {
+      if (string.IsNullOrEmpty(source))
+      {
+        return source;
+      }
+
+      return source
+        .Replace("\u0002", string.Empty)
+        .Replace("\u0003", string.Empty)
+        .Replace("\u000E", string.Empty)
+        .Replace("\u000F", string.Empty);
     }
 
     private static RecheckReviewFileResult RecheckReviewFile(string filePath)
@@ -1538,8 +1556,8 @@ namespace UI.Controls.Archive
       }
 
       var text = await Task.Run(() => ReadReviewFileText(selectedEntry.SourceFilePath, selectedEntry.FileType));
-
       FileContentTextBox.Content = CreatePreviewEditor(text, selectedEntry.FileType);
+
       _lastSelectedArchivePath = reviewDirectoryPath;
       _lastSelectedEntryName = NormalizeEntryName(entryName);
       _lastSelectedReviewFilePath = selectedEntry.SourceFilePath;
@@ -1922,7 +1940,7 @@ namespace UI.Controls.Archive
       double printableAreaHeight)
     {
       var cellPadding = new Thickness(2);
-      
+
       var doc = new FlowDocument
       {
         FontFamily = new FontFamily("Segoe UI"),
@@ -1936,7 +1954,7 @@ namespace UI.Controls.Archive
         PageHeight = printableAreaHeight + hardMarginY * 2,
         ColumnWidth = double.PositiveInfinity
       };
-      
+
       var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
 
       // Заголовок
@@ -2383,7 +2401,7 @@ namespace UI.Controls.Archive
         await PasteArchiveClipboardToAsync(_lastSelectedArchivePath);
       }
     }
-    
+
     private async void PrintArchiveCatalogButton_Click(object sender, RoutedEventArgs e)
     {
       await PrintArchiveCatalogAsync();
@@ -3181,7 +3199,7 @@ namespace UI.Controls.Archive
         ? dialog.Tag as string
         : null;
     }
-        
+
     private async void ArchivesTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
       var node = e.NewValue as ArchiveTreeNode;

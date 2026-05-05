@@ -15,7 +15,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// <returns>Строка без префикса команды.</returns>
     internal static string RemoveCommandPrefix(string remainder)
     {
-      var match = Regex.Match(remainder, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+      var match = Regex.Match(remainder, @"^\s*\d+\s+[\p{L}_]{2,}(?=\s|$)\s*(.*)$", RegexOptions.IgnoreCase);
       return match.Success ? match.Groups[1].Value.Trim() : remainder;
     }
   }

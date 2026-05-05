@@ -119,9 +119,24 @@ namespace MainWindowProgram.Services.Conversion
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
-      return File.ReadAllText(path, encoding)
+      return CommandTranslationManager.NormalizeCommandMnemonics(
+          RemoveLegacyControlChars(File.ReadAllText(path, encoding)))
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
+    }
+
+    private static string RemoveLegacyControlChars(string source)
+    {
+      if (string.IsNullOrEmpty(source))
+      {
+        return source;
+      }
+
+      return source
+        .Replace("\u0002", string.Empty)
+        .Replace("\u0003", string.Empty)
+        .Replace("\u000E", string.Empty)
+        .Replace("\u000F", string.Empty);
     }
 
     private static string BuildUniqueOutputPath(string inputPath, string outputDirectory)
