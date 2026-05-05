@@ -1,16 +1,12 @@
-﻿using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Formatting;
 using Message;
-using MigraDoc.DocumentObjectModel.Tables;
-using SQLitePCL;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -26,8 +22,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
-using UI.Components.MultiEditorMethods;
 using UI.Components;
+using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
@@ -47,34 +43,103 @@ namespace UI.Controls.Archive
   /// </summary>
   public partial class ArchiveControl : UserControl
   {
-    private readonly Dictionary<string, IReadOnlyList<ArchiveEntryInfo>> _archiveEntriesCache =
-      new Dictionary<string, IReadOnlyList<ArchiveEntryInfo>>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Кэш архивных записей по строковому ключу (без учёта регистра).
+    /// Используется для ускорения доступа и избежания повторной загрузки данных.
+    /// </summary>
+    private readonly Dictionary<string, IReadOnlyList<ArchiveEntryInfo>> _archiveEntriesCache = new Dictionary<string, IReadOnlyList<ArchiveEntryInfo>>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Настройки сериализации JSON для манифеста (имена свойств без учёта регистра).
+    /// </summary>
     private static readonly JsonSerializerOptions ManifestJsonOptions = new JsonSerializerOptions
     {
       PropertyNameCaseInsensitive = true
     };
 
+    /// <summary>
+    /// Путь к директории с архивами.
+    /// </summary>
     private readonly string _archivesFolderPath;
-    private readonly string _reviewArchivesFolderPath;
-    private readonly FileSystemWatcher _archivesWatcher;
-    private readonly DispatcherTimer _autoRefreshTimer;
-    private readonly ArchiveManager _archiveManager = new ArchiveManager();
-    private readonly object _archiveManagerSync = new object();
-    private readonly object _reviewRefreshSuppressionSync = new object();
-    private readonly Dictionary<string, DateTime> _recentlyMutatedReviewPaths =
-      new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Путь к директории архивов на проверке.
+    /// </summary>
+    private readonly string _reviewArchivesFolderPath;
+
+    /// <summary>
+    /// Таймер для отложенного автообновления UI.
+    /// </summary>
+    private readonly DispatcherTimer _autoRefreshTimer;
+
+    /// <summary>
+    /// Менеджер для работы с архивами (чтение, изменение, операции с файлами).
+    /// </summary>
+    private readonly ArchiveManager _archiveManager = new ArchiveManager();
+
+    /// <summary>
+    /// Объект синхронизации для потокобезопасной работы с ArchiveManager.
+    /// </summary>
+    private readonly object _archiveManagerSync = new object();
+
+    /// <summary>
+    /// Объект синхронизации для контроля подавления обновлений review-архивов.
+    /// </summary>
+    private readonly object _reviewRefreshSuppressionSync = new object();
+
+    /// <summary>
+    /// Кэш путей review-файлов, недавно изменённых (с временем истечения подавления обновлений).
+    /// </summary>
+    private readonly Dictionary<string, DateTime> _recentlyMutatedReviewPaths = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Текущий список записей, отображаемых в таблице.
+    /// </summary>
     private IReadOnlyList<ArchiveEntryInfo> _currentGridEntries = Array.Empty<ArchiveEntryInfo>();
+
+    /// <summary>
+    /// Флаг подавления обработки изменения выбора в таблице.
+    /// </summary>
     private bool _suppressGridSelection;
+
+    /// <summary>
+    /// Путь к последнему выбранному архиву.
+    /// </summary>
     private string _lastSelectedArchivePath;
+
+    /// Имя последнего выбранного файла в архиве.
+    /// </summary>
     private string _lastSelectedEntryName;
+
+    /// <summary>
+    /// Путь к последнему выбранному review-файлу.
+    /// </summary>
     private string _lastSelectedReviewFilePath;
+
+    /// <summary>
+    /// Флаг, указывающий, что выбранный файл относится к review.
+    /// </summary>
     private bool _lastSelectedIsReviewEntry;
+
+    /// <summary>
+    /// Узел, для которого открыт контекстное меню.
+    /// </summary>
     private ArchiveTreeNode _contextMenuNode;
+
+    /// <summary>
+    /// Буфер обмена для операций с файлами архива.
+    /// </summary>
     private ArchiveClipboardEntry? _archiveClipboardEntry;
 
+    /// <summary>
+    /// Кэш манифестов архивов (имя файла → дата создания).
+    /// </summary>
     private readonly Dictionary<string, Dictionary<string, DateTime>> _manifestCache = new();
 
+    /// <summary>
+    /// Инициализирует контрол: подписка на события, настройка путей, таймера автообновления и начального состояния UI.
+    /// </summary>
     public ArchiveControl()
     {
       InitializeComponent();
@@ -86,14 +151,18 @@ namespace UI.Controls.Archive
       {
         Interval = TimeSpan.FromMilliseconds(350),
       };
+
       _autoRefreshTimer.Tick += AutoRefreshTimer_Tick;
 
-      _archivesWatcher = CreateArchivesWatcher(_archivesFolderPath);
 
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
       ResetTree();
     }
 
+    /// <summary>
+    /// Обрабатывает событие изменения архива: проверяет входные данные,
+    /// при необходимости переключает выполнение в UI-поток и запускает обработку.
+    /// </summary>
     private void OnArchiveChanged(ArchiveEvents.Changed change)
     {
       if (change == null || string.IsNullOrWhiteSpace(change.ArchivePath))
@@ -110,6 +179,9 @@ namespace UI.Controls.Archive
       _ = HandleArchiveChangedAsync(change);
     }
 
+    /// <summary>
+    /// Обрабатывает изменение архива: инвалидирует кэш и обновляет дерево с учётом текущего состояния.
+    /// </summary>
     private async Task HandleArchiveChangedAsync(ArchiveEvents.Changed change)
     {
       try
@@ -140,6 +212,11 @@ namespace UI.Controls.Archive
         ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
+
+    /// <summary>
+    /// Возвращает кэш манифеста архива (имя файла → дата создания),
+    /// при отсутствии — считывает и парсит его из архива.
+    /// </summary>
     private async Task<Dictionary<string, DateTime>> GetManifestCacheAsync(string archivePath)
     {
       if (_manifestCache.TryGetValue(archivePath, out var cached))
@@ -179,23 +256,10 @@ namespace UI.Controls.Archive
       return result;
     }
 
-    private FileSystemWatcher CreateArchivesWatcher(string archivesFolderPath)
-    {
-      var watcher = new FileSystemWatcher(archivesFolderPath, "*")
-      {
-        IncludeSubdirectories = true,
-        NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime,
-        EnableRaisingEvents = true,
-      };
-
-      watcher.Created += OnArchivesWatcherChanged;
-      watcher.Changed += OnArchivesWatcherChanged;
-      watcher.Deleted += OnArchivesWatcherChanged;
-      watcher.Renamed += OnArchivesWatcherRenamed;
-
-      return watcher;
-    }
-
+    /// <summary>
+    /// Обрабатывает изменения файловой системы: фильтрует служебные и недавние изменения,
+    /// при необходимости запускает отложенное обновление UI.
+    /// </summary>
     private void OnArchivesWatcherChanged(object sender, FileSystemEventArgs e)
     {
       if (IsUnderReviewWorkspace(e.FullPath))
@@ -217,6 +281,10 @@ namespace UI.Controls.Archive
       ScheduleAutoRefresh();
     }
 
+    /// <summary>
+    /// Обрабатывает переименование в файловой системе: игнорирует служебные и недавние изменения,
+    /// при необходимости инициирует обновление UI.
+    /// </summary>
     private void OnArchivesWatcherRenamed(object sender, RenamedEventArgs e)
     {
       if (IsUnderReviewWorkspace(e.OldFullPath) || IsUnderReviewWorkspace(e.FullPath))
@@ -232,6 +300,9 @@ namespace UI.Controls.Archive
       ScheduleAutoRefresh();
     }
 
+    /// <summary>
+    /// Помечает путь как недавно изменённый для временного подавления автообновления.
+    /// </summary>
     private void MarkReviewPathAsRecentlyMutated(string? path)
     {
       if (string.IsNullOrWhiteSpace(path))
@@ -246,6 +317,9 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Проверяет, был ли путь недавно изменён (с учётом очистки устаревших записей).
+    /// </summary>
     private bool WasRecentlyMutatedReviewPath(string? path)
     {
       if (string.IsNullOrWhiteSpace(path))
@@ -275,6 +349,9 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Проверяет, находится ли путь внутри директории архивов на проверке.
+    /// </summary>
     private bool IsUnderReviewWorkspace(string? path)
     {
       if (string.IsNullOrWhiteSpace(path))
@@ -286,6 +363,9 @@ namespace UI.Controls.Archive
       return fullPath.StartsWith(_reviewArchivesFolderPath, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Планирует отложенное обновление UI через перезапуск таймера в UI-потоке.
+    /// </summary>
     private void ScheduleAutoRefresh()
     {
       Dispatcher.BeginInvoke(new Action(() =>
@@ -295,6 +375,9 @@ namespace UI.Controls.Archive
       }));
     }
 
+    /// <summary>
+    /// Обрабатывает срабатывание таймера: очищает кэши и обновляет дерево с сохранением состояния.
+    /// </summary>
     private async void AutoRefreshTimer_Tick(object sender, EventArgs e)
     {
       _autoRefreshTimer.Stop();
@@ -303,6 +386,9 @@ namespace UI.Controls.Archive
       await RefreshTreePreservingStateAsync(preservePanels: true);
     }
 
+    /// <summary>
+    /// Сохраняет текущее состояние дерева (раскрытые узлы и выбранные архивы).
+    /// </summary>
     private TreeRefreshState CaptureTreeRefreshState()
     {
       var state = new TreeRefreshState();
@@ -331,17 +417,27 @@ namespace UI.Controls.Archive
       return state;
     }
 
+    /// <summary>
+    /// Возвращает корневые узлы дерева архивов.
+    /// </summary>
     private IReadOnlyList<ArchiveTreeNode> GetRootNodes()
     {
       var roots = ArchivesTreeView.ItemsSource as IEnumerable<ArchiveTreeNode>;
       return roots?.ToList() ?? [];
     }
 
+
+    /// <summary>
+    /// Возвращает корневой узел дерева по указанному типу.
+    /// </summary>
     private ArchiveTreeNode? GetRootNode(ArchiveTreeNodeKind rootKind)
     {
       return GetRootNodes().FirstOrDefault(node => node.Kind == rootKind);
     }
 
+    /// <summary>
+    /// Обновляет дерево архивов с восстановлением состояния и опциональным сохранением правых панелей.
+    /// </summary>
     private async Task RefreshTreePreservingStateAsync(bool preservePanels)
     {
       var state = CaptureTreeRefreshState();
@@ -375,6 +471,9 @@ namespace UI.Controls.Archive
       ClearFilePanels();
     }
 
+    /// <summary>
+    /// Восстанавливает состояние правых панелей (список файлов и редактор) после обновления дерева.
+    /// </summary>
     private async Task RestoreRightPanelsAfterRefreshAsync()
     {
       if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
@@ -427,6 +526,9 @@ namespace UI.Controls.Archive
       await ShowArchiveInGridAsync(_lastSelectedArchivePath, clearEditor: true);
     }
 
+    /// <summary>
+    /// Инвалидирует кэши архива (записи и манифест) по указанному пути.
+    /// </summary>
     private void InvalidateArchiveCaches(string archivePath)
     {
       if (string.IsNullOrWhiteSpace(archivePath))
@@ -445,6 +547,9 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Проверяет равенство путей архивов с учётом нормализации и регистра.
+    /// </summary>
     private static bool IsSameArchivePath(string firstPath, string secondPath)
     {
       if (string.IsNullOrWhiteSpace(firstPath) || string.IsNullOrWhiteSpace(secondPath))
@@ -455,6 +560,9 @@ namespace UI.Controls.Archive
       return string.Equals(Path.GetFullPath(firstPath), Path.GetFullPath(secondPath), StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Сбрасывает дерево архивов в начальное состояние и очищает панели файлов.
+    /// </summary>
     private void ResetTree()
     {
       var archiveRootNode = ArchiveTreeNode.CreateRoot("Архивы");
@@ -467,6 +575,9 @@ namespace UI.Controls.Archive
       ClearFilePanels();
     }
 
+    /// <summary>
+    /// Очищает панели файлов и редактора, сбрасывая состояние выбора.
+    /// </summary>
     private void ClearFilePanels()
     {
       ApplyGridItemsSource(Array.Empty<ArchiveEntryInfo>());
@@ -482,6 +593,10 @@ namespace UI.Controls.Archive
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
     }
 
+
+    /// <summary>
+    /// Загружает список архивов в корневой узел дерева с учётом состояния раскрытия.
+    /// </summary>
     private async Task LoadArchivesIntoRootAsync(ArchiveTreeNode rootNode, TreeRefreshState? state = null)
     {
       if (!HasPlaceholder(rootNode))
@@ -517,6 +632,12 @@ namespace UI.Controls.Archive
       rootNode.Children.ReplaceRange(archiveNodes);
     }
 
+    /// <summary>
+    /// Возвращает раскрытые дочерние узлы указанного типа.
+    /// </summary>
+    /// <param name="rootNode">Корневой узел дерева.</param>
+    /// <param name="expectedKind">Тип узлов для выборки.</param>
+    /// <returns>Коллекция раскрытых узлов.</returns>
     private static IEnumerable<ArchiveTreeNode> GetExpandedNodes(ArchiveTreeNode rootNode, ArchiveTreeNodeKind expectedKind)
     {
       foreach (var node in rootNode.Children.Where(node =>
@@ -528,6 +649,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Загружает список архивов на проверке в корневой узел с учётом состояния и расчётом статусов.
+    /// </summary>
+    /// <param name="rootNode">Корневой узел дерева.</param>
+    /// <param name="state">Сохранённое состояние дерева (опционально).</param>
+    /// <returns>Асинхронная задача загрузки.</returns>
     private async Task LoadReviewArchivesIntoRootAsync(ArchiveTreeNode rootNode, TreeRefreshState? state = null)
     {
       if (!HasPlaceholder(rootNode))
@@ -568,6 +695,11 @@ namespace UI.Controls.Archive
       rootNode.Children.ReplaceRange(reviewNodes);
     }
 
+    /// <summary>
+    /// Загружает файлы архива в узел дерева и обновляет их статус.
+    /// </summary>
+    /// <param name="archiveNode">Узел архива.</param>
+    /// <returns>Асинхронная задача загрузки.</returns>
     private async Task LoadArchiveFilesIntoTreeAsync(ArchiveTreeNode archiveNode)
     {
       if (archiveNode.ArchivePath == null || !HasPlaceholder(archiveNode))
@@ -603,6 +735,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Загружает файлы архива на проверке в узел дерева и обновляет их статус.
+    /// </summary>
+    /// <param name="reviewNode">Узел архива на проверке.</param>
+    /// <returns>Асинхронная задача загрузки.</returns>
     private async Task LoadReviewFilesIntoTreeAsync(ArchiveTreeNode reviewNode)
     {
       if (reviewNode.ArchivePath == null || !HasPlaceholder(reviewNode))
@@ -639,6 +776,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Ищет узел архива на проверке по пути.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <returns>Найденный узел или null.</returns>
     private ArchiveTreeNode? FindReviewArchiveNode(string reviewArchivePath)
     {
       var reviewRootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
@@ -652,6 +794,11 @@ namespace UI.Controls.Archive
         IsSameArchivePath(node.ArchivePath, reviewArchivePath));
     }
 
+    /// <summary>
+    /// Ищет узел архива по пути.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Найденный узел или null.</returns>
     private ArchiveTreeNode? FindArchiveNode(string archivePath)
     {
       var archiveRootNode = GetRootNode(ArchiveTreeNodeKind.Root);
@@ -665,6 +812,11 @@ namespace UI.Controls.Archive
         IsSameArchivePath(node.ArchivePath, archivePath));
     }
 
+    /// <summary>
+    /// Обновляет статус узла архива на основе данных записей.
+    /// </summary>
+    /// <param name="node">Узел архива.</param>
+    /// <param name="entries">Коллекция записей архива.</param>
     private static void UpdateArchiveNodeState(ArchiveTreeNode node, IReadOnlyCollection<ArchiveEntryInfo> entries)
     {
       var totalErrors = entries.Sum(entry => entry.ErrorCount);
@@ -675,6 +827,11 @@ namespace UI.Controls.Archive
       node.UpdateReviewState(status, totalErrors);
     }
 
+    /// <summary>
+    /// Обновляет состояние узла архива и его файлов в дереве.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entries">Список записей архива.</param>
     private void UpdateArchiveTreeState(string archivePath, IReadOnlyList<ArchiveEntryInfo> entries)
     {
       var archiveNode = IsReviewArchivePath(archivePath)
@@ -705,6 +862,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Ищет узел файла в архиве на проверке.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <param name="entryName">Имя файла.</param>
+    /// <returns>Найденный узел или null.</returns>
     private ArchiveTreeNode? FindReviewFileNode(string reviewArchivePath, string entryName)
     {
       var reviewArchiveNode = FindReviewArchiveNode(reviewArchivePath);
@@ -719,6 +882,12 @@ namespace UI.Controls.Archive
         string.Equals(node.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Ищет запись файла в текущем списке таблицы для архива на проверке.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <param name="entryName">Имя файла.</param>
+    /// <returns>Найденная запись или null.</returns>
     private ArchiveEntryInfo? FindReviewGridEntry(string reviewArchivePath, string entryName)
     {
       var normalizedEntryName = NormalizeEntryName(entryName);
@@ -728,6 +897,12 @@ namespace UI.Controls.Archive
         string.Equals(entry.EntryName, normalizedEntryName, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Обновляет состояние файла в дереве на месте.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <param name="entryName">Имя файла.</param>
+    /// <param name="errorCount">Количество ошибок.</param>
     private void UpdateReviewStateInPlace(string reviewArchivePath, string entryName, int errorCount)
     {
       var normalizedReviewArchivePath = Path.GetFullPath(reviewArchivePath);
@@ -763,6 +938,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Возвращает записи архива с использованием кэша или считывает их при отсутствии.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Список записей архива.</returns>
     private async Task<IReadOnlyList<ArchiveEntryInfo>> GetArchiveEntriesAsync(string archivePath)
     {
       if (_archiveEntriesCache.TryGetValue(archivePath, out var cached))
@@ -775,6 +955,11 @@ namespace UI.Controls.Archive
       return entries;
     }
 
+    /// <summary>
+    /// Возвращает записи архива на проверке с использованием кэша или считывает их при отсутствии.
+    /// </summary>
+    /// <param name="reviewDirectoryPath">Путь к директории с архивами на проверке.</param>
+    /// <returns>Список записей архива на проверке.</returns>
     private async Task<IReadOnlyList<ArchiveEntryInfo>> GetReviewEntriesAsync(string reviewDirectoryPath)
     {
       if (_archiveEntriesCache.TryGetValue(reviewDirectoryPath, out var cached))
@@ -787,6 +972,11 @@ namespace UI.Controls.Archive
       return entries;
     }
 
+    /// <summary>
+    /// Открывает архив через менеджер и возвращает уведомления о целостности.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Список уведомлений о целостности.</returns>
     private IReadOnlyList<string> OpenArchiveInManager(string archivePath)
     {
       lock (_archiveManagerSync)
@@ -803,6 +993,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Читает текст записи архива с использованием менеджера.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entryName">Имя записи.</param>
+    /// <returns>Текст записи.</returns>
     private string ReadArchiveEntryTextWithManager(string archivePath, string entryName)
     {
       lock (_archiveManagerSync)
@@ -820,6 +1016,10 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обеспечивает открытие архива в менеджере.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
     private void EnsureArchiveOpenedInManagerCore(string archivePath)
     {
       var fullArchivePath = Path.GetFullPath(archivePath);
@@ -829,6 +1029,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Читает записи архива.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Список записей архива.</returns>
     private IReadOnlyList<ArchiveEntryInfo> ReadArchiveEntries(string archivePath)
     {
       var items = new List<ArchiveEntryInfo>();
@@ -862,6 +1067,11 @@ namespace UI.Controls.Archive
         .ToList();
     }
 
+    /// <summary>
+    /// Читает записи архива на проверке.
+    /// </summary>
+    /// <param name="reviewDirectoryPath">Путь к директории с архивами на проверке.</param>
+    /// <returns>Список записей архива на проверке.</returns>
     private IReadOnlyList<ArchiveEntryInfo> ReadReviewEntries(string reviewDirectoryPath)
     {
       var directoryPath = Path.GetFullPath(reviewDirectoryPath);
@@ -905,6 +1115,12 @@ namespace UI.Controls.Archive
         .ToList();
     }
 
+    /// <summary>
+    /// Формирует информацию о записи архива (с учётом манифеста и содержимого файла).
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entry">Запись архива.</param>
+    /// <returns>Информация о записи или null.</returns>
     private async Task<ArchiveEntryInfo?> GetArchiveEntryInfoAsync(string archivePath, ZipArchiveEntry entry)
     {
       var manifest = await GetManifestCacheAsync(archivePath);
@@ -927,16 +1143,29 @@ namespace UI.Controls.Archive
         fileType: FileType.OPKW);
     }
 
+    /// <summary>
+    /// Парсит текст файла и формирует объект информации о записи архива.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entryName">Имя записи.</param>
+    /// <param name="opkFileName">Имя файла ОПК.</param>
+    /// <param name="text">Текст содержимого.</param>
+    /// <param name="creationDate">Дата создания.</param>
+    /// <param name="sourceFilePath">Путь к исходному файлу (для review).</param>
+    /// <param name="isReviewEntry">Флаг review-записи.</param>
+    /// <param name="errorCount">Количество ошибок.</param>
+    /// <param name="fileType">Тип файла.</param>
+    /// <returns>Информация о записи или null.</returns>
     private ArchiveEntryInfo? BuildEntryInfoFromText(
-      string archivePath,
-      string entryName,
-      string opkFileName,
-      string text,
-      DateTime creationDate,
-      string? sourceFilePath,
-      bool isReviewEntry,
-      int errorCount,
-      FileType fileType)
+        string archivePath,
+        string entryName,
+        string opkFileName,
+        string text,
+        DateTime creationDate,
+        string? sourceFilePath,
+        bool isReviewEntry,
+        int errorCount,
+        FileType fileType)
     {
       Regex commandStartRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
       if (string.IsNullOrWhiteSpace(text))
@@ -1024,11 +1253,21 @@ namespace UI.Controls.Archive
         fileType);
     }
 
+    /// <summary>
+    /// Нормализует имя записи (замена слешей и удаление ведущих разделителей).
+    /// </summary>
+    /// <param name="entryName">Исходное имя записи.</param>
+    /// <returns>Нормализованное имя.</returns>
     private static string NormalizeEntryName(string entryName)
     {
       return (entryName ?? string.Empty).Replace('\\', '/').TrimStart('/');
     }
 
+    /// <summary>
+    /// Проверяет, поддерживается ли файл для обработки в review.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <returns>true, если формат поддерживается; иначе false.</returns>
     private static bool IsSupportedReviewFilePath(string filePath)
     {
       var extension = Path.GetExtension(filePath);
@@ -1036,6 +1275,11 @@ namespace UI.Controls.Archive
              string.Equals(extension, ".pkw", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Определяет тип файла по его расширению.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <returns>Тип файла.</returns>
     private static FileType DeterminePreviewFileType(string filePath)
     {
       return Path.GetExtension(filePath).ToLowerInvariant() switch
@@ -1048,6 +1292,12 @@ namespace UI.Controls.Archive
       };
     }
 
+    /// <summary>
+    /// Читает и нормализует текст файла на проверке с учётом кодировки.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <param name="fileType">Тип файла.</param>
+    /// <returns>Нормализованный текст файла.</returns>
     private static string ReadReviewFileText(string filePath, FileType fileType)
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -1062,6 +1312,11 @@ namespace UI.Controls.Archive
         .Replace('\r', '\n');
     }
 
+    /// <summary>
+    /// Удаляет устаревшие управляющие символы из текста.
+    /// </summary>
+    /// <param name="source">Исходный текст.</param>
+    /// <returns>Очищенный текст.</returns>
     private static string RemoveLegacyControlChars(string source)
     {
       if (string.IsNullOrEmpty(source))
@@ -1076,6 +1331,11 @@ namespace UI.Controls.Archive
         .Replace("\u000F", string.Empty);
     }
 
+    /// <summary>
+    /// Выполняет повторную проверку файла: пересчитывает ошибки и обновляет связанные файлы.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <returns>Результат повторной проверки.</returns>
     private static RecheckReviewFileResult RecheckReviewFile(string filePath)
     {
       if (string.IsNullOrWhiteSpace(filePath))
@@ -1123,6 +1383,11 @@ namespace UI.Controls.Archive
       };
     }
 
+    /// <summary>
+    /// Удаляет заголовок с информацией об ошибках из текста файла на проверке.
+    /// </summary>
+    /// <param name="text">Исходный текст.</param>
+    /// <returns>Текст без заголовка ошибок.</returns>
     private static string RemoveExistingReviewErrorHeader(string text)
     {
       if (string.IsNullOrWhiteSpace(text))
@@ -1150,6 +1415,12 @@ namespace UI.Controls.Archive
       return string.Join("\n", lines);
     }
 
+    /// <summary>
+    /// Создает текст с аннотациями об ошибках для файла на проверке.
+    /// </summary>
+    /// <param name="sourceText">Исходный текст.</param>
+    /// <param name="errorCount">Количество ошибок.</param>
+    /// <returns>Текст с аннотациями об ошибках.</returns>
     private static string BuildReviewErrorAnnotatedText(string sourceText, int errorCount)
     {
       var header = $"//=======НАЙДЕНО {errorCount} ОШИБОК";
@@ -1161,6 +1432,12 @@ namespace UI.Controls.Archive
       return header + "\r\n\r\n" + sourceText.Replace("\n", "\r\n");
     }
 
+    /// <summary>
+    /// Записывает текст в файл на проверке.
+    /// </summary>
+    /// <param name="filePath">Путь к файлу.</param>
+    /// <param name="text">Текст для записи.</param>
+    /// <param name="fileType">Тип файла.</param>
     private static void WriteReviewFileText(string filePath, string text, FileType fileType)
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -1180,6 +1457,11 @@ namespace UI.Controls.Archive
       File.WriteAllText(filePath, normalizedText, encoding);
     }
 
+    /// <summary>
+    /// Извлекает количество ошибок из текста.
+    /// </summary>
+    /// <param name="text">Текст для извлечения количества ошибок.</param>
+    /// <returns>Количество ошибок.</returns>
     private static int ExtractErrorCount(string text)
     {
       if (string.IsNullOrWhiteSpace(text))
@@ -1197,11 +1479,20 @@ namespace UI.Controls.Archive
         : 0;
     }
 
+    /// <summary>
+    /// Проверяет, имеет ли узел архива заполнитель.
+    /// </summary>
+    /// <param name="node">Узел архива.</param>
+    /// <returns>True, если узел имеет заполнитель; в противном случае — false.</returns>
     private static bool HasPlaceholder(ArchiveTreeNode node)
     {
       return node.Children.Count == 1 && node.Children[0].Kind == ArchiveTreeNodeKind.Placeholder;
     }
 
+    /// <summary>
+    /// Пробует удалить файл.
+    /// </summary>
+    /// <param name="path">Путь к файлу.</param>
     private static void TryDeleteFile(string? path)
     {
       if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -1218,6 +1509,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обновляет видимость и раскладку правых панелей (список файлов и редактор).
+    /// </summary>
+    /// <param name="isFilesVisible">Отображать список файлов.</param>
+    /// <param name="isEditorVisible">Отображать редактор.</param>
     private void UpdateRightPanels(bool isFilesVisible, bool isEditorVisible)
     {
       FilesPanel.Visibility = Visibility.Visible;
@@ -1252,6 +1548,10 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Устанавливает источник данных таблицы и обновляет текущие записи с подавлением событий выбора.
+    /// </summary>
+    /// <param name="entries">Список записей для отображения.</param>
     private void ApplyGridItemsSource(IReadOnlyList<ArchiveEntryInfo> entries)
     {
       _currentGridEntries = entries ?? Array.Empty<ArchiveEntryInfo>();
@@ -1272,11 +1572,22 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Проверяет наличие записи в буфере обмена архива.
+    /// </summary>
+    /// <returns>true, если буфер не пуст; иначе false.</returns>
     private bool HasArchiveClipboardEntry()
     {
       return _archiveClipboardEntry != null;
     }
 
+    /// <summary>
+    /// Сохраняет запись файла в буфер обмена архива.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entryName">Имя записи.</param>
+    /// <param name="displayName">Отображаемое имя.</param>
+    /// <param name="operation">Тип операции (копирование или вырезание).</param>
     private void StoreArchiveClipboardEntry(string archivePath, string entryName, string displayName, ArchiveClipboardOperation operation)
     {
       var normalizedArchivePath = Path.GetFullPath(archivePath);
@@ -1295,6 +1606,10 @@ namespace UI.Controls.Archive
       UpdateActionButtons();
     }
 
+    /// <summary>
+    /// Очищает буфер обмена архива и обновляет состояние UI.
+    /// </summary>
+    /// <param name="wasConsumed">Флаг, указывающий, был ли буфер использован.</param>
     private void ClearArchiveClipboardEntry(bool wasConsumed)
     {
       if (_archiveClipboardEntry == null)
@@ -1311,6 +1626,11 @@ namespace UI.Controls.Archive
       UpdateActionButtons();
     }
 
+    /// <summary>
+    /// Вставляет файл из буфера обмена в указанный архив (копирование или перемещение).
+    /// </summary>
+    /// <param name="targetArchivePath">Путь к целевому архиву.</param>
+    /// <returns>Асинхронная задача выполнения операции.</returns>
     private async Task PasteArchiveClipboardToAsync(string targetArchivePath)
     {
       var clipboardEntry = _archiveClipboardEntry;
@@ -1363,6 +1683,9 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обновляет состояние и видимость кнопок действий в зависимости от текущего выбора.
+    /// </summary>
     private void UpdateActionButtons()
     {
       UpdatePanelTitles();
@@ -1396,12 +1719,20 @@ namespace UI.Controls.Archive
         : Visibility.Collapsed;
     }
 
+    /// <summary>
+    /// Обновляет заголовки панелей в зависимости от текущего выбора.
+    /// </summary>
     private void UpdatePanelTitles()
     {
       SetPanelTitle(SelectedArchiveNameTextBlock, GetArchiveDisplayName(_lastSelectedArchivePath));
       SetPanelTitle(SelectedArchiveFileNameTextBlock, GetFileDisplayName(_lastSelectedEntryName));
     }
 
+    /// <summary>
+    /// Возвращает отображаемое имя архива по пути.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Имя архива или null.</returns>
     private static string? GetArchiveDisplayName(string archivePath)
     {
       return string.IsNullOrWhiteSpace(archivePath)
@@ -1409,6 +1740,11 @@ namespace UI.Controls.Archive
         : Path.GetFileName(archivePath);
     }
 
+    /// <summary>
+    /// Возвращает отображаемое имя файла по имени.
+    /// </summary>
+    /// <param name="entryName">Имя файла.</param>
+    /// <returns>Отображаемое имя файла или null.</returns>
     private static string? GetFileDisplayName(string entryName)
     {
       return string.IsNullOrWhiteSpace(entryName)
@@ -1416,6 +1752,11 @@ namespace UI.Controls.Archive
         : Path.GetFileName(entryName);
     }
 
+    /// <summary>
+    /// Устанавливает заголовок панели.
+    /// </summary>
+    /// <param name="textBlock">Элемент управления TextBlock.</param>
+    /// <param name="value">Значение заголовка.</param>
     private static void SetPanelTitle(TextBlock textBlock, string? value)
     {
       var hasValue = !string.IsNullOrWhiteSpace(value);
@@ -1425,6 +1766,11 @@ namespace UI.Controls.Archive
       textBlock.Visibility = hasValue ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    /// <summary>
+    /// Проверяет, является ли указанный путь путем к архиву отзывов.
+    /// </summary>
+    /// <param name="path">Путь для проверки.</param>
+    /// <returns>True, если путь указывает на архив отзывов; в противном случае — false.</returns>
     private bool IsReviewArchivePath(string path)
     {
       if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
@@ -1436,6 +1782,12 @@ namespace UI.Controls.Archive
       return fullPath.StartsWith(_reviewArchivesFolderPath, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Отображает содержимое архива в таблице и обновляет состояние UI.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="clearEditor">Очистить редактор.</param>
+    /// <returns>Асинхронная задача отображения.</returns>
     private async Task ShowArchiveInGridAsync(string archivePath, bool clearEditor)
     {
       if (IsReviewArchivePath(archivePath))
@@ -1478,6 +1830,13 @@ namespace UI.Controls.Archive
       UpdateActionButtons();
     }
 
+    /// <summary>
+    /// Отображает содержимое файла архива в редакторе и обновляет состояние UI.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entryName">Имя файла.</param>
+    /// <param name="fromGrid">Флаг вызова из таблицы.</param>
+    /// <returns>Асинхронная задача отображения.</returns>
     private async Task ShowFileAsync(string archivePath, string entryName, bool fromGrid)
     {
       if (IsReviewArchivePath(archivePath))
@@ -1510,6 +1869,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Отображает содержимое архива отзывов в таблице и обновляет состояние UI.
+    /// </summary>
+    /// <param name="reviewDirectoryPath">Путь к директории отзывов.</param>
+    /// <param name="clearEditor">Очистить редактор.</param>
+    /// <returns>Асинхронная задача отображения.</returns>
     private async Task ShowReviewArchiveInGridAsync(string reviewDirectoryPath, bool clearEditor)
     {
       var entries = await GetReviewEntriesAsync(reviewDirectoryPath);
@@ -1542,6 +1907,13 @@ namespace UI.Controls.Archive
       UpdateActionButtons();
     }
 
+    /// <summary>
+    /// Отображает содержимое файла из архива на проверке в редакторе.
+    /// </summary>
+    /// <param name="reviewDirectoryPath">Путь к архиву на проверке.</param>
+    /// <param name="entryName">Имя файла.</param>
+    /// <param name="fromGrid">Флаг вызова из таблицы.</param>
+    /// <returns>Асинхронная задача отображения.</returns>
     private async Task ShowReviewFileAsync(string reviewDirectoryPath, string entryName, bool fromGrid)
     {
       await ShowReviewArchiveInGridAsync(reviewDirectoryPath, clearEditor: false);
@@ -1573,6 +1945,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Создает предварительный редактор для отображения содержимого файла.
+    /// </summary>
+    /// <param name="text">Текст файла.</param>
+    /// <param name="fileType">Тип файла.</param>
+    /// <returns>Экземпляр предварительного редактора.</returns>
     private static TextEditorUI CreatePreviewEditor(string text, FileType fileType)
     {
       var textEditor = new TextEditorUI(fileType);
@@ -1590,6 +1968,11 @@ namespace UI.Controls.Archive
       return textEditor;
     }
 
+    /// <summary>
+    /// Выбирает строку в таблице архивов.
+    /// </summary>
+    /// <param name="selectedRow">Выбранная строка.</param>
+    /// <returns>Асинхронная задача выбора строки.</returns>
     private async Task SelectGridRow(object selectedRow)
     {
       _suppressGridSelection = true;
@@ -1635,6 +2018,11 @@ namespace UI.Controls.Archive
       BeginCreateArchiveWorkflow();
     }
 
+    /// <summary>
+    /// Открывает архив по пути с переключением в UI-поток при необходимости.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Асинхронная задача открытия.</returns>
     public Task OpenArchivePathAsync(string archivePath)
     {
       if (!Dispatcher.CheckAccess())
@@ -1645,6 +2033,11 @@ namespace UI.Controls.Archive
       return OpenArchivePathCoreAsync(archivePath);
     }
 
+    /// <summary>
+    /// Открывает архив на проверке по пути с переключением в UI-поток при необходимости.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <returns>Асинхронная задача открытия.</returns>
     public Task OpenReviewArchivePathAsync(string reviewArchivePath)
     {
       if (!Dispatcher.CheckAccess())
@@ -1655,6 +2048,11 @@ namespace UI.Controls.Archive
       return OpenReviewArchivePathCoreAsync(reviewArchivePath);
     }
 
+    /// <summary>
+    /// Открывает архив по пути: загружает дерево и отображает содержимое.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <returns>Асинхронная задача открытия.</returns>
     private async Task OpenArchivePathCoreAsync(string archivePath)
     {
       if (string.IsNullOrWhiteSpace(archivePath))
@@ -1694,6 +2092,11 @@ namespace UI.Controls.Archive
       await OpenArchiveAsync(fullArchivePath);
     }
 
+    /// <summary>
+    /// Открывает архив на проверке по пути: загружает дерево и отображает содержимое.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <returns>Асинхронная задача открытия.</returns>
     private async Task OpenReviewArchivePathCoreAsync(string reviewArchivePath)
     {
       if (string.IsNullOrWhiteSpace(reviewArchivePath))
@@ -1733,6 +2136,11 @@ namespace UI.Controls.Archive
       await OpenArchiveAsync(fullReviewArchivePath);
     }
 
+    /// <summary>
+    /// Обрабатывает событие раскрытия элемента дерева.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
     {
       if (!ReferenceEquals(sender, e.OriginalSource))
@@ -1778,6 +2186,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие нажатия левой кнопки мыши на элементе дерева.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void TreeViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
       var item = sender as TreeViewItem;
@@ -1832,6 +2245,11 @@ namespace UI.Controls.Archive
         $"Archive UI: PreviewMouseLeftButtonDown selected kind='{node?.Kind}', display='{node?.DisplayName}', selectedAfter='{item.IsSelected}'.");
     }
 
+    /// <summary>
+    /// Обрабатывает правый клик по узлу дерева и сохраняет контекстный узел.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события мыши.</param>
     private void TreeViewItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
       var item = sender as TreeViewItem;
@@ -1843,13 +2261,22 @@ namespace UI.Controls.Archive
       _contextMenuNode = item.DataContext as ArchiveTreeNode;
     }
 
+    /// <summary>
+    /// Возвращает текущий контекстный узел (из контекстного меню или выбранный).
+    /// </summary>
+    /// <returns>Узел дерева или null.</returns>
     private ArchiveTreeNode? GetContextNode()
     {
       return _contextMenuNode ?? (ArchivesTreeView.SelectedItem as ArchiveTreeNode);
     }
 
-    private static T? FindVisualAncestor<T>(DependencyObject? current)
-      where T : DependencyObject
+    /// <summary>
+    /// Ищет родительский элемент заданного типа в визуальном дереве.
+    /// </summary>
+    /// <typeparam name="T">Тип искомого элемента.</typeparam>
+    /// <param name="current">Начальный элемент.</param>
+    /// <returns>Найденный элемент или null.</returns>
+    private static T? FindVisualAncestor<T>(DependencyObject? current) where T : DependencyObject
     {
       while (current != null)
       {
@@ -1864,16 +2291,29 @@ namespace UI.Controls.Archive
       return null;
     }
 
+    /// <summary>
+    /// Возвращает узел дерева для печати.
+    /// </summary>
+    /// <returns>Узел дерева или null.</returns>
     private ArchiveTreeNode GetNodeForPrint()
     {
       return _contextMenuNode ?? ArchivesTreeView.SelectedItem as ArchiveTreeNode;
     }
 
+    /// <summary>
+    /// Обрабатывает событие закрытия контекстного меню дерева архивов.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void ArchivesTreeContextMenu_Closed(object sender, RoutedEventArgs e)
     {
       _contextMenuNode = null;
     }
 
+    /// <summary>
+    /// Обеспечивает получение записей архива для печати (из текущего состояния или с загрузкой).
+    /// </summary>
+    /// <returns>Кортеж: список записей и путь к архиву.</returns>
     private async Task<(IReadOnlyList<ArchiveEntryInfo> entries, string archivePath)> EnsureEntriesForPrintAsync()
     {
       var node = GetNodeForPrint();
@@ -1883,7 +2323,6 @@ namespace UI.Controls.Archive
 
       var archivePath = node.ArchivePath;
 
-      // Если уже открыт нужный архив и есть данные — используем их
       if (_lastSelectedArchivePath == archivePath &&
           _currentGridEntries != null &&
           _currentGridEntries.Count > 0)
@@ -1891,12 +2330,15 @@ namespace UI.Controls.Archive
         return (_currentGridEntries, archivePath);
       }
 
-      // Иначе — загружаем
       var entries = await GetArchiveEntriesAsync(archivePath);
 
       return (entries, archivePath);
     }
 
+    /// <summary>
+    /// Печатает каталог архива.
+    /// </summary>
+    /// <returns>Задача для асинхронного выполнения.</returns>
     private async Task PrintArchiveCatalogAsync()
     {
       var (entries, archivePath) = await EnsureEntriesForPrintAsync();
@@ -1931,6 +2373,16 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Создает документ для печати.
+    /// </summary>
+    /// <param name="entries">Список записей архива.</param>
+    /// <param name="archiveName">Имя архива.</param>
+    /// <param name="hardMarginX">Горизонтальный отступ.</param>
+    /// <param name="hardMarginY">Вертикальный отступ.</param>
+    /// <param name="printableAreaWidth">Ширина печатной области.</param>
+    /// <param name="printableAreaHeight">Высота печатной области.</param>
+    /// <returns>Документ для печати.</returns>
     private FlowDocument CreatePrintDocument(
       IReadOnlyList<ArchiveEntryInfo> entries,
       string archiveName,
@@ -1950,14 +2402,13 @@ namespace UI.Controls.Archive
           hardMarginY,
           hardMarginX,
           hardMarginY),
-        PageWidth = printableAreaWidth + hardMarginX * 2,
-        PageHeight = printableAreaHeight + hardMarginY * 2,
+        PageWidth = printableAreaWidth + (hardMarginX * 2),
+        PageHeight = printableAreaHeight + (hardMarginY * 2),
         ColumnWidth = double.PositiveInfinity
       };
 
       var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
 
-      // Заголовок
       doc.Blocks.Add(new Paragraph(new Run($"Каталог архива {archiveName}"))
       {
         FontSize = 14,
@@ -2104,13 +2555,23 @@ namespace UI.Controls.Archive
       return doc;
     }
 
-    Paragraph CreateCell(string text) =>
+    /// <summary>
+    /// Создаёт ячейку таблицы для печати с заданным текстом.
+    /// </summary>
+    /// <param name="text">Текст ячейки.</param>
+    /// <returns>Элемент Paragraph для таблицы.</returns>
+    private Paragraph CreateCell(string text) =>
     new Paragraph(new Run(text ?? ""))
     {
       Margin = new Thickness(0),
       TextAlignment = TextAlignment.Left
     };
 
+    /// <summary>
+    /// Обновляет состояние и видимость пунктов контекстного меню в зависимости от выбранного узла.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void ArchivesTreeContextMenu_Opened(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2148,21 +2609,41 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Создать архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void CreateArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       BeginCreateArchiveWorkflow();
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Загрузить архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void UploadArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       ArchiveTransferUiService.UploadArchive();
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Скачать архивы".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void DownloadArchivesMenuItem_Click(object sender, RoutedEventArgs e)
     {
       ArchiveTransferUiService.DownloadArchives();
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Открыть архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void OpenArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2177,6 +2658,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Сохранить архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void SaveArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2190,6 +2676,11 @@ namespace UI.Controls.Archive
       SaveSelectedArchiveToDisk();
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Добавить файл в архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void AddFileToArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2201,6 +2692,11 @@ namespace UI.Controls.Archive
       AddFileToArchive(node.ArchivePath);
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Удалить архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void DeleteArchiveMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2221,6 +2717,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает открытие файла или архива из контекстного меню.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void OpenArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2242,6 +2743,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Открывает файл из архива на проверке во внешнем текстовом редакторе.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void OpenInTextEditorMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2253,6 +2759,11 @@ namespace UI.Controls.Archive
       FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(node.FilePath);
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Удалить файл из архива".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void DeleteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2275,6 +2786,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Копировать файл из архива".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void CopyArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2288,6 +2804,11 @@ namespace UI.Controls.Archive
       StoreArchiveClipboardEntry(node.ArchivePath, node.EntryName, node.DisplayName, ArchiveClipboardOperation.Copy);
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Вырезать файл из архива".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void CutArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2301,6 +2822,11 @@ namespace UI.Controls.Archive
       StoreArchiveClipboardEntry(node.ArchivePath, node.EntryName, node.DisplayName, ArchiveClipboardOperation.Cut);
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по пункту меню "Вставить файл в архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void PasteArchiveFileMenuItem_Click(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
@@ -2313,6 +2839,11 @@ namespace UI.Controls.Archive
       await PasteArchiveClipboardToAsync(node.ArchivePath);
     }
 
+    /// <summary>
+    /// Обрабатывает событие клика по кнопке "Добавить файл в архив".
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void AddFileToArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
@@ -2321,12 +2852,22 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки сохранения архива на диск.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void SaveArchiveToDiskButton_Click(object sender, RoutedEventArgs e)
     {
       SaveSelectedArchiveToDisk();
       ResetArchiveActionButtonFocus();
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки удаления архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void DeleteArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
@@ -2341,6 +2882,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки вставки файла в архив из буфера.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void PasteIntoArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
@@ -2349,6 +2895,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки удаления файла из архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void DeleteArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
@@ -2368,6 +2919,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки копирования файла в архив.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void CopyArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
@@ -2381,6 +2937,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки вырезания файла из архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void CutArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath) &&
@@ -2394,6 +2955,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки вставки файла из буфера в архив.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void PasteArchiveFileButton_Click(object sender, RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(_lastSelectedArchivePath))
@@ -2402,12 +2968,20 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки печати каталога архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void PrintArchiveCatalogButton_Click(object sender, RoutedEventArgs e)
     {
       await PrintArchiveCatalogAsync();
       ResetArchiveActionButtonFocus();
     }
 
+    /// <summary>
+    /// Сбрасывает фокус с кнопок действий над архивом.
+    /// </summary>
     private void ResetArchiveActionButtonFocus()
     {
       Dispatcher.BeginInvoke(new Action(() =>
@@ -2416,11 +2990,19 @@ namespace UI.Controls.Archive
       }), DispatcherPriority.Background);
     }
 
+    /// <summary>
+    /// Обрабатывает выбор пункта меню печати каталога архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void PrintArchiveCatalogMenuItem_Click(object sender, RoutedEventArgs e)
     {
       await PrintArchiveCatalogAsync();
     }
 
+    /// <summary>
+    /// Начинает процесс создания архива.
+    /// </summary>
     private void BeginCreateArchiveWorkflow()
     {
       try
@@ -2446,6 +3028,10 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Начинает процесс открытия архива.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
     private async Task OpenArchiveAsync(string archivePath)
     {
       try
@@ -2461,6 +3047,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Открывает файл из архива и отображает его содержимое.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entryName">Имя файла внутри архива.</param>
+    /// <returns>Асинхронная задача открытия файла.</returns>
     private async Task OpenArchiveFileAsync(string archivePath, string entryName)
     {
       try
@@ -2476,6 +3068,10 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Добавляет файл в архив.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
     private void AddFileToArchive(string archivePath)
     {
       var openFileDialog = new OpenFileDialog
@@ -2510,6 +3106,9 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Сохраняет выбранный архив на диск.
+    /// </summary>
     private void SaveSelectedArchiveToDisk()
     {
       if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
@@ -2547,6 +3146,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Удаляет архив.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="displayName">Отображаемое имя архива.</param>
     private void DeleteArchive(string archivePath, string displayName)
     {
       var confirmation = Message.MessageBoxCustom.Show(
@@ -2578,6 +3182,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Удаляет файл из архива с подтверждением пользователя.
+    /// </summary>
+    /// <param name="archivePath">Путь к архиву.</param>
+    /// <param name="entryName">Имя файла внутри архива.</param>
+    /// <param name="displayName">Отображаемое имя файла.</param>
     private void DeleteArchiveFile(string archivePath, string entryName, string displayName)
     {
       var confirmation = Message.MessageBoxCustom.Show(
@@ -2610,6 +3220,12 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Удаляет архив на проверке.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <param name="displayName">Отображаемое имя архива.</param>
+    /// <returns>Асинхронная задача удаления архива.</returns>
     private async Task DeleteReviewArchiveAsync(string reviewArchivePath, string displayName)
     {
       var confirmation = Message.MessageBoxCustom.Show(
@@ -2651,6 +3267,14 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Удаляет файл из архива на проверке вместе с сопутствующими файлами и обновляет состояние UI.
+    /// </summary>
+    /// <param name="reviewArchivePath">Путь к архиву на проверке.</param>
+    /// <param name="entryName">Имя файла внутри архива.</param>
+    /// <param name="displayName">Отображаемое имя файла.</param>
+    /// <param name="filePath">Полный путь к исходному файлу (если известен).</param>
+    /// <returns>Асинхронная задача удаления.</returns>
     private async Task DeleteReviewFileAsync(string reviewArchivePath, string entryName, string displayName, string? filePath)
     {
       var confirmation = Message.MessageBoxCustom.Show(
@@ -2708,6 +3332,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки конвертации текущего содержимого в файл PKW.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void ConvertToPkwButton_Click(object sender, RoutedEventArgs e)
     {
       var fileText = GetFileContentText();
@@ -2721,6 +3350,11 @@ namespace UI.Controls.Archive
       SaveFileManager.SaveFileAs(fileText, suggestedFileName);
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки открытия файла в редакторе.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private void OpenInEditorButton_Click(object sender, RoutedEventArgs e)
     {
       if (string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath))
@@ -2731,6 +3365,11 @@ namespace UI.Controls.Archive
       FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(_lastSelectedReviewFilePath);
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки запуска файла в исполнителе.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void RunInExecutorButton_Click(object sender, RoutedEventArgs e)
     {
       if (_lastSelectedIsReviewEntry ||
@@ -2775,6 +3414,10 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Пытается выполнить команду запуска (RunCommand) из контекста главного окна.
+    /// </summary>
+    /// <returns>true, если команда успешно выполнена; иначе false.</returns>
     private static bool TryExecuteRunCommand()
     {
       var mainWindow = Application.Current?.MainWindow;
@@ -2801,6 +3444,12 @@ namespace UI.Controls.Archive
       return true;
     }
 
+    /// <summary>
+    /// Создаёт уникальный временный путь для файла исполнения на основе имени записи архива.
+    /// </summary>
+    /// <param name="entryName">Имя файла внутри архива.</param>
+    /// <param name="extension">Расширение создаваемого файла.</param>
+    /// <returns>Полный путь к временному файлу.</returns>
     private static string CreateExecutionTempFilePath(string entryName, string extension)
     {
       var tempRoot = Path.Combine(Path.GetTempPath(), "AskMkiM", "ArchiveExecution");
@@ -2821,6 +3470,12 @@ namespace UI.Controls.Archive
       return Path.Combine(tempRoot, $"{safeBase}_{Guid.NewGuid():N}{extension}");
     }
 
+    /// <summary>
+    /// Получает расширение файла для исполнения на основе его типа.
+    /// </summary>
+    /// <param name="fileType">Тип файла.</param>
+    /// <param name="entryName">Имя записи архива.</param>
+    /// <returns>Расширение файла.</returns>
     private static string GetExecutionExtension(FileType fileType, string entryName)
     {
       return fileType switch
@@ -2833,6 +3488,11 @@ namespace UI.Controls.Archive
       };
     }
 
+    /// <summary>
+    /// Обрабатывает нажатие кнопки повторной проверки архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события.</param>
     private async void RecheckReviewArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !IsReviewArchivePath(_lastSelectedArchivePath))
@@ -2963,6 +3623,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Ожидает завершения обновления и отрисовки окна прогресса.
+    /// </summary>
+    /// <param name="progressWindow">Окно прогресса.</param>
+    /// <returns>Асинхронная задача ожидания.</returns>
     private static async Task WaitForProgressWindowAsync(ProgressWindow progressWindow)
     {
       await progressWindow.Dispatcher.InvokeAsync(
@@ -3039,6 +3704,10 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Возвращает текст текущего содержимого редактора файла.
+    /// </summary>
+    /// <returns>Текст содержимого или пустая строка.</returns>
     private string GetFileContentText()
     {
       if (FileContentTextBox.Content is TextEditorUI contentTextEditor)
@@ -3049,6 +3718,10 @@ namespace UI.Controls.Archive
       return FileContentTextBox.Text ?? string.Empty;
     }
 
+    /// <summary>
+    /// Формирует рекомендуемое имя файла для сохранения в формате PKW.
+    /// </summary>
+    /// <returns>Имя файла без расширения.</returns>
     private string GetSuggestedPkwFileName()
     {
       var rawName = string.IsNullOrWhiteSpace(_lastSelectedEntryName)
@@ -3060,6 +3733,10 @@ namespace UI.Controls.Archive
         : rawName;
     }
 
+    /// <summary>
+    /// Отображает диалоговое окно создания архива.
+    /// </summary>
+    /// <returns>Имя созданного архива или null, если операция отменена.</returns>
     private string? ShowArchiveCreationDialog()
     {
       var dialog = CreateDialogWindow("Создание архива");
@@ -3200,6 +3877,11 @@ namespace UI.Controls.Archive
         : null;
     }
 
+    /// <summary>
+    /// Обрабатывает изменение выбранного узла дерева архивов и открывает соответствующий архив или файл.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события изменения выбранного элемента.</param>
     private async void ArchivesTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
       var node = e.NewValue as ArchiveTreeNode;
@@ -3250,6 +3932,11 @@ namespace UI.Controls.Archive
       }
     }
 
+    /// <summary>
+    /// Обрабатывает изменение выбранного элемента в таблице файлов архива.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события изменения выбора.</param>
     private async void ArchiveFilesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (_suppressGridSelection)
@@ -3300,6 +3987,12 @@ namespace UI.Controls.Archive
         ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
+
+    /// <summary>
+    /// Создаёт модальное диалоговое окно с заданным заголовком и преднастроенными параметрами отображения.
+    /// </summary>
+    /// <param name="title">Заголовок окна.</param>
+    /// <returns>Экземпляр окна.</returns>
     private Window CreateDialogWindow(string title)
     {
       return new Window
@@ -3316,6 +4009,10 @@ namespace UI.Controls.Archive
       };
     }
 
+    /// <summary>
+    /// Создаёт оболочку для диалогового окна.
+    /// </summary>
+    /// <returns>Экземпляр границы.</returns>
     private Border CreateDialogShell()
     {
       return new Border
@@ -3328,6 +4025,10 @@ namespace UI.Controls.Archive
       };
     }
 
+    /// <summary>
+    /// Применяет к кнопке стиль диалогового окна и базовые параметры отображения.
+    /// </summary>
+    /// <param name="button">Кнопка для стилизации.</param>
     private void ApplyDialogButtonStyle(Button button)
     {
       if (TryFindResource("ButtonStyleV10") is Style style)
@@ -3340,6 +4041,12 @@ namespace UI.Controls.Archive
       button.FontSize = 16;
     }
 
+    /// <summary>
+    /// Получает кисть темы по её ключу или возвращает резервную кисть.
+    /// </summary>
+    /// <param name="key">Ключ ресурса.</param>
+    /// <param name="fallbackColor">Резервный цвет.</param>
+    /// <returns>Экземпляр кисти.</returns>
     private Brush GetThemeBrush(string key, Color fallbackColor)
     {
       if (TryFindResource(key) is Brush brush)
@@ -3355,11 +4062,22 @@ namespace UI.Controls.Archive
       return new SolidColorBrush(fallbackColor);
     }
 
+    /// <summary>
+    /// Отображает уведомление об архиве.
+    /// </summary>
+    /// <param name="title">Заголовок уведомления.</param>
+    /// <param name="message">Сообщение уведомления.</param>
+    /// <param name="notificationType">Тип уведомления.</param>
     private void ShowArchiveNotification(string title, string message, NotificationType notificationType)
     {
       NotificationHostService.Instance.Show(title, message, notificationType);
     }
 
+    /// <summary>
+    /// Получает пользовательское сообщение об ошибке при создании архива.
+    /// </summary>
+    /// <param name="ex">Исключение.</param>
+    /// <returns>Пользовательское сообщение об ошибке.</returns>
     private static string GetUserFriendlyCreateArchiveErrorMessage(Exception ex)
     {
       if (ex is InvalidOperationException invalidOperation &&
@@ -3406,6 +4124,11 @@ namespace UI.Controls.Archive
       return "Не удалось создать архив.";
     }
 
+    /// <summary>
+    /// Преобразует исключение в понятное пользователю сообщение об ошибке при работе с архивами.
+    /// </summary>
+    /// <param name="ex">Исключение.</param>
+    /// <returns>Текст ошибки для отображения пользователю.</returns>
     private static string GetUserFriendlyArchiveErrorMessage(Exception ex)
     {
       if (ex is InvalidOperationException invalidOperation &&
@@ -3457,14 +4180,27 @@ namespace UI.Controls.Archive
       return "Не удалось выполнить операцию с архивом.";
     }
 
+    /// <summary>
+    /// Определяет тип операции буфера обмена для файлов архива.
+    /// </summary>
     private enum ArchiveClipboardOperation
     {
       Copy,
       Cut
     }
 
+    /// <summary>
+    /// Представляет элемент буфера обмена архива (источник, имя записи и операция).
+    /// </summary>
     private sealed class ArchiveClipboardEntry
     {
+      /// <summary>
+      /// Инициализирует новый экземпляр класса <see cref="ArchiveClipboardEntry"/>.
+      /// </summary>
+      /// <param name="sourceArchivePath">Путь к исходному архиву.</param>
+      /// <param name="entryName">Имя записи в архиве.</param>
+      /// <param name="displayName">Отображаемое имя записи.</param>
+      /// <param name="operation">Операция буфера обмена.</param>
       public ArchiveClipboardEntry(string sourceArchivePath, string entryName, string displayName, ArchiveClipboardOperation operation)
       {
         SourceArchivePath = sourceArchivePath;
@@ -3473,25 +4209,67 @@ namespace UI.Controls.Archive
         Operation = operation;
       }
 
+      /// <summary>
+      /// Путь к исходному архиву.
+      /// </summary>
       public string SourceArchivePath { get; }
+
+      /// <summary>
+      /// Имя записи внутри архива.
+      /// </summary>
       public string EntryName { get; }
+
+      /// <summary>
+      /// Отображаемое имя файла.
+      /// </summary>
       public string DisplayName { get; }
+
+      /// <summary>
+      /// Тип операции буфера обмена (копирование или вырезание).
+      /// </summary>
       public ArchiveClipboardOperation Operation { get; }
     }
 
+    /// <summary>
+    /// Содержит результат повторной проверки файла на ошибки.
+    /// </summary>
     private sealed class RecheckReviewFileResult
     {
+      /// <summary>
+      /// Путь к файлу, прошедшему повторную проверку.
+      /// </summary>
       public string FilePath { get; init; } = string.Empty;
+
+      /// <summary>
+      /// Количество найденных ошибок.
+      /// </summary>
       public int ErrorCount { get; init; }
     }
 
+    /// <summary>
+    /// Хранит состояние дерева архивов (раскрытые корневые узлы и архивы).
+    /// </summary>
     private sealed class TreeRefreshState
     {
+      /// <summary>
+      /// Признак того, что корневой узел архивов раскрыт.
+      /// </summary>
       public bool IsArchiveRootExpanded { get; set; }
+
+      /// <summary>
+      /// Признак того, что корневой узел архивов на проверке раскрыт.
+      /// </summary>
       public bool IsReviewRootExpanded { get; set; }
+
+      /// <summary>
+      /// Набор путей раскрытых архивов.
+      /// </summary>
       public HashSet<string> ExpandedArchivePaths { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+      /// <summary>
+      /// Набор путей раскрытых архивов на проверке.
+      /// </summary>
       public HashSet<string> ExpandedReviewArchivePaths { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
-
   }
 }
