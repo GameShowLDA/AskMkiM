@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using OpenFolderDialog = Microsoft.Win32.OpenFolderDialog;
 
 namespace MainWindowProgram.Windows
@@ -51,6 +52,11 @@ namespace MainWindowProgram.Windows
     /// <param name="e">Аргументы события.</param>
     private void SelectFilesButton_Click(object sender, RoutedEventArgs e)
     {
+      SelectFiles();
+    }
+
+    private void SelectFiles()
+    {
       var dialog = new OpenFileDialog
       {
         Title = "Выберите OPK-файлы",
@@ -82,6 +88,11 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
+    private void SelectedFilesListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      SelectFiles();
+    }
+
     /// <summary>
     /// Обрабатывает нажатие кнопки очистки списка выбранных файлов.
     /// </summary>
@@ -99,6 +110,17 @@ namespace MainWindowProgram.Windows
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Аргументы события.</param>
     private void SelectOutputDirectoryButton_Click(object sender, RoutedEventArgs e)
+    {
+      SelectOutputDirectory();
+    }
+
+    private void OutputDirectoryTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      SelectOutputDirectory();
+      e.Handled = true;
+    }
+
+    private void SelectOutputDirectory()
     {
       var dialog = new OpenFolderDialog
       {
@@ -120,11 +142,6 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
-    /// <summary>
-    /// Обрабатывает изменение текста в поле папки сохранения.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события.</param>
     private void OutputDirectoryTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
       UpdateState();
@@ -190,5 +207,19 @@ namespace MainWindowProgram.Windows
         ? dialog.ShowDialog(Owner) == true
         : dialog.ShowDialog() == true;
     }
+
+    private void HeaderBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.LeftButton == MouseButtonState.Pressed)
+      {
+        DragMove();
+      }
+    }
+
+    private void CloseButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      Close();
+    }
   }
 }
+

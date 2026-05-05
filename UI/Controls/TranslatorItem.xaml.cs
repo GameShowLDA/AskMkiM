@@ -5,11 +5,13 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using Ask.UI.Shared.Formatting;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
 using Ask.UI.Controls.ErrorList;
 using System.Windows.Media;
+using System.Windows.Threading;
 using UI.Components;
 using UI.Controls.TextEditorControl;
 using UI.Services;
@@ -49,35 +51,14 @@ namespace UI.Controls
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
+    private bool _userResizing = false;
+    private bool _resizeRefreshQueued = false;
 
     public List<BaseCommandModel> TranslationModels
     {
       get => translationModels;
       set
       {
-        translationModels = value;
-
-        ErrorClear();
-        ErrorListBoxVertical.ClearAll();
-
-        foreach (var model in value)
-        {
-          if (model.Errors.Count > 0)
-          {
-            ErrorListBoxVertical.AddErrors(model.Errors);
-            ErrorCount += model.Errors.Count;
-          }
-
-          if (model.Warnings.Count > 0)
-          {
-            ErrorListBoxVertical.AddWarnings(model.Warnings);
-            WarningCount += model.Warnings.Count;
-          }
-        }
-
-        Ask.Core.Services.EventCore.Adapters.MessageEventAdapter.RaiseInfoMessage(
-          $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
-		  
         ApplyTranslationModels(value, BuildIssuesSnapshot(value));
       }
     }
@@ -85,8 +66,10 @@ namespace UI.Controls
     public TranslatorItem()
     {
       InitializeComponent();
+      Loaded += TranslatorItem_Loaded;
 
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
+      ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
 
       // Новое: вкладка "Точки остановки"
       ErrorListBoxVertical.BreakpointItemDoubleClicked += ErrorListBoxVertical_BreakpointItemDoubleClicked;
@@ -97,6 +80,95 @@ namespace UI.Controls
       EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => BreakpointOn(e));
       EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => BreakpointOff(e));
+    }
+
+    private void TranslatorItem_Loaded(object sender, RoutedEventArgs e)
+    {
+      ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
+      ErrorListBoxVertical.RefreshLayoutFromHost();
+    }
+
+    private void ErrorListSplitter_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+    {
+      _userResizing = true;
+      ApplyErrorListBounds();
+      ErrorListRow.Height = new GridLength(ErrorListLayoutSettings.ClampHeight(ErrorListRow.ActualHeight));
+    }
+
+    private void ErrorListSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+    {
+      ClampErrorListRowDuringResize();
+      QueueErrorListResizeRefresh();
+    }
+
+    private void ErrorListSplitter_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+    {
+      _userResizing = false;
+
+      var height = ErrorListLayoutSettings.ClampHeight(ErrorListRow.ActualHeight);
+      ApplyErrorListHeight(height);
+      ErrorListLayoutSettings.SaveHeight(height);
+      ErrorListBoxVertical.RefreshLayoutFromHost();
+    }
+
+    private void QueueErrorListResizeRefresh()
+    {
+      if (_resizeRefreshQueued)
+        return;
+
+      _resizeRefreshQueued = true;
+      Dispatcher.BeginInvoke(
+        new Action(() =>
+        {
+          _resizeRefreshQueued = false;
+          ErrorListBoxVertical.RefreshLayoutFromHost();
+        }),
+        DispatcherPriority.Render);
+    }
+
+    private void ErrorListBoxVertical_DesiredHeightChanged(double height)
+    {
+      if (_userResizing)
+        return;
+
+      ApplyErrorListHeight(height);
+    }
+
+    private void ApplyErrorListHeight(double height)
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(height);
+
+      ApplyErrorListBounds();
+      ErrorListRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ClampErrorListRowDuringResize()
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(ErrorListRow.ActualHeight);
+      if (Math.Abs(ErrorListRow.ActualHeight - clampedHeight) < 0.5)
+        return;
+
+      ErrorListRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ApplyErrorListBounds()
+    {
+      var minHeight = ErrorListLayoutSettings.GetMinHeight();
+      var maxHeight = ErrorListLayoutSettings.GetMaxHeight();
+
+      ErrorListBoxVertical.MinHeight = minHeight;
+      ErrorListRow.MinHeight = minHeight;
+
+      if (double.IsInfinity(maxHeight))
+      {
+        ErrorListBoxVertical.ClearValue(MaxHeightProperty);
+        ErrorListRow.ClearValue(RowDefinition.MaxHeightProperty);
+      }
+      else
+      {
+        ErrorListBoxVertical.MaxHeight = maxHeight;
+        ErrorListRow.MaxHeight = maxHeight;
+      }
     }
 
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(IDisplayIssue item)
@@ -150,7 +222,7 @@ namespace UI.Controls
       UpdateRightEditorActions();
 
       MessageEventAdapter.RaiseInfoMessage(
-             $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+             $"Общее кол-во ошибок и предупреждений: {CountDisplayFormatter.Format(GeneralCount)}");
       UpdateRightEditorActions();
     }
 
@@ -253,6 +325,7 @@ namespace UI.Controls
 
     private bool SaveFileToArchive()
     {
+      var leftTextEditor = GetLeftBox()?.GetTextEditor();
       var rightBox = GetRightBox();
       var rightTextEditor = rightBox?.GetTextEditor();
       if (rightTextEditor?.TextEditorModel == null)
@@ -264,7 +337,19 @@ namespace UI.Controls
         return false;
       }
 
-      return _archiveSaveService.SaveFileToArchive(this, TranslationModels, rightTextEditor.TextEditorModel.FilePath);
+      var sourceText = leftTextEditor?.Text;
+      if (string.IsNullOrWhiteSpace(sourceText))
+      {
+        sourceText = rightTextEditor.Text;
+      }
+
+      var sourcePath = leftTextEditor?.TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(sourcePath))
+      {
+        sourcePath = rightTextEditor.TextEditorModel.FilePath;
+      }
+
+      return _archiveSaveService.SaveFileToArchive(this, sourceText ?? string.Empty, sourcePath);
     }
 
     private void UpdateRightEditorActions()

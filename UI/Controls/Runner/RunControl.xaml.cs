@@ -9,11 +9,14 @@ using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Shared.Formatting;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Threading;
 using UI.Controls.TextEditorControl;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
@@ -39,8 +42,7 @@ namespace UI.Controls.Runner
     private List<BaseCommandModel> ControlProgram = null;
 
     private bool _userResizing = false;
-
-    private const double MaxAutoHeight = 250.0;
+    private bool _resizeRefreshQueued = false;
 
     public int ErrorCount { get; private set; } = 0;
     public int TranslationErrorCount { get; private set; } = 0;
@@ -94,6 +96,7 @@ namespace UI.Controls.Runner
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
+      ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
       devicesStatus = new DevicesStatus();
 
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
@@ -125,6 +128,7 @@ namespace UI.Controls.Runner
         if (translatorItem != null)
         {
           var translatorEditor = translatorItem.Content as TranslatorEditor;
+          var canReturnToSource = CanReturnToSourceFile();
           if (newValue)
           {
             translatorEditor.BackButton.Visibility = Visibility.Collapsed;
@@ -133,7 +137,7 @@ namespace UI.Controls.Runner
 
           else
           {
-            translatorEditor.BackButton.Visibility = Visibility.Visible;
+            translatorEditor.BackButton.Visibility = canReturnToSource ? Visibility.Visible : Visibility.Collapsed;
             isLocked = false;
           }
         }
@@ -164,6 +168,8 @@ namespace UI.Controls.Runner
 
     private void RunControl_Loaded(object sender, RoutedEventArgs e)
     {
+      ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
+      ErrorListBoxVertical.RefreshLayoutFromHost();
       FocusMainContent();
     }
     private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -198,7 +204,7 @@ namespace UI.Controls.Runner
 
       if (ErrorCount > 0)
       {
-        MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+        MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {CountDisplayFormatter.Format(ErrorCount)}");
       }
     }
 
@@ -239,6 +245,9 @@ namespace UI.Controls.Runner
       rightEditor.SaveToDiskRequested -= RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SaveToDiskRequested += RightEditor_SaveToDiskRequestedAsync;
       rightEditor.SetArchiveButtonVisibility(ErrorCount == 0);
+      rightEditor.BackButton.Visibility = CanReturnToSourceFile() && !isLocked
+        ? Visibility.Visible
+        : Visibility.Collapsed;
       var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.FileName);
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = fileName;
@@ -351,6 +360,17 @@ namespace UI.Controls.Runner
       await manager.ExecuteAllAsync();
     }
 
+    private bool CanReturnToSourceFile()
+    {
+      if (string.IsNullOrWhiteSpace(OpkFilePath))
+      {
+        return true;
+      }
+
+      var extension = Path.GetExtension(OpkFilePath);
+      return !string.Equals(extension, ".opk", StringComparison.OrdinalIgnoreCase);
+    }
+
     private void AddError(ErrorItem errorItem)
     {
       Application.Current.Dispatcher?.Invoke(() =>
@@ -360,7 +380,7 @@ namespace UI.Controls.Runner
 
         if (ErrorCount > 0)
         {
-          MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+          MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {CountDisplayFormatter.Format(ErrorCount)}");
         }
       });
     }
@@ -407,7 +427,27 @@ namespace UI.Controls.Runner
         sourceFilePath = OpkFilePath;
       }
 
-      _archiveSaveService.SaveFileToArchive(this, this.TranslationModels, sourceFilePath);
+      var sourceText = TryReadSourceTextForArchive(sourceFilePath)
+        ?? rightEditor?.GetTextEditor()?.Text
+        ?? string.Empty;
+
+      _archiveSaveService.SaveFileToArchive(this, sourceText, sourceFilePath);
+    }
+
+    private static string? TryReadSourceTextForArchive(string? sourceFilePath)
+    {
+      if (string.IsNullOrWhiteSpace(sourceFilePath) || !File.Exists(sourceFilePath))
+      {
+        return null;
+      }
+
+      var ext = Path.GetExtension(sourceFilePath);
+      var encoding = string.Equals(ext, ".pkw", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(ext, ".opkw", StringComparison.OrdinalIgnoreCase)
+          ? new UTF8Encoding(false)
+          : Encoding.GetEncoding(866);
+
+      return File.ReadAllText(sourceFilePath, encoding);
     }
 
     private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
@@ -427,27 +467,84 @@ namespace UI.Controls.Runner
     {
       _userResizing = true;
 
-      BottomRow.Height = new GridLength(ErrorListBoxVertical.ActualHeight);
-      ErrorListBoxVertical.MaxHeight = double.PositiveInfinity;
+      ApplyErrorListBounds();
+      BottomRow.Height = new GridLength(ErrorListLayoutSettings.ClampHeight(ErrorListBoxVertical.ActualHeight));
+    }
+
+    private void BottomSplitter_OnDragDelta(object sender, DragDeltaEventArgs e)
+    {
+      ClampErrorListRowDuringResize();
+      QueueErrorListResizeRefresh();
     }
 
     private void BottomSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
       _userResizing = false;
+
+      var height = ErrorListLayoutSettings.ClampHeight(ErrorListBoxVertical.ActualHeight);
+      ApplyErrorListHeight(height);
+      ErrorListLayoutSettings.SaveHeight(height);
+      ErrorListBoxVertical.RefreshLayoutFromHost();
     }
 
-    private void ErrorListBoxVertical_OnSizeChanged(object sender, SizeChangedEventArgs e)
+    private void QueueErrorListResizeRefresh()
+    {
+      if (_resizeRefreshQueued)
+        return;
+
+      _resizeRefreshQueued = true;
+      Dispatcher.BeginInvoke(
+        new Action(() =>
+        {
+          _resizeRefreshQueued = false;
+          ErrorListBoxVertical.RefreshLayoutFromHost();
+        }),
+        DispatcherPriority.Render);
+    }
+
+    private void ErrorListBoxVertical_DesiredHeightChanged(double height)
     {
       if (_userResizing)
         return;
 
-      double desired = ErrorListBoxVertical.ActualHeight;
+      ApplyErrorListHeight(height);
+    }
 
-      if (desired > MaxAutoHeight)
-        desired = MaxAutoHeight;
+    private void ApplyErrorListHeight(double height)
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(height);
 
-      BottomRow.Height = GridLength.Auto;
-      ErrorListBoxVertical.MaxHeight = desired;
+      ApplyErrorListBounds();
+      BottomRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ClampErrorListRowDuringResize()
+    {
+      var clampedHeight = ErrorListLayoutSettings.ClampHeight(BottomRow.ActualHeight);
+      if (Math.Abs(BottomRow.ActualHeight - clampedHeight) < 0.5)
+        return;
+
+      BottomRow.Height = new GridLength(clampedHeight);
+    }
+
+    private void ApplyErrorListBounds()
+    {
+      var minHeight = ErrorListLayoutSettings.GetMinHeight();
+      var maxHeight = ErrorListLayoutSettings.GetMaxHeight();
+
+      ErrorListBoxVertical.MinHeight = minHeight;
+      BottomRow.MinHeight = minHeight;
+
+      if (double.IsInfinity(maxHeight))
+      {
+        ErrorListBoxVertical.ClearValue(MaxHeightProperty);
+        BottomRow.ClearValue(RowDefinition.MaxHeightProperty);
+      }
+      else
+      {
+        ErrorListBoxVertical.MaxHeight = maxHeight;
+        BottomRow.MaxHeight = maxHeight;
+      }
     }
 
     private bool CanSaveTranslatedFileToDisk()

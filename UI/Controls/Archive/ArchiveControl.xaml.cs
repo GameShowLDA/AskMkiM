@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using Ask.UI.Shared.Formatting;
 using Message;
 using MigraDoc.DocumentObjectModel.Tables;
 using SQLitePCL;
@@ -425,22 +426,6 @@ namespace UI.Controls.Archive
       await ShowArchiveInGridAsync(_lastSelectedArchivePath, clearEditor: true);
     }
 
-    private async Task RefreshArchiveViewsAfterMutationAsync(string archivePath)
-    {
-      if (string.IsNullOrWhiteSpace(archivePath))
-      {
-        return;
-      }
-
-      var normalizedArchivePath = Path.GetFullPath(archivePath);
-      InvalidateArchiveCaches(archivePath);
-
-      _lastSelectedArchivePath = normalizedArchivePath;
-      _lastSelectedEntryName = null;
-
-      await RefreshTreePreservingStateAsync(preservePanels: true);
-    }
-
     private void InvalidateArchiveCaches(string archivePath)
     {
       if (string.IsNullOrWhiteSpace(archivePath))
@@ -502,14 +487,14 @@ namespace UI.Controls.Archive
         return;
       }
 
-      rootNode.Children.Clear();
       var archivePaths = await Task.Run(() => ArchiveDirectoryService.GetArchivesInDirectory(_archivesFolderPath));
       if (archivePaths.Count == 0)
       {
-        rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Архивы не найдены."));
+        rootNode.Children.ReplaceRange([ArchiveTreeNode.CreatePlaceholder("Архивы не найдены.")]);
         return;
       }
 
+      var archiveNodes = new List<ArchiveTreeNode>();
       foreach (var archivePath in archivePaths)
       {
         var fullArchivePath = Path.GetFullPath(archivePath);
@@ -518,13 +503,16 @@ namespace UI.Controls.Archive
         var archiveNode = ArchiveTreeNode.CreateArchive(Path.GetFileName(archivePath), archivePath);
         archiveNode.IsExpanded = isExpanded;
         archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Разверните для загрузки файлов..."));
-        rootNode.Children.Add(archiveNode);
 
         if (isExpanded)
         {
           await LoadArchiveFilesIntoTreeAsync(archiveNode);
         }
+
+        archiveNodes.Add(archiveNode);
       }
+
+      rootNode.Children.ReplaceRange(archiveNodes);
     }
 
     private static IEnumerable<ArchiveTreeNode> GetExpandedNodes(ArchiveTreeNode rootNode, ArchiveTreeNodeKind expectedKind)
@@ -545,14 +533,14 @@ namespace UI.Controls.Archive
         return;
       }
 
-      rootNode.Children.Clear();
       var reviewDirectories = await Task.Run(() => ArchiveDirectoryService.GetReviewDirectories(_reviewArchivesFolderPath));
       if (reviewDirectories.Count == 0)
       {
-        rootNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Архивы на проверке не найдены."));
+        rootNode.Children.ReplaceRange([ArchiveTreeNode.CreatePlaceholder("Архивы на проверке не найдены.")]);
         return;
       }
 
+      var reviewNodes = new List<ArchiveTreeNode>();
       foreach (var reviewDirectory in reviewDirectories)
       {
         var fullReviewDirectory = Path.GetFullPath(reviewDirectory);
@@ -566,13 +554,16 @@ namespace UI.Controls.Archive
         var reviewNode = ArchiveTreeNode.CreateReviewArchive(Path.GetFileName(reviewDirectory), fullReviewDirectory, status, totalErrors);
         reviewNode.IsExpanded = isExpanded;
         reviewNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Разверните для загрузки файлов..."));
-        rootNode.Children.Add(reviewNode);
 
         if (isExpanded)
         {
           await LoadReviewFilesIntoTreeAsync(reviewNode);
         }
+
+        reviewNodes.Add(reviewNode);
       }
+
+      rootNode.Children.ReplaceRange(reviewNodes);
     }
 
     private async Task LoadArchiveFilesIntoTreeAsync(ArchiveTreeNode archiveNode)
@@ -582,25 +573,30 @@ namespace UI.Controls.Archive
         return;
       }
 
-      archiveNode.Children.Clear();
-
       try
       {
         var entries = await GetArchiveEntriesAsync(archiveNode.ArchivePath);
+        UpdateArchiveNodeState(archiveNode, entries);
         if (entries.Count == 0)
         {
-          archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Архив пуст."));
+          archiveNode.Children.ReplaceRange([ArchiveTreeNode.CreatePlaceholder("Архив пуст.")]);
           return;
         }
 
-        foreach (var entry in entries)
+        archiveNode.Children.ReplaceRange(entries.Select(entry =>
         {
-          archiveNode.Children.Add(ArchiveTreeNode.CreateFile(entry.EntryName, archiveNode.ArchivePath, entry.EntryName));
-        }
+          var status = entry.ErrorCount > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+          return ArchiveTreeNode.CreateFile(
+            entry.EntryName,
+            archiveNode.ArchivePath,
+            entry.EntryName,
+            status,
+            entry.ErrorCount);
+        }));
       }
       catch (Exception ex)
       {
-        archiveNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Ошибка чтения архива."));
+        archiveNode.Children.ReplaceRange([ArchiveTreeNode.CreatePlaceholder("Ошибка чтения архива.")]);
         ShowArchiveNotification("Архивы", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
@@ -612,74 +608,32 @@ namespace UI.Controls.Archive
         return;
       }
 
-      reviewNode.Children.Clear();
-
       try
       {
         var entries = await GetReviewEntriesAsync(reviewNode.ArchivePath);
+        UpdateArchiveNodeState(reviewNode, entries);
         if (entries.Count == 0)
         {
-          reviewNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Файлы на проверке не найдены."));
+          reviewNode.Children.ReplaceRange([ArchiveTreeNode.CreatePlaceholder("Файлы на проверке не найдены.")]);
           return;
         }
 
-        foreach (var entry in entries)
+        reviewNode.Children.ReplaceRange(entries.Select(entry =>
         {
           var status = entry.ErrorCount > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
-          reviewNode.Children.Add(ArchiveTreeNode.CreateReviewFile(
+          return ArchiveTreeNode.CreateReviewFile(
             entry.EntryName,
             reviewNode.ArchivePath,
             entry.EntryName,
             entry.SourceFilePath ?? string.Empty,
             status,
-            entry.ErrorCount));
-        }
+            entry.ErrorCount);
+        }));
       }
       catch (Exception ex)
       {
-        reviewNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Ошибка чтения файлов."));
+        reviewNode.Children.ReplaceRange([ArchiveTreeNode.CreatePlaceholder("Ошибка чтения файлов.")]);
         ShowArchiveNotification("Архивы на проверке", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
-      }
-    }
-
-    private async Task RefreshReviewArchiveNodeAsync(string reviewArchivePath)
-    {
-      var reviewRootNode = GetRootNode(ArchiveTreeNodeKind.ReviewRoot);
-      if (reviewRootNode == null || HasPlaceholder(reviewRootNode))
-      {
-        return;
-      }
-
-      var existingNodeIndex = reviewRootNode.Children
-        .Select((node, index) => new { node, index })
-        .FirstOrDefault(item =>
-          item.node.Kind == ArchiveTreeNodeKind.ReviewArchive &&
-          IsSameArchivePath(item.node.ArchivePath, reviewArchivePath));
-
-      if (existingNodeIndex == null)
-      {
-        return;
-      }
-
-      var entries = await GetReviewEntriesAsync(reviewArchivePath);
-      var totalErrors = entries.Sum(entry => entry.ErrorCount);
-      var status = entries.Count == 0
-        ? ArchiveNodeStatus.None
-        : totalErrors > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
-
-      var refreshedNode = ArchiveTreeNode.CreateReviewArchive(
-        Path.GetFileName(reviewArchivePath),
-        reviewArchivePath,
-        status,
-        totalErrors);
-
-      refreshedNode.IsExpanded = existingNodeIndex.node.IsExpanded;
-      refreshedNode.Children.Add(ArchiveTreeNode.CreatePlaceholder("Разверните для загрузки файлов..."));
-      reviewRootNode.Children[existingNodeIndex.index] = refreshedNode;
-
-      if (refreshedNode.IsExpanded)
-      {
-        await LoadReviewFilesIntoTreeAsync(refreshedNode);
       }
     }
 
@@ -694,6 +648,59 @@ namespace UI.Controls.Archive
       return reviewRootNode.Children.FirstOrDefault(node =>
         node.Kind == ArchiveTreeNodeKind.ReviewArchive &&
         IsSameArchivePath(node.ArchivePath, reviewArchivePath));
+    }
+
+    private ArchiveTreeNode? FindArchiveNode(string archivePath)
+    {
+      var archiveRootNode = GetRootNode(ArchiveTreeNodeKind.Root);
+      if (archiveRootNode == null)
+      {
+        return null;
+      }
+
+      return archiveRootNode.Children.FirstOrDefault(node =>
+        node.Kind == ArchiveTreeNodeKind.Archive &&
+        IsSameArchivePath(node.ArchivePath, archivePath));
+    }
+
+    private static void UpdateArchiveNodeState(ArchiveTreeNode node, IReadOnlyCollection<ArchiveEntryInfo> entries)
+    {
+      var totalErrors = entries.Sum(entry => entry.ErrorCount);
+      var status = entries.Count == 0
+        ? ArchiveNodeStatus.None
+        : totalErrors > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success;
+
+      node.UpdateReviewState(status, totalErrors);
+    }
+
+    private void UpdateArchiveTreeState(string archivePath, IReadOnlyList<ArchiveEntryInfo> entries)
+    {
+      var archiveNode = IsReviewArchivePath(archivePath)
+        ? FindReviewArchiveNode(archivePath)
+        : FindArchiveNode(archivePath);
+
+      if (archiveNode == null)
+      {
+        return;
+      }
+
+      UpdateArchiveNodeState(archiveNode, entries);
+
+      if (HasPlaceholder(archiveNode))
+      {
+        return;
+      }
+
+      foreach (var entry in entries)
+      {
+        var fileNode = archiveNode.Children.FirstOrDefault(node =>
+          (node.Kind == ArchiveTreeNodeKind.File || node.Kind == ArchiveTreeNodeKind.ReviewFile) &&
+          string.Equals(node.EntryName, entry.EntryName, StringComparison.OrdinalIgnoreCase));
+
+        fileNode?.UpdateReviewState(
+          entry.ErrorCount > 0 ? ArchiveNodeStatus.Error : ArchiveNodeStatus.Success,
+          entry.ErrorCount);
+      }
     }
 
     private ArchiveTreeNode? FindReviewFileNode(string reviewArchivePath, string entryName)
@@ -913,7 +920,7 @@ namespace UI.Controls.Archive
         creationDate,
         sourceFilePath: null,
         isReviewEntry: false,
-        errorCount: 0,
+        errorCount: ExtractErrorCount(text),
         fileType: FileType.OPKW);
     }
 
@@ -1032,6 +1039,7 @@ namespace UI.Controls.Archive
       {
         ".pk" => FileType.PK,
         ".pkw" => FileType.PKW,
+        ".opk" => FileType.OPK,
         ".opkw" => FileType.OPKW,
         _ => FileType.None,
       };
@@ -1361,6 +1369,7 @@ namespace UI.Controls.Archive
       CutArchiveFileButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
       PasteArchiveFileButton.Visibility = canManageArchiveFiles && hasClipboardEntry ? Visibility.Visible : Visibility.Collapsed;
       ConvertToPkwButton.Visibility = _lastSelectedIsReviewEntry ? Visibility.Collapsed : Visibility.Visible;
+      RunInExecutorButton.Visibility = canManageArchiveFiles ? Visibility.Visible : Visibility.Collapsed;
       RecheckReviewFileButton.Visibility = _lastSelectedIsReviewEntry && !string.IsNullOrWhiteSpace(_lastSelectedReviewFilePath)
         ? Visibility.Visible
         : Visibility.Collapsed;
@@ -1419,6 +1428,7 @@ namespace UI.Controls.Archive
 
       var integrityNotifications = await Task.Run(() => OpenArchiveInManager(archivePath));
       var entries = await GetArchiveEntriesAsync(archivePath);
+      UpdateArchiveTreeState(archivePath, entries);
 
       ApplyGridItemsSource(entries);
       var baseHint = entries.Count == 0
@@ -1485,6 +1495,7 @@ namespace UI.Controls.Archive
     private async Task ShowReviewArchiveInGridAsync(string reviewDirectoryPath, bool clearEditor)
     {
       var entries = await GetReviewEntriesAsync(reviewDirectoryPath);
+      UpdateArchiveTreeState(reviewDirectoryPath, entries);
 
       ApplyGridItemsSource(entries);
       FilesHintTextBlock.Text = entries.Count == 0
@@ -1559,18 +1570,6 @@ namespace UI.Controls.Archive
       }
 
       return textEditor;
-    }
-
-    private async Task LoadFileAsync(string archivePath, string entryName)
-    {
-      var text = await Task.Run(() =>
-          ReadArchiveEntryTextWithManager(archivePath, entryName));
-
-      FileContentTextBox.Text = text;
-      EditorHintTextBlock.Text = "Содержимое файла доступно только для чтения.";
-
-      UpdateActionButtons();
-      UpdateRightPanels(true, true);
     }
 
     private async Task SelectGridRow(object selectedRow)
@@ -2714,6 +2713,108 @@ namespace UI.Controls.Archive
       FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(_lastSelectedReviewFilePath);
     }
 
+    private async void RunInExecutorButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (_lastSelectedIsReviewEntry ||
+          string.IsNullOrWhiteSpace(_lastSelectedArchivePath) ||
+          string.IsNullOrWhiteSpace(_lastSelectedEntryName))
+      {
+        return;
+      }
+
+      try
+      {
+        var entryName = NormalizeEntryName(_lastSelectedEntryName);
+        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(_lastSelectedArchivePath, entryName));
+        if (string.IsNullOrWhiteSpace(text))
+        {
+          ShowArchiveNotification("Запуск в исполнителе", "Выбранный файл пустой.", NotificationType.Warning);
+          return;
+        }
+
+        var fileType = DeterminePreviewFileType(entryName);
+        var extension = GetExecutionExtension(fileType, entryName);
+        var tempFilePath = CreateExecutionTempFilePath(entryName, extension);
+        var encoding = (fileType == FileType.PKW || fileType == FileType.OPKW)
+          ? new UTF8Encoding(false)
+          : Encoding.GetEncoding(866);
+
+        await File.WriteAllTextAsync(tempFilePath, text, encoding);
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(tempFilePath);
+
+        await Task.Delay(120);
+        if (!TryExecuteRunCommand())
+        {
+          ShowArchiveNotification(
+            "Запуск в исполнителе",
+            "Файл открыт, но не удалось автоматически запустить исполнитель. Запустите через меню Выполнение -> Запуск.",
+            NotificationType.Warning);
+        }
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Запуск в исполнителе", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+    }
+
+    private static bool TryExecuteRunCommand()
+    {
+      var mainWindow = Application.Current?.MainWindow;
+      if (mainWindow?.DataContext == null)
+      {
+        return false;
+      }
+
+      var translationProp = mainWindow.DataContext.GetType().GetProperty("Translation");
+      var translationVm = translationProp?.GetValue(mainWindow.DataContext);
+      if (translationVm == null)
+      {
+        return false;
+      }
+
+      var runCommandProp = translationVm.GetType().GetProperty("RunCommand");
+      var runCommand = runCommandProp?.GetValue(translationVm) as ICommand;
+      if (runCommand == null || !runCommand.CanExecute(null))
+      {
+        return false;
+      }
+
+      runCommand.Execute(null);
+      return true;
+    }
+
+    private static string CreateExecutionTempFilePath(string entryName, string extension)
+    {
+      var tempRoot = Path.Combine(Path.GetTempPath(), "AskMkiM", "ArchiveExecution");
+      Directory.CreateDirectory(tempRoot);
+
+      var safeBase = Path.GetFileNameWithoutExtension(entryName);
+      if (string.IsNullOrWhiteSpace(safeBase))
+      {
+        safeBase = "archive_entry";
+      }
+
+      safeBase = string.Join("_", safeBase.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+      if (string.IsNullOrWhiteSpace(safeBase))
+      {
+        safeBase = "archive_entry";
+      }
+
+      return Path.Combine(tempRoot, $"{safeBase}_{Guid.NewGuid():N}{extension}");
+    }
+
+    private static string GetExecutionExtension(FileType fileType, string entryName)
+    {
+      return fileType switch
+      {
+        FileType.OPK => ".opk",
+        FileType.OPKW => ".opkw",
+        FileType.PK => ".pk",
+        FileType.PKW => ".pkw",
+        _ => string.IsNullOrWhiteSpace(Path.GetExtension(entryName)) ? ".opkw" : Path.GetExtension(entryName),
+      };
+    }
+
     private async void RecheckReviewArchiveButton_Click(object sender, RoutedEventArgs e)
     {
       if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !IsReviewArchivePath(_lastSelectedArchivePath))
@@ -2828,7 +2929,7 @@ namespace UI.Controls.Archive
         {
           ShowArchiveNotification(
             "Повторная проверка архива",
-            $"Архив проверен повторно. Найдено ошибок: {totalErrors} в {filesWithErrors} файлах.",
+            $"Архив проверен повторно. Найдено ошибок: {CountDisplayFormatter.Format(totalErrors)} в {CountDisplayFormatter.Format(filesWithErrors)} файлах.",
             NotificationType.Warning);
           return;
         }
@@ -2904,7 +3005,7 @@ namespace UI.Controls.Archive
         {
           ShowArchiveNotification(
             "Повторная проверка файла",
-            $"Файл проверен повторно. Найдено ошибок: {result.ErrorCount}.",
+            $"Файл проверен повторно. Найдено ошибок: {CountDisplayFormatter.Format(result.ErrorCount)}.",
             NotificationType.Warning);
           return;
         }

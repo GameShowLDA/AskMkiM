@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.UI.Shared.Formatting;
 using Message;
 using System.IO;
 using System.Text;
@@ -29,7 +30,9 @@ namespace MainWindowProgram.Services
   public class TranslationServices
   {
     private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
+    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
     private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
+    private readonly HashSet<string> _acceptedNormalizationSources = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Сервис для управления многооконным интерфейсом.
@@ -45,6 +48,8 @@ namespace MainWindowProgram.Services
     {
       ".pk",
       ".pkw",
+      ".opk",
+      ".opkw",
       ".acs",
     };
 
@@ -569,7 +574,7 @@ namespace MainWindowProgram.Services
         if (translator.ErrorCount > 0)
         {
           MessageBoxCustom.Show(
-              $"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.",
+              $"Возникли ошибки сборки ({CountDisplayFormatter.Format(translator.ErrorCount)} ошибок). Устраните ошибки и повторите попытку.",
               "Ошибка запуска программы контроля",
               image: MessageBoxImage.Error);
           return;
@@ -1014,8 +1019,30 @@ namespace MainWindowProgram.Services
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
       text = editor.Text ?? string.Empty;
+      text = NormalizeIndentationForEditor(text);
+
+      if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
+      {
+        editor.Text = text;
+      }
+
       if (!LatinLettersRegex.IsMatch(text))
       {
+        return true;
+      }
+
+      var normalizedText = _lookalikeNormalizer.Normalize(text);
+      if (string.Equals(normalizedText, text, StringComparison.Ordinal))
+      {
+        return true;
+      }
+
+      var normalizationSource = GetNormalizationSourceKey(editor);
+      if (!string.IsNullOrWhiteSpace(normalizationSource)
+          && _acceptedNormalizationSources.Contains(normalizationSource))
+      {
+        editor.Text = normalizedText;
+        text = normalizedText;
         return true;
       }
 
@@ -1027,12 +1054,13 @@ namespace MainWindowProgram.Services
 
       if (replaceDecision == MessageBoxResult.Yes)
       {
-        var normalizedText = _lookalikeNormalizer.Normalize(text);
-        if (!string.Equals(normalizedText, text, StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(normalizationSource))
         {
-          editor.Text = normalizedText;
-          text = normalizedText;
+          _acceptedNormalizationSources.Add(normalizationSource);
         }
+
+        editor.Text = normalizedText;
+        text = normalizedText;
 
         return true;
       }
@@ -1044,6 +1072,56 @@ namespace MainWindowProgram.Services
         MessageBoxImage.Warning);
 
       return true;
+    }
+
+    private static string NormalizeIndentationForEditor(string sourceText)
+    {
+      if (string.IsNullOrEmpty(sourceText))
+      {
+        return sourceText;
+      }
+
+      var lines = sourceText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+      bool insideCommand = false;
+
+      for (int i = 0; i < lines.Length; i++)
+      {
+        var line = lines[i].Replace('\t', ' ');
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          lines[i] = line;
+          continue;
+        }
+
+        var trimmedStart = line.TrimStart();
+        if (CommandHeaderRegex.IsMatch(line))
+        {
+          insideCommand = true;
+          lines[i] = trimmedStart;
+          continue;
+        }
+
+        if (!insideCommand || char.IsWhiteSpace(line[0]) || line.Trim() == "*")
+        {
+          lines[i] = line;
+          continue;
+        }
+
+        lines[i] = $" {line}";
+      }
+
+      return string.Join("\r\n", lines);
+    }
+
+    private static string GetNormalizationSourceKey(TextEditorUI editor)
+    {
+      var filePath = editor.TextEditorModel?.FilePath;
+      if (!string.IsNullOrWhiteSpace(filePath))
+      {
+        return Path.GetFullPath(filePath);
+      }
+
+      return editor.TextEditorModel?.FileName ?? string.Empty;
     }
   }
 }
