@@ -267,7 +267,10 @@ body {
 
 /* Search & Bookmarks */
 .search-container {
-    margin-bottom: 15px;
+    margin-bottom: 15px
+}
+
+.search-field {
     position: relative
 }
 
