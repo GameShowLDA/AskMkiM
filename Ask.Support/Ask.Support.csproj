@@ -33,6 +33,7 @@
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png" />
 	  <None Remove="AppHelp\favicon.ico" />
 	</ItemGroup>
 
@@ -1027,7 +1028,13 @@
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.6_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeEHTPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCPart.html">
