@@ -120,6 +120,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("GEN025")]
     Gen_InvalidReference,
 
+    /// <summary> В записи точек присутсвует недопустимая последовательность - ,*. </summary>
+    [ErrorCodeTag("GEN026")]
+    Gen_CommaStar,
+
     #endregion
 
     #region Режим УМ
