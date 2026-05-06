@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats.Apk;
 using Ask.Core.Services.FileFormats.Opk;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -133,11 +134,19 @@ namespace MainWindowProgram.Services
         {
           Filter = "Supported files (*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt)|*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt|PK/PKW files (*.pk;*.pkw)|*.pk;*.pkw|OPK/OPKW files (*.opk;*.opkw)|*.opk;*.opkw|Protocol files (*.lst;*.lstw)|*.lst;*.lstw|ACS files (*.acs)|*.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
           Title = "Выберите файл",
-          Multiselect = true
+          Multiselect = true,
+          InitialDirectory = LastDirectoryService.GetLastDirectory()
         };
 
         if (openFileDialog.ShowDialog() == true)
         {
+          string? directory =Path.GetDirectoryName(openFileDialog.FileName);
+
+          if (!string.IsNullOrWhiteSpace(directory))
+          {
+            LastDirectoryService.SaveLastDirectory(directory);
+          }
+
           foreach (string filePath in openFileDialog.FileNames)
           {
             OpenFileWithLegacyConversion(filePath);
