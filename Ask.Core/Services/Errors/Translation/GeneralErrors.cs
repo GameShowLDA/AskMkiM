@@ -272,6 +272,15 @@ namespace Ask.Core.Services.Errors.Translation
       Description = $"Обнаружены нераспознанные параметры: {unparsed}"
     };
 
+    public static ErrorItem CommaStarError(int lineNumber, string command, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Code = ErrorCode.Gen_CommaStar,
+      DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+      Description = $"Обнаружена недопустимая последовательность - \",*\""
+    };
+
     /// <summary>
     /// Возвращает ошибку, если после вопросительной ЦУ (с "?" или "??") отсутствует ожидаемая команда УП.
     /// </summary>

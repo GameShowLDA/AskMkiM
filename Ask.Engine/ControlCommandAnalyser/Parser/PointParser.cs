@@ -37,6 +37,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
 
       var chainModels = new List<GroupModel>();
+      if (expr.Contains(",*"))
+      {
+        errors.Add(GeneralErrors.CommaStarError(model.StartLineNumber, model.Mnemonic));
+        return (null, errors);
+      }
 
       expr = NormalizeExpression(expr);
       if (string.IsNullOrEmpty(expr))
