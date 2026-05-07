@@ -3890,121 +3890,21 @@ namespace Ask.UI.Features.Archive.Views
     /// <returns>Имя созданного архива или null, если операция отменена.</returns>
     private string? ShowArchiveCreationDialog()
     {
-
       var dialog = CreateDialogWindow("Создание архива");
-      var shell = CreateDialogShell();
-
-      var layout = new Grid
-      {
-        MinWidth = 420,
-      };
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-      layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-      var label = new TextBlock
-      {
-        Text = "Введите название нового архива:",
-        Margin = new Thickness(0, 0, 0, 4),
-        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
-        FontFamily = Application.Current?.Resources["WinstonMedium"] as FontFamily,
-        FontSize = 16,
-        TextWrapping = TextWrapping.Wrap,
-      };
-
-      var inputBorder = new Border
-      {
-        Background = GetThemeBrush("PrimarySolidColorBrush", Color.FromRgb(239, 239, 224)),
-        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromArgb(120, 0, 0, 0)),
-        BorderThickness = new Thickness(1),
-        CornerRadius = new CornerRadius(10),
-        Margin = new Thickness(0, 8, 0, 0),
-        Padding = new Thickness(10, 8, 10, 8),
-      };
-
-      var inputBox = new TextBox
-      {
-        MinWidth = 360,
-        Background = Brushes.Transparent,
-        BorderThickness = new Thickness(0),
-        Text = "new_archive",
-        Foreground = GetThemeBrush("ForegroundSolidColorBrush", Colors.Black),
-        FontSize = 15,
-      };
-      inputBorder.Child = inputBox;
-
-      var errorTextBlock = new TextBlock
-      {
-        Margin = new Thickness(0, 10, 0, 0),
-        Foreground = GetThemeBrush("RedColorSolidColorBrush", Color.FromRgb(178, 58, 72)),
-        FontSize = 14,
-        TextWrapping = TextWrapping.Wrap,
-        Visibility = Visibility.Collapsed,
-      };
-
-      var buttonsPanel = new StackPanel
-      {
-        Orientation = Orientation.Horizontal,
-        HorizontalAlignment = HorizontalAlignment.Right,
-        Margin = new Thickness(0, 14, 0, 0),
-      };
-
-      var createButton = new Button
-      {
-        Content = "Создать",
-        MinWidth = 140,
-        IsDefault = true,
-        Margin = new Thickness(0, 0, 8, 0),
-      };
-      ApplyDialogButtonStyle(createButton);
-
-      var cancelButton = new Button
-      {
-        Content = "Отмена",
-        MinWidth = 120,
-        IsCancel = true,
-      };
-      ApplyDialogButtonStyle(cancelButton);
-
-      buttonsPanel.Children.Add(createButton);
-      buttonsPanel.Children.Add(cancelButton);
-
-      Grid.SetRow(label, 0);
-      Grid.SetRow(inputBorder, 1);
-      Grid.SetRow(errorTextBlock, 2);
-      Grid.SetRow(buttonsPanel, 3);
-      layout.Children.Add(label);
-      layout.Children.Add(inputBorder);
-      layout.Children.Add(errorTextBlock);
-      layout.Children.Add(buttonsPanel);
-      shell.Child = layout;
-      dialog.Content = shell;
-
-      void ClearError()
-      {
-        errorTextBlock.Text = string.Empty;
-        errorTextBlock.Visibility = Visibility.Collapsed;
-      }
-
-      void ShowValidationError(Exception ex)
-      {
-        errorTextBlock.Text = GetUserFriendlyCreateArchiveErrorMessage(ex);
-        errorTextBlock.Visibility = Visibility.Visible;
-        inputBox.Focus();
-        inputBox.SelectAll();
-      }
+      var content = new ArchiveNameInputControl();
+      content.Initialize(this, "new_archive", isFirstArchive: false);
+      dialog.Content = content;
 
       void TryCreateArchive()
       {
-        ClearError();
+        content.ClearError();
 
         try
         {
           string createdArchivePath;
           lock (_archiveManagerSync)
           {
-            createdArchivePath = _archiveManager.CreateArchive(inputBox.Text);
+            createdArchivePath = _archiveManager.CreateArchive(content.ArchiveName ?? string.Empty);
           }
 
           dialog.Tag = createdArchivePath;
@@ -4012,17 +3912,12 @@ namespace Ask.UI.Features.Archive.Views
         }
         catch (Exception ex)
         {
-          ShowValidationError(ex);
+          content.ShowError(GetUserFriendlyCreateArchiveErrorMessage(ex));
         }
       }
 
-      createButton.Click += (_, _) => TryCreateArchive();
-      inputBox.TextChanged += (_, _) => ClearError();
-      dialog.Loaded += (_, _) =>
-      {
-        inputBox.Focus();
-        inputBox.SelectAll();
-      };
+      content.ConfirmRequested += (_, _) => TryCreateArchive();
+      content.TextChanged += (_, _) => content.ClearError();
 
       return dialog.ShowDialog() == true
         ? dialog.Tag as string
@@ -4157,59 +4052,6 @@ namespace Ask.UI.Features.Archive.Views
         AllowsTransparency = true,
         Background = Brushes.Transparent,
       };
-    }
-
-    /// <summary>
-    /// Создаёт оболочку для диалогового окна.
-    /// </summary>
-    /// <returns>Экземпляр границы.</returns>
-    private Border CreateDialogShell()
-    {
-      return new Border
-      {
-        Background = GetThemeBrush("IsCheckedColorSolidColorBrush", Color.FromRgb(230, 232, 236)),
-        BorderBrush = GetThemeBrush("ForegroundSolidColorBrush60", Color.FromRgb(120, 130, 140)),
-        BorderThickness = new Thickness(1),
-        CornerRadius = new CornerRadius(20),
-        Padding = new Thickness(20),
-      };
-    }
-
-    /// <summary>
-    /// Применяет к кнопке стиль диалогового окна и базовые параметры отображения.
-    /// </summary>
-    /// <param name="button">Кнопка для стилизации.</param>
-    private void ApplyDialogButtonStyle(Button button)
-    {
-      if (TryFindResource("ButtonStyleV10") is Style style)
-      {
-        button.Style = style;
-      }
-
-      button.Height = 44;
-      button.Padding = new Thickness(14, 6, 14, 6);
-      button.FontSize = 16;
-    }
-
-    /// <summary>
-    /// Получает кисть темы по её ключу или возвращает резервную кисть.
-    /// </summary>
-    /// <param name="key">Ключ ресурса.</param>
-    /// <param name="fallbackColor">Резервный цвет.</param>
-    /// <returns>Экземпляр кисти.</returns>
-    private Brush GetThemeBrush(string key, Color fallbackColor)
-    {
-      if (TryFindResource(key) is Brush brush)
-      {
-        return brush;
-      }
-
-      if (Application.Current?.Resources[key] is Brush appBrush)
-      {
-        return appBrush;
-      }
-
-      return new SolidColorBrush(fallbackColor);
     }
 
     /// <summary>
