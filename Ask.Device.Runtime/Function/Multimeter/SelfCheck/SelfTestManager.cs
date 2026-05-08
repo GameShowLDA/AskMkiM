@@ -23,18 +23,6 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
     {
       return typeof(MultimeterTypeConnector);
     }
-
-    private double _voltageDcRangeFrom = -0.02;
-    private double _voltageDcRangeTo = 0.02;
-
-    private double _voltageAcRangeFrom = -0.02;
-    private double _voltageAcRangeTo = 0.02;
-
-    private double _resistanceRangeFrom = 0;
-    private double _resistanceRangeTo = 0.02;
-
-    private double _capacityRangeFrom = 0.97;
-    private double _capacityRangeTo = 1.03;
     public async Task StartSelfCheck(CancellationToken cancellationToken, Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IFastMeter meter = null)
     {
       await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage());
@@ -78,20 +66,20 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
 
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(rangeFrom: _voltageDcRangeFrom, rangeTo: _voltageDcRangeTo);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(IdealVoltage);
       cancellationToken.ThrowIfCancellationRequested();
 
-      await SelfTestHelper.IsCorrectRangeAsync(_voltageDcRangeFrom, _voltageDcRangeTo, result, "напряжения", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealVoltage, result, "напряжения", userMessageService);
 
       await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
 
       cancellationToken.ThrowIfCancellationRequested();
 
-      result = await meter.AcVoltageManager.MeasureACVoltageAsync(rangeFrom: _voltageAcRangeFrom, rangeTo: _voltageAcRangeTo);
+      result = await meter.AcVoltageManager.MeasureACVoltageAsync(IdealVoltage);
       cancellationToken.ThrowIfCancellationRequested();
 
-      await SelfTestHelper.IsCorrectRangeAsync(_voltageAcRangeFrom, _voltageAcRangeTo, result, "напряжения", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealResistance, result, "напряжения", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
@@ -101,8 +89,8 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB2, userMessageService);
 
       await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
-      double result = await meter.ResistanceManager.MeasureResistanceAsync(rangeFrom: _resistanceRangeFrom, rangeTo: _resistanceRangeTo);
-      await SelfTestHelper.IsCorrectRangeAsync(_resistanceRangeFrom, _resistanceRangeTo, result, "сопротивления", userMessageService);
+      double result = await meter.ResistanceManager.MeasureResistanceAsync(rangeFrom: IdealResistance, rangeTo: IdealResistance);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealResistance, result, "сопротивления", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB2, userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
@@ -116,11 +104,11 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       cancellationToken.ThrowIfCancellationRequested();
-      double result = await meter.CapacitanceManager.MeasureCapacitanceAsync(rangeFrom: _capacityRangeFrom, rangeTo: _capacityRangeTo);
+      double result = await meter.CapacitanceManager.MeasureCapacitanceAsync(IdealCapacity);
 
       cancellationToken.ThrowIfCancellationRequested();
 
-      await SelfTestHelper.IsCorrectRangeAsync(_capacityRangeFrom, _capacityRangeTo, result, "емкости", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealCapacity, result, "емкости", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB4, userMessageService);
     }
