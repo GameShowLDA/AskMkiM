@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// - ',': перечисление токенов (точка или диапазон).
     /// - Диапазоны: 87-90, 1.2.7-10, 1.2.7-1.2.10, Х51/51-60.
     /// - Спец-кейс: токен, заканчивающийся '-' и следующий сегмент после '*' — конец диапазона
-    ///   (пример 'Х51/51-*60') → каждая раскрытая точка = отдельная цепь.
+    ///   (пример 'Х51/51-*60') > каждая раскрытая точка = отдельная цепь.
     /// - Для КС: одиночная точка (один исходный токен БЕЗ '-') в части запрещена.
     /// </summary>
     public static (SchemeModel?, List<ErrorItem>) ParsePoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
@@ -37,6 +37,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
 
       var chainModels = new List<GroupModel>();
+      if (expr.Contains(",*"))
+      {
+        errors.Add(GeneralErrors.CommaStarError(model.StartLineNumber, model.Mnemonic));
+        return (null, errors);
+      }
 
       expr = NormalizeExpression(expr);
       if (string.IsNullOrEmpty(expr))
@@ -61,9 +66,41 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         chainModels.AddRange(groups);
       }
 
-      ApplyAlgorithmWarnings(chainModels, model);
-
       return (new SchemeModel(chainModels), errors);
+    }
+
+    /// <summary>
+    /// Разбор списка исключения ССИРТ из конструкции ~(...) в точки АСК.
+    /// </summary>
+    public static (List<PointModel> Points, List<ErrorItem> Errors) ParseDeletionPoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
+    {
+      var errors = new List<ErrorItem>();
+      var points = new List<PointModel>();
+
+      if (!HasPointsMap(rmCommandModel))
+      {
+        errors.Add(GeneralErrors.MissingPointsMap(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+        return (points, errors);
+      }
+
+      expr = Regex.Replace(expr ?? string.Empty, @"\s+", "");
+      if (string.IsNullOrEmpty(expr))
+      {
+        errors.Add(GeneralErrors.EmptyPointsBody(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+        return (points, errors);
+      }
+
+      var expanded = ExpandDeletionTokens(expr, errors);
+      if (errors.Count > 0)
+        return (points, errors);
+
+      var (pointErrors, pointModels) = CommandPostAnalyzer.GetPointsModel(expanded, model, rmCommandModel);
+      errors.AddRange(pointErrors);
+
+      if (pointModels != null)
+        points.AddRange(pointModels);
+
+      return (points, errors);
     }
 
     /// <summary>
@@ -141,45 +178,105 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     private static List<GroupModel> ParseChainParts(string segment, BaseCommandModel model, RmCommandModel rm, List<ErrorItem> errors)
     {
       var result = new List<GroupModel>();
-      var chainParts = new List<ChainModel>();
 
       var parts = SplitParts(segment);
 
       foreach (var part in parts)
       {
-        var (connected, disconnected) = ExpandTokens(part, errors);
-
-        ValidateSinglePoint(model, connected, part, errors);
-
-        var (chainErrors, chain) = CreateChain(connected, model, rm);
-        if (chainErrors.Count > 0)
-        {
-          errors.AddRange(chainErrors);
-        }
-        else
-        {
-          chainParts.Add(chain);
-        }
-
-        foreach (var d in disconnected)
-        {
-          var (dErrors, group) = CreateSinglePointGroup(d, model, rm);
-          if (dErrors.Count > 0)
-          {
-            errors.AddRange(dErrors);
-            continue;
-          }
-          else
-          {
-            result.Add(group);
-          }
-        }
-
-        result.Add(new GroupModel(chainParts));
+        ProcessPartWithCrossRanges(
+            part,
+            model,
+            rm,
+            result,
+            errors);
       }
 
       AssignPointTypes(result, rm);
+
       return result;
+    }
+
+    private static void ProcessPartWithCrossRanges(string part, BaseCommandModel model, RmCommandModel rm, List<GroupModel> result, List<ErrorItem> errors)
+    {
+      {
+        var rawTokens = SplitTokens(part);
+
+        var currentChain = new List<string>();
+
+        foreach (var tok in rawTokens)
+        {
+          if (tok.Contains("-*"))
+          {
+            ValidateExpandedRangeNotation(tok, errors);
+
+            var expanded = ExpandRangeToken(tok, errors, model);
+
+            if (expanded.Count == 0)
+              continue;
+
+            // первый элемент остаётся в текущей цепи
+            currentChain.Add(expanded.First());
+
+            // фиксируем текущую цепь
+            ValidateSinglePoint(model, currentChain, part, errors);
+
+            var (firstErrors, firstChain) =
+                CreateChain(currentChain, model, rm);
+
+            if (firstErrors.Count > 0)
+            {
+              errors.AddRange(firstErrors);
+            }
+            else
+            {
+              result.Add(new GroupModel(
+                  new List<ChainModel> { firstChain }));
+            }
+
+            // промежуточные — отдельные группы
+            for (int i = 1; i < expanded.Count - 1; i++)
+            {
+              var (midErrors, midGroup) =
+                  CreateSinglePointGroup(expanded[i], model, rm);
+
+              if (midErrors.Count > 0)
+              {
+                errors.AddRange(midErrors);
+              }
+              else
+              {
+                result.Add(midGroup);
+              }
+            }
+
+            // последняя точка начинает новую цепь
+            currentChain = new List<string> { expanded.Last() };
+          }
+          else
+          {
+            currentChain.Add(tok);
+          }
+        }
+
+        // финальная цепь
+        if (currentChain.Count > 0)
+        {
+          ValidateSinglePoint(model, currentChain, part, errors);
+
+          var (chainErrors, chain) =
+              CreateChain(currentChain, model, rm);
+
+          if (chainErrors.Count > 0)
+          {
+            errors.AddRange(chainErrors);
+          }
+          else
+          {
+            result.Add(new GroupModel(
+                new List<ChainModel> { chain }));
+          }
+        }
+      }
     }
 
     private static List<string> SplitParts(string seg) =>
@@ -273,10 +370,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
     /// <summary>
     /// Раскрывает токены части цепи:
-    /// - обычные диапазоны → connected
-    /// - диапазоны с "-*" → disconnected (отдельные группы)
+    /// - обычные диапазоны > connected
+    /// - диапазоны с "-*" > disconnected (отдельные группы)
     /// </summary>
-    private static (List<string> Connected, List<string> Disconnected) ExpandTokens(string part, List<ErrorItem> errors)
+    private static (List<string> Connected, List<string> Disconnected) ExpandTokens(string part, List<ErrorItem> errors, BaseCommandModel model)
     {
       var connected = new List<string>();
       var disconnected = new List<string>();
@@ -290,11 +387,27 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       {
         if (tok.Contains("-*"))
         {
-          disconnected.AddRange(ExpandRangeToken(tok, errors));
+          //ValidateExpandedRangeNotation(tok, errors);
+
+          //if (errors.Count == 0)
+          //{
+          //  //disconnected.AddRange(ExpandRangeToken(tok, errors, model));
+          //  var expanded = ExpandRangeToken(tok, errors, model);
+
+          //  if (expanded.Count > 0)
+          //  {
+          //    // Все кроме последней — отдельные группы
+          //    disconnected.AddRange(expanded);
+
+          //    // Последняя продолжает текущую цепь
+          //    connected.Add(expanded.Last());
+          //  }
+          //}
+          disconnected.AddRange(ExpandRangeToken(tok, errors, model));
         }
         else if (tok.Contains('-'))
         {
-          connected.AddRange(ExpandRangeToken(tok, errors));
+          connected.AddRange(ExpandRangeToken(tok, errors, model));
         }
         else
         {
@@ -305,21 +418,87 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return (connected, disconnected);
     }
 
+    private static void ValidateExpandedRangeNotation(string token, List<ErrorItem> errors)
+    {
+      var normalized = NormalizeRangeToken(token);
+
+      if (!TrySplitRange(normalized, out var left, out var right))
+        return;
+
+      if (!TrySplitPrefixAndNumber(left, out var leftPrefix, out _))
+        return;
+
+      if (!TrySplitPrefixAndNumber(right, out var rightPrefix, out _))
+        return;
+
+      if (!string.IsNullOrEmpty(leftPrefix) &&
+          string.Equals(leftPrefix, rightPrefix, StringComparison.OrdinalIgnoreCase))
+      {
+        errors.Add(new ErrorItem
+        {
+          Description =
+            $"Недопустимая запись диапазона: {token}. " +
+            $"Используйте сокращённую форму: {left}-*{right.Replace(rightPrefix, "")}",
+          Code = ErrorCode.Gen_InvalidRange
+        });
+      }
+    }
+
+    private static List<string> ExpandDeletionTokens(string expr, List<ErrorItem> errors)
+    {
+      var result = new List<string>();
+
+      var rawTokens = expr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                          .Select(CleanToken)
+                          .Where(t => !string.IsNullOrEmpty(t))
+                          .ToList();
+
+      foreach (var tok in rawTokens)
+      {
+        if (tok.Contains("-*"))
+        {
+          AddRangeError(errors, $"В списке исключения ССИРТ недопустим разделитель разобщения: {tok}.");
+        }
+        else if (tok.Contains('-'))
+        {
+          result.AddRange(ExpandRangeToken(tok, errors));
+        }
+        else
+        {
+          result.Add(tok);
+        }
+      }
+
+      return result;
+    }
+
     /// <summary>
     /// Раскрывает диапазон точек в список значений.
     /// </summary>
-    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors)
+    private static List<string> ExpandRangeToken(string token, List<ErrorItem> errors, BaseCommandModel model = null)
     {
       var result = new List<string>();
 
       token = NormalizeRangeToken(token);
 
+      if (TryExtractContactSuffix(token, out var rangePart, out var suffix))
+      {
+        var baseRange = ExpandRangeToken(rangePart, errors, model);
+
+        return baseRange
+            .Select(x => x + suffix)
+            .ToList();
+      }
+
       if (!TrySplitRange(token, out var left, out var right))
         return result;
 
       if (!TryParseRangeBounds(token, left, right, errors,
-          out string prefix, out int start, out int end))
+          out string prefix, out int start, out int end, out bool wasCompleted))
         return result;
+
+      if (wasCompleted && model != null)
+        AddCompletedRangeWarning(model, token);
 
       if (!ValidateRangeBounds(token, start, end, errors))
         return result;
@@ -356,10 +535,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <summary>
     /// Парсит начало и конец диапазона.
     /// </summary>
-    private static bool TryParseRangeBounds(string token, string left, string right, List<ErrorItem> errors, out string prefix, out int start, out int end)
+    private static bool TryParseRangeBounds(string token, string left, string right, List<ErrorItem> errors, out string prefix, out int start, out int end, out bool wasCompleted)
     {
       prefix = "";
       start = end = 0;
+      wasCompleted = false;
 
       if (!TrySplitPrefixAndNumber(left, out prefix, out start))
       {
@@ -369,12 +549,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (TrySplitPrefixAndNumber(right, out string rightPrefix, out int rightNum))
       {
-        if (!string.IsNullOrEmpty(rightPrefix) && rightPrefix != prefix)
+        if (!AreRangePrefixesCompatible(prefix, rightPrefix))
         {
           AddRangeError(errors,
             $"Несовместимые префиксы в диапазоне: {token} (\"{prefix}\" vs \"{rightPrefix}\").");
           return false;
         }
+        wasCompleted = IsRangeCompletion(left, right, prefix, rightPrefix);
         end = rightNum;
       }
       else if (!int.TryParse(right, out end))
@@ -386,17 +567,90 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return true;
     }
 
+    private static bool IsRangeCompletion(string left, string right, string leftPrefix, string rightPrefix)
+    {
+      if (!string.IsNullOrEmpty(rightPrefix))
+        return false;
+
+      if (!Regex.IsMatch(right, @"^\d+$"))
+        return false;
+
+      var leftTailPrefix = GetTailPrefix(leftPrefix);
+      return !string.IsNullOrEmpty(leftTailPrefix)
+          && Regex.IsMatch(left, @"[/\.][^/\.\d]+\d+$");
+    }
+
+    private static void AddCompletedRangeWarning(BaseCommandModel model, string token)
+    {
+      model.Warnings.Add(new WarningItem
+      {
+        SourceLineNumber = model.StartLineNumber,
+        Command = $"{model.CommandNumber} {model.Mnemonic}",
+        Description = $"Запись диапазона ({token}) была дополнена. Убедитесь в правильности записи.",
+        Code = WarningCode.Unknown
+      });
+    }
+    private static bool AreRangePrefixesCompatible(string leftPrefix, string rightPrefix)
+    {
+      if (string.IsNullOrEmpty(rightPrefix))
+        return true;
+
+      if (string.Equals(leftPrefix, rightPrefix, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+      var leftTailPrefix = GetTailPrefix(leftPrefix);
+      return !string.IsNullOrEmpty(leftTailPrefix)
+          && string.Equals(leftTailPrefix, rightPrefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetTailPrefix(string prefix)
+    {
+      int dot = prefix.LastIndexOf('.');
+      int slash = prefix.LastIndexOf('/');
+      int sep = Math.Max(dot, slash);
+
+      return sep >= 0 && sep + 1 < prefix.Length
+          ? prefix.Substring(sep + 1)
+          : string.Empty;
+    }
+
+    private static bool TryExtractContactSuffix(string token, out string rangePart, out string suffix)
+    {
+      rangePart = token;
+      suffix = "";
+
+      int slashIndex = token.LastIndexOf('/');
+
+      if (slashIndex < 0)
+        return false;
+
+      var afterSlash = token.Substring(slashIndex + 1);
+
+      if (string.IsNullOrWhiteSpace(afterSlash))
+        return false;
+
+      var leftPart = token.Substring(0, slashIndex);
+
+      if (!leftPart.Contains('-'))
+        return false;
+
+      rangePart = leftPart;
+      suffix = token.Substring(slashIndex); // включая "/"
+
+      return true;
+    }
+
     /// <summary>
     /// Проверяет корректность диапазона.
     /// </summary>
     private static bool ValidateRangeBounds(string token, int start, int end, List<ErrorItem> errors)
     {
-      if (end < start)
-      {
-        AddRangeError(errors,
-          $"Неверный диапазон точек (конец меньше начала): {token}.");
-        return false;
-      }
+      //if (end < start)
+      //{
+      //  AddRangeError(errors,
+      //    $"Неверный диапазон точек (конец меньше начала): {token}.");
+      //  return false;
+      //}
 
       return true;
     }
@@ -406,9 +660,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     private static List<string> GenerateRangeValues(string prefix, int start, int end)
     {
-      var result = new List<string>(end - start + 1);
+      var result = new List<string>();
 
-      for (int n = start; n <= end; n++)
+      int step = start <= end ? 1 : -1;
+
+      for (int n = start; step > 0 ? n <= end : n >= end; n += step)
         result.Add($"{prefix}{n}");
 
       return result;
@@ -438,14 +694,35 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (sep >= 0)
       {
-        prefix = token.Substring(0, sep + 1);
+        var basePrefix = token.Substring(0, sep + 1);
         var tail = token.Substring(sep + 1);
-        return int.TryParse(tail, out number);
+
+        if (int.TryParse(tail, out number))
+        {
+          prefix = basePrefix;
+          return true;
+        }
+
+        var tailMatch = Regex.Match(tail, @"^(.*?)(\d+)$");
+        if (tailMatch.Success)
+        {
+          prefix = basePrefix + tailMatch.Groups[1].Value;
+          number = int.Parse(tailMatch.Groups[2].Value);
+          return true;
+        }
+
+        return false;
       }
-      else
+
+      var match = Regex.Match(token, @"^(.*?)(\d+)$");
+      if (match.Success)
       {
-        return int.TryParse(token, out number);
+        prefix = match.Groups[1].Value;
+        number = int.Parse(match.Groups[2].Value);
+        return true;
       }
+
+      return int.TryParse(token, out number);
     }
 
     private static string CleanToken(string t)
@@ -677,41 +954,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return result;
     }
 
-    /// <summary>
-    /// Применяет бизнес-правило:
-    /// если найдено меньше двух разомкнутых цепей для PR/SI/PI,
-    /// автоматически добавляется алгоритм ЗР.
-    /// </summary>
-    private static void ApplyAlgorithmWarnings(List<GroupModel> chainModels, BaseCommandModel model)
-    {
-      if (chainModels == null || chainModels.Count == 0)
-        return;
-
-      int disconnectedCount = 0;
-      var scheme = new SchemeModel(chainModels);
-
-      foreach (var group in chainModels)
-      {
-        var points = scheme.GetPointsDisconnected(group);
-        if (points != null)
-          disconnectedCount++;
-      }
-
-      bool isMeasurementType =
-         model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName ||
-         model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName ||
-         model.Mnemonic == EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
-
-      if (disconnectedCount < 2 &&
-          disconnectedCount != 0 &&
-          isMeasurementType &&
-          !model.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
-      {
-        model.AlgorithmKey.Add(AlgorithmKey.ЗР.ToString());
-        model.Warnings.Add(
-          GeneralWarnings.KeyZR(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}")
-        );
-      }
-    }
   }
 }

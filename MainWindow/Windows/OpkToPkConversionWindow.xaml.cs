@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using OpenFolderDialog = Microsoft.Win32.OpenFolderDialog;
 
 namespace MainWindowProgram.Windows
@@ -12,6 +13,8 @@ namespace MainWindowProgram.Windows
   /// </summary>
   public partial class OpkToPkConversionWindow : Window
   {
+    private readonly string _targetFormatName;
+
     /// <summary>
     /// Хранит список выбранных пользователем OPK-файлов.
     /// </summary>
@@ -20,9 +23,14 @@ namespace MainWindowProgram.Windows
     /// <summary>
     /// Инициализирует новый экземпляр окна конвертации OPK в PK.
     /// </summary>
-    public OpkToPkConversionWindow()
+    public OpkToPkConversionWindow(string targetFormatName = "PK")
     {
+      _targetFormatName = string.IsNullOrWhiteSpace(targetFormatName)
+        ? "PK"
+        : targetFormatName.Trim().ToUpperInvariant();
+
       InitializeComponent();
+      ApplyTargetFormatText();
       SelectedFilesListBox.ItemsSource = _selectedFiles;
       UpdateState();
     }
@@ -44,6 +52,11 @@ namespace MainWindowProgram.Windows
     /// <param name="e">Аргументы события.</param>
     private void SelectFilesButton_Click(object sender, RoutedEventArgs e)
     {
+      SelectFiles();
+    }
+
+    private void SelectFiles()
+    {
       var dialog = new OpenFileDialog
       {
         Title = "Выберите OPK-файлы",
@@ -51,6 +64,8 @@ namespace MainWindowProgram.Windows
         Multiselect = true,
         CheckFileExists = true,
       };
+
+      dialog.Title = "Выберите OPK-файлы";
 
       if (!ShowDialog(dialog))
       {
@@ -73,6 +88,11 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
+    private void SelectedFilesListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      SelectFiles();
+    }
+
     /// <summary>
     /// Обрабатывает нажатие кнопки очистки списка выбранных файлов.
     /// </summary>
@@ -91,6 +111,17 @@ namespace MainWindowProgram.Windows
     /// <param name="e">Аргументы события.</param>
     private void SelectOutputDirectoryButton_Click(object sender, RoutedEventArgs e)
     {
+      SelectOutputDirectory();
+    }
+
+    private void OutputDirectoryTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+      SelectOutputDirectory();
+      e.Handled = true;
+    }
+
+    private void SelectOutputDirectory()
+    {
       var dialog = new OpenFolderDialog
       {
         Title = "Выберите папку для сохранения PK-файлов",
@@ -99,6 +130,8 @@ namespace MainWindowProgram.Windows
           ? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
           : OutputDirectory,
       };
+
+      dialog.Title = $"Выберите папку для сохранения {_targetFormatName}-файлов";
 
       if (!ShowDialog(dialog))
       {
@@ -109,11 +142,6 @@ namespace MainWindowProgram.Windows
       UpdateState();
     }
 
-    /// <summary>
-    /// Обрабатывает изменение текста в поле папки сохранения.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события.</param>
     private void OutputDirectoryTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
       UpdateState();
@@ -128,13 +156,13 @@ namespace MainWindowProgram.Windows
     {
       if (_selectedFiles.Count == 0)
       {
-        MessageBoxCustom.Show("Выберите хотя бы один файл OPK.", "Конвертация OPK в PK", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Выберите хотя бы один файл OPK.", GetDialogTitle(), MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
       if (string.IsNullOrWhiteSpace(OutputDirectory))
       {
-        MessageBoxCustom.Show("Укажите папку для сохранения результата.", "Конвертация OPK в PK", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Укажите папку для сохранения результата.", GetDialogTitle(), MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
@@ -157,6 +185,17 @@ namespace MainWindowProgram.Windows
       ConvertButton.IsEnabled = _selectedFiles.Count > 0 && !string.IsNullOrWhiteSpace(OutputDirectory);
     }
 
+    private void ApplyTargetFormatText()
+    {
+      Title = GetDialogTitle();
+      DescriptionTextBlock.Text =
+        $"Выберите один или несколько файлов OPK и папку, в которую нужно сохранить результаты конвертации в {_targetFormatName}.";
+      OutputDirectoryLabelTextBlock.Text = $"Папка для сохранения {_targetFormatName}";
+    }
+
+    private string GetDialogTitle()
+      => $"Конвертация OPK в {_targetFormatName}";
+
     /// <summary>
     /// Открывает системовый диалог с учётом владельца текущего окна.
     /// </summary>
@@ -168,5 +207,19 @@ namespace MainWindowProgram.Windows
         ? dialog.ShowDialog(Owner) == true
         : dialog.ShowDialog() == true;
     }
+
+    private void HeaderBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.LeftButton == MouseButtonState.Pressed)
+      {
+        DragMove();
+      }
+    }
+
+    private void CloseButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      Close();
+    }
   }
 }
+

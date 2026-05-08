@@ -20,7 +20,7 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
     /// <summary>
     /// Словарь цепей и списков сообщенных точек.
     /// </summary>
-    public Dictionary<GroupModel, GroupModel> ChainConnectedPointsMap = new();
+    private Dictionary<GroupModel, GroupModel> ChainConnectedPointsMap = new();
 
     /// <summary>
     /// Словарь цепей и списков разобщенных точек.
@@ -86,7 +86,7 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 
         if (disconnectedPoint.ChainModels.Count > 0)
         {
-          ChainConnectedPointsMap.Add(chain, disconnectedPoint);
+          SetPointsConnected(chain, disconnectedPoint);
         }
 
       }
@@ -110,7 +110,7 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 
         if (disconnectPoint.PointModels.Count > 0)
         {
-          ChainDisconnectedPointsMap.Add(group, disconnectPoint);
+          SetPointsDisconnected(group, disconnectPoint);
         }
       }
     }
@@ -122,6 +122,20 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
     public ChainModel GetPointsDisconnected(GroupModel groupModel)
     {
       return ChainDisconnectedPointsMap.GetValueOrDefault(groupModel);
+    }
+    public void SetPointsConnected(GroupModel groupModel, GroupModel groupModel1)
+    {
+      ChainConnectedPointsMap.Add(groupModel, groupModel1);
+    }
+
+    public void SetPointsDisconnected(GroupModel groupModel, ChainModel chainModel)
+    {
+      ChainDisconnectedPointsMap.Add(groupModel, chainModel);
+    }
+
+    public void SetAllPoints(PointModel pointModel)
+    {
+      AllPoint.PointModels.Add(pointModel);
     }
 
     public GroupModel GetPointsDisconnected()

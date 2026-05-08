@@ -5,14 +5,119 @@
              Width="{Binding Size, ElementName=Root}"
              Height="{Binding Size, ElementName=Root}"
              IsHitTestVisible="False">
+  <UserControl.Resources>
+    <StreamGeometry x:Key="SemiIconCopyBack">
+      M7 4c0-1.1.9-2 2-2h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-1V8c0-2-1-3-3-3H7V4Z
+    </StreamGeometry>
+
+    <StreamGeometry x:Key="SemiIconCopyFront">
+      M5 7a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h10a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5Z
+    </StreamGeometry>
+
+    <Storyboard x:Key="CopyInStoryboard">
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackSheetTranslate"
+                                     Storyboard.TargetProperty="X">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="1.4" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="2.5" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="2.1" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackSheetTranslate"
+                                     Storyboard.TargetProperty="Y">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="-1.1" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.16" Value="-2.1" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="-1.75" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="BackSheetOpacity"
+                                     Storyboard.TargetProperty="Opacity">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.10" Value="0.85" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.20" Value="0.92" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetScale"
+                                     Storyboard.TargetProperty="ScaleX">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.96" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1.03" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.01" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetScale"
+                                     Storyboard.TargetProperty="ScaleY">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.96" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="1.03" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="1.01" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetTranslate"
+                                     Storyboard.TargetProperty="X">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="-0.4" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="0.3" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="0.12" />
+      </DoubleAnimationUsingKeyFrames>
+      <DoubleAnimationUsingKeyFrames Storyboard.TargetName="FrontSheetTranslate"
+                                     Storyboard.TargetProperty="Y">
+        <EasingDoubleKeyFrame KeyTime="0:0:0.08" Value="0.4" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.18" Value="-0.2" />
+        <EasingDoubleKeyFrame KeyTime="0:0:0.28" Value="-0.08" />
+      </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <Storyboard x:Key="CopyOutStoryboard">
+      <DoubleAnimation Storyboard.TargetName="BackSheetTranslate"
+                       Storyboard.TargetProperty="X"
+                       To="0"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="BackSheetTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="0"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="BackSheetOpacity"
+                       Storyboard.TargetProperty="Opacity"
+                       To="1"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="FrontSheetScale"
+                       Storyboard.TargetProperty="ScaleX"
+                       To="1"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="FrontSheetScale"
+                       Storyboard.TargetProperty="ScaleY"
+                       To="1"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="FrontSheetTranslate"
+                       Storyboard.TargetProperty="X"
+                       To="0"
+                       Duration="0:0:0.16" />
+      <DoubleAnimation Storyboard.TargetName="FrontSheetTranslate"
+                       Storyboard.TargetProperty="Y"
+                       To="0"
+                       Duration="0:0:0.16" />
+    </Storyboard>
+  </UserControl.Resources>
+
   <Viewbox Stretch="Uniform">
     <Grid Width="24"
           Height="24">
-      <Path Fill="{Binding Foreground, ElementName=Root}"
-            Opacity="0.5"
-            Data="M7 3a2 2 0 0 0-2 2v10.5A2.5 2.5 0 0 0 7.5 18H8V8a2 2 0 0 1 2-2h6V5a2 2 0 0 0-2-2H7Z" />
-      <Path Fill="{Binding Foreground, ElementName=Root}"
-            Data="M10 6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V10.33a1 1 0 0 0-.3-.71l-2.99-3.03A1 1 0 0 0 15 6h-5Zm5 1.7 2.28 2.3H15V7.7ZM11.5 12a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5A.75.75 0 0 1 11.5 12Zm0 3a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 11.5 15Z" />
+      <Grid x:Name="BackSheetOpacity"
+            Opacity="1">
+        <Grid.RenderTransform>
+          <TranslateTransform x:Name="BackSheetTranslate"
+                              X="0"
+                              Y="0" />
+        </Grid.RenderTransform>
+        <Path Fill="{Binding Foreground, ElementName=Root}"
+              Data="{StaticResource SemiIconCopyBack}" />
+      </Grid>
+
+      <Grid RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+          <TransformGroup>
+            <ScaleTransform x:Name="FrontSheetScale"
+                            ScaleX="1"
+                            ScaleY="1" />
+            <TranslateTransform x:Name="FrontSheetTranslate"
+                                X="0"
+                                Y="0" />
+          </TransformGroup>
+        </Grid.RenderTransform>
+        <Path Fill="{Binding Foreground, ElementName=Root}"
+              Data="{StaticResource SemiIconCopyFront}" />
+      </Grid>
     </Grid>
   </Viewbox>
 </UserControl>

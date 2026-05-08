@@ -3,8 +3,11 @@
   internal enum ArchiveTreeNodeKind
   {
     Root,
+    ReviewRoot,
     Archive,
+    ReviewArchive,
     File,
+    ReviewFile,
     Placeholder,
   }
 }

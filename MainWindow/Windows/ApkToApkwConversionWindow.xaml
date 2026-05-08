@@ -1,0 +1,133 @@
+<Window x:Class="MainWindowProgram.Windows.ApkToApkwConversionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Components="clr-namespace:UI.Components;assembly=UI"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Конвертация APK в APKW"
+        Width="820"
+        MinWidth="820"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        Foreground="{DynamicResource ForegrounfBrushes}"
+        FontFamily="{DynamicResource WinstonRegular}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MainWindowProgram;component/Windows/ConversionDialogStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Border Style="{StaticResource ConversionDialogShellBorderStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0"
+                        Style="{StaticResource ConversionDialogHeaderBorderStyle}"
+                        PreviewMouseLeftButtonDown="HeaderBorder_MouseLeftButtonDown">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Margin="22,0,18,0"
+                                   Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Title}"
+                                   Style="{StaticResource ConversionDialogTitleTextStyle}" />
+
+                        <Components:WindowButtons Grid.Column="1"
+                                                  Margin="0,0,2,0"
+                                                  Style="{StaticResource ConversionDialogWindowButtonStyle}"
+                                                  ChoiceElement="Exit"
+                                                  ToolTip="Закрыть окно"
+                                                  PreviewMouseDown="CloseButton_PreviewMouseDown" />
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="24">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Margin="0,0,0,18"
+                               Text="Выберите старый архив APK. Новый архив APKW будет создан во внутреннем хранилище Archives приложения и сразу открыт."
+                               Style="{StaticResource ConversionDialogDescriptionTextStyle}" />
+
+                    <Border Grid.Row="1"
+                            Style="{StaticResource ConversionDialogSectionCardStyle}">
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,12"
+                                       Text="Исходный архив APK"
+                                       Style="{StaticResource ConversionDialogSectionTitleStyle}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox x:Name="InputFileTextBox"
+                                         Grid.Column="0"
+                                         Style="{StaticResource ConversionDialogTextBoxStyle}"
+                                         TextChanged="InputFileTextBox_TextChanged"
+                                         MouseDoubleClick="InputFileTextBox_MouseDoubleClick" />
+
+                                <Button Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        Content="Выбрать файл"
+                                        Style="{StaticResource ConversionDialogBrowseButtonStyle}"
+                                        Click="SelectInputFileButton_Click" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2"
+                            Style="{StaticResource ConversionDialogHintBorderStyle}"
+                            Margin="0,0,0,0">
+                        <TextBlock x:Name="StateTextBlock"
+                                   Text="Выберите исходный APK-архив."
+                                   Style="{StaticResource ConversionDialogHintTextStyle}" />
+                    </Border>
+
+                    <Grid Grid.Row="3" Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="1"
+                                MinWidth="132"
+                                Content="Отмена"
+                                Style="{StaticResource ConversionDialogSecondaryButtonStyle}"
+                                IsCancel="True" />
+                        <Button x:Name="ConvertButton"
+                                Grid.Column="2"
+                                Margin="12,0,0,0"
+                                Content="Конвертировать"
+                                Style="{StaticResource ConversionDialogPrimaryButtonStyle}"
+                                IsDefault="True"
+                                Click="ConvertButton_Click" />
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

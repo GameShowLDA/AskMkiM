@@ -141,9 +141,6 @@
   <data name="menu.file.archive" xml:space="preserve">
     <value>Архив</value>
   </data>
-  <data name="menu.file.compare" xml:space="preserve">
-    <value>Сравнить</value>
-  </data>
   <data name="menu.file.legacyConversion" xml:space="preserve">
     <value>Конвертация</value>
   </data>
@@ -182,6 +179,9 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Поиск и замена</value>
+  </data>
+  <data name="menu.file.compare" xml:space="preserve">
+    <value>Сравнить</value>
   </data>
   <data name="menu.file.openArchive" xml:space="preserve">
     <value>Открыть архив</value>
@@ -602,5 +602,11 @@
   </data>
   <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
     <value>Отображает сообщения о шагах проверки в протоколе выполнения.</value>
+  </data>
+  <data name="settings.execution.compatibilityMode" xml:space="preserve">
+    <value>Выполнение в режиме совместимости со старой системой</value>
+  </data>
+  <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
+    <value>Включает привязку модулей АСК-МКИ-М к разъёмам переходной панели по таблице соответствия старой системы АСК-МКИ. Используется для сохранения совместимости рабочих мест и существующих схем подключения.</value>
   </data>
 </root>

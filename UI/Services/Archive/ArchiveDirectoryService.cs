@@ -4,8 +4,9 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Services.Archive
 {
-  internal static class ArchiveDirectoryService
+  public static class ArchiveDirectoryService
   {
+    private const string ReviewArchivesDirectoryName = "ConversionReview";
     private static readonly string[] ArchiveFolderCandidates = new[]
     {
       Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory),
@@ -43,6 +44,13 @@ namespace UI.Services.Archive
       var message = "Не удалось открыть папку архивов.";
       LogError(message);
       throw new DirectoryNotFoundException(message);
+    }
+
+    public static string ResolveReviewArchivesRootPath()
+    {
+      var archivesRootPath = ResolveArchivesRootPath();
+      var reviewRootPath = Path.Combine(archivesRootPath, ReviewArchivesDirectoryName);
+      return Directory.CreateDirectory(reviewRootPath).FullName;
     }
 
     /// <summary>
@@ -85,6 +93,15 @@ namespace UI.Services.Archive
       EnsureExistingDirectory(directoryPath, nameof(directoryPath));
 
       return Directory.EnumerateFiles(directoryPath, "*.apkw", SearchOption.TopDirectoryOnly)
+        .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
+        .ToList();
+    }
+
+    public static IReadOnlyList<string> GetReviewDirectories(string reviewRootPath)
+    {
+      EnsureExistingDirectory(reviewRootPath, nameof(reviewRootPath));
+
+      return Directory.EnumerateDirectories(reviewRootPath, "*", SearchOption.TopDirectoryOnly)
         .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase)
         .ToList();
     }

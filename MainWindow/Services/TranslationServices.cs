@@ -1,11 +1,15 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.UI.Shared.Formatting;
 using Message;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
@@ -25,6 +29,11 @@ namespace MainWindowProgram.Services
   /// </summary>
   public class TranslationServices
   {
+    private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
+    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
+    private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
+    private readonly HashSet<string> _acceptedNormalizationSources = new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
     /// Сервис для управления многооконным интерфейсом.
     /// </summary>
@@ -34,6 +43,15 @@ namespace MainWindowProgram.Services
     /// Сервис для работы с файлами.
     /// </summary>
     private readonly FileService _fileService;
+
+    private static readonly HashSet<string> SupportedExecutionSourceExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+      ".pk",
+      ".pkw",
+      ".opk",
+      ".opkw",
+      ".acs",
+    };
 
     private TextEditorUI _actualTextEditor;
 
@@ -430,6 +448,11 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var translationContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
+      if (editor != null && !EnsureSupportedExecutionSource(editor))
+      {
+        return;
+      }
+
       if (editor == null && translationContainer != null)
       {
         await TryUpdateExistingTranslator(translationContainer);
@@ -455,6 +478,11 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
+
+      if (editor != null && !EnsureSupportedExecutionSource(editor))
+      {
+        return;
+      }
 
       if (runContainer != null)
       {
@@ -524,6 +552,18 @@ namespace MainWindowProgram.Services
       }
       else
       {
+        var sourceEditor = translator.GetLeftBox().GetTextEditor();
+        if (sourceEditor == null)
+        {
+          ShowEditorNotFoundError();
+          return;
+        }
+
+        if (!EnsureSupportedExecutionSource(sourceEditor))
+        {
+          return;
+        }
+
         _actualTextEditor = translator.GetRightBox().GetTextEditor();
         if (_actualTextEditor == null)
         {
@@ -534,7 +574,7 @@ namespace MainWindowProgram.Services
         if (translator.ErrorCount > 0)
         {
           MessageBoxCustom.Show(
-              $"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.",
+              $"Возникли ошибки сборки ({CountDisplayFormatter.Format(translator.ErrorCount)} ошибок). Устраните ошибки и повторите попытку.",
               "Ошибка запуска программы контроля",
               image: MessageBoxImage.Error);
           return;
@@ -557,7 +597,7 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
-      runControl.FileName = GetDisplayFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.FileName);
+      runControl.FileName = BuildDerivedFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.FileName, ".lst", "protocol.lst");
       runControl.SetLeftEditor(editor);
 
       if (runContainer == null)
@@ -588,13 +628,29 @@ namespace MainWindowProgram.Services
       return fileName ?? string.Empty;
     }
 
+    private static string BuildDerivedFileName(string? sourceFilePath, string? sourceFileName, string extension, string fallbackFileName)
+    {
+      string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
+      if (string.IsNullOrWhiteSpace(baseName))
+      {
+        baseName = Path.GetFileNameWithoutExtension(sourceFileName);
+      }
+
+      return string.IsNullOrWhiteSpace(baseName)
+        ? fallbackFileName
+        : $"{baseName}{extension}";
+    }
+
     /// <summary>
     /// Пытается создать новый транслятор, используя текст из указанного редактора.
     /// </summary>
     /// <param name="editor">Редактор с исходным текстом.</param>
     private async Task TryCreateNewTranslator(TextEditorUI editor)
     {
-      string text = editor.Text;
+      if (!TryPrepareTextForTranslation(editor, out var text))
+      {
+        return;
+      }
 
       if (_multiWindow.RemoveActiveTextEditor(true))
       {
@@ -628,7 +684,42 @@ namespace MainWindowProgram.Services
         return;
       }
 
+      if (!EnsureSupportedExecutionSource(editor))
+      {
+        return;
+      }
+
       await EditExistingTranslator(editor, foundDockItem);
+    }
+
+    private static bool EnsureSupportedExecutionSource(TextEditorUI editor)
+    {
+      if (IsSupportedExecutionSource(editor))
+      {
+        return true;
+      }
+
+      MessageBoxCustom.Show(
+          "Неподдерживаемый тип файла для исполнителя и трансляции. Поддерживаются файлы .pk, .pkw и .acs.",
+          "Неподдерживаемый тип файла",
+          MessageBoxButton.OK,
+          image: MessageBoxImage.Warning);
+
+      return false;
+    }
+
+    private static bool IsSupportedExecutionSource(TextEditorUI editor)
+    {
+      var filePath = editor.TextEditorModel?.FilePath;
+      if (!string.IsNullOrWhiteSpace(filePath)
+          && SupportedExecutionSourceExtensions.Contains(Path.GetExtension(filePath)))
+      {
+        return true;
+      }
+
+      var fileName = editor.TextEditorModel?.FileName;
+      return !string.IsNullOrWhiteSpace(fileName)
+          && SupportedExecutionSourceExtensions.Contains(Path.GetExtension(fileName));
     }
 
     /// <summary>
@@ -657,7 +748,10 @@ namespace MainWindowProgram.Services
     /// <param name="foundDockItem">Док-элемент, содержащий компонент транслятора.</param>
     private async Task EditExistingTranslator(TextEditorUI editor, DockItem foundDockItem)
     {
-      string text = editor.Text;
+      if (!TryPrepareTextForTranslation(editor, out var text))
+      {
+        return;
+      }
       var translateEditor = _fileService.CreateTranslationFileAsync(editor.TextEditorModel.FilePath);
       if (translateEditor == null)
       {
@@ -921,5 +1015,133 @@ namespace MainWindowProgram.Services
         await RevealDeferredElementsAsync(createdItem, translateEditor?.View);
       }
     }
+
+    private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
+    {
+      text = editor.Text ?? string.Empty;
+      text = RemoveLegacyControlChars(text);
+      text = CommandTranslationManager.NormalizeCommandMnemonics(text);
+      text = NormalizeIndentationForEditor(text);
+
+      if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
+      {
+        editor.Text = text;
+      }
+
+      if (!LatinLettersRegex.IsMatch(text))
+      {
+        return true;
+      }
+
+      var normalizedText = _lookalikeNormalizer.Normalize(text);
+      if (string.Equals(normalizedText, text, StringComparison.Ordinal))
+      {
+        return true;
+      }
+
+      var normalizationSource = GetNormalizationSourceKey(editor);
+      if (!string.IsNullOrWhiteSpace(normalizationSource)
+          && _acceptedNormalizationSources.Contains(normalizationSource))
+      {
+        editor.Text = normalizedText;
+        text = normalizedText;
+        return true;
+      }
+
+      var replaceDecision = MessageBoxCustom.Show(
+        "В тексте найдены английские буквы.\nЗаменить их на русские аналоги перед трансляцией?\nЕсли не заменить, возможны ошибки локализации, и часть параметров может быть не распознана.",
+        "Проверка текста перед трансляцией",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Warning);
+
+      if (replaceDecision == MessageBoxResult.Yes)
+      {
+        if (!string.IsNullOrWhiteSpace(normalizationSource))
+        {
+          _acceptedNormalizationSources.Add(normalizationSource);
+        }
+
+        editor.Text = normalizedText;
+        text = normalizedText;
+
+        return true;
+      }
+
+      MessageBoxCustom.Show(
+        "Трансляция будет выполнена без замены английских букв. Возможны ошибки локализации, и часть параметров может быть не распознана.",
+        "Предупреждение",
+        MessageBoxButton.OK,
+        MessageBoxImage.Warning);
+
+      return true;
+    }
+
+    private static string RemoveLegacyControlChars(string source)
+    {
+      if (string.IsNullOrEmpty(source))
+      {
+        return source;
+      }
+
+      return source
+        .Replace("\u0002", string.Empty)
+        .Replace("\u0003", string.Empty)
+        .Replace("\u000E", string.Empty)
+        .Replace("\u000F", string.Empty);
+    }
+
+    private static string NormalizeIndentationForEditor(string sourceText)
+    {
+      if (string.IsNullOrEmpty(sourceText))
+      {
+        return sourceText;
+      }
+
+      var lines = sourceText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+      bool insideCommand = false;
+
+      for (int i = 0; i < lines.Length; i++)
+      {
+        var line = lines[i].Replace('\t', ' ');
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          lines[i] = line;
+          continue;
+        }
+
+        var trimmedStart = line.TrimStart();
+        if (CommandHeaderRegex.IsMatch(line))
+        {
+          insideCommand = true;
+          lines[i] = trimmedStart;
+          continue;
+        }
+
+        if (!insideCommand || char.IsWhiteSpace(line[0]) || line.Trim() == "*")
+        {
+          lines[i] = line;
+          continue;
+        }
+
+        lines[i] = $" {line}";
+      }
+
+      return string.Join("\r\n", lines);
+    }
+
+    private static string GetNormalizationSourceKey(TextEditorUI editor)
+    {
+      var filePath = editor.TextEditorModel?.FilePath;
+      if (!string.IsNullOrWhiteSpace(filePath))
+      {
+        return Path.GetFullPath(filePath);
+      }
+
+      return editor.TextEditorModel?.FileName ?? string.Empty;
+    }
   }
 }
+
+
+
+

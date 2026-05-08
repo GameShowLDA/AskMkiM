@@ -113,5 +113,39 @@ namespace UI.Services
         _ => null
       };
     }
+
+    /// <summary>
+    /// Возвращает список файлов, открытых во вкладках основного текстового редактора.
+    /// </summary>
+    public IReadOnlyList<OpenTextEditorDescriptor> GetOpenTextEditors()
+    {
+      var container = _fileManager.ContainerService.GetEditorContainer(EditorType.TextEditor);
+      if (container == null)
+      {
+        return Array.Empty<OpenTextEditorDescriptor>();
+      }
+
+      var result = new List<OpenTextEditorDescriptor>();
+      foreach (var dockItem in container.DockManager.DockItems)
+      {
+        if (dockItem.Content is not TextEditorUI textEditor)
+        {
+          continue;
+        }
+
+        var displayName = textEditor.TextEditorModel?.FileName;
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+          displayName = dockItem.TabText;
+        }
+
+        var filePath = textEditor.TextEditorModel?.FilePath ?? string.Empty;
+        result.Add(new OpenTextEditorDescriptor(displayName ?? string.Empty, filePath, textEditor.Text));
+      }
+
+      return result
+        .OrderBy(item => item.DisplayName, StringComparer.OrdinalIgnoreCase)
+        .ToList();
+    }
   }
 }

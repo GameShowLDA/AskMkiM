@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor;
 using System.Windows.Controls;
 using UI.Components;
 using UI.Controls;
@@ -78,6 +79,11 @@ namespace MainWindowProgram.Services
     /// либо <c>null</c>, если ни один редактор не активен.
     /// </returns>
     public TextEditorUI GetActiveTextEditor() => _multiWindowControl.GetActiveTextEditor();
+
+    /// <summary>
+    /// Возвращает список файлов, открытых во вкладках основного текстового редактора.
+    /// </summary>
+    public IReadOnlyList<OpenTextEditorDescriptor> GetOpenTextEditors() => _multiWindowControl.GetOpenTextEditors();
 
     /// <summary>
     /// Возвращает активный пользовательский элемент управления в рабочей области.

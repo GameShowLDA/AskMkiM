@@ -597,6 +597,7 @@ namespace UI.Controls.TextEditorControl
 
       FileType = fileType;
       TextEditorModel = textEditorModel;
+      textEditor.IsReadOnly = IsReadOnlyFileType(fileType);
       _defaultFontSize = textEditor.FontSize;
       EnsureLineNumbersForeground();
 
@@ -772,6 +773,9 @@ namespace UI.Controls.TextEditorControl
 
       targetProp.SetValue(target, sourceProp.GetValue(source));
     }
+
+    private static bool IsReadOnlyFileType(FileType fileType)
+      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol;
 
     #endregion
   }

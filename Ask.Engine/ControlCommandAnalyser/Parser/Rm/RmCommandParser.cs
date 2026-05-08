@@ -1,5 +1,8 @@
-﻿using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -75,7 +78,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         var line = lines[i].Trim();
         if (i == 0)
         {
-          var match = System.Text.RegularExpressions.Regex.Match(line, @"^\s*\d+\s+[А-ЯA-Z]{2,}\s*(.*)$");
+          var match = System.Text.RegularExpressions.Regex.Match(
+            line,
+            @"^\s*\d+\s+[\p{L}_]{2,}(?=\s|$)\s*(.*)$",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
           if (match.Success) line = match.Groups[1].Value.Trim();
         }
         if (!string.IsNullOrWhiteSpace(line))
@@ -87,10 +93,69 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 
       var pairs = RmExpressionParser.ParseAllExpressions(sb.ToString(), ref model);
 
+      if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+      {
+        InitializeCompatibilityPointsMap(model);
+      }
+
       foreach (var pair in pairs)
-        model.PointsMap[pair.OkPoint] = pair.AskInput;
+      {
+        if (!ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+        {
+          model.PointsMap[pair.OkPoint] = pair.AskInput;
+        }
+        else
+        {
+          var point = LegacyCompatibilityMapper.GetRealAddressByCompatibilityPoint(pair.AskInput.ToString());
+          model.PointsMap[pair.OkPoint] = point;
+        }
+      }
 
       return model;
+    }
+
+    /// <summary>
+    /// Заполняет таблицу соответствия точек подключения
+    /// для режима совместимости со старой системой АСК-МКИ.
+    /// </summary>
+    private void InitializeCompatibilityPointsMap(RmCommandModel rmCommandModel)
+    {
+      Dictionary<PointModel, PointModel> CompatibilityPointsMap = new();
+      var mkrs = Ask.DataBase.Engine.Static.Devices.RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult().OrderBy(x => x.Number).ToList();
+
+      int numberModule = 1;
+      int pointNumber = 1;
+
+      foreach (var item in mkrs)
+      {
+        for (int i = 1; i <= item.PointCount; i++)
+        {
+          var askPoint = new PointModel
+          {
+            DeviceNumber = item.NumberChassis,
+            ModuleNumber = item.Number,
+            PointNumber = i
+          };
+
+          var okPoint = new PointModel
+          {
+            DeviceNumber = item.NumberChassis,
+            ModuleNumber = numberModule,
+            PointNumber = pointNumber
+          };
+
+          CompatibilityPointsMap[askPoint] = okPoint;
+
+          pointNumber++;
+          if (pointNumber > 100)
+          {
+            pointNumber = 1;
+            numberModule++;
+          }
+        }
+      }
+
+      LegacyCompatibilityMapper.SetCompatibilityPointsMap(CompatibilityPointsMap);
     }
   }
 }

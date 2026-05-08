@@ -277,11 +277,65 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Создать архив.
+        /// </summary>
+        internal static string menu_file_createArchive {
+            get {
+                return ResourceManager.GetString("menu.file.createArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Скачать архивы.
+        /// </summary>
+        internal static string menu_file_downloadArchives {
+            get {
+                return ResourceManager.GetString("menu.file.downloadArchives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Выход.
         /// </summary>
         internal static string menu_file_exit {
             get {
                 return ResourceManager.GetString("menu.file.exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конвертация.
+        /// </summary>
+        internal static string menu_file_legacyConversion {
+            get {
+                return ResourceManager.GetString("menu.file.legacyConversion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на APK в APKW.
+        /// </summary>
+        internal static string menu_file_legacyConversion_apkToApkw {
+            get {
+                return ResourceManager.GetString("menu.file.legacyConversion.apkToApkw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на OPK в OPKW.
+        /// </summary>
+        internal static string menu_file_legacyConversion_opkToOpkw {
+            get {
+                return ResourceManager.GetString("menu.file.legacyConversion.opkToOpkw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на OPK в PK.
+        /// </summary>
+        internal static string menu_file_legacyConversion_opkToPkw {
+            get {
+                return ResourceManager.GetString("menu.file.legacyConversion.opkToPkw", resourceCulture);
             }
         }
         
@@ -300,6 +354,15 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string menu_file_open {
             get {
                 return ResourceManager.GetString("menu.file.open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Открыть архив.
+        /// </summary>
+        internal static string menu_file_openArchive {
+            get {
+                return ResourceManager.GetString("menu.file.openArchive", resourceCulture);
             }
         }
         
@@ -345,6 +408,24 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string menu_file_search {
             get {
                 return ResourceManager.GetString("menu.file.search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Замена.
+        /// </summary>
+        internal static string menu_file_searchreplace {
+            get {
+                return ResourceManager.GetString("menu.file.searchreplace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Загрузить архив.
+        /// </summary>
+        internal static string menu_file_uploadArchive {
+            get {
+                return ResourceManager.GetString("menu.file.uploadArchive", resourceCulture);
             }
         }
         
@@ -561,6 +642,15 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string menu_test_selfcontrol_module {
             get {
                 return ResourceManager.GetString("menu.test.selfcontrol.module", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Система.
+        /// </summary>
+        internal static string menu_test_selfcontrol_system {
+            get {
+                return ResourceManager.GetString("menu.test.selfcontrol.system", resourceCulture);
             }
         }
         
@@ -840,6 +930,24 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_config_title {
             get {
                 return ResourceManager.GetString("settings.config.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение в режиме совместимости со старой системой.
+        /// </summary>
+        internal static string settings_execution_compatibilityMode {
+            get {
+                return ResourceManager.GetString("settings.execution.compatibilityMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает привязку модулей АСК-МКИ-М к разъёмам переходной панели по таблице соответствия старой системы АСК-МКИ. Используется для сохранения совместимости рабочих мест и существующих схем подключения..
+        /// </summary>
+        internal static string settings_execution_compatibilityMode_legacySystemExecution {
+            get {
+                return ResourceManager.GetString("settings.execution.compatibilityMode.legacySystemExecution", resourceCulture);
             }
         }
         
@@ -1213,7 +1321,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Отображает сообщения об этапах проверки в протоколе выполнения..
+        ///   Ищет локализованную строку, похожую на Отображает сообщения о шагах проверки в протоколе выполнения..
         /// </summary>
         internal static string settings_protocol_testStepMessages_description {
             get {
@@ -1222,7 +1330,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Отображение этапов проверки.
+        ///   Ищет локализованную строку, похожую на Сообщения шагов проверки.
         /// </summary>
         internal static string settings_protocol_testStepMessages_title {
             get {

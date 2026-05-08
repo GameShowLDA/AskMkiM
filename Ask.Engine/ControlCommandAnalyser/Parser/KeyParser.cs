@@ -95,7 +95,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       {
         remainder = Regex.Replace(
         remainder,
-        $@"\b{Regex.Escape(key)}\s*,?",
+        $@"(?<![\p{{L}}\p{{N}}/]){Regex.Escape(key)}(?![\p{{L}}\p{{N}}/])\s*,?",
         "",
         RegexOptions.IgnoreCase);
       }

@@ -141,9 +141,6 @@
   <data name="menu.file.archive" xml:space="preserve">
     <value>Archive</value>
   </data>
-  <data name="menu.file.compare" xml:space="preserve">
-    <value>Compare</value>
-  </data>
   <data name="menu.file.legacyConversion" xml:space="preserve">
     <value>Conversion</value>
   </data>
@@ -182,6 +179,9 @@
   </data>
   <data name="menu.file.search" xml:space="preserve">
     <value>Search and replace</value>
+  </data>
+  <data name="menu.file.compare" xml:space="preserve">
+    <value>Compare</value>
   </data>
   <data name="menu.file.openArchive" xml:space="preserve">
     <value>Open Archive</value>
@@ -602,5 +602,11 @@
   </data>
   <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
     <value>Shows test step messages in the execution protocol.</value>
+  </data>
+  <data name="settings.execution.compatibilityMode" xml:space="preserve">
+    <value>Legacy System Compatibility Mode</value>
+  </data>
+  <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
+    <value>Enables binding of ASK-MKI-M modules to transition panel connectors using the mapping table of the legacy ASK-MKI system. Used to preserve compatibility of workstations and existing connection schemes.</value>
   </data>
 </root>

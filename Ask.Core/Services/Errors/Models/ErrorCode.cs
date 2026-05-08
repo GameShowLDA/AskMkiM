@@ -116,6 +116,14 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("GEN024")]
     Gen_NoPointsBody,
 
+    /// <summary> Команда, на которую указывает ссылка, не имеет точек. </summary>
+    [ErrorCodeTag("GEN025")]
+    Gen_InvalidReference,
+
+    /// <summary> В записи точек присутсвует недопустимая последовательность - ,*. </summary>
+    [ErrorCodeTag("GEN026")]
+    Gen_CommaStar,
+
     #endregion
 
     #region Режим УМ
