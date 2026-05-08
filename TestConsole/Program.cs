@@ -26,9 +26,10 @@ namespace TestConsole
         Console.WriteLine("14. Проверка namespace по папкам");
         Console.WriteLine("15. New DB check");
         Console.WriteLine("16. Добавить устройство в новую БД");
+        Console.WriteLine("17. Скан пустых строк");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 16)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 17)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -100,6 +101,10 @@ namespace TestConsole
             await DatabaseDeviceCreate.RunAsync();
             break;
 
+          case 17:
+            EmptyLineScanner.Run();
+            break;
+
           case 0:
             Console.WriteLine("Exit...");
             return;
@@ -109,13 +114,6 @@ namespace TestConsole
             break;
         }
       }
-    }
-
-    private static void WriteStartupLog(string message)
-    {
-      Console.ForegroundColor = ConsoleColor.DarkGray;
-      Console.WriteLine(message);
-      Console.ResetColor();
     }
   }
 }
