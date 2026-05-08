@@ -100,7 +100,6 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       context.CurrentComment.Append(line[index]);
 
-      // ��������� /*
       if (Match(line, index, "/*"))
       {
         context.Stack.Push("slash");
@@ -108,7 +107,6 @@ namespace Ask.Engine.ControlCommandAnalyser
         return index + 2;
       }
 
-      // �������� */
       if (Match(line, index, "*/") && context.Stack.Peek() == "slash")
       {
         context.Stack.Pop();
