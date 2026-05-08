@@ -1,4 +1,4 @@
-﻿using Message;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,7 +16,6 @@ namespace UI.Controls.GPT.Mode
     }
 
     private bool connect = false;
-
 
     /// <summary>
     /// Метод для загрузки конфигурации и заполнения элементов управления.

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
@@ -159,7 +159,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       }
     }
 
-
     /// <summary>
     /// Разделяет текстовый блок на отдельные выражения.
     /// </summary>
@@ -226,7 +225,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       expr = expr.Trim();
 
       LogDebug($"[ExpandAll] Processing expression: {expr}");
-
 
       if (expr.Contains('[') || expr.Contains(']') || expr.Contains('"') || expr.Contains('$') || expr.Contains(','))
       {

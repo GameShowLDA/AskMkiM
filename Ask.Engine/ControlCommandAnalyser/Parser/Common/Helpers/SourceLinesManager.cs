@@ -1,8 +1,7 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {

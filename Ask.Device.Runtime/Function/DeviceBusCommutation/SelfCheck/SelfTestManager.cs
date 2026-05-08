@@ -66,6 +66,5 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <inheritdoc />
     public async Task<bool> ControlRelayAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, int relayNumber, int busContact, int action, IUserInteractionService? userMessageService = null) => await SelfTestProcessManager.ControlRelayAsync(cancellationToken, _deviceBusCommutation, testType, relayNumber, busContact, action);
 
-
   }
 }

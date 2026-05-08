@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -195,7 +195,6 @@ namespace Ask.Core.Services.Errors.Translation
       error.Description = $"Ошибка при проверке цепи {str} при методе полного узла.";
       return error;
     }
-
 
     /// <summary>
     /// Ошибка: не указано напряжение для измерения.

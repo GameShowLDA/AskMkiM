@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -125,7 +125,6 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       var result = string.Empty;
       var count = chainModels.PointModels.Count;
-
 
       for (int i = 0; i < count; i++)
       {

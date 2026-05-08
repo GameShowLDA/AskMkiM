@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
@@ -208,7 +208,6 @@ namespace UI.Controls.Runner
       }
     }
 
-
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
       LogInformation("SetLeftEditor вызван: " + this.GetHashCode());
@@ -319,7 +318,6 @@ namespace UI.Controls.Runner
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
       }
     }
-
 
     public async Task Start(List<BaseCommandModel> models)
     {

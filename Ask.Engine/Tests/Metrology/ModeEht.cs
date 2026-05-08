@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -140,7 +140,6 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-
       private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, double param, double rangeFrom, double rangeTo)
       {
         if (DeviceDisplayConfig.GetConnectionInfoVisibility())
@@ -158,7 +157,6 @@ namespace Ask.Engine.Tests.Metrology
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
       }
-
 
       private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param, double rangeFrom, double rangeTo)
       {

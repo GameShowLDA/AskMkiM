@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.UI.Shared.Commands;
 using Ask.UI.Shared.ViewModels;
 using System;
@@ -235,4 +235,3 @@ namespace Ask.UI.Features.ExecutionSelection.ViewModels
     }
   }
 }
-

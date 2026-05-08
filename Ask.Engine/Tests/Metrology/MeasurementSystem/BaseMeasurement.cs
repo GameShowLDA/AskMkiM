@@ -18,7 +18,6 @@ using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
 
-
 namespace Ask.Engine.Tests.Metrology.MeasurementSystem
 {
   /// <summary>
@@ -45,7 +44,6 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     internal List<double> Measurements { get; set; } = new();
     internal double LowerBound = -1;
     internal double UpperBound = -1;
-
 
     /// <summary>
     /// Формирует список уникальных устройств, необходимых для выполнения алгоритма,
@@ -308,7 +306,6 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         case MeasurementTypeCommand.PR:
           return MetrologicalDeviceType.FastMeter;
 
-
         case MeasurementTypeCommand.SI:
         case MeasurementTypeCommand.PI_ACW:
         case MeasurementTypeCommand.PI_DCW:
@@ -376,7 +373,6 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     {
       return Points;
     }
-
 
     /// <summary>
     /// Выполняет проверку наличия всех необходимых устройств для коммутации.

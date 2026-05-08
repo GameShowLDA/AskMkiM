@@ -5,7 +5,6 @@ using System.Text;
 using System.Xml.Linq;
 namespace MethodDependencyExplorer;
 
-
 internal static class Program
 {
   private static int Main(string[] args)

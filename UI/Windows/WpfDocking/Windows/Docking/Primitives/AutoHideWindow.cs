@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Windows.WpfDocking.Internal;
@@ -73,7 +73,6 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
       e.CanExecute = (dockItem.AllowedDockTreePositions & AllowedDockTreePositions.Floating) == AllowedDockTreePositions.Floating;
       e.Handled = true;
     }
-
 
     /// <summary>Gets or sets the double click command being invoked. This is a dependency property.</summary>
     /// <value>The double click command being invoked. The default value is <see langword="null"/>.</value>

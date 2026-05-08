@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using ICSharpCode.AvalonEdit;
 using MainWindowProgram.HotkeyBindings;
@@ -95,7 +95,6 @@ namespace MainWindowProgram.Events
       UpdateCompareMenuVisibility(isActive);
       UpdateArchiveMenuVisibility();
     }
-
 
     public void OnTextEditorActivated(UserControl editor)
     {

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Message
@@ -118,7 +118,6 @@ namespace Message
       Close();
     }
 
-
     public static MessageBoxResult Show(string text = "", string title = "", MessageBoxButton buttons = MessageBoxButton.OK, MessageBoxImage image = MessageBoxImage.None)
     {
       return Application.Current.Dispatcher.Invoke(() =>
@@ -175,13 +174,11 @@ namespace Message
       CancelButton.Visibility = Visibility.Visible;
     }
 
-
     private void YesNoButtonsVisible()
     {
       YesButton.Visibility = Visibility.Visible;
       NoButton.Visibility = Visibility.Visible;
     }
-
 
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {

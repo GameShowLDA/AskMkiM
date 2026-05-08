@@ -1,11 +1,10 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Commands;
-
 
 namespace TestConsole.MINT
 {

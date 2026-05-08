@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
@@ -360,7 +360,6 @@ namespace Ask.UI.Controls.ProtocolNew
       await MoveToLineAsync(item.SourceLineNumber);
     }
 
-
     /// <summary>
     /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
     /// </summary>
@@ -649,4 +648,3 @@ namespace Ask.UI.Controls.ProtocolNew
     }
   }
 }
-

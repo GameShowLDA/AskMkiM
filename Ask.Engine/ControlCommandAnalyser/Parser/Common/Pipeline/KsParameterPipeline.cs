@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
@@ -40,4 +40,3 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
         => _pipeline.Execute(model, remainder, ctx with { Fastmeter = meter });
   }
 }
-

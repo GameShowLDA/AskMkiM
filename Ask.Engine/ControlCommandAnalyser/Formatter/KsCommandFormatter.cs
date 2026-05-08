@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
@@ -40,7 +40,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       {
         yield return $"\tНижний порог сопротивления не задан.";
       }
-
 
       // Верхний порог сопротивления
       if (!string.IsNullOrWhiteSpace(ks.HigherLimitResistanceSource))
@@ -96,7 +95,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           }
         }
       }
-
 
       yield return string.Empty;
     }

@@ -1,4 +1,4 @@
-﻿namespace ConsoleUI.ConsoleCommanding.Core
+namespace ConsoleUI.ConsoleCommanding.Core
 {
   public interface IConsoleWriter
   {
@@ -15,4 +15,3 @@
     Task<string> ReadLineAsync();
   }
 }
-

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Collections.ObjectModel;
@@ -316,7 +316,6 @@ namespace UI.Components.ProtocolListBox
 
       return fallbackColor;
     }
-
 
   }
 }

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -40,7 +40,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     private static List<PointModel>? AnalyzedPoints { get; set; }
 
     static private Dictionary<string, string> PointsMap { get; set; } = new();
-
 
     /// <summary>
     /// Основной метод анализа точек подключения. Проверяет существование всех шасси и модулей, инициализирует их.

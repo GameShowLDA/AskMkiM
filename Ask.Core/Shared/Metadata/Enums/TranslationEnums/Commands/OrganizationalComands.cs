@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Metadata.Atributes;
+using Ask.Core.Shared.Metadata.Atributes;
 
 namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
 {
@@ -70,4 +70,3 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     OC,
   }
 }
-

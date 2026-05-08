@@ -1,4 +1,4 @@
-﻿using Ask.Core.Contracts.Debugging;
+using Ask.Core.Contracts.Debugging;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
@@ -104,4 +104,3 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime
     }
   }
 }
-

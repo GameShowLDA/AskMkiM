@@ -1,4 +1,4 @@
-﻿using Message;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -20,7 +20,6 @@ namespace UI.Controls.GPT.Mode
     }
 
     private bool connect = false;
-
 
     /// <summary>
     /// Асинхронно загружает конфигурацию устройства и обновляет элементы управления.

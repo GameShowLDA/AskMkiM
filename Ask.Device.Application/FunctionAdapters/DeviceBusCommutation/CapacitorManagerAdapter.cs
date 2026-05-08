@@ -50,7 +50,6 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         return succes;
       }, userMessageService, deviceTask: true);
 
-
       if (!result)
       {
         throw CapacitorExceptionFactory.ConnectFailed(number.ToString());
@@ -78,7 +77,6 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         return succes;
       }, userMessageService, deviceTask: true);
-
 
       if (!result)
       {

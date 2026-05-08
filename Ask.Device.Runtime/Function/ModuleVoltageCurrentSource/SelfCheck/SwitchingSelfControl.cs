@@ -82,7 +82,6 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 
       var connectBus = await switchingDevice.ConnectorManager.ConnectMultimeter(busSwitch, messageService);
 
-
       if (switchingBus.ToString().StartsWith("A"))
       {
         await powerSource.BusManager.ConnectBusToPositiveAsync(switchingBus, messageService);
@@ -117,7 +116,6 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 
       await switchingDevice.ConnectorManager.DisconnectMultimeter(busSwitch, messageService);
     }
-
 
     private static SwitchingBusNew GetAbPair(SwitchingBus bus)
     {
