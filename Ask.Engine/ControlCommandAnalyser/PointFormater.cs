@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -45,7 +46,18 @@ namespace Ask.Engine.ControlCommandAnalyser
         for (int i = 0; i < count; i++)
         {
           string point = item.PointModels[i].Mnemonic;
-          point += DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{item.PointModels[i].ToString()}]" : string.Empty;
+
+          if (DeviceDisplayConfig.GetMachineAddressVisibility())
+          {
+            if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+            {
+              point += $" [{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(item.PointModels[i].ToString())}]";
+            }
+            else
+            {
+              point += $" [{item.PointModels[i].ToString()}]";
+            }
+          }
 
           if (i == 0 && i + 1 == count)
           {
@@ -119,7 +131,20 @@ namespace Ask.Engine.ControlCommandAnalyser
       {
         var point = chainModels.PointModels[i];
 
-        var machineAddress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{point.ToString()}]" : string.Empty;
+        string machineAddress = string.Empty;
+
+        if (DeviceDisplayConfig.GetMachineAddressVisibility())
+        {
+          if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+          {
+            machineAddress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+          }
+          else
+          {
+            machineAddress = $"[{point.ToString()}]";
+          }
+        }
+
         result += $"*{point.Mnemonic}{machineAddress}*";
       }
 

@@ -18,6 +18,7 @@ namespace Ask.Core.Services.Config.Base
       ExecutionConfig.SetIsErrorSimulationMode(executionModel.IsErrorSimulationMode);
       ExecutionConfig.SetStepByStepMode(executionModel.StepByStepMode);
       ExecutionConfig.SetIdleMode(executionModel.IdleModeExecution);
+      ExecutionConfig.SetLegacyCompatibilityMode(executionModel.LegacyCompatibilityMode);
     }
 
     /// <summary>

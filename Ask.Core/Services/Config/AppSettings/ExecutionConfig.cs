@@ -46,6 +46,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetStopOnError(bool enable) => SettingsExecutionModel.StopOnError = enable;
+    public static void SetLegacyCompatibilityMode(bool enable) => SettingsExecutionModel.LegacyCompatibilityMode = enable;
 
     /// <summary>
     /// Включает или выключает режим симуляции ошибок.
@@ -59,6 +60,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
+      SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
 
       return Task.CompletedTask;
     }
@@ -90,6 +92,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     /// <returns>true, если включен; false, если выключена.</returns>
     public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
+    public static bool GetIsLegacyCompatibilityModeEnabled() => SettingsExecutionModel?.LegacyCompatibilityMode ?? false;
 
     public static Task<SettingsExecutionDto> GetExecitonModel()
     {
@@ -98,7 +101,8 @@ namespace Ask.Core.Services.Config.AppSettings
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
         IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
         StepByStepMode = SettingsExecutionModel.StepByStepMode,
-        StopOnError = SettingsExecutionModel.StopOnError
+        StopOnError = SettingsExecutionModel.StopOnError,
+        LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode
       };
 
       return Task.FromResult(executionModel);
@@ -111,6 +115,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIsErrorSimulationMode(execution.IsErrorSimulationMode);
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);
+      SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);
 
       await InvokeSaveExecutionAsync(execution);
     }

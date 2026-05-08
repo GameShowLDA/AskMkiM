@@ -65,6 +65,7 @@ namespace UI.Controls.Settings.Execution
         ErrorSimulation.CheckedChanged += CheckedChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
+        CompatibilityModeCheckBox.CheckedChanged += CheckedChanged;
         Success.PreviewMouseDown += Success_PreviewMouseDown;
         Error.PreviewMouseDown += Error_PreviewMouseDown;
         _isInitialized = true;
@@ -145,7 +146,8 @@ namespace UI.Controls.Settings.Execution
         StopOnError = StopInError.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
         IsErrorSimulationMode = ErrorSimulation.IsChecked,
-        IdleModeExecution = IdleMode.IsChecked
+        IdleModeExecution = IdleMode.IsChecked,
+        LegacyCompatibilityMode = CompatibilityModeCheckBox.IsChecked,
       };
       return model;
     }
@@ -157,7 +159,8 @@ namespace UI.Controls.Settings.Execution
       a.IdleModeExecution == b.IdleModeExecution &&
       a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
-      a.StopOnError == b.StopOnError;
+      a.StopOnError == b.StopOnError &&
+      a.LegacyCompatibilityMode == b.LegacyCompatibilityMode;
 
     /// <summary>
     /// Заполняет элементы UI значениями из базовой (сохранённой) модели.
@@ -168,6 +171,7 @@ namespace UI.Controls.Settings.Execution
       ErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
+      CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;
     }
   }
 }
