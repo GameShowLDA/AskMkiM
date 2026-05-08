@@ -12,16 +12,15 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
   {
 
     /// <summary>
-    /// Метод для проверки попадания результата в допустимый диапазон и отображения соответствующего сообщения пользователю.
+    /// Метод для вывода сообщения пользователю о результатах измерения.
     /// </summary>
-    /// <param name="idealResult">Результат, который должен получиться в идеале</param>
+    /// <param name="status">Статус измерения (true - в норме, false - брак)</param>
     /// <param name="result">Полученный результат</param>
     /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
     /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    /// <returns></returns>
-    public static async Task IsCorrectRangeAsync(double idealResult, double result, string param, IUserInteractionService? userMessageService = null)
+    public static async Task IsCorrectRangeAsync(bool status, double result, string param, IUserInteractionService? userMessageService = null)
     {
-      if (InRange(idealResult, result))
+      if (status)
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
@@ -41,10 +40,20 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       }
     }
 
-    private static bool InRange(double idealResult, double result)
+    /// <summary>
+    /// Метод для выявления правильности результата с учетом погрешности.
+    /// </summary>
+    /// <param name="idealResult">Идеальный результат</param>
+    /// <param name="result">Получившийся результат</param>
+    /// <param name="range">Допустимый диапазон отклонений</param>
+    /// <returns><see langword="true"/> - результат находится в допустимом диапазоне</returns>
+    /// <remarks>
+    /// Определение правилости результата работает по формуле:
+    /// <paramref name="result"/> +- <paramref name="range"/> ~ <paramref name="idealResult"/>
+    /// </remarks>
+    public static bool InRange(double idealResult, double result, double range = 0)
     {
-      double error_rate = (0.01 * result) + 0.02;
-      if (result - error_rate <= idealResult && result + error_rate >= idealResult) return true;
+      if (result - range <= idealResult && result + range >= idealResult) return true;
       return false;
     }
   }
