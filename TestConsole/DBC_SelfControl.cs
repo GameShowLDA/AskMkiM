@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
@@ -252,7 +252,6 @@ namespace TestConsole
       return continuityResult;
     }
 
-
     /// <summary>
     /// Проверяет главные реле в цепи самоконтроля для указанного типа проверки.
     /// </summary>
@@ -306,7 +305,6 @@ namespace TestConsole
 
       return true;
     }
-
 
     private static async Task SettingsMeter(IFastMeter meter)
     {

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Metadata.View;
+using Ask.Core.Shared.Metadata.View;
 using System.Management;
 using System.Windows.Threading;
 using static Ask.LogLib.LoggerUtility;
@@ -62,7 +62,6 @@ namespace Ask.Core.Services.Usb
       watcher.EventArrived += handler;
       return watcher;
     }
-
 
     /// <summary>
     /// Включает или отключает мониторинг USB в зависимости от режима администратора.

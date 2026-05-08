@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -27,7 +27,6 @@ namespace UI.Controls
         });
       };
     }
-
 
     public DeviceState(IAttachableDevice device) : this()
     {

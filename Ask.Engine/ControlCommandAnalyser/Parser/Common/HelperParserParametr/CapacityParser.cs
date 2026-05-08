@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 {
@@ -23,7 +23,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
       var m = Regex.Match(input,
                               @"(?:(?<low>\d+(?:[.,]\d+)?)\s*<\s*)?(?<unit>нф|мкф|пф)(?:\s*<\s*(?<high>\d+(?:[.,]\d+)?))?",
                               RegexOptions.IgnoreCase);
-
 
       if (!m.Success)
         return (null, null, null, input);

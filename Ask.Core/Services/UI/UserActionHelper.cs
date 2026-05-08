@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 
 namespace Ask.Core.Services.UI
@@ -161,7 +161,6 @@ namespace Ask.Core.Services.UI
 
       return result;
     }
-
 
     /// <summary>
     /// Внутренняя логика повтора операции, общая для методов с типом bool.

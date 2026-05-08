@@ -20,7 +20,6 @@ using System.Windows.Threading;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
 
-
 namespace MainWindowProgram
 {
   public partial class MainWindow : Window
@@ -77,7 +76,6 @@ namespace MainWindowProgram
     public IProtocolViewerService ProtocolViewerService => MultiWindow.ProtocolViewerService;
     public IWorkspaceService WorkspaceService => MultiWindow.WorkspaceService;
     public ITranslationService TranslationService => MultiWindow.TranslationService;
-
 
     #endregion
 

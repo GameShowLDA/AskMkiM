@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -6,7 +6,6 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
@@ -61,7 +60,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       ApplyResistanceToModel(model, parsed, defaults);
     }
-
 
     /// <summary>
     /// Получает значения сопротивления по умолчанию из метаданных команды.
@@ -238,7 +236,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       return !hasErrors;
     }
-
 
     /// <summary>
     /// Добавляет ошибку валидации сопротивления.

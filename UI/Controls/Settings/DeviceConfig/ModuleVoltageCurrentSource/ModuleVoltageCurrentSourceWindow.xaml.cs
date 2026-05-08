@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Services.Errors.DataBase;
 using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -138,4 +138,3 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleVoltageCurrentSource
     }
   }
 }
-

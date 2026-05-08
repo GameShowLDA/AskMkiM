@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -16,8 +16,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Словарь: "точка источника" → "точка назначения".
     /// </summary>
     public Dictionary<string, string> PointsMap { get; set; } = new();
-
-
 
     public IEnumerable<string> ToExpandedLines()
     {
@@ -84,10 +82,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 
       return false;
     }
-
-
-
-
 
     internal static string NormalizePointKey(string value)
     {

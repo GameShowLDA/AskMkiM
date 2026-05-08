@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -49,7 +49,6 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <param name="enable">true для отображения, false для скрытия.</param>
     public static void SetTimeStart(bool enable) => ProtocolModel.DisplayOperationTime = enable;
 
-
     /// <summary>
     /// Устанавливает отображение времени выполнения операций.
     /// </summary>
@@ -68,7 +67,6 @@ namespace Ask.Core.Services.Config.AppSettings
 
     public static void SetCommandHeadersInProtocol(bool enable) => ProtocolModel.ShowCommandHeadersInProtocol = enable;
     public static void SetTestStepMessagesInProtocol(bool enable) => ProtocolModel.ShowTestStepMessagesInProtocol = enable;
-
 
     #endregion
 
@@ -181,7 +179,6 @@ namespace Ask.Core.Services.Config.AppSettings
         await handler(protocolModel);
       }
     }
-
 
     public static string GetBaseTextProtocol() =>
 @"Протокол($РЕЖИМ) от $ДАТА

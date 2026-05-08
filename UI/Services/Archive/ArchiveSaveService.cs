@@ -81,7 +81,6 @@ namespace UI.Services.Archive
           $"Файл {fileName} добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.",
           NotificationType.Success);
 
-
         return true;
       }
       catch (Exception ex)

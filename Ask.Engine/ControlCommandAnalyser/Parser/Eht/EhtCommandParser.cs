@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -7,7 +7,6 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
 {
@@ -83,5 +82,3 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Eht
       => UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
   }
 }
-
-

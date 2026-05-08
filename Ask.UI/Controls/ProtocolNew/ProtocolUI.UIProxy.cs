@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -13,4 +13,3 @@ namespace Ask.UI.Controls.ProtocolNew
     private UIElement ContinueButtonElement => IsTopMenuVisible ? ContinueButtonTop : ContinueButton;
   }
 }
-

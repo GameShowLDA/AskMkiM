@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -1072,7 +1072,6 @@ namespace UI.Windows.WpfDocking.Windows.Docking
         throw;
       }
     }
-
 
     private void DoShowAsDockPosition(DockControl dockControl, DockPosition dockPosition, DockItemShowMethod showMethod)
     {

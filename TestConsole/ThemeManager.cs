@@ -1,4 +1,4 @@
-﻿using System.Resources;
+using System.Resources;
 
 namespace TestConsole
 {
@@ -10,7 +10,6 @@ namespace TestConsole
 
       var darkManager = new ResourceManager("UI.Resources.Theme.Colors", assembly);
       var lightManager = new ResourceManager("UI.Resources.Theme.Colors.Light", assembly);
-
 
       string[] keys = { "PrimaryColor", "SecondaryColor", "ForegroundColor", "ActiveColor", "RedColor", "GreenColor", "YellowColor" };
 

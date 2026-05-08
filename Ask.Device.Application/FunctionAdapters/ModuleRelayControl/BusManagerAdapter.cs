@@ -32,8 +32,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       _busManager = new BusManager(_moduleRelayControl);
     }
 
-
-
     /// <inheritdoc />
     public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {

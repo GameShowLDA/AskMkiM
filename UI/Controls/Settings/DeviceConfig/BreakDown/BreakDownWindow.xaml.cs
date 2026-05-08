@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Services.Errors.DataBase;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -140,4 +140,3 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
     }
   }
 }
-

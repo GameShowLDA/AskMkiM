@@ -82,7 +82,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
         return true;
       }
 
-
       DeviceCommand cmd = new DeviceCommand(2, 1, 0, 0);
       string result = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 

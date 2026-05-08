@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -26,7 +26,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ot
     /// </returns>
     public override bool CanParse(MnemonicIdentifier mnemonic)
       => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.OT);
-
 
     /// <summary>
     /// Создаёт модель команды ОТ.

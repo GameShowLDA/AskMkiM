@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -28,7 +28,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
       List<ChainModel> errorChains = new();
-
 
       var groupChains = context.SchemeModel.GetPointsDisconnected();
       if (groupChains.ChainModels.Count == 0)
@@ -82,7 +81,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await context.MessageService.ShowMessageAsync(new ShowMessageModel("Анализ на наличие короткого замыкания между точками"), IsBlockStart: true);
         var chains = await FindAllShortCircuitChainsAsync(context.PerformMeasurementAsync, ErrorsPoints, context.Value, context.MessageService, context.VoltageType, context.IsPolarityReversed);
-
 
         foreach (var chain in chains)
         {

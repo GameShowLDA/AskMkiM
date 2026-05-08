@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +26,6 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
     /// Словарь цепей и списков разобщенных точек.
     /// </summary>
     private Dictionary<GroupModel, ChainModel> ChainDisconnectedPointsMap = new();
-
 
     /// <summary>
     /// Словарь цепей и списков разобщенных точек.
@@ -153,7 +152,6 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
           .ToList());
     }
 
-
     /// <summary>
     /// Возвращает список списков точек в строковом формате ("x.x.x").
     /// </summary>
@@ -237,7 +235,6 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
     {
       return _normalizedErrors ?? new List<(ChainModel A, ChainModel B)>();
     }
-
 
     #endregion
 

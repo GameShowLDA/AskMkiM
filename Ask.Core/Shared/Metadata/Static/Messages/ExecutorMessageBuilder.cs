@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -155,7 +155,6 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
           secondAddress = $"({secondPoint})";
         }
       }
-
 
       char symbol = circuitFaultType == CircuitFaultType.OpenCircuit ? '*' : ',';
 

@@ -6,7 +6,6 @@ using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
-
 namespace Ask.Device.Runtime.Function.GPT.Helper
 {
   static internal class OffsetHelper
@@ -86,7 +85,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
           BreakdownTypeMode.IR => ManualCommand.MANU_IR_REF,
           _ => throw new NotSupportedException($"Тип команды {typeCommand} не поддерживается в {nameof(SetOffsetAsync)}"),
         };
-
 
         var query = $"{GetCommandSyntax(manualCommand)} ?";
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);

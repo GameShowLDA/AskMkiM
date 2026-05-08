@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
@@ -14,7 +14,6 @@ namespace Ask.Core.Services.Config.Base
 
     public static Action<UserInterfaceDto>? SaveUserInterfaceEvent;
     public static Func<UserInterfaceDto, Task>? SaveUserInterfaceAsyncEvent;
-
 
     #region Set.
     /// <summary>
@@ -43,7 +42,6 @@ namespace Ask.Core.Services.Config.Base
     public static void SetTopMenuIcons(bool enable) => UserInterfaceModel.UseTopMenuIcons = enable;
 
     public static void SetCommandAutoCollapse(bool enable) => UserInterfaceModel.UseCommandAutoCollapse = enable;
-
 
     public static Task SetUserInterfaceModel(UserInterfaceDto user)
     {
@@ -108,7 +106,6 @@ namespace Ask.Core.Services.Config.Base
       ThemeEventAdapter.RaiseSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
       ThemeEventAdapter.RaiseChangeTheme(parametrModel.Theme);
     }
-
 
     #endregion
 

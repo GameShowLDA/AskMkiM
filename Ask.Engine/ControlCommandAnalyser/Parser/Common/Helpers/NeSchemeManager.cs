@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -6,7 +6,6 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {

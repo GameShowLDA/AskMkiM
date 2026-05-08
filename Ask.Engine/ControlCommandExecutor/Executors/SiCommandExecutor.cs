@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -144,7 +144,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
         answer = await breadDown.IrManger.Measure.MeasureAsync(value, value, 60000);
 
-
         var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer.Value);
         return result;
 
@@ -154,4 +153,3 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     }
   }
 }
-

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -27,7 +27,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ks
             machineAddress =$"[{pointErr.ToString()}]";
           }
         }
-
 
         chainStr += pointErr.Mnemonic + machineAddress;
 
