@@ -603,4 +603,10 @@
   <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
     <value>Отображает сообщения о шагах проверки в протоколе выполнения.</value>
   </data>
+  <data name="settings.execution.compatibilityMode" xml:space="preserve">
+    <value>Выполнение в режиме совместимости со старой системой</value>
+  </data>
+  <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
+    <value>Включает привязку модулей АСК-МКИ-М к разъёмам переходной панели по таблице соответствия старой системы АСК-МКИ. Используется для сохранения совместимости рабочих мест и существующих схем подключения.</value>
+  </data>
 </root>

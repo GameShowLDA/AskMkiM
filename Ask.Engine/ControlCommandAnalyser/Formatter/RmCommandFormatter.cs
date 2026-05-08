@@ -1,4 +1,6 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
@@ -25,7 +27,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         }
 
         foreach (var pair in rm.PointsMap)
-          yield return $"\t{pair.Key} = {pair.Value}";
+        {
+          if (!ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+          {
+            yield return $"\t{pair.Key} = {pair.Value}";
+          }
+          else
+          { 
+            yield return $"\t{pair.Key} = {LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(pair.Value)}({pair.Value})";
+          }
+        }
 
         yield return string.Empty;
       }
