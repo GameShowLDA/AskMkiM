@@ -2,14 +2,35 @@ using System.Text;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
+  /// <summary>
+  /// Выполняет предварительную обработку текста,
+  /// удаляя комментарии и выделяя их в отдельную коллекцию.
+  /// </summary>
   internal static class PreprocessText
   {
     /// <summary>
-    /// ������� ����� �����.
-    /// ����������:
-    ///  - ������� ����� ��� ������������
-    ///  - ������ ��������� ������������ � ��������� �����
+    /// Выполняет разбор текста:
+    /// удаляет комментарии из исходного кода
+    /// и возвращает найденные комментарии отдельно.
     /// </summary>
+    /// <param name="text">
+    /// Исходный текст для обработки.
+    /// </param>
+    /// <returns>
+    /// Кортеж, содержащий:
+    /// <list type="bullet">
+    /// <item>
+    /// <description>
+    /// Словарь строк очищенного кода без комментариев.
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <description>
+    /// Список найденных комментариев с индексами строк.
+    /// </description>
+    /// </item>
+    /// </list>
+    /// </returns>
     public static (Dictionary<int, string> CleanLines, List<(int LineIndex, string Text)> Comments)
       PreprocessTextAndExtractComments(string text)
     {
@@ -30,14 +51,15 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ��������� ����� �� ������ � ������������� ���������.
+    /// Разбивает текст на строки
+    /// с нормализацией переносов.
     /// </summary>
     private static List<string> SplitLines(string text) =>
       text.Replace("\r\n", "\n").Split('\n').ToList();
 
     /// <summary>
-    /// ������������ ���� ������:
-    /// ���������� ����������� � ��������� ��������� ������.
+    /// Обрабатывает одну строку текста:
+    /// выделяет комментарии и сохраняет очищенный код.
     /// </summary>
     private static void ProcessLine(string line, int lineIndex, CommentContext context, Dictionary<int, string> cleanLines, List<(int, string)> comments)
     {
@@ -72,7 +94,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ��������� ��������, ����� ������ ��������� ������ �����������.
+    /// Обрабатывает содержимое внутри блочного комментария.
     /// </summary>
     private static int HandleInsideComment(string line, int index, CommentContext context, List<(int, string)> comments)
     {
@@ -112,7 +134,8 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// �������� ������ ������� ����������� (/* ��� { }).
+    /// Проверяет начало блочного комментария
+    /// (<c>/*</c> или <c>{ }</c>).
     /// </summary>
     private static bool TryStartBlockComment(string line, ref int index, int lineIndex, StringBuilder cleanBuilder, CommentContext context,
       Dictionary<int, string> cleanLines, ref bool commentLine)
@@ -147,7 +170,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// �������� ���������� ������������ ����������� //.
+    /// Проверяет начало однострочного комментария <c>//</c>.
     /// </summary>
     private static bool TryStartLineComment(string line, int index, int lineIndex, StringBuilder cleanBuilder, Dictionary<int, string> cleanLines,
       List<(int, string)> comments, ref bool commentLine)
@@ -167,7 +190,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ��������� ���, ������� ��� ����� ������� �����������.
+    /// Сохраняет код, расположенный перед началом комментария.
     /// </summary>
     private static void SaveCodeBeforeComment(int lineIndex, StringBuilder cleanBuilder, Dictionary<int, string> cleanLines, ref bool commentLine)
     {
@@ -180,7 +203,8 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ��������� ����������� � ��������� ��� � ������.
+    /// Завершает обработку комментария
+    /// и добавляет его в результирующую коллекцию.
     /// </summary>
     private static void CloseComment(CommentContext context, List<(int, string)> comments)
     {
@@ -191,7 +215,8 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ��������� ��������� ������, ���� ��� �������� ���.
+    /// Завершает обработку строки,
+    /// сохраняя очищенный код при необходимости.
     /// </summary>
     private static void FinalizeCleanLine(int lineIndex, StringBuilder cleanBuilder, CommentContext context, Dictionary<int, string> cleanLines, bool commentLine)
     {
@@ -206,7 +231,8 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ���� ����������� �� ��� ������ �� ����� ����� � ��������� ���.
+    /// Добавляет незакрытый комментарий,
+    /// если файл завершился до его закрытия.
     /// </summary>
     private static void FinalizeUnclosedComment(int totalLines, CommentContext context, List<(int, string)> comments)
     {
@@ -218,20 +244,38 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
-    /// ��������� ���������� ��������� ������� � �������.
+    /// Проверяет совпадение подстроки
+    /// с указанным значением по заданному индексу.
     /// </summary>
     private static bool Match(string line, int index, string value) =>
       index < line.Length - (value.Length - 1) &&
       line.Substring(index, value.Length) == value;
 
     /// <summary>
-    /// �������� �������� ��������� �������� ������������.
+    /// Хранит текущее состояние обработки комментариев.
     /// </summary>
     private sealed class CommentContext
     {
+      /// <summary>
+      /// Стек вложенности комментариев.
+      /// </summary>
       public Stack<string> Stack { get; } = new();
+
+      /// <summary>
+      /// Накопитель текста текущего комментария.
+      /// </summary>
       public StringBuilder CurrentComment { get; } = new();
+
+      /// <summary>
+      /// Индекс строки,
+      /// в которой начался текущий комментарий.
+      /// </summary>
       public int StartLine { get; set; } = -1;
+
+      /// <summary>
+      /// Возвращает <c>true</c>,
+      /// если в данный момент выполняется обработка комментария.
+      /// </summary>
       public bool InComment => Stack.Count > 0;
     }
   }

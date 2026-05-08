@@ -29,7 +29,7 @@ namespace TestConsole
         Console.WriteLine("17. Скан пустых строк");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 17)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 18)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -103,6 +103,10 @@ namespace TestConsole
 
           case 17:
             EmptyLineScanner.Run();
+            break;
+
+          case 18:
+            EncodingScanner.Run();
             break;
 
           case 0:
