@@ -10,17 +10,18 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 {
   public static class SelfTestHelper
   {
+
     /// <summary>
     /// Метод для проверки попадания результата в допустимый диапазон и отображения соответствующего сообщения пользователю.
     /// </summary>
-    /// <param name="rangeFrom">Начало диапазона (включительно)</param>
-    /// <param name="rangeTo">Конец диапазона (включительно)</param>
-    /// <param name="result">Сравниваемый результат измерений</param>
+    /// <param name="idealResult">Результат, который должен получиться в идеале</param>
+    /// <param name="result">Полученный результат</param>
     /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
     /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    public static async Task IsCorrectRangeAsync(double rangeFrom, double rangeTo, double result, string param, IUserInteractionService? userMessageService = null)
+    /// <returns></returns>
+    public static async Task IsCorrectRangeAsync(double idealResult, double result, string param, IUserInteractionService? userMessageService = null)
     {
-      if (result >= rangeFrom && result <= rangeTo)
+      if (InRange(idealResult, result))
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
@@ -38,6 +39,13 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
             type: ShowMessageModel.MessageType.Error)
           );
       }
+    }
+
+    private static bool InRange(double idealResult, double result)
+    {
+      double error_rate = (0.01 * result) + 0.02;
+      if (result - error_rate <= idealResult && result + error_rate >= idealResult) return true;
+      return false;
     }
   }
 }

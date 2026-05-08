@@ -15,6 +15,10 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 {
   public class SelfTestManager : ISelfTestCheckerMultimeter
   {
+    private static readonly double IdealVoltage = 0;
+    private static readonly double IdealResistance = 0;
+    private static readonly double IdealCapacity = 0;
+
     public Type GetTestTypeEnum()
     {
       return typeof(MultimeterTypeConnector);
@@ -61,7 +65,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(userMessageService:  userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisableRelay(userMessageService);
-      await SelfTestHelper.IsCorrectRangeAsync(-0.02, 0.02, result, "напряжения", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealVoltage, result, "постоянного напряжения", userMessageService);
 
       await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
@@ -70,7 +74,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       result = await meter.AcVoltageManager.MeasureACVoltageAsync(userMessageService: userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisableRelay(userMessageService);
-      await SelfTestHelper.IsCorrectRangeAsync(0.97, 1.03, result, "напряжения", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealVoltage, result, "переменного напряжения", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
@@ -87,7 +91,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       double result = await meter.ResistanceManager.MeasureResistanceAsync(userMessageService: userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisableRelay(userMessageService);
-      await SelfTestHelper.IsCorrectRangeAsync(-0.02, 0.02, result, "сопротивления", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealResistance, result, "сопротивления", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB2, userMessageService);
     }
@@ -104,7 +108,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       double result = await meter.CapacitanceManager.MeasureCapacitanceAsync(userMessageService: userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisableRelay(userMessageService);
-      await SelfTestHelper.IsCorrectRangeAsync(-0.02, 0.02, result, "емкости", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(IdealCapacity, result, "емкости", userMessageService);
 
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB4, userMessageService);
     }
