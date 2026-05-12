@@ -1,10 +1,12 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Newtonsoft.Json.Linq;
+using YamlDotNet.Core.Tokens;
 
 namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 {
@@ -22,8 +24,8 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
     public static async Task IsCorrectRangeAsync(bool status, double result, string param, string? unit = null, IUserInteractionService? userMessageService = null)
     {
       var formattedResult = string.IsNullOrWhiteSpace(unit)
-        ? $"{result}"
-        : $"{result} {unit}";
+        ? $"{result.ToString("0.000###;-0.000###;0.000")}"
+        : $"{result.ToString("0.000###;-0.000###;0.000")} {unit}";
 
       if (status)
       {
