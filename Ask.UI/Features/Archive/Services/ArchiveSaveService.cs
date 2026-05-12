@@ -11,7 +11,6 @@ using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
-using System.Windows.Media;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.Archive.Services
@@ -158,7 +157,7 @@ namespace Ask.UI.Features.Archive.Services
       string archivesFolderPath,
       string suggestedArchiveName)
     {
-      var dialog = CreateDialogWindow(ownerElement, "Сохранение в архив");
+      var dialog = ArchiveDialogHostService.CreateDialogWindow(ownerElement, "Сохранение в архив");
       var content = new ArchiveSaveTargetPickerControl();
       content.Initialize(ownerElement, archivePaths);
 
@@ -216,7 +215,7 @@ namespace Ask.UI.Features.Archive.Services
 
     private string? PromptForArchiveName(FrameworkElement ownerElement, string suggestedArchiveName, bool isFirstArchive = false)
     {
-      var dialog = CreateDialogWindow(ownerElement, "Создание архива");
+      var dialog = ArchiveDialogHostService.CreateDialogWindow(ownerElement, "Создание архива");
       var content = new ArchiveNameInputControl();
       content.Initialize(ownerElement, suggestedArchiveName, isFirstArchive);
       content.ConfirmRequested += (_, _) => dialog.DialogResult = true;
@@ -225,22 +224,6 @@ namespace Ask.UI.Features.Archive.Services
       return dialog.ShowDialog() == true
         ? content.ArchiveName
         : null;
-    }
-
-    private static Window CreateDialogWindow(FrameworkElement ownerElement, string title)
-    {
-      return new Window
-      {
-        Title = title,
-        Owner = Window.GetWindow(ownerElement),
-        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        ResizeMode = ResizeMode.NoResize,
-        SizeToContent = SizeToContent.WidthAndHeight,
-        ShowInTaskbar = false,
-        WindowStyle = WindowStyle.None,
-        AllowsTransparency = true,
-        Background = Brushes.Transparent,
-      };
     }
 
     private static string CreateArchiveInFolder(string archivesFolderPath, string archiveName)
