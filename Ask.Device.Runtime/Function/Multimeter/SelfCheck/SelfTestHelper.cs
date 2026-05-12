@@ -17,26 +17,29 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
     /// <param name="status">Статус измерения (true - в норме, false - брак)</param>
     /// <param name="result">Полученный результат</param>
     /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
+    /// <param name="unit">Единица измерения результата</param>
     /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    public static async Task IsCorrectRangeAsync(bool status, double result, string param, IUserInteractionService? userMessageService = null)
+    public static async Task IsCorrectRangeAsync(bool status, double result, string param, string? unit = null, IUserInteractionService? userMessageService = null)
     {
+      var formattedResult = string.IsNullOrWhiteSpace(unit)
+        ? $"{result}"
+        : $"{result} {unit}";
+
       if (status)
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
             header: $"Тест {param}",
-            message: $"{result} [НОРМА]",
-            type: ShowMessageModel.MessageType.Success)
-          );
+            message: $"{formattedResult} [НОРМА]",
+            type: ShowMessageModel.MessageType.Success));
       }
       else
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
             header: $"Тест {param}",
-            message: $"{result} [БРАК]",
-            type: ShowMessageModel.MessageType.Error)
-          );
+            message: $"{formattedResult} [БРАК]",
+            type: ShowMessageModel.MessageType.Error));
       }
     }
 
