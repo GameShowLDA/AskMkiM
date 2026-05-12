@@ -571,7 +571,7 @@
     <value>Settings</value>
   </data>
   <data name="settings.config.title" xml:space="preserve">
-    <value>ASK configuration</value>
+    <value>ASK-MKI-M configuration</value>
   </data>
   <data name="settings.config.printButton" xml:space="preserve">
     <value>Print</value>
@@ -603,10 +603,20 @@
   <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
     <value>Shows test step messages in the execution protocol.</value>
   </data>
-  <data name="settings.execution.compatibilityMode" xml:space="preserve">
-    <value>Legacy System Compatibility Mode</value>
+  <data name="settings.askMki.config.mkiPath.title" xml:space="preserve">
+    <value>Path to mkiw.exe</value>
   </data>
-  <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
-    <value>Enables binding of ASK-MKI-M modules to transition panel connectors using the mapping table of the legacy ASK-MKI system. Used to preserve compatibility of workstations and existing connection schemes.</value>
+  <data name="settings.askMki.config.mkiPath.description" xml:space="preserve">
+    <value>Select execute file ASK-MKI</value>
+  </data>
+  <data name="settings.askMki.config.title" xml:space="preserve">
+    <value>ASK-MKI configuration</value>
+  </data>
+  <data name="settings.askMki.config.selectMki" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="settings.askMki.config.clearMki" xml:space="preserve">
+    <value>Clear</value>
+
   </data>
 </root>
