@@ -620,5 +620,6 @@
   </data>
   <data name="settings.askMki.config.clearMki" xml:space="preserve">
     <value>Очистить</value>
+
   </data>
 </root>

@@ -10,4 +10,6 @@
     <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode" Key="settings.execution.idleMode" />
     <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_ErrorSimulation" Key="settings.execution.idleMode.errSimulation" />
     <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_IdleExecutionMode" Key="settings.execution.idleMode.runMode" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_CompatibilityMode" Key="settings.execution.compatibilityMode" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Execution_CompatibilityMode_LegacySystemExecution" Key="settings.execution.compatibilityMode.legacySystemExecution" />
 </ResourceDictionary>

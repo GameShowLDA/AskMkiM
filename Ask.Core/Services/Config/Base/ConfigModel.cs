@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.Base
@@ -18,6 +18,7 @@ namespace Ask.Core.Services.Config.Base
       ExecutionConfig.SetIsErrorSimulationMode(executionModel.IsErrorSimulationMode);
       ExecutionConfig.SetStepByStepMode(executionModel.StepByStepMode);
       ExecutionConfig.SetIdleMode(executionModel.IdleModeExecution);
+      ExecutionConfig.SetLegacyCompatibilityMode(executionModel.LegacyCompatibilityMode);
     }
 
     /// <summary>
@@ -40,7 +41,6 @@ namespace Ask.Core.Services.Config.Base
       ProtocolConfig.SetCommandHeadersInProtocol(executionModel.ShowCommandHeadersInProtocol);
       ProtocolConfig.SetTestStepMessagesInProtocol(executionModel.ShowTestStepMessagesInProtocol);
     }
-
 
     /// <summary>
     /// Устанавливает текущую модель протокола (ProtocolModel).

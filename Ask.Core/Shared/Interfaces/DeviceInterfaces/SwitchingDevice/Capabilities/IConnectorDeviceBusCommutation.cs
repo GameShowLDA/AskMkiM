@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
@@ -74,4 +74,3 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabiliti
     IReadOnlyList<DeviceConnectionInfo> GetConnectedDevices();
   }
 }
-

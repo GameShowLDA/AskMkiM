@@ -133,6 +133,15 @@
                     VerticalAlignment="Top"
                     x:Name="ErrorSimulation"
                  />
+
+                <SharedComponents:SettingsCard
+                    Title="{Binding Source={StaticResource Settings_Execution_CompatibilityMode}, Path=Value}"
+                    Description="{Binding Source={StaticResource Settings_Execution_CompatibilityMode_LegacySystemExecution}, Path=Value}"
+                    IsChecked="{Binding IdleMode, Mode=TwoWay}" 
+                    Margin="10,10"
+                    VerticalAlignment="Top"
+                    x:Name="CompatibilityModeCheckBox"
+                 />
             </WrapPanel>
 
         </Grid>

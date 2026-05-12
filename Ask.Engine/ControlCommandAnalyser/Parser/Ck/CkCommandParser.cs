@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -10,7 +10,6 @@ using Ask.Engine.ControlCommandAnalyser.Parser.Common;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Ck
 {

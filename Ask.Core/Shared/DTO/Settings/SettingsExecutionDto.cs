@@ -35,4 +35,10 @@ public class SettingsExecutionDto
   /// Останавливает выполнение при возникновении ошибки.
   /// </summary>
   public bool StopOnError { get; set; }
+
+  /// <summary>
+  /// Включает режим совместимости со старой системой АСК-МКИ.
+  /// Использует таблицу соответствия модулей МКР-350 и разъёмов переходной панели.
+  /// </summary>
+  public bool LegacyCompatibilityMode { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -169,7 +169,6 @@ namespace Ask.Core.Services.Errors.Translation
         Description = "Не указана сила тока."
       };
 
-
     /// <summary>
     /// Ошибка: нижняя граница напряжения больше верхней границы напряжения.
     /// </summary>
@@ -199,7 +198,6 @@ namespace Ask.Core.Services.Errors.Translation
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = description
       };
-
 
     /// <summary>
     /// Ошибка: верхняя граница сопротивления больше максимально допустимой границы сопротивления.

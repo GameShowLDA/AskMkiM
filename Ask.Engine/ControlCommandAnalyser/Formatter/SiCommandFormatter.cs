@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 
@@ -99,8 +99,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           yield return str.Remove(str.Length - 1);
         }
       }
-
-
 
       yield return string.Empty;
     }

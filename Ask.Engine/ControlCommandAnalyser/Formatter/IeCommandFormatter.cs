@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
@@ -90,7 +90,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           }
         }
       }
-
 
       yield return string.Empty;
     }

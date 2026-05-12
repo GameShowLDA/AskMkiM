@@ -195,7 +195,6 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           return succes;
         }, userMessageService, deviceTask: true);
 
-
         if (!result.Connect)
           throw AcwExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
 

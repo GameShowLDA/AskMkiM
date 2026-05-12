@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
@@ -43,7 +43,6 @@ namespace MainWindowProgram.ViewModels
     /// <summary>Групповой метод ПИ (DCW).</summary>
     [RelayCommand]
     private void PiDCWMethodExecutor() => _testService.AddPiDCWMethodExecutorControlAsync();
-
 
     /// <summary>Перекрёстный тест МКР.</summary>
     [RelayCommand]

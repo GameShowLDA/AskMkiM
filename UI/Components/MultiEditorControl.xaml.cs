@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
@@ -62,8 +62,6 @@ namespace UI.Components
     public IWorkspaceService WorkspaceService => controlManager;
 
     public ITranslationService TranslationService => fileManager.TranslationService;
-
-
 
     /// <summary>
     /// Событие, которое вызывается, когда результаты поиска готовы для отображения.
@@ -274,9 +272,7 @@ namespace UI.Components
 
     #endregion
 
-
     public bool GetEmtyControl() => controlManager.GetEmtyControl();
-
 
     /// <summary>
     /// Выполняет поиск по тектсу.
@@ -443,9 +439,7 @@ namespace UI.Components
     internal Task<TranslatorItem> AddTranslatorItem(ITextEditorView editor, ITextEditorView translateEditor, EditorType editorType) =>
       fileManager.TranslationService.AddTranslatorItem(editor, translateEditor, editorType);
 
-
     internal async Task DeleteTranslatorItem(TranslatorItem translatorItem, EditorType editorType) =>
       await fileManager.TranslationService.RemoveTranslatorTabAsync(translatorItem, editorType);
   }
 }
-

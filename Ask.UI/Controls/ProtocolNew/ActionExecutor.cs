@@ -152,7 +152,6 @@ namespace Ask.UI.Controls.ProtocolNew
         ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
         StartProcessing?.Invoke(true);
 
-
         if (ExecutionConfig.GetIsStepByStepModeEnabled())
         {
           StepControlManager.EnableStepMode(true);
@@ -461,7 +460,6 @@ namespace Ask.UI.Controls.ProtocolNew
       }
     }
 
-
     /// <summary>
     /// Проверка на паузу или завершение программы.
     /// </summary>
@@ -681,7 +679,6 @@ namespace Ask.UI.Controls.ProtocolNew
       ProcessTask = null;
     }
 
-
     /// <summary>
     /// Сбрасывает состояние выполнения и интерфейса.
     /// </summary>
@@ -797,4 +794,3 @@ namespace Ask.UI.Controls.ProtocolNew
     #endregion
   }
 }
-

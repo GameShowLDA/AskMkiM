@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -24,7 +24,6 @@ using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
 using UI.Services.Archive;
 using Ask.Core.Services.Config.AppSettings;
-
 
 
 namespace MainWindowProgram.Services

@@ -52,7 +52,6 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
           await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
 
-
         case PowerSourceModuleTypeConnector.OutputVoltageCheck:
           await SettingsMeter(meter, messageService);
           await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2, messageService);

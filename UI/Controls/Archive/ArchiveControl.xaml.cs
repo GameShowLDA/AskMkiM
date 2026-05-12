@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Errors.Models;
@@ -1915,7 +1915,6 @@ namespace UI.Controls.Archive
 
       double hardMarginX = printCapabilities.PageImageableArea.OriginWidth;
       double hardMarginY = printCapabilities.PageImageableArea.OriginHeight;
-
 
       if (printDialog.ShowDialog() == true)
       {

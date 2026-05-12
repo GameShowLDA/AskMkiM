@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -636,9 +637,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       for (int index = 0; index < chain.PointModels.Count; index++)
       {
         var point = chain.PointModels[index];
-        var machineAddress = DeviceDisplayConfig.GetMachineAddressVisibility()
-          ? $" [{point}]"
-          : string.Empty;
+
+        string machineAddress = string.Empty;
+
+        if (DeviceDisplayConfig.GetMachineAddressVisibility())
+        {
+          if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+          {
+            machineAddress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+          }
+          else
+          {
+            machineAddress = $"[{point.ToString()}]";
+          }
+        }
 
         var pointText = $"{point.Mnemonic}{machineAddress}";
         if (index == 0 && !string.IsNullOrEmpty(directionSign))
@@ -760,7 +772,19 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       for (int i = 0; i < chain.PointModels.Count; i++)
       {
         var point = chain.PointModels[i];
-        var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
+        string address = string.Empty;
+        if (DeviceDisplayConfig.GetMachineAddressVisibility())
+        {
+          if (!ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+          {
+            address = $"[{point.ToString()}]";
+          }
+          else
+          {
+            address = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+          }
+        }
+
         var delimiter = (i + 1) == chain.PointModels.Count ? "*" : ",";
         builder.Append($"{point.Mnemonic}{address}{delimiter}");
       }
@@ -787,7 +811,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         var points = fragment.PointModels.Select(p =>
         {
-          var address = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{p.ToString()}]" : string.Empty;
+          string address = string.Empty;
+
+          if (DeviceDisplayConfig.GetMachineAddressVisibility())
+          {
+            if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+            {
+              address = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(p.ToString())}]";
+            }
+            else
+            {
+              address = $"[{p.ToString()}]";
+            }
+          }
+
           return $"{p.Mnemonic}{address}";
         });
 

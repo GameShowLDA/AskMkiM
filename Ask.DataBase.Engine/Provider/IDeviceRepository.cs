@@ -1,4 +1,4 @@
-﻿namespace Ask.DataBase.Engine.Provider;
+namespace Ask.DataBase.Engine.Provider;
 
 /// <summary>
 /// Контракт репозитория для работы с устройствами на уровне хранения данных.
@@ -15,4 +15,3 @@ public interface IDeviceRepository
   /// </returns>
   Task<object?> GetByIdAsync(int id);
 }
-

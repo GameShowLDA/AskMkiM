@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
   /// <summary>
@@ -161,7 +160,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       return;
     }
-
 
     /// <summary>
     /// Ограничивает ввод только числовыми значениями для номера устройства.

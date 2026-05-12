@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -89,7 +89,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           model = piCommandModel;
         }
       }
-
 
       foreach (var (key, hasError) in result)
       {

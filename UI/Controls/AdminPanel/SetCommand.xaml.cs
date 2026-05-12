@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Base;
 using System;
 using System.Linq;
 using System.Net;
@@ -535,7 +535,6 @@ namespace UI.Controls.AdminPanel
       ]
     };
 
-
     #endregion
 
     private string portInput = "8800";
@@ -658,7 +657,6 @@ namespace UI.Controls.AdminPanel
         AddConsoleLine("Ошибка: " + ex.Message, Brushes.Red);
       }
     }
-
 
     private async Task SendCommandAsync(string ip, string command)
     {

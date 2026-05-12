@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
@@ -36,7 +36,6 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public static Action? OnExitPressed;
     public static Action? OnRepeatPressed;
-
 
     /// <summary>
     /// Регистрирует глобальный обработчик нажатий клавиш.
@@ -202,6 +201,3 @@ namespace Ask.UI.Controls.ProtocolNew
   }
 
 }
-
-
-

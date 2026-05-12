@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -215,7 +215,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       }, messageService);
 
-
       return result;
     }
 
@@ -262,7 +261,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return (result, answer);
     }
 
-
     public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
     {
       var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
@@ -280,4 +278,3 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     }
   }
 }
-

@@ -19,7 +19,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     private readonly IRelaySwitchModule _moduleRelayControl;
     private readonly PointManager _pointManager;
 
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="PointManagerAdapter"/>.
     /// </summary>
@@ -183,7 +182,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       return result;
     }
 
-
     public async Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null)
     {
       var description = $"всех точек от шины А";
@@ -223,7 +221,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
       return result;
     }
-
 
     /// <inheritdoc />
     public async Task<string> CheckPoint(int numberPoint, IUserInteractionService? userMessageService = null)
