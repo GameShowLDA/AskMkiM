@@ -162,6 +162,9 @@
   <data name="menu.file.open" xml:space="preserve">
     <value>Открыть</value>
   </data>
+  <data name="menu.file.runAskMki" xml:space="preserve">
+    <value>Выполнение АСК-МКИ(OLD)</value>
+  </data>
   <data name="menu.file.openfolder" xml:space="preserve">
     <value>Открыть папку в проводнике</value>
   </data>
@@ -571,7 +574,7 @@
     <value>Параметры</value>
   </data>
   <data name="settings.config.title" xml:space="preserve">
-    <value>Конфигурация АСК</value>
+    <value>Конфигурация АСК-МКИ-М</value>
   </data>
   <data name="settings.config.printButton" xml:space="preserve">
     <value>Печать</value>
@@ -602,5 +605,20 @@
   </data>
   <data name="settings.protocol.testStepMessages.description" xml:space="preserve">
     <value>Отображает сообщения о шагах проверки в протоколе выполнения.</value>
+  </data>
+  <data name="settings.askMki.config.mkiPath.title" xml:space="preserve">
+    <value>Путь к mkiw.exe</value>
+  </data>
+  <data name="settings.askMki.config.mkiPath.description" xml:space="preserve">
+    <value>Выберите исполняемый файл старой программы АСК-МКИ. Этот путь будет использоваться при запуске выполнения АСК-МКИ OLD.</value>
+  </data>
+  <data name="settings.askMki.config.title" xml:space="preserve">
+    <value>Конфигурация АСК-МКИ</value>
+  </data>
+  <data name="settings.askMki.config.selectMki" xml:space="preserve">
+    <value>Выбрать</value>
+  </data>
+  <data name="settings.askMki.config.clearMki" xml:space="preserve">
+    <value>Очистить</value>
   </data>
 </root>

@@ -25,6 +25,7 @@
         { "CompareFile", "Ctrl+K" },
         { "Build", "Ctrl+B" },
         { "Run", "Ctrl+F5" },
+        { "RunAskMki", "Ctrl+Shift+F5" },
         { "RunStepByStepMode", "Ctrl+F10" },
 
         // Включение питания
