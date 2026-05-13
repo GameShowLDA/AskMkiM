@@ -153,9 +153,6 @@
   <data name="menu.file.legacyConversion.apkToApkw" xml:space="preserve">
     <value>APK to APKW</value>
   </data>
-  <data name="menu.file.legacyConversion.apkwToApk" xml:space="preserve">
-    <value>APKW to APK</value>
-  </data>
   <data name="menu.file.exit" xml:space="preserve">
     <value>Exit</value>
   </data>
@@ -620,6 +617,14 @@
   </data>
   <data name="settings.askMki.config.clearMki" xml:space="preserve">
     <value>Clear</value>
-
+  </data>
+  <data name="menu.file.legacyConversion.apkwToApk" xml:space="preserve">
+    <value>APKW to APK</value>
+  </data>
+  <data name="settings.execution.compatibilityMode" xml:space="preserve">
+    <value>Legacy System Compatibility Mode</value>
+  </data>
+  <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
+    <value>Enables binding of ASK-MKI-M modules to transition panel connectors using the mapping table of the legacy ASK-MKI system. Used to preserve compatibility of workstations and existing connection schemes.</value>
   </data>
 </root>
