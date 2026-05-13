@@ -1019,7 +1019,7 @@ namespace MainWindowProgram.Services
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
       text = editor.Text ?? string.Empty;
-      text = RemoveLegacyControlChars(text);
+      text = TextSanitizer.RemoveLegacyControlChars(text);
       text = CommandTranslationManager.NormalizeCommandMnemonics(text);
       text = NormalizeIndentationForEditor(text);
 
@@ -1074,20 +1074,6 @@ namespace MainWindowProgram.Services
         MessageBoxImage.Warning);
 
       return true;
-    }
-
-    private static string RemoveLegacyControlChars(string source)
-    {
-      if (string.IsNullOrEmpty(source))
-      {
-        return source;
-      }
-
-      return source
-        .Replace("\u0002", string.Empty)
-        .Replace("\u0003", string.Empty)
-        .Replace("\u000E", string.Empty)
-        .Replace("\u000F", string.Empty);
     }
 
     private static string NormalizeIndentationForEditor(string sourceText)

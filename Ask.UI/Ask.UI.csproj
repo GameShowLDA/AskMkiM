@@ -20,12 +20,14 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+	  <ProjectReference Include="..\Ask.Engine\Ask.Engine.csproj" />
 	  <ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
 	  <ProjectReference Include="..\Message\Message.csproj" />
 	  <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
 	  <PackageReference Include="InputSimulator" Version="1.0.4" />
 	</ItemGroup>
 

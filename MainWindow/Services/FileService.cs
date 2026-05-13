@@ -18,13 +18,11 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Controls.Archive;
+using Ask.UI.Features.Archive.Views;
 using UI.Controls.FileCompare;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
-using UI.Services.Archive;
-using Ask.Core.Services.Config.AppSettings;
-
+using Ask.UI.Features.Archive.Services;
 
 namespace MainWindowProgram.Services
 {

@@ -1,3 +1,4 @@
+using Ask.Core.Services.FileFormats;
 using Ask.Engine.ControlCommandAnalyser;
 using System.IO;
 using System.Text;
@@ -120,25 +121,10 @@ namespace MainWindowProgram.Services.Conversion
         : Encoding.GetEncoding(866);
 
       return CommandTranslationManager.NormalizeCommandMnemonics(
-          RemoveLegacyControlChars(File.ReadAllText(path, encoding)))
+          TextSanitizer.RemoveLegacyControlChars(File.ReadAllText(path, encoding)))
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
     }
-
-    private static string RemoveLegacyControlChars(string source)
-    {
-      if (string.IsNullOrEmpty(source))
-      {
-        return source;
-      }
-
-      return source
-        .Replace("\u0002", string.Empty)
-        .Replace("\u0003", string.Empty)
-        .Replace("\u000E", string.Empty)
-        .Replace("\u000F", string.Empty);
-    }
-
     private static string BuildUniqueOutputPath(string inputPath, string outputDirectory)
     {
       var baseFileName = Path.GetFileNameWithoutExtension(inputPath);
