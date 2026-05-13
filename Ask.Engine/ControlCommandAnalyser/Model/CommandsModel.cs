@@ -121,6 +121,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
             if (ComparePoints(scheme, allPoints, pointModel, groupModel) == false)
             {
               scheme.GroupModels.Add(groupModel);
+              scheme.SetPointsDisconnected(groupModel, chainModel);
+              scheme.SetAllPoints(pointModel);
             }
           }
           LogInformation(

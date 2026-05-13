@@ -20,21 +20,24 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
     public (string? Value, string? Unit, string Remainder) ParseVoltage(string input)
     {
       var m = Regex.Match(input,
-                              @"(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>В|кВ|КВ|мВ|МВ)",
-                              RegexOptions.IgnoreCase);
+                            @"(?<!\d[.,])(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>В|кВ|КВ|мВ|МВ)",
+                            RegexOptions.IgnoreCase);
 
       if (!m.Success)
         return (null, null, input);
 
       string unit = m.Groups["unit"].Value;
 
-      double? value = UnitsConvertor.TryParseValue(m.Groups["val"].Value, unit);
+      // 🔥 ВАЖНО: нормализация
+      string rawValue = m.Groups["val"].Value.Replace(',', '.');
+
+      double? value = UnitsConvertor.TryParseValue(rawValue, unit);
 
       string remainder = Regex.Replace(
-        input,
-        $@"\b{Regex.Escape(m.Value)}\s*,?",
-        "",
-        RegexOptions.IgnoreCase
+          input,
+          $@"\b{Regex.Escape(m.Value)}\s*,?",
+          "",
+          RegexOptions.IgnoreCase
       ).Trim();
 
       return (

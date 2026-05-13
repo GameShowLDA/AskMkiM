@@ -1,10 +1,11 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.UI.Shared.Formatting;
 using Message;
 using System.IO;
 using System.Text;
@@ -573,7 +574,7 @@ namespace MainWindowProgram.Services
         if (translator.ErrorCount > 0)
         {
           MessageBoxCustom.Show(
-              $"Возникли ошибки сборки ({translator.ErrorCount} ошибок). Устраните ошибки и повторите попытку.",
+              $"Возникли ошибки сборки ({CountDisplayFormatter.Format(translator.ErrorCount)} ошибок). Устраните ошибки и повторите попытку.",
               "Ошибка запуска программы контроля",
               image: MessageBoxImage.Error);
           return;
@@ -1018,6 +1019,8 @@ namespace MainWindowProgram.Services
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
       text = editor.Text ?? string.Empty;
+      text = TextSanitizer.RemoveLegacyControlChars(text);
+      text = CommandTranslationManager.NormalizeCommandMnemonics(text);
       text = NormalizeIndentationForEditor(text);
 
       if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
@@ -1124,7 +1127,3 @@ namespace MainWindowProgram.Services
     }
   }
 }
-
-
-
-

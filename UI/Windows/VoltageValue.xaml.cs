@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -60,7 +60,6 @@ namespace UI.Windows
         e.Handled = true;
       }
     }
-
 
     private void VoltageInput_KeyDown(object sender, KeyEventArgs e)
     {

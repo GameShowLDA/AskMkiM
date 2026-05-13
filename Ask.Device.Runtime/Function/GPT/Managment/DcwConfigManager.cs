@@ -57,7 +57,6 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       return sb.ToString();
     }
 
-
     /// <inheritdoc />
     public async Task<DcwConfiguration> ReadConfigurationAsync()
     {

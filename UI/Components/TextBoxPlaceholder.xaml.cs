@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
 using System.Globalization;
@@ -69,7 +69,6 @@ namespace UI.Components
       set => SetValue(AllowRangeProperty, value);
     }
 
-
     /// <summary>
     /// Текст, отображаемый как Placeholder.
     /// </summary>
@@ -126,7 +125,6 @@ namespace UI.Components
       get => (Brush)GetValue(BackgroundProperty);
       set => SetValue(BackgroundProperty, value);
     }
-
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextBoxPlaceholder"/>.
@@ -317,7 +315,6 @@ namespace UI.Components
       BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.TitleColor);
       Keyboard.ClearFocus();
     }
-
 
   }
 

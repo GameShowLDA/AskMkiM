@@ -47,7 +47,6 @@ namespace Ask.Device.Application.Function.Helpers
           }
         }
 
-
         double min = rangeFrom / 2;
         double max = rangeTo == double.MaxValue
             ? rangeTo

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace Ask.Core.Services.Errors.Models
 {
@@ -161,7 +161,6 @@ namespace Ask.Core.Services.Errors.Models
     #region Метрология
 
     #region Валидация данных.
-
 
     #endregion
 

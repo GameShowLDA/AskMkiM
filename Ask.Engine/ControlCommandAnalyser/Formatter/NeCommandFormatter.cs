@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -132,7 +132,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           }
         }
       }
-
 
       yield return string.Empty;
     }

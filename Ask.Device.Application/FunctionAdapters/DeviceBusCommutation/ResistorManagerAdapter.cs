@@ -41,7 +41,6 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         return succes;
       }, userMessageService, deviceTask: true);
 
-
       if (!result)
         throw ResistorExceptionFactory.ConnectFailed(number);
 

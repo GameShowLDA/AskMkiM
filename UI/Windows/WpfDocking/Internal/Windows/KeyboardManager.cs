@@ -26,6 +26,5 @@ namespace UI.Windows.WpfDocking.Internal.Windows
         KeyUp(e);
     }
 
-
   }
 }

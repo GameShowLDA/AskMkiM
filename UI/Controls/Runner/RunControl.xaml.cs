@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
@@ -6,9 +6,11 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.View.EditorHost;
-using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Features.Archive.Services;
+using Ask.UI.Shared.Formatting;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -17,10 +19,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.TextEditorControl;
-using Ask.UI.Controls.ErrorList;
-using Ask.UI.Controls.ProtocolNew;
 using UI.Services;
-using UI.Services.Archive;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -203,10 +202,9 @@ namespace UI.Controls.Runner
 
       if (ErrorCount > 0)
       {
-        MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+        MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {CountDisplayFormatter.Format(ErrorCount)}");
       }
     }
-
 
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
@@ -319,7 +317,6 @@ namespace UI.Controls.Runner
       }
     }
 
-
     public async Task Start(List<BaseCommandModel> models)
     {
       ProtocolUI.MenuButtonVisibility(false);
@@ -379,7 +376,7 @@ namespace UI.Controls.Runner
 
         if (ErrorCount > 0)
         {
-          MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {ErrorCount}");
+          MessageEventAdapter.RaiseInfoMessage($"Общее кол-во ошибок: {CountDisplayFormatter.Format(ErrorCount)}");
         }
       });
     }

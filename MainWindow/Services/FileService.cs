@@ -1,9 +1,10 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats.Apk;
 using Ask.Core.Services.FileFormats.Opk;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
@@ -17,12 +18,11 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Controls.Archive;
+using Ask.UI.Features.Archive.Views;
 using UI.Controls.FileCompare;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
-using UI.Services.Archive;
-
+using Ask.UI.Features.Archive.Services;
 
 namespace MainWindowProgram.Services
 {
@@ -133,11 +133,19 @@ namespace MainWindowProgram.Services
         {
           Filter = "Supported files (*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt)|*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.acs;*.txt|PK/PKW files (*.pk;*.pkw)|*.pk;*.pkw|OPK/OPKW files (*.opk;*.opkw)|*.opk;*.opkw|Protocol files (*.lst;*.lstw)|*.lst;*.lstw|ACS files (*.acs)|*.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
           Title = "Выберите файл",
-          Multiselect = true
+          Multiselect = true,
+          InitialDirectory = LastDirectoryService.GetLastDirectory()
         };
 
         if (openFileDialog.ShowDialog() == true)
         {
+          string? directory =Path.GetDirectoryName(openFileDialog.FileName);
+
+          if (!string.IsNullOrWhiteSpace(directory))
+          {
+            LastDirectoryService.SaveLastDirectory(directory);
+          }
+
           foreach (string filePath in openFileDialog.FileNames)
           {
             OpenFileWithLegacyConversion(filePath);
@@ -839,6 +847,337 @@ namespace MainWindowProgram.Services
 
       await _mainWindow.SearchWindow.ShowWindow(expandReplaceRow, focusReplaceField);
       return activeEditor;
+    }
+
+    /// <summary>
+    /// Запускает выполнение программы контроля через внешнюю старую программу АСК-МКИ.
+    /// Пользователь выбирает путь к mkiw.exe и файл программы контроля (*.acs, *.pk)
+    /// в отдельном окне параметров. После завершения выполнения метод ищет последний
+    /// сформированный протокол в папке HISTORY рядом с mkiw.exe и открывает его
+    /// во внутреннем редакторе приложения.
+    /// </summary>
+    public async Task RunAskMkiAsync()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show(
+          "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!",
+          "Ошибка!",
+          MessageBoxButton.OK);
+
+        return;
+      }
+
+      var dialog = new RunAskMkiWindow
+      {
+        Owner = _mainWindow
+      };
+
+      try
+      {
+        _mainWindow.Effect = new BlurEffect { Radius = 8 };
+
+        if (dialog.ShowDialog() != true)
+        {
+          return;
+        }
+      }
+      finally
+      {
+        _mainWindow.Effect = null;
+      }
+
+      try
+      {
+        var protocolPath = await RunMkiAndGetProtocolWithProgressAsync(dialog.MkiPath, dialog.ProgramPath);
+
+        OpenFileAsync(protocolPath);
+      }
+      catch (Exception ex)
+      {
+        Message.MessageBoxCustom.Show(
+          ex.Message,
+          "Ошибка выполнения АСК-МКИ",
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+      }
+    }
+
+    /// <summary>
+    /// Выполняет запуск mkiw.exe в скрытом режиме с аргументом /runheadless
+    /// и возвращает путь к последнему сформированному протоколу.
+    /// </summary>
+    /// <param name="mkiPath">Полный путь к исполняемому файлу mkiw.exe.</param>
+    /// <param name="programPath">Полный путь к программе контроля (*.acs или *.pk).</param>
+    /// <param name="timeoutSeconds">Максимальное время ожидания завершения процесса в секундах.</param>
+    /// <returns>Полный путь к найденному файлу протокола.</returns>
+    /// <exception cref="FileNotFoundException">
+    /// Возникает, если mkiw.exe, программа контроля или сформированный протокол не найдены.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Возникает, если не удалось запустить процесс или mkiw.exe завершилась с ошибкой.
+    /// </exception>
+    /// <exception cref="TimeoutException">
+    /// Возникает, если mkiw.exe выполнялась дольше заданного времени ожидания.
+    /// </exception>
+    private static async Task<string> RunMkiAndGetProtocolAsync(
+      string mkiPath,
+      string programPath,
+      int timeoutSeconds = 30)
+    {
+      if (!File.Exists(mkiPath))
+        throw new FileNotFoundException($"mkiw.exe не найден: {mkiPath}", mkiPath);
+
+      if (!File.Exists(programPath))
+        throw new FileNotFoundException($"Программа контроля не найдена: {programPath}", programPath);
+
+      var mkiDir = Path.GetDirectoryName(mkiPath);
+
+      if (string.IsNullOrWhiteSpace(mkiDir))
+        throw new InvalidOperationException("Не удалось определить папку mkiw.exe.");
+
+      var historyRoot = Path.Combine(mkiDir, "HISTORY");
+
+      var startedUtc = DateTime.UtcNow.AddSeconds(-2);
+
+      using var process = new Process();
+
+      process.StartInfo = new ProcessStartInfo
+      {
+        FileName = mkiPath,
+        WorkingDirectory = mkiDir,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+        WindowStyle = ProcessWindowStyle.Hidden
+      };
+
+      process.StartInfo.ArgumentList.Add("/runheadless");
+      process.StartInfo.ArgumentList.Add(programPath);
+
+      if (!process.Start())
+        throw new InvalidOperationException("Не удалось запустить mkiw.exe.");
+
+      using var cancellationTokenSource = new CancellationTokenSource(
+        TimeSpan.FromSeconds(timeoutSeconds));
+
+      try
+      {
+        await process.WaitForExitAsync(cancellationTokenSource.Token);
+      }
+      catch (OperationCanceledException)
+      {
+        try
+        {
+          if (!process.HasExited)
+            process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+          // Ошибку принудительного завершения процесса игнорируем.
+        }
+
+        throw new TimeoutException($"mkiw.exe работала больше {timeoutSeconds} секунд.");
+      }
+
+      if (process.ExitCode != 0)
+        throw new InvalidOperationException($"mkiw.exe завершилась с кодом {process.ExitCode}.");
+
+      var protocolPath = FindLatestProtocol(historyRoot, startedUtc);
+
+      if (protocolPath == null)
+        throw new FileNotFoundException($"Протокол не найден в папке: {historyRoot}");
+
+      return protocolPath;
+    }
+
+    /// <summary>
+    /// Находит последний сформированный файл протокола в папке HISTORY.
+    /// Сначала ищет файл, изменённый после запуска mkiw.exe,
+    /// затем, если такой файл не найден, возвращает самый свежий файл в HISTORY.
+    /// </summary>
+    /// <param name="historyRoot">Путь к корневой папке HISTORY.</param>
+    /// <param name="startedUtc">Время запуска mkiw.exe в UTC.</param>
+    /// <returns>
+    /// Полный путь к найденному протоколу или <c>null</c>, если подходящих файлов нет.
+    /// </returns>
+    private static string? FindLatestProtocol(string historyRoot, DateTime startedUtc)
+    {
+      if (!Directory.Exists(historyRoot))
+        return null;
+
+      var files = Directory
+        .EnumerateFiles(historyRoot, "*.*", SearchOption.AllDirectories)
+        .Select(path => new
+        {
+          Path = path,
+          LastWriteUtc = File.GetLastWriteTimeUtc(path)
+        })
+        .OrderByDescending(file => file.LastWriteUtc)
+        .ToList();
+
+      var freshFile = files
+        .Where(file => file.LastWriteUtc >= startedUtc)
+        .Select(file => file.Path)
+        .FirstOrDefault();
+
+      if (freshFile != null)
+        return freshFile;
+
+      return files
+        .Select(file => file.Path)
+        .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Выполняет запуск старой программы АСК-МКИ с отображением окна прогресса.
+    /// Окно показывается на время ожидания завершения mkiw.exe и поиска протокола.
+    /// </summary>
+    /// <param name="mkiPath">Полный путь к mkiw.exe.</param>
+    /// <param name="programPath">Полный путь к программе контроля (*.acs или *.pk).</param>
+    /// <returns>Полный путь к сформированному протоколу.</returns>
+    private async Task<string> RunMkiAndGetProtocolWithProgressAsync(
+      string mkiPath,
+      string programPath)
+    {
+      var owner = Application.Current?.MainWindow;
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
+
+      try
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+
+        progressWindow.Configure(
+          "Выполнение АСК-МКИ OLD",
+          "Запуск программы контроля",
+          $"Выполняется файл: {Path.GetFileName(programPath)}");
+
+        if (owner != null)
+        {
+          owner.Effect = new BlurEffect { Radius = 8 };
+        }
+
+        progressWindow.Show();
+
+        await WaitForProgressWindowAsync(progressWindow);
+
+        progressWindow.SetStage(
+          "Ожидание завершения mkiw.exe",
+          "Формирование протокола.");
+
+        var protocolPath = await RunMkiAndGetProtocolAsync(mkiPath, programPath);
+
+        progressWindow.SetStage(
+          "Протокол сформирован",
+          $"Открываем протокол: {Path.GetFileName(protocolPath)}");
+
+        return protocolPath;
+      }
+      finally
+      {
+        progressWindow?.Close();
+
+        if (owner != null)
+        {
+          owner.Effect = previousEffect;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Запускает текущий открытый файл программы контроля через старую программу АСК-МКИ.
+    /// Путь к mkiw.exe берётся из настроек конфигурации АСК-МКИ.
+    /// После выполнения открывает сформированный протокол во внутреннем редакторе приложения.
+    /// </summary>
+    public async Task RunAskMkiActiveFileAsync()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show(
+          "В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!",
+          "Ошибка!",
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+
+        return;
+      }
+
+      var activeEditor = _multiWindow.GetActiveTextEditor();
+
+      if (activeEditor == null)
+      {
+        Message.MessageBoxCustom.Show(
+          "Нет открытого файла для выполнения.",
+          "Выполнение АСК-МКИ",
+          MessageBoxButton.OK,
+          MessageBoxImage.Warning);
+
+        return;
+      }
+
+      var programPath = activeEditor.TextEditorModel?.FilePath;
+
+      if (string.IsNullOrWhiteSpace(programPath) || !File.Exists(programPath))
+      {
+        Message.MessageBoxCustom.Show(
+          "Текущий файл не найден на диске. Сначала сохраните файл.",
+          "Выполнение АСК-МКИ",
+          MessageBoxButton.OK,
+          MessageBoxImage.Warning);
+
+        return;
+      }
+
+      var extension = Path.GetExtension(programPath);
+
+      if (!string.Equals(extension, ".acs", StringComparison.OrdinalIgnoreCase)
+          && !string.Equals(extension, ".pk", StringComparison.OrdinalIgnoreCase))
+      {
+        Message.MessageBoxCustom.Show(
+          "Через АСК-МКИ OLD можно выполнять только файлы *.acs или *.pk.",
+          "Выполнение АСК-МКИ",
+          MessageBoxButton.OK,
+          MessageBoxImage.Warning);
+
+        return;
+      }
+
+      var mkiPath = LegacyMkiConfig.GetMkiPath();
+
+      if (string.IsNullOrWhiteSpace(mkiPath) || !File.Exists(mkiPath))
+      {
+        Message.MessageBoxCustom.Show(
+          "Путь к mkiw.exe не задан или файл не найден. Укажите путь в параметрах: Конфигурация АСК-МКИ.",
+          "Выполнение АСК-МКИ",
+          MessageBoxButton.OK,
+          MessageBoxImage.Warning);
+
+        return;
+      }
+
+      try
+      {
+        // Чтобы старая программа выполняла актуальную версию файла.
+        _multiWindow.EditorDocumentService.SaveFile();
+
+        var protocolPath = await RunMkiAndGetProtocolWithProgressAsync(mkiPath, programPath);
+
+        OpenFileAsync(protocolPath);
+      }
+      catch (Exception ex)
+      {
+        Message.MessageBoxCustom.Show(
+          ex.Message,
+          "Ошибка выполнения АСК-МКИ",
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+      }
     }
   }
 }

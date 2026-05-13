@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -40,7 +40,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
       var binaryPoints = ConvertToReversedBinaryRange(groupChains, HighestBitCount);
-
 
       for (int step = 0; step < HighestBitCount; step++)
       {
@@ -92,7 +91,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var maxPoints = points.Count;
       return Convert.ToString(maxPoints, 2).Length;
     }
-
 
     /// <summary>
     /// Преобразует все точки в диапазоне в перевёрнутые двоичные строки фиксированной длины.

@@ -1,7 +1,6 @@
-﻿using Message;
+using Message;
 using System.Windows;
 using System.Windows.Controls;
-
 
 namespace UI.Controls.GPT.Mode
 {

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
@@ -524,4 +524,3 @@ namespace Ask.UI.Controls.ProtocolNew
     }
   }
 }
-

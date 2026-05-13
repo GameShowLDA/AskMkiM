@@ -1,4 +1,4 @@
-﻿using Ask.UI.Features.ExecutionSelection.ViewModels;
+using Ask.UI.Features.ExecutionSelection.ViewModels;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Linq;
 using System.ComponentModel;
@@ -189,4 +189,3 @@ namespace Ask.UI.Features.ExecutionSelection.Views
     }
   }
 }
-

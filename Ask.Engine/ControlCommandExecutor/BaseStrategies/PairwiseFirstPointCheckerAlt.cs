@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
@@ -64,9 +65,21 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var Rt1 = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
           if (Rt1 > 100)
           {
-            var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            string machineAddress = string.Empty;
 
-            var errorMessageModels = new ShowMessageModel($"{_basePoint.Mnemonic}{machineAdress}", message: "Rизм = Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
+            if (DeviceDisplayConfig.GetMachineAddressVisibility())
+            {
+              if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+              {
+                machineAddress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(_basePoint.ToString())}]";
+              }
+              else
+              {
+                machineAddress = $"[{_basePoint.ToString()}]";
+              }
+            }
+
+            var errorMessageModels = new ShowMessageModel($"{_basePoint.Mnemonic}{machineAddress}", message: "Rизм = Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
             errorPoint = true;
 
             await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Результат измерений"));
@@ -76,18 +89,31 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
             context.CommandManager.AddErrorMethod(
               EhtErrors.PointNotConnected($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-              $"{_basePoint}{machineAdress}",
+              $"{_basePoint}{machineAddress}",
               context.MessageService.GetLastLineNumber(),
               baseCommandModel.FormattedStartLineNumber));
           }
           else
           {
-            var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
+            string machineAddress = string.Empty;
+
+            if (DeviceDisplayConfig.GetMachineAddressVisibility())
+            {
+              if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+              {
+                machineAddress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(_basePoint.ToString())}]";
+              }
+              else
+              {
+                machineAddress = $"[{_basePoint.ToString()}]";
+              }
+            }
+
             if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
             {
               await context.MessageService.ShowMessageAsync(
                 new ShowMessageModel(
-                  $"Результат измерений ({_basePoint.Mnemonic}{machineAdress})",
+                  $"Результат измерений ({_basePoint.Mnemonic}{machineAddress})",
                   message: MeasurementValueFormatter.FormatWithUnit(Rt1, "Ом"),
                   type: ShowMessageModel.MessageType.Info)
                 { IndentLevel = 1 });
@@ -105,7 +131,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var Rt2 = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
             if (Rt2 > 100)
             {
-              var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
+              string machineAdress = string.Empty;
+              if (DeviceDisplayConfig.GetMachineAddressVisibility())
+              {
+                if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+                {
+                  machineAdress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+                }
+                else
+                {
+                  machineAdress = $"[{point.ToString()}]";
+                }
+              }
 
               var errorMessageModels = new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
               errorPoint = true;
@@ -123,7 +160,19 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
             else
             {
-              var machineAdress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
+              string machineAdress = string.Empty;
+              if (DeviceDisplayConfig.GetMachineAddressVisibility())
+              {
+                if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+                {
+                  machineAdress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+                }
+                else
+                {
+                  machineAdress = $"[{point.ToString()}]";
+                }
+              }
+
               if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
               {
                 await context.MessageService.ShowMessageAsync(
@@ -141,8 +190,31 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
             var UpperBound = (baseCommandModel as EhtCommandModel).HigherLimitResistance.Value;
 
-            string machineAdressFirst = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{_basePoint.ToString()}]" : string.Empty;
-            string machineAdressSecond = DeviceDisplayConfig.GetMachineAddressVisibility() ? $"[{point.ToString()}]" : string.Empty;
+            string machineAdressFirst = string.Empty;
+            if (DeviceDisplayConfig.GetMachineAddressVisibility())
+            {
+              if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+              {
+                machineAdressFirst = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(_basePoint.ToString())}]";
+              }
+              else
+              {
+                machineAdressFirst = $"[{_basePoint.ToString()}]";
+              }
+            }
+
+            string machineAdressSecond = string.Empty;
+            if (DeviceDisplayConfig.GetMachineAddressVisibility())
+            {
+              if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+              {
+                machineAdressSecond = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+              }
+              else
+              {
+                machineAdressSecond = $"[{point.ToString()}]";
+              }
+            }
 
             if (!errorPoint)
             {

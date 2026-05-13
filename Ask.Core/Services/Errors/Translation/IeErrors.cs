@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -51,7 +51,6 @@ namespace Ask.Core.Services.Errors.Translation
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = "Не указаны точки для измерения."
       };
-
 
     public ErrorItem PairError(string command, string pointFirst, string pointLast, int sourceLineNumber, int formaterLineNumber,
       [CallerMemberName] string callerName = "",

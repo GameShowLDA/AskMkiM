@@ -65,7 +65,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       }
     }
 
-
     /// <inheritdoc />
     static public async Task<double> GetHighCurrentLimitAsync(IBreakdownTester breakDown, BreakdownTypeMode typeCommand, int delay)
     {
@@ -161,7 +160,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         await Task.Delay(delay);
       }
     }
-
 
     /// <inheritdoc />
     static public async Task<double> GetLowCurrentLimitAsync(IBreakdownTester breakDown, BreakdownTypeMode typeCommand, int delay)

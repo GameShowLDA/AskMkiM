@@ -55,7 +55,7 @@ namespace Ask.Device.Runtime.Function.ManagerChassis
       }
 
       var cmd = new DeviceCommand(7);
-      var result = await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      var result = await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
 
       return result.Contains("1");
     }

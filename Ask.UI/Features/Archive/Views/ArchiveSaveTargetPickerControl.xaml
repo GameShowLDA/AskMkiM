@@ -1,0 +1,85 @@
+<UserControl x:Class="Ask.UI.Features.Archive.Views.ArchiveSaveTargetPickerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="DialogShellBackgroundBrush" Color="#E6E8EC" />
+        <SolidColorBrush x:Key="DialogShellBorderBrush" Color="#78828C" />
+        <SolidColorBrush x:Key="DialogForegroundBrush" Color="Black" />
+        <SolidColorBrush x:Key="DialogListBackgroundBrush" Color="#EFEFE0" />
+        <SolidColorBrush x:Key="DialogListBorderBrush" Color="#78000000" />
+        <SolidColorBrush x:Key="DialogListAccentBrush" Color="#78A4EB9E" />
+
+        <Style x:Key="ArchiveListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DialogListAccentBrush}" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DialogListAccentBrush}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Padding="20"
+            Background="{DynamicResource DialogShellBackgroundBrush}"
+            BorderBrush="{DynamicResource DialogShellBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="20">
+        <Grid MinWidth="420">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="PromptTextBlock"
+                       Margin="0,0,0,4"
+                       Foreground="{DynamicResource DialogForegroundBrush}"
+                       FontSize="16"
+                       TextWrapping="Wrap" />
+
+            <Border Grid.Row="1"
+                    Margin="0,8,0,0"
+                    Padding="6"
+                    Background="{DynamicResource DialogListBackgroundBrush}"
+                    BorderBrush="{DynamicResource DialogListBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10">
+                <ListBox x:Name="ArchivesListBox"
+                         MinWidth="380"
+                         MinHeight="180"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="15"
+                         Foreground="{DynamicResource DialogForegroundBrush}"
+                         ItemContainerStyle="{StaticResource ArchiveListItemStyle}"
+                         SelectionChanged="ArchivesListBox_OnSelectionChanged" />
+            </Border>
+
+            <StackPanel Grid.Row="2"
+                        Margin="0,12,0,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button x:Name="CreateArchiveButton"
+                        MinWidth="160"
+                        Margin="0,0,8,0"
+                        Click="CreateArchiveButton_OnClick">Создать архив</Button>
+                <Button x:Name="SaveButton"
+                        MinWidth="140"
+                        Margin="0,0,8,0"
+                        IsDefault="True"
+                        Click="SaveButton_OnClick">Сохранить</Button>
+                <Button x:Name="CancelButton"
+                        MinWidth="120"
+                        IsCancel="True">Отмена</Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

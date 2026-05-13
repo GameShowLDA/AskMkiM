@@ -1,6 +1,8 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
-using Ask.Core.Services.Config.AppSettings;
+using System.Reflection;
 
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
@@ -13,7 +15,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
       for (int index = 0; index < chain.PointModels.Count; index++)
       {
         var point = chain.PointModels[index];
-        var machineAddress = DeviceDisplayConfig.GetMachineAddressVisibility() ? $" [{point}]" : string.Empty;
+        
+        string machineAddress = string.Empty;
+
+        if (DeviceDisplayConfig.GetMachineAddressVisibility())
+        {
+          if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+          {
+            machineAddress = $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]";
+          }
+          else
+          {
+            machineAddress = $"[{point.ToString()}]";
+          }
+        }
 
         chainStr += point.Mnemonic + machineAddress;
 

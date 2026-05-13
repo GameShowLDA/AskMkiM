@@ -1,10 +1,11 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using Ask.UI.Shared.Formatting;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,7 +15,7 @@ using System.Windows.Threading;
 using UI.Components;
 using UI.Controls.TextEditorControl;
 using UI.Services;
-using UI.Services.Archive;
+using Ask.UI.Features.Archive.Services;
 using Ask.Core.Services.EventCore.Adapters;
 
 namespace UI.Controls
@@ -58,29 +59,6 @@ namespace UI.Controls
       get => translationModels;
       set
       {
-        translationModels = value;
-
-        ErrorClear();
-        ErrorListBoxVertical.ClearAll();
-
-        foreach (var model in value)
-        {
-          if (model.Errors.Count > 0)
-          {
-            ErrorListBoxVertical.AddErrors(model.Errors);
-            ErrorCount += model.Errors.Count;
-          }
-
-          if (model.Warnings.Count > 0)
-          {
-            ErrorListBoxVertical.AddWarnings(model.Warnings);
-            WarningCount += model.Warnings.Count;
-          }
-        }
-
-        Ask.Core.Services.EventCore.Adapters.MessageEventAdapter.RaiseInfoMessage(
-          $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
-		  
         ApplyTranslationModels(value, BuildIssuesSnapshot(value));
       }
     }
@@ -244,7 +222,7 @@ namespace UI.Controls
       UpdateRightEditorActions();
 
       MessageEventAdapter.RaiseInfoMessage(
-             $"Общее кол-во ошибок и предупреждений: {GeneralCount}");
+             $"Общее кол-во ошибок и предупреждений: {CountDisplayFormatter.Format(GeneralCount)}");
       UpdateRightEditorActions();
     }
 

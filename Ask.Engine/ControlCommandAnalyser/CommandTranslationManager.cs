@@ -19,6 +19,7 @@ namespace Ask.Engine.ControlCommandAnalyser
 {
   public class CommandTranslationManager
   {
+    private static readonly Regex CommandHeaderRegex = new(@"^\s*(\d+)\s+([\p{L}_]{2,})(?=\s|$)", RegexOptions.Compiled);
     private readonly List<ICommandParser> _parsers;
     private readonly List<ICommandFormatter> _formatters;
     private readonly List<ICommandBody> _commandBodyBuilders;
@@ -291,6 +292,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       MessageEventAdapter.RaiseInfoMessage("Сбор данных...");
 
+      text = NormalizeCommandMnemonics(text);
       var (lines, comments) = PreprocessText.PreprocessTextAndExtractComments(text);
       var commands = new List<BaseCommandModel>();
 
@@ -303,14 +305,12 @@ namespace Ask.Engine.ControlCommandAnalyser
       int currentStartLine = -1;
       int lastCommandLine = -1;
 
-      var cmdRegex = new Regex(@"^\s*(\d+)\s+([А-ЯA-Z]{2,})\b", RegexOptions.Compiled);
-
       foreach (var kvp in lines.OrderBy(x => x.Key))
       {
         int lineNumber = kvp.Key;
         string line = kvp.Value;
 
-        var match = cmdRegex.Match(line);
+        var match = CommandHeaderRegex.Match(line);
         if (match.Success)
         {
           // --- закрываем предыдущую команду ---
@@ -339,8 +339,8 @@ namespace Ask.Engine.ControlCommandAnalyser
 
           // --- начинаем новую команду ---
           commandNumber = match.Groups[1].Value;
-          mnemonic = match.Groups[2].Value;
-          commandLines = new List<string> { line };
+          mnemonic = NormalizeCommandMnemonic(match.Groups[2].Value);
+          commandLines = new List<string> { NormalizeCommandLineMnemonic(line, match) };
           currentStartLine = lineNumber;
           lastCommandLine = lineNumber;
         }
@@ -370,8 +370,39 @@ namespace Ask.Engine.ControlCommandAnalyser
       return commands;
     }
 
+    public static string NormalizeCommandMnemonics(string text)
+    {
+      if (string.IsNullOrEmpty(text))
+      {
+        return text;
+      }
+
+      var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+      var changed = false;
+
+      for (var i = 0; i < lines.Length; i++)
+      {
+        var match = CommandHeaderRegex.Match(lines[i]);
+        if (!match.Success)
+        {
+          continue;
+        }
+
+        var normalizedLine = NormalizeCommandLineMnemonic(lines[i], match);
+        if (!string.Equals(lines[i], normalizedLine, StringComparison.Ordinal))
+        {
+          lines[i] = normalizedLine;
+          changed = true;
+        }
+      }
+
+      return changed ? string.Join("\n", lines) : text;
+    }
+
     private BaseCommandModel ParseSingle(string commandNumber, string mnemonic, int lineNumber, List<string> lines)
     {
+      mnemonic = NormalizeCommandMnemonic(mnemonic);
+
       foreach (var parser in _parsers)
         if (parser.CanParse(mnemonic))
         {
@@ -398,6 +429,25 @@ namespace Ask.Engine.ControlCommandAnalyser
       }
 
       return unknownCommandModel;
+    }
+
+    private static string NormalizeCommandMnemonic(string mnemonic)
+    {
+      return (mnemonic ?? string.Empty).ToUpperInvariant();
+    }
+
+    private static string NormalizeCommandLineMnemonic(string line, Match match)
+    {
+      var mnemonicGroup = match.Groups[2];
+      var normalizedMnemonic = NormalizeCommandMnemonic(mnemonicGroup.Value);
+      if (string.Equals(mnemonicGroup.Value, normalizedMnemonic, StringComparison.Ordinal))
+      {
+        return line;
+      }
+
+      return line[..mnemonicGroup.Index]
+        + normalizedMnemonic
+        + line[(mnemonicGroup.Index + mnemonicGroup.Length)..];
     }
 
     public void SetSourseLines(List<BaseCommandModel> models)

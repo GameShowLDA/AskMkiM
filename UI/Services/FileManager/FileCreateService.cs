@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
 using System.Windows;
 using UI.Components.SearchControls;
@@ -109,7 +109,6 @@ namespace UI.Services.FileManager
           // просто игнорируем отменённую задержку
         }
       };
-
 
       return textEditor;
     }

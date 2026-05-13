@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Ask.UI.Shared.Components.Icons
@@ -33,4 +33,3 @@ namespace Ask.UI.Shared.Components.Icons
     }
   }
 }
-

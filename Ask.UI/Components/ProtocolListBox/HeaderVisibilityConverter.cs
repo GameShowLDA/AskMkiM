@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -23,4 +23,3 @@ namespace Ask.UI.Components.ProtocolListBox
         => throw new NotSupportedException();
   }
 }
-

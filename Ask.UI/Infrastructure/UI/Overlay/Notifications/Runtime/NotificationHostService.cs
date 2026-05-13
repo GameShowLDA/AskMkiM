@@ -72,8 +72,6 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime
         {
           _viewModel.Items.Insert(0, item);
 
-          // Жёстко ограничиваем стек уведомлений.
-          // Это защищает UI от лавинообразных вызовов Show().
           while (_viewModel.Items.Count > _viewModel.MaxItems)
           {
             _viewModel.Items.RemoveAt(_viewModel.Items.Count - 1);
@@ -166,7 +164,6 @@ namespace Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime
           return false;
         }
 
-        // Периодически очищаем устаревшие ключи, чтобы словарь не разрастался.
         if (_recentNotificationByKey.Count > 512)
         {
           var staleKeys = _recentNotificationByKey

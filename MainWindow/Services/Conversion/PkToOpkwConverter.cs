@@ -1,3 +1,4 @@
+using Ask.Core.Services.FileFormats;
 using Ask.Engine.ControlCommandAnalyser;
 using System.IO;
 using System.Text;
@@ -119,11 +120,11 @@ namespace MainWindowProgram.Services.Conversion
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
-      return File.ReadAllText(path, encoding)
+      return CommandTranslationManager.NormalizeCommandMnemonics(
+          TextSanitizer.RemoveLegacyControlChars(File.ReadAllText(path, encoding)))
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
     }
-
     private static string BuildUniqueOutputPath(string inputPath, string outputDirectory)
     {
       var baseFileName = Path.GetFileNameWithoutExtension(inputPath);

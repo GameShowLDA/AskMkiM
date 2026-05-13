@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Windows;
 
 namespace UI.Windows.WpfDocking.Windows.Docking
@@ -42,7 +42,6 @@ namespace UI.Windows.WpfDocking.Windows.Docking
         Initialize(oldValue.FloatingWindow, oldValue.Value, newValue.Value);
         return true;
       }
-
 
       public bool ShouldRemove(DockControl dockControl, UpdateBoundsData value)
       {

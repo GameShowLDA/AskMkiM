@@ -64,7 +64,6 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         return (true, string.Empty);
       }
 
-
       if (_device.IP == null)
       {
         if (IPAddress.TryParse(_device.ConnectionDetails, out IPAddress ip))

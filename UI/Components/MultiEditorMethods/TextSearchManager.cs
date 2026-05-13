@@ -210,7 +210,6 @@ namespace UI.Components.MultiEditorMethods
               }
               var allOccurrences = FindAllOccurrences(textEditor.Text, searchText, wholeWord, caseWord, searchArea);
 
-
               if (allOccurrences != null)
               {
                 currentIndex = -1; // сброс перед вычислением позиции от каретки
@@ -392,7 +391,6 @@ namespace UI.Components.MultiEditorMethods
         }
       })).ToList();
     }
-
 
     /// <summary>
     /// Задает страницы, в которых необходимо провести поиск по тексту.

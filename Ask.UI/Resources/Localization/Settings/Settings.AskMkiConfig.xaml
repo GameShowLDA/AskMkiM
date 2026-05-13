@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_AskMkiConfig_Title"
+                                     Key="settings.askMki.config.title" />
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_AskMkiConfig_MkiPath_Title"
+                                     Key="settings.askMki.config.mkiPath.title" />
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_AskMkiConfig_MkiPath_Description"
+                                     Key="settings.askMki.config.mkiPath.description" />
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_AskMkiConfig_SelectMki"
+                                     Key="settings.askMki.config.selectMki" />
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_AskMkiConfig_ClearMki"
+                                     Key="settings.askMki.config.clearMki" />
+
+</ResourceDictionary>
