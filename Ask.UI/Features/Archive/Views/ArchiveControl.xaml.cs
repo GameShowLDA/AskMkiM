@@ -3248,6 +3248,95 @@ namespace Ask.UI.Features.Archive.Views
     }
 
     /// <summary>
+    /// Конвертирует выбранный APKW-архив в legacy-комплект APK + OPK.
+    /// </summary>
+    /// <returns>Асинхронная задача конвертации.</returns>
+    public async Task ConvertSelectedArchiveToApkAsync()
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
+      {
+        ShowArchiveNotification("Конвертация APKW в APK", "Выберите архив для конвертации.", NotificationType.Warning);
+        return;
+      }
+
+      var outputDirectory = ArchiveFileDialogService.SelectFolder(this, "Выберите папку для сохранения APK и OPK");
+      if (string.IsNullOrWhiteSpace(outputDirectory))
+      {
+        return;
+      }
+
+      var owner = Window.GetWindow(this);
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
+
+      try
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+
+        progressWindow.Configure(
+          "Конвертация APKW в APK",
+          "Подготовка конвертации",
+          "Извлекаем файлы из APKW и собираем legacy-комплект для старой программы.");
+
+        if (owner != null)
+        {
+          owner.Effect = new BlurEffect { Radius = 8 };
+        }
+
+        progressWindow.Show();
+        await WaitForProgressWindowAsync(progressWindow);
+
+        var progress = new Progress<ApkwToApkLegacyExportProgress>(info =>
+        {
+          progressWindow.SetProgress(info.Percent);
+          var status = info.TotalEntries > 0
+            ? $"{info.Stage} ({Math.Min(info.ProcessedEntries, info.TotalEntries)}/{info.TotalEntries})"
+            : info.Stage;
+
+          progressWindow.SetStage(status, info.Hint);
+        });
+
+        var result = await new ApkwToApkLegacyExportService()
+          .ExportAsync(_lastSelectedArchivePath, outputDirectory, progress);
+
+        if (!result.Success)
+        {
+          ShowArchiveNotification(
+            "Конвертация APKW в APK",
+            result.ErrorMessage ?? "Не удалось выполнить конвертацию.",
+            NotificationType.Error);
+          return;
+        }
+
+        ShowArchiveNotification(
+          "Конвертация APKW в APK",
+          $"Создан '{Path.GetFileName(result.OutputApkPath)}'. OPK-файлов: {CountDisplayFormatter.Format(result.EntriesCount)}.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Конвертация APKW в APK", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+      finally
+      {
+        progressWindow?.Close();
+
+        if (owner != null)
+        {
+          owner.Effect = previousEffect;
+        }
+
+        ResetArchiveActionButtonFocus();
+      }
+    }
+
+    /// <summary>
     /// Удаляет архив.
     /// </summary>
     /// <param name="archivePath">Путь к архиву.</param>

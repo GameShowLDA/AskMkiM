@@ -47,6 +47,7 @@ namespace MainWindowProgram.Services
     private readonly OpkToOpkwConverter _opkToOpkwConverter;
     private readonly PkToOpkwConverter _pkToOpkwConverter;
     private readonly ApkToApkwConverter _apkToApkwConverter;
+    private readonly ApkwToApkLegacyExportService _apkwToApkExporter;
 
     private bool _isSearchWindowOpen;
     private bool _selectFileHandlerAttached;
@@ -91,6 +92,7 @@ namespace MainWindowProgram.Services
         },
         () => new ApkwArchiveWriter(),
         ArchiveDirectoryService.ResolveReviewArchivesRootPath);
+      _apkwToApkExporter = new ApkwToApkLegacyExportService();
 
       EventAggregator.Subscribe<SearchEvents.SearchWindowClosing>(e => OnSearchWindowClosing(e.IsClosing));
 
@@ -373,6 +375,45 @@ namespace MainWindowProgram.Services
       }
 
       ShowApkToApkwSummary(result);
+    }
+
+    /// <summary>
+    /// Запускает конвертацию нового APKW-архива в legacy-комплект APK + OPK.
+    /// </summary>
+    public async void ConvertApkwToApk()
+    {
+      if (_isLockedProvider())
+      {
+        Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
+        return;
+      }
+
+      var dialog = new ApkwToApkConversionWindow
+      {
+        Owner = _mainWindow,
+      };
+
+      try
+      {
+        _mainWindow.Effect = new BlurEffect { Radius = 8 };
+        if (dialog.ShowDialog() != true)
+        {
+          return;
+        }
+      }
+      finally
+      {
+        _mainWindow.Effect = null;
+      }
+
+      var result = await RunApkwToApkConversionAsync(dialog.InputFilePath, dialog.OutputDirectory);
+      if (!result.Success)
+      {
+        ShowApkwToApkFailure(result);
+        return;
+      }
+
+      ShowApkwToApkSummary(result);
     }
 
     /// <summary>
@@ -670,6 +711,59 @@ namespace MainWindowProgram.Services
       }
     }
 
+    private async Task<ApkwToApkLegacyExportResult> RunApkwToApkConversionAsync(string inputFilePath, string outputDirectory)
+    {
+      var owner = Application.Current?.MainWindow;
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
+
+      try
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+
+        progressWindow.Configure(
+          "Конвертация APKW в APK",
+          "Подготовка конвертации",
+          "Проверяем архив, извлекаем OPKW-файлы и готовим legacy-комплект.");
+
+        if (owner != null)
+        {
+          owner.Effect = new BlurEffect { Radius = 8 };
+        }
+
+        progressWindow.Show();
+        await WaitForProgressWindowAsync(progressWindow);
+
+        var progress = new Progress<ApkwToApkLegacyExportProgress>(info =>
+        {
+          progressWindow.SetProgress(info.Percent);
+
+          var status = info.TotalEntries > 0
+            ? $"{info.Stage} ({System.Math.Min(info.ProcessedEntries, info.TotalEntries)}/{info.TotalEntries})"
+            : info.Stage;
+
+          progressWindow.SetStage(status, info.Hint);
+        });
+
+        return await _apkwToApkExporter.ExportAsync(inputFilePath, outputDirectory, progress);
+      }
+      finally
+      {
+        progressWindow?.Close();
+
+        if (owner != null)
+        {
+          owner.Effect = previousEffect;
+        }
+      }
+    }
+
     private static async Task WaitForProgressWindowAsync(ProgressWindow progressWindow)
     {
       await progressWindow.Dispatcher.InvokeAsync(
@@ -723,6 +817,31 @@ namespace MainWindowProgram.Services
         "Конвертация APK в APKW",
         MessageBoxButton.OK,
         MessageBoxImage.Information);
+    }
+
+    private static void ShowApkwToApkSummary(ApkwToApkLegacyExportResult result)
+    {
+      var summaryLines = new List<string>
+      {
+        $"Создан APK: {Path.GetFileName(result.OutputApkPath)}",
+        $"Создано OPK-файлов: {result.EntriesCount}",
+        $"Папка: {result.OutputDirectory}",
+      };
+
+      Message.MessageBoxCustom.Show(
+        string.Join(Environment.NewLine, summaryLines),
+        "Конвертация APKW в APK",
+        MessageBoxButton.OK,
+        MessageBoxImage.Information);
+    }
+
+    private static void ShowApkwToApkFailure(ApkwToApkLegacyExportResult result)
+    {
+      Message.MessageBoxCustom.Show(
+        result.ErrorMessage ?? "Не удалось выполнить конвертацию APKW в APK.",
+        "Конвертация APKW в APK",
+        MessageBoxButton.OK,
+        MessageBoxImage.Error);
     }
 
     private void ShowApkToApkwFailure(ApkToApkwConversionResult result)

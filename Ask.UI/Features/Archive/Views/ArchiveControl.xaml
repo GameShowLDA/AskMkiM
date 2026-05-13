@@ -657,6 +657,14 @@
                                 <askUiIcons:SaveIcon Size="16"
                                                      Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                             </Button>
+                            <Button x:Name="ConvertArchiveToApkButton"
+                                    Style="{StaticResource ArchiveToolbarNeutralIconButtonStyle}"
+                                    ToolTip="Конвертировать APKW в APK для старой программы"
+                                    Visibility="{Binding ConvertArchiveToApkVisibility}" Command="{Binding ConvertSelectedArchiveToApkCommand}">
+                                <askUiIcons:ExportConfigIcon Size="16"
+                                                             IsExporting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                            </Button>
                             <Button x:Name="PrintArchiveCatalogButton"
                                     Style="{StaticResource ArchiveToolbarNeutralIconButtonStyle}"
                                     ToolTip="Распечатать каталог архива"
