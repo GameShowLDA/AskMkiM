@@ -9,7 +9,7 @@ namespace Ask.UI.Features.Archive.Services
     public static void ShowAndPrint(
       FrameworkElement ownerElement,
       string documentName,
-      Func<double, double, double, double, FixedDocument> documentFactory)
+      Func<double, double, double, double, IDocumentPaginatorSource> documentFactory)
     {
       ArgumentNullException.ThrowIfNull(ownerElement);
       ArgumentNullException.ThrowIfNull(documentFactory);
@@ -36,9 +36,7 @@ namespace Ask.UI.Features.Archive.Services
         hardMarginY,
         printDialog.PrintableAreaWidth,
         printDialog.PrintableAreaHeight);
-
-      IDocumentPaginatorSource paginatorSource = document;
-      printDialog.PrintDocument(paginatorSource.DocumentPaginator, documentName);
+      printDialog.PrintDocument(document.DocumentPaginator, documentName);
     }
   }
 }

@@ -6,6 +6,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -239,15 +241,28 @@ namespace UI.Components
       await Task.Delay(500);
 
       bool power = true;
-      while (power)
+      int i = 0;
+
+      while (power && i < 3)
       {
         await model.PowerManager.StopPowerAsync();
         power = await model.PowerManager.VerifyPowerAsync();
         await Task.Delay(100);
+        i++;
       }
 
-      active = false;
-      SetDisconnectedState("Подключить систему");
+      if (!power)
+      {
+        active = false;
+        SetDisconnectedState("Подключить систему");
+      }
+      else
+      {
+        NotificationHostService.Instance.Show(
+              "Отключение системы",
+              "Не удалось выполнить отключение питания системы. Проверьте подключение системы к компьютеру и повторите попытку.",
+              type: NotificationType.Error);
+      }
     }
 
     /// <summary>
@@ -300,7 +315,7 @@ namespace UI.Components
       SetLoadingState("Отменить подключение", (Color)FindResource("YellowColor"));
 
       bool exitLoop = false;
-
+      int i = 0;
       do
       {
         if (cancellationToken.Token.IsCancellationRequested)
@@ -317,8 +332,18 @@ namespace UI.Components
         {
           break;
         }
+
+        i++;
       }
-      while (!await TryConnectAsync());
+      while (!await TryConnectAsync() && i < 3);
+
+      if (!exitLoop)
+      {
+        NotificationHostService.Instance.Show(
+               "Включение системы",
+               "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку.",
+               type: NotificationType.Error);
+      }
     }
 
     /// <summary>

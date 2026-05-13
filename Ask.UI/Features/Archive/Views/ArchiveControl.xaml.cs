@@ -1,4 +1,4 @@
-using Ask.Core.Services.EventCore.Adapters;
+﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats;
@@ -33,10 +33,8 @@ using Ask.UI.Shared.Components.Progress;
 using Ask.UI.Features.Archive.Services;
 using static Ask.LogLib.LoggerUtility;
 using Button = System.Windows.Controls.Button;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
-using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 using Table = System.Windows.Documents.Table;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -2490,32 +2488,21 @@ namespace Ask.UI.Features.Archive.Views
 
       if (entries == null || entries.Count == 0)
       {
-        MessageBoxCustom.Show("Нет данных для печати", "Ошибка печати", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("??? ?????? ??? ??????", "?????? ??????", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
       var archiveName = System.IO.Path.GetFileName(archivePath);
-
-      var printDialog = new PrintDialog();
-
-      var printCapabilities = printDialog.PrintQueue.GetPrintCapabilities(printDialog.PrintTicket);
-
-      double hardMarginX = printCapabilities.PageImageableArea.OriginWidth;
-      double hardMarginY = printCapabilities.PageImageableArea.OriginHeight;
-
-
-      if (printDialog.ShowDialog() == true)
-      {
-        var document = CreatePrintDocument(
+      ArchivePrintDialogService.ShowAndPrint(
+        this,
+        "??????? ??????",
+        (hardMarginX, hardMarginY, printableAreaWidth, printableAreaHeight) => CreatePrintDocument(
           entries,
           archiveName,
           hardMarginX,
           hardMarginY,
-          printDialog.PrintableAreaWidth,
-          printDialog.PrintableAreaHeight);
-        IDocumentPaginatorSource idpSource = document;
-        printDialog.PrintDocument(idpSource.DocumentPaginator, "Каталог архива");
-      }
+          printableAreaWidth,
+          printableAreaHeight));
     }
 
     /// <summary>
@@ -3204,15 +3191,8 @@ namespace Ask.UI.Features.Archive.Views
     /// <param name="archivePath">Путь к архиву.</param>
     private void AddFileToArchive(string archivePath)
     {
-      var openFileDialog = new OpenFileDialog
-      {
-        Title = "Выберите файл для добавления",
-        Filter = "OPKW file (*.opkw)|*.opkw",
-        CheckFileExists = true,
-        Multiselect = false,
-      };
-
-      if (openFileDialog.ShowDialog(Window.GetWindow(this)) != true)
+      var filePath = ArchiveFileDialogService.SelectFileToAddToArchive(this);
+      if (string.IsNullOrWhiteSpace(filePath))
       {
         return;
       }
@@ -3222,17 +3202,17 @@ namespace Ask.UI.Features.Archive.Views
         lock (_archiveManagerSync)
         {
           EnsureArchiveOpenedInManagerCore(archivePath);
-          _archiveManager.AddFileToOpenedArchive(openFileDialog.FileName);
+          _archiveManager.AddFileToOpenedArchive(filePath);
         }
 
         ShowArchiveNotification(
-          "Добавление файла",
-          $"Файл '{Path.GetFileName(openFileDialog.FileName)}' успешно добавлен в архив '{Path.GetFileNameWithoutExtension(archivePath)}'.",
+          "???????????????????? ??????????",
+          $"???????? '{Path.GetFileName(filePath)}' ?????????????? ???????????????? ?? ?????????? '{Path.GetFileNameWithoutExtension(archivePath)}'.",
           NotificationType.Success);
       }
       catch (Exception ex)
       {
-        ShowArchiveNotification("Добавление файла", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+        ShowArchiveNotification("???????????????????? ??????????", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -3243,36 +3223,27 @@ namespace Ask.UI.Features.Archive.Views
     {
       if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
       {
-        ShowArchiveNotification("Сохранение архива", "Выберите архив для сохранения на диск.", NotificationType.Warning);
+        ShowArchiveNotification("???????????????????? ????????????", "???????????????? ?????????? ?????? ???????????????????? ???? ????????.", NotificationType.Warning);
         return;
       }
 
-      var saveFileDialog = new SaveFileDialog
-      {
-        Title = "Сохранить архив на диск",
-        Filter = "Архив ASK (*.apkw)|*.apkw",
-        DefaultExt = ".apkw",
-        AddExtension = true,
-        FileName = Path.GetFileName(_lastSelectedArchivePath),
-        OverwritePrompt = true,
-      };
-
-      if (saveFileDialog.ShowDialog(Window.GetWindow(this)) != true)
+      var destinationPath = ArchiveFileDialogService.SelectArchiveExportPath(this, Path.GetFileName(_lastSelectedArchivePath));
+      if (string.IsNullOrWhiteSpace(destinationPath))
       {
         return;
       }
 
       try
       {
-        var savedArchivePath = ArchiveTransferService.ExportArchive(_lastSelectedArchivePath, saveFileDialog.FileName);
+        var savedArchivePath = ArchiveTransferService.ExportArchive(_lastSelectedArchivePath, destinationPath);
         ShowArchiveNotification(
-          "Сохранение архива",
-          $"Архив '{Path.GetFileName(savedArchivePath)}' успешно сохранён на диск.",
+          "???????????????????? ????????????",
+          $"?????????? '{Path.GetFileName(savedArchivePath)}' ?????????????? ???????????????? ???? ????????.",
           NotificationType.Success);
       }
       catch (Exception ex)
       {
-        ShowArchiveNotification("Сохранение архива", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+        ShowArchiveNotification("???????????????????? ????????????", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
       }
     }
 
@@ -3856,27 +3827,20 @@ namespace Ask.UI.Features.Archive.Views
 
     private void SavePkwFileAs(string fileText, string suggestedFileName)
     {
-      var saveFileDialog = new SaveFileDialog
-      {
-        Title = "Save as PKW",
-        Filter = "PKW file (*.pkw)|*.pkw",
-        DefaultExt = ".pkw",
-        AddExtension = true,
-        FileName = string.IsNullOrWhiteSpace(suggestedFileName) ? "converted_from_archive" : suggestedFileName,
-        OverwritePrompt = true,
-      };
-
-      if (saveFileDialog.ShowDialog(Window.GetWindow(this)) != true)
+      var destinationPath = ArchiveFileDialogService.SelectPkwExportPath(
+        this,
+        string.IsNullOrWhiteSpace(suggestedFileName) ? "converted_from_archive" : suggestedFileName);
+      if (string.IsNullOrWhiteSpace(destinationPath))
       {
         return;
       }
 
       try
       {
-        File.WriteAllText(saveFileDialog.FileName, fileText ?? string.Empty, new UTF8Encoding(false));
+        File.WriteAllText(destinationPath, fileText ?? string.Empty, new UTF8Encoding(false));
         ShowArchiveNotification(
           "PKW export",
-          $"File '{Path.GetFileName(saveFileDialog.FileName)}' saved.",
+          $"File '{Path.GetFileName(destinationPath)}' saved.",
           NotificationType.Success);
       }
       catch (Exception ex)
@@ -3890,7 +3854,7 @@ namespace Ask.UI.Features.Archive.Views
     /// <returns>Имя созданного архива или null, если операция отменена.</returns>
     private string? ShowArchiveCreationDialog()
     {
-      var dialog = CreateDialogWindow("Создание архива");
+      var dialog = ArchiveDialogHostService.CreateDialogWindow(this, "???????? ??????");
       var content = new ArchiveNameInputControl();
       content.Initialize(this, "new_archive", isFirstArchive: false);
       dialog.Content = content;
@@ -4038,21 +4002,7 @@ namespace Ask.UI.Features.Archive.Views
     /// </summary>
     /// <param name="title">Заголовок окна.</param>
     /// <returns>Экземпляр окна.</returns>
-    private Window CreateDialogWindow(string title)
-    {
-      return new Window
-      {
-        Title = title,
-        Owner = Window.GetWindow(this),
-        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        ResizeMode = ResizeMode.NoResize,
-        SizeToContent = SizeToContent.WidthAndHeight,
-        ShowInTaskbar = false,
-        WindowStyle = WindowStyle.None,
-        AllowsTransparency = true,
-        Background = Brushes.Transparent,
-      };
-    }
+
 
     /// <summary>
     /// Отображает уведомление об архиве.
