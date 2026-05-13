@@ -153,6 +153,9 @@
   <data name="menu.file.legacyConversion.apkToApkw" xml:space="preserve">
     <value>APK в APKW</value>
   </data>
+  <data name="menu.file.legacyConversion.apkwToApk" xml:space="preserve">
+    <value>APKW в APK</value>
+  </data>
   <data name="menu.file.exit" xml:space="preserve">
     <value>Выход</value>
   </data>

@@ -93,6 +93,12 @@ namespace Ask.UI.Features.Archive.Contracts
     void SaveSelectedArchiveToDisk();
 
     /// <summary>
+    /// Экспортирует выбранный APKW-архив в legacy-комплект APK + OPK.
+    /// </summary>
+    /// <returns>Асинхронная задача экспорта.</returns>
+    Task ConvertSelectedArchiveToApkAsync();
+
+    /// <summary>
     /// Добавляет файл в выбранный архив.
     /// </summary>
     void AddFileToSelectedArchive();

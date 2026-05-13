@@ -29,6 +29,7 @@ namespace Ask.UI.Features.Archive.ViewModels
     private Visibility _archiveActionsVisibility = Visibility.Collapsed;
     private Visibility _recheckReviewArchiveVisibility = Visibility.Collapsed;
     private Visibility _saveArchiveVisibility = Visibility.Collapsed;
+    private Visibility _convertArchiveToApkVisibility = Visibility.Collapsed;
     private Visibility _printArchiveCatalogVisibility = Visibility.Collapsed;
     private Visibility _addFileToArchiveVisibility = Visibility.Collapsed;
     private Visibility _pasteIntoArchiveVisibility = Visibility.Collapsed;
@@ -138,6 +139,11 @@ namespace Ask.UI.Features.Archive.ViewModels
     /// Видимость команды сохранения архива.
     /// </summary>
     public Visibility SaveArchiveVisibility { get => _saveArchiveVisibility; private set => SetProperty(ref _saveArchiveVisibility, value); }
+
+    /// <summary>
+    /// Видимость команды конвертации выбранного архива в legacy APK.
+    /// </summary>
+    public Visibility ConvertArchiveToApkVisibility { get => _convertArchiveToApkVisibility; private set => SetProperty(ref _convertArchiveToApkVisibility, value); }
 
     /// <summary>
     /// Видимость команды печати каталога архива.
@@ -261,6 +267,9 @@ namespace Ask.UI.Features.Archive.ViewModels
     /// <summary> Команда сохранения выбранного архива. </summary>
     public ICommand SaveSelectedArchiveCommand { get; }
 
+    /// <summary> Команда конвертации выбранного архива в legacy APK. </summary>
+    public ICommand ConvertSelectedArchiveToApkCommand { get; }
+
     /// <summary> Команда добавления файла в выбранный архив. </summary>
     public ICommand AddFileToSelectedArchiveCommand { get; }
 
@@ -316,6 +325,7 @@ namespace Ask.UI.Features.Archive.ViewModels
       DeleteContextFileCommand = new AsyncRelayCommand(() => _actions?.DeleteContextFileAsync() ?? Task.CompletedTask);
       RecheckSelectedReviewArchiveCommand = new AsyncRelayCommand(() => _actions?.RecheckSelectedReviewArchiveAsync() ?? Task.CompletedTask);
       SaveSelectedArchiveCommand = new RelayCommand(() => _actions?.SaveSelectedArchiveToDisk());
+      ConvertSelectedArchiveToApkCommand = new AsyncRelayCommand(() => _actions?.ConvertSelectedArchiveToApkAsync() ?? Task.CompletedTask);
       AddFileToSelectedArchiveCommand = new RelayCommand(() => _actions?.AddFileToSelectedArchive());
       DeleteSelectedArchiveCommand = new AsyncRelayCommand(() => _actions?.DeleteSelectedArchiveAsync() ?? Task.CompletedTask);
       PasteIntoSelectedArchiveCommand = new AsyncRelayCommand(() => _actions?.PasteIntoSelectedArchiveAsync() ?? Task.CompletedTask);
@@ -441,6 +451,7 @@ namespace Ask.UI.Features.Archive.ViewModels
       ArchiveActionsVisibility = ToVisibility(hasArchive);
       RecheckReviewArchiveVisibility = ToVisibility(isReviewArchive);
       SaveArchiveVisibility = ToVisibility(hasArchive && !isReviewArchive);
+      ConvertArchiveToApkVisibility = ToVisibility(hasArchive && !isReviewArchive);
       PrintArchiveCatalogVisibility = ToVisibility(hasArchive && !isReviewArchive);
       AddFileToArchiveVisibility = ToVisibility(hasArchive && !isReviewArchive);
       PasteIntoArchiveVisibility = ToVisibility(hasArchive && hasClipboardEntry);
