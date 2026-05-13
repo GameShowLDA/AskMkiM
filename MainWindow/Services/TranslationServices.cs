@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
@@ -1019,6 +1019,8 @@ namespace MainWindowProgram.Services
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
       text = editor.Text ?? string.Empty;
+      text = TextSanitizer.RemoveLegacyControlChars(text);
+      text = CommandTranslationManager.NormalizeCommandMnemonics(text);
       text = NormalizeIndentationForEditor(text);
 
       if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
@@ -1125,7 +1127,3 @@ namespace MainWindowProgram.Services
     }
   }
 }
-
-
-
-

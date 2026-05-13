@@ -26,7 +26,6 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// </summary>
     public string ControlObjectName { get; set; }
 
-
     /// <summary>
     /// Номер сборочной единицы.
     /// </summary>
@@ -138,7 +137,6 @@ namespace Ask.Core.Shared.DTO.Protocol
     {
       ErrorsTemplate = templatePath;
     }
-
 
     static public string GetProtocolText(ProtocolModel protocolModel)
     {

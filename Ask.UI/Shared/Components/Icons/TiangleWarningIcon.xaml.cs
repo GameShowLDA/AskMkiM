@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -59,4 +59,3 @@ namespace Ask.UI.Shared.Components.Icons
     public Brush GetIconFillColor() => IconStrokeColor;
   }
 }
-

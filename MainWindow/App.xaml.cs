@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
@@ -85,12 +85,10 @@ namespace MainWindowProgram
 
         await SplashScreenManager.CloseSplashAsync();
 
-
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
         mainWindow.Visibility = Visibility.Visible;
 
         mainWindow.Topmost = true;
-
 
         await mainWindow.Dispatcher.BeginInvoke(new Action(() =>
         {

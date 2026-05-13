@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -15,4 +15,3 @@ namespace Ask.UI.Components.ProtocolListBox
         throw new NotImplementedException();
   }
 }
-

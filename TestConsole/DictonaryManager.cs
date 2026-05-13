@@ -1,4 +1,4 @@
-﻿namespace TestConsole
+namespace TestConsole
 {
   internal class DictonaryManager
   {
@@ -6,8 +6,6 @@
     {
 
     }
-
-
 
   }
 }

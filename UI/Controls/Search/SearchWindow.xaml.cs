@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using System.Windows;
@@ -45,7 +45,6 @@ namespace UI.Controls.Search
     private Grid ReplaceRowPanelElement => (Grid)FindName("ReplaceRowPanel");
     private Grid OptionsRowPanelElement => (Grid)FindName("OptionsRowPanel");
 
-
     /// <summary>
     /// Высота окна при развернутой строке замены.
     /// </summary>
@@ -70,7 +69,6 @@ namespace UI.Controls.Search
       SearchTextBox.Focus();
       LogInformation("Окно поиска инициализировано");
     }
-
 
     /// <summary>
     /// Обработчик события загрузки окна.

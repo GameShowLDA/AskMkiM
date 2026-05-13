@@ -11,7 +11,6 @@ using Ask.Device.Runtime.Commands;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
 
-
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
   /// <summary>
@@ -99,7 +98,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       await meter.ConnectableManager.DisconnectAsync(messageService);
     }
-
 
     /// <summary>
     /// Выполняет самоконтроль указанной цепи, включая проверку главных реле на каждой шине.

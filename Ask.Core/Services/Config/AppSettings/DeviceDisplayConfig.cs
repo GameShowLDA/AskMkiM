@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -102,7 +102,6 @@ namespace Ask.Core.Services.Config.AppSettings
       return protocolModel;
     }
     #endregion
-
 
     /// <summary>
     /// Переносит значения из переданной модели в текущие параметры отображения

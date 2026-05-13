@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Windows.Data;
 
 namespace Ask.UI.Controls.ErrorList
@@ -18,4 +18,3 @@ namespace Ask.UI.Controls.ErrorList
     }
   }
 }
-

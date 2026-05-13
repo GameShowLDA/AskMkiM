@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using System;
 using System.Collections.Generic;
@@ -41,7 +41,6 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost.TextEditor
     /// Не зависит от конкретной реализации редактора.
     /// </summary>
     public ITextDocumentView Document { get; }
-
 
     /// <summary>
     /// Возникает при изменении текста документа пользователем или программно.

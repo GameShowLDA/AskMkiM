@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
@@ -88,7 +88,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
           objectName = null;
         }
 
-
         if (string.IsNullOrWhiteSpace(objectCode))
           model.Errors.Add(OkErrors.MissingObjectCode(numberLine, $"{commandNumber} {mnemonic}"));
         else if (objectCode.Length > 39)
@@ -99,7 +98,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
         model.ControlObjectTitle = objectCode;
         model.ControlObjectName = objectName;
       }
-
 
       var uniqueKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
       var multiKeys = new HashSet<string> { "ОПК", "КД", "ИК", "ЦЕХ", "ПРИМ", "ПРИМЕЧ", "ПРИМЕЧАНИЕ" };

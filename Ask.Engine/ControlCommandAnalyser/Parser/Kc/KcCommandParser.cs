@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
@@ -151,4 +151,3 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
     }
   }
 }
-

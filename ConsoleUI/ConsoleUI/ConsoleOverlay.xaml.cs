@@ -1,4 +1,4 @@
-﻿using ConsoleUI.ConsoleCommanding.Engine;
+using ConsoleUI.ConsoleCommanding.Engine;
 using ConsoleUI.ConsoleCommanding.Services;
 using ConsoleUI.ConsoleLogic;
 using System.Collections.ObjectModel;
@@ -289,7 +289,6 @@ namespace ConsoleUI.ConsoleUI
     private static bool TryClassify(LogEntry e, out bool isDevice) =>
       TryClassify(e?.Text ?? string.Empty, out isDevice);
 
-
     private void InitializeLogView()
     {
       if (_splitViewEnabled)
@@ -454,7 +453,6 @@ namespace ConsoleUI.ConsoleUI
         CommandInput.SelectionStart = CommandInput.Text.Length;
       }
     }
-
 
     private void CommandInput_TextChanged(object sender, TextChangedEventArgs e)
     {

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
@@ -40,7 +40,6 @@ namespace UI.Components
     public IWorkspaceService WorkspaceService => MultiEditor.WorkspaceService;
 
     public ITranslationService TranslationService => MultiEditor.TranslationService;
-
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="MultiWindowControl"/>.
@@ -226,7 +225,6 @@ namespace UI.Components
     {
       return MultiEditor.TryCloseActiveTabAsync(eventAlreadyHandled);
     }
-
 
     /// </summary>
     /// <param name="searchText">Искомый текст.</param>

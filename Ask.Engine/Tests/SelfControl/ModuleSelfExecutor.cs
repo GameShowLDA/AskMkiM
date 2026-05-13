@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -48,8 +48,6 @@ namespace Ask.Engine.Tests.SelfControl
           return;
         }
 
-
-
         switch (type)
         {
           case DeviceType.RelaySwitchModule when device is IRelaySwitchModule relay:
@@ -68,7 +66,6 @@ namespace Ask.Engine.Tests.SelfControl
             var switcher1 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis)).FirstOrDefault();
             await mint.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), _messageService, part, switcher1, mint, meter);
             break;
-
 
           case DeviceType.BreakdownTester when device is IBreakdownTester breakdown:
             var numberBreakdown = breakdown.NumberChassis;

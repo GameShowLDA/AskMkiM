@@ -36,7 +36,6 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         return true;
       }
 
-
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");

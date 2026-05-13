@@ -1,0 +1,70 @@
+<UserControl x:Class="Ask.UI.Features.Archive.Views.ArchiveNameInputControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="DialogShellBackgroundBrush" Color="#E6E8EC" />
+        <SolidColorBrush x:Key="DialogShellBorderBrush" Color="#78828C" />
+        <SolidColorBrush x:Key="DialogForegroundBrush" Color="Black" />
+        <SolidColorBrush x:Key="DialogInputBackgroundBrush" Color="#EFEFE0" />
+        <SolidColorBrush x:Key="DialogInputBorderBrush" Color="#78000000" />
+    </UserControl.Resources>
+
+    <Border Padding="20"
+            Background="{DynamicResource DialogShellBackgroundBrush}"
+            BorderBrush="{DynamicResource DialogShellBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="20">
+        <Grid MinWidth="420">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="PromptTextBlock"
+                       Margin="0,0,0,4"
+                       Foreground="{DynamicResource DialogForegroundBrush}"
+                       FontSize="16"
+                       TextWrapping="Wrap" />
+
+            <Border Grid.Row="1"
+                    Margin="0,8,0,0"
+                    Padding="10,8"
+                    Background="{DynamicResource DialogInputBackgroundBrush}"
+                    BorderBrush="{DynamicResource DialogInputBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10">
+                <TextBox x:Name="ArchiveNameTextBox"
+                         MinWidth="360"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="15"
+                         Foreground="{DynamicResource DialogForegroundBrush}"
+                         TextChanged="ArchiveNameTextBox_OnTextChanged" />
+            </Border>
+
+            <TextBlock x:Name="ErrorTextBlock"
+                       Grid.Row="2"
+                       Margin="0,10,0,0"
+                       FontSize="14"
+                       Foreground="{DynamicResource DialogErrorBrush}"
+                       TextWrapping="Wrap"
+                       Visibility="Collapsed" />
+
+            <StackPanel Grid.Row="3"
+                        Margin="0,12,0,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button x:Name="CreateButton"
+                        MinWidth="140"
+                        Margin="0,0,8,0"
+                        IsDefault="True"
+                        Click="CreateButton_OnClick">Создать</Button>
+                <Button x:Name="CancelButton"
+                        MinWidth="120"
+                        IsCancel="True">Отмена</Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

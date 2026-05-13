@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -72,7 +72,6 @@ namespace Ask.UI.Infrastructure.Localization
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-
 
     public static void RefreshAll()
     {

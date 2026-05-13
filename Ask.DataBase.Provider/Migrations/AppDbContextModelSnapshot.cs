@@ -410,6 +410,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("IsErrorSimulationMode")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("LegacyCompatibilityMode")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("StepByStepMode")
                         .HasColumnType("INTEGER");
 

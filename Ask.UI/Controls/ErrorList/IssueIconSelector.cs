@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -20,4 +20,3 @@ namespace Ask.UI.Controls.ErrorList
     }
   }
 }
-

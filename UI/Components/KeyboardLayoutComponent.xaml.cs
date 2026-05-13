@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -33,7 +33,6 @@ namespace UI.Components
         LayoutText.Foreground = value;
       }
     }
-
 
     private void UpdateLayoutDisplay()
     {

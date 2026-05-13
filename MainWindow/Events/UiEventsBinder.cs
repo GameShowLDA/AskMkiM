@@ -1,5 +1,6 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.UI.Features.Archive.Views;
 using ICSharpCode.AvalonEdit;
 using MainWindowProgram.HotkeyBindings;
 using MainWindowProgram.ViewModels;
@@ -7,7 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Controls.Archive;
 using UI.Controls.TextEditorControl;
 
 namespace MainWindowProgram.Events
@@ -95,7 +95,6 @@ namespace MainWindowProgram.Events
       UpdateCompareMenuVisibility(isActive);
       UpdateArchiveMenuVisibility();
     }
-
 
     public void OnTextEditorActivated(UserControl editor)
     {

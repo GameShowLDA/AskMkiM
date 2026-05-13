@@ -121,7 +121,6 @@ namespace MainWindowProgram.Services
       await _multiWindowControl.DeleteTranslatorItem(translatorItem, editorType);
     }
 
-
     /// <summary>
     /// Добавляет вкладку с транслятором.
     /// </summary>

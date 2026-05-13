@@ -38,7 +38,6 @@ namespace Ask.Engine.Tests.NodeMethod.PI
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       await UdpBroadcastCommandSender.ResetAllDevicesAsync();
 
-
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
       if (!connect.Connect)
       {
@@ -92,7 +91,6 @@ namespace Ask.Engine.Tests.NodeMethod.PI
               token.ThrowIfCancellationRequested();
               var answer = await breakDown.AcwManger.Measure.MeasureAsync(dataModel.Param, userMessageService: protocolUI);
               var type = ShowMessageModel.MessageType.Success;
-
 
               if (answer.value >= dataModel.Param)
               {

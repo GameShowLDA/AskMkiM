@@ -81,7 +81,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         return succes;
       }, userMessageService, deviceTask: true);
 
-
       if (!result)
       {
         throw MeterExceptionFactory.DisconnectFailed(description);

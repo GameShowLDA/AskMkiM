@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text;
 
@@ -34,7 +34,6 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
           commandBody.Append($"*");
         }
       }
-
 
       return newSourseLines.Append(commandBody.ToString());
     }

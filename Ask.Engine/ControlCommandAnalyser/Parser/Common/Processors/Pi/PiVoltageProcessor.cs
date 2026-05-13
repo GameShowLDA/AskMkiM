@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -6,7 +6,6 @@ using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
 {
