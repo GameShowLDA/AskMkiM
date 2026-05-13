@@ -96,7 +96,6 @@ namespace MainWindowProgram.Events
       UpdateArchiveMenuVisibility();
     }
 
-
     public void OnTextEditorActivated(UserControl editor)
     {
       if (editor is not TextEditorUI textEditorUI || textEditorUI.TextEditor == null)

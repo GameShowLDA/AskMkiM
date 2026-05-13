@@ -1,4 +1,4 @@
-﻿namespace Ask.Engine.ControlCommandAnalyser
+namespace Ask.Engine.ControlCommandAnalyser
 {
   public class UnitsConvertor
   {
@@ -58,7 +58,6 @@
 
       return (value, unit);
     }
-
 
     /// <summary>
     /// Преобразует значение сопротивления в Омы (СИ).

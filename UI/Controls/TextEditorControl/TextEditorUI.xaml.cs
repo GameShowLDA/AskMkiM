@@ -399,7 +399,6 @@ namespace UI.Controls.TextEditorControl
       textEditor.Focus();
     }
 
-
     /// <summary>
     /// Получает область текста редактора.
     /// </summary>

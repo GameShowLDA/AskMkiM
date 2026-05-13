@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -232,7 +232,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return null;
       }
     }
-
 
     /// <summary>
     /// Делит список точек пополам.

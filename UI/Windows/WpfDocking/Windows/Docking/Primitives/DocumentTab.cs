@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using System.Diagnostics;
 using System.Windows;
@@ -84,7 +84,6 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
           ? Visibility.Collapsed
           : Visibility.Visible;
     }
-
 
     static DocumentTab()
     {

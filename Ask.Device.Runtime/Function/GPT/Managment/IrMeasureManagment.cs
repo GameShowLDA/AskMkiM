@@ -270,7 +270,6 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       };
     }
 
-
     /// <summary>
     /// Модель для хранения результата измерения в режиме IR.
     /// </summary>

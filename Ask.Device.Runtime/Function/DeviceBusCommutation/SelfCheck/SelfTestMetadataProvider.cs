@@ -3,7 +3,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
 
-
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
   internal static class SelfTestMetadataProvider

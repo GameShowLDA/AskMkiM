@@ -1,4 +1,4 @@
-﻿using NLog;
+using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Ask.LogLib
@@ -64,7 +64,6 @@ namespace Ask.LogLib
       logger.Debug(BuildMessage(message, callerFilePath, lineNumber));
       return message;
     }
-
 
     /// <summary>
     /// Логирует исключение с возможностью фильтрации трассировки стека.

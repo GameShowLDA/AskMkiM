@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
@@ -168,7 +168,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     #region Измерения.
 
-
     /// <summary>
     /// Выполняет измерение между уже подключёнными точками метод накапливающего узла.
     /// Предполагается, что коммутация завершена заранее.
@@ -276,4 +275,3 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   }
     #endregion
 }
-

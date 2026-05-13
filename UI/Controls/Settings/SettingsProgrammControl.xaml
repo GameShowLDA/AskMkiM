@@ -10,6 +10,7 @@
              xmlns:Procol="clr-namespace:UI.Controls.Settings.Protocol"
              xmlns:Config="clr-namespace:UI.Controls.Settings.DeviceConfig"
              xmlns:UiSetting="clr-namespace:UI.Controls.Settings.UserInterface"
+             xmlns:AskMkiConfig="clr-namespace:UI.Controls.Settings.AskMkiConfig"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
@@ -17,8 +18,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <LocalizeStrings:LocalizedString x:Key="Settings_Main_Title" Key="settings.main.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Config_Title" Key="settings.config.title" />
+       
 
         <Style x:Key="ConfigActionIconButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonBackgroundBrush}"/>
@@ -84,7 +84,7 @@
             Grid.Row="0"/>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
-                <Grid >
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -93,6 +93,8 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    
+    
                     <Border Grid.Row="0" x:Name="ConfigManager" 
                         Style="{DynamicResource SettingPanelStyle}"
                         Margin="15,10" 
@@ -193,11 +195,13 @@
                         </Grid>
                     </Border>
 
-                    <Execution:ExecutionControl Grid.Row="1" x:Name="ExecutionManager"/>
+                    <AskMkiConfig:AskMkiConfigControl Grid.Row="1" x:Name="AskMkiConfigManager"/>
 
-                    <Procol:ProtocolControl Grid.Row="2" x:Name="ProtocolManager"/>
+                    <Execution:ExecutionControl Grid.Row="2" x:Name="ExecutionManager"/>
 
-                    <UiSetting:UiSettingsControl Grid.Row="3" x:Name="InterfaceManager"/>
+                    <Procol:ProtocolControl Grid.Row="3" x:Name="ProtocolManager"/>
+
+                    <UiSetting:UiSettingsControl Grid.Row="4" x:Name="InterfaceManager"/>
 
 
                 </Grid>

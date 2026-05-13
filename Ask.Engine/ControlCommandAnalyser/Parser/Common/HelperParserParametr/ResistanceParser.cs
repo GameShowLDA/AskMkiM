@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
@@ -189,7 +189,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         return ParseLimitRUnified(input, m);
       }
 
-
       // 4. Диапазон вида "10<МОм<20"
       m = Regex.Match(input,
           @"(?<!\w)(?<min>\d+(?:[.,]\d+)?)\s*(?<op1><=|>=|<|>|≤|≥)\s*(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op2><=|>=|<|>|≤|≥)\s*(?<max>\d+(?:[.,]\d+)?)\b",
@@ -269,7 +268,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           remainder
       );
     }
-
 
     private (string? Min, string? Max, string? Unit, string Remainder) ParseHigherLimit(string input, Match m)
     {

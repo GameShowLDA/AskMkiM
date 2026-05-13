@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -7,7 +7,6 @@ using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
 {
@@ -106,7 +105,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       return true;
     }
-
 
     /// <summary>
     /// Выполняет основную логику теста: валидация, инициализация модулей,
@@ -359,7 +357,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       }
       return true;
     }
-
 
     #endregion
 

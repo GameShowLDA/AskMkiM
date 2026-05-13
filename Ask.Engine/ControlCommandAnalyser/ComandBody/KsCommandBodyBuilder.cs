@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using System.Text;
@@ -24,7 +24,6 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
       {
         commandBody.Append($"<{ks.HigherLimitResistance} ");
       }
-
 
       return newSourseLines.Append(commandBody.ToString());
     }

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Device.Chassis;
+using Ask.Core.Services.Errors.Device.Chassis;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Services.Errors.Models;
@@ -61,7 +61,6 @@ namespace Ask.Engine.Tests.Base
         throw;
       }
     }
-
 
     /// <summary>
     /// Выполняет полную валидацию пользовательского ввода из элемента <see cref="InputField"/>,

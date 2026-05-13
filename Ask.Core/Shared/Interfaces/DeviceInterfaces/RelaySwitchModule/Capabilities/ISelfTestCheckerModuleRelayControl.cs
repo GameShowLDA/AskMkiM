@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities
@@ -16,7 +16,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabili
     /// <param name="device">Устройство коммутации шин.</param>
     /// <param name="meter">Измеритель.</param>
     Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null);
-
 
     /// <summary>
     /// Возвращает тип перечисления, используемый как тип проверки.

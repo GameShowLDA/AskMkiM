@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using System.Globalization;
 using System.Windows.Data;
 
@@ -24,4 +24,3 @@ namespace Ask.UI.Controls.ErrorList
         => throw new NotImplementedException();
   }
 }
-

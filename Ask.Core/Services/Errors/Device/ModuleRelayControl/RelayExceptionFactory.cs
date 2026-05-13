@@ -1,4 +1,4 @@
-﻿namespace Ask.Core.Services.Errors.Device.ModuleRelayControl
+namespace Ask.Core.Services.Errors.Device.ModuleRelayControl
 {
   /// <summary>
   /// Фабрика исключений для ошибок подключения и отключения реле (точек).
@@ -23,7 +23,6 @@
     public static DeviceException DisconnectPointFailed(string description) =>
         new($"Ошибка отключения точки {description}");
 
-
     /// <summary>
     /// Ошибка подключения отдельной точки.
     /// </summary>
@@ -47,7 +46,6 @@
     /// </summary>
     public static DeviceException ConnectingPointToNewBusFailed(string description) =>
         new($"Ошибка переподключения точки {description}");
-
 
     /// <summary>
     /// Ошибка отключения отдельной точки.

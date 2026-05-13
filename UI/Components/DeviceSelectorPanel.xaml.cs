@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -254,7 +254,6 @@ namespace UI.Components
       RelayData.ItemsSource = combined;
       RelayData.DisplayFields = displayNames;
     }
-
 
     /// <summary>
     /// Возвращает выбранное устройство как IRelaySwitchModule, если возможно.

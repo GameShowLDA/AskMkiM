@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.UI.Shared.Formatting;
 using System.Windows;
@@ -40,4 +40,3 @@ namespace Ask.UI.Controls.ProtocolNew
     }
   }
 }
-

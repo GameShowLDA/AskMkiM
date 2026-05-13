@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
@@ -1127,7 +1127,3 @@ namespace MainWindowProgram.Services
     }
   }
 }
-
-
-
-

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -101,4 +101,3 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     }
   }
 }
-

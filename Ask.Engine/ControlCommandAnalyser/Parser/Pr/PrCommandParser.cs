@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -77,7 +77,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
         return model;
       var remainder = PreprocessSourceLines.GetClearCommandBody(model, lines);
       remainder = TextRemoveManager.RemoveCommandPrefix(remainder);
-
 
       var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
       var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();

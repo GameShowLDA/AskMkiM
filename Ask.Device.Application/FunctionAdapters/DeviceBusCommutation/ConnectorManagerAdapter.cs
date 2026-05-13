@@ -101,10 +101,8 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       if (!result)
         throw ConnectorExceptionFactory.ConnectMultiMeterFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
 
-
       return result;
     }
-
 
     /// <inheritdoc />
     public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)

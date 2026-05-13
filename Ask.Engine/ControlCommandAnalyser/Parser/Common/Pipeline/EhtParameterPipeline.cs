@@ -1,9 +1,8 @@
-﻿using Ask.Core.Shared.Interfaces.ParserInterfaces;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht;
 using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.ProcessorFactory;
-
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
 {

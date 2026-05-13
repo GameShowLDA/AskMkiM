@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -262,7 +262,6 @@ namespace Ask.UI.Controls.ProtocolNew
           ExecutionConfig.SetStepByStepMode(true);
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
-
 
       KeyboardManager.OnExitPressed = () =>
         Application.Current.Dispatcher.Invoke(() =>
@@ -632,4 +631,3 @@ namespace Ask.UI.Controls.ProtocolNew
     #endregion
   }
 }
-

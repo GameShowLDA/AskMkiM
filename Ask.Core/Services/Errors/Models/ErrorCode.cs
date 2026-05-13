@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace Ask.Core.Services.Errors.Models
 {
@@ -119,6 +119,10 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> Команда, на которую указывает ссылка, не имеет точек. </summary>
     [ErrorCodeTag("GEN025")]
     Gen_InvalidReference,
+
+    /// <summary> В записи точек присутсвует недопустимая последовательность - ,*. </summary>
+    [ErrorCodeTag("GEN026")]
+    Gen_CommaStar,
 
     #endregion
 
@@ -400,7 +404,6 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("PR009")]
     Pr_EmptyCommandBody,
 
-
     /// <summary> В команде ПР отсутствует список точек. </summary>
     [ErrorCodeTag("PR0010")]
     Pr_EmptyPoints,
@@ -424,7 +427,6 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> В команде ПР одна из границ сопротивления больше максимально измеряемой мультиметром границы сопротивления или ниже минимально измеряемой.  </summary>
     [ErrorCodeTag("PR0015")]
     Pr_EquipmentOutOfRange,
-
 
     /// <summary> Ошибка: предудыщая команда не имеет точек для измерения. </summary>
     [ErrorCodeTag("PR0016")]
@@ -478,8 +480,6 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
-
-
     #region Режим ВШ
 
     /// <summary> В команде ВШ указана неверная структура стойки коммутации. </summary>
@@ -505,7 +505,6 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> Тело команды НЭ отсутствует или пустое. </summary>
     [ErrorCodeTag("NE003")]
     Ne_EmptyCommandBody,
-
 
     /// <summary> В команде НЭ отсутствует список точек. </summary>
     [ErrorCodeTag("NE004")]

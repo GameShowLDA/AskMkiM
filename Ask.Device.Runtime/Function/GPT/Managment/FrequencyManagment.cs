@@ -7,7 +7,6 @@ using Ask.Device.Runtime.Function.GPT.Command;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
-
 namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
@@ -68,7 +67,6 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         _frequency = frequency;
         return (true, string.Empty);
       }
-
 
       try
       {

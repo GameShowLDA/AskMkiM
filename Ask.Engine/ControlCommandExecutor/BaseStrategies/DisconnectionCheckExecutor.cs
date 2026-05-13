@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using System;
 using System.Collections.Generic;
@@ -111,7 +111,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     private static bool IsNodeFull(DisconnectionCheckRequest request) =>
       request.AlgorithmKey.Contains("К");
 
-
     /// <summary>
     /// Определяет, используется ли алгоритм проверки разобщения
     /// для группового метода (ключ <c>Г</c>).
@@ -123,7 +122,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </returns>
     private static bool IsMethodExecution(DisconnectionCheckRequest request) =>
       request.AlgorithmKey.Contains("Г");
-
 
     /// <summary>
     /// Определяет, используется ли алгоритм проверки разобщения
@@ -148,7 +146,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </returns>
     private static bool IsInversion(DisconnectionCheckRequest request) =>
       request.AlgorithmKey.Contains("И");
-
 
     /// <summary>
     /// Выполняет альтернативную проверку разобщения

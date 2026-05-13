@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -31,7 +31,6 @@ namespace UI.Controls.Settings.Protocol
     /// Если true — загружает шаблон с ошибками, если false — обычный.
     /// </summary>
     public bool IsErrorsTemplate { get; set; }
-
 
     /// <summary>
     /// Текст шаблона (привязан к ProtocolEditor.Text).
@@ -144,7 +143,6 @@ namespace UI.Controls.Settings.Protocol
         }
       }
     }
-
 
     /// <summary>
     /// Возвращает части запрошенного диапазона, которые МОЖНО удалить.

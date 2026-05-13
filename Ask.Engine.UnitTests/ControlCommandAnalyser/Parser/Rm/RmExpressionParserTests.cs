@@ -40,8 +40,6 @@ public class RmExpressionParserTests
     Assert.Equal(new[] { "X1/a1", "X1/a2", "X1/a3" }, expanded);
   }
 
-  
-
   [Fact(DisplayName = "RM model finds point address after mnemonic normalization")]
   public void TryGetAddressByKey_WithHomoglyphLetters_FindsMappedAddress()
   {

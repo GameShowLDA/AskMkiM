@@ -5,6 +5,7 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_File" Key="menu.file" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Create" Key="menu.file.new" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Open" Key="menu.file.open" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_RunAskMki" Key="menu.file.runAskMki" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Exit" Key="menu.file.exit" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Archive" Key="menu.file.archive" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Save" Key="menu.file.save" />

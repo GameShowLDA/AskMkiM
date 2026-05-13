@@ -69,7 +69,6 @@ namespace Ask.Engine.Tests.Metrology
       await _userInteractionService.AppendEmptyLineAsync();
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} В"));
 
-
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
     }
 
@@ -119,8 +118,8 @@ namespace Ask.Engine.Tests.Metrology
         var err = result - param;
         Measurements.Add(err);
 
-        await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжения", message: MeasurementValueFormatter.FormatWithUnit(result, "�"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        await userMessageService.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "�"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжения", message: MeasurementValueFormatter.FormatWithUnit(result, "�"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "�"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
 
         return true;
       }
@@ -141,4 +140,3 @@ namespace Ask.Engine.Tests.Metrology
     }
   }
 }
-

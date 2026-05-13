@@ -80,7 +80,6 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     {
       var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(() => _manager.InitializeAsync(messageService), messageService, deviceTask: true);
 
-
       if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(answer) ? "ОК" : answer, result, 1, messageService);

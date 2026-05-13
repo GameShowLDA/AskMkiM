@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using System.Globalization;
 using System.Windows;
@@ -35,4 +35,3 @@ namespace Ask.UI.Components.ProtocolListBox
     }
   }
 }
-

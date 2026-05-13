@@ -2495,7 +2495,7 @@ namespace Ask.UI.Features.Archive.Views
       var archiveName = System.IO.Path.GetFileName(archivePath);
       ArchivePrintDialogService.ShowAndPrint(
         this,
-        "??????? ??????",
+        "Каталог архива",
         (hardMarginX, hardMarginY, printableAreaWidth, printableAreaHeight) => CreatePrintDocument(
           entries,
           archiveName,

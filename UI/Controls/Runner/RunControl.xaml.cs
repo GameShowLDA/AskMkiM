@@ -206,7 +206,6 @@ namespace UI.Controls.Runner
       }
     }
 
-
     public void SetLeftEditor(TextEditorUI textEditorUI)
     {
       LogInformation("SetLeftEditor вызван: " + this.GetHashCode());
@@ -317,7 +316,6 @@ namespace UI.Controls.Runner
         LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
       }
     }
-
 
     public async Task Start(List<BaseCommandModel> models)
     {

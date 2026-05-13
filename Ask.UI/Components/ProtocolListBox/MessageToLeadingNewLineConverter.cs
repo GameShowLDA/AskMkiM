@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Windows.Data;
 
 namespace Ask.UI.Components.ProtocolListBox
@@ -20,4 +20,3 @@ namespace Ask.UI.Components.ProtocolListBox
     }
   }
 }
-

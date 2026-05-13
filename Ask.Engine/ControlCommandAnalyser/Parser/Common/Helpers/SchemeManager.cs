@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -116,7 +116,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return modelScheme;
     }
 
-
     /// <summary>
     /// Применяет ключи алгоритма П или С для PI.
     /// </summary>
@@ -196,7 +195,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       return scheme;
     }
 
-
     /// <summary>
     /// Возвращает список шин из блока точек.
     /// </summary>
@@ -246,7 +244,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       return busDictionary ?? new();
     }
-
 
     /// <summary>
     /// Пытается найти границы блока точек '*...*'.
@@ -578,4 +575,3 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
   }
 }
-

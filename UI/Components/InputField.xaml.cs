@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
@@ -204,7 +204,6 @@ namespace UI.Components
       get => TestRangeBox.Text;
       set => TestRangeBox.Text = value;
     }
-
 
     /// <summary>
     /// Только геттер для получения активной шины.
@@ -502,7 +501,6 @@ namespace UI.Components
 
       _busGroupInternalChange = false;
     }
-
 
     /// <summary>
     /// Возвращает значение времени выполнения теста.

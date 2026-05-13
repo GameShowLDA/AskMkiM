@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
+
+    <LocalizeStrings:LocalizedString x:Key="Settings_Main_Title" Key="settings.main.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_Config_Title" Key="settings.config.title" />
+</ResourceDictionary>

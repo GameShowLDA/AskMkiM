@@ -1,9 +1,8 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using System.Globalization;
 using System.Resources;
 using System.Windows;
 using static Ask.LogLib.LoggerUtility;
-
 
 namespace Ask.UI.Infrastructure.Localization
 {

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Metrology;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.Atributes;
@@ -46,7 +46,6 @@ namespace MainWindowProgram.Init
   internal class PreStartupInitializer
   {
     public static IHost AppHost { get; private set; }
-
 
     /// <summary>
     /// Запускает процедуру предварительной инициализации приложения.
@@ -131,7 +130,6 @@ namespace MainWindowProgram.Init
       foreach (var c in controls)
         services.AddTransient(c.Type);
     }
-
 
     private static void InitializeHelpServer()
     {

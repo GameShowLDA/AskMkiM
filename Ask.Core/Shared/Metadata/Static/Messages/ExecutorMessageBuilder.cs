@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
@@ -139,10 +139,23 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// </summary>
     public static ShowMessageModel BuildPointsCheckHeaderAsync(PointModel firstPoint, PointModel secondPoint, CircuitFaultType circuitFaultType)
     {
-      bool showAddress = DeviceDisplayConfig.GetMachineAddressVisibility();
+      string firstAddress = string.Empty;
+      string secondAddress =string.Empty;
 
-      string firstAddress = showAddress ? $"({firstPoint})" : string.Empty;
-      string secondAddress = showAddress ? $"({secondPoint})" : string.Empty;
+      if (DeviceDisplayConfig.GetMachineAddressVisibility())
+      {
+        if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+        {
+          firstAddress = $"({LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(firstPoint.ToString())})";
+          secondAddress = $"({LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(secondPoint.ToString())})";
+        }
+        else
+        {
+          firstAddress = $"({firstPoint})";
+          secondAddress = $"({secondPoint})";
+        }
+      }
+
       char symbol = circuitFaultType == CircuitFaultType.OpenCircuit ? '*' : ',';
 
       var model = new ShowMessageModel

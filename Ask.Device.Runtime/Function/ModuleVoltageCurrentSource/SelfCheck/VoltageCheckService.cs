@@ -21,7 +21,6 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       await CheckVoltageLevelsAsync(cancellationToken, messageService, 10, 40, 10, 20, fastMeter, powerSource);
     }
 
-
     /// <summary>
     /// Проверяет уровни напряжения по заданному диапазону и шагу.
     /// </summary>
