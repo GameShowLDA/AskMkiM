@@ -258,26 +258,122 @@ namespace Ask.UI.Controls.TextEditorControl
         return string.Empty;
 
       var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+      var formattedLines = new List<string>(lines.Length);
+      string? blockCommentIndent = null;
+      string? blockCommentCloseToken = null;
 
       for (int i = 0; i < lines.Length; i++)
       {
         string line = lines[i].TrimEnd(' ', '\t');
         if (string.IsNullOrWhiteSpace(line))
         {
-          lines[i] = string.Empty;
+          formattedLines.Add(string.Empty);
+          continue;
+        }
+
+        string trimmedLine = line.TrimStart(' ', '\t');
+
+        if (blockCommentIndent != null)
+        {
+          if (trimmedLine.StartsWith(blockCommentCloseToken, StringComparison.Ordinal))
+          {
+            formattedLines.Add(blockCommentIndent + blockCommentCloseToken);
+            blockCommentIndent = null;
+            blockCommentCloseToken = null;
+          }
+          else
+          {
+            formattedLines.Add(blockCommentIndent + " " + trimmedLine);
+          }
+
+          continue;
+        }
+
+        string originalIndent = GetLeadingWhitespace(line);
+
+        if (trimmedLine.StartsWith("{", StringComparison.Ordinal))
+        {
+          blockCommentIndent = originalIndent;
+          blockCommentCloseToken = "}";
+          formattedLines.Add(blockCommentIndent + "{");
+
+          string commentBody = trimmedLine[1..].TrimStart(' ', '\t');
+          if (!string.IsNullOrEmpty(commentBody))
+          {
+            if (commentBody == "}")
+            {
+              formattedLines.Add(blockCommentIndent + "}");
+              blockCommentIndent = null;
+              blockCommentCloseToken = null;
+            }
+            else if (commentBody.EndsWith("}", StringComparison.Ordinal))
+            {
+              string inlineBody = commentBody[..^1].TrimEnd(' ', '\t');
+              if (!string.IsNullOrEmpty(inlineBody))
+              {
+                formattedLines.Add(blockCommentIndent + " " + inlineBody);
+              }
+
+              formattedLines.Add(blockCommentIndent + "}");
+              blockCommentIndent = null;
+              blockCommentCloseToken = null;
+            }
+            else
+            {
+              formattedLines.Add(blockCommentIndent + " " + commentBody);
+            }
+          }
+
+          continue;
+        }
+
+        if (trimmedLine.StartsWith("/*", StringComparison.Ordinal))
+        {
+          blockCommentIndent = originalIndent;
+          blockCommentCloseToken = "*/";
+          formattedLines.Add(blockCommentIndent + "/*");
+
+          string commentBody = trimmedLine[2..].TrimStart(' ', '\t');
+          if (!string.IsNullOrEmpty(commentBody))
+          {
+            if (commentBody == "*/")
+            {
+              formattedLines.Add(blockCommentIndent + "*/");
+              blockCommentIndent = null;
+              blockCommentCloseToken = null;
+            }
+            else if (commentBody.EndsWith("*/", StringComparison.Ordinal))
+            {
+              string inlineBody = commentBody[..^2].TrimEnd(' ', '\t');
+              if (!string.IsNullOrEmpty(inlineBody))
+              {
+                formattedLines.Add(blockCommentIndent + " " + inlineBody);
+              }
+
+              formattedLines.Add(blockCommentIndent + "*/");
+              blockCommentIndent = null;
+              blockCommentCloseToken = null;
+            }
+            else
+            {
+              formattedLines.Add(blockCommentIndent + " " + commentBody);
+            }
+          }
+
           continue;
         }
 
         if (CommandHeaderRegex.IsMatch(line))
         {
-          lines[i] = NormalizeCommandHeader(line);
-          continue;
+          formattedLines.Add(NormalizeCommandHeader(line));
         }
-
-        lines[i] = "\t" + line.TrimStart(' ', '\t');
+        else
+        {
+          formattedLines.Add("\t" + trimmedLine);
+        }
       }
 
-      return string.Join(Environment.NewLine, lines);
+      return string.Join(Environment.NewLine, formattedLines);
     }
 
     private static string NormalizeCommandHeader(string line)
