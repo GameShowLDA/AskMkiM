@@ -1,6 +1,7 @@
 using Ask.Core.Services.FilesUtility;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 
 namespace UI.Controls.TextEditorControl
 {
@@ -108,6 +109,14 @@ namespace UI.Controls.TextEditorControl
             e.Handled = true;
             return true;
           }
+
+          if (key == Key.D)
+          {
+            _ctrlKPressed = false;
+            FormatProgramText();
+            e.Handled = true;
+            return true;
+          }
         }
 
         if (key is not Key.LeftCtrl and not Key.RightCtrl)
@@ -210,6 +219,93 @@ namespace UI.Controls.TextEditorControl
       }
 
       return shiftedOffset;
+    }
+
+    private void FormatProgramText()
+    {
+      if (textEditor.IsReadOnly || textEditor.Document == null)
+        return;
+
+      if (!SupportsProgramFormatting())
+        return;
+
+      string sourceText = textEditor.Text ?? string.Empty;
+      string formattedText = NormalizeProgramWhitespace(sourceText);
+
+      if (string.Equals(sourceText, formattedText, StringComparison.Ordinal))
+        return;
+
+      var document = textEditor.Document;
+      int selectionStart = Math.Min(textEditor.SelectionStart, formattedText.Length);
+      int selectionLength = textEditor.SelectionLength;
+      int caretOffset = Math.Min(textEditor.CaretOffset, formattedText.Length);
+
+      document.Replace(0, document.TextLength, formattedText);
+
+      if (selectionLength > 0)
+      {
+        int maxSelectionLength = Math.Max(0, formattedText.Length - selectionStart);
+        textEditor.Select(selectionStart, Math.Min(selectionLength, maxSelectionLength));
+        return;
+      }
+
+      textEditor.CaretOffset = caretOffset;
+    }
+
+    private static string NormalizeProgramWhitespace(string text)
+    {
+      if (string.IsNullOrEmpty(text))
+        return string.Empty;
+
+      var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+
+      for (int i = 0; i < lines.Length; i++)
+      {
+        string line = lines[i].TrimEnd(' ', '\t');
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          lines[i] = string.Empty;
+          continue;
+        }
+
+        if (CommandHeaderRegex.IsMatch(line))
+        {
+          lines[i] = NormalizeCommandHeader(line);
+          continue;
+        }
+
+        lines[i] = "\t" + line.TrimStart(' ', '\t');
+      }
+
+      return string.Join(Environment.NewLine, lines);
+    }
+
+    private static string NormalizeCommandHeader(string line)
+    {
+      string trimmedLine = line.TrimStart(' ', '\t');
+      var match = Regex.Match(trimmedLine, @"^(\d+)\s+(\S+)(.*)$");
+      if (!match.Success)
+        return trimmedLine;
+
+      string tail = match.Groups[3].Value;
+      return $"{match.Groups[1].Value} {match.Groups[2].Value}{tail}";
+    }
+
+    private bool SupportsProgramFormatting()
+    {
+      if (FileType is FileType.PK or FileType.PKW or FileType.OPK or FileType.OPKW)
+        return true;
+
+      string? fileName = TextEditorModel?.FileName ?? TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(fileName))
+        return false;
+
+      string extension = System.IO.Path.GetExtension(fileName);
+      return extension.Equals(".pk", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".pkw", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".opk", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".opkw", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".acs", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

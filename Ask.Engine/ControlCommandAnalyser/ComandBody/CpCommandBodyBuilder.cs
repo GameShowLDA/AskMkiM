@@ -1,6 +1,7 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.ComandBody
 {
@@ -14,22 +15,32 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
       {
         return newSourseLines;
       }
+
       var commandBody = new StringBuilder();
       for (int i = 0; i < cp.SourceLines.Count; i++)
       {
-        if (cp.SourceLines[i].Contains(cp.CommandNumber))
+        var sourceLine = cp.SourceLines[i];
+        if (i == 0)
         {
-          cp.SourceLines[i] = cp.SourceLines[i].Replace(cp.CommandNumber, "");
+          sourceLine = StripCommandHeader(sourceLine, cp.CommandNumber, cp.Mnemonic);
         }
-        if (cp.SourceLines[i].Contains(cp.Mnemonic))
-        {
-          cp.SourceLines[i] = cp.SourceLines[i].Replace(cp.Mnemonic, "");
-        }
-        commandBody.Append($"{cp.SourceLines[i]}\n");
+
+        commandBody.Append($"{sourceLine}\n");
       }
 
       newSourseLines.Append(commandBody.ToString());
       return newSourseLines;
+    }
+
+    private static string StripCommandHeader(string line, string commandNumber, string mnemonic)
+    {
+      if (string.IsNullOrEmpty(line))
+      {
+        return string.Empty;
+      }
+
+      var pattern = $@"^\s*{Regex.Escape(commandNumber)}\s+{Regex.Escape(mnemonic)}(?=\s|$)";
+      return Regex.Replace(line, pattern, string.Empty, RegexOptions.IgnoreCase);
     }
   }
 }
