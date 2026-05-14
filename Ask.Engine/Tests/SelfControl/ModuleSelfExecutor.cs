@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -71,6 +72,12 @@ namespace Ask.Engine.Tests.SelfControl
             var numberBreakdown = breakdown.NumberChassis;
             var switcher2 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberBreakdown)).FirstOrDefault();
             await breakdown.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, breakdown, switcher2, meter);
+            break;
+
+          case DeviceType.FastMeter when device is IFastMeter multimeter:
+            var numberMultimeter = multimeter.NumberChassis;
+            var switcher3 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberMultimeter)).FirstOrDefault();
+            await multimeter.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, switcher3, multimeter);
             break;
         }
       }

@@ -16,5 +16,17 @@
     /// </summary>
     public static DeviceException DisconnectFailed(int number) =>
         new($"Ошибка отключения реле №{number}");
+
+    /// <summary>
+    /// Исключение при ошибке включения реле.
+    /// </summary>
+    public static DeviceException EnableFailed() =>
+        new("Ошибка включения реле");
+
+    /// <summary>
+    /// Исключение при ошибке отключения реле.
+    /// </summary>
+    public static DeviceException DisableFailed() =>
+        new("Ошибка отключения реле");
   }
 }
