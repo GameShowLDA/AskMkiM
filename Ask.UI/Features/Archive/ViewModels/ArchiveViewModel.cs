@@ -22,7 +22,7 @@ namespace Ask.UI.Features.Archive.ViewModels
     private string _selectedArchiveName = string.Empty;
     private string _selectedArchiveFileName = string.Empty;
     private string _previewText = string.Empty;
-    private FileType _previewFileType = FileType.OPKW;
+    private FileType _previewFileType = FileType.None;
     private Visibility _archiveFilesGridVisibility = Visibility.Collapsed;
     private Visibility _editorPanelVisibility = Visibility.Collapsed;
     private Visibility _rightSplitterVisibility = Visibility.Collapsed;
@@ -386,7 +386,7 @@ namespace Ask.UI.Features.Archive.ViewModels
     /// <summary>
     /// Очищает область предварительного просмотра.
     /// </summary>
-    public void ClearPreview() { PreviewText = string.Empty; PreviewFileType = FileType.OPKW; }
+    public void ClearPreview() { PreviewText = string.Empty; PreviewFileType = FileType.None; }
 
     /// <summary>
     /// Проверяет наличие содержимого предварительного просмотра.

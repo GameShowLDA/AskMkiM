@@ -13,7 +13,7 @@ namespace Ask.UI.Features.Archive.Views
       DependencyProperty.Register(nameof(Text), typeof(string), typeof(ArchivePreviewPane), new PropertyMetadata(string.Empty, OnPreviewChanged));
 
     public static readonly DependencyProperty FileTypeProperty =
-      DependencyProperty.Register(nameof(FileType), typeof(FileType), typeof(ArchivePreviewPane), new PropertyMetadata(FileType.OPKW, OnPreviewChanged));
+      DependencyProperty.Register(nameof(FileType), typeof(FileType), typeof(ArchivePreviewPane), new PropertyMetadata(FileType.None, OnPreviewChanged));
 
     public ArchivePreviewPane()
     {
@@ -51,7 +51,7 @@ namespace Ask.UI.Features.Archive.Views
         IsReadOnly = true,
       };
 
-      if (FileType == FileType.OPKW &&
+      if (FileTypeResolver.SupportsBraceCommentColorizer(FileType) &&
           !editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
       {
         editor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
