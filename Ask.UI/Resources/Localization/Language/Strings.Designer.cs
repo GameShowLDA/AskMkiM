@@ -321,6 +321,15 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на APKW в APK.
+        /// </summary>
+        internal static string menu_file_legacyConversion_apkwToApk {
+            get {
+                return ResourceManager.GetString("menu.file.legacyConversion.apkwToApk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на OPK в OPKW.
         /// </summary>
         internal static string menu_file_legacyConversion_opkToOpkw {
@@ -380,6 +389,15 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string menu_file_print {
             get {
                 return ResourceManager.GetString("menu.file.print", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выполнение АСК-МКИ(OLD).
+        /// </summary>
+        internal static string menu_file_runAskMki {
+            get {
+                return ResourceManager.GetString("menu.file.runAskMki", resourceCulture);
             }
         }
         
@@ -915,6 +933,51 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Очистить.
+        /// </summary>
+        internal static string settings_askMki_config_clearMki {
+            get {
+                return ResourceManager.GetString("settings.askMki.config.clearMki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выберите исполняемый файл старой программы АСК-МКИ. Этот путь будет использоваться при запуске выполнения АСК-МКИ OLD..
+        /// </summary>
+        internal static string settings_askMki_config_mkiPath_description {
+            get {
+                return ResourceManager.GetString("settings.askMki.config.mkiPath.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Путь к mkiw.exe.
+        /// </summary>
+        internal static string settings_askMki_config_mkiPath_title {
+            get {
+                return ResourceManager.GetString("settings.askMki.config.mkiPath.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выбрать.
+        /// </summary>
+        internal static string settings_askMki_config_selectMki {
+            get {
+                return ResourceManager.GetString("settings.askMki.config.selectMki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Конфигурация АСК-МКИ.
+        /// </summary>
+        internal static string settings_askMki_config_title {
+            get {
+                return ResourceManager.GetString("settings.askMki.config.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Печать.
         /// </summary>
         internal static string settings_config_printButton {
@@ -924,7 +987,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Конфигурация АСК.
+        ///   Ищет локализованную строку, похожую на Конфигурация АСК-МКИ-М.
         /// </summary>
         internal static string settings_config_title {
             get {

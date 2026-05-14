@@ -4,6 +4,8 @@
                     xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization"
                     >
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.AskMkiConfig.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.Config.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.Protocol.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.Execution.xaml"/>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Localization/Settings/Settings.UserInterface.xaml"/>

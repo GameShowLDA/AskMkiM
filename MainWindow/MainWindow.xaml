@@ -181,6 +181,7 @@
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}"/>
                             <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToOpkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToOpkw" Command="{Binding File.ConvertOpkToOpkwCommand}"/>-->
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}"/>
                         </MenuItem>
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
@@ -248,7 +249,7 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Build}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Build" Name="Build" Command="{Binding Translation.BuildCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_Run}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Run" Name="Run" Command="{Binding Translation.RunCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Execution_RunStepByStepMode}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="RunStepByStepMode" Name="RunStepByStepMode" Command="{Binding Translation.RunStepByStepModeCommand}" utilities:HelpProvider.HelpKey="DescriptionWorkTranslator"/>
-
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_RunAskMki}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="RunAskMki" x:Name="runAskMkiMenuItem" Command="{Binding File.RunAskMkiActiveFileCommand}" utilities:HelpProvider.HelpKey="FuncRunAskMki"/>
                     </MenuItem>
 
                     <MenuItem Command="{Binding Settings.SettingsCommand}" Header="{Binding Source={StaticResource LS_Menu_Settings}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Settings" Tag="menuHeader_4"/>
