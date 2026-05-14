@@ -261,10 +261,31 @@ namespace Ask.UI.Controls.TextEditorControl
       var formattedLines = new List<string>(lines.Length);
       string? blockCommentIndent = null;
       string? blockCommentCloseToken = null;
+      bool hasReachedFirstCommand = false;
+      bool hasReachedEndCommand = false;
 
       for (int i = 0; i < lines.Length; i++)
       {
-        string line = lines[i].TrimEnd(' ', '\t');
+        string rawLine = lines[i];
+        string line = rawLine.TrimEnd(' ', '\t');
+        if (!hasReachedFirstCommand)
+        {
+          if (CommandHeaderRegex.IsMatch(line))
+          {
+            hasReachedFirstCommand = true;
+          }
+          else
+          {
+            formattedLines.Add(rawLine);
+            continue;
+          }
+        }
+        else if (hasReachedEndCommand)
+        {
+          formattedLines.Add(rawLine);
+          continue;
+        }
+
         if (string.IsNullOrWhiteSpace(line))
         {
           formattedLines.Add(string.Empty);
@@ -371,6 +392,11 @@ namespace Ask.UI.Controls.TextEditorControl
         {
           formattedLines.Add("\t" + trimmedLine);
         }
+
+        if (IsEndCommandLine(line))
+        {
+          hasReachedEndCommand = true;
+        }
       }
 
       return string.Join(Environment.NewLine, formattedLines);
@@ -385,6 +411,13 @@ namespace Ask.UI.Controls.TextEditorControl
 
       string tail = match.Groups[3].Value;
       return $"{match.Groups[1].Value} {match.Groups[2].Value}{tail}";
+    }
+
+    private static bool IsEndCommandLine(string line)
+    {
+      string trimmedLine = line.TrimStart(' ', '\t');
+      var match = Regex.Match(trimmedLine, @"^(\d+)\s+(\S+)(.*)$");
+      return match.Success && string.Equals(match.Groups[2].Value, "КЦ", StringComparison.OrdinalIgnoreCase);
     }
 
     private bool SupportsProgramFormatting()
