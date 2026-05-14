@@ -1353,7 +1353,7 @@ namespace Ask.UI.Features.Archive.Views
         sourceFilePath: null,
         isReviewEntry: false,
         errorCount: ExtractErrorCount(text),
-        fileType: FileType.OPKW);
+        fileType: DeterminePreviewFileType(entry.FullName));
     }
 
     /// <summary>
@@ -1495,14 +1495,7 @@ namespace Ask.UI.Features.Archive.Views
     /// <returns>Тип файла.</returns>
     private static FileType DeterminePreviewFileType(string filePath)
     {
-      return Path.GetExtension(filePath).ToLowerInvariant() switch
-      {
-        ".pk" => FileType.PK,
-        ".pkw" => FileType.PKW,
-        ".opk" => FileType.OPK,
-        ".opkw" => FileType.OPKW,
-        _ => FileType.None,
-      };
+      return FileTypeResolver.DetermineFromPath(filePath);
     }
 
     /// <summary>
@@ -1515,7 +1508,7 @@ namespace Ask.UI.Features.Archive.Views
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-      var encoding = fileType == FileType.PKW || fileType == FileType.OPKW
+      var encoding = FileTypeResolver.UsesUtf8Encoding(fileType)
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
@@ -1636,7 +1629,7 @@ namespace Ask.UI.Features.Archive.Views
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-      var encoding = fileType == FileType.PKW || fileType == FileType.OPKW
+      var encoding = FileTypeResolver.UsesUtf8Encoding(fileType)
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
@@ -2014,8 +2007,9 @@ namespace Ask.UI.Features.Archive.Views
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
       var normalizedEntryName = NormalizeEntryName(entryName);
+      var fileType = DeterminePreviewFileType(normalizedEntryName);
 
-      ViewModel.SetPreview(text, FileType.OPKW);
+      ViewModel.SetPreview(text, fileType);
       _lastSelectedArchivePath = archivePath;
       _lastSelectedEntryName = normalizedEntryName;
       _lastSelectedReviewFilePath = null;
@@ -3582,7 +3576,7 @@ namespace Ask.UI.Features.Archive.Views
         var fileType = DeterminePreviewFileType(entryName);
         var extension = GetExecutionExtension(fileType, entryName);
         var tempFilePath = CreateExecutionTempFilePath(entryName, extension);
-        var encoding = (fileType == FileType.PKW || fileType == FileType.OPKW)
+        var encoding = FileTypeResolver.UsesUtf8Encoding(fileType)
           ? new UTF8Encoding(false)
           : Encoding.GetEncoding(866);
 
@@ -3672,7 +3666,7 @@ namespace Ask.UI.Features.Archive.Views
       {
         FileType.OPK => ".opk",
         FileType.OPKW => ".opkw",
-        FileType.PK => ".pk",
+        FileType.PK => string.Equals(Path.GetExtension(entryName), ".acs", StringComparison.OrdinalIgnoreCase) ? ".acs" : ".pk",
         FileType.PKW => ".pkw",
         _ => string.IsNullOrWhiteSpace(Path.GetExtension(entryName)) ? ".opkw" : Path.GetExtension(entryName),
       };
@@ -4071,7 +4065,7 @@ namespace Ask.UI.Features.Archive.Views
         else
         {
           text = await Task.Run(() => ReadArchiveEntryTextWithManager(selected.ArchivePath, selected.EntryName));
-          fileType = FileType.OPKW;
+          fileType = selected.FileType;
         }
 
         ViewModel.SetPreview(text, fileType);
