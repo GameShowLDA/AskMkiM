@@ -20,9 +20,13 @@ namespace Ask.UI.Controls.TextEditorControl
   public partial class TextEditorUI
   {
     private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
+    private const string LineCommentPrefix = "//";
     private bool _ctrlMPressed = false;
+    private bool _ctrlKPressed = false;
     private DateTime _lastCtrlMTime = DateTime.MinValue;
+    private DateTime _lastCtrlKTime = DateTime.MinValue;
     private const int CtrlMTimeoutMs = 1000;
+    private const int CtrlKTimeoutMs = 1500;
 
     /// <summary>
     /// Главный обработчик нажатия клавиш в текстовом редакторе.
@@ -33,6 +37,7 @@ namespace Ask.UI.Controls.TextEditorControl
       if (HandleAutoIndentOnEnter(e)) return;
       if (HandleBreakpointShortcut(e)) return;
       if (HandleCtrlM(e)) return;
+      if (HandleCtrlKChord(e)) return;
       ResetCtrlMFlagIfNeeded(e);
       if (HandleZoomShortcuts(e)) return;
       if (HandlePrintShortcut(e)) return;
@@ -74,6 +79,137 @@ namespace Ask.UI.Controls.TextEditorControl
     {
       if (e.Key != Key.M)
         _ctrlMPressed = false;
+    }
+
+    private bool HandleCtrlKChord(KeyEventArgs e)
+    {
+      var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+      if (_ctrlKPressed)
+      {
+        if ((DateTime.Now - _lastCtrlKTime).TotalMilliseconds >= CtrlKTimeoutMs)
+        {
+          _ctrlKPressed = false;
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.Control)
+        {
+          if (key == Key.C)
+          {
+            _ctrlKPressed = false;
+            ToggleLineComments(comment: true);
+            e.Handled = true;
+            return true;
+          }
+
+          if (key == Key.U)
+          {
+            _ctrlKPressed = false;
+            ToggleLineComments(comment: false);
+            e.Handled = true;
+            return true;
+          }
+        }
+
+        if (key is not Key.LeftCtrl and not Key.RightCtrl)
+        {
+          _ctrlKPressed = false;
+        }
+      }
+
+      if (key != Key.K || Keyboard.Modifiers != ModifierKeys.Control)
+        return false;
+
+      _ctrlKPressed = true;
+      _lastCtrlKTime = DateTime.Now;
+      e.Handled = true;
+      return true;
+    }
+
+    private bool ToggleLineComments(bool comment)
+    {
+      if (textEditor.IsReadOnly || textEditor.Document == null)
+        return false;
+
+      var document = textEditor.Document;
+      int selectionStart = textEditor.SelectionStart;
+      int selectionLength = textEditor.SelectionLength;
+      int selectionEnd = selectionStart + selectionLength;
+      int caretOffset = textEditor.CaretOffset;
+
+      int startLineNumber = selectionLength == 0
+        ? document.GetLineByOffset(caretOffset).LineNumber
+        : document.GetLineByOffset(selectionStart).LineNumber;
+      int endLineNumber = selectionLength == 0
+        ? startLineNumber
+        : document.GetLineByOffset(Math.Max(selectionStart, selectionEnd - 1)).LineNumber;
+
+      var firstLine = document.GetLineByNumber(startLineNumber);
+      var lastLine = document.GetLineByNumber(endLineNumber);
+
+      var lineUpdates = new List<(int EditOffset, int Delta)>(endLineNumber - startLineNumber + 1);
+
+      document.BeginUpdate();
+      try
+      {
+        for (int lineNumber = endLineNumber; lineNumber >= startLineNumber; lineNumber--)
+        {
+          var line = document.GetLineByNumber(lineNumber);
+          string lineText = document.GetText(line.Offset, line.Length);
+          var update = comment
+            ? CommentLine(document, line, lineText)
+            : UncommentLine(document, line, lineText);
+
+          lineUpdates.Add(update);
+        }
+      }
+      finally
+      {
+        document.EndUpdate();
+      }
+
+      if (selectionLength == 0)
+      {
+        textEditor.CaretOffset = ShiftOffset(caretOffset, lineUpdates);
+        return true;
+      }
+
+      firstLine = document.GetLineByNumber(startLineNumber);
+      lastLine = document.GetLineByNumber(endLineNumber);
+      textEditor.Select(firstLine.Offset, lastLine.EndOffset - firstLine.Offset);
+      return true;
+    }
+
+    private static (int EditOffset, int Delta) CommentLine(ICSharpCode.AvalonEdit.Document.TextDocument document, ICSharpCode.AvalonEdit.Document.DocumentLine line, string lineText)
+    {
+      int insertOffset = line.Offset + GetLeadingWhitespace(lineText).Length;
+      document.Insert(insertOffset, LineCommentPrefix);
+      return (insertOffset, LineCommentPrefix.Length);
+    }
+
+    private static (int EditOffset, int Delta) UncommentLine(ICSharpCode.AvalonEdit.Document.TextDocument document, ICSharpCode.AvalonEdit.Document.DocumentLine line, string lineText)
+    {
+      int whitespaceLength = GetLeadingWhitespace(lineText).Length;
+      if (!lineText.AsSpan(whitespaceLength).StartsWith(LineCommentPrefix, StringComparison.Ordinal))
+        return (line.Offset, 0);
+
+      int removeOffset = line.Offset + whitespaceLength;
+      document.Remove(removeOffset, LineCommentPrefix.Length);
+      return (removeOffset, -LineCommentPrefix.Length);
+    }
+
+    private static int ShiftOffset(int offset, IEnumerable<(int EditOffset, int Delta)> lineUpdates)
+    {
+      int shiftedOffset = offset;
+
+      foreach (var (editOffset, delta) in lineUpdates)
+      {
+        if (delta == 0 || editOffset >= shiftedOffset)
+          continue;
+
+        shiftedOffset += delta;
+      }
+
+      return shiftedOffset;
     }
 
     /// <summary>
