@@ -255,10 +255,20 @@ public static class DatabaseInitializationService
       .ToDictionary(x => x.ActionName, StringComparer.OrdinalIgnoreCase);
 
     var addedHotkeys = 0;
+    var updatedHotkeys = 0;
     foreach (var pair in UiDictonary.DefaultsHotKeys)
     {
-      if (existingHotkeys.ContainsKey(pair.Key))
+      if (existingHotkeys.TryGetValue(pair.Key, out var existingHotkey))
       {
+        if (string.Equals(pair.Key, "CompareFile", StringComparison.OrdinalIgnoreCase)
+          && string.Equals(existingHotkey.KeyCombination, "Ctrl+K", StringComparison.OrdinalIgnoreCase)
+          && !string.Equals(existingHotkey.KeyCombination, pair.Value, StringComparison.OrdinalIgnoreCase))
+        {
+          existingHotkey.KeyCombination = pair.Value;
+          updatedHotkeys++;
+          TraceInfo(report, progress, $"[DB] Обновлена горячая клавиша по умолчанию: {pair.Key} -> {pair.Value}");
+        }
+
         continue;
       }
 
@@ -274,7 +284,7 @@ public static class DatabaseInitializationService
       TraceInfo(report, progress, $"[DB] Добавлена горячая клавиша по умолчанию: {pair.Key} -> {pair.Value}");
     }
 
-    if (addedHotkeys > 0)
+    if (addedHotkeys > 0 || updatedHotkeys > 0)
     {
       await context.SaveChangesAsync(cancellationToken);
     }
