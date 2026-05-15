@@ -1,4 +1,5 @@
 using Ask.Core.Services.FilesUtility;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
@@ -36,6 +37,7 @@ namespace UI.Controls.TextEditorControl
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (HandleAutoIndentOnEnter(e)) return;
+      if (HandleMoveLinesShortcut(e)) return;
       if (HandleBreakpointShortcut(e)) return;
       if (HandleCtrlM(e)) return;
       if (HandleCtrlKChord(e)) return;
@@ -134,6 +136,93 @@ namespace UI.Controls.TextEditorControl
       return true;
     }
 
+    private bool HandleMoveLinesShortcut(KeyEventArgs e)
+    {
+      var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+      if (Keyboard.Modifiers != ModifierKeys.Alt)
+        return false;
+
+      if (key == Key.Up)
+      {
+        e.Handled = MoveSelectedLines(moveUp: true);
+        return e.Handled;
+      }
+
+      if (key == Key.Down)
+      {
+        e.Handled = MoveSelectedLines(moveUp: false);
+        return e.Handled;
+      }
+
+      return false;
+    }
+
+    private bool MoveSelectedLines(bool moveUp)
+    {
+      if (textEditor.IsReadOnly || textEditor.Document == null)
+        return false;
+
+      var document = textEditor.Document;
+      var selection = textEditor.TextArea.Selection;
+      int selectionStart = textEditor.SelectionStart;
+      int selectionLength = textEditor.SelectionLength;
+      int caretOffset = textEditor.CaretOffset;
+      var (startLineNumber, endLineNumber) = selection is ICSharpCode.AvalonEdit.Editing.RectangleSelection rectangleSelection && HasRectangularLineSelection(rectangleSelection)
+        ? GetSelectedLineRange(rectangleSelection, document, caretOffset)
+        : GetSelectedLineRange(document, selectionStart, selectionLength, caretOffset);
+
+      if ((moveUp && startLineNumber <= 1) || (!moveUp && endLineNumber >= document.LineCount))
+        return false;
+
+      var firstSelectedLine = document.GetLineByNumber(startLineNumber);
+      int selectionStartWithinBlock = selectionStart - firstSelectedLine.Offset;
+      int caretOffsetWithinBlock = caretOffset - firstSelectedLine.Offset;
+
+      int rangeStartLineNumber = moveUp ? startLineNumber - 1 : startLineNumber;
+      int rangeEndLineNumber = moveUp ? endLineNumber : endLineNumber + 1;
+      int lineDelta = moveUp ? -1 : 1;
+
+      var rangeFirstLine = document.GetLineByNumber(rangeStartLineNumber);
+      var rangeLastLine = document.GetLineByNumber(rangeEndLineNumber);
+      int replaceOffset = rangeFirstLine.Offset;
+      int replaceLength = GetLineBlockLength(rangeFirstLine, rangeLastLine);
+
+      string replacementText = BuildMovedLineBlock(document, rangeStartLineNumber, rangeEndLineNumber, moveUp);
+
+      document.BeginUpdate();
+      try
+      {
+        document.Replace(replaceOffset, replaceLength, replacementText);
+      }
+      finally
+      {
+        document.EndUpdate();
+      }
+
+      int newStartLineNumber = startLineNumber + lineDelta;
+
+      if (TryRestoreRectangularSelection(selection, lineDelta))
+      {
+        textEditor.ScrollToLine(newStartLineNumber);
+        return true;
+      }
+
+      int newSelectionStart = document.GetLineByNumber(newStartLineNumber).Offset + selectionStartWithinBlock;
+
+      if (selectionLength > 0)
+      {
+        textEditor.Select(newSelectionStart, selectionLength);
+      }
+      else
+      {
+        textEditor.CaretOffset = newSelectionStart + caretOffsetWithinBlock - selectionStartWithinBlock;
+      }
+
+      textEditor.ScrollToLine(newStartLineNumber);
+      return true;
+    }
+
     private bool ToggleLineComments(bool comment)
     {
       if (textEditor.IsReadOnly || textEditor.Document == null)
@@ -219,6 +308,116 @@ namespace UI.Controls.TextEditorControl
       }
 
       return shiftedOffset;
+    }
+
+    private bool TryRestoreRectangularSelection(ICSharpCode.AvalonEdit.Editing.Selection selection, int lineDelta)
+    {
+      if (selection is not ICSharpCode.AvalonEdit.Editing.RectangleSelection rectangleSelection || !HasRectangularLineSelection(rectangleSelection))
+        return false;
+
+      var newStartPosition = ShiftTextViewPosition(rectangleSelection.StartPosition, lineDelta);
+      var newEndPosition = ShiftTextViewPosition(rectangleSelection.EndPosition, lineDelta);
+
+      textEditor.TextArea.Selection = new ICSharpCode.AvalonEdit.Editing.RectangleSelection(
+        textEditor.TextArea,
+        newStartPosition,
+        newEndPosition);
+      textEditor.TextArea.Caret.Position = newEndPosition;
+      return true;
+    }
+
+    private static ICSharpCode.AvalonEdit.TextViewPosition ShiftTextViewPosition(
+      ICSharpCode.AvalonEdit.TextViewPosition position,
+      int lineDelta)
+    {
+      return new ICSharpCode.AvalonEdit.TextViewPosition(
+        position.Line + lineDelta,
+        position.Column,
+        position.VisualColumn);
+    }
+
+    private static bool HasRectangularLineSelection(ICSharpCode.AvalonEdit.Editing.RectangleSelection selection)
+    {
+      return !selection.IsEmpty || selection.StartPosition.Line != selection.EndPosition.Line;
+    }
+
+    private static (int StartLineNumber, int EndLineNumber) GetSelectedLineRange(
+      ICSharpCode.AvalonEdit.Document.TextDocument document,
+      int selectionStart,
+      int selectionLength,
+      int caretOffset)
+    {
+      int selectionEnd = selectionStart + selectionLength;
+      int startLineNumber = selectionLength == 0
+        ? document.GetLineByOffset(caretOffset).LineNumber
+        : document.GetLineByOffset(selectionStart).LineNumber;
+      int endLineNumber = selectionLength == 0
+        ? startLineNumber
+        : document.GetLineByOffset(Math.Max(selectionStart, selectionEnd - 1)).LineNumber;
+
+      return (startLineNumber, endLineNumber);
+    }
+
+    private static (int StartLineNumber, int EndLineNumber) GetSelectedLineRange(
+      ICSharpCode.AvalonEdit.Editing.Selection selection,
+      ICSharpCode.AvalonEdit.Document.TextDocument document,
+      int caretOffset)
+    {
+      if (selection == null)
+      {
+        int lineNumber = document.GetLineByOffset(caretOffset).LineNumber;
+        return (lineNumber, lineNumber);
+      }
+
+      if (selection.IsEmpty && selection.StartPosition.Line == selection.EndPosition.Line)
+      {
+        int lineNumber = document.GetLineByOffset(caretOffset).LineNumber;
+        return (lineNumber, lineNumber);
+      }
+
+      return (
+        Math.Min(selection.StartPosition.Line, selection.EndPosition.Line),
+        Math.Max(selection.StartPosition.Line, selection.EndPosition.Line));
+    }
+
+    private static int GetLineBlockLength(
+      ICSharpCode.AvalonEdit.Document.DocumentLine firstLine,
+      ICSharpCode.AvalonEdit.Document.DocumentLine lastLine)
+    {
+      return lastLine.Offset + lastLine.TotalLength - firstLine.Offset;
+    }
+
+    // Keeps existing line separators on their original positions, including the EOF case without a trailing newline.
+    private static string BuildMovedLineBlock(
+      ICSharpCode.AvalonEdit.Document.TextDocument document,
+      int startLineNumber,
+      int endLineNumber,
+      bool moveUp)
+    {
+      var segments = new List<(string Content, string Delimiter)>(endLineNumber - startLineNumber + 1);
+
+      for (int lineNumber = startLineNumber; lineNumber <= endLineNumber; lineNumber++)
+      {
+        var line = document.GetLineByNumber(lineNumber);
+        segments.Add((
+          document.GetText(line.Offset, line.Length),
+          document.GetText(line.EndOffset, line.DelimiterLength)));
+      }
+
+      var builder = new StringBuilder();
+      int contentStartIndex = moveUp ? 1 : segments.Count - 1;
+
+      for (int i = 0; i < segments.Count; i++)
+      {
+        int contentIndex = moveUp
+          ? (contentStartIndex + i) % segments.Count
+          : (contentStartIndex + i) % segments.Count;
+
+        builder.Append(segments[contentIndex].Content);
+        builder.Append(segments[i].Delimiter);
+      }
+
+      return builder.ToString();
     }
 
     private void FormatProgramText()
