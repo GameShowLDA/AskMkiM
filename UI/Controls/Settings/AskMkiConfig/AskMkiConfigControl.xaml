@@ -3,21 +3,730 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:local="clr-namespace:UI.Controls.Settings.AskMkiConfig"
              mc:Ignorable="d"
-             d:DesignHeight="180"
-             d:DesignWidth="800">
+             d:DesignHeight="760"
+             d:DesignWidth="1280">
 
     <UserControl.Resources>
+
+        <sys:String x:Key="AskMki.Text.HeaderTitle">Конфигурация АСК-МКИ</sys:String>
+        <sys:String x:Key="AskMki.Text.SaveTooltip">Сохранить</sys:String>
+        <sys:String x:Key="AskMki.Text.CancelTooltip">Отменить изменения</sys:String>
+        <sys:String x:Key="AskMki.Text.SectionMkiPath">Путь к mkiw.exe</sys:String>
+        <sys:String x:Key="AskMki.Text.SectionIntro">Здесь задаются путь к старой программе и путь к mki_hrd.cfg. Ниже редактируется активная legacy-конфигурация через новый интерфейс без открытия старого MKI.</sys:String>
+        <sys:String x:Key="AskMki.Text.SelectExeButton">Выбрать EXE</sys:String>
+        <sys:String x:Key="AskMki.Text.ClearButton">Очистить</sys:String>
+        <sys:String x:Key="AskMki.Text.SectionConfigPath">Путь к mki_hrd.cfg</sys:String>
+        <sys:String x:Key="AskMki.Text.SelectCfgButton">Выбрать CFG</sys:String>
+        <sys:String x:Key="AskMki.Text.SectionConfigEditor">Параметры конфигурации</sys:String>
+        <sys:String x:Key="AskMki.Text.SectionConfigEditorDescription">Каждый старый блок конфигурации вынесен в отдельную сворачиваемую группу. Подпункты A1/B1/C1 скрыты, все параметры показаны сразу внутри основной группы.</sys:String>
+        <sys:String x:Key="AskMki.Text.CheckBoxEnabled">Включено</sys:String>
+
+        <sys:String x:Key="AskMki.Dialog.SelectMki.Title">Выберите mkiw.exe</sys:String>
+        <sys:String x:Key="AskMki.Dialog.SelectMki.Filter">mkiw.exe|mkiw.exe|EXE-файлы (*.exe)|*.exe|Все файлы (*.*)|*.*</sys:String>
+        <sys:String x:Key="AskMki.Dialog.SelectCfg.Title">Выберите mki_hrd.cfg</sys:String>
+        <sys:String x:Key="AskMki.Dialog.SelectCfg.Filter">mki_hrd.cfg|mki_hrd.cfg|CFG-файлы (*.cfg)|*.cfg|Все файлы (*.*)|*.*</sys:String>
+
+        <sys:String x:Key="AskMki.Message.Title">Конфигурация АСК-МКИ</sys:String>
+        <sys:String x:Key="AskMki.Message.Warning.ConfigPathRequired">Сначала укажите путь к mki_hrd.cfg.</sys:String>
+        <sys:String x:Key="AskMki.Message.Warning.ConfigFileMissing">Файл mki_hrd.cfg не найден. Сначала загрузите существующий файл.</sys:String>
+        <sys:String x:Key="AskMki.Message.SaveSuccess">Конфигурация сохранена в:{0}{1}</sys:String>
+        <sys:String x:Key="AskMki.Message.LoadSuccess">Файл mki_hrd.cfg загружен:{0}{1}</sys:String>
+        <sys:String x:Key="AskMki.Message.SaveErrorTitle">Ошибка сохранения mki_hrd.cfg</sys:String>
+        <sys:String x:Key="AskMki.Message.LoadErrorTitle">Ошибка загрузки mki_hrd.cfg</sys:String>
+
+        <sys:String x:Key="AskMki.Error.UnknownEditorType">Неизвестный тип редактора: {0}.</sys:String>
+        <sys:String x:Key="AskMki.Error.OptionsKeyMissing">Для поля "{0}" не указан OptionsKey.</sys:String>
+        <sys:String x:Key="AskMki.Error.OptionNotSelected">Для поля "{0}" не выбран вариант.</sys:String>
+        <sys:String x:Key="AskMki.Error.ProfileNotLoaded">Профиль legacy-конфигурации не загружен.</sys:String>
+        <sys:String x:Key="AskMki.Error.PropertyNotFound">Свойство "{0}" не найдено в {1}.</sys:String>
+        <sys:String x:Key="AskMki.Error.PropertyIsNotArray">Свойство "{0}" не является массивом.</sys:String>
+        <sys:String x:Key="AskMki.Error.ArrayElementTypeMissing">Не удалось определить тип элемента массива "{0}".</sys:String>
+        <sys:String x:Key="AskMki.Error.PathWriteFailed">Не удалось записать значение по пути "{0}".</sys:String>
+        <sys:String x:Key="AskMki.Error.InvalidPathSegment">Некорректный сегмент пути: "{0}".</sys:String>
+
+        <x:Array x:Key="AskMki.SwitchNames" Type="{x:Type sys:String}">
+            <sys:String>ТКИ</sys:String>
+            <sys:String>СК-2400 2</sys:String>
+            <sys:String>СК-2400 3</sys:String>
+            <sys:String>СК-2400 4</sys:String>
+            <sys:String>СК-2400 5</sys:String>
+            <sys:String>СК-2400 6</sys:String>
+            <sys:String>СК-2400 7</sys:String>
+            <sys:String>СК-2400 8</sys:String>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Gui3" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Отсутствует"/>
+            <local:AskMkiSettingOption Value="1" Label="ZUP серия (RS-232)"/>
+            <local:AskMkiSettingOption Value="2" Label="Б5-108"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Gui4" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Отсутствует"/>
+            <local:AskMkiSettingOption Value="1" Label="U/I 2-10 код (ПУИ)"/>
+            <local:AskMkiSettingOption Value="2" Label="U/I 2-й код (RS-485)"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.PkiRange" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Табличный"/>
+            <local:AskMkiSettingOption Value="1" Label="Расширенный"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Ppu" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Отсутствует"/>
+            <local:AskMkiSettingOption Value="1" Label="Имеется, 625В"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Adc" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Нет"/>
+            <local:AskMkiSettingOption Value="1" Label="Есть"/>
+            <local:AskMkiSettingOption Value="2" Label="Есть(F)"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.AdcImax" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="10"/>
+            <local:AskMkiSettingOption Value="1" Label="20"/>
+            <local:AskMkiSettingOption Value="2" Label="50"/>
+            <local:AskMkiSettingOption Value="3" Label="100"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Voltmeter" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="В7-34А (СКУ)"/>
+            <local:AskMkiSettingOption Value="1" Label="В7-53 (КОП)"/>
+            <local:AskMkiSettingOption Value="2" Label="В7-65/4 (КОП)"/>
+            <local:AskMkiSettingOption Value="3" Label="В7-72 (КОП)"/>
+            <local:AskMkiSettingOption Value="4" Label="В7-73/1 (КОП)"/>
+            <local:AskMkiSettingOption Value="5" Label="В7-73/2 (COM)"/>
+            <local:AskMkiSettingOption Value="6" Label="Agilent (COM)"/>
+            <local:AskMkiSettingOption Value="7" Label="Agilent (USB)"/>
+            <local:AskMkiSettingOption Value="8" Label="В7-87 (COM)"/>
+            <local:AskMkiSettingOption Value="9" Label="Вольтметр неисправен/отсутствует"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.CurrentSource" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="ПИТ"/>
+            <local:AskMkiSettingOption Value="1" Label="ПИНТ4"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Block" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Отсутствует"/>
+            <local:AskMkiSettingOption Value="1" Label="ББ1 (неотключаемый)"/>
+            <local:AskMkiSettingOption Value="2" Label="СПР (отключаемый)"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.UseWait" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Без ускорения"/>
+            <local:AskMkiSettingOption Value="1" Label="Только при проверке подключения/отключения"/>
+            <local:AskMkiSettingOption Value="2" Label="Максимальное ускорение"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Baud" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="1200"/>
+            <local:AskMkiSettingOption Value="1" Label="2400"/>
+            <local:AskMkiSettingOption Value="2" Label="4800"/>
+            <local:AskMkiSettingOption Value="3" Label="9600"/>
+            <local:AskMkiSettingOption Value="4" Label="19200"/>
+            <local:AskMkiSettingOption Value="5" Label="38400"/>
+            <local:AskMkiSettingOption Value="6" Label="57600"/>
+            <local:AskMkiSettingOption Value="7" Label="115200"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.Parity" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Без паритета"/>
+            <local:AskMkiSettingOption Value="1" Label="Нечетность"/>
+            <local:AskMkiSettingOption Value="2" Label="Четность"/>
+            <local:AskMkiSettingOption Value="3" Label="Всегда 0"/>
+            <local:AskMkiSettingOption Value="4" Label="Всегда 1"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.ComSplitter" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="COMx4 отсутствует"/>
+            <local:AskMkiSettingOption Value="1" Label="COM1 IBM"/>
+            <local:AskMkiSettingOption Value="2" Label="COM2 IBM"/>
+            <local:AskMkiSettingOption Value="3" Label="COM3 IBM"/>
+            <local:AskMkiSettingOption Value="4" Label="COM4 IBM"/>
+            <local:AskMkiSettingOption Value="5" Label="COM5 IBM"/>
+            <local:AskMkiSettingOption Value="6" Label="COM6 IBM"/>
+            <local:AskMkiSettingOption Value="7" Label="COM7 IBM"/>
+            <local:AskMkiSettingOption Value="8" Label="COM8 IBM"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.ControllerPort" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Паралл.обмен"/>
+            <local:AskMkiSettingOption Value="1" Label="COM1 IBM"/>
+            <local:AskMkiSettingOption Value="2" Label="COM2 IBM"/>
+            <local:AskMkiSettingOption Value="3" Label="COM3 IBM"/>
+            <local:AskMkiSettingOption Value="4" Label="COM4 IBM"/>
+            <local:AskMkiSettingOption Value="5" Label="COM5 IBM"/>
+            <local:AskMkiSettingOption Value="6" Label="COM6 IBM"/>
+            <local:AskMkiSettingOption Value="7" Label="COM7 IBM"/>
+            <local:AskMkiSettingOption Value="8" Label="COM8 IBM"/>
+            <local:AskMkiSettingOption Value="9" Label="COMx4/Канал 1"/>
+            <local:AskMkiSettingOption Value="10" Label="COMx4/Канал 2"/>
+            <local:AskMkiSettingOption Value="11" Label="COMx4/Канал 3"/>
+            <local:AskMkiSettingOption Value="12" Label="COMx4/Канал 4"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Options.DevicePort" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="0" Label="Не используется"/>
+            <local:AskMkiSettingOption Value="1" Label="COM1 IBM"/>
+            <local:AskMkiSettingOption Value="2" Label="COM2 IBM"/>
+            <local:AskMkiSettingOption Value="3" Label="COM3 IBM"/>
+            <local:AskMkiSettingOption Value="4" Label="COM4 IBM"/>
+            <local:AskMkiSettingOption Value="5" Label="COM5 IBM"/>
+            <local:AskMkiSettingOption Value="6" Label="COM6 IBM"/>
+            <local:AskMkiSettingOption Value="7" Label="COM7 IBM"/>
+            <local:AskMkiSettingOption Value="8" Label="COM8 IBM"/>
+            <local:AskMkiSettingOption Value="9" Label="COMx4/Канал 1"/>
+            <local:AskMkiSettingOption Value="10" Label="COMx4/Канал 2"/>
+            <local:AskMkiSettingOption Value="11" Label="COMx4/Канал 3"/>
+            <local:AskMkiSettingOption Value="12" Label="COMx4/Канал 4"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Groups" Type="{x:Type local:AskMkiGroupDefinition}">
+            <local:AskMkiGroupDefinition Code="A" Title="Параметры СК, БК" Description="Наличие коммутаторов СК/ТКИ и диапазоны БК, используемых в стойке." Summary="Стойки, ТКИ и диапазоны БК.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.A.Switches"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="B" Title="Параметры ПИНТов" Description="Наличие, тип, ток, напряжение и временные параметры ПИНТ3/ПИНТ4." Summary="ПИНТ3, ПИНТ4, токи, напряжения, задержки.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.B.Types"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.B.Current"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.B.Voltage"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.B.Timing"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.B.Load"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="C" Title="Параметры ПКИ" Description="Проверка сопротивления изоляции." Summary="Umax, Rиз, dU, dI, НР-4.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.C.Main"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.C.Voltages"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.C.Dividers"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.C.Nr4"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.C.Timing"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="D" Title="Параметры ППУ" Description="Проверка прочности изоляции." Summary="Umax, сеть, коэффициент, задержки.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.D.Main"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.D.Timing"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.D.Protocol"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="E" Title="Параметры АЦП" Description="Наличие АЦП, тестовые параметры и задержки." Summary="АЦП, Imax, U теста, задержки.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.E.Main"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.E.Timing"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="F" Title="Параметры цифрового вольтметра" Description="Тип вольтметра, Agilent, КОП и задержки." Summary="Тип, адрес, КОП, задержки.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.Main"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.Kop"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.CommonTiming"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.ModeTiming"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="G" Title="Параметры LC-метра" Description="Параметры измерения емкости." Summary="Измерение C, задержка, замеры, поправка.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.G.Main"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="H" Title="Связь IBM - АСК" Description="Настройки COM-портов контроллера, вольтметра и ПИНТ3." Summary="COMx4, СКУ, вольтметр, ПИНТ3.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.H.Connection"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.H.ControllerCom"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.H.VoltmeterCom"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="I" Title="Временные параметры" Description="Задержки коммутации, переключения, установки и параметры измерения времени." Summary="Коммутация и измерение времени.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.I.Switching"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.I.TimeMeasure"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="J" Title="Общие параметры" Description="Блок блокировок, Rдобавочное и ускорение выполнения ПК и тестов." Summary="Блокировки, сопротивление, ускорение.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.J.Main"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.J.Acceleration"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+
+            <local:AskMkiGroupDefinition Code="K" Title="Прочие параметры" Description="Оставшиеся legacy-настройки аппаратуры." Summary="Источник тока, ЭК, расчёт погрешностей.">
+                <local:AskMkiGroupDefinition.Children>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.K.Main"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.K.Ek"/>
+                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.K.Accuracy"/>
+                </local:AskMkiGroupDefinition.Children>
+            </local:AskMkiGroupDefinition>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.A.Switches" Type="{x:Type local:AskMkiFieldDefinition}">
+
+            <local:AskMkiFieldDefinition
+        Label="ТКИ: имеется"
+        Description="Всегда"
+        EditorKind="Info"/>
+
+            <local:AskMkiFieldDefinition
+        LabelFormat="{}{0}: имеется"
+        EditorKind="Toggle"
+        PathFormat="HardwareConfig.SkIs[{0}]"
+        Count="7"
+        StartIndex="1"
+        NamesKey="AskMki.SwitchNames"/>
+
+            <local:AskMkiFieldDefinition
+        LabelFormat="{}{0}: первый БК"
+        EditorKind="Text"
+        PathFormat="HardwareConfig.SkBkBeg[{0}]"
+        Count="8"
+        NamesKey="AskMki.SwitchNames"/>
+
+            <local:AskMkiFieldDefinition
+        LabelFormat="{}{0}: последний БК"
+        EditorKind="Text"
+        PathFormat="HardwareConfig.SkBkEnd[{0}]"
+        Count="8"
+        NamesKey="AskMki.SwitchNames"/>
+
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.B.Types" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="ПИНТ3: наличие" EditorKind="Choice" Path="HardwareConfig.GuiType[0]" OptionsKey="AskMki.Options.Gui3"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ4: тип" EditorKind="Choice" Path="HardwareConfig.GuiType[1]" OptionsKey="AskMki.Options.Gui4"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.B.Current" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="ПИНТ3: шаг тока, А" EditorKind="Text" Path="HardwareConfig.GuiAmperStep[0]"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ4: шаг тока, А" EditorKind="Text" Path="HardwareConfig.GuiAmperStep[1]"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ3: максимальный ток, А" EditorKind="Text" Path="HardwareConfig.GuiAmperMax[0]"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ4: максимальный ток, А" EditorKind="Text" Path="HardwareConfig.GuiAmperMax[1]"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.B.Voltage" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="ПИНТ3: шаг напряжения, В" EditorKind="Text" Path="HardwareConfig.GuiVoltStep[0]"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ4: шаг напряжения, В" EditorKind="Text" Path="HardwareConfig.GuiVoltStep[1]"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ3: максимальное напряжение, В" EditorKind="Text" Path="HardwareConfig.GuiVoltMax[0]"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ4: максимальное напряжение, В" EditorKind="Text" Path="HardwareConfig.GuiVoltMax[1]"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.B.Timing" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Задержка включения питания ПИНТ, мс" EditorKind="Text" Path="Timing.GuiPwr"/>
+            <local:AskMkiFieldDefinition Label="Задержка установки режима ПИНТ3, мс" EditorKind="Text" Path="Timing.Gui3Mod"/>
+            <local:AskMkiFieldDefinition Label="Задержка восстановления режима ПИНТ, мс" EditorKind="Text" Path="Timing.GuiRst"/>
+            <local:AskMkiFieldDefinition Label="Задержка установки режима ПИНТ4, мс" EditorKind="Text" Path="Timing.Gui4Mod"/>
+            <local:AskMkiFieldDefinition Label="Задержка коммутации ПИНТ к шинам, мс" EditorKind="Text" Path="Timing.GuiGat"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.B.Load" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="ПИНТ4: R активной нагрузки, Ом" EditorKind="Text" Path="HardwareAux.Rgui4"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ4: dI при активной нагрузке, мА" EditorKind="Text" Path="HardwareAux.DIGui4mA"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.C.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="ПКИ имеется" EditorKind="Toggle" Path="HardwareConfig.IsPki"/>
+            <local:AskMkiFieldDefinition Label="Аппаратный контроль Uпки" EditorKind="Toggle" Path="HardwareAux.IsTstUpki"/>
+            <local:AskMkiFieldDefinition Label="Umax ПКИ, В" EditorKind="Text" Path="HardwareConfig.PkiUmax"/>
+            <local:AskMkiFieldDefinition Label="R изоляции коммутатора, ГОм" EditorKind="Text" Path="HardwareConfig.GomCmt"/>
+            <local:AskMkiFieldDefinition Label="Режим выбора диапазона тока" EditorKind="Choice" Path="HardwareConfig.PkiExtMo" OptionsKey="AskMki.Options.PkiRange"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.C.Voltages" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition LabelFormat="Входное напряжение ПКИ диапазона {0}, В" EditorKind="Text" PathFormat="HardwareAux.PkiAVolt[{0}]" Count="5"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.C.Dividers" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition LabelFormat="R нижнего плеча делителя ПКИ диапазона {0}, кОм" EditorKind="Text" PathFormat="HardwareAux.PkiAkomDiv[{0}]" Count="8"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.C.Nr4" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition LabelFormat="Сопротивление НР-4 #{0}, МОм" EditorKind="Text" PathFormat="HardwareAux.PkiKomTst[{0}]" Count="10"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.C.Timing" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Задержка включения питания ПКИ, мс" EditorKind="Text" Path="Timing.PkiPwr"/>
+            <local:AskMkiFieldDefinition Label="Задержка установки режима ПКИ, мс" EditorKind="Text" Path="Timing.PkiMod"/>
+            <local:AskMkiFieldDefinition Label="Дополнительная задержка перед измерением ПКИ, мс" EditorKind="Text" Path="Timing.PkiBef"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.D.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="ППУ: наличие и Umax" EditorKind="Choice" Path="HardwareConfig.TyPpu" OptionsKey="AskMki.Options.Ppu"/>
+            <local:AskMkiFieldDefinition Label="Фазное напряжение сети, В" EditorKind="Text" Path="HardwareAux.U220"/>
+            <local:AskMkiFieldDefinition Label="Коэффициент делителя 1/100 ППУ" EditorKind="Text" Path="HardwareAux.PpuKmul"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.D.Timing" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Задержка включения питания ППУ, мс" EditorKind="Text" Path="Timing.PpuPwr"/>
+            <local:AskMkiFieldDefinition Label="Задержка смены режима ППУ, мс" EditorKind="Text" Path="Timing.PpuMod"/>
+            <local:AskMkiFieldDefinition Label="Задержка перед измерением ППУ, мс" EditorKind="Text" Path="Timing.PpuBef"/>
+            <local:AskMkiFieldDefinition Label="Задержка после пуска ППУ, мс" EditorKind="Text" Path="Timing.PpuAftPusk"/>
+            <local:AskMkiFieldDefinition Label="Минимальное время измерения Uппу, мс" EditorKind="Text" Path="Timing.TMeasUppuMin"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.D.Protocol" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Выводить Uппу в протокол" EditorKind="Toggle" Path="HardwareAux.OutUpi"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.E.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Наличие АЦП" EditorKind="Choice" Path="HardwareConfig.DvAcp" OptionsKey="AskMki.Options.Adc"/>
+            <local:AskMkiFieldDefinition Label="Imax АЦП (ПИТ), мА" EditorKind="Choice" Path="HardwareConfig.NAcpMaMax" OptionsKey="AskMki.Options.AdcImax"/>
+            <local:AskMkiFieldDefinition Label="U АЦП для теста, В" EditorKind="Text" Path="HardwareAux.UacpR"/>
+            <local:AskMkiFieldDefinition Label="R короткозамкнутого входа АЦП, Ом" EditorKind="Text" Path="HardwareAux.RwirAdc"/>
+            <local:AskMkiFieldDefinition Label="Есть диапазон U АЦП 0.3В" EditorKind="Toggle" Path="HardwareConfig.AcpIs0_3V"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.E.Timing" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Задержка установки режима АЦП, мс" EditorKind="Text" Path="Timing.AcpMod"/>
+            <local:AskMkiFieldDefinition Label="Задержка коммутации АЦП к шинам, мс" EditorKind="Text" Path="Timing.AcpGat"/>
+            <local:AskMkiFieldDefinition Label="Дополнительная задержка перед измерением АЦП, мс" EditorKind="Text" Path="Timing.AcpBef"/>
+            <local:AskMkiFieldDefinition Label="Время измерения контроллером, мкс" EditorKind="Text" Path="HardwareAux.MksAcpTmr"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.F.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Тип вольтметра" EditorKind="Choice" Path="HardwareConfig.DvV7" OptionsKey="AskMki.Options.Voltmeter"/>
+            <local:AskMkiFieldDefinition Label="Agilent USB-адрес" EditorKind="Text" Path="HardwareAux.UsbAddrVm"/>
+            <local:AskMkiFieldDefinition Label="Задавать ДУ" EditorKind="Toggle" Path="HardwareAux.PortVm.Base"/>
+            <local:AskMkiFieldDefinition Label="Отключать звук" EditorKind="Toggle" Path="HardwareAux.BeepOff"/>
+            <local:AskMkiFieldDefinition Label="Отбрасывать первый замер" EditorKind="Toggle" Path="HardwareAux.Meas2"/>
+            <local:AskMkiFieldDefinition Label="U вольтметра для теста АЦП, В" EditorKind="Text" Path="HardwareAux.Uv7R"/>
+            <local:AskMkiFieldDefinition Label="R короткозамкнутого входа вольтметра, Ом" EditorKind="Text" Path="HardwareAux.RwirV7"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.F.Kop" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Адрес вольтметра на КОП" EditorKind="Text" Path="HardwareAux.KopAddr"/>
+            <local:AskMkiFieldDefinition Label="Задержка между записями в КОП, мс" EditorKind="Text" Path="Timing.KoPwr"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.F.CommonTiming" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Задержка коммутации вольтметра к шинам, мс" EditorKind="Text" Path="Timing.V7Gat"/>
+            <local:AskMkiFieldDefinition Label="Дополнительная задержка перед измерением вольтметром, мс" EditorKind="Text" Path="Timing.V7Bef"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.F.ModeTiming" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="В7-34: установка режима, мс" EditorKind="Text" Path="Timing.V734Mod"/>
+            <local:AskMkiFieldDefinition Label="В7-53: установка режима, мс" EditorKind="Text" Path="Timing.V753Mod"/>
+            <local:AskMkiFieldDefinition Label="В7-65/72/73/87: установка режима, мс" EditorKind="Text" Path="Timing.V765Mod"/>
+            <local:AskMkiFieldDefinition Label="В7-53: пуск R, мс" EditorKind="Text" Path="Timing.V753RunR"/>
+            <local:AskMkiFieldDefinition Label="В7-53: пуск U=, мс" EditorKind="Text" Path="Timing.V753RunU"/>
+            <local:AskMkiFieldDefinition Label="В7-53: пуск Uперем, мс" EditorKind="Text" Path="Timing.V753RunV"/>
+            <local:AskMkiFieldDefinition Label="В7-65/73: пуск R, мс" EditorKind="Text" Path="Timing.V765RunR"/>
+            <local:AskMkiFieldDefinition Label="В7-65/73: пуск U=, мс" EditorKind="Text" Path="Timing.V765RunU"/>
+            <local:AskMkiFieldDefinition Label="В7-65/73: пуск Uперем, мс" EditorKind="Text" Path="Timing.V765RunUv"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.G.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Измерение емкости поддерживается" EditorKind="Toggle" Path="HardwareConfig.LcIs"/>
+            <local:AskMkiFieldDefinition Label="Задержка перед измерением C, мс" EditorKind="Text" Path="Timing.LcBef"/>
+            <local:AskMkiFieldDefinition Label="Количество замеров емкости" EditorKind="Text" Path="HardwareAux.QMeasC"/>
+            <local:AskMkiFieldDefinition Label="Поправка C, пФ" EditorKind="Text" Path="HardwareAux.CcorrectPf"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.H.Connection" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="COMx4: код COM-порта/разветвителя" EditorKind="Choice" Path="HardwareConfig.Comx4Com1" OptionsKey="AskMki.Options.ComSplitter"/>
+            <local:AskMkiFieldDefinition Label="СКУ: код COM-порта/канала" EditorKind="Choice" Path="HardwareAux.PortSku.Com1" OptionsKey="AskMki.Options.ControllerPort"/>
+            <local:AskMkiFieldDefinition Label="Вольтметр на COM: код COM-порта/канала" EditorKind="Choice" Path="HardwareAux.PortVm.Com1" OptionsKey="AskMki.Options.DevicePort"/>
+            <local:AskMkiFieldDefinition Label="ПИНТ3 на COM: код COM-порта/канала" EditorKind="Choice" Path="HardwareAux.PortGui3.Com1" OptionsKey="AskMki.Options.DevicePort"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.H.ControllerCom" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="СКУ: скорость обмена" EditorKind="Choice" Path="HardwareAux.PortSku.Baud" OptionsKey="AskMki.Options.Baud"/>
+            <local:AskMkiFieldDefinition Label="СКУ: длина посылки, бит" EditorKind="Text" Path="HardwareAux.PortSku.Len"/>
+            <local:AskMkiFieldDefinition Label="СКУ: паритет" EditorKind="Choice" Path="HardwareAux.PortSku.Parity" OptionsKey="AskMki.Options.Parity"/>
+            <local:AskMkiFieldDefinition Label="СКУ: количество стоп-бит" EditorKind="Text" Path="HardwareAux.PortSku.QStopBit"/>
+            <local:AskMkiFieldDefinition Label="СКУ: тайм-аут обмена, мс" EditorKind="Text" Path="HardwareAux.PortSku.MsTmo"/>
+            <local:AskMkiFieldDefinition Label="СКУ: COM-задержка, мкс" EditorKind="Text" Path="HardwareAux.PortSku.MksWait"/>
+            <local:AskMkiFieldDefinition Label="Сетевой протокол с контроллером" EditorKind="Toggle" Path="HardwareAux.Net"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.H.VoltmeterCom" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Вольтметр: скорость обмена" EditorKind="Choice" Path="HardwareAux.PortVm.Baud" OptionsKey="AskMki.Options.Baud"/>
+            <local:AskMkiFieldDefinition Label="Вольтметр: длина посылки, бит" EditorKind="Text" Path="HardwareAux.PortVm.Len"/>
+            <local:AskMkiFieldDefinition Label="Вольтметр: паритет" EditorKind="Choice" Path="HardwareAux.PortVm.Parity" OptionsKey="AskMki.Options.Parity"/>
+            <local:AskMkiFieldDefinition Label="Вольтметр: количество стоп-бит" EditorKind="Text" Path="HardwareAux.PortVm.QStopBit"/>
+            <local:AskMkiFieldDefinition Label="Вольтметр: тайм-аут обмена, мс" EditorKind="Text" Path="HardwareAux.PortVm.MsTmo"/>
+            <local:AskMkiFieldDefinition Label="Вольтметр: COM-задержка, мкс" EditorKind="Text" Path="HardwareAux.PortVm.MksWait"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.I.Switching" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Включение питания СК, мс" EditorKind="Text" Path="Timing.SkPwr"/>
+            <local:AskMkiFieldDefinition Label="Коммутация БК к ИШ, мс" EditorKind="Text" Path="Timing.BkBus"/>
+            <local:AskMkiFieldDefinition Label="Коммутация групповых реле, мс" EditorKind="Text" Path="Timing.EkRk"/>
+            <local:AskMkiFieldDefinition Label="Коммутация реле КЗШ, мс" EditorKind="Text" Path="Timing.KzSh"/>
+            <local:AskMkiFieldDefinition Label="Коммутация точек к шинам ЭК, мс" EditorKind="Text" Path="Timing.PtEk"/>
+            <local:AskMkiFieldDefinition Label="Коммутация точек к шинам РК, мс" EditorKind="Text" Path="Timing.PtRk"/>
+            <local:AskMkiFieldDefinition Label="Задержка перед измерением КЭП, мс" EditorKind="Text" Path="Timing.EpBef"/>
+            <local:AskMkiFieldDefinition Label="Коммутация КЭП к шинам ЭК, мс" EditorKind="Text" Path="Timing.EpPwr"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.I.TimeMeasure" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="K умножения измеренного времени" EditorKind="Text" Path="HardwareAux.KmulKi"/>
+            <local:AskMkiFieldDefinition Label="tдо_доб, с" EditorKind="Text" Path="HardwareAux.TdobTdo"/>
+            <local:AskMkiFieldDefinition Label="tи_доб, с" EditorKind="Text" Path="HardwareAux.TdobTi"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.J.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Блок блокировок" EditorKind="Choice" Path="HardwareConfig.BbSpr" OptionsKey="AskMki.Options.Block"/>
+            <local:AskMkiFieldDefinition Label="Rдобавочное шины, Ом" EditorKind="Text" Path="HardwareConfig.RbusBb"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.J.Acceleration" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Алгоритмы ускорения" EditorKind="Choice" Path="HardwareAux.UseWait" OptionsKey="AskMki.Options.UseWait"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.K.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Источник тока для ЭТ" EditorKind="Choice" Path="HardwareConfig.EtGui4" OptionsKey="AskMki.Options.CurrentSource"/>
+            <local:AskMkiFieldDefinition Label="Команды КУ/СИ с ПИНТ4" EditorKind="Toggle" Path="HardwareConfig.KuGui4"/>
+            <local:AskMkiFieldDefinition Label="Разделенные входы БК" EditorKind="Toggle" Path="HardwareConfig.DivGatBk"/>
+            <local:AskMkiFieldDefinition Label="Имеется схема НК" EditorKind="Toggle" Path="HardwareConfig.IsRos"/>
+            <local:AskMkiFieldDefinition Label="КИ с контроллером" EditorKind="Toggle" Path="HardwareConfig.AcpTmr"/>
+            <local:AskMkiFieldDefinition Label="Umax на шинах ЭК, В" EditorKind="Text" Path="HardwareConfig.UmaxEk"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.K.Ek" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Полнодоступный ЭК" EditorKind="Toggle" Path="HardwareConfig.EkFull"/>
+            <local:AskMkiFieldDefinition Label="Если полнодоступный ЭК: Umax СИ, В" EditorKind="Text" Path="HardwareConfig.UmaxSiEkFull"/>
+            <local:AskMkiFieldDefinition Label="Если полнодоступный ЭК: Umax ПИ, В" EditorKind="Text" Path="HardwareConfig.UmaxPiEkFull"/>
+        </x:Array>
+
+        <x:Array x:Key="AskMki.Fields.K.Accuracy" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Расчет погрешностей по формулам" EditorKind="Toggle" Path="HardwareConfig.CalcPgr"/>
+        </x:Array>
+
         <Style x:Key="AskMkiPathTextBoxStyle" TargetType="TextBox">
             <Setter Property="Height" Value="38"/>
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="Foreground" Value="{DynamicResource SettingsTitleSolidColorBrush}"/>
             <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="AskMkiCardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="AskMkiHeaderActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#3F5368"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                        Width="30"
+                        Height="30"
+                        CornerRadius="15"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#253241"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#58708A"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#1A242F"/>
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        
+
+        <Style x:Key="AskMkiSectionTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource SettingsTitleStyle}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="AskMkiEditorTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource AskMkiPathTextBoxStyle}">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,6"/>
+        </Style>
+
+        <Style x:Key="AskMkiSmallNumberTextBoxStyle"
+       TargetType="TextBox"
+       BasedOn="{StaticResource AskMkiEditorTextBoxStyle}">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="4,0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style x:Key="AskMkiMatrixHeaderTextStyle"
+       TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SettingsTitleSolidColorBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Opacity" Value="0.8"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style x:Key="AskMkiMatrixColumnTitleStyle"
+       TargetType="TextBlock"
+       BasedOn="{StaticResource AskMkiSectionTitleStyle}">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="AskMkiMatrixNameTextStyle"
+       TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SettingsTitleSolidColorBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="AskMkiMatrixDescriptionTextStyle"
+       TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SettingsTitleSolidColorBrush}"/>
+            <Setter Property="Opacity" Value="0.65"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+
+        <Style x:Key="AskMkiToggleCheckBoxStyle"
+       TargetType="CheckBox"
+       BasedOn="{StaticResource SettingsCheckBox}">
+            <Setter Property="Margin" Value="0,2,10,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EditorKind}" Value="Toggle">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="AskMkiDescriptionStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SettingsTitleSolidColorBrush}"/>
+            <Setter Property="Opacity" Value="0.75"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+
+        <Style x:Key="AskMkiGroupExpanderStyle" TargetType="Expander">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Expander">
+                        <StackPanel>
+                            <ToggleButton x:Name="HeaderSite"
+                                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Padding="0"
+                                          HorizontalContentAlignment="Stretch">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                                BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="14"
+                                                Padding="14,12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="18"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding Title}"
+                                                               Style="{StaticResource AskMkiSectionTitleStyle}"/>
+                                                    <TextBlock Text="{Binding Summary}"
+                                                               Style="{StaticResource AskMkiDescriptionStyle}"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
+
+                                                <TextBlock x:Name="ChevronIcon"
+                                                           Grid.Column="2"
+                                                           Text="›"
+                                                           FontSize="28"
+                                                           FontWeight="Bold"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource SettingsTitleSolidColorBrush}"
+                                                           RenderTransformOrigin="0.5,0.5">
+                                                    <TextBlock.RenderTransform>
+                                                        <RotateTransform Angle="0"/>
+                                                    </TextBlock.RenderTransform>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Border>
+
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="ChevronIcon" Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <RotateTransform Angle="90"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <Border x:Name="ExpandSite"
+                                    Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                    Padding="14,0,14,12"
+                                    Visibility="Collapsed">
+                                <ContentPresenter/>
+                            </Border>
+                        </StackPanel>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
 
@@ -28,38 +737,73 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding Source={StaticResource Settings_AskMkiConfig_Title}, Path=Value}"
-                           Padding="10,10"
-                           Style="{DynamicResource SettingsTitleStyle}"
-                           VerticalAlignment="Center"
-                           Grid.Column="0"/>
+                <TextBlock Grid.Column="0"
+               Text="{StaticResource AskMki.Text.HeaderTitle}"
+               Padding="10,10"
+               Style="{DynamicResource SettingsTitleStyle}"/>
 
                 <Grid Grid.Column="1"
-                      Margin="20,0">
+          Margin="20,0">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
                     <Icons:ArrowButton x:Name="ToggleAskMkiConfigButton"
-                                       HorizontalAlignment="Right"
-                                       Width="30"
-                                       Height="30"
-                                       ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                                       ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                       ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                       ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
-                                       IsArrowUp="True"
-                                       VerticalAlignment="Center"/>
+                           Grid.Column="0"
+                           HorizontalAlignment="Right"
+                           Width="30"
+                           Height="30"
+                           IsArrowUp="True"
+                           ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                           ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                           ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                           ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
+                           VerticalAlignment="Center"/>
+
+                    <Icons:SuccessIconControlV2 
+                            Visibility="Collapsed"
+                            Grid.Column="1"
+                            x:Name="SuccessAskMkiConfig"
+                            Width="30"
+                            Height="30"
+                            Margin="10,0,0,0"
+                            CheckThickness="4"
+                            CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                            CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                            ToolTip="{StaticResource AskMki.Text.SaveTooltip}"
+                            Cursor="Hand"
+                            PreviewMouseDown="SaveConfigIcon_PreviewMouseDown"/>
+
+                    <Icons:ErrorIconControlV2
+                            Visibility="Collapsed"  
+                            Grid.Column="2"
+                            x:Name="ErrorAskMkiConfig"
+                            Width="30"
+                            Height="30"
+                            Margin="10,0,0,0"
+                            CrossThickness="4"
+                            CircleBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                            CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                            ToolTip="{StaticResource AskMki.Text.CancelTooltip}"
+                            Cursor="Hand"
+                            PreviewMouseDown="CancelConfigIcon_PreviewMouseDown"/>
                 </Grid>
             </Grid>
 
-            <ContentControl Grid.Row="1">
+            <ContentControl Grid.Row="1"
+                            VerticalAlignment="Stretch">
                 <ContentControl.Style>
                     <Style TargetType="{x:Type ContentControl}">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -81,19 +825,23 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="12"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="12"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
-                                   Text="{Binding Source={StaticResource Settings_AskMkiConfig_MkiPath_Title}, Path=Value}"
-                                   Style="{DynamicResource SettingsTitleStyle}"
-                                   FontWeight="SemiBold"/>
+                                   Text="Путь к mkiw.exe"
+                                   Style="{StaticResource AskMkiSectionTitleStyle}"/>
 
                         <TextBlock Grid.Row="1"
-                                   Text="{Binding Source={StaticResource Settings_AskMkiConfig_MkiPath_Description}, Path=Value}"
-                                   TextWrapping="Wrap"
-                                   Margin="0,6,0,0"
-                                   Opacity="0.8"
-                                   Style="{DynamicResource SettingsTitleStyle}"/>
+                                   Text="Здесь задаются путь к старой программе и путь к mki_hrd.cfg. Ниже редактируется активная legacy-конфигурация через новый интерфейс без открытия старого MKI."
+                                   Style="{StaticResource AskMkiDescriptionStyle}"/>
 
                         <Grid Grid.Row="3">
                             <Grid.ColumnDefinitions>
@@ -109,18 +857,310 @@
                                      Style="{StaticResource AskMkiPathTextBoxStyle}"/>
 
                             <Button Grid.Column="2"
-                                    Content="{Binding Source={StaticResource Settings_AskMkiConfig_SelectMki}, Path=Value}"
+                                    Content="Выбрать EXE"
                                     Style="{StaticResource DeviceInputSecondaryActionButton}"
                                     MinWidth="140"
                                     Click="SelectMkiPathButton_Click"/>
 
                             <Button x:Name="ClearMkiPathButton"
-                                            Grid.Column="4"
-                                            Content="{Binding Source={StaticResource Settings_AskMkiConfig_ClearMki}, Path=Value}"
-                                            Style="{StaticResource DeviceInputSecondaryActionButton}"
-                                            MinWidth="140"
-                                            Click="ClearMkiPathButton_Click"/>
+                                    Grid.Column="4"
+                                    Content="Очистить"
+                                    Style="{StaticResource DeviceInputSecondaryActionButton}"
+                                    MinWidth="140"
+                                    Click="ClearMkiPathButton_Click"/>
                         </Grid>
+
+                        <TextBlock Grid.Row="5"
+                                   Text="Путь к mki_hrd.cfg"
+                                   Style="{StaticResource AskMkiSectionTitleStyle}"/>
+
+                        <Grid Grid.Row="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox x:Name="ConfigPathTextBox"
+                                     Grid.Column="0"
+                                     Style="{StaticResource AskMkiPathTextBoxStyle}"/>
+
+                            <Button Grid.Column="2"
+                                    Content="Выбрать CFG"
+                                    Style="{StaticResource DeviceInputSecondaryActionButton}"
+                                    MinWidth="140"
+                                    Click="SelectConfigPathButton_Click"/>
+                        </Grid>
+
+                        <TextBlock Grid.Row="8"
+                                   Text="Параметры конфигурации"
+                                   Style="{StaticResource AskMkiSectionTitleStyle}"/>
+
+                        <TextBlock Grid.Row="9"
+                                   Text="Каждый старый блок конфигурации вынесен в отдельную сворачиваемую группу. Подпункты A1/B1/C1 скрыты, все параметры показаны сразу внутри основной группы."
+                                   Style="{StaticResource AskMkiDescriptionStyle}"/>
+
+                        <ScrollViewer x:Name="ProfileGroupsScrollViewer"
+              Grid.Row="11"
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Disabled"
+              CanContentScroll="False"
+              Focusable="False"
+              PreviewMouseWheel="ProfileGroupsScrollViewer_PreviewMouseWheel">
+
+                            <ItemsControl x:Name="ProfileGroupsItemsControl"
+                  PreviewMouseWheel="ProfileGroupsScrollViewer_PreviewMouseWheel">
+
+                                <ItemsControl.Resources>
+                                    <DataTemplate x:Key="AskMkiSettingItemTemplate"
+                          DataType="{x:Type local:AskMkiSettingItem}">
+                                        <Border x:Name="ItemBorder"
+                        BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                        BorderThickness="0,0,0,1"
+                        Padding="0,10">
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2.2*"/>
+                                                    <ColumnDefinition Width="18"/>
+                                                    <ColumnDefinition Width="1.3*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid x:Name="InfoStack"
+                              Grid.Column="0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <CheckBox x:Name="InlineToggleCheckBox"
+                                      Grid.Column="0"
+                                      Grid.Row="0"
+                                      Grid.RowSpan="2"
+                                      Style="{StaticResource AskMkiToggleCheckBoxStyle}"
+                                      IsChecked="{Binding ToggleValue, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                                    <TextBlock x:Name="LabelText"
+                                       Grid.Column="1"
+                                       Grid.Row="0"
+                                       Text="{Binding Label}"
+                                       Style="{DynamicResource SettingsTitleStyle}"
+                                       FontWeight="SemiBold"/>
+
+                                                    <TextBlock Grid.Column="1"
+                                       Grid.Row="1"
+                                       Text="{Binding Description}"
+                                       Style="{StaticResource AskMkiDescriptionStyle}"/>
+                                                </Grid>
+
+                                                <Grid x:Name="EditorHost"
+                              Grid.Column="2">
+
+                                                    <TextBox Text="{Binding TextValue, UpdateSourceTrigger=PropertyChanged}">
+                                                        <TextBox.Style>
+                                                            <Style TargetType="TextBox"
+                                           BasedOn="{StaticResource AskMkiEditorTextBoxStyle}">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding EditorKind}" Value="Text">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBox.Style>
+                                                    </TextBox>
+
+                                                    <ComboBox ItemsSource="{Binding Options}"
+                                      SelectedItem="{Binding SelectedOption, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="Label"
+                                      Height="38"
+                                      VerticalContentAlignment="Center">
+                                                        <ComboBox.Style>
+                                                            <Style TargetType="ComboBox"
+                                           BasedOn="{StaticResource CustomComboBoxStyle}">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding EditorKind}" Value="Choice">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ComboBox.Style>
+                                                    </ComboBox>
+
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding EditorKind}" Value="Toggle">
+                                                <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
+                                                <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding EditorKind}" Value="Info">
+                                                <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0"/>
+                                                <Setter TargetName="ItemBorder" Property="Padding" Value="0,14,0,6"/>
+                                                <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
+                                                <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
+                                                <Setter TargetName="LabelText" Property="FontSize" Value="18"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.Resources>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type local:AskMkiSettingGroup}">
+                                        <Border Style="{StaticResource AskMkiCardBorderStyle}">
+
+                                            <Expander Style="{StaticResource AskMkiGroupExpanderStyle}"
+                              IsExpanded="{Binding IsExpanded}">
+
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <TextBlock Grid.Row="0"
+                                       Text="{Binding Description}"
+                                       Style="{StaticResource AskMkiDescriptionStyle}"
+                                       Margin="0,12,0,6"/>
+
+                                                    <!-- Специальная таблица для группы СК/БК -->
+                                                    <Grid x:Name="SwitchMatrixContainer"
+      Grid.Row="1"
+      Visibility="Collapsed"
+      HorizontalAlignment="Left"
+      Margin="0,10,0,0">
+
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <!-- Заголовки колонок -->
+                                                        <Grid Grid.Row="0">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="260"/>
+                                                                <ColumnDefinition Width="100"/>
+                                                                <ColumnDefinition Width="110"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Grid.Column="0"
+                   Text="Коммутатор"
+                   Style="{StaticResource AskMkiMatrixHeaderTextStyle}"/>
+
+                                                            <TextBlock Grid.Column="1"
+                   Text="БКнач"
+                   Style="{StaticResource AskMkiMatrixHeaderTextStyle}"/>
+
+                                                            <TextBlock Grid.Column="2"
+                   Text="БКкон"
+                   Style="{StaticResource AskMkiMatrixHeaderTextStyle}"/>
+                                                        </Grid>
+
+                                                        <!-- Строки -->
+                                                        <ItemsControl Grid.Row="1"
+                  ItemsSource="{Binding SwitchRows}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate DataType="{x:Type local:AskMkiSwitchRangeRow}">
+                                                                    <Border BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                        BorderThickness="0,0,0,1"
+                        Padding="0,9">
+
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="260"/>
+                                                                                <ColumnDefinition Width="100"/>
+                                                                                <ColumnDefinition Width="110"/>
+                                                                            </Grid.ColumnDefinitions>
+
+                                                                            <!-- Название + чекбокс -->
+                                                                            <Grid Grid.Column="0">
+                                                                                <Grid x:Name="EditablePresentPanel">
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="Auto"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+
+                                                                                    <CheckBox Grid.Column="0"
+                                          IsChecked="{Binding IsPresent, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource SettingsCheckBox}"
+                                          Margin="0,1,10,0"
+                                          VerticalAlignment="Center"/>
+
+                                                                                    <TextBlock Grid.Column="1"
+                                           Text="{Binding Name}"
+                                           Style="{StaticResource AskMkiMatrixNameTextStyle}"/>
+                                                                                </Grid>
+
+                                                                                <StackPanel x:Name="FixedPresentPanel"
+                                        Visibility="Collapsed">
+                                                                                    <TextBlock Text="{Binding Name}"
+                                           Style="{StaticResource AskMkiMatrixNameTextStyle}"/>
+
+                                                                                    <TextBlock Text="{Binding FixedDescription}"
+                                           Style="{StaticResource AskMkiMatrixDescriptionTextStyle}"/>
+                                                                                </StackPanel>
+                                                                            </Grid>
+
+                                                                            <!-- Первый БК -->
+                                                                            <TextBox Grid.Column="1"
+                                 Text="{Binding FirstBk, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource AskMkiSmallNumberTextBoxStyle}"
+                                 MaxLength="2"
+                                 PreviewTextInput="SmallNumberTextBox_PreviewTextInput"
+                                 DataObject.Pasting="SmallNumberTextBox_Pasting"/>
+
+                                                                            <!-- Последний БК -->
+                                                                            <TextBox Grid.Column="2"
+                                 Text="{Binding LastBk, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource AskMkiSmallNumberTextBoxStyle}"
+                                 MaxLength="2"
+                                 PreviewTextInput="SmallNumberTextBox_PreviewTextInput"
+                                 DataObject.Pasting="SmallNumberTextBox_Pasting"/>
+                                                                        </Grid>
+                                                                    </Border>
+
+                                                                    <DataTemplate.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsFixedPresent}" Value="True">
+                                                                            <Setter TargetName="EditablePresentPanel" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="FixedPresentPanel" Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </DataTemplate.Triggers>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </Grid>
+
+                                                    <!-- Обычный вид для остальных групп -->
+                                                    <StackPanel x:Name="DefaultItemsContainer"
+                                        Grid.Row="1">
+
+                                                        <ItemsControl ItemsSource="{Binding Items}"
+                                              ItemTemplate="{StaticResource AskMkiSettingItemTemplate}"
+                                              Margin="0,8,0,0"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Expander>
+                                        </Border>
+
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsSwitchMatrixGroup}" Value="True">
+                                                <Setter TargetName="SwitchMatrixContainer" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="DefaultItemsContainer" Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
             </ContentControl>

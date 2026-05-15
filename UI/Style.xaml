@@ -43,7 +43,7 @@
     <SolidColorBrush x:Key="ToggleButtonActiveForegroundColor" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ToggleButtonActiveBorderColor" Color="{DynamicResource ActiveColor}"/>
     <SolidColorBrush x:Key="ToggleButtonSecondActiveBorderColor" Color="{DynamicResource IsCheckedColor}"/>
-
+    <SolidColorBrush x:Key="GridHeaderHoverBrush" Color="#263545"/>
     <SolidColorBrush x:Key="Cb_BackBrush" Color="{StaticResource GreenColor}"/>
     <SolidColorBrush x:Key="Cb_BorderBrush" Color="{StaticResource ForegroundColor}"/>
     <SolidColorBrush x:Key="Cb_DisabledBrush" Color="{StaticResource ForegroundColor}"/>
