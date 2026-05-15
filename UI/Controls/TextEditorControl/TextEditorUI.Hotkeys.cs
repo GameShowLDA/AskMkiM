@@ -37,6 +37,7 @@ namespace UI.Controls.TextEditorControl
     private void TextEditor_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (HandleAutoIndentOnEnter(e)) return;
+      if (HandleRedoShortcut(e)) return;
       if (HandleMoveLinesShortcut(e)) return;
       if (HandleBreakpointShortcut(e)) return;
       if (HandleCtrlM(e)) return;
@@ -132,6 +133,21 @@ namespace UI.Controls.TextEditorControl
 
       _ctrlKPressed = true;
       _lastCtrlKTime = DateTime.Now;
+      e.Handled = true;
+      return true;
+    }
+
+    private bool HandleRedoShortcut(KeyEventArgs e)
+    {
+      var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+      if (key != Key.Z || Keyboard.Modifiers != (ModifierKeys.Control | ModifierKeys.Shift))
+        return false;
+
+      if (!textEditor.CanRedo)
+        return true;
+
+      textEditor.Redo();
       e.Handled = true;
       return true;
     }
