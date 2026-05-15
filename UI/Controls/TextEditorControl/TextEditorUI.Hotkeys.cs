@@ -168,7 +168,7 @@ namespace UI.Controls.TextEditorControl
       int selectionStart = textEditor.SelectionStart;
       int selectionLength = textEditor.SelectionLength;
       int caretOffset = textEditor.CaretOffset;
-      var (startLineNumber, endLineNumber) = selection is ICSharpCode.AvalonEdit.Editing.RectangleSelection rectangleSelection && !rectangleSelection.IsEmpty
+      var (startLineNumber, endLineNumber) = selection is ICSharpCode.AvalonEdit.Editing.RectangleSelection rectangleSelection && HasRectangularLineSelection(rectangleSelection)
         ? GetSelectedLineRange(rectangleSelection, document, caretOffset)
         : GetSelectedLineRange(document, selectionStart, selectionLength, caretOffset);
 
@@ -312,7 +312,7 @@ namespace UI.Controls.TextEditorControl
 
     private bool TryRestoreRectangularSelection(ICSharpCode.AvalonEdit.Editing.Selection selection, int lineDelta)
     {
-      if (selection is not ICSharpCode.AvalonEdit.Editing.RectangleSelection rectangleSelection || rectangleSelection.IsEmpty)
+      if (selection is not ICSharpCode.AvalonEdit.Editing.RectangleSelection rectangleSelection || !HasRectangularLineSelection(rectangleSelection))
         return false;
 
       var newStartPosition = ShiftTextViewPosition(rectangleSelection.StartPosition, lineDelta);
@@ -334,6 +334,11 @@ namespace UI.Controls.TextEditorControl
         position.Line + lineDelta,
         position.Column,
         position.VisualColumn);
+    }
+
+    private static bool HasRectangularLineSelection(ICSharpCode.AvalonEdit.Editing.RectangleSelection selection)
+    {
+      return !selection.IsEmpty || selection.StartPosition.Line != selection.EndPosition.Line;
     }
 
     private static (int StartLineNumber, int EndLineNumber) GetSelectedLineRange(
@@ -358,7 +363,13 @@ namespace UI.Controls.TextEditorControl
       ICSharpCode.AvalonEdit.Document.TextDocument document,
       int caretOffset)
     {
-      if (selection == null || selection.IsEmpty)
+      if (selection == null)
+      {
+        int lineNumber = document.GetLineByOffset(caretOffset).LineNumber;
+        return (lineNumber, lineNumber);
+      }
+
+      if (selection.IsEmpty && selection.StartPosition.Line == selection.EndPosition.Line)
       {
         int lineNumber = document.GetLineByOffset(caretOffset).LineNumber;
         return (lineNumber, lineNumber);
