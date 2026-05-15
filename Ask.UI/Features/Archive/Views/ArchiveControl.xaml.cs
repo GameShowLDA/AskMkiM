@@ -4,21 +4,20 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.UI.Features.Archive.Contracts;
+using Ask.UI.Features.Archive.Services;
+using Ask.UI.Features.Archive.ViewModels;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using Ask.UI.Shared.Components.Progress;
 using Ask.UI.Shared.Formatting;
 using Message;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -27,13 +26,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
-using Ask.UI.Features.Archive.Contracts;
-using Ask.UI.Features.Archive.ViewModels;
-using Ask.UI.Shared.Components.Progress;
-using Ask.UI.Features.Archive.Services;
 using static Ask.LogLib.LoggerUtility;
-using Button = System.Windows.Controls.Button;
-using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
 using Table = System.Windows.Documents.Table;
 using UserControl = System.Windows.Controls.UserControl;
@@ -1966,7 +1959,7 @@ namespace Ask.UI.Features.Archive.Views
         : "Выберите файл в архиве для просмотра..";
       ViewModel.SetFilesHint(integrityNotifications.Count == 0
         ? baseHint
-        : $"{baseHint} Integrity warnings: {integrityNotifications.Count}." );
+        : $"{baseHint} Integrity warnings: {integrityNotifications.Count}.");
 
       if (clearEditor)
       {
