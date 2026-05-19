@@ -252,6 +252,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             // последняя точка начинает новую цепь
             currentChain = new List<string> { expanded.Last() };
           }
+          else if (tok.Contains("-"))
+          {
+            var expanded = ExpandRangeToken(tok, errors, model);
+
+            if (expanded.Count > 0)
+              currentChain.AddRange(expanded);
+          }
           else
           {
             currentChain.Add(tok);
@@ -481,6 +488,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       token = NormalizeRangeToken(token);
 
+      if (TryExpandCompactSuffixRange(token, out var compactExpanded))
+      {
+        return compactExpanded;
+      }
+
       if (TryExtractContactSuffix(token, out var rangePart, out var suffix))
       {
         var baseRange = ExpandRangeToken(rangePart, errors, model);
@@ -504,6 +516,33 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return result;
 
       return GenerateRangeValues(prefix, start, end);
+    }
+
+    /// <summary>
+    /// Раскрывает сокращённые диапазоны вида:
+    /// x1/1-2 => x1/1,x1/2
+    /// x3.4-6 => x3.4,x3.5,x3.6
+    /// </summary>
+    private static bool TryExpandCompactSuffixRange(string token, out List<string> result)
+    {
+      result = new List<string>();
+
+      var match = Regex.Match(token, @"^(.*[/\.])(\d+)-(\d+)$");
+      if (!match.Success)
+        return false;
+
+      var prefix = match.Groups[1].Value;
+      var start = int.Parse(match.Groups[2].Value);
+      var end = int.Parse(match.Groups[3].Value);
+
+      int step = start <= end ? 1 : -1;
+
+      for (int i = start; step > 0 ? i <= end : i >= end; i += step)
+      {
+        result.Add($"{prefix}{i}");
+      }
+
+      return true;
     }
 
     /// <summary>
