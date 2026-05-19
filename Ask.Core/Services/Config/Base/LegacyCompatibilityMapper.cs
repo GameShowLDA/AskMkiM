@@ -24,7 +24,7 @@ namespace Ask.Core.Services.Config.Base
 
       var pair = CompatibilityPointsMap.FirstOrDefault(x => x.Value.Equals(pointModel));
 
-      if (string.IsNullOrWhiteSpace(pair.Key.ToString()))
+      if (pair.Key == null || string.IsNullOrWhiteSpace(pair.Key.ToString()))
       {
         return compatibilityPoint;
       }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Ask.UI.Controls.ErrorList
 {
@@ -136,7 +135,7 @@ namespace Ask.UI.Controls.ErrorList
       var direction = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? -1 : 1;
       IssueNavigationRequested?.Invoke(
         this,
-        new IssueNavigationRequestedEventArgs(direction, TryGetIssueUnderMouse()));
+        new IssueNavigationRequestedEventArgs(direction, null));
 
       e.Handled = true;
       Dispatcher.BeginInvoke(new Action(FocusTable), System.Windows.Threading.DispatcherPriority.Input);
@@ -147,21 +146,6 @@ namespace Ask.UI.Controls.ErrorList
       FocusTable();
     }
 
-    private IDisplayIssue? TryGetIssueUnderMouse()
-    {
-      var mousePos = Mouse.GetPosition(this);
-      DependencyObject? visual = VisualTreeHelper.HitTest(this, mousePos)?.VisualHit;
-
-      while (visual != null && visual != this)
-      {
-        if (visual is FrameworkElement { DataContext: IDisplayIssue issue })
-          return issue;
-
-        visual = VisualTreeHelper.GetParent(visual);
-      }
-
-      return null;
-    }
   }
 
   public sealed class IssueNavigationRequestedEventArgs : EventArgs

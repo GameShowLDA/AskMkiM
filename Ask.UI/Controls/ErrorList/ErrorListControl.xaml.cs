@@ -20,6 +20,10 @@ namespace Ask.UI.Controls.ErrorList
   /// </summary>
   public partial class ErrorListControl : UserControl
   {
+    private static readonly object RegistryLock = new();
+    private static readonly List<WeakReference<ErrorListControl>> RegisteredControls = new();
+    private static WeakReference<ErrorListControl>? _preferredControl;
+
     /// <summary>
     /// Коллекция элементов (ошибки + предупреждения), отображаемая в DataGrid.
     /// </summary>
@@ -53,7 +57,11 @@ namespace Ask.UI.Controls.ErrorList
     {
       InitializeComponent();
       Loaded += ErrorListControl_Loaded;
+      Unloaded += ErrorListControl_Unloaded;
       SizeChanged += ErrorListControl_SizeChanged;
+      IsVisibleChanged += ErrorListControl_IsVisibleChanged;
+      PreviewMouseDown += (_, _) => PromoteAsPreferredControl();
+      GotKeyboardFocus += (_, _) => PromoteAsPreferredControl();
       DataContext = this;
       IssuesTable.IssueNavigationRequested += IssuesTable_IssueNavigationRequested;
 
@@ -75,6 +83,12 @@ namespace Ask.UI.Controls.ErrorList
         UpdateTabsVisibilityAndSelection();
         EnsureBreakpointsSorting();
       };
+    }
+
+    public static bool TryNavigatePreferredIssue(int direction)
+    {
+      var target = GetPreferredControl();
+      return target != null && target.NavigateIssues(direction);
     }
 
     #region События для вкладки "Точки остановки"
@@ -126,6 +140,21 @@ namespace Ask.UI.Controls.ErrorList
     {
       get => IssuesTable.MeasureResultVisible;
       set => IssuesTable.MeasureResultVisible = value;
+    }
+
+    public bool NavigateIssues(int direction)
+    {
+      if (!CanNavigateIssues())
+        return false;
+
+      var normalizedDirection = direction < 0 ? -1 : 1;
+      var targetIssue = GetAdjacentIssue(normalizedDirection);
+      if (targetIssue == null)
+        return false;
+
+      PromoteAsPreferredControl();
+      SelectAndActivateIssue(targetIssue);
+      return true;
     }
 
     #region Ошибки/предупреждения
@@ -286,21 +315,28 @@ namespace Ask.UI.Controls.ErrorList
 
     private void ErrorListControl_Loaded(object sender, RoutedEventArgs e)
     {
+      RegisterControl(this);
       ApplyInitialButtonState();
       RefreshCurrentPage();
+      PromoteAsPreferredControl();
+    }
+
+    private void ErrorListControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+      UnregisterControl(this);
+    }
+
+    private void ErrorListControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+      if (IsVisible)
+      {
+        PromoteAsPreferredControl();
+      }
     }
 
     private void IssuesTable_IssueNavigationRequested(object? sender, IssueNavigationRequestedEventArgs e)
     {
-      IDisplayIssue? targetIssue = e.IssueUnderMouse;
-
-      if (targetIssue == null)
-        targetIssue = GetAdjacentIssue(e.Direction);
-
-      if (targetIssue == null)
-        return;
-
-      SelectAndActivateIssue(targetIssue);
+      NavigateIssues(e.Direction);
     }
 
     private IDisplayIssue? GetAdjacentIssue(int direction)
@@ -342,9 +378,87 @@ namespace Ask.UI.Controls.ErrorList
       Dispatcher.BeginInvoke(new Action(IssuesTable.FocusTable), System.Windows.Threading.DispatcherPriority.Input);
     }
 
+    private void PromoteAsPreferredControl()
+    {
+      lock (RegistryLock)
+      {
+        _preferredControl = new WeakReference<ErrorListControl>(this);
+      }
+    }
+
+    private static void RegisterControl(ErrorListControl control)
+    {
+      lock (RegistryLock)
+      {
+        CleanupRegisteredControls();
+
+        if (RegisteredControls.Any(reference => reference.TryGetTarget(out var existing) && ReferenceEquals(existing, control)))
+          return;
+
+        RegisteredControls.Add(new WeakReference<ErrorListControl>(control));
+      }
+    }
+
+    private static void UnregisterControl(ErrorListControl control)
+    {
+      lock (RegistryLock)
+      {
+        RegisteredControls.RemoveAll(reference => !reference.TryGetTarget(out var existing) || ReferenceEquals(existing, control));
+
+        if (_preferredControl != null
+            && (!_preferredControl.TryGetTarget(out var preferred) || ReferenceEquals(preferred, control)))
+        {
+          _preferredControl = null;
+        }
+      }
+    }
+
+    private static ErrorListControl? GetPreferredControl()
+    {
+      lock (RegistryLock)
+      {
+        CleanupRegisteredControls();
+
+        if (_preferredControl != null
+            && _preferredControl.TryGetTarget(out var preferred)
+            && preferred.CanNavigateIssues())
+        {
+          return preferred;
+        }
+
+        var fallback = RegisteredControls
+          .Select(reference => reference.TryGetTarget(out var control) ? control : null)
+          .Where(control => control != null && control.CanNavigateIssues())
+          .OrderBy(control => control!.IsKeyboardFocusWithin)
+          .ThenBy(control => Window.GetWindow(control)?.IsActive == true)
+          .LastOrDefault();
+
+        if (fallback != null)
+        {
+          _preferredControl = new WeakReference<ErrorListControl>(fallback);
+        }
+
+        return fallback;
+      }
+    }
+
+    private static void CleanupRegisteredControls()
+    {
+      RegisteredControls.RemoveAll(reference => !reference.TryGetTarget(out _));
+    }
+
     private IEnumerable<IDisplayIssue> GetVisibleIssues()
     {
       return _allIssues.Where(ShouldDisplay);
+    }
+
+    private bool CanNavigateIssues()
+    {
+      return IsLoaded
+             && IsVisible
+             && Visibility == Visibility.Visible
+             && MainTabControl.SelectedItem == ErrorsTab
+             && GetVisibleCount() > 0;
     }
 
     private void RecalculateTotals()
