@@ -73,6 +73,47 @@ namespace Ask.Engine.ControlCommandAnalyser
     }
 
     /// <summary>
+    /// Формирует каноничное представление исходного текста программы контроля
+    /// без изменения логики команд. В отличие от трансляции, не добавляет
+    /// автоматически недостающие команды и не разворачивает текст в OPKW-вид.
+    /// </summary>
+    /// <param name="text">Исходный текст программы.</param>
+    /// <returns>Отформатированный исходный текст.</returns>
+    public string BuildFormattedSourceText(string text)
+    {
+      if (string.IsNullOrWhiteSpace(text))
+      {
+        return string.Empty;
+      }
+
+      var models = ParseAll(text, emitMessages: false);
+      var originalSourceLines = models.ToDictionary(
+        model => model,
+        model => model.SourceLines?.ToList() ?? new List<string>());
+
+      SetSourseLines(models);
+
+      var formattedLines = new List<string>();
+
+      foreach (var model in models)
+      {
+        var lines = model switch
+        {
+          UnknownCommandModel => NormalizeUnknownSourceLines(originalSourceLines[model]),
+          CpCommandModel or CuCommandModel => NormalizeVerbatimBodySourceLines(
+            originalSourceLines[model],
+            model.CommandNumber,
+            model.Mnemonic),
+          _ => NormalizeGeneratedSourceLines(model.SourceLines),
+        };
+
+        formattedLines.AddRange(lines);
+      }
+
+      return string.Join(Environment.NewLine, formattedLines);
+    }
+
+    /// <summary>
     /// Строит результат трансляции без прямой записи в UI-редактор.
     /// Это позволяет безопасно выполнять тяжёлую часть трансляции в фоновом потоке.
     /// </summary>
@@ -288,9 +329,12 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Преобразует текст в список моделей команд.
     /// </summary>
-    public List<BaseCommandModel> ParseAll(string text)
+    public List<BaseCommandModel> ParseAll(string text, bool emitMessages = true)
     {
-      MessageEventAdapter.RaiseInfoMessage("Сбор данных...");
+      if (emitMessages)
+      {
+        MessageEventAdapter.RaiseInfoMessage("Сбор данных...");
+      }
 
       text = NormalizeCommandMnemonics(text);
       var (lines, comments) = PreprocessText.PreprocessTextAndExtractComments(text);
@@ -509,7 +553,7 @@ namespace Ask.Engine.ControlCommandAnalyser
           {
             points = string.Empty;
           }
-          pointsLine.Append($"{points} ");
+          pointsLine.Append(FormatPointsSourceForDisplay(points));
         }
 
         var commentsLine = new StringBuilder();
@@ -555,6 +599,134 @@ namespace Ask.Engine.ControlCommandAnalyser
         if (!string.IsNullOrEmpty(commentsLine.ToString()) && !string.IsNullOrWhiteSpace(commentsLine.ToString()))
         {
           model.SourceLines.Add($"{commentsLine.ToString()}");
+        }
+      }
+    }
+
+    private static IEnumerable<string> NormalizeGeneratedSourceLines(IEnumerable<string>? sourceLines)
+    {
+      if (sourceLines == null)
+      {
+        yield break;
+      }
+
+      bool isFirstLine = true;
+      foreach (var raw in ExpandMultilineEntries(sourceLines))
+      {
+        var line = raw.TrimEnd();
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          continue;
+        }
+
+        if (isFirstLine)
+        {
+          yield return line.TrimStart();
+          isFirstLine = false;
+          continue;
+        }
+
+        yield return $"\t{line.TrimStart()}";
+      }
+    }
+
+    private static string FormatPointsSourceForDisplay(string points)
+    {
+      if (string.IsNullOrWhiteSpace(points))
+      {
+        return string.Empty;
+      }
+
+      return Regex.Replace(points.Trim(), @"(?<!^)\*", Environment.NewLine + "*");
+    }
+
+    private static IEnumerable<string> NormalizeUnknownSourceLines(IEnumerable<string>? sourceLines)
+    {
+      if (sourceLines == null)
+      {
+        yield break;
+      }
+
+      bool isFirstLine = true;
+      foreach (var raw in ExpandMultilineEntries(sourceLines))
+      {
+        var line = raw.TrimEnd();
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          continue;
+        }
+
+        if (isFirstLine)
+        {
+          yield return line.TrimStart();
+          isFirstLine = false;
+          continue;
+        }
+
+        yield return $"\t{line.TrimStart()}";
+      }
+    }
+
+    private static IEnumerable<string> NormalizeVerbatimBodySourceLines(
+      IEnumerable<string>? sourceLines,
+      string? commandNumber,
+      string? mnemonic)
+    {
+      if (sourceLines == null)
+      {
+        yield break;
+      }
+
+      bool isFirstLine = true;
+      foreach (var raw in ExpandMultilineEntries(sourceLines))
+      {
+        var line = raw.TrimEnd();
+        if (string.IsNullOrWhiteSpace(line))
+        {
+          continue;
+        }
+
+        if (isFirstLine)
+        {
+          yield return NormalizePreservedHeaderLine(line, commandNumber, mnemonic);
+          isFirstLine = false;
+          continue;
+        }
+
+        yield return line;
+      }
+    }
+
+    private static string NormalizePreservedHeaderLine(string line, string? commandNumber, string? mnemonic)
+    {
+      var trimmedLine = line.TrimStart();
+      if (string.IsNullOrEmpty(commandNumber) || string.IsNullOrEmpty(mnemonic))
+      {
+        return trimmedLine;
+      }
+
+      var match = CommandHeaderRegex.Match(trimmedLine);
+      if (!match.Success)
+      {
+        return trimmedLine;
+      }
+
+      var headerSuffix = trimmedLine[(match.Index + match.Length)..];
+      return $"{commandNumber} {mnemonic}{headerSuffix}";
+    }
+
+    private static IEnumerable<string> ExpandMultilineEntries(IEnumerable<string> sourceLines)
+    {
+      foreach (var entry in sourceLines)
+      {
+        if (string.IsNullOrEmpty(entry))
+        {
+          continue;
+        }
+
+        foreach (var line in entry.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+        {
+          yield return line;
         }
       }
     }

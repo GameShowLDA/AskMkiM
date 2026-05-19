@@ -4,21 +4,20 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.UI.Features.Archive.Contracts;
+using Ask.UI.Features.Archive.Services;
+using Ask.UI.Features.Archive.ViewModels;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using Ask.UI.Shared.Components.Progress;
 using Ask.UI.Shared.Formatting;
 using Message;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -27,13 +26,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
-using Ask.UI.Features.Archive.Contracts;
-using Ask.UI.Features.Archive.ViewModels;
-using Ask.UI.Shared.Components.Progress;
-using Ask.UI.Features.Archive.Services;
 using static Ask.LogLib.LoggerUtility;
-using Button = System.Windows.Controls.Button;
-using Orientation = System.Windows.Controls.Orientation;
 using Path = System.IO.Path;
 using Table = System.Windows.Documents.Table;
 using UserControl = System.Windows.Controls.UserControl;
@@ -1353,7 +1346,7 @@ namespace Ask.UI.Features.Archive.Views
         sourceFilePath: null,
         isReviewEntry: false,
         errorCount: ExtractErrorCount(text),
-        fileType: FileType.OPKW);
+        fileType: DeterminePreviewFileType(entry.FullName));
     }
 
     /// <summary>
@@ -1495,14 +1488,7 @@ namespace Ask.UI.Features.Archive.Views
     /// <returns>Тип файла.</returns>
     private static FileType DeterminePreviewFileType(string filePath)
     {
-      return Path.GetExtension(filePath).ToLowerInvariant() switch
-      {
-        ".pk" => FileType.PK,
-        ".pkw" => FileType.PKW,
-        ".opk" => FileType.OPK,
-        ".opkw" => FileType.OPKW,
-        _ => FileType.None,
-      };
+      return FileTypeResolver.DetermineFromPath(filePath);
     }
 
     /// <summary>
@@ -1515,7 +1501,7 @@ namespace Ask.UI.Features.Archive.Views
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-      var encoding = fileType == FileType.PKW || fileType == FileType.OPKW
+      var encoding = FileTypeResolver.UsesUtf8Encoding(fileType)
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
@@ -1636,7 +1622,7 @@ namespace Ask.UI.Features.Archive.Views
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-      var encoding = fileType == FileType.PKW || fileType == FileType.OPKW
+      var encoding = FileTypeResolver.UsesUtf8Encoding(fileType)
         ? Encoding.UTF8
         : Encoding.GetEncoding(866);
 
@@ -1973,7 +1959,7 @@ namespace Ask.UI.Features.Archive.Views
         : "Выберите файл в архиве для просмотра..";
       ViewModel.SetFilesHint(integrityNotifications.Count == 0
         ? baseHint
-        : $"{baseHint} Integrity warnings: {integrityNotifications.Count}." );
+        : $"{baseHint} Integrity warnings: {integrityNotifications.Count}.");
 
       if (clearEditor)
       {
@@ -2014,8 +2000,9 @@ namespace Ask.UI.Features.Archive.Views
       await ShowArchiveInGridAsync(archivePath, clearEditor: false);
       var text = await Task.Run(() => ReadArchiveEntryTextWithManager(archivePath, entryName));
       var normalizedEntryName = NormalizeEntryName(entryName);
+      var fileType = DeterminePreviewFileType(normalizedEntryName);
 
-      ViewModel.SetPreview(text, FileType.OPKW);
+      ViewModel.SetPreview(text, fileType);
       _lastSelectedArchivePath = archivePath;
       _lastSelectedEntryName = normalizedEntryName;
       _lastSelectedReviewFilePath = null;
@@ -3248,6 +3235,95 @@ namespace Ask.UI.Features.Archive.Views
     }
 
     /// <summary>
+    /// Конвертирует выбранный APKW-архив в legacy-комплект APK + OPK.
+    /// </summary>
+    /// <returns>Асинхронная задача конвертации.</returns>
+    public async Task ConvertSelectedArchiveToApkAsync()
+    {
+      if (string.IsNullOrWhiteSpace(_lastSelectedArchivePath) || !File.Exists(_lastSelectedArchivePath))
+      {
+        ShowArchiveNotification("Конвертация APKW в APK", "Выберите архив для конвертации.", NotificationType.Warning);
+        return;
+      }
+
+      var outputDirectory = ArchiveFileDialogService.SelectFolder(this, "Выберите папку для сохранения APK и OPK");
+      if (string.IsNullOrWhiteSpace(outputDirectory))
+      {
+        return;
+      }
+
+      var owner = Window.GetWindow(this);
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
+
+      try
+      {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+
+        progressWindow.Configure(
+          "Конвертация APKW в APK",
+          "Подготовка конвертации",
+          "Извлекаем файлы из APKW и собираем legacy-комплект для старой программы.");
+
+        if (owner != null)
+        {
+          owner.Effect = new BlurEffect { Radius = 8 };
+        }
+
+        progressWindow.Show();
+        await WaitForProgressWindowAsync(progressWindow);
+
+        var progress = new Progress<ApkwToApkLegacyExportProgress>(info =>
+        {
+          progressWindow.SetProgress(info.Percent);
+          var status = info.TotalEntries > 0
+            ? $"{info.Stage} ({Math.Min(info.ProcessedEntries, info.TotalEntries)}/{info.TotalEntries})"
+            : info.Stage;
+
+          progressWindow.SetStage(status, info.Hint);
+        });
+
+        var result = await new ApkwToApkLegacyExportService()
+          .ExportAsync(_lastSelectedArchivePath, outputDirectory, progress);
+
+        if (!result.Success)
+        {
+          ShowArchiveNotification(
+            "Конвертация APKW в APK",
+            result.ErrorMessage ?? "Не удалось выполнить конвертацию.",
+            NotificationType.Error);
+          return;
+        }
+
+        ShowArchiveNotification(
+          "Конвертация APKW в APK",
+          $"Создан '{Path.GetFileName(result.OutputApkPath)}'. OPK-файлов: {CountDisplayFormatter.Format(result.EntriesCount)}.",
+          NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        ShowArchiveNotification("Конвертация APKW в APK", GetUserFriendlyArchiveErrorMessage(ex), NotificationType.Error);
+      }
+      finally
+      {
+        progressWindow?.Close();
+
+        if (owner != null)
+        {
+          owner.Effect = previousEffect;
+        }
+
+        ResetArchiveActionButtonFocus();
+      }
+    }
+
+    /// <summary>
     /// Удаляет архив.
     /// </summary>
     /// <param name="archivePath">Путь к архиву.</param>
@@ -3493,7 +3569,7 @@ namespace Ask.UI.Features.Archive.Views
         var fileType = DeterminePreviewFileType(entryName);
         var extension = GetExecutionExtension(fileType, entryName);
         var tempFilePath = CreateExecutionTempFilePath(entryName, extension);
-        var encoding = (fileType == FileType.PKW || fileType == FileType.OPKW)
+        var encoding = FileTypeResolver.UsesUtf8Encoding(fileType)
           ? new UTF8Encoding(false)
           : Encoding.GetEncoding(866);
 
@@ -3583,7 +3659,7 @@ namespace Ask.UI.Features.Archive.Views
       {
         FileType.OPK => ".opk",
         FileType.OPKW => ".opkw",
-        FileType.PK => ".pk",
+        FileType.PK => string.Equals(Path.GetExtension(entryName), ".acs", StringComparison.OrdinalIgnoreCase) ? ".acs" : ".pk",
         FileType.PKW => ".pkw",
         _ => string.IsNullOrWhiteSpace(Path.GetExtension(entryName)) ? ".opkw" : Path.GetExtension(entryName),
       };
@@ -3982,7 +4058,7 @@ namespace Ask.UI.Features.Archive.Views
         else
         {
           text = await Task.Run(() => ReadArchiveEntryTextWithManager(selected.ArchivePath, selected.EntryName));
-          fileType = FileType.OPKW;
+          fileType = selected.FileType;
         }
 
         ViewModel.SetPreview(text, fileType);

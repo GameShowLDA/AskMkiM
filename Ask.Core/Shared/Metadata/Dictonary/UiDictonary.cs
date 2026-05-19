@@ -22,7 +22,7 @@
         { "PrintFile", "Ctrl+P" },
         { "SearchFile", "Ctrl+F" },
         { "SearchReplace", "Ctrl+H" },
-        { "CompareFile", "Ctrl+K" },
+        { "CompareFile", "Ctrl+Shift+K" },
         { "Build", "Ctrl+B" },
         { "Run", "Ctrl+F5" },
         { "RunAskMki", "Ctrl+Shift+F5" },

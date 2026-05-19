@@ -23,4 +23,5 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_OpkToPkw" Key="menu.file.legacyConversion.opkToPkw" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_OpkToOpkw" Key="menu.file.legacyConversion.opkToOpkw" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_ApkToApkw" Key="menu.file.legacyConversion.apkToApkw" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_LegacyConversion_ApkwToApk" Key="menu.file.legacyConversion.apkwToApk" />
 </ResourceDictionary>

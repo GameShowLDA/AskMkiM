@@ -152,7 +152,7 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         textEditor.Text = value;
 
-        if (FileType == FileType.OPKW)
+        if (FileTypeResolver.SupportsOpkFolding(FileType))
         {
           InitializeFolding();
         }
@@ -509,13 +509,7 @@ namespace Ask.UI.Controls.TextEditorControl
         return;
       }
 
-      string? xshdFile = FileType switch
-      {
-        FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
-        FileType.PK or FileType.PKW => "MKI_PK.xshd",
-        FileType.Protocol => "MKI_PROTOCOL.xshd",
-        _ => null
-      };
+      string? xshdFile = FileTypeResolver.GetHighlightingResourceName(FileType);
 
       if (string.IsNullOrWhiteSpace(xshdFile))
       {

@@ -620,6 +620,14 @@
   </data>
   <data name="settings.askMki.config.clearMki" xml:space="preserve">
     <value>Очистить</value>
-
+  </data>
+  <data name="menu.file.legacyConversion.apkwToApk" xml:space="preserve">
+    <value>APKW в APK</value>
+  </data>
+  <data name="settings.execution.compatibilityMode" xml:space="preserve">
+    <value>Выполнение в режиме совместимости со старой системой</value>
+  </data>
+  <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
+    <value>Включает привязку модулей АСК-МКИ-М к разъёмам переходной панели по таблице соответствия старой системы АСК-МКИ. Используется для сохранения совместимости рабочих мест и существующих схем подключения.</value>
   </data>
 </root>

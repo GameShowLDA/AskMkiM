@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text.Json;
+using Ask.Core.Services.Config.LegacyMki;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -23,22 +24,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>Путь к mkiw.exe или пустая строка, если путь не задан.</returns>
     public static string GetMkiPath()
     {
-      try
-      {
-        if (!File.Exists(ConfigFilePath))
-        {
-          return string.Empty;
-        }
-
-        var json = File.ReadAllText(ConfigFilePath);
-        var config = JsonSerializer.Deserialize<LegacyMkiSettings>(json);
-
-        return config?.MkiPath ?? string.Empty;
-      }
-      catch
-      {
-        return string.Empty;
-      }
+      return LoadSettings().MkiPath;
     }
 
     /// <summary>
@@ -47,12 +33,90 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <param name="mkiPath">Полный путь к mkiw.exe.</param>
     public static void SetMkiPath(string mkiPath)
     {
-      Directory.CreateDirectory(ConfigDirectory);
+      var config = LoadSettings();
+      config.MkiPath = mkiPath ?? string.Empty;
 
-      var config = new LegacyMkiSettings
+      if (string.IsNullOrWhiteSpace(config.ConfigPath))
       {
-        MkiPath = mkiPath ?? string.Empty
-      };
+        config.ConfigPath = ResolveConfigPathFromExecutable(config.MkiPath);
+      }
+
+      SaveSettings(config);
+    }
+
+    /// <summary>
+    /// Очищает сохранённый путь к mkiw.exe.
+    /// </summary>
+    public static void ClearMkiPath()
+    {
+      var config = LoadSettings();
+      config.MkiPath = string.Empty;
+      SaveSettings(config);
+    }
+
+    /// <summary>
+    /// Возвращает сохранённый путь к mki_hrd.cfg.
+    /// </summary>
+    public static string GetConfigPath()
+    {
+      var config = LoadSettings();
+      return !string.IsNullOrWhiteSpace(config.ConfigPath)
+        ? config.ConfigPath
+        : ResolveConfigPathFromExecutable(config.MkiPath);
+    }
+
+    /// <summary>
+    /// Сохраняет путь к mki_hrd.cfg.
+    /// </summary>
+    public static void SetConfigPath(string configPath)
+    {
+      var config = LoadSettings();
+      config.ConfigPath = configPath ?? string.Empty;
+      SaveSettings(config);
+    }
+
+    /// <summary>
+    /// Возвращает выбранный профиль legacy-конфигурации.
+    /// </summary>
+    public static LegacyMkiProfileKind GetSelectedProfile()
+    {
+      var config = LoadSettings();
+      return Enum.TryParse<LegacyMkiProfileKind>(config.SelectedProfile, true, out var profile)
+        ? profile
+        : LegacyMkiProfileKind.M1;
+    }
+
+    /// <summary>
+    /// Сохраняет выбранный профиль legacy-конфигурации.
+    /// </summary>
+    public static void SetSelectedProfile(LegacyMkiProfileKind profile)
+    {
+      var config = LoadSettings();
+      config.SelectedProfile = profile.ToString();
+      SaveSettings(config);
+    }
+
+    private static LegacyMkiSettings LoadSettings()
+    {
+      try
+      {
+        if (!File.Exists(ConfigFilePath))
+        {
+          return new LegacyMkiSettings();
+        }
+
+        var json = File.ReadAllText(ConfigFilePath);
+        return JsonSerializer.Deserialize<LegacyMkiSettings>(json) ?? new LegacyMkiSettings();
+      }
+      catch
+      {
+        return new LegacyMkiSettings();
+      }
+    }
+
+    private static void SaveSettings(LegacyMkiSettings config)
+    {
+      Directory.CreateDirectory(ConfigDirectory);
 
       var json = JsonSerializer.Serialize(
         config,
@@ -64,12 +128,24 @@ namespace Ask.Core.Services.Config.AppSettings
       File.WriteAllText(ConfigFilePath, json);
     }
 
-    /// <summary>
-    /// Очищает сохранённый путь к mkiw.exe.
-    /// </summary>
-    public static void ClearMkiPath()
+    private static string ResolveConfigPathFromExecutable(string? mkiPath)
     {
-      SetMkiPath(string.Empty);
+      if (string.IsNullOrWhiteSpace(mkiPath))
+      {
+        return string.Empty;
+      }
+
+      try
+      {
+        var directory = Path.GetDirectoryName(mkiPath);
+        return string.IsNullOrWhiteSpace(directory)
+          ? string.Empty
+          : Path.Combine(directory, "mki_hrd.cfg");
+      }
+      catch
+      {
+        return string.Empty;
+      }
     }
 
     /// <summary>
@@ -81,6 +157,16 @@ namespace Ask.Core.Services.Config.AppSettings
       /// Полный путь к mkiw.exe.
       /// </summary>
       public string MkiPath { get; set; } = string.Empty;
+
+      /// <summary>
+      /// Полный путь к mki_hrd.cfg.
+      /// </summary>
+      public string ConfigPath { get; set; } = string.Empty;
+
+      /// <summary>
+      /// Выбранный профиль legacy-конфигурации.
+      /// </summary>
+      public string SelectedProfile { get; set; } = LegacyMkiProfileKind.M1.ToString();
     }
   }
 }
