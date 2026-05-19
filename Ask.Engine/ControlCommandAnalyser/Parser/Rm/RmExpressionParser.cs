@@ -1,5 +1,7 @@
 using Ask.Core.Services.Errors.Translation;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
@@ -135,18 +137,23 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 
       var leftList = ExpandAll(left, ref baseCommandModel);
       var rightList = ExpandAll(right, ref baseCommandModel);
-      var middleList = !string.IsNullOrWhiteSpace(middle) ? ExpandAll(middle, ref baseCommandModel) : Enumerable.Repeat<string?>(null, leftList.Count).ToList();
+      var middleList = ExpandAll(middle, ref baseCommandModel);
+
+      if (leftList.Count != rightList.Count || middleList.Count != rightList.Count)
+      {
+        baseCommandModel.Errors.Add(
+            RmErrors.MismatchedCounts(
+                Math.Max(leftList.Count, middleList.Count),
+                rightList.Count,
+                baseCommandModel.StartLineNumber,
+                $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+
+        return;
+      }
 
       // Диагностика: выводим размеры списков
       LogDebug($"[ProcessExpression] Expanded Left: {string.Join(", ", leftList)} (Count: {leftList.Count})");
       LogDebug($"[ProcessExpression] Expanded Right: {string.Join(", ", rightList)} (Count: {rightList.Count})");
-
-      // Проверяем соответствие размеров списков
-      if (leftList.Count != rightList.Count)
-      {
-        baseCommandModel.Errors.Add(RmErrors.MismatchedCounts(leftList.Count, rightList.Count, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-        return;
-      }
 
       for (int i = 0; i < leftList.Count; i++)
       {
@@ -157,6 +164,38 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
           AskInput = rightList[i]
         });
       }
+    }
+
+    private static int GetLogicalExpressionCount(string expr)
+    {
+      expr = expr.Trim();
+
+      var decimalRange = Regex.Match(
+       expr,
+       @"^(?<axis>[A-Za-zА-Яа-я]+)(?<start>\d+(?:\.\d+)?)-(?<end>\d+(?:\.\d+)?)\((?<step>\d+(?:\.\d+)?)\)/.+$");
+
+
+      if (decimalRange.Success)
+      {
+        var start = decimal.Parse(
+            decimalRange.Groups["start"].Value,
+            CultureInfo.InvariantCulture);
+
+        var end = decimal.Parse(
+            decimalRange.Groups["end"].Value,
+            CultureInfo.InvariantCulture);
+
+        var step = decimal.Parse(
+            decimalRange.Groups["step"].Value,
+            CultureInfo.InvariantCulture);
+
+        if (step <= 0)
+          return 0;
+
+        return (int)(((end - start) / step) + 1);
+      }
+
+      return ExpandAll(expr, ref Unsafe.NullRef<RmCommandModel>()).Count;
     }
 
     /// <summary>
@@ -231,6 +270,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         baseCommandModel.Errors.Add(RmErrors.UnacceptableSymbol(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return result;
       }
+      if (TryExpandSteppedAlphaRange(expr, result))
+      {
+        return result;
+      }
+
+      if (TryExpandDecimalCoordinateRange(expr, result))
+      {
+        LogDebug($"[ExpandAll] Decimal coordinate range expanded: {expr} -> {string.Join(", ", result)}");
+        return result;
+      }
 
       if (TryExpandCompositeRanges(expr, result))
       {
@@ -247,6 +296,103 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       result.Add(expr);
       LogDebug($"[ExpandAll] Single value: {expr}");
       return result;
+    }
+
+    private static bool TryExpandSteppedAlphaRange(string expr, List<string> result)
+    {
+      var match = Regex.Match(
+          expr,
+          @"^(?<prefix>[A-Za-zА-Яа-я]+)(?<start>\d+)-(?<end>\d+)\((?<step>-?\d+)\)$");
+
+      if (!match.Success)
+        return false;
+
+      string prefix = match.Groups["prefix"].Value;
+      int start = int.Parse(match.Groups["start"].Value);
+      int end = int.Parse(match.Groups["end"].Value);
+      int step = int.Parse(match.Groups["step"].Value);
+
+      if (step == 0)
+        return false;
+
+      if (step > 0)
+      {
+        for (int i = start; i <= end; i += step)
+          result.Add($"{prefix}{i}");
+      }
+      else
+      {
+        for (int i = start; i >= end; i += step)
+          result.Add($"{prefix}{i}");
+      }
+
+      return true;
+    }
+
+    private static bool TryExpandDecimalCoordinateRange(string expr, List<string> result)
+    {
+      var match = Regex.Match(
+          expr,
+          @"^(?<prefix>[A-Za-zА-Яа-я]+)(?<start>\d+\.\d+)-(?<end>\d+\.\d+)\((?<step>\d+\.\d+)\)(?<suffix>/.+)$");
+
+      if (!match.Success)
+        return false;
+
+      var prefix = match.Groups["prefix"].Value;
+      var suffix = match.Groups["suffix"].Value;
+
+      if (!decimal.TryParse(match.Groups["start"].Value,
+          NumberStyles.Any,
+          CultureInfo.InvariantCulture,
+          out var start))
+        return false;
+
+      if (!decimal.TryParse(match.Groups["end"].Value,
+          NumberStyles.Any,
+          CultureInfo.InvariantCulture,
+          out var end))
+        return false;
+
+      if (!decimal.TryParse(match.Groups["step"].Value,
+          NumberStyles.Any,
+          CultureInfo.InvariantCulture,
+          out var step))
+        return false;
+
+      if (step <= 0)
+        return false;
+
+      int precision = GetMaxPrecision(
+          match.Groups["start"].Value,
+          match.Groups["end"].Value,
+          match.Groups["step"].Value);
+
+      string format = "0." + new string('0', precision);
+
+      for (decimal current = start; current <= end; current += step)
+      {
+        result.Add($"{prefix}{current.ToString(format, CultureInfo.InvariantCulture)}{suffix}");
+      }
+
+      return true;
+    }
+
+    private static int GetMaxPrecision(params string[] values)
+    {
+      int max = 0;
+
+      foreach (var value in values)
+      {
+        int dot = value.IndexOf('.');
+        if (dot >= 0)
+        {
+          int precision = value.Length - dot - 1;
+          if (precision > max)
+            max = precision;
+        }
+      }
+
+      return max;
     }
 
     /// <summary>
