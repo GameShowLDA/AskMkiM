@@ -174,10 +174,10 @@ namespace UI.Controls
     private void ErrorListBoxVertical_ErrorItemDoubleClicked(IDisplayIssue item)
     {
       var leftEditor = GetLeftBox().GetTextEditor();
-      leftEditor.GoToLine(item.SourceLineNumber);
+      leftEditor.GoToIssue(item);
 
       var rightEditor = GetRightBox().GetTextEditor();
-      rightEditor.GoToLine(item.FormattedLineNumber);
+      rightEditor.GoToIssue(item, useFormattedLineNumber: true);
     }
 
     private void ErrorClear()
