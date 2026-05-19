@@ -137,13 +137,28 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 
       var leftList = ExpandAll(left, ref baseCommandModel);
       var rightList = ExpandAll(right, ref baseCommandModel);
-      var middleList = ExpandAll(middle, ref baseCommandModel);
+      var middleList = !string.IsNullOrWhiteSpace(middle)
+        ? ExpandAll(middle, ref baseCommandModel)
+        : Enumerable.Repeat<string>(null, leftList.Count).ToList();
 
-      if (leftList.Count != rightList.Count || middleList.Count != rightList.Count)
+      if (leftList.Count != rightList.Count)
       {
         baseCommandModel.Errors.Add(
             RmErrors.MismatchedCounts(
-                Math.Max(leftList.Count, middleList.Count),
+                leftList.Count,
+                rightList.Count,
+                baseCommandModel.StartLineNumber,
+                $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+
+        return;
+      }
+
+      if (!string.IsNullOrWhiteSpace(middle) &&
+          middleList.Count != rightList.Count)
+      {
+        baseCommandModel.Errors.Add(
+            RmErrors.MismatchedCounts(
+                middleList.Count,
                 rightList.Count,
                 baseCommandModel.StartLineNumber,
                 $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
