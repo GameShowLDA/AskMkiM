@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
+using Ask.UI.Controls.ErrorList;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.UI.Shared.Components.Icons;
 using ConsoleUI.ConsoleLogic;
@@ -693,6 +694,21 @@ namespace MainWindowProgram
 
       if (SearchWindow == null || !SearchWindow.IsVisible)
       {
+        if (e.StagingItem.Input is not KeyEventArgs globalKeyArgs || globalKeyArgs.RoutedEvent != Keyboard.KeyDownEvent)
+        {
+          return;
+        }
+
+        var globalModifiers = Keyboard.Modifiers;
+        var globalPressedKey = globalKeyArgs.SystemKey == Key.None ? globalKeyArgs.Key : globalKeyArgs.SystemKey;
+
+        if (globalPressedKey == Key.F8
+            && (globalModifiers == ModifierKeys.None || globalModifiers == ModifierKeys.Shift)
+            && ErrorListControl.TryNavigatePreferredIssue(globalModifiers == ModifierKeys.Shift ? -1 : 1))
+        {
+          globalKeyArgs.Handled = true;
+        }
+
         return;
       }
 
@@ -705,6 +721,14 @@ namespace MainWindowProgram
       bool ctrl = (mods & ModifierKeys.Control) != 0;
       bool alt = (mods & ModifierKeys.Alt) != 0;
       var pressedKey = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
+
+      if (pressedKey == Key.F8
+          && (mods == ModifierKeys.None || mods == ModifierKeys.Shift)
+          && ErrorListControl.TryNavigatePreferredIssue(mods == ModifierKeys.Shift ? -1 : 1))
+      {
+        ke.Handled = true;
+        return;
+      }
 
       if (ctrl && !alt && pressedKey == Key.F)
       {
