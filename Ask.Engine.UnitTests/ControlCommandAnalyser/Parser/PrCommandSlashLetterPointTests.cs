@@ -11,7 +11,7 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser;
 
 public class PrCommandSlashLetterPointTests : IDisposable
 {
-  [Fact(DisplayName = "Key parser does not remove contact letter c from PR points")]
+  [Fact(DisplayName = "Парсер ключей: ключ С не удаляет контактную букву из точек ПР")]
   public void ParseKeys_WithKeyCAndSlashLetterPoints_KeepsContactLetterC()
   {
     var pr = new PrCommandModel
@@ -30,7 +30,7 @@ public class PrCommandSlashLetterPointTests : IDisposable
     Assert.DoesNotContain(", С ", parsed);
   }
 
-  [Fact(DisplayName = "PR command keeps slash contact letters when key C adds RM points")]
+  [Fact(DisplayName = "Команда ПР: контактные буквы после косой черты сохраняются при добавлении точек РМ по ключу С")]
   public void BuildTranslation_WithSlashLetterPointsAndKeyC_DoesNotReportPointsWithoutContactLetter()
   {
     var rm = CreateRmCommand();

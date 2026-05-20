@@ -23,7 +23,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что парсер КС распознаёт только свою мнемонику.
   /// </summary>
-  [Fact(DisplayName = "КС parser: CanParse принимает только мнемонику КС")]
+  [Fact(DisplayName = "КС парсер: проверка поддерживаемой мнемоники принимает только КС")]
   public void CanParse_ReturnsTrueOnlyForKsMnemonic()
   {
     Assert.True(parser.CanParse(new MnemonicIdentifier("КС")));
@@ -34,7 +34,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что null-набор строк в парсере КС не валит разбор, а корректно превращается в KS004.
   /// </summary>
-  [Fact(DisplayName = "КС parser: null lines дают KS004, а не исключение")]
+  [Fact(DisplayName = "КС парсер: пустая ссылка на строки даёт ошибку пустого тела, а не исключение")]
   public void Parse_WithNullLines_ReturnsKs004()
   {
     var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, null!));
@@ -45,7 +45,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что строки из одних пробелов в КС считаются пустым телом команды.
   /// </summary>
-  [Fact(DisplayName = "КС parser: строки из пробелов дают KS004")]
+  [Fact(DisplayName = "КС парсер: строки из пробелов дают ошибку пустого тела")]
   public void Parse_WithWhitespaceLines_ReturnsKs004()
   {
     var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, new List<string> { "   " }));
@@ -57,7 +57,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// Проверяет, что строка продолжения без отступа автоматически нормализуется
   /// и не ломает дальнейший разбор КС.
   /// </summary>
-  [Fact(DisplayName = "КС parser: строка продолжения без отступа автоисправляется и разбирается")]
+  [Fact(DisplayName = "КС парсер: строка продолжения без отступа автоисправляется и разбирается")]
   public void Parse_WithInvalidContinuationIndentation_AutoFixesAndParses()
   {
     var model = Assert.IsType<KsCommandModel>(parser.Parse("10", "КС", 10, new List<string>
@@ -75,7 +75,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет защитную ветку анализа порядка параметров, когда remainder пустой и не должен считаться перестановкой.
   /// </summary>
-  [Fact(DisplayName = "КС parser: пустой remainder не считается нарушением порядка параметров")]
+  [Fact(DisplayName = "КС парсер: пустой остаток параметров не считается нарушением порядка")]
   public void HasPointsBeforeResistance_WithWhitespaceRemainder_ReturnsFalse()
   {
     var method = typeof(KcCommandParser).GetMethod("HasPointsBeforeResistance", BindingFlags.NonPublic | BindingFlags.Static);
@@ -88,7 +88,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет корректный разбор команды КС с закрытым диапазоном сопротивления и парой точек.
   /// </summary>
-  [Fact(DisplayName = "КС parser: корректная команда без ошибок разбирает диапазон и точки")]
+  [Fact(DisplayName = "КС парсер: корректная команда без ошибок разбирает диапазон и точки")]
   public void Parse_WithClosedResistanceRangeAndPoints_ParsesCommandWithoutErrors()
   {
     var model = ParseBody("10<Ом<15 *X1,X2*");
@@ -108,7 +108,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что открытая верхняя граница КС корректно превращается в бесконечность.
   /// </summary>
-  [Fact(DisplayName = "КС parser: открытая верхняя граница сохраняется как бесконечность")]
+  [Fact(DisplayName = "КС парсер: открытая верхняя граница сохраняется как бесконечность")]
   public void Parse_WithOpenUpperLimit_StoresInfinityAsUpperSource()
   {
     var model = ParseBody("10<Ом *X1,X2*");
@@ -122,7 +122,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что открытая нижняя граница КС подставляет минимальное значение из метаданных команды.
   /// </summary>
-  [Fact(DisplayName = "КС parser: открытая нижняя граница подставляет минимальное значение из метаданных")]
+  [Fact(DisplayName = "КС парсер: открытая нижняя граница подставляет минимальное значение из метаданных")]
   public void Parse_WithOpenLowerLimit_UsesMinimumResistanceAsLowerLimit()
   {
     var model = ParseBody("Ом<15 *X1,X2*");
@@ -136,7 +136,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ошибку KS001, когда в КС не задан ни один предел сопротивления.
   /// </summary>
-  [Fact(DisplayName = "КС parser: отсутствие диапазона сопротивления даёт KS001")]
+  [Fact(DisplayName = "КС парсер: отсутствие диапазона сопротивления даёт ошибку пустого сопротивления")]
   public void Parse_WithoutResistance_ReturnsKs001()
   {
     var model = ParseBody("*X1,X2*");
@@ -149,7 +149,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ошибку KS002 и фиксацию хвоста, когда параметры КС не удаётся распознать.
   /// </summary>
-  [Fact(DisplayName = "КС parser: мусорные параметры дают KS002 и общую ошибку нераспознанного хвоста")]
+  [Fact(DisplayName = "КС парсер: мусорные параметры дают ошибку разбора и общую ошибку нераспознанного хвоста")]
   public void Parse_WithGarbageParametersAndPoints_ReturnsKs002AndUnrecognizedParameters()
   {
     var model = ParseBody("abc *X1,X2*");
@@ -161,7 +161,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ошибку KS003, когда диапазон есть, а список точек отсутствует.
   /// </summary>
-  [Fact(DisplayName = "КС parser: отсутствие точек даёт KS003")]
+  [Fact(DisplayName = "КС парсер: отсутствие точек даёт ошибку пустых точек")]
   public void Parse_WithoutPoints_ReturnsKs003()
   {
     var model = ParseBody("10<Ом<15");
@@ -172,7 +172,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ошибку KS004, когда после мнемоники КС тело команды отсутствует.
   /// </summary>
-  [Fact(DisplayName = "КС parser: пустое тело команды даёт KS004")]
+  [Fact(DisplayName = "КС парсер: пустое тело команды даёт ошибку пустого тела")]
   public void Parse_WithoutBody_ReturnsKs004()
   {
     var model = ParseBody(string.Empty);
@@ -183,7 +183,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ошибку KS005, когда блок точек КС указан раньше диапазона сопротивления.
   /// </summary>
-  [Fact(DisplayName = "КС parser: точки раньше диапазона дают KS005")]
+  [Fact(DisplayName = "КС парсер: точки раньше диапазона дают ошибку порядка параметров")]
   public void Parse_WithPointsBeforeResistance_ReturnsKs005()
   {
     var model = ParseBody("*X1,X2* 10<Ом<15");
@@ -197,7 +197,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что допустимые ключи КС корректно попадают в модель команды.
   /// </summary>
-  [Fact(DisplayName = "КС parser: допустимые ключи Б и Д сохраняются в модели")]
+  [Fact(DisplayName = "КС парсер: допустимые ключи Б и Д сохраняются в модели")]
   public void Parse_WithAllowedKeys_StoresThemInAlgorithmKey()
   {
     var model = ParseBody("Б, Д 10<Ом<15 *X1,X2*");
@@ -209,7 +209,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что дублирующийся ключ КС не дублируется в модели и уходит в предупреждения.
   /// </summary>
-  [Fact(DisplayName = "КС parser: дублирующийся ключ даёт предупреждение и не дублируется в модели")]
+  [Fact(DisplayName = "КС парсер: дублирующийся ключ даёт предупреждение и не дублируется в модели")]
   public void Parse_WithDuplicateAllowedKey_AddsWarningAndStoresSingleKey()
   {
     var model = ParseBody("Д, Д 10<Ом<15 *X1,X2*");
@@ -224,7 +224,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что недопустимый для КС ключ фиксируется как ошибка трансляции.
   /// </summary>
-  [Fact(DisplayName = "КС parser: недопустимый ключ даёт ошибку Gen_WrongKey")]
+  [Fact(DisplayName = "КС парсер: недопустимый ключ даёт ошибку неверного ключа")]
   public void Parse_WithNotAllowedKey_ReturnsWrongKeyError()
   {
     var model = ParseBody("ЗР 10<Ом<15 *X1,X2*");
@@ -236,7 +236,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет конфликт диапазона КС, когда нижняя граница равна верхней.
   /// </summary>
-  [Fact(DisplayName = "КС parser: нижняя граница не может быть больше или равна верхней")]
+  [Fact(DisplayName = "КС парсер: нижняя граница не может быть больше или равна верхней")]
   public void Parse_WhenLowerLimitEqualsOrExceedsUpperLimit_ReturnsKs009()
   {
     var model = ParseBody("15<Ом<15 *X1,X2*");
@@ -248,7 +248,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет конфликт диапазона КС, когда нижняя граница выше максимально допустимой.
   /// </summary>
-  [Fact(DisplayName = "КС parser: нижняя граница выше максимума даёт KS009")]
+  [Fact(DisplayName = "КС парсер: нижняя граница выше максимума даёт ошибку конфликта пределов")]
   public void Parse_WhenLowerLimitAboveMaximum_ReturnsKs009()
   {
     var model = ParseBody("11<МОм *X1,X2*");
@@ -260,7 +260,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет конфликт диапазона КС, когда верхняя граница выше максимально допустимой.
   /// </summary>
-  [Fact(DisplayName = "КС parser: верхняя граница выше максимума даёт KS009")]
+  [Fact(DisplayName = "КС парсер: верхняя граница выше максимума даёт ошибку конфликта пределов")]
   public void Parse_WhenUpperLimitAboveMaximum_ReturnsKs009()
   {
     var model = ParseBody("10<Ом<10000001 *X1,X2*");
@@ -273,7 +273,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет, что лишний хвост после корректных параметров не ломает разбор, а фиксируется отдельно.
   /// </summary>
-  [Fact(DisplayName = "КС parser: хвостовые параметры фиксируются как нераспознанные без потери корректного разбора")]
+  [Fact(DisplayName = "КС парсер: хвостовые параметры фиксируются как нераспознанные без потери корректного разбора")]
   public void Parse_WithTrailingUnrecognizedParameter_KeepsParsedCommandAndAddsGeneralError()
   {
     var model = ParseBody("10<Ом<15 tail *X1,X2*");
@@ -288,7 +288,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет специфическое правило КС: одиночную точку в блоке точек задавать нельзя.
   /// </summary>
-  [Fact(DisplayName = "КС parser: одиночная точка даёт ошибку Gen_InvalidOnePointUse")]
+  [Fact(DisplayName = "КС парсер: одиночная точка даёт ошибку недопустимого одиночного использования")]
   public void Parse_WithSinglePoint_ReturnsInvalidOnePointUse()
   {
     var model = ParseBody("10<Ом<15 *X1*");
@@ -301,7 +301,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ветку KS009 в helper-валидации, когда нижняя граница КС уходит ниже минимального значения метаданных.
   /// </summary>
-  [Fact(DisplayName = "КС resistance helper: нижняя граница ниже минимума даёт KS009")]
+  [Fact(DisplayName = "КС помощник сопротивления: нижняя граница ниже минимума даёт ошибку конфликта пределов")]
   public void ProcessResistance_WhenLowerLimitBelowMetadataMinimum_ReturnsKs009()
   {
     var model = CreateResistanceModel();
@@ -315,7 +315,7 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
   /// <summary>
   /// Проверяет ветку KS009 в helper-валидации, когда верхняя граница КС уходит ниже минимального значения метаданных.
   /// </summary>
-  [Fact(DisplayName = "КС resistance helper: верхняя граница ниже минимума даёт KS009")]
+  [Fact(DisplayName = "КС помощник сопротивления: верхняя граница ниже минимума даёт ошибку конфликта пределов")]
   public void ProcessResistance_WhenUpperLimitBelowMetadataMinimum_ReturnsKs009()
   {
     var model = CreateResistanceModel();
