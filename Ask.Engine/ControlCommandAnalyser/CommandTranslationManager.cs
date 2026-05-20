@@ -124,13 +124,23 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       ReportProgress(progress, "Начало трансляции");
       var models = ParseAll(text);
+
+      if (HasCriticalStructuralErrors(models))
+        return CompleteCriticalTranslation(models, progress);
+
       CheckVshModel(models);
+
+      if (HasCriticalStructuralErrors(models))
+        return CompleteCriticalTranslation(models, progress);
 
       ReportProgress(progress, "Формирование данных");
       _ = BuildFormattedText(models);
 
       ReportProgress(progress, "Проверка взаимосвязей");
       Analyze(models);
+
+      if (HasCriticalStructuralErrors(models))
+        return CompleteCriticalTranslation(models, progress);
 
       ReportProgress(progress, "Формирование данных");
       string formattedText = BuildFormattedText(models);
@@ -181,6 +191,14 @@ namespace Ask.Engine.ControlCommandAnalyser
           models.Insert(rmIndex + 1, vshModel);
         }
       }
+    }
+
+    private TranslationBuildResult CompleteCriticalTranslation(List<BaseCommandModel> models, IProgress<string>? progress)
+    {
+      ReportProgress(progress, "Трансляция остановлена: критическая ошибка структуры");
+      MessageEventAdapter.RaiseInfoMessage("Ошибка трансляции");
+
+      return new TranslationBuildResult(models, BuildFormattedText(models));
     }
 
     /// <summary>
@@ -320,6 +338,16 @@ namespace Ask.Engine.ControlCommandAnalyser
       }
     }
 
+    private static bool HasCriticalStructuralErrors(IEnumerable<BaseCommandModel> models)
+    {
+      return models.Any(HasCriticalStructuralErrors);
+    }
+
+    private static bool HasCriticalStructuralErrors(BaseCommandModel model)
+    {
+      return model.Errors?.Any(CriticalTranslationErrorClassifier.IsCriticalStructural) == true;
+    }
+
     private static void ReportProgress(IProgress<string>? progress, string message)
     {
       MessageEventAdapter.RaiseInfoMessage(message);
@@ -379,6 +407,9 @@ namespace Ask.Engine.ControlCommandAnalyser
 
             commands.Add(model);
             CommandsModel.CommandModels.Add(model);
+
+            if (HasCriticalStructuralErrors(model))
+              return commands;
           }
 
           // --- начинаем новую команду ---
