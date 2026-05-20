@@ -14,9 +14,9 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
     /// </summary>
-    public async Task InitializeSettingsAsync(IExecutionController executionController)
+    public void InitializeSettings(IExecutionController executionController)
     {
-      executionController.SetSettings(StartDelegate: ExecuteMeasurementProcess, true, null);
+      executionController.SetSettings(StartDelegate: ExecuteMeasurementProcess, true);
     }
 
     /// <summary>
@@ -83,6 +83,8 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
           {
             type = ShowMessageModel.MessageType.Error;
           }
+
+          await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА", type: type), skipPause: true);
 
           return type == ShowMessageModel.MessageType.Success ? true : false;
 
