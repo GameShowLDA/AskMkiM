@@ -1,34 +1,25 @@
 using Ask.Core.Services.Errors.Translation;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 {
-  /// <summary>
-  /// Класс для парсинга выражений RM (Remote Monitoring) и преобразования их в модели <see cref="RmPairModel"/>.
-  /// Поддерживает обработку диапазонов, синонимов, составных выражений и других сложных форматов.
-  /// </summary>
   public static class RmExpressionParser
   {
-    /// <summary>
-    /// Парсит все выражения из блока RM и возвращает список моделей <see cref="RmPairModel"/>.
-    /// </summary>
-    /// <param name="rmBlock">Текстовый блок с выражениями RM.</param>
-    /// <returns>Список моделей <see cref="RmPairModel"/>.</returns>
     public static List<RmPairModel> ParseAllExpressions(string rmBlock, ref RmCommandModel baseCommandModel)
     {
-      if (string.IsNullOrEmpty(rmBlock))
+      var result = new List<RmPairModel>();
+      if (string.IsNullOrWhiteSpace(rmBlock))
       {
-        baseCommandModel.Errors.Add(RmErrors.EmptyCommandBody(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        baseCommandModel.Errors.Add(RmErrors.EmptyCommandBody(
+          baseCommandModel.StartLineNumber,
+          $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        return result;
       }
 
-      var expressions = SplitExpressions(rmBlock, ref baseCommandModel);
-      var result = new List<RmPairModel>();
-
-      foreach (var expr in expressions)
+      foreach (var expr in SplitExpressions(rmBlock, ref baseCommandModel))
       {
         ParseExpression(expr, result, ref baseCommandModel);
       }
@@ -36,16 +27,130 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       return result;
     }
 
-    /// <summary>
-    /// Парсит одно выражение и добавляет результаты в список моделей.
-    /// </summary>
-    /// <param name="expr">Выражение для парсинга.</param>
-    /// <param name="result">Список для добавления результатов.</param>
+    public static List<string> SplitExpressions(string input, ref RmCommandModel baseCommandModel)
+    {
+      var result = new List<string>();
+      foreach (var rawLine in input.Replace("\r", string.Empty).Split('\n'))
+      {
+        var line = NormalizeSeparators(rawLine.Trim());
+        if (string.IsNullOrWhiteSpace(line))
+          continue;
+
+        foreach (var token in SplitExpressionLine(line))
+        {
+          if (token.Contains('=') && !token.StartsWith("=") && !token.EndsWith("="))
+          {
+            result.Add(token);
+          }
+          else
+          {
+            baseCommandModel.Errors.Add(RmErrors.ExtraSpace(
+              token,
+              baseCommandModel.StartLineNumber,
+              $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+          }
+        }
+      }
+
+      return result;
+    }
+
+    public static List<string> ExpandAll(string expr, ref RmCommandModel baseCommandModel)
+    {
+      var result = new List<string>();
+      expr = expr?.Trim() ?? string.Empty;
+      if (expr.Length == 0)
+        return result;
+
+      LogDebug($"[RM] Expand: {expr}");
+
+      if (expr.Contains('"') || expr.Contains('$'))
+      {
+        baseCommandModel.Errors.Add(RmErrors.UnacceptableSymbol(
+          expr,
+          baseCommandModel.StartLineNumber,
+          $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        return result;
+      }
+
+      var enumerated = SplitTopLevel(expr, ',');
+      if (enumerated.Count > 1)
+      {
+        foreach (var item in enumerated)
+          result.AddRange(ExpandAll(item, ref baseCommandModel));
+        return result;
+      }
+
+      if (TryExpandDecimalCoordinateRange(expr, result))
+        return result;
+
+      if (TryExpandSlashExpression(expr, ref baseCommandModel, result))
+        return result;
+
+      if (TryExpandFullCompositeRange(expr, result))
+        return result;
+
+      if (TryExpandColonRange(expr, result))
+        return result;
+
+      if (TryExpandCompositeProduct(expr, result))
+        return result;
+
+      if (TryExpandComponent(expr, result))
+        return result;
+
+      result.Add(expr);
+      return result;
+    }
+
+    public static List<string> ExpandRange(string prefix, string from, string to, int step = 1)
+    {
+      var result = new List<string>();
+      if (step == 0)
+        return result;
+
+      if (TryExpandLetterRange(prefix, from, to, step, result))
+        return result;
+
+      if (int.TryParse(from, out int nFrom) && int.TryParse(to, out int nTo))
+      {
+        foreach (var number in Enumerate(nFrom, nTo, step))
+          result.Add($"{prefix}{number}");
+      }
+      else
+      {
+        result.Add($"{prefix}{from}-{to}");
+      }
+
+      return result;
+    }
+
+    public static List<string> ExpandComponent(string part)
+    {
+      var result = new List<string>();
+      if (TryExpandComponent(part, result))
+        return result;
+
+      return new List<string> { part.Trim() };
+    }
+
+    public static IEnumerable<List<string>> CartesianProduct(List<List<string>> sequences)
+    {
+      IEnumerable<List<string>> result = new List<List<string>> { new() };
+      foreach (var sequence in sequences)
+      {
+        result =
+          from seq in result
+          from item in sequence
+          select new List<string>(seq) { item };
+      }
+
+      return result;
+    }
+
     private static void ParseExpression(string expr, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
     {
-      string left, right, middle = null;
-
-      if (TryParseSynonymExpression(expr, out left, out middle, out right))
+      if (TryParseSynonymExpression(expr, out var left, out var middle, out var right))
       {
         ProcessExpression(left, middle, right, result, ref baseCommandModel);
       }
@@ -55,55 +160,35 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       }
       else
       {
-        baseCommandModel.Errors.Add(RmErrors.CannotParseExpression(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        baseCommandModel.Errors.Add(RmErrors.CannotParseExpression(
+          expr,
+          baseCommandModel.StartLineNumber,
+          $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
       }
     }
 
-    /// <summary>
-    /// Пытается распознать выражение с синонимами (формат: "левое == синоним = правое").
-    /// </summary>
-    /// <param name="expr">Выражение для парсинга.</param>
-    /// <param name="left">Левая часть выражения.</param>
-    /// <param name="middle">Синоним (средняя часть выражения).</param>
-    /// <param name="right">Правая часть выражения.</param>
-    /// <returns>True, если выражение успешно распознано; иначе False.</returns>
     private static bool TryParseSynonymExpression(string expr, out string left, out string middle, out string right)
     {
-      var synMatch = Regex.Match(expr, @"^(.*?)==\s*(.*?)=(.*)$");
-      if (synMatch.Success)
+      var match = Regex.Match(expr, @"^(.*?)==(.+?)=(.+)$");
+      if (match.Success)
       {
-        left = synMatch.Groups[1].Value.Trim();
-        middle = synMatch.Groups[2].Value.Trim();
-        right = synMatch.Groups[3].Value.Trim();
-
-        // Если средняя часть (middle) пуста, это не синонимное выражение
-        if (string.IsNullOrWhiteSpace(middle))
-        {
-          left = right = middle = null;
-          return false;
-        }
-
-        return true;
+        left = match.Groups[1].Value.Trim();
+        middle = match.Groups[2].Value.Trim();
+        right = match.Groups[3].Value.Trim();
+        return middle.Length > 0;
       }
 
       left = middle = right = null;
       return false;
     }
 
-    /// <summary>
-    /// Пытается распознать базовое выражение (формат: "левое = правое").
-    /// </summary>
-    /// <param name="expr">Выражение для парсинга.</param>
-    /// <param name="left">Левая часть выражения.</param>
-    /// <param name="right">Правая часть выражения.</param>
-    /// <returns>True, если выражение успешно распознано; иначе False.</returns>
     private static bool TryParseBasicExpression(string expr, out string left, out string right)
     {
-      var basicMatch = Regex.Match(expr, @"^(.*?)=(.*)$");
-      if (basicMatch.Success)
+      var match = Regex.Match(expr, @"^(.*?)=(.+)$");
+      if (match.Success)
       {
-        left = basicMatch.Groups[1].Value.Trim();
-        right = basicMatch.Groups[2].Value.Trim();
+        left = match.Groups[1].Value.Trim();
+        right = match.Groups[2].Value.Trim();
         return true;
       }
 
@@ -111,64 +196,53 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       return false;
     }
 
-    /// <summary>
-    /// Обрабатывает выражение, расширяет диапазоны и добавляет результаты в список моделей.
-    /// </summary>
-    /// <param name="left">Левая часть выражения.</param>
-    /// <param name="middle">Синоним (средняя часть выражения).</param>
-    /// <param name="right">Правая часть выражения.</param>
-    /// <param name="result">Список для добавления результатов.</param>
-    private static void ProcessExpression(string left, string middle, string right, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
+    private static void ProcessExpression(
+      string left,
+      string middle,
+      string right,
+      List<RmPairModel> result,
+      ref RmCommandModel baseCommandModel)
     {
       if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
       {
-        baseCommandModel.Errors.Add(RmErrors.EmptyLeftOrRight(left, middle, right, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
+        baseCommandModel.Errors.Add(RmErrors.EmptyLeftOrRight(
+          left,
+          middle,
+          right,
+          baseCommandModel.StartLineNumber,
+          $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return;
       }
 
-      LogDebug($"[ProcessExpression] Left: {left}, Middle: {middle}, Right: {right}");
-
-      // Новый обработчик для особого случая
-      if (TryProcessSynonymRangeWithStep(left, middle, right, result, ref baseCommandModel))
-        return;
-
-      if (TryProcessGroupedRanges(left, right, middle, result, ref baseCommandModel))
-        return;
-
+      var errorCount = baseCommandModel.Errors.Count;
       var leftList = ExpandAll(left, ref baseCommandModel);
       var rightList = ExpandAll(right, ref baseCommandModel);
-      var middleList = !string.IsNullOrWhiteSpace(middle)
-        ? ExpandAll(middle, ref baseCommandModel)
-        : Enumerable.Repeat<string>(null, leftList.Count).ToList();
+      var middleList = string.IsNullOrWhiteSpace(middle)
+        ? Enumerable.Repeat<string>(null, leftList.Count).ToList()
+        : ExpandAll(middle, ref baseCommandModel);
+
+      if (baseCommandModel.Errors.Count != errorCount)
+        return;
 
       if (leftList.Count != rightList.Count)
       {
-        baseCommandModel.Errors.Add(
-            RmErrors.MismatchedCounts(
-                leftList.Count,
-                rightList.Count,
-                baseCommandModel.StartLineNumber,
-                $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-
+        baseCommandModel.Errors.Add(RmErrors.MismatchedCounts(
+          leftList.Count,
+          rightList.Count,
+          baseCommandModel.StartLineNumber,
+          $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return;
       }
 
-      if (!string.IsNullOrWhiteSpace(middle) &&
-          middleList.Count != rightList.Count)
+      if (!string.IsNullOrWhiteSpace(middle) && middleList.Count != rightList.Count)
       {
-        baseCommandModel.Errors.Add(
-            RmErrors.MismatchedCounts(
-                middleList.Count,
-                rightList.Count,
-                baseCommandModel.StartLineNumber,
-                $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-
+        baseCommandModel.Errors.Add(RmErrors.MismatchedCounts(
+          middleList.Count,
+          rightList.Count,
+          baseCommandModel.StartLineNumber,
+          $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
         return;
       }
-
-      // Диагностика: выводим размеры списков
-      LogDebug($"[ProcessExpression] Expanded Left: {string.Join(", ", leftList)} (Count: {leftList.Count})");
-      LogDebug($"[ProcessExpression] Expanded Right: {string.Join(", ", rightList)} (Count: {rightList.Count})");
 
       for (int i = 0; i < leftList.Count; i++)
       {
@@ -181,165 +255,177 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       }
     }
 
-    private static int GetLogicalExpressionCount(string expr)
+    private static string NormalizeSeparators(string line)
     {
-      expr = expr.Trim();
-
-      var decimalRange = Regex.Match(
-       expr,
-       @"^(?<axis>[A-Za-zА-Яа-я]+)(?<start>\d+(?:\.\d+)?)-(?<end>\d+(?:\.\d+)?)\((?<step>\d+(?:\.\d+)?)\)/.+$");
-
-
-      if (decimalRange.Success)
-      {
-        var start = decimal.Parse(
-            decimalRange.Groups["start"].Value,
-            CultureInfo.InvariantCulture);
-
-        var end = decimal.Parse(
-            decimalRange.Groups["end"].Value,
-            CultureInfo.InvariantCulture);
-
-        var step = decimal.Parse(
-            decimalRange.Groups["step"].Value,
-            CultureInfo.InvariantCulture);
-
-        if (step <= 0)
-          return 0;
-
-        return (int)(((end - start) / step) + 1);
-      }
-
-      return ExpandAll(expr, ref Unsafe.NullRef<RmCommandModel>()).Count;
+      line = Regex.Replace(line, @"\s*==\s*", "==");
+      line = Regex.Replace(line, @"(?<!=)\s*=\s*(?!=)", "=");
+      return line.Trim();
     }
 
-    /// <summary>
-    /// Разделяет текстовый блок на отдельные выражения.
-    /// </summary>
-    /// <param name="input">Текстовый блок.</param>
-    /// <returns>Список выражений.</returns>
-    public static List<string> SplitExpressions(string input, ref RmCommandModel baseCommandModel)
+    private static IEnumerable<string> SplitExpressionLine(string line)
     {
-      var rawLines = input.Replace("\r", "").Split('\n');
-      var result = new List<string>();
-
-      foreach (var lineRaw in rawLines)
+      foreach (var token in Regex.Split(line, @"\s+"))
       {
-        var line = lineRaw.Trim();
-
-        if (string.IsNullOrWhiteSpace(line))
-          continue;
-
-        // Нормализация пробелов вокруг "="
-        line = Regex.Replace(line, @"\s*=\s*", "=");
-
-        // Обработка ==
-        if (line.Contains("=="))
-        {
-          result.Add(line);
-          continue;
-        }
-
-        var matches = Regex.Matches(line, @"[^=\s]+=[^=\s]+");
-
-        foreach (Match m in matches)
-        {
-          var expr = m.Value.Trim();
-
-          if (!string.IsNullOrWhiteSpace(expr) &&
-              expr.Contains("=") &&
-              !expr.StartsWith("=") &&
-              !expr.EndsWith("="))
-          {
-            result.Add(expr);
-          }
-        }
-
-        // Если ничего не нашли — ошибка
-        if (matches.Count == 0)
-        {
-          baseCommandModel.Errors.Add(
-            RmErrors.ExtraSpace(line, baseCommandModel.StartLineNumber,
-            $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}")
-          );
-        }
+        if (!string.IsNullOrWhiteSpace(token))
+          yield return token.Trim();
       }
-
-      return result;
     }
 
-    /// <summary>
-    /// Расширяет выражение, обрабатывая диапазоны, массивы и составные части.
-    /// </summary>
-    /// <param name="expr">Выражение для расширения.</param>
-    /// <returns>Список расширенных значений.</returns>
-    public static List<string> ExpandAll(string expr, ref RmCommandModel baseCommandModel)
+    private static bool TryExpandSlashExpression(string expr, ref RmCommandModel model, List<string> result)
     {
-      var result = new List<string>();
-      expr = expr.Trim();
+      var slash = expr.LastIndexOf('/');
+      if (slash < 0 || slash == expr.Length - 1)
+        return false;
 
-      LogDebug($"[ExpandAll] Processing expression: {expr}");
+      var prefix = expr.Substring(0, slash + 1);
+      var tail = expr.Substring(slash + 1);
+      if (!LooksExpandable(tail))
+        return false;
 
-      if (expr.Contains('[') || expr.Contains(']') || expr.Contains('"') || expr.Contains('$') || expr.Contains(','))
-      {
-        baseCommandModel.Errors.Add(RmErrors.UnacceptableSymbol(expr, baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-        return result;
-      }
-      if (TryExpandSteppedAlphaRange(expr, result))
-      {
-        return result;
-      }
+      foreach (var item in ExpandAll(tail, ref model))
+        result.Add(prefix + item);
 
-      if (TryExpandDecimalCoordinateRange(expr, result))
-      {
-        LogDebug($"[ExpandAll] Decimal coordinate range expanded: {expr} -> {string.Join(", ", result)}");
-        return result;
-      }
-
-      if (TryExpandCompositeRanges(expr, result))
-      {
-        LogDebug($"[ExpandAll] Composite range expanded: {expr} -> {string.Join(", ", result)}");
-        return result;
-      }
-
-      if (TryExpandDelimitedRanges(expr, result))
-      {
-        LogDebug($"[ExpandAll] Delimited range expanded: {expr} -> {string.Join(", ", result)}");
-        return result;
-      }
-
-      result.Add(expr);
-      LogDebug($"[ExpandAll] Single value: {expr}");
-      return result;
+      return true;
     }
 
-    private static bool TryExpandSteppedAlphaRange(string expr, List<string> result)
+    private static bool TryExpandFullCompositeRange(string expr, List<string> result)
     {
-      var match = Regex.Match(
-          expr,
-          @"^(?<prefix>[A-Za-zА-Яа-я]+)(?<start>\d+)-(?<end>\d+)\((?<step>-?\d+)\)$");
+      if (expr.Contains('[') || expr.Contains(']'))
+        return false;
 
+      var match = Regex.Match(expr, @"^(?<left>.+)-(?<right>.+?)(?:\((?<step>-?\d+)\))?$");
       if (!match.Success)
         return false;
 
-      string prefix = match.Groups["prefix"].Value;
-      int start = int.Parse(match.Groups["start"].Value);
-      int end = int.Parse(match.Groups["end"].Value);
-      int step = int.Parse(match.Groups["step"].Value);
+      var leftParts = match.Groups["left"].Value.Split('.');
+      var rightParts = match.Groups["right"].Value.Split('.');
+      var step = match.Groups["step"].Success ? int.Parse(match.Groups["step"].Value) : 1;
 
       if (step == 0)
         return false;
 
-      if (step > 0)
+      if (rightParts.Length == 1 && leftParts.Length > 1 && int.TryParse(rightParts[0], out _))
       {
-        for (int i = start; i <= end; i += step)
-          result.Add($"{prefix}{i}");
+        rightParts = leftParts.Take(leftParts.Length - 1).Concat(rightParts).ToArray();
       }
-      else
+
+      if (leftParts.Length != rightParts.Length || leftParts.Length < 2)
+        return false;
+
+      for (int i = 0; i < leftParts.Length - 1; i++)
       {
-        for (int i = start; i >= end; i += step)
-          result.Add($"{prefix}{i}");
+        if (!string.Equals(leftParts[i], rightParts[i], StringComparison.OrdinalIgnoreCase))
+          return false;
       }
+
+      if (!int.TryParse(leftParts[^1], out var from) || !int.TryParse(rightParts[^1], out var to))
+        return false;
+
+      var prefix = string.Join(".", leftParts.Take(leftParts.Length - 1));
+      foreach (var number in Enumerate(from, to, step))
+        result.Add($"{prefix}.{number}");
+
+      return true;
+    }
+
+    private static bool TryExpandColonRange(string expr, List<string> result)
+    {
+      var match = Regex.Match(expr, @"^(?<prefix>.+:)(?<from>\d+)-(?<to>\d+)(?:\((?<step>-?\d+)\))?$");
+      if (!match.Success)
+        return false;
+
+      var step = match.Groups["step"].Success ? int.Parse(match.Groups["step"].Value) : 1;
+      result.AddRange(ExpandRange(
+        match.Groups["prefix"].Value,
+        match.Groups["from"].Value,
+        match.Groups["to"].Value,
+        step));
+      return true;
+    }
+
+    private static bool TryExpandCompositeProduct(string expr, List<string> result)
+    {
+      var components = SplitTopLevel(expr, '.');
+      if (components.Count <= 1 || !components.Any(LooksExpandable))
+        return false;
+
+      var expandedComponents = new List<List<string>>();
+      foreach (var component in components)
+      {
+        var expanded = new List<string>();
+        if (!TryExpandComponent(component, expanded))
+          expanded.Add(component);
+        expandedComponents.Add(expanded);
+      }
+
+      foreach (var tuple in CartesianProduct(expandedComponents))
+        result.Add(string.Join(".", tuple));
+
+      return true;
+    }
+
+    private static bool TryExpandComponent(string part, List<string> result)
+    {
+      part = part.Trim();
+      if (part.Length == 0)
+        return false;
+
+      if (part.StartsWith("[") && part.EndsWith("]"))
+      {
+        foreach (var item in SplitTopLevel(part[1..^1], ','))
+          result.Add(item);
+        return true;
+      }
+
+      var letterRange = Regex.Match(part, @"^(?<prefix>[\p{L}]+)(?<from>\d+)-(?:(?<toPrefix>[\p{L}]+)?)(?<to>\d+)(?:\((?<step>-?\d+)\))?$");
+      if (letterRange.Success)
+      {
+        var prefix = letterRange.Groups["prefix"].Value;
+        var toPrefix = letterRange.Groups["toPrefix"].Value;
+        if (toPrefix.Length > 0 && !string.Equals(prefix, toPrefix, StringComparison.OrdinalIgnoreCase))
+          return false;
+
+        var step = letterRange.Groups["step"].Success ? int.Parse(letterRange.Groups["step"].Value) : 1;
+        result.AddRange(ExpandRange(prefix, letterRange.Groups["from"].Value, letterRange.Groups["to"].Value, step));
+        return true;
+      }
+
+      var numericRange = Regex.Match(part, @"^(?<from>\d+)-(?<to>\d+)(?:\((?<step>-?\d+)\))?$");
+      if (numericRange.Success)
+      {
+        var step = numericRange.Groups["step"].Success ? int.Parse(numericRange.Groups["step"].Value) : 1;
+        result.AddRange(ExpandRange(string.Empty, numericRange.Groups["from"].Value, numericRange.Groups["to"].Value, step));
+        return true;
+      }
+
+      return false;
+    }
+
+    private static bool TryExpandLetterRange(string prefix, string from, string to, int step, List<string> result)
+    {
+      var fromMatch = Regex.Match(from, @"^(?<letters>[\p{L}]+)(?<number>\d+)$");
+      if (!fromMatch.Success)
+        return false;
+
+      var letters = fromMatch.Groups["letters"].Value;
+      var fromNumber = int.Parse(fromMatch.Groups["number"].Value);
+      int toNumber;
+
+      var toMatch = Regex.Match(to, @"^(?<letters>[\p{L}]+)(?<number>\d+)$");
+      if (toMatch.Success)
+      {
+        if (!string.Equals(letters, toMatch.Groups["letters"].Value, StringComparison.OrdinalIgnoreCase))
+          return false;
+
+        toNumber = int.Parse(toMatch.Groups["number"].Value);
+      }
+      else if (!int.TryParse(to, out toNumber))
+      {
+        return false;
+      }
+
+      foreach (var number in Enumerate(fromNumber, toNumber, step))
+        result.Add($"{prefix}{letters}{number}");
 
       return true;
     }
@@ -347,326 +433,77 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
     private static bool TryExpandDecimalCoordinateRange(string expr, List<string> result)
     {
       var match = Regex.Match(
-          expr,
-          @"^(?<prefix>[A-Za-zА-Яа-я]+)(?<start>\d+\.\d+)-(?<end>\d+\.\d+)\((?<step>\d+\.\d+)\)(?<suffix>/.+)$");
+        expr,
+        @"^(?<prefix>[\p{L}]+)(?<start>\d+\.\d+)-(?<end>\d+\.\d+)\((?<step>\d+\.\d+)\)(?<suffix>/.+)$");
 
       if (!match.Success)
         return false;
 
-      var prefix = match.Groups["prefix"].Value;
-      var suffix = match.Groups["suffix"].Value;
-
-      if (!decimal.TryParse(match.Groups["start"].Value,
-          NumberStyles.Any,
-          CultureInfo.InvariantCulture,
-          out var start))
+      if (!decimal.TryParse(match.Groups["start"].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var start)
+          || !decimal.TryParse(match.Groups["end"].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var end)
+          || !decimal.TryParse(match.Groups["step"].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var step)
+          || step <= 0)
         return false;
 
-      if (!decimal.TryParse(match.Groups["end"].Value,
-          NumberStyles.Any,
-          CultureInfo.InvariantCulture,
-          out var end))
-        return false;
-
-      if (!decimal.TryParse(match.Groups["step"].Value,
-          NumberStyles.Any,
-          CultureInfo.InvariantCulture,
-          out var step))
-        return false;
-
-      if (step <= 0)
-        return false;
-
-      int precision = GetMaxPrecision(
-          match.Groups["start"].Value,
-          match.Groups["end"].Value,
-          match.Groups["step"].Value);
-
-      string format = "0." + new string('0', precision);
-
-      for (decimal current = start; current <= end; current += step)
+      int precision = new[]
       {
-        result.Add($"{prefix}{current.ToString(format, CultureInfo.InvariantCulture)}{suffix}");
-      }
+        match.Groups["start"].Value,
+        match.Groups["end"].Value,
+        match.Groups["step"].Value
+      }.Select(GetPrecision).Max();
+
+      var format = "0." + new string('0', precision);
+      for (var current = start; current <= end; current += step)
+        result.Add($"{match.Groups["prefix"].Value}{current.ToString(format, CultureInfo.InvariantCulture)}{match.Groups["suffix"].Value}");
 
       return true;
     }
 
-    private static int GetMaxPrecision(params string[] values)
+    private static int GetPrecision(string value)
     {
-      int max = 0;
-
-      foreach (var value in values)
-      {
-        int dot = value.IndexOf('.');
-        if (dot >= 0)
-        {
-          int precision = value.Length - dot - 1;
-          if (precision > max)
-            max = precision;
-        }
-      }
-
-      return max;
+      var dot = value.IndexOf('.');
+      return dot < 0 ? 0 : value.Length - dot - 1;
     }
 
-    /// <summary>
-    /// Пытается расширить составные диапазоны (например, "1.1-3.5").
-    /// </summary>
-    private static bool TryExpandCompositeRanges(string expr, List<string> result)
-    {
-      var compParts = expr.Split('.');
-      if (compParts.Length > 1 && compParts.Any(p => p.Contains('-')))
-      {
-        if (!string.Equals(compParts.FirstOrDefault(p => p.Contains("-")), compParts.ElementAt(compParts.Length - 1)))
-        {
-          var dashElements = compParts.FirstOrDefault(p => p.Contains("-")).Split('-');
-          if (compParts.ElementAt(0).Equals(dashElements.ElementAt(1)) &&
-            compParts.ElementAt(1).Equals(compParts.ElementAt(3)))
-          {
-            var newExpr = $"{compParts.ElementAt(0)}.{compParts.ElementAt(1)}.{dashElements.ElementAt(0)}-{compParts.ElementAt(4)}";
-            compParts = newExpr.Split('.');
-          }
-        }
-        var ranges = compParts.Select(ExpandComponent).ToList();
-        foreach (var tuple in CartesianProduct(ranges))
-          result.Add(string.Join(".", tuple));
-        return true;
-      }
-      return false;
-    }
-
-    /// <summary>
-    /// Пытается расширить диапазоны с разделителями (например, "X1/1-3").
-    /// </summary>
-    private static bool TryExpandDelimitedRanges(string expr, List<string> result)
-    {
-      var diap2 = Regex.Match(expr, @"^([^\s/=]+/)?([^\s/=]+)-([^\s/=]+)$");
-      if (diap2.Success)
-      {
-        string prefix = diap2.Groups[1].Success ? diap2.Groups[1].Value : "";
-        string from = diap2.Groups[2].Value;
-        string to = diap2.Groups[3].Value;
-        result.AddRange(ExpandRange(prefix, from, to));
-        return true;
-      }
-      return false;
-    }
-
-    /// <summary>
-    /// Расширяет числовые и буквенные диапазоны.
-    /// </summary>
-    public static List<string> ExpandRange(string prefix, string from, string to, int step = 1)
+    private static List<string> SplitTopLevel(string value, char separator)
     {
       var result = new List<string>();
+      var depthSquare = 0;
+      var depthRound = 0;
+      var start = 0;
 
-      if (TryExpandLetterRanges(prefix, from, to, step, result))
-        return result;
-
-      if (int.TryParse(from, out int nFrom) && int.TryParse(to, out int nTo))
+      for (int i = 0; i < value.Length; i++)
       {
-        int sign = nTo >= nFrom ? 1 : -1;
-        for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
-          result.Add($"{prefix}{n}");
-      }
-      else
-      {
-        result.Add($"{prefix}{from}-{to}");
-      }
-
-      return result;
-    }
-
-    /// <summary>
-    /// Пытается расширить буквенные диапазоны (например, "A1-A3").
-    /// </summary>
-    private static bool TryExpandLetterRanges(string prefix, string from, string to, int step, List<string> result)
-    {
-      var rg = new Regex(@"^([\p{L}]+)(\d+)$");
-      var mFrom = rg.Match(from);
-      if (!mFrom.Success)
-        return false;
-
-      var letter = mFrom.Groups[1].Value;
-      int nFrom = int.Parse(mFrom.Groups[2].Value);
-      int nTo;
-
-      var mTo = rg.Match(to);
-      if (mTo.Success)
-      {
-        var toLetter = mTo.Groups[1].Value;
-        if (!string.Equals(letter, toLetter, StringComparison.OrdinalIgnoreCase))
-          return false;
-
-        nTo = int.Parse(mTo.Groups[2].Value);
-      }
-      else if (!int.TryParse(to, out nTo))
-      {
-        return false;
-      }
-
-      int sign = nTo >= nFrom ? 1 : -1;
-      for (int n = nFrom; sign > 0 ? n <= nTo : n >= nTo; n += sign * step)
-        result.Add($"{prefix}{letter}{n}");
-
-      return true;
-    }
-
-    /// <summary>
-    /// Расширяет компонент диапазона (например, "1-3").
-    /// </summary>
-    public static List<string> ExpandComponent(string part)
-    {
-      part = part.Trim();
-      var diap = Regex.Match(part, @"^([^\s/=]+)-([^\s/=]+)(?:\((\d+)\))?$");
-      if (diap.Success)
-      {
-        string from = diap.Groups[1].Value;
-        string to = diap.Groups[2].Value;
-        int step = diap.Groups[3].Success ? int.Parse(diap.Groups[3].Value) : 1;
-        return ExpandRange("", from, to, step);
-      }
-      else
-        return new List<string> { part };
-    }
-
-    /// <summary>
-    /// Генерирует декартово произведение списков.
-    /// </summary>
-    public static IEnumerable<List<string>> CartesianProduct(List<List<string>> sequences)
-    {
-      IEnumerable<List<string>> result = new List<List<string>> { new List<string>() };
-      foreach (var sequence in sequences)
-      {
-        result = from seq in result
-                 from item in sequence
-                 select new List<string>(seq) { item };
-      }
-      return result;
-    }
-
-    /// <summary>
-    /// Пытается обработать выражение с групповыми диапазонами (например, "101-300=1.[3,5].1-100").
-    /// </summary>
-    /// <param name="left">Левая часть выражения.</param>
-    /// <param name="right">Правая часть выражения.</param>
-    /// <param name="middle">Синоним (средняя часть выражения).</param>
-    /// <param name="result">Список для добавления результатов.</param>
-    /// <returns>True, если выражение успешно обработано; иначе False.</returns>
-    private static bool TryProcessGroupedRanges(string left, string right, string middle, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
-    {
-      // Регулярное выражение для левой части (диапазон чисел, например, "101-300")
-      var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
-      // Регулярное выражение для правой части (составной диапазон, например, "1.3.1-100")
-      var rightMatch = Regex.Match(right, @"^(\d+)\.(\d+)\.(\d+)-(\d+)$");
-
-      if (leftMatch.Success && rightMatch.Success)
-      {
-        int leftFrom = int.Parse(leftMatch.Groups[1].Value);
-        int leftTo = int.Parse(leftMatch.Groups[2].Value);
-        int leftTotal = leftTo - leftFrom + 1;
-
-        int rightPrefix = int.Parse(rightMatch.Groups[1].Value);
-        var midList = rightMatch.Groups[2].Value.Split(',').Select(x => int.Parse(x.Trim())).ToList();
-        int rightStart = int.Parse(rightMatch.Groups[3].Value);
-        int rightEnd = int.Parse(rightMatch.Groups[4].Value);
-
-        // Проверяем, можно ли разбить левую часть на группы
-        int groupCount = midList.Count;
-        int groupSize = leftTotal / groupCount;
-        if (groupSize * groupCount != leftTotal)
+        var ch = value[i];
+        if (ch == '[') depthSquare++;
+        else if (ch == ']') depthSquare--;
+        else if (ch == '(') depthRound++;
+        else if (ch == ')') depthRound--;
+        else if (ch == separator && depthSquare == 0 && depthRound == 0)
         {
-          baseCommandModel.Errors.Add(RmErrors.GroupMismatch(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-          return false;
+          result.Add(value[start..i].Trim());
+          start = i + 1;
         }
-
-        int leftPtr = leftFrom;
-        foreach (var mid in midList)
-        {
-          for (int i = 0; i < groupSize; i++)
-          {
-            int rightNum = rightStart + i;
-            if (rightNum > rightEnd)
-            {
-              baseCommandModel.Errors.Add(RmErrors.GroupTooShort(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-              return false;
-            }
-
-            result.Add(new RmPairModel
-            {
-              OkPoint = leftPtr++.ToString(),
-              Synonym = middle, 
-              AskInput = $"{rightPrefix}.{mid}.{rightNum}"
-            });
-          }
-        }
-        return true;
       }
 
-      return false;
+      result.Add(value[start..].Trim());
+      return result.Where(x => x.Length > 0).ToList();
     }
 
-    /// <summary>
-    /// Пытается обработать выражение с синонимами и шагами (например, "301-310 == XS1:1-10 = 1.6.2-20(2)").
-    /// </summary>
-    /// <param name="left">Левая часть выражения.</param>
-    /// <param name="middle">Синоним (средняя часть выражения).</param>
-    /// <param name="right">Правая часть выражения.</param>
-    /// <param name="result">Список для добавления результатов.</param>
-    /// <returns>True, если выражение успешно обработано; иначе False.</returns>
-    private static bool TryProcessSynonymRangeWithStep(string left, string middle, string right, List<RmPairModel> result, ref RmCommandModel baseCommandModel)
+    private static bool LooksExpandable(string value)
     {
-      // Левый диапазон: 301-310
-      var leftMatch = Regex.Match(left, @"^(\d+)-(\d+)$");
-      // Синоним: XS1:1-10
-      var middleMatch = Regex.Match(middle ?? "", @"^([A-Za-z]+)(\d+):(\d+)-(\d+)$");
-      // Правая часть: 1.6.2-20(2)
-      var rightMatch = Regex.Match(right, @"^(\d+\.\d+\.)(\d+)-(\d+)\((\d+)\)$");
+      return value.Contains('-') || value.Contains('[') || value.Contains(',') || value.Contains('(');
+    }
 
-      if (leftMatch.Success && middleMatch.Success && rightMatch.Success)
-      {
-        int leftFrom = int.Parse(leftMatch.Groups[1].Value);
-        int leftTo = int.Parse(leftMatch.Groups[2].Value);
+    private static IEnumerable<int> Enumerate(int from, int to, int step)
+    {
+      if (step == 0)
+        yield break;
 
-        string synPrefix = middleMatch.Groups[1].Value;
-        int synBase = int.Parse(middleMatch.Groups[2].Value); // XS1
-        int synRangeFrom = int.Parse(middleMatch.Groups[3].Value); // 1
-        int synRangeTo = int.Parse(middleMatch.Groups[4].Value);   // 10
-
-        string rightPrefix = rightMatch.Groups[1].Value;
-        int rightFrom = int.Parse(rightMatch.Groups[2].Value);
-        int rightTo = int.Parse(rightMatch.Groups[3].Value);
-        int rightStep = int.Parse(rightMatch.Groups[4].Value);
-
-        int count = leftTo - leftFrom + 1;
-        if (count != synRangeTo - synRangeFrom + 1 || count != ((rightTo - rightFrom) / rightStep) + 1)
-        {
-          baseCommandModel.Errors.Add(RmErrors.StepRangeMismatch(baseCommandModel.StartLineNumber, $"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}"));
-          return false;
-        }
-
-        for (int i = 0; i < count; i++)
-        {
-          int leftVal = leftFrom + i;
-          int synNum = synRangeFrom + i;
-          int rightVal = rightFrom + (i * rightStep);
-
-          result.Add(new RmPairModel
-          {
-            OkPoint = leftVal.ToString(),
-            Synonym = null,
-            AskInput = $"{rightPrefix}{rightVal}"
-          });
-          result.Add(new RmPairModel
-          {
-            OkPoint = $"{synPrefix}{synBase}:{synNum}",
-            Synonym = null,
-            AskInput = $"{rightPrefix}{rightVal}"
-          });
-        }
-        return true;
-      }
-      return false;
+      var direction = to >= from ? 1 : -1;
+      var actualStep = Math.Abs(step) * direction;
+      for (int current = from; direction > 0 ? current <= to : current >= to; current += actualStep)
+        yield return current;
     }
   }
 }

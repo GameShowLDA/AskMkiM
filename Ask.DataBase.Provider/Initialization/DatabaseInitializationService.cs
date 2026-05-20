@@ -67,6 +67,7 @@ public static class DatabaseInitializationService
     }
 
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
+    await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
     TraceInfo(
@@ -292,6 +293,35 @@ public static class DatabaseInitializationService
     report.SeededHotkeys += addedHotkeys;
   }
 
+  private static async Task EnsureLegacyCompatibilityModeColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "Execution", cancellationToken)
+      || await ColumnExistsAsync(connection, "Execution", "LegacyCompatibilityMode", cancellationToken))
+    {
+      return;
+    }
+
+    await using var command = connection.CreateCommand();
+    command.CommandText =
+      """
+      ALTER TABLE "Execution"
+      ADD COLUMN "LegacyCompatibilityMode" INTEGER NOT NULL DEFAULT 0;
+      """;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    TraceWarning(
+      report,
+      progress,
+      "[DB] Р’ СЃС‚Р°СЂРѕР№ С…РµРјРµ Execution РґРѕР±Р°РІР»РµРЅР° РєРѕР»РѕРЅРєР° LegacyCompatibilityMode.");
+  }
+
   private static async Task<int> EnsureSingleSettingsRowAsync<T>(
     AppDbContext context,
     DbSet<T> dbSet,
@@ -509,6 +539,28 @@ public static class DatabaseInitializationService
 
     var result = await command.ExecuteScalarAsync(cancellationToken);
     return result is not null;
+  }
+
+  private static async Task<bool> ColumnExistsAsync(
+    System.Data.Common.DbConnection connection,
+    string tableName,
+    string columnName,
+    CancellationToken cancellationToken)
+  {
+    await using var command = connection.CreateCommand();
+    command.CommandText = $"PRAGMA table_info(\"{tableName.Replace("\"", "\"\"")}\");";
+
+    await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+    while (await reader.ReadAsync(cancellationToken))
+    {
+      if (!reader.IsDBNull(1)
+        && string.Equals(reader.GetString(1), columnName, StringComparison.OrdinalIgnoreCase))
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private static async Task<HashSet<string>> GetAppliedMigrationIdsSafeAsync(

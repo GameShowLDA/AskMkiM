@@ -109,7 +109,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// Проверяет, что при выходе измеренного сопротивления за допустимый диапазон
   /// команда пишет ошибку в протокол и публикует ошибку выполнения.
   /// </summary>
-  [Fact(DisplayName = "КС: выход за диапазон формирует ошибку протокола и execution error")]
+  [Fact(DisplayName = "КС: выход за диапазон формирует ошибку протокола и ошибку выполнения")]
   public async Task ExecuteAsync_WhenMeasurementFails_WritesErrorAndPublishesExecutionError()
   {
     using var harness = new KsExecutionHarness();
@@ -155,7 +155,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// Проверяет, что при открытой верхней границе исполнитель использует целевое значение firstValue + 10,
   /// а не пытается измерять по несуществующему верхнему пределу.
   /// </summary>
-  [Fact(DisplayName = "КС: без верхней границы используется целевое значение firstValue плюс 10")]
+  [Fact(DisplayName = "КС: без верхней границы используется целевое значение нижней границы плюс десять")]
   public async Task ExecuteAsync_WithoutHigherLimit_UsesLowerLimitPlusTenAsMeasurementTarget()
   {
     using var harness = new KsExecutionHarness();
@@ -240,7 +240,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// Проверяет холостой режим без симуляции ошибок:
   /// сопротивление коммутатора не вычитается, поэтому измерение остается успешным.
   /// </summary>
-  [Fact(DisplayName = "КС: в idle-режиме сопротивление коммутатора не вычитается")]
+  [Fact(DisplayName = "КС: в холостом режиме сопротивление коммутатора не вычитается")]
   public async Task ExecuteAsync_InIdleMode_DoesNotSubtractSwitchResistance()
   {
     using var harness = new KsExecutionHarness(switchResistance: 1, idleMode: true);
@@ -260,7 +260,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// Проверяет холостой режим с симуляцией ошибок при открытой верхней границе:
   /// исполнитель должен принудительно сформировать ошибку, даже если прибор вернул нормальное значение.
   /// </summary>
-  [Fact(DisplayName = "КС: в idle-режиме с симуляцией ошибок формируется принудительный брак")]
+  [Fact(DisplayName = "КС: в холостом режиме с симуляцией ошибок формируется принудительный брак")]
   public async Task ExecuteAsync_InIdleModeWithErrorSimulationAndOpenUpperLimit_ForcesFailure()
   {
     using var harness = new KsExecutionHarness(idleMode: true, errorSimulation: true);
@@ -280,7 +280,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// <summary>
   /// Проверяет сквозной сценарий: текст команды КС проходит через парсер, а затем корректно исполняется executor-ом.
   /// </summary>
-  [Fact(DisplayName = "КС: parsed command корректно проходит путь parser -> executor")]
+  [Fact(DisplayName = "КС: разобранная команда корректно проходит путь от парсера к исполнителю")]
   public async Task ExecuteAsync_WithParsedCommand_RunsEndToEnd()
   {
     using var harness = new KsExecutionHarness();
@@ -370,7 +370,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// <summary>
   /// Проверяет, что отсутствие устройства коммутации останавливает выполнение КС до начала измерений.
   /// </summary>
-  [Fact(DisplayName = "КС: отсутствие switching device даёт ошибку конфигурации")]
+  [Fact(DisplayName = "КС: отсутствие устройства коммутации даёт ошибку конфигурации")]
   public async Task ExecuteAsync_WithoutSwitchingDevice_ThrowsConfigurationException()
   {
     using var harness = new KsExecutionHarness(includeSwitchingDevice: false);
@@ -387,7 +387,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// <summary>
   /// Проверяет, что отсутствие быстрого измерителя останавливает выполнение КС с ошибкой конфигурации.
   /// </summary>
-  [Fact(DisplayName = "КС: отсутствие fast meter даёт ошибку конфигурации")]
+  [Fact(DisplayName = "КС: отсутствие быстрого измерителя даёт ошибку конфигурации")]
   public async Task ExecuteAsync_WithoutFastMeter_ThrowsConfigurationException()
   {
     const int missingMeterChassis = 987654;
@@ -402,7 +402,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// <summary>
   /// Проверяет, что при отсутствии модулей МКР исполнитель КС не может получить измеритель и останавливается.
   /// </summary>
-  [Fact(DisplayName = "КС: отсутствие relay modules даёт ошибку неинициализированных МКР")]
+  [Fact(DisplayName = "КС: отсутствие релейных модулей даёт ошибку неинициализированных МКР")]
   public async Task ExecuteAsync_WithoutRelayModules_ThrowsInitializationException()
   {
     using var harness = new KsExecutionHarness(includeRelayModules: false, includeFastMeter: false);
@@ -417,7 +417,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   /// <summary>
   /// Проверяет, что точка, отсутствующая в заранее проанализированном наборе, вызывает системную ошибку трансляции.
   /// </summary>
-  [Fact(DisplayName = "КС: точка вне analyzed points даёт системную ошибку трансляции")]
+  [Fact(DisplayName = "КС: точка вне проанализированных точек даёт системную ошибку трансляции")]
   public async Task ExecuteAsync_WithPointOutsideAnalyzedPoints_ThrowsTranslationException()
   {
     var commandPoints = CreatePoints("X1", "X2");

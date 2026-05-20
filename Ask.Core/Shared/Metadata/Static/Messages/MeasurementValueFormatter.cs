@@ -8,7 +8,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
   public static class MeasurementValueFormatter
   {
     private const int DisplayPrecision = 3;
-    private const string DisplayFormat = "0.000";
+    private const string DisplayFormat = "0.###";
 
     /// <summary>
     /// Округляет измеренное значение для отображения с точностью до трёх знаков после запятой.

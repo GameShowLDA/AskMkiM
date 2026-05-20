@@ -4,7 +4,7 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser;
 
 public class IndentationChekerTests
 {
-  [Fact(DisplayName = "Indentation checker allows standalone PR chain separator without indentation")]
+  [Fact(DisplayName = "Проверка отступов: одиночный разделитель цепей ПР допускается без отступа")]
   public void CheckIndentationErrors_WithStandaloneChainSeparator_DoesNotReportError()
   {
     var lines = new List<string>
@@ -19,7 +19,7 @@ public class IndentationChekerTests
     Assert.Empty(errors);
   }
 
-  [Fact(DisplayName = "Indentation checker still reports continuation line without indentation")]
+  [Fact(DisplayName = "Проверка отступов: строка продолжения без отступа по-прежнему даёт ошибку")]
   public void CheckIndentationErrors_WithContinuationLineWithoutIndentation_ReportsError()
   {
     var lines = new List<string>

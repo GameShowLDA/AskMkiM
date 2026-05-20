@@ -1,67 +1,27 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.RmTranslation.Diagnostics;
+using Ask.Engine.ControlCommandAnalyser.RmTranslation.Translation;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 {
-  /// <summary>
-  /// Парсер команды РМ.
-  /// <para>
-  /// Отвечает за разбор команды конфигурации точек,
-  /// формируя отображение точек объекта контроля на входы системы.
-  /// </para>
-  /// <para>
-  /// Основные задачи:
-  /// <list type="number">
-  /// <item><description>Проверка соответствия мнемоники.</description></item>
-  /// <item><description>Удаление комментариев и нормализация строк.</description></item>
-  /// <item><description>Парсинг выражений точек.</description></item>
-  /// <item><description>Заполнение словаря соответствия точек.</description></item>
-  /// </list>
-  /// </para>
-  /// </summary>
   public class RmCommandParser : ICommandParser
   {
-    /// <summary>
-    /// Определяет, может ли текущий парсер обработать команду
-    /// с указанной мнемоникой.
-    /// </summary>
-    /// <param name="mnemonic">Идентификатор мнемоники команды.</param>
-    /// <returns>
-    /// true — если мнемоника соответствует команде РМ;  
-    /// false — если команда не поддерживается данным парсером.
-    /// </returns>
     public bool CanParse(MnemonicIdentifier mnemonic)
     => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.RM);
 
-    /// <summary>
-    /// Выполняет разбор команды РМ и формирует модель.
-    /// </summary>
-    /// <param name="commandNumber">Номер команды.</param>
-    /// <param name="mnemonic">Мнемоника команды.</param>
-    /// <param name="numberLine">Номер строки начала команды.</param>
-    /// <param name="lines">Исходные строки команды.</param>
-    /// <returns>
-    /// Экземпляр <see cref="RmCommandModel"/>,
-    /// содержащий карту соответствия точек и исходные данные.
-    /// </returns>
-    /// <remarks>
-    /// В процессе выполнения:
-    /// <list type="bullet">
-    /// <item><description>Удаляются комментарии.</description></item>
-    /// <item><description>Очищается префикс команды из первой строки.</description></item>
-    /// <item><description>Объединяются строки тела команды.</description></item>
-    /// <item><description>Выполняется парсинг всех выражений точек.</description></item>
-    /// <item><description>Заполняется словарь <c>PointsMap</c>.</description></item>
-    /// </list>
-    /// </remarks>
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
+      lines ??= new List<string>();
       var model = new RmCommandModel
       {
         CommandNumber = commandNumber,
@@ -69,55 +29,171 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         StartLineNumber = numberLine,
       };
 
-      var sb = new System.Text.StringBuilder();
-      List<string> processedLines = CommentsParser.ParseComments(lines, model);
+      var bodyBuilder = new StringBuilder();
+      var processedLines = CommentsParser.ParseComments(lines, model);
       lines.Clear();
       lines.AddRange(processedLines);
+
       for (int i = 0; i < lines.Count; i++)
       {
         var line = lines[i].Trim();
         if (i == 0)
         {
-          var match = System.Text.RegularExpressions.Regex.Match(
+          var match = Regex.Match(
             line,
             @"^\s*\d+\s+[\p{L}_]{2,}(?=\s|$)\s*(.*)$",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-          if (match.Success) line = match.Groups[1].Value.Trim();
+            RegexOptions.IgnoreCase);
+          if (match.Success)
+            line = match.Groups[1].Value.Trim();
         }
+
         if (!string.IsNullOrWhiteSpace(line))
-        {
-          sb.AppendLine(line);
-          model.PointsSourse = line;
-        }
+          bodyBuilder.AppendLine(line);
       }
 
-      var pairs = RmExpressionParser.ParseAllExpressions(sb.ToString(), ref model);
+      var body = bodyBuilder.ToString();
+      model.PointsSourse = body.Trim();
+      var pairs = ParseParts(body, model);
+      model.Pairs = pairs;
 
-      if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
-      {
+      if (pairs.Count > 0 && ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
         InitializeCompatibilityPointsMap(model);
-      }
 
       foreach (var pair in pairs)
-      {
-        if (!ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
-        {
-          model.PointsMap[pair.OkPoint] = pair.AskInput;
-        }
-        else
-        {
-          var point = LegacyCompatibilityMapper.GetRealAddressByCompatibilityPoint(pair.AskInput.ToString());
-          model.PointsMap[pair.OkPoint] = point;
-        }
-      }
+        AddPair(model, pair);
 
       return model;
     }
 
-    /// <summary>
-    /// Заполняет таблицу соответствия точек подключения
-    /// для режима совместимости со старой системой АСК-МКИ.
-    /// </summary>
+    private static List<RmPairModel> ParseParts(string body, RmCommandModel model)
+    {
+      var result = new List<RmPairModel>();
+      var hasPartSeparators = body.Contains('*');
+      var sourceParts = hasPartSeparators
+        ? body.Replace("\r", string.Empty).Split('*')
+        : new[] { body };
+
+      foreach (var sourcePart in sourceParts)
+      {
+        var partText = sourcePart.Trim();
+        if (partText.Length == 0)
+          continue;
+
+        var part = CreatePart(partText, hasPartSeparators, model);
+        var translation = new ControlAddressTranslationEngine().Translate(part.SourceText);
+        foreach (var diagnostic in translation.Diagnostics)
+          AddDiagnostic(model, diagnostic);
+
+        var pairs = translation.Entries
+          .Select(entry => new RmPairModel
+          {
+            OkPoint = entry.ObjectAddress.Value,
+            Synonym = entry.Synonym?.Value,
+            AskInput = entry.MachineAddress.ToString()
+          })
+          .ToList();
+        foreach (var pair in pairs)
+        {
+          pair.PartNumber = part.PartNumber;
+          part.Pairs.Add(pair);
+          result.Add(pair);
+        }
+
+        if (part.Pairs.Count > 0 || part.PartNumber.HasValue)
+          model.Parts.Add(part);
+      }
+
+      if (result.Count == 0 && model.Errors.Count == 0)
+      {
+        model.Errors.Add(RmErrors.EmptyCommandBody(
+          model.StartLineNumber,
+          $"{model.CommandNumber} {model.Mnemonic}"));
+      }
+
+      return result;
+    }
+
+    private static RmPartModel CreatePart(string partText, bool requirePartNumber, RmCommandModel model)
+    {
+      var part = new RmPartModel();
+      var match = Regex.Match(partText, @"^\s*[Чч]\s*=\s*(?<number>\d+)\b\s*(?<tail>.*)$", RegexOptions.Singleline);
+
+      if (match.Success)
+      {
+        part.PartNumber = int.Parse(match.Groups["number"].Value);
+        part.SourceText = match.Groups["tail"].Value.Trim();
+      }
+      else
+      {
+        part.SourceText = partText;
+        if (requirePartNumber)
+        {
+          model.Errors.Add(RmErrors.CannotParseExpression(
+            $"Ожидался номер части Ч=...: {partText}",
+            model.StartLineNumber,
+            $"{model.CommandNumber} {model.Mnemonic}"));
+        }
+      }
+
+      return part;
+    }
+
+    private static void AddPair(RmCommandModel model, RmPairModel pair)
+    {
+      if (PointModel.ParsePointString(pair.AskInput) == null)
+      {
+        model.Errors.Add(RmErrors.CannotParseExpression(
+          pair.AskInput,
+          model.StartLineNumber,
+          $"{model.CommandNumber} {model.Mnemonic}"));
+        return;
+      }
+
+      var askPoint = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled()
+        ? LegacyCompatibilityMapper.GetRealAddressByCompatibilityPoint(pair.AskInput)
+        : pair.AskInput;
+
+      if (ContainsPointKey(model, pair.OkPoint))
+      {
+        return;
+      }
+      else
+      {
+        model.PointsMap[pair.OkPoint] = askPoint;
+      }
+
+      if (!string.IsNullOrWhiteSpace(pair.Synonym))
+      {
+        if (ContainsPointKey(model, pair.Synonym))
+        {
+          return;
+        }
+        else
+        {
+          model.SynonymMap[pair.Synonym] = askPoint;
+        }
+      }
+    }
+
+    private static bool ContainsPointKey(RmCommandModel model, string pointKey)
+    {
+      var normalizedKey = RmCommandModel.NormalizePointKey(pointKey);
+      return model.PointsMap.Keys
+        .Concat(model.SynonymMap.Keys)
+        .Any(key => string.Equals(RmCommandModel.NormalizePointKey(key), normalizedKey, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static void AddDiagnostic(RmCommandModel model, RmDiagnostic diagnostic)
+    {
+      if (diagnostic.Severity != DiagnosticSeverity.Error)
+        return;
+
+      model.Errors.Add(RmErrors.CannotParseExpression(
+        $"{diagnostic.Code}: {diagnostic.Message}",
+        model.StartLineNumber,
+        $"{model.CommandNumber} {model.Mnemonic}"));
+    }
+
     private void InitializeCompatibilityPointsMap(RmCommandModel rmCommandModel)
     {
       Dictionary<PointModel, PointModel> CompatibilityPointsMap = new();
