@@ -75,10 +75,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
             errorMessage += $"Несовпадение по NumberDevice: ожидается {_deviceBusCommutation.Number}, получено {baseResponse.NumberDevice}.";
           }
 
+          IsReset?.Invoke();
           return (false, errorMessage.Trim());
         }
       }
 
+      IsReset?.Invoke();
       return (false, result);
     }
 
@@ -87,6 +89,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        IsReset?.Invoke();
         return true;
       }
 

@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation
@@ -39,6 +40,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       _deviceBusCommutation = deviceBusCommutation;
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
+      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
       InitializeDeviceBusStatus();
     }
 
@@ -71,9 +73,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && isConnected)
-        return true;
-
       foreach (var kvp in deviceBusStatus.Where(x => x.Key.Item1 == DeviceType.Multimeter && x.Value))
       {
         var oldBus = kvp.Key.Item2;
@@ -87,6 +86,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         deviceBusStatus[(DeviceType.Multimeter, bus)] = true;
       }
+      else
+      {
+        deviceBusStatus[(DeviceType.Multimeter, bus)] = false;
+      }
 
       return result;
     }
@@ -94,16 +97,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && !isConnected)
-        return true;
-
       var result = await SetMultimeterState(false, bus);
-
-      if (result)
-      {
-        deviceBusStatus[(DeviceType.Multimeter, bus)] = false;
-      }
-
+      deviceBusStatus[(DeviceType.Multimeter, bus)] = false;
       return result;
     }
 
@@ -116,7 +111,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     private async Task<bool> SetMultimeterState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.Multimeter;
-      if (TryGetBusNumber(bus, out int busNumber) && (busNumber >= 1 || busNumber <= 4))
+      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -124,9 +119,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         }
 
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
         await Task.Delay(10);
-        return true;
+        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
       }
 
       LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
@@ -138,7 +133,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     #region АЦП
 
     /// <inheritdoc />
-    public async Task<bool> ConnectADC(SwitchingBusNew bus, bool reversePolarity = false, IUserInteractionService? userMessageService = null) => await SetADCState(false, bus, reversePolarity);
+    public async Task<bool> ConnectADC(SwitchingBusNew bus, bool reversePolarity = false, IUserInteractionService? userMessageService = null) => await SetADCState(true, bus, reversePolarity);
 
     /// <inheritdoc />
     public async Task<bool> DisconnectADC(SwitchingBusNew bus, bool reversePolarity = false, IUserInteractionService? userMessageService = null) => await SetADCState(false, bus, reversePolarity);
@@ -158,7 +153,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         numberConnector++;
       }
 
-      if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 1 || busNumber > 4))
+      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -166,9 +161,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         }
 
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
         await Task.Delay(10);
-        return true;
+        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
       }
 
       LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
@@ -182,9 +177,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      if (deviceBusStatus.TryGetValue((DeviceType.PINT, bus), out var isConnected) && isConnected)
-        return true;
-
       foreach (var kvp in deviceBusStatus.Where(x => x.Key.Item1 == DeviceType.PINT && x.Value))
       {
         var oldBus = kvp.Key.Item2;
@@ -197,6 +189,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         deviceBusStatus[(DeviceType.PINT, bus)] = true;
       }
+      else
+      {
+        deviceBusStatus[(DeviceType.PINT, bus)] = false;
+      }
 
       return result;
     }
@@ -204,16 +200,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      if (deviceBusStatus.TryGetValue((DeviceType.Multimeter, bus), out var isConnected) && !isConnected)
-        return true;
-
-      var result = await SetPINTState(true, bus);
-
-      if (result)
-      {
-        deviceBusStatus[(DeviceType.PINT, bus)] = false;
-      }
-
+      var result = await SetPINTState(false, bus);
+      deviceBusStatus[(DeviceType.PINT, bus)] = false;
       return result;
     }
 
@@ -226,7 +214,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     private async Task<bool> SetPINTState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
-      if (TryGetBusNumber(bus, out int busNumber) && (busNumber < 2 || busNumber > 3))
+      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -234,9 +222,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         }
 
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
+        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
         await Task.Delay(10);
-        return true;
+        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
       }
 
       LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
@@ -250,14 +238,15 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnected(DeviceType.BreakdownTester, BreakdownBus))
-        return true;
-
       var result = await SetBreakdownTesterState(true);
 
       if (result)
       {
         deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = true;
+      }
+      else
+      {
+        deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = false;
       }
 
       return result;
@@ -266,9 +255,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      if (!IsConnected(DeviceType.BreakdownTester, BreakdownBus))
-        return true;
-
       var result = await SetBreakdownTesterState(false);
 
       deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = false;
@@ -291,7 +277,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      return answer.Contains("5.7.1.1");
+      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
     }
 
     #endregion
@@ -324,7 +310,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       var command = new DeviceCommand(7, connect ? 1 : 2);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      return connect ? answer.Contains("7.1") : answer.Contains("7.2");
+      return !string.IsNullOrWhiteSpace(answer) && (connect ? answer.Contains("7.1") : answer.Contains("7.2"));
     }
 
     #endregion
@@ -353,9 +339,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnected(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus))
-        return true;
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = true;
@@ -365,11 +348,15 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       var command = new DeviceCommand(5, 7, 0, 1);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
       var expectingResult = command.ToString();
-      var result = answer.Contains(expectingResult);
+      var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
 
       if (result)
       {
         deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = true;
+      }
+      else
+      {
+        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
       }
 
       return result;
@@ -378,9 +365,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (!IsConnected(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus))
-        return true;
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
@@ -390,13 +374,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       var command = new DeviceCommand(5, 7, 0, 2);
       var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
       var expectingResult = command.ToString();
-      var result = answer.Contains(expectingResult);
+      var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
 
-      if (result)
-      {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
-      }
-
+      deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
       return result;
     }
 

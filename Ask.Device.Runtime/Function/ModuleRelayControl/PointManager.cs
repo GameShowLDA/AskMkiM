@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl
@@ -32,6 +33,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       _moduleRelayControl = moduleRelayControl;
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
+      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
+      ConnectableManager_IsReset();
     }
 
     private void ConnectableManager_IsReset()
@@ -50,11 +53,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (CheckPointConnected(number, bus, true))
-      {
-        return true;
-      }
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.AB)
@@ -106,17 +104,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError($"Не удалось подключить точку {number} к шине {bus}.", isDeviceLog: true);
+      SetPointConnection(number, bus, false);
       return false;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (CheckPointConnected(number, bus, false))
-      {
-        return true;
-      }
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.AB)
@@ -168,17 +162,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError($"Не удалось отключить точку {number} от шины {bus}.", isDeviceLog: true);
+      SetPointConnection(number, bus, false);
       return false;
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (CheckPointConnected(number, bus, true))
-      {
-        return true;
-      }
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.AB)
@@ -230,17 +220,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError($"Не удалось подключить точку {number} к шине {bus}.", isDeviceLog: true);
+      SetPointConnection(number, bus, false);
       return false;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (CheckPointConnected(number, bus, false))
-      {
-        return true;
-      }
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.AB)
@@ -292,6 +278,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError($"Не удалось отключить точку {number} от шины {bus}.", isDeviceLog: true);
+      SetPointConnection(number, bus, false);
       return false;
     }
 
@@ -343,6 +330,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError($"Не удалось подключить диапазон точек {firstPoint}-{lastPoint} к шине {bus}.", isDeviceLog: true);
+      for (int number = firstPoint; number <= lastPoint; number++)
+      {
+        SetPointConnection(number, bus, false);
+      }
+
       return false;
     }
 
@@ -394,6 +386,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError($"Не удалось отключить диапазон точек {firstPoint}-{lastPoint} от шины {bus}.", isDeviceLog: true);
+      for (int number = firstPoint; number <= lastPoint; number++)
+      {
+        SetPointConnection(number, bus, false);
+      }
+
       return false;
     }
 
@@ -413,11 +410,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint, IUserInteractionService? userMessageService = null)
     {
-      if (CheckPointConnected(nubmerPoint, bus, true))
-      {
-        return true;
-      }
-
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (bus == BusPoint.A)
@@ -449,6 +441,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
           IsConnectedPointBusB[nubmerPoint] = true;
         }
       }
+      else
+      {
+        SetPointConnection(nubmerPoint, BusPoint.AB, false);
+      }
+
       return result;
     }
 
@@ -516,27 +513,21 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       return success;
     }
 
-    /// <inheritdoc />
-    private bool CheckPointConnected(int number, BusPoint busPoint, bool connect)
+    private void SetPointConnection(int number, BusPoint busPoint, bool connected)
     {
-      if (busPoint == BusPoint.A)
+      if (busPoint == BusPoint.AB)
       {
-        IsConnectedPointBusA.TryGetValue(number, out bool connected);
-        if (connected == connect)
-        {
-          return true;
-        }
+        IsConnectedPointBusA[number] = connected;
+        IsConnectedPointBusB[number] = connected;
+      }
+      else if (busPoint == BusPoint.A)
+      {
+        IsConnectedPointBusA[number] = connected;
       }
       else
       {
-        IsConnectedPointBusB.TryGetValue(number, out bool connected);
-        if (connected == connect)
-        {
-          return true;
-        }
+        IsConnectedPointBusB[number] = connected;
       }
-
-      return false;
     }
 
     /// <inheritdoc />

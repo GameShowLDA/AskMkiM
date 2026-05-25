@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl
@@ -26,6 +27,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       _moduleRelayControl = moduleRelayControl;
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
+      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
 
@@ -48,12 +50,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <returns>Результат замыкания шины.</returns>
     public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      switchingBuses.TryGetValue(bus, out bool connected);
-      if (connected)
-      {
-        return true;
-      }
-
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
         LogError("Ошибка данных шины!", isDeviceLog: true);
@@ -88,6 +84,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
+      switchingBuses[bus] = false;
       return false;
     }
 
@@ -99,10 +96,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <returns>Результат замыкания шины.</returns>
     public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      switchingBuses.TryGetValue(bus, out bool connected);
-      if (!connected)
-        return true;
-
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
         LogError("Ошибка данных шины!", isDeviceLog: true);
@@ -137,6 +130,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
+      switchingBuses[bus] = false;
       return false;
     }
 
