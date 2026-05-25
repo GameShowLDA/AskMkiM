@@ -3,7 +3,6 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
@@ -15,16 +14,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
   /// </summary>
   public class ConnectorManager : IConnectorDeviceBusCommutation
   {
-
-    private enum DeviceType
-    {
-      Multimeter,
-      PINT,
-      BreakdownTester,
-      BreakdownTesterAndMultimeter
-    }
-
-    private ObservableDictionary<(DeviceType, SwitchingBusNew), bool> deviceBusStatus = new ObservableDictionary<(DeviceType, SwitchingBusNew), bool>();
+    private readonly DeviceBusConnectionStateStore connectionState = new DeviceBusConnectionStateStore();
     private const SwitchingBusNew BreakdownBus = SwitchingBusNew.AB1;
 
     /// <summary>
@@ -41,31 +31,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       _deviceBusCommutation = deviceBusCommutation;
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
       UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
-      InitializeDeviceBusStatus();
+      ConnectableManager_IsReset();
     }
 
     /// <inheritdoc />
     private void ConnectableManager_IsReset()
     {
-      InitializeDeviceBusStatus();
-    }
-
-    private void InitializeDeviceBusStatus()
-    {
-      deviceBusStatus.Clear();
-
-      foreach (DeviceType device in Enum.GetValues(typeof(DeviceType)))
-      {
-        foreach (SwitchingBusNew bus in Enum.GetValues(typeof(SwitchingBusNew)))
-        {
-          deviceBusStatus[(device, bus)] = false;
-        }
-      }
-    }
-
-    private bool IsConnected(DeviceType deviceType, SwitchingBusNew bus)
-    {
-      return deviceBusStatus.TryGetValue((deviceType, bus), out var isConnected) && isConnected;
+      connectionState.Reset();
     }
 
     #region Мультиметр.
@@ -73,22 +45,21 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      foreach (var kvp in deviceBusStatus.Where(x => x.Key.Item1 == DeviceType.Multimeter && x.Value))
+      foreach (var connected in connectionState.GetConnected(DeviceBusConnectionType.Multimeter))
       {
-        var oldBus = kvp.Key.Item2;
-        var disconnectResult = await DisconnectMultimeter(oldBus);
-        deviceBusStatus[(DeviceType.Multimeter, oldBus)] = false;
+        var disconnectResult = await DisconnectMultimeter(connected.Bus);
+        connectionState.Set(DeviceBusConnectionType.Multimeter, connected.Bus, false);
       }
 
       var result = await SetMultimeterState(true, bus);
 
       if (result)
       {
-        deviceBusStatus[(DeviceType.Multimeter, bus)] = true;
+        connectionState.Set(DeviceBusConnectionType.Multimeter, bus, true);
       }
       else
       {
-        deviceBusStatus[(DeviceType.Multimeter, bus)] = false;
+        connectionState.Set(DeviceBusConnectionType.Multimeter, bus, false);
       }
 
       return result;
@@ -98,7 +69,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
       var result = await SetMultimeterState(false, bus);
-      deviceBusStatus[(DeviceType.Multimeter, bus)] = false;
+      connectionState.Set(DeviceBusConnectionType.Multimeter, bus, false);
       return result;
     }
 
@@ -177,21 +148,20 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      foreach (var kvp in deviceBusStatus.Where(x => x.Key.Item1 == DeviceType.PINT && x.Value))
+      foreach (var connected in connectionState.GetConnected(DeviceBusConnectionType.PINT))
       {
-        var oldBus = kvp.Key.Item2;
-        var disconnectResult = await DisconnectPINT(oldBus);
-        deviceBusStatus[(DeviceType.PINT, oldBus)] = false;
+        var disconnectResult = await DisconnectPINT(connected.Bus);
+        connectionState.Set(DeviceBusConnectionType.PINT, connected.Bus, false);
       }
 
       var result = await SetPINTState(true, bus);
       if (result)
       {
-        deviceBusStatus[(DeviceType.PINT, bus)] = true;
+        connectionState.Set(DeviceBusConnectionType.PINT, bus, true);
       }
       else
       {
-        deviceBusStatus[(DeviceType.PINT, bus)] = false;
+        connectionState.Set(DeviceBusConnectionType.PINT, bus, false);
       }
 
       return result;
@@ -201,7 +171,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
       var result = await SetPINTState(false, bus);
-      deviceBusStatus[(DeviceType.PINT, bus)] = false;
+      connectionState.Set(DeviceBusConnectionType.PINT, bus, false);
       return result;
     }
 
@@ -242,11 +212,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       if (result)
       {
-        deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = true;
+        connectionState.Set(DeviceBusConnectionType.BreakdownTester, BreakdownBus, true);
       }
       else
       {
-        deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = false;
+        connectionState.Set(DeviceBusConnectionType.BreakdownTester, BreakdownBus, false);
       }
 
       return result;
@@ -257,7 +227,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       var result = await SetBreakdownTesterState(false);
 
-      deviceBusStatus[(DeviceType.BreakdownTester, BreakdownBus)] = false;
+      connectionState.Set(DeviceBusConnectionType.BreakdownTester, BreakdownBus, false);
       return result;
     }
 
@@ -341,7 +311,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = true;
+        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, true);
         return true;
       }
 
@@ -352,11 +322,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       if (result)
       {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = true;
+        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, true);
       }
       else
       {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
+        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
       }
 
       return result;
@@ -367,7 +337,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
+        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
         return true;
       }
 
@@ -376,27 +346,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       var expectingResult = command.ToString();
       var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
 
-      deviceBusStatus[(DeviceType.BreakdownTesterAndMultimeter, BreakdownBus)] = false;
+      connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
       return result;
     }
 
     public IReadOnlyList<DeviceConnectionInfo> GetConnectedDevices()
     {
-      return deviceBusStatus
-        .Where(x => x.Value)
-        .Select(x => new DeviceConnectionInfo(x.Key.Item2, DeviceTypeToText(x.Key.Item1)))
-        .OrderBy(x => x.bus)
-        .ThenBy(x => x.device)
-        .ToList();
+      return connectionState.GetConnectedDevices();
     }
-
-    private static string DeviceTypeToText(DeviceType type) => type switch
-    {
-      DeviceType.Multimeter => "Мультиметр",
-      DeviceType.PINT => "ПИНТ",
-      DeviceType.BreakdownTester => "Пробойная установка",
-      DeviceType.BreakdownTesterAndMultimeter => "Пробойная установка + мультиметр",
-      _ => type.ToString()
-    };
   }
 }
