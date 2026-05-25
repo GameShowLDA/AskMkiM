@@ -7,4 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ask.DataBase.Engine\Ask.DataBase.Engine.csproj" />
+  </ItemGroup>
+
 </Project>
