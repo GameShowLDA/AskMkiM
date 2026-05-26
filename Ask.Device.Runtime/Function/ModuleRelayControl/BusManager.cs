@@ -4,9 +4,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl
@@ -17,6 +17,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
   public class BusManager : IBusManager
   {
     private IRelaySwitchModule _moduleRelayControl { get; set; }
+    private readonly BusConnectionStateStore connectionState = new BusConnectionStateStore();
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="BusManager"/>.
@@ -26,18 +27,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       _moduleRelayControl = moduleRelayControl;
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
+      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
 
-    private readonly ObservableDictionary<SwitchingBus, bool> switchingBuses = new ObservableDictionary<SwitchingBus, bool>();
-
     private void ConnectableManager_IsReset()
     {
-      switchingBuses.Clear();
-      foreach (SwitchingBus item in System.Enum.GetValues(typeof(SwitchingBus)))
-      {
-        switchingBuses.Add(item, false);
-      }
+      connectionState.Reset();
     }
 
     /// <summary>
@@ -48,12 +44,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <returns>Результат замыкания шины.</returns>
     public async Task<bool> ConnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      switchingBuses.TryGetValue(bus, out bool connected);
-      if (connected)
-      {
-        return true;
-      }
-
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
         LogError("Ошибка данных шины!", isDeviceLog: true);
@@ -62,7 +52,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        switchingBuses[bus] = true;
+        connectionState.Set(bus, true);
         return true;
       }
 
@@ -79,7 +69,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
         if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
         {
-          switchingBuses[bus] = true;
+          connectionState.Set(bus, true);
           return true;
         }
 
@@ -88,6 +78,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
+      connectionState.Set(bus, false);
       return false;
     }
 
@@ -99,10 +90,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <returns>Результат замыкания шины.</returns>
     public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      switchingBuses.TryGetValue(bus, out bool connected);
-      if (!connected)
-        return true;
-
       if (!TryGetBusNumber(bus, out int numberBus) || !TryGetBusType(bus, out int typeBus))
       {
         LogError("Ошибка данных шины!", isDeviceLog: true);
@@ -111,7 +98,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        switchingBuses[bus] = false;
+        connectionState.Set(bus, false);
         return true;
       }
 
@@ -128,7 +115,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
         if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}.2")
         {
-          switchingBuses[bus] = false;
+          connectionState.Set(bus, false);
           return true;
         }
 
@@ -137,6 +124,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       LogError("Не удалось получить корректный ответ от устройства.", isDeviceLog: true);
+      connectionState.Set(bus, false);
       return false;
     }
 
@@ -190,10 +178,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
     public IReadOnlyList<BusConnectionInfo> GetConnectedBuses()
     {
-      return switchingBuses
-        .Where(kv => kv.Value)
-        .Select(kv => new BusConnectionInfo(kv.Key, true))
-        .ToList();
+      return connectionState.GetConnectedBuses();
     }
   }
 }

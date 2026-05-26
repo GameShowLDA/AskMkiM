@@ -42,6 +42,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       if (string.IsNullOrEmpty(result))
       {
+        IsReset?.Invoke();
         return (false, $"Нет ответа от устройства {_moduleRelayControl.Name}({_moduleRelayControl.Number})");
       }
 
@@ -67,10 +68,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
             errorMessage += $"Несовпадение по NumberDevice: ожидается {_moduleRelayControl.Number}, получено {baseResponse.NumberDevice}.";
           }
 
+          IsReset?.Invoke();
           return (false, errorMessage.Trim());
         }
       }
 
+      IsReset?.Invoke();
       return (false, result);
     }
 
@@ -79,6 +82,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        IsReset?.Invoke();
         return true;
       }
 
@@ -108,10 +112,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
             errorMessage += $"Несовпадение по NumberDevice: ожидается {_moduleRelayControl.Number}, получено {baseResponse.NumberDevice}.";
           }
 
+          IsReset?.Invoke();
           return false;
         }
       }
 
+      IsReset?.Invoke();
       return false;
     }
 

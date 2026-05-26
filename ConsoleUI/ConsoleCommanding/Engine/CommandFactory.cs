@@ -20,6 +20,7 @@ namespace ConsoleUI.ConsoleCommanding.Engine
       commands.Add(new EchoCommand());
       commands.Add(new ExitCommand());
       commands.Add(new LogsCommand());
+      commands.Add(new DeviceStatusCommand());
       commands.Add(new UnknownCommand());
       commands.Add(new SplitLogsCommand());
 

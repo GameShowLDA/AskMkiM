@@ -12,6 +12,8 @@ namespace Ask.Device.Runtime.Ethernet.Udp.Broadcast
   /// </summary>
   public static class UdpBroadcastCommandSender
   {
+    public static event Action? ResetAllDevicesSent;
+
     /// <summary>
     /// Базовый порт широковещательной отправки.
     /// </summary>
@@ -55,14 +57,17 @@ namespace Ask.Device.Runtime.Ethernet.Udp.Broadcast
     /// </summary>
     public static async Task ResetAllDevicesAsync()
     {
-      await SendBroadcastCommandAsync(new DeviceCommand(2, 0, 0, 0));
+      if (await SendBroadcastCommandAsync(new DeviceCommand(2, 0, 0, 0)))
+      {
+        ResetAllDevicesSent?.Invoke();
+      }
     }
 
     /// <summary>
     /// Отправляет команду широковещательно.
     /// </summary>
     /// <param name="command">Команда для отправки.</param>
-    private static async Task SendBroadcastCommandAsync(DeviceCommand command)
+    private static async Task<bool> SendBroadcastCommandAsync(DeviceCommand command)
     {
       try
       {
@@ -71,18 +76,22 @@ namespace Ask.Device.Runtime.Ethernet.Udp.Broadcast
         await Socket.SendToAsync(new ArraySegment<byte>(sendBuffer), SocketFlags.None, endPoint);
 
         LogInformation("Команда отправлена широковещательно.", isDeviceLog: true);
+        return true;
       }
       catch (SocketException ex)
       {
         LogException("Ошибка UDP-соединения", ex, isDeviceLog: true);
+        return false;
       }
       catch (TimeoutException ex)
       {
         LogException("Превышено время ожидания при широковещательной отправке", ex, isDeviceLog: true);
+        return false;
       }
       catch (ArgumentException ex)
       {
         LogException("Переданы неверные аргументы для широковещательной отправки", ex, isDeviceLog: true);
+        return false;
       }
       catch (Exception ex)
       {
