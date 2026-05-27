@@ -11,6 +11,11 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
   /// </summary>
   public class GroupModel
   {
+    /// <summary>
+    /// Пользовательское имя цепи, указанное в ССИРТ перед символом "=".
+    /// </summary>
+    public string? ChainName { get; set; }
+
     public List<ChainModel> ChainModels;
 
     public GroupModel(List<ChainModel> chainModels)

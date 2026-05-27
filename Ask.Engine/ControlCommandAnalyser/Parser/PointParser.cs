@@ -178,6 +178,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     private static List<GroupModel> ParseChainParts(string segment, BaseCommandModel model, RmCommandModel rm, List<ErrorItem> errors)
     {
       var result = new List<GroupModel>();
+      var chainName = ExtractChainName(ref segment);
 
       var parts = SplitParts(segment);
 
@@ -191,9 +192,31 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             errors);
       }
 
+      ApplyChainName(result, chainName);
       AssignPointTypes(result, rm);
 
       return result;
+    }
+
+    private static string? ExtractChainName(ref string segment)
+    {
+      var equalsIndex = segment.IndexOf('=');
+      if (equalsIndex < 0)
+        return null;
+
+      var chainName = CleanToken(segment.Substring(0, equalsIndex));
+      segment = segment.Substring(equalsIndex + 1);
+
+      return string.IsNullOrEmpty(chainName) ? null : chainName;
+    }
+
+    private static void ApplyChainName(List<GroupModel> groups, string? chainName)
+    {
+      if (string.IsNullOrWhiteSpace(chainName))
+        return;
+
+      foreach (var group in groups)
+        group.ChainName = chainName;
     }
 
     private static void ProcessPartWithCrossRanges(string part, BaseCommandModel model, RmCommandModel rm, List<GroupModel> result, List<ErrorItem> errors)
