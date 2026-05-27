@@ -47,6 +47,8 @@ namespace Ask.UI.Features.Archive.Services
 
         var manager = new CommandTranslationManager();
         var modelList = models.ToList();
+        manager.SetSourseLines(modelList);
+
         var sourceLines = new List<List<string>>(modelList.Count);
 
         foreach (var model in modelList)

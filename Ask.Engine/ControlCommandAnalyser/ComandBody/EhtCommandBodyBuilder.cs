@@ -33,7 +33,11 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
       }
       if (!string.IsNullOrEmpty(eht.CabelResistanceSource))
       {
-        commandBody.Append($", {eht.CabelResistance}");
+        commandBody.Append($", {eht.CabelResistanceSource}");
+      }
+      if (!string.IsNullOrEmpty(eht.AmperageSource))
+      {
+        commandBody.Append($", {eht.AmperageSource}");
       }
 
       return newSourseLines.Append(commandBody.ToString());

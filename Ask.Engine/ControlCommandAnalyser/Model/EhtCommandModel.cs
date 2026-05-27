@@ -80,6 +80,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     public string? UnparsedParameters { get; set; }
 
     /// <summary>
+    /// Строка со значением силы тока.
+    /// </summary>
+    public string? AmperageSource { get; set; }
+
+    /// <summary>
+    /// Значение силы тока.
+    /// </summary>
+    public double? Amperage { get; set; }
+
+    /// <summary>
+    /// Единицы измерения силы тока.
+    /// </summary>
+    public string? AmperageUnit { get; set; }
+
+    /// <summary>
     /// Значение времени (например, "1c").
     /// </summary>
     public string? TimeSource { get; set; }
