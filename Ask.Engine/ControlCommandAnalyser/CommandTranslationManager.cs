@@ -11,6 +11,7 @@ using Ask.Engine.ControlCommandAnalyser.ComandBody;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
+using Ask.Engine.ControlCommandAnalyser.Validation;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -129,6 +130,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         return CompleteCriticalTranslation(models, progress);
 
       CheckVshModel(models);
+      CkCommandValidator.ValidateVshCompatibility(models);
 
       if (HasCriticalStructuralErrors(models))
         return CompleteCriticalTranslation(models, progress);

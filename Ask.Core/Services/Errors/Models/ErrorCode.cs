@@ -480,6 +480,14 @@ namespace Ask.Core.Services.Errors.Models
 
     #endregion
 
+    #region Режим СК
+
+    /// <summary> Команда СК запрещена при двухшинной структуре коммутации ВШ 2Ш. </summary>
+    [ErrorCodeTag("CK001")]
+    Ck_ForbiddenForTwoBusStructure,
+
+    #endregion
+
     #region Режим ВШ
 
     /// <summary> В команде ВШ указана неверная структура стойки коммутации. </summary>
