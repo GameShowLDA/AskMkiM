@@ -1,16 +1,20 @@
-﻿using Ask.Core.Shared.Interfaces.ParserInterfaces;
+﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht
+namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
 {
   /// <summary>
-  /// Процессор параметра силы тока для команды ЭХТ.
+  /// Процессор параметра силы тока.
   /// Извлекает значение тока из строки и передаёт остаток дальше по конвейеру.
   /// </summary>
-  internal class EhtAmperageProcessor : IParameterProcessor<EhtCommandModel>
+  internal class AmperageProcessor<TModel> : IParameterProcessor<TModel>
+    where TModel : IHasAmperage, IError
   {
     /// <summary>
     /// Выполняет разбор параметра силы тока из строки команды.
@@ -19,7 +23,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht
     /// <param name="remainder">Оставшаяся часть строки команды.</param>
     /// <param name="ctx">Контекст парсинга параметров.</param>
     /// <returns>Строка без обработанного параметра.</returns>
-    public string Process(EhtCommandModel model, string remainder, ParameterContext ctx)
+    public string Process(TModel model, string remainder, ParameterContext ctx)
     {
       var (amperageRaw, unitRaw, rest) =
           CommonParameterParser.AmperageParser.ParseAmperage(remainder);
@@ -28,11 +32,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht
       {
         double value = CommonParameterParser.ParseToDouble(amperageRaw);
 
-        model.Amperage = value;
-        model.AmperageUnit = unitRaw;
-        model.AmperageSource = $"{amperageRaw} {unitRaw}";
+        if (model.HasAmperage)
+        {
+          model.Amperage = value;
+          model.AmperageUnit = unitRaw;
+          model.AmperageSource = $"{amperageRaw} {unitRaw}";
 
-        LogDebug($"Распознана сила тока: {model.AmperageSource}");
+          LogDebug($"Распознана сила тока: {model.AmperageSource}");
+        }
+        else
+        {
+          if (model is BaseCommandModel baseCommand)
+          {
+            baseCommand.Warnings.Add(GeneralWarnings.IgnoreAmperage(baseCommand.StartLineNumber, $"{baseCommand.CommandNumber} {baseCommand.Mnemonic}"));
+          }
+          LogDebug($"Распознана сила тока: {amperageRaw}{unitRaw}");
+        }
       }
 
       return rest;

@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ne;
 using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.ProcessorFactory;
 
@@ -20,7 +22,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
         {
             Keys<NeCommandModel>(),
             new NeVoltageProcessor(),
-            new NeAmperageProcessor(),
+            new AmperageProcessor<NeCommandModel>(),
         });
 
     /// <summary>

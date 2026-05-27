@@ -14,7 +14,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [AllowedKeys(Д)]
-  public class EhtCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel
+  public class EhtCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel, IHasAmperage
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.
@@ -93,6 +93,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Единицы измерения силы тока.
     /// </summary>
     public string? AmperageUnit { get; set; }
+    public bool HasAmperage { get; set; } = true;
 
     /// <summary>
     /// Значение времени (например, "1c").
@@ -104,5 +105,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Ошибки связанные с замыканием точек.
     /// </summary>
     public override IPointError PointErrors => new PrErrors();
+
   }
 }

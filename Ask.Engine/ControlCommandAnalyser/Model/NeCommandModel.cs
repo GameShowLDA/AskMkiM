@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -16,7 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     //Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б,
     Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Н)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
-  public class NeCommandModel : BaseCommandModel, IError, IHasScheme
+  public class NeCommandModel : BaseCommandModel, IError, IHasScheme, IHasAmperage
   {
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
 
@@ -78,5 +79,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Сбор данных в сообщение.
     /// </summary>
     public override IDislpayInfo BuildDislpayInfo => new NeMessageBuild();
+
+    public double? Amperage { get; set; }
+    public string? AmperageSource { get; set; }
+    public bool HasAmperage { get; set; } = false;
+    public string? AmperageUnit { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
 }
