@@ -15,6 +15,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
 
@@ -217,9 +218,10 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <summary>
     /// Завершает измерение, размыкает реле и отключает прибор.
     /// </summary>
-    public virtual async Task FinalizeMeasurement(IUserInteractionService messageService)
+    public virtual async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
     {
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+      var devices = GetDevices(metrologicalModeRole);
+      await RelayModuleHelper.ResetDevices(devices, messageService);
     }
 
     /// <summary>
@@ -263,6 +265,31 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       }
 
       throw MetrologyValidationErrors.DeviceByRoleNotFound(role, index, typeof(T));
+    }
+
+    private List<IDevice> GetDevices(MeasurementTypeCommand role)
+    {
+      List<IDevice> devices = new List<IDevice>();
+      var mkr = GetRelayModules(role);
+      var uksh = GetBusSwitcher(role);
+      var mint = GetMintModule(role);
+
+      if (mkr != null)
+      {
+        devices.AddRange(mkr);
+      }
+
+      if (uksh != null)
+      {
+        devices.Add(uksh);
+      }
+
+      if (mint != null)
+      {
+        devices.Add(mint);
+      }
+
+      return devices;
     }
 
     public virtual async Task PrintResult(IMessageOutputService messageService, MeasurementTypeCommand command)

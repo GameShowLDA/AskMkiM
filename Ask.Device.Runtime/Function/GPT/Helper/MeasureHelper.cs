@@ -119,7 +119,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
         answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-        if (!answerDevice.Contains("TEST"))
+        if (!string.IsNullOrEmpty(answerDevice) && !answerDevice.Contains("TEST"))
           break;
       }
 

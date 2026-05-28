@@ -14,7 +14,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// <summary>
     /// Список собранных устройств.
     /// </summary>
-    public List<object> Devices { get; } = [];
+    public List<IDevice> Devices { get; } = [];
 
     /// <summary>
     /// Выполняет сбор всех необходимых устройств по диапазону точек.

@@ -1,9 +1,11 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
@@ -32,7 +34,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// <summary>
     /// Список задействованных в тесте устройств.
     /// </summary>
-    protected List<object> Devices => _deviceCollector.Devices;
+    protected List<IDevice> Devices => _deviceCollector.Devices;
 
     /// <summary>
     /// Количество разрядов в двоичном представлении номера точки.
@@ -130,7 +132,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+      await RelayModuleHelper.ResetDevices(Devices, messageService);
     }
 
     /// <summary>
