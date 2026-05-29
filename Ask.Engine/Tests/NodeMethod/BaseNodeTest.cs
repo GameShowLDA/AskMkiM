@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Base;
@@ -32,7 +33,7 @@ namespace Ask.Engine.Tests.NodeMethod
     /// <summary>
     /// Список устройств, задействованных в тесте.
     /// </summary>
-    protected List<object> Devices { get; } = new();
+    protected List<IDevice> Devices { get; } = new();
 
     /// <summary>
     /// Заданная шина.
@@ -190,7 +191,7 @@ namespace Ask.Engine.Tests.NodeMethod
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+      await RelayModuleHelper.ResetDevices(Devices, messageService);
     }
 
     /// <summary>

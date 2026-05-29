@@ -47,7 +47,7 @@ namespace Ask.Engine.Tests.Metrology
         true,
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement(userInteractionService);
+          await testMeasurement.FinalizeMeasurement(metrologicalModeRole, userInteractionService);
         });
     }
 
@@ -123,11 +123,11 @@ namespace Ask.Engine.Tests.Metrology
 
         return true;
       }
-      public override async Task FinalizeMeasurement(IUserInteractionService messageService)
+      public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
-        await base.FinalizeMeasurement(messageService);
         await PrintResult(messageService, MeasurementTypeCommand.PI_ACW);
         await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} В"));
+        await base.FinalizeMeasurement(metrologicalModeRole, messageService);
 
         Measurements.Clear();
       }

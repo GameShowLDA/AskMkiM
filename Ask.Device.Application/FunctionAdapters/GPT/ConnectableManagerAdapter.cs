@@ -66,7 +66,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение пробойной установки", result ? "Успешно" : "Ошибка отключения", result, 1, messageService);
       }
 
-      Task.Delay(1000).GetAwaiter().GetResult();
+      await Task.Delay(1000);
       if (!result)
       {
         throw ConnectionExceptionAdapter.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
