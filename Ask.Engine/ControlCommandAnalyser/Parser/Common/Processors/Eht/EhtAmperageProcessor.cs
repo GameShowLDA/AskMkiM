@@ -28,11 +28,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht
       {
         double value = CommonParameterParser.ParseToDouble(amperageRaw);
 
-        //model.Amperage = value;
-        //model.AmperageSource = $"{amperageRaw}{unitRaw}";
+        model.Amperage = value;
+        model.AmperageUnit = unitRaw;
+        model.AmperageSource = $"{amperageRaw} {unitRaw}";
 
-        //LogDebug($"Распознана сила тока: {model.AmperageSource}");
-        LogDebug($"Распознана сила тока: {amperageRaw}{unitRaw}");
+        LogDebug($"Распознана сила тока: {model.AmperageSource}");
       }
 
       return rest;

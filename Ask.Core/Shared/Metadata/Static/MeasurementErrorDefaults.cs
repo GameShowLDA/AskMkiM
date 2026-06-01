@@ -89,7 +89,8 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         Ranges = new List<MeasurementErrorRangeEntity>
         {
-          new MeasurementErrorRangeEntity { MinValue = 0.01,  MaxValue = 100, NumericError = 0.05,  PercentageError = 1 },
+          new MeasurementErrorRangeEntity { MinValue = 0.1, MaxValue = 1, NumericError = 0.05 },
+          new MeasurementErrorRangeEntity { MinValue = 1, MaxValue = 100, PercentageError = 5 },
         }
       },
     };
@@ -137,6 +138,10 @@ namespace Ask.Core.Shared.Metadata.Static
 
       if (range == null)
       {
+        var minConfiguredValue = config.Ranges.Min(r => r.MinValue);
+        if (measuredValue < minConfiguredValue)
+          throw new InvalidOperationException($"❌ Не удалось определить диапазон погрешности для команды {type}");
+
         range = config.Ranges
             .OrderByDescending(r => r.MaxValue ?? double.MaxValue)
             .FirstOrDefault();

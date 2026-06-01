@@ -14,7 +14,7 @@ public class SchemeManagerDeletionTests : IDisposable
     CommandsModel.CommandModels.Add(CreateRmCommand());
   }
 
-  [Fact(DisplayName = "SchemeManager removes a chain containing a point from SSIRT deletion list")]
+  [Fact(DisplayName = "Менеджер схем: цепь с точкой из списка исключения ССИРТ удаляется целиком")]
   public void GetScheme_WithDeletionList_RemovesWholeContainingGroup()
   {
     var model = new TestCommandModel
@@ -32,7 +32,7 @@ public class SchemeManagerDeletionTests : IDisposable
     Assert.Equal(new[] { "1.1.1", "1.1.2", "1.1.3", "1.1.6" }, GetPointAddresses(scheme));
   }
 
-  [Fact(DisplayName = "SchemeManager applies SSIRT deletion after key C adds RM points")]
+  [Fact(DisplayName = "Менеджер схем: исключение ССИРТ применяется после добавления точек РМ по ключу С")]
   public void GetScheme_WithKeyCAndDeletionList_RemovesPointsAddedByKeyC()
   {
     var model = new SiCommandModel

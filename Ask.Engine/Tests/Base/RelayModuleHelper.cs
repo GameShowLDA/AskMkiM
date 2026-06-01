@@ -336,6 +336,14 @@ namespace Ask.Engine.Tests.Base
       await uksh.ConnectorManager.DisconnectAllBuses(ui);
     }
 
+    public static async Task ResetDevices(List<IDevice> devices, IUserInteractionService? messageService = null)
+    {
+      foreach (var device in devices)
+      {
+        await device.ConnectableManager.ResetAsync();
+      }
+    }
+
     #endregion
   }
 }

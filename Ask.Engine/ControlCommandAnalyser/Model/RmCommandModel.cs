@@ -17,6 +17,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// </summary>
     public Dictionary<string, string> PointsMap { get; set; } = new();
 
+    public Dictionary<string, string> SynonymMap { get; set; } = new();
+
+    public List<RmPartModel> Parts { get; set; } = new();
+
+    public List<RmPairModel> Pairs { get; set; } = new();
+
     public IEnumerable<string> ToExpandedLines()
     {
       foreach (var kv in PointsMap)
@@ -25,7 +31,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 
     public List<string> GetAllDestinationPoints()
     {
-      return PointsMap.Values.ToList();
+      return PointsMap.Values.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     /// <summary>
@@ -70,8 +76,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
       if (PointsMap.TryGetValue(pointKey, out address))
         return true;
 
+      if (SynonymMap.TryGetValue(pointKey, out address))
+        return true;
+
       string normalizedKey = NormalizePointKey(pointKey);
       foreach (var kv in PointsMap)
+      {
+        if (string.Equals(NormalizePointKey(kv.Key), normalizedKey, StringComparison.OrdinalIgnoreCase))
+        {
+          address = kv.Value;
+          return true;
+        }
+      }
+
+      foreach (var kv in SynonymMap)
       {
         if (string.Equals(NormalizePointKey(kv.Key), normalizedKey, StringComparison.OrdinalIgnoreCase))
         {
@@ -119,5 +137,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
       'х' => 'x',
       _ => ch
     };
+  }
+
+  public class RmPartModel
+  {
+    public int? PartNumber { get; set; }
+
+    public string SourceText { get; set; } = string.Empty;
+
+    public List<RmPairModel> Pairs { get; set; } = new();
   }
 }

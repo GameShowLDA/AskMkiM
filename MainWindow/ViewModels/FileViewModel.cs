@@ -87,6 +87,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void ConvertApkToApkw() => _fileService.ConvertApkToApkw();
 
+    /// <summary>Команда конвертации APKW в APK.</summary>
+    [RelayCommand]
+    private void ConvertApkwToApk() => _fileService.ConvertApkwToApk();
+
     /// <summary>Команда выполнения АСК-МКИ через старую программу mkiw.exe.</summary>
     [RelayCommand]
     private async Task RunAskMki() => await _fileService.RunAskMkiAsync();

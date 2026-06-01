@@ -82,10 +82,6 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
         }
       }, userMessageService, deviceTask: true);
 
-      if (!success)
-      {
-        throw new DeviceException($"Ошибка включения питания {_device.Name}({_device.NumberChassis}.{_device.Number})");
-      }
     }
 
     /// <inheritdoc />

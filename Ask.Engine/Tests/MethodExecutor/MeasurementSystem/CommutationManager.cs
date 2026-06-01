@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -11,13 +12,13 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
   /// </summary>
   public class CommutationManager
   {
-    private readonly List<object> _devices;
+    private readonly List<IDevice> _devices;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="CommutationManager"/>.
     /// </summary>
     /// <param name="devices">Список доступных устройств, участвующих в коммутации.</param>
-    public CommutationManager(List<object> devices)
+    public CommutationManager(List<IDevice> devices)
     {
       _devices = devices ?? throw new ArgumentNullException(nameof(devices));
     }

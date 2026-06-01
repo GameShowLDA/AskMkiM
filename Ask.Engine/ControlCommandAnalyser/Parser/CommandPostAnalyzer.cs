@@ -40,6 +40,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       CheckStartAndEnd(models);
       CheckUniqueMnemonics(models);
+
+      if (HasCriticalStructuralErrors(models))
+        return;
+
       CheckUpLabels(models);
 
       var rmModel = models.OfType<RmCommandModel>().FirstOrDefault();
@@ -83,6 +87,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           rmModel.Errors.Add(GeneralErrors.DuplicateDestinationPoint(dest, rmModel.StartLineNumber, $"{rmModel.CommandNumber} {rmModel.Mnemonic}"));
         }
       }
+    }
+
+    private static bool HasCriticalStructuralErrors(IEnumerable<BaseCommandModel> models)
+    {
+      return models.Any(model =>
+        model.Errors?.Any(CriticalTranslationErrorClassifier.IsCriticalStructural) == true);
     }
 
     /// <summary>

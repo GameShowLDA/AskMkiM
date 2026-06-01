@@ -150,7 +150,7 @@ namespace Ask.UI.Features.Archive.ViewModels
       string? sourceFilePath = null,
       bool isReviewEntry = false,
       int errorCount = 0,
-      FileType fileType = FileType.OPKW)
+      FileType fileType = FileType.None)
     {
       ArchivePath = archivePath;
       EntryName = entryName;

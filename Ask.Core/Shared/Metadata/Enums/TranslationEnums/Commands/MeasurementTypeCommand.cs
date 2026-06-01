@@ -62,7 +62,7 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// </summary>
     PI,
 
-    [CommandDisplayInfo("Сопротивления", "ЭТ", UnitEnums.QuantitySymbol.R, "Ом", 0, 100)]
+    [CommandDisplayInfo("Сопротивления", "ЭТ", UnitEnums.QuantitySymbol.R, "Ом", 0.01, 100)]
     /// <summary>
     /// Тип команды EHT постоянным током.
     /// </summary>

@@ -158,7 +158,7 @@ namespace UI.Controls.Runner
           var dockItemPk = dockManader.DockItems.FirstOrDefault(di => di.TabText != "Состояние оборудования");
           if (dockItemPk != null && dockItemPk.Content is TextEditorUI textEditor)
           {
-            textEditor.GoToLine(obj.FormattedLineNumber);
+            textEditor.GoToIssue(obj, useFormattedLineNumber: true);
           }
         }
       }

@@ -5,7 +5,7 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser;
 
 public class CommandMnemonicCaseTests : IDisposable
 {
-  [Fact(DisplayName = "Parser recognizes lowercase command mnemonics and normalizes them")]
+  [Fact(DisplayName = "Парсер: строчные мнемоники команд распознаются и нормализуются")]
   public void ParseAll_WithLowercaseCyrillicMnemonics_NormalizesToUppercase()
   {
     var manager = new CommandTranslationManager();

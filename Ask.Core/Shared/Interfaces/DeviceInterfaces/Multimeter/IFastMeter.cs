@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
@@ -45,5 +46,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     /// Максимальное сопротивление (Ом), при котором считается срабатывание прозвонки.
     /// </summary>
     int MaxContinuityResistance { get; set; }
+
+    ISelfTestCheckerMultimeter SelfTestManager { get; set; }
   }
 }

@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Services;
@@ -152,7 +153,7 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         textEditor.Text = value;
 
-        if (FileType == FileType.OPKW)
+        if (FileTypeResolver.SupportsOpkFolding(FileType))
         {
           InitializeFolding();
         }
@@ -388,6 +389,49 @@ namespace Ask.UI.Controls.TextEditorControl
       GoToLineCore(lineNumber, selectLine: false);
     }
 
+    public void GoToIssue(IDisplayIssue issue, bool useFormattedLineNumber = false)
+    {
+      var lineNumber = useFormattedLineNumber && issue.FormattedLineNumber > 0
+        ? issue.FormattedLineNumber
+        : issue.SourceLineNumber;
+
+      if (textEditor.Document == null || lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
+        return;
+
+      var line = textEditor.Document.GetLineByNumber(lineNumber);
+      var lineText = textEditor.Document.GetText(line.Offset, line.Length);
+
+      textEditor.ScrollToLine(lineNumber);
+      ApplyIssueSelectionBrush(issue);
+      if (IssueSelectionHintResolver.TryResolve(issue, lineText, out var hint))
+        textEditor.Select(line.Offset + hint.StartIndex, hint.Length);
+      else
+        textEditor.Select(line.Offset, line.Length);
+
+      textEditor.Focus();
+    }
+
+    private void ApplyIssueSelectionBrush(IDisplayIssue issue)
+    {
+      var backgroundKey = issue.IsWarning ? "ErrorListWarningIconBrush" : "ErrorListErrorIconBrush";
+      var foregroundKey = issue.IsWarning ? "ErrorListWarningIconForegroundBrush" : "ErrorListErrorIconForegroundBrush";
+
+      if (TryFindResource(backgroundKey) is Brush background)
+        textEditor.TextArea.SelectionBrush = background;
+
+      if (TryFindResource(foregroundKey) is Brush foreground)
+        textEditor.TextArea.SelectionForeground = foreground;
+
+      textEditor.TextArea.SelectionBorder = null;
+    }
+
+    private void ResetIssueSelectionBrush()
+    {
+      textEditor.TextArea.ClearValue(TextArea.SelectionBrushProperty);
+      textEditor.TextArea.ClearValue(TextArea.SelectionForegroundProperty);
+      textEditor.TextArea.SelectionBorder = null;
+    }
+
     private void GoToLineCore(int lineNumber, bool selectLine)
     {
       if (textEditor.Document == null || lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
@@ -509,13 +553,7 @@ namespace Ask.UI.Controls.TextEditorControl
         return;
       }
 
-      string? xshdFile = FileType switch
-      {
-        FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
-        FileType.PK or FileType.PKW => "MKI_PK.xshd",
-        FileType.Protocol => "MKI_PROTOCOL.xshd",
-        _ => null
-      };
+      string? xshdFile = FileTypeResolver.GetHighlightingResourceName(FileType);
 
       if (string.IsNullOrWhiteSpace(xshdFile))
       {
@@ -602,6 +640,7 @@ namespace Ask.UI.Controls.TextEditorControl
       EnsureLineNumbersForeground();
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
+      textEditor.PreviewMouseDown += (_, _) => ResetIssueSelectionBrush();
 
       if (_executionMargin == null)
       {

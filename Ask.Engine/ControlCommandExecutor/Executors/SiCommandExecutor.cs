@@ -70,7 +70,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
       pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
       nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-      firstValue = nodeFullContext.LowerLimit;
+      firstValue = command.Resistance.Value;
 
       DisconnectionCheckRequest disconnectionCheckRequest = new DisconnectionCheckRequest()
       {
