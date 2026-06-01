@@ -27,6 +27,18 @@
         new($"Ошибка отключения ППУ на {name}({chassis}.{number})");
 
     /// <summary>
+    /// Исключение при ошибке включения делителя.
+    /// </summary>
+    public static DeviceException EnableDividerFailed(string name, int chassis, int number) =>
+        new($"Ошибка включения делителя ППУ на {name}({chassis}.{number})");
+
+    /// <summary>
+    /// Исключение при ошибке отключения делителя.
+    /// </summary>
+    public static DeviceException DisableDividerFailed(string name, int chassis, int number) =>
+        new($"Ошибка отключения делителя ППУ на {name}({chassis}.{number})");
+
+    /// <summary>
     /// Исключение при ошибке подключения устройства.
     /// </summary>
     public static DeviceException ConnectMultiMeterFailed(string name, int chassis, int number) =>
