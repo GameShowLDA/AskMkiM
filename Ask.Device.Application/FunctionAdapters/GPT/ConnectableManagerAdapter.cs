@@ -38,7 +38,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
         if (!succes.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(succes.Answer) ? "Успешно" : succes.Answer, succes.Connect, 1, messageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", succes.Connect, 1, messageService);
         }
 
         return succes;
@@ -82,7 +82,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
       if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(answer) ? "ОК" : answer, result, 1, messageService);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация устройства", string.IsNullOrWhiteSpace(answer) ? "ОК" : answer, result, 1, messageService);
       }
 
       if (!result)

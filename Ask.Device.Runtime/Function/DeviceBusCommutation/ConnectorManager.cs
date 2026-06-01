@@ -255,6 +255,41 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
     #endregion
 
+    #region Делитель.
+
+
+    public async Task<bool> EnableDivider(IUserInteractionService? userMessageService = null)
+    {
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      var command = new DeviceCommand(9, 2, 0, 1);
+      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
+
+      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+    }
+
+    public async Task<bool> DisableDivider(IUserInteractionService? userMessageService = null)
+    {
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      var command = new DeviceCommand(9, 2, 0, 2);
+      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
+
+      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+    }
+
+    #endregion
+
     #region Шины.
 
     /// <inheritdoc />
@@ -357,5 +392,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       return connectionState.GetConnectedDevices();
     }
+
   }
 }

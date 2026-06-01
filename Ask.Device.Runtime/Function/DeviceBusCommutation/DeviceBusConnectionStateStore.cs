@@ -8,7 +8,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     Multimeter,
     PINT,
     BreakdownTester,
-    BreakdownTesterAndMultimeter
+    BreakdownTesterAndMultimeter,
   }
 
   internal sealed class DeviceBusConnectionStateStore
