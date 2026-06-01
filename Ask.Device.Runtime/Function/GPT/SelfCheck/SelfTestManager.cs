@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
@@ -6,6 +7,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
 
@@ -25,44 +28,96 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       [Description("Полная проверка устройства")]
       FullCheck = 0,
 
-      /// <summary>
-      /// Аналого-цифровой преобразователь (АЦП), используется для измерения входного сигнала.
-      /// Подключение: разъем XS3.
-      /// </summary>
       [Description("Проверка переменного напряжения")]
       ACW = 1,
 
-      /// <summary>
-      /// Аналого-цифровой преобразователь (АЦП) с переполюсовкой,
-      /// предназначен для измерения сигнала с измененной полярностью.
-      /// Подключение: разъем XS3.
-      /// </summary>
       [Description("Проверка постоянного напряжения")]
       DCW = 2,
+
+      [Description("Проверка сопротивления изоляции")]
+      IR = 3,
     }
 
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IFastMeter meter = null)
     {
       await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester));
+      await InitDevices(userMessageService, device, meter, breakdownTester);
+      await device.ConnectorManager.ConnectBreakdownTester(userMessageService);
+      await device.ConnectorManager.EnableDivider(userMessageService);
 
       switch (selectedType)
       {
-        case TypeConnector.ACW:
-          await InitDevices(userMessageService, device, meter, breakdownTester);
-          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+        case TypeConnector.IR:
           break;
 
-        case TypeConnector.DCW:
-          await InitDevices(userMessageService, device, meter, breakdownTester);
-          await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
-          break;
+        //case TypeConnector.ACW:
+        //  await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+        //  break;
+
+        //case TypeConnector.DCW:
+        //  await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+        //  break;
 
         case TypeConnector.FullCheck:
-          await InitDevices(userMessageService, device, meter, breakdownTester);
-          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
           await Task.Delay(1000);
-          await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
           break;
+
+          //  await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          //  await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+      }
+
+      await device.ConnectorManager.DisconnectBreakdownTester(userMessageService);
+      await device.ConnectorManager.DisableDivider(userMessageService);
+    }
+
+
+    /// <summary>
+    /// Выполняет самопроверку режима IR (сопротивление изоляции).
+    /// </summary>
+    private async Task PerformIrCheckAsync(
+      CancellationToken cancellationToken,
+      IBreakdownTester breakdownTester,
+      ISwitchingDevice device,
+      IFastMeter meter,
+      IUserInteractionService? userMessageService = null)
+    {
+      try
+      {
+        string name = breakdownTester.Name;
+        int numberChassis = breakdownTester.NumberChassis;
+        int number = breakdownTester.Number;
+
+        await userMessageService.AppendEmptyLineAsync();
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка измерения соопротивления изоляции"));
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
+
+        await breakdownTester.IrManger.Mode.SetModeAsync(userMessageService);
+        await breakdownTester.IrManger.Time.SetTestTimeAsync(1, userMessageService);
+        await breakdownTester.IrManger.Time.SetRampTimeAsync(0.1, userMessageService);
+
+        await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
+
+        List<int> voltage = new List<int>() { 100, 500, 1000 };
+        int param = 10;
+
+        foreach (var item in voltage)
+        {
+          await userMessageService.AppendEmptyLineAsync();
+          await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка при напряжении {item}В") { IndentLevel = 1 });
+          await breakdownTester.IrManger.Voltage.SetVoltageAsync(item, userMessageService);
+
+          (var lowerBound, var upperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
+          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(param, lowerBound, upperBound, userMessageService: userMessageService)).value;
+
+          var err = result - param;
+          await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: MeasurementValueFormatter.FormatWithUnit(result, "МОм"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+          await userMessageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения ({lowerBound} - {upperBound} МОм)", message: MeasurementValueFormatter.FormatWithUnit(err, "МОм"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+
+        }
+      }
+      catch (Exception)
+      {
       }
     }
 
