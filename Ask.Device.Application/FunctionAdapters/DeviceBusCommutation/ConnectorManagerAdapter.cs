@@ -65,7 +65,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.EnableDivider();
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Включение делителя ППУ", succes, 1, userMessageService);
         }
@@ -87,7 +87,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.DisableDivider();
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение делителя ППУ", succes, 1, userMessageService);
         }
