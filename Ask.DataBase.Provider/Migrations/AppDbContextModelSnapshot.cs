@@ -134,7 +134,10 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
 
-                    b.Property<double>("PpuDividerCoefficientPercent")
+                    b.Property<double>("AcwPpuDividerCoefficientPercent")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("DcwPpuDividerCoefficientPercent")
                         .HasColumnType("REAL");
 
                     b.Property<int>("TypeMode")

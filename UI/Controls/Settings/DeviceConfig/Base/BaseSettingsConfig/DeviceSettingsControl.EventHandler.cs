@@ -113,17 +113,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
     private void ShowFastMeterAdditionalSettings()
     {
-      _ppuDividerCoefficientPercentTextBox ??= new TextBox();
-      _ppuDividerCoefficientPercentTextBox.Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle");
-      _ppuDividerCoefficientPercentTextBox.PreviewTextInput -= ResistanceDevice_PreviewTextInput;
-      _ppuDividerCoefficientPercentTextBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
-      _ppuDividerCoefficientPercentTextBox.TextChanged -= ResistanceDevice_TextChanged;
-      _ppuDividerCoefficientPercentTextBox.TextChanged += ResistanceDevice_TextChanged;
-
-      if (string.IsNullOrWhiteSpace(_ppuDividerCoefficientPercentTextBox.Text))
-      {
-        _ppuDividerCoefficientPercentTextBox.Text = "100";
-      }
+      _acwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_acwPpuDividerCoefficientPercentTextBox);
+      _dcwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_dcwPpuDividerCoefficientPercentTextBox);
 
       var container = new Border
       {
@@ -131,6 +122,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       };
 
       var grid = new Grid();
+      grid.RowDefinitions.Add(new RowDefinition());
+      grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
       grid.RowDefinitions.Add(new RowDefinition());
       grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
@@ -148,18 +141,65 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Margin = new Thickness(7, 0, 7, 0)
       };
 
+      if (titleBar.Child is TextBlock acwTitle)
+      {
+        acwTitle.Text = "Коэффициент делителя ППУ ACW, %";
+      }
+
       var inputBorder = new Border
       {
         Style = (Style)FindResource("DeviceSettingsUnifiedInputBorderStyle")
       };
 
-      inputBorder.Child = _ppuDividerCoefficientPercentTextBox;
+      inputBorder.Child = _acwPpuDividerCoefficientPercentTextBox;
       Grid.SetRow(inputBorder, 1);
+
+      var dcwTitleBar = new Border
+      {
+        Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
+      };
+
+      dcwTitleBar.Child = new TextBlock
+      {
+        Text = "Коэффициент делителя ППУ DCW, %",
+        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
+        FontSize = 20,
+        FontWeight = FontWeights.Bold,
+        Margin = new Thickness(7, 0, 7, 0)
+      };
+
+      var dcwInputBorder = new Border
+      {
+        Style = (Style)FindResource("DeviceSettingsUnifiedInputBorderStyle")
+      };
+
+      dcwInputBorder.Child = _dcwPpuDividerCoefficientPercentTextBox;
+      Grid.SetRow(dcwTitleBar, 2);
+      Grid.SetRow(dcwInputBorder, 3);
 
       grid.Children.Add(titleBar);
       grid.Children.Add(inputBorder);
+      grid.Children.Add(dcwTitleBar);
+      grid.Children.Add(dcwInputBorder);
       container.Child = grid;
       AdditionalSettingsContainer.Content = container;
+    }
+
+    private TextBox PreparePpuDividerTextBox(TextBox? textBox)
+    {
+      textBox ??= new TextBox();
+      textBox.Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle");
+      textBox.PreviewTextInput -= ResistanceDevice_PreviewTextInput;
+      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
+      textBox.TextChanged -= ResistanceDevice_TextChanged;
+      textBox.TextChanged += ResistanceDevice_TextChanged;
+
+      if (string.IsNullOrWhiteSpace(textBox.Text))
+      {
+        textBox.Text = "100";
+      }
+
+      return textBox;
     }
 
     /// <summary>

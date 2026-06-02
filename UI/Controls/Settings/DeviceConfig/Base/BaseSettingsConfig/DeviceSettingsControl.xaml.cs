@@ -305,7 +305,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       if (device is FastMeterDto fastMeterDevice)
       {
-        SetPpuDividerCoefficientPercent(fastMeterDevice.PpuDividerCoefficientPercent);
+        SetPpuDividerCoefficientPercent(
+          fastMeterDevice.AcwPpuDividerCoefficientPercent,
+          fastMeterDevice.DcwPpuDividerCoefficientPercent);
       }
 
       ApplyConnectionDetails(device.ConnectionDetails);

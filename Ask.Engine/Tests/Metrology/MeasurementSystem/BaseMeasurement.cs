@@ -215,6 +215,16 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="protocolUI">Пользовательский элемент для вывода в протокол.</param>
     public abstract Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0);
 
+    protected static double ApplyPpuDividerCoefficient(double measuredVoltage, double coefficientPercent)
+    {
+      if (coefficientPercent <= 0)
+      {
+        throw new InvalidOperationException("Коэффициент делителя ППУ должен быть больше 0.");
+      }
+
+      return measuredVoltage / (coefficientPercent / 100d);
+    }
+
     /// <summary>
     /// Завершает измерение, размыкает реле и отключает прибор.
     /// </summary>
