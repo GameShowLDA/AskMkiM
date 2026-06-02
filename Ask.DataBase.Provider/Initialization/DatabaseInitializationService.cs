@@ -332,24 +332,50 @@ public static class DatabaseInitializationService
     await using var connection = new SqliteConnection($"Data Source={databasePath}");
     await connection.OpenAsync(cancellationToken);
 
-    if (!await TableExistsAsync(connection, "FastMeters", cancellationToken)
-      || await ColumnExistsAsync(connection, "FastMeters", "PpuDividerCoefficientPercent", cancellationToken))
+    if (!await TableExistsAsync(connection, "FastMeters", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureFastMeterPpuDividerCoefficientColumnAsync(
+      connection,
+      "AcwPpuDividerCoefficientPercent",
+      report,
+      progress,
+      cancellationToken);
+
+    await EnsureFastMeterPpuDividerCoefficientColumnAsync(
+      connection,
+      "DcwPpuDividerCoefficientPercent",
+      report,
+      progress,
+      cancellationToken);
+  }
+
+  private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(
+    System.Data.Common.DbConnection connection,
+    string columnName,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    if (await ColumnExistsAsync(connection, "FastMeters", columnName, cancellationToken))
     {
       return;
     }
 
     await using var command = connection.CreateCommand();
     command.CommandText =
-      """
+      $"""
       ALTER TABLE "FastMeters"
-      ADD COLUMN "PpuDividerCoefficientPercent" REAL NOT NULL DEFAULT 100.0;
+      ADD COLUMN "{columnName}" REAL NOT NULL DEFAULT 100.0;
       """;
 
     await command.ExecuteNonQueryAsync(cancellationToken);
     TraceWarning(
       report,
       progress,
-      "[DB] Added FastMeters.PpuDividerCoefficientPercent column for existing schema.");
+      $"[DB] Added FastMeters.{columnName} column for existing schema.");
   }
 
   private static async Task<int> EnsureSingleSettingsRowAsync<T>(

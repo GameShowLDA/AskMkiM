@@ -12,7 +12,14 @@ namespace Ask.DataBase.Provider.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<double>(
-                name: "PpuDividerCoefficientPercent",
+                name: "AcwPpuDividerCoefficientPercent",
+                table: "FastMeters",
+                type: "REAL",
+                nullable: false,
+                defaultValue: 100d);
+
+            migrationBuilder.AddColumn<double>(
+                name: "DcwPpuDividerCoefficientPercent",
                 table: "FastMeters",
                 type: "REAL",
                 nullable: false,
@@ -23,7 +30,11 @@ namespace Ask.DataBase.Provider.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "PpuDividerCoefficientPercent",
+                name: "AcwPpuDividerCoefficientPercent",
+                table: "FastMeters");
+
+            migrationBuilder.DropColumn(
+                name: "DcwPpuDividerCoefficientPercent",
                 table: "FastMeters");
         }
     }

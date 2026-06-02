@@ -50,7 +50,12 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     /// <summary>
     /// Коэффициент делителя ППУ в процентах.
     /// </summary>
-    double PpuDividerCoefficientPercent { get; set; }
+    double AcwPpuDividerCoefficientPercent { get; set; }
+
+    /// <summary>
+    /// Коэффициент делителя ППУ для DCW в процентах.
+    /// </summary>
+    double DcwPpuDividerCoefficientPercent { get; set; }
 
     ISelfTestCheckerMultimeter SelfTestManager { get; set; }
   }

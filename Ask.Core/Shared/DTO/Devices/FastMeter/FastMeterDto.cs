@@ -24,5 +24,10 @@ public class FastMeterDto : AttachableDeviceDto
   /// <summary>
   /// Коэффициент делителя для измерений напряжения ППУ, в процентах.
   /// </summary>
-  public double PpuDividerCoefficientPercent { get; set; } = 100d;
+  public double AcwPpuDividerCoefficientPercent { get; set; } = 100d;
+
+  /// <summary>
+  /// Коэффициент делителя ППУ для DCW, в процентах.
+  /// </summary>
+  public double DcwPpuDividerCoefficientPercent { get; set; } = 100d;
 }
