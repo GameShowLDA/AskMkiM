@@ -52,9 +52,9 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
           break;
 
-        //case TypeConnector.ACW:
-        //  await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
-        //  break;
+        case TypeConnector.ACW:
+          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          break;
 
         case TypeConnector.DCW:
           await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
@@ -62,13 +62,14 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
         case TypeConnector.FullCheck:
           await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
-          await Task.Delay(1000);
+          await Task.Delay(500);
 
           await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
-          await Task.Delay(1000);
-          break;
+          await Task.Delay(500);
 
-          //  await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await Task.Delay(500);
+          break;
       }
 
       await device.ConnectorManager.DisconnectBreakdownTester(userMessageService);
@@ -137,40 +138,49 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
     {
       try
       {
+          string name = breakdownTester.Name;
+          int numberChassis = breakdownTester.NumberChassis;
+          int number = breakdownTester.Number;
 
-        string name = breakdownTester.Name;
-        int numberChassis = breakdownTester.NumberChassis;
-        int number = breakdownTester.Number;
+          await userMessageService.AppendEmptyLineAsync();
+          await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка напряжения ACW с ППУ"));
+          await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
 
-        await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка для проверки пременного напряжения"));
-        await breakdownTester.AcwManger.Mode.SetModeAsync(userMessageService);
-        await breakdownTester.AcwManger.Time.SetTestTimeAsync(1, userMessageService);
-        await breakdownTester.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, userMessageService);
-        await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
-        await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
+          await breakdownTester.AcwManger.Mode.SetModeAsync(userMessageService);
+          await breakdownTester.AcwManger.Time.SetTestTimeAsync(5, userMessageService);
+          await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
-        await device.ConnectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
+          await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
 
-        for (int i = 100; i <= 500; i += 100)
-        {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка напряжения {i}В") { IndentLevel = 1 });
-          await Task.Delay(50);
+          List<int> voltage = new List<int>() { 100, 200, 400, 500, 600, 700 };
 
-          await breakdownTester.AcwManger.Voltage.SetVoltageAsync(i, userMessageService);
+          foreach (var item in voltage)
+          {
+            await userMessageService.AppendEmptyLineAsync();
+            await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка при напряжении {item}В") { IndentLevel = 1 });
+            await breakdownTester.AcwManger.Voltage.SetVoltageAsync(item, userMessageService);
 
-          await breakdownTester.AcwManger.Measure.ApplyVoltageAsync(userMessageService);
-          await Task.Delay(150);
+            var bound = item / 100 * 5;
+            (var lowerBound, var upperBound) = (item - bound, item + bound);
 
-          var resultMeter = await meter.AcVoltageManager.MeasureACVoltageAsync(i, userMessageService: userMessageService);
+            await breakdownTester.AcwManger.Measure.ApplyVoltageAsync();
 
-          await breakdownTester.AcwManger.Measure.StopMeasure();
+            await Task.Delay(2500);
+
+            var result = (await meter.AcVoltageManager.MeasureACVoltageAsync(item, lowerBound, upperBound));
+            result *= 10;
+            await breakdownTester.AcwManger.Measure.StopMeasure();
+
+            var err = result - item;
+            await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат ACW", message: MeasurementValueFormatter.FormatWithUnit(result, "В"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+            await userMessageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения ({lowerBound} - {upperBound} В)", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+
+          }
         }
-        await device.ConnectorManager.DisconnectBreakdownTesterAndMultimeter(userMessageService);
+        catch (Exception)
+        {
+        }
       }
-      catch (Exception)
-      {
-      }
-    }
 
     /// <summary>
     /// Выполняет самопроверку режима DCW (постоянное напряжение).
