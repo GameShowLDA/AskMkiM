@@ -68,6 +68,12 @@ namespace Ask.Device.Runtime.Device
     public int MaxContinuityResistance { get; set; }
 
     /// <inheritdoc />
+    public double AcwPpuDividerCoefficientPercent { get; set; }
+
+    /// <inheritdoc />
+    public double DcwPpuDividerCoefficientPercent { get; set; }
+
+    /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
@@ -100,6 +106,8 @@ namespace Ask.Device.Runtime.Device
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, Port);
       MaxContinuityResistance = 100000;
+      AcwPpuDividerCoefficientPercent = 100d;
+      DcwPpuDividerCoefficientPercent = 100d;
     }
 
     public FastMeterDto Convert()
@@ -115,7 +123,9 @@ namespace Ask.Device.Runtime.Device
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
         TypeMode = TypeMode,
-        MaxContinuityResistance = MaxContinuityResistance
+        MaxContinuityResistance = MaxContinuityResistance,
+        AcwPpuDividerCoefficientPercent = AcwPpuDividerCoefficientPercent,
+        DcwPpuDividerCoefficientPercent = DcwPpuDividerCoefficientPercent
       };
     }
   }

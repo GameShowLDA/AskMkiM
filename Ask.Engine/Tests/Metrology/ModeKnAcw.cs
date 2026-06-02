@@ -121,7 +121,7 @@ namespace Ask.Engine.Tests.Metrology
       private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
         var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(param);
-        return result;
+        return ApplyPpuDividerCoefficient(result, fastMeter.AcwPpuDividerCoefficientPercent);
       }
 
       private async Task<double> MeasuredReferenceMeter(IUserInteractionService userMessageService, double param)
