@@ -92,6 +92,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         string name = breakdownTester.Name;
         int numberChassis = breakdownTester.NumberChassis;
         int number = breakdownTester.Number;
+        cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
         await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка измерения соопротивления изоляции"));
@@ -108,6 +109,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
         foreach (var item in voltage)
         {
+          cancellationToken.ThrowIfCancellationRequested();
           await userMessageService.AppendEmptyLineAsync();
           await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка при напряжении {item}В") { IndentLevel = 1 });
           await breakdownTester.IrManger.Voltage.SetVoltageAsync(item, userMessageService);
@@ -141,6 +143,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         string name = breakdownTester.Name;
         int numberChassis = breakdownTester.NumberChassis;
         int number = breakdownTester.Number;
+        cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
         await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка напряжения ACW с ППУ"));
@@ -156,6 +159,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
         foreach (var item in voltage)
         {
+          cancellationToken.ThrowIfCancellationRequested();
           await userMessageService.AppendEmptyLineAsync();
           await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка при напряжении {item}В") { IndentLevel = 1 });
           await breakdownTester.AcwManger.Voltage.SetVoltageAsync(item, userMessageService);
@@ -199,6 +203,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         string name = breakdownTester.Name;
         int numberChassis = breakdownTester.NumberChassis;
         int number = breakdownTester.Number;
+        cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
         await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка напряжения DCW с ППУ"));
@@ -214,6 +219,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
         foreach (var item in voltage)
         {
+          cancellationToken.ThrowIfCancellationRequested();
           await userMessageService.AppendEmptyLineAsync();
           await userMessageService.ShowMessageAsync(new ShowMessageModel($"Проверка при напряжении {item}В") { IndentLevel = 1 });
           await breakdownTester.DcwManger.Voltage.SetVoltageAsync(item, userMessageService);
