@@ -11,6 +11,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
   /// </summary>
   public partial class DeviceSettingsControl
   {
+    private TextBox? _ppuDividerCoefficientPercentTextBox;
+
     /// <summary>
     /// Экземпляр головного устройства.
     /// </summary>
@@ -179,6 +181,39 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         text,
         CultureInfo.InvariantCulture
       );
+    }
+
+    public void SetPpuDividerCoefficientPercent(double value)
+    {
+      _ppuDividerCoefficientPercentTextBox ??= new TextBox();
+      _ppuDividerCoefficientPercentTextBox.Text = (value > 0 ? value : 100d).ToString(CultureInfo.InvariantCulture);
+    }
+
+    public double GetPpuDividerCoefficientPercent()
+    {
+      if (_ppuDividerCoefficientPercentTextBox == null)
+      {
+        return 100d;
+      }
+
+      var text = _ppuDividerCoefficientPercentTextBox.Text?.Trim();
+
+      if (string.IsNullOrEmpty(text))
+      {
+        return 100d;
+      }
+
+      text = text.Replace(',', '.');
+
+      if (text.EndsWith("."))
+      {
+        text += "0";
+        _ppuDividerCoefficientPercentTextBox.Text = text;
+      }
+
+      return double.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value)
+        ? value
+        : -1d;
     }
   }
 }

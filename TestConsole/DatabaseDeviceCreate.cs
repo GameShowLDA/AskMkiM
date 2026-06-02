@@ -210,6 +210,9 @@ internal static class DatabaseDeviceCreate
       fastMeter.MaxContinuityResistance = ReadInt(
         "Максимальное сопротивление прозвонки",
         fastMeter.MaxContinuityResistance > 0 ? fastMeter.MaxContinuityResistance : 100000);
+      fastMeter.PpuDividerCoefficientPercent = ReadDouble(
+        "Коэффициент делителя ППУ, %",
+        fastMeter.PpuDividerCoefficientPercent > 0 ? fastMeter.PpuDividerCoefficientPercent : 100d);
       return;
     }
 

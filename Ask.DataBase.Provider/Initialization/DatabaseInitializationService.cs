@@ -68,6 +68,7 @@ public static class DatabaseInitializationService
 
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
     TraceInfo(
@@ -320,6 +321,35 @@ public static class DatabaseInitializationService
       report,
       progress,
       "[DB] Р’ СЃС‚Р°СЂРѕР№ С…РµРјРµ Execution РґРѕР±Р°РІР»РµРЅР° РєРѕР»РѕРЅРєР° LegacyCompatibilityMode.");
+  }
+
+  private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "FastMeters", cancellationToken)
+      || await ColumnExistsAsync(connection, "FastMeters", "PpuDividerCoefficientPercent", cancellationToken))
+    {
+      return;
+    }
+
+    await using var command = connection.CreateCommand();
+    command.CommandText =
+      """
+      ALTER TABLE "FastMeters"
+      ADD COLUMN "PpuDividerCoefficientPercent" REAL NOT NULL DEFAULT 100.0;
+      """;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    TraceWarning(
+      report,
+      progress,
+      "[DB] Added FastMeters.PpuDividerCoefficientPercent column for existing schema.");
   }
 
   private static async Task<int> EnsureSingleSettingsRowAsync<T>(

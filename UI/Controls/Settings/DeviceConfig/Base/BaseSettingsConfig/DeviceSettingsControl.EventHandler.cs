@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
@@ -89,6 +90,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           CapacitanceContainer.Visibility = Visibility.Collapsed;
         }
 
+        if (typeof(IFastMeter).IsAssignableFrom(selectedType))
+        {
+          ShowFastMeterAdditionalSettings();
+        }
+        else
+        {
+          AdditionalSettingsContainer.Content = null;
+        }
+
         if (baseClass == typeof(DeviceWithCOM))
         {
           object deviceModel = Activator.CreateInstance(selectedType);
@@ -99,6 +109,57 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       {
         MessageBoxCustom.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
+    }
+
+    private void ShowFastMeterAdditionalSettings()
+    {
+      _ppuDividerCoefficientPercentTextBox ??= new TextBox();
+      _ppuDividerCoefficientPercentTextBox.Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle");
+      _ppuDividerCoefficientPercentTextBox.PreviewTextInput -= ResistanceDevice_PreviewTextInput;
+      _ppuDividerCoefficientPercentTextBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
+      _ppuDividerCoefficientPercentTextBox.TextChanged -= ResistanceDevice_TextChanged;
+      _ppuDividerCoefficientPercentTextBox.TextChanged += ResistanceDevice_TextChanged;
+
+      if (string.IsNullOrWhiteSpace(_ppuDividerCoefficientPercentTextBox.Text))
+      {
+        _ppuDividerCoefficientPercentTextBox.Text = "100";
+      }
+
+      var container = new Border
+      {
+        Style = (Style)FindResource("DeviceInputSectionCardStyle")
+      };
+
+      var grid = new Grid();
+      grid.RowDefinitions.Add(new RowDefinition());
+      grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+      var titleBar = new Border
+      {
+        Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
+      };
+
+      titleBar.Child = new TextBlock
+      {
+        Text = "Коэффициент делителя ППУ, %",
+        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
+        FontSize = 20,
+        FontWeight = FontWeights.Bold,
+        Margin = new Thickness(7, 0, 7, 0)
+      };
+
+      var inputBorder = new Border
+      {
+        Style = (Style)FindResource("DeviceSettingsUnifiedInputBorderStyle")
+      };
+
+      inputBorder.Child = _ppuDividerCoefficientPercentTextBox;
+      Grid.SetRow(inputBorder, 1);
+
+      grid.Children.Add(titleBar);
+      grid.Children.Add(inputBorder);
+      container.Child = grid;
+      AdditionalSettingsContainer.Content = container;
     }
 
     /// <summary>

@@ -20,4 +20,9 @@ public class FastMeterDto : AttachableDeviceDto
   /// Максимальное сопротивление (Ом), при котором фиксируется прозвонка.
   /// </summary>
   public int MaxContinuityResistance { get; set; }
+
+  /// <summary>
+  /// Коэффициент делителя для измерений напряжения ППУ, в процентах.
+  /// </summary>
+  public double PpuDividerCoefficientPercent { get; set; } = 100d;
 }

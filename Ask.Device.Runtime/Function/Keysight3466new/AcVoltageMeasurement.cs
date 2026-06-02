@@ -70,7 +70,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))
       {
-        return MeasurementAdapterHelper.Round(voltage);
+        return MeasurementAdapterHelper.Round(_device.ApplyPpuDividerCoefficient(voltage));
       }
 
       throw new FormatException($"Неверный формат ответа прибора при измерении AC-напряжения: '{response}'.");
