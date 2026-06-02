@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -300,6 +301,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
+      }
+
+      if (device is FastMeterDto fastMeterDevice)
+      {
+        SetPpuDividerCoefficientPercent(fastMeterDevice.PpuDividerCoefficientPercent);
       }
 
       ApplyConnectionDetails(device.ConnectionDetails);

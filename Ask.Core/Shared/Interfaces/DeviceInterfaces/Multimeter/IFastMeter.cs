@@ -47,6 +47,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     /// </summary>
     int MaxContinuityResistance { get; set; }
 
+    /// <summary>
+    /// Коэффициент делителя ППУ в процентах.
+    /// </summary>
+    double PpuDividerCoefficientPercent { get; set; }
+
     ISelfTestCheckerMultimeter SelfTestManager { get; set; }
   }
 }

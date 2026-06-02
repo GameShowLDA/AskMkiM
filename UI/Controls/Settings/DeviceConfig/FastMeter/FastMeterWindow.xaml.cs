@@ -87,6 +87,16 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
         if (deviceDto != null)
         {
           deviceDto.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
+          deviceDto.PpuDividerCoefficientPercent = deviceSettingsWindow.GetPpuDividerCoefficientPercent();
+
+          if (deviceDto.PpuDividerCoefficientPercent <= 0)
+          {
+            Message.MessageBoxCustom.Show(
+              "Коэффициент делителя ППУ должен быть больше 0.",
+              "Ошибка сохранения данных",
+              image: MessageBoxImage.Error);
+            return;
+          }
 
           try
           {
