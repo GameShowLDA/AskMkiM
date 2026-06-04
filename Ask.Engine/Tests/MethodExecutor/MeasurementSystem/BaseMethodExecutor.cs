@@ -139,5 +139,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// Возвращает строку, где заданный разряд равен 1, остальные — 0.
     /// </summary>
     protected string GetBitString() => _runner.GetBitString();
+
+    protected int CurrentDischargeNumber => _runner.CurrentDischargeNumber;
   }
 }
