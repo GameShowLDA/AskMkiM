@@ -89,7 +89,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         //  Тип тока
         if (pi.VoltageType != null)
         {
-
           if (pi.VoltageType == VoltageEnum.Type.ACW)
           {
             yield return $"\tТип тока: переменный";
