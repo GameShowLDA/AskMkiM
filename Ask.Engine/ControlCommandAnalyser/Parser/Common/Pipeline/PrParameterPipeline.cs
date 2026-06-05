@@ -1,7 +1,9 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
+using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr;
 using static Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.ProcessorFactory;
 
@@ -21,6 +23,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
         {
             Keys<PrCommandModel>(),
             new PrResistanceProcessor(),
+            new AmperageProcessor<PrCommandModel>(),
+            new PrVoltageProcessor(),
             Time<PrCommandModel>(),
         });
 

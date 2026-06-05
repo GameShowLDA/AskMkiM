@@ -81,7 +81,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         return (null, null, null, input);
 
       var m = Regex.Match(input,
-          @"(?:(?<low>\d+(?:[.,]\d+)?)\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)(?:\s*<\s*(?<high>\d+(?:[.,]\d+)?))?",
+          @"(?:(?<low>\d+(?:[.,]\d+)?(?![.,]\d))\s*<\s*)?(?<unit>Ом|кОм|МОм|ГОм)(?:\s*<\s*(?<high>\d+(?:[.,]\d+)?(?![.,]\d)))?",
           RegexOptions.IgnoreCase);
 
       if (!m.Success)
@@ -164,60 +164,65 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
       if (string.IsNullOrWhiteSpace(input))
         return (null, null, null, input);
 
-      // 1) Диапазон: "10 Ом < R < 20 Ом"
+      const string Number = @"\d+(?:[.,](?!\d+\.\d)\d+)?";
+
+      // 1) "10 Ом < R < 20 Ом"
       var m = Regex.Match(input,
-          @"(?<!\w)(?<low>\d+(?:[.,]\d+)?)\s*(?<unit1>Ом|кОм|МОм|ГОм)?\s*<\s*[RР]\b\s*<\s*(?<high>\d+(?:[.,]\d+)?)
-        \s*(?<unit2>Ом|кОм|МОм|ГОм)?",
+          $@"(?<!\w)
+        (?<low>{Number})\s*(?<unit1>Ом|кОм|МОм|ГОм)?\s*
+        <\s*[RР]\s*<\s*
+        (?<high>{Number})\s*(?<unit2>Ом|кОм|МОм|ГОм)?",
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+
       if (m.Success)
-      {
         return ParseBothLimitsR(input, m);
-      }
 
-      // 2) Порог: "R < 10 Ом" или "R <= 10 Ом" (также ≥, >, >=)
+      // 2) "R < 10 Ом" / "10 Ом > R"
       m = Regex.Match(input,
-          @"(?<!\w)(?:
-              (?<rLeft>[RР])\s*(?<op><=|>=|<|>|≤|≥)\s*(?<val>\d+(?:[.,]\d+)?)\s*(?<unit>Ом|кОм|МОм|ГОм)
+          $@"(?<!\w)(?:
+            (?<rLeft>[RР])\s*(?<op><=|>=|<|>|≤|≥)\s*(?<val>{Number})\s*(?<unit>Ом|кОм|МОм|ГОм)
             |
-              (?<val>\d+(?:[.,]\d+)?)\s*(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op><=|>=|<|>|≤|≥)\s*(?<rRight>[RР])
-          )\b",
-        RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace
-      );
+            (?<val>{Number})\s*(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op><=|>=|<|>|≤|≥)\s*(?<rRight>[RР])
+        )\b",
+          RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-      {
         return ParseLimitRUnified(input, m);
-      }
 
-      // 4. Диапазон вида "10<МОм<20"
+      // 4) "10<МОм<20"
       m = Regex.Match(input,
-          @"(?<!\w)(?<min>\d+(?:[.,]\d+)?)\s*(?<op1><=|>=|<|>|≤|≥)\s*(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op2><=|>=|<|>|≤|≥)\s*(?<max>\d+(?:[.,]\d+)?)\b",
-          RegexOptions.IgnoreCase);
+          $@"(?<!\w)
+        (?<min>{Number})\s*
+        (?<op1><=|>=|<|>|≤|≥)\s*
+        (?<unit>Ом|кОм|МОм|ГОм)\s*
+        (?<op2><=|>=|<|>|≤|≥)\s*
+        (?<max>{Number})\b",
+          RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-      {
         return ParseRange(input, m);
-      }
 
-      // 5. Нижняя граница 
+      // 5) "Ом < 10"
       m = Regex.Match(input,
-          @"(?<!\w)(?<unit>Ом|кОм|МОм|ГОм)\s*(?<op><=|>=|<|>|≤|≥)\s*(?<val>\d+(?:[.,]\d+)?)\b",
-          RegexOptions.IgnoreCase);
+          $@"(?<!\w)
+        (?<unit>Ом|кОм|МОм|ГОм)\s*
+        (?<op><=|>=|<|>|≤|≥)\s*
+        (?<val>{Number})\b",
+          RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-      {
         return ParseLowerLimit(input, m);
-      }
 
-      // 6.Верхняя граница
+      // 6) "10 < Ом"
       m = Regex.Match(input,
-          @"(?<!\w)(?<val>\d+(?:[.,]\d+)?)\s*(?<op><=|>=|<|>|≤|≥)\s*(?<unit>Ом|кОм|МОм|ГОм)\b",
-          RegexOptions.IgnoreCase);
+          $@"(?<!\w)
+        (?<val>{Number})\s*
+        (?<op><=|>=|<|>|≤|≥)\s*
+        (?<unit>Ом|кОм|МОм|ГОм)\b",
+          RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-      {
         return ParseHigherLimit(input, m);
-      }
 
       return (null, null, null, input);
     }
