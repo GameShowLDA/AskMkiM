@@ -1,61 +1,34 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  public class OtCommandFormatter : ICommandFormatter
+  public class OtCommandFormatter : CommandFormatter<OtCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is OtCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(OtCommandModel ot)
     {
-      if (model is not OtCommandModel ot)
-        yield break;
-
-      var firstLine = $"{ot.CommandNumber} {ot.Mnemonic}";
-      yield return firstLine;
-
-      // Ключи команды
-      if (ot.AlgorithmKey.Count > 0)
+      foreach (var line in FormatCommandStart(ot))
       {
-        yield return $"\tКлючи команды: {string.Join(", ", ot.AlgorithmKey)}";
-      }
-      else
-      {
-        yield return $"\tКлючи команды не указаны.";
+        yield return line;
       }
 
-      // Время
-      if (!string.IsNullOrWhiteSpace(ot.TimeSource))
+      yield return TimeFormatter.FormatTime(ot, "Время отключения точек");
+
+      foreach (var line in FormatBusPointGroups(ot.BusPointsDictionary, "\tТочки, отключаемые от шины"))
       {
-        yield return $"\tВремя отключения точек: {ot.TimeSource}";
-      }
-      else
-      {
-        yield return $"\tВремя отключения точек не задано!";
+        yield return line;
       }
 
-      foreach (var bus in ot.BusPointsDictionary)
+      foreach (var line in FormatComments(ot))
       {
-        yield return $"\tТочки, отключаемые от шины: {bus.Key}";
-        foreach (var point in bus.Value)
-        {
-          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
-        }
+        yield return line;
       }
 
-      if (ot.Comment.Count > 0)
+      foreach (var line in FormatEnd())
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in ot.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
-
-      yield return string.Empty;
     }
   }
 }

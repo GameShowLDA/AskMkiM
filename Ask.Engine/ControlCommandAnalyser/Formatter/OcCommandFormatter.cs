@@ -1,32 +1,26 @@
-using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  internal class OcCommandFormatter : ICommandFormatter
+  internal class OcCommandFormatter : CommandFormatter<OcCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is OcCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(OcCommandModel oc)
     {
-      if (model is not OcCommandModel oc)
-        yield break;
-
-      var firstLine = $"{oc.CommandNumber} {oc.Mnemonic}";
-      yield return firstLine;
-
-      if (oc.Comment.Count > 0)
+      foreach (var line in FormatCommandStart(oc))
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in oc.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
 
-      yield return string.Empty;
+      foreach (var line in FormatComments(oc))
+      {
+        yield return line;
+      }
+
+      foreach (var line in FormatEnd())
+      {
+        yield return line;
+      }
     }
   }
 }

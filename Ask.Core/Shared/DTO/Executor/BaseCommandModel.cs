@@ -13,8 +13,18 @@ namespace Ask.Core.Shared.DTO.Executor
   /// <summary>
   /// Базовая модель любой команды после разбора.
   /// </summary>
-  public abstract class BaseCommandModel : IError, IExecutionCommandInfo
+  public abstract class BaseCommandModel : IError, IExecutionCommandInfo, IHasMnemonic, IHasKey, IHasComment
   {
+    /// <summary>
+    /// Номер команды.
+    /// </summary>
+    public string CommandNumber { get; set; }
+
+    /// <summary>
+    /// Мнемоника команды.
+    /// </summary>
+    public virtual string Mnemonic { get; set; }
+
     public virtual MeasurementTypeCommand TypeCommand { get; set; }
     public List<string> SourceLines { get; set; } = new List<string>();
 
@@ -46,8 +56,7 @@ namespace Ask.Core.Shared.DTO.Executor
 
     public virtual IDislpayInfo BuildDislpayInfo => null;
 
-    public string CommandNumber { get; set; }
-    public virtual string Mnemonic { get; set; }
+
     public string PointsSourse { get; set; }
 
     /// <summary>
