@@ -33,11 +33,25 @@ public sealed class AddressExpansionService
   public Result<IReadOnlyList<MachineAddress>> ExpandMachineExpression(AddressExpressionSyntax expression)
   {
     var diagnostics = new List<RmDiagnostic>();
+    var addresses = new List<MachineAddress>();
 
-    if (!TryParseMachineAddressRange(expression.Text, expression.Span, diagnostics, out var range))
-      return new Result<IReadOnlyList<MachineAddress>>(Array.Empty<MachineAddress>(), diagnostics);
+    foreach (var item in SplitTopLevel(expression.Text, ','))
+    {
+      if (!TryParseMachineAddressRange(
+              item,
+              expression.Span,
+              diagnostics,
+              out var range))
+      {
+        continue;
+      }
 
-    return new Result<IReadOnlyList<MachineAddress>>(range.Expand(), diagnostics);
+      addresses.AddRange(range.Expand());
+    }
+
+    return new Result<IReadOnlyList<MachineAddress>>(
+        addresses,
+        diagnostics);
   }
 
   private static IReadOnlyList<string> ExpandSingleObjectExpression(
