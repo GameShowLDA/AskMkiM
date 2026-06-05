@@ -16,7 +16,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     //Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Б,
     Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Н)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
-  public class NeCommandModel : BaseCommandModel, IError, IHasScheme
+  public class NeCommandModel : BaseCommandModel, IError, IHasScheme, IHasVoltage, IHasVoltageLimits, IHasUnparsedParameters
   {
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
 

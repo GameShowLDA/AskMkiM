@@ -105,6 +105,10 @@ namespace Ask.Engine.Tests.Metrology
           {
             measuremend.Add(result);
           }
+          else
+          {
+            i--;
+          }
         }
         result = measuremend.Average();
 

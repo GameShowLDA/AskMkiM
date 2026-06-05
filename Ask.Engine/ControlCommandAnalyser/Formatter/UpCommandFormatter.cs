@@ -1,44 +1,30 @@
-﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  /// <summary>
-  /// Форматтер для команды УП (условный переход).
-  /// </summary>
-  public class UpCommandFormatter : ICommandFormatter
+  public class UpCommandFormatter : CommandFormatter<UpCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is UpCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(UpCommandModel up)
     {
-      if (model is not UpCommandModel up)
-        yield break;
-
-      yield return $"{up.CommandNumber} {up.Mnemonic} {up.TargetLabel}";
-
-      // Ключи
-      if (up.AlgorithmKey.Count > 0)
-        yield return $"\tКлючи команды: {string.Join(", ", up.AlgorithmKey)}";
-
-      // Описание перехода
-      if (!string.IsNullOrWhiteSpace(up.TargetLabel))
-        yield return $"\tПереход к команде {up.TargetLabel}";
-      else
-        yield return $"\tПереходная метка не указана!";
-
-      if (up.Comment.Count > 0)
+      foreach (var line in FormatCommandStart(up, $"{up.CommandNumber} {up.Mnemonic} {up.TargetLabel}"))
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in up.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
 
-      yield return string.Empty;
+      yield return !string.IsNullOrWhiteSpace(up.TargetLabel)
+        ? $"\tПереход к команде {up.TargetLabel}"
+        : "\tПереходная метка не указана!";
+
+      foreach (var line in FormatComments(up))
+      {
+        yield return line;
+      }
+
+      foreach (var line in FormatEnd())
+      {
+        yield return line;
+      }
     }
   }
 }

@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ie
   /// </summary>
   [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Д)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
-  public class IeCommandModel : BaseCommandModel, IHasScheme
+  public class IeCommandModel : BaseCommandModel, IHasScheme, IHasCapacityLimits, IHasUnparsedParameters
   {
     public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
 
