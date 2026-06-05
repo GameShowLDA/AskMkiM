@@ -29,7 +29,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           await realysModule.PointManager.DisconnectingAllPointFromBusA(context.Console);
         }
-        else if (command.BusList.Contains(busB))
+        if (command.BusList.Contains(busB))
         {
           await realysModule.PointManager.DisconnectingAllPointFromBusB(context.Console);
         }

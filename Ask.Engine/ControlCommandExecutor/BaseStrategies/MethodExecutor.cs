@@ -43,17 +43,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       for (int step = 0; step < HighestBitCount; step++)
       {
-        char[] bits = new char[HighestBitCount];
-        for (int i = 0; i < bits.Length; i++)
-          bits[i] = '0';
-
-        bits[HighestBitCount - step - 1] = '1';
-
-        string stepStr = new string(bits);
+        string stepStr = GetBitString(step);
+        int dischargeNumber = GetDischargeNumber(step);
 
         if (ProtocolConfig.GetTestStepMessagesInProtocol())
         {
-          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(ConvertIntToString(step + 1)), IsBlockStart: true);
+          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(dischargeNumber, stepStr), IsBlockStart: true);
         }
 
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
@@ -64,8 +59,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
-          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckError(stepStr), IsBlockStart: true);
-          showMessageModels.Add(new ShowMessageModel($"Разряд {stepStr}({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
+          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckError(dischargeNumber, stepStr), IsBlockStart: true);
+          showMessageModels.Add(new ShowMessageModel($"Разряд {dischargeNumber} ({stepStr})({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
 
           NodeFullContext contextNodeFull = methodExecutionContext.CreateChild<NodeFullContext>();
           contextNodeFull.PerformMeasurementAsync = methodExecutionContext.PerformMeasurementAsync;
@@ -183,29 +178,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       return new string(chars);
     }
 
-    /// <summary>
-    /// Формирует строку фиксированной длины <see cref="HighestBitCount"/>,
-    /// состоящую из символов '0' с единственной '1' на позиции,
-    /// соответствующей значению <paramref name="number"/> 
-    /// (индекс вычисляется как HighestBitCount - number).
-    /// </summary>
-    /// <param name="number">
-    /// Порядковый номер разряда, который должен быть установлен в '1'.
-    /// </param>
-    /// <returns>
-    /// Строка из '0' и одной '1' длиной <see cref="HighestBitCount"/>.
-    /// </returns>
-    private static string ConvertIntToString(int number)
+    static private int GetDischargeNumber(int step)
     {
-      var chars = new char[HighestBitCount];
-      Array.Fill(chars, '0');
-
-      int index = HighestBitCount - number;
-
-      if (index >= 0 && index < HighestBitCount)
-        chars[index] = '1';
-
-      return new string(chars);
+      return step + 1;
     }
 
   }

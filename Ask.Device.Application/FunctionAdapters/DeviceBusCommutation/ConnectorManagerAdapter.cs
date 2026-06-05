@@ -60,6 +60,50 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     }
 
     /// <inheritdoc />
+    public async Task<bool> EnableDivider(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _connectorManager.EnableDivider();
+        if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Включение делителя ППУ", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw ConnectorExceptionFactory.EnableDividerFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
+      }
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisableDivider(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await _connectorManager.DisableDivider();
+        if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение делителя ППУ", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw ConnectorExceptionFactory.DisableDividerFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
+      }
+
+      return result;
+    }
+
+    /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -238,5 +282,6 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     }
 
     public IReadOnlyList<DeviceConnectionInfo> GetConnectedDevices() => _connectorManager.GetConnectedDevices();
+
   }
 }

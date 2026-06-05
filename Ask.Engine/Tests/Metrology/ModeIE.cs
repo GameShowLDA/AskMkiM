@@ -22,7 +22,7 @@ namespace Ask.Engine.Tests.Metrology
     /// <summary>
     /// Текущий метрологический режим - ИЕ.
     /// </summary>
-    private MeasurementTypeCommand MetrologicalModeRole => MeasurementTypeCommand.IE;
+    private MeasurementTypeCommand metrologicalModeRole => MeasurementTypeCommand.IE;
 
     /// <summary>
     /// Экземпляр объекта, инкапсулирующего логику проведения измерений и работу с оборудованием для данного режима.
@@ -56,9 +56,9 @@ namespace Ask.Engine.Tests.Metrology
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService);
 
-      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, MetrologicalModeRole, _userInteractionService);
-      await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, MetrologicalModeRole);
-      await testMeasurement.ConfigureMeter(_userInteractionService, MetrologicalModeRole);
+      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
+      await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole);
 
       var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.IE, data.Param);
 
@@ -66,8 +66,8 @@ namespace Ask.Engine.Tests.Metrology
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} нФ"));
 
       var intrinsicCapacitance = testMeasurement.GetIntrinsicCapacitanceByPoints(data.FirstPoint, data.SecondPoint);
-      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(MetrologicalModeRole, data.Param, _userInteractionService, intrinsicCapacitance), _userInteractionService, true);
-      await testMeasurement.FinalizeMeasurement(_userInteractionService);
+      await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService, intrinsicCapacitance), _userInteractionService, true);
+      await testMeasurement.FinalizeMeasurement(metrologicalModeRole, _userInteractionService);
     }
 
     public ITextAdapter GetControl()
@@ -104,6 +104,10 @@ namespace Ask.Engine.Tests.Metrology
           if (result > 0)
           {
             measuremend.Add(result);
+          }
+          else
+          {
+            i--;
           }
         }
         result = measuremend.Average();
@@ -150,11 +154,11 @@ namespace Ask.Engine.Tests.Metrology
         return selectedModule?.SwitchCapacitance ?? 0;
       }
 
-      public override async Task FinalizeMeasurement(IUserInteractionService messageService)
+      public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
-        await base.FinalizeMeasurement(messageService);
         await PrintResult(messageService, MeasurementTypeCommand.IE);
         await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {LowerBound} до {UpperBound} нФ") { IndentLevel = 1 }, skipPause: true);
+        await base.FinalizeMeasurement(metrologicalModeRole, messageService);
 
         Measurements.Clear();
       }

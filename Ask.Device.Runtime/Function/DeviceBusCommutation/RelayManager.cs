@@ -79,7 +79,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return true;
       }
 
-      var cmd = new DeviceCommand(9, 1);
+      var cmd = new DeviceCommand(9, 1, 0, 1);
       string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 
       await Task.Delay(10);
@@ -101,7 +101,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return true;
       }
 
-      var cmd = new DeviceCommand(9, 2);
+      var cmd = new DeviceCommand(9, 1, 0, 2);
       string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 
       if (answer == null || answer.Length == 0) return false;

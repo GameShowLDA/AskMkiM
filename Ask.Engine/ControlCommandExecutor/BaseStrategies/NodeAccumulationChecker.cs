@@ -1,7 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -153,84 +152,65 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         bool revers
         )
     {
-      try
-      {
-        ChainModel errorPoint = null;
-        step++;
-
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Выполенение шага {step}"));
-        var (leftPart, rightPart) = SplitInHalf(candidates);
-
-        await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
-        await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
-
-        IRelaySwitchModule module = null;
-        if (leftPart.ChainModels.FirstOrDefault() != null)
-        {
-          module = EquipmentService.GetModuleByPoint(leftPart.ChainModels.FirstOrDefault().PointModels.FirstOrDefault());
-        }
-        else if (rightPart.ChainModels.FirstOrDefault() != null)
-        {
-          module = EquipmentService.GetModuleByPoint(rightPart.ChainModels.FirstOrDefault().PointModels.FirstOrDefault());
-        }
-
-        (bool Result, double Value) measured;
-
-        if (module != null)
-        {
-          measured = await performMeasurementAsync(resistance, messageService, cancellationToken, module.SwitchResistance, type: type);
-        }
-        else
-        {
-          measured = await performMeasurementAsync(resistance, messageService, cancellationToken, 0, type: type);
-        }
-
-        if (!measured.Result)
-        {
-          if (rightPart.ChainModels.Count > 1)
-          {
-            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type, revers);
-          }
-          else
-          {
-            errorPoint = rightPart.ChainModels[0];
-            return errorPoint;
-          }
-        }
-        else
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel("Отключение правой части группы точек"));
-          await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(rightPart, messageService, revers);
-
-          await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
-          await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
-
-          if (leftPart.ChainModels.Count > 1)
-          {
-            errorPoint = await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type, revers);
-          }
-          else if (rightPart.ChainModels.Count > 1)
-          {
-            measured = await performMeasurementAsync(resistance, messageService, cancellationToken, module.SwitchResistance, type: type);
-            if (!measured.Result)
-            {
-              errorPoint = leftPart.ChainModels[0];
-              return errorPoint;
-            }
-            else
-            {
-              return errorPoint;
-            }
-          }
-        }
-
-        await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(candidates, messageService, revers);
-        return errorPoint;
-      }
-      catch
+      if (candidates == null || candidates.ChainModels.Count == 0)
       {
         return null;
       }
+
+      if (candidates.ChainModels.Count == 1)
+      {
+        return candidates.ChainModels[0];
+      }
+
+      step++;
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение шага {step}"));
+
+      var (leftPart, rightPart) = SplitInHalf(candidates);
+      var switchResistance = GetSwitchResistance(candidates);
+
+      try
+      {
+        await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
+        await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
+
+        var measuredWithoutLeft = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type);
+        if (!measuredWithoutLeft.Result)
+        {
+          return rightPart.ChainModels.Count == 1
+            ? rightPart.ChainModels[0]
+            : await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type, revers);
+        }
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Отключение правой части группы точек"));
+        await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(rightPart, messageService, revers);
+
+        await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
+        await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
+
+        var measuredWithoutRight = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type);
+        if (!measuredWithoutRight.Result)
+        {
+          return leftPart.ChainModels.Count == 1
+            ? leftPart.ChainModels[0]
+            : await LocalizeFaultyPointAsync(performMeasurementAsync, leftPart, resistance, messageService, cancellationToken, type, revers);
+        }
+
+        return null;
+      }
+      finally
+      {
+        await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(candidates, messageService, revers);
+      }
+    }
+
+    private static double GetSwitchResistance(GroupModel candidates)
+    {
+      var point = candidates.ChainModels
+        .SelectMany(chain => chain.PointModels)
+        .FirstOrDefault();
+
+      var module = point != null ? EquipmentService.GetModuleByPoint(point) : null;
+      return module?.SwitchResistance ?? 0;
     }
 
     /// <summary>

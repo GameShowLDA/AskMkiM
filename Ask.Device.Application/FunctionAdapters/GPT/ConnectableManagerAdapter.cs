@@ -38,7 +38,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
         if (!succes.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(succes.Answer) ? "Успешно" : succes.Answer, succes.Connect, 1, messageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", succes.Connect, 1, messageService);
         }
 
         return succes;
@@ -66,7 +66,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение пробойной установки", result ? "Успешно" : "Ошибка отключения", result, 1, messageService);
       }
 
-      Task.Delay(1000).GetAwaiter().GetResult();
+      await Task.Delay(1000);
       if (!result)
       {
         throw ConnectionExceptionAdapter.DisconnectFailed(_device.Name, _device.NumberChassis, _device.Number);
@@ -82,7 +82,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
       if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация пробойной установки", string.IsNullOrWhiteSpace(answer) ? "ОК" : answer, result, 1, messageService);
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Инициализация устройства", string.IsNullOrWhiteSpace(answer) ? "ОК" : answer, result, 1, messageService);
       }
 
       if (!result)

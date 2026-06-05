@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
   [AllowedKeys(К, ЗР, ЗС, С, П, И, Т, Г, Т1)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [ResistanceRange(0, 100000.0, 10.0)]
-  public class PrCommandModel : BaseCommandModel, IError, IHasScheme, ITimeCommandModel, IHasAmperage
+  public class PrCommandModel : BaseCommandModel, IError, IHasScheme, IHasAmperage, IHasTime, IHasUnparsedParameters
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.

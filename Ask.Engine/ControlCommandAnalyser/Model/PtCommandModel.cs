@@ -10,7 +10,7 @@ using static Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey;
 namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [AllowedKeys(Б, П, С)]
-  public class PtCommandModel : BaseCommandModel, ITimeCommandModel
+  public class PtCommandModel : BaseCommandModel, IHasTime, Ask.Core.Shared.Interfaces.ExecutionInterfaces.IHasUnparsedParameters
   {
     public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.PT).DisplayName;
 

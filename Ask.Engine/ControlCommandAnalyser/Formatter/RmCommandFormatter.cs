@@ -1,32 +1,37 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
-using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  public class RmCommandFormatter : ICommandFormatter
+  public class RmCommandFormatter : CommandFormatter<RmCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is RmCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(RmCommandModel rm)
     {
-      if (model is not RmCommandModel rm)
-        yield break;
-
-      yield return $"{rm.CommandNumber} {rm.Mnemonic}";
-
-      if (rm.Comment.Count > 0)
+      foreach (var line in FormatCommandStart(rm, includeKey: false))
       {
-        yield return "\tКомментарии:";
-        foreach (var line in rm.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
 
+      foreach (var line in FormatComments(rm))
+      {
+        yield return line;
+      }
+
+      foreach (var line in FormatPoints(rm))
+      {
+        yield return line;
+      }
+
+      foreach (var line in FormatEnd())
+      {
+        yield return line;
+      }
+    }
+
+    private static IEnumerable<string> FormatPoints(RmCommandModel rm)
+    {
       if (rm.Parts.Count > 0)
       {
         foreach (var part in rm.Parts)
@@ -39,16 +44,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           }
 
           foreach (var pair in part.Pairs)
+          {
             yield return $"\t{FormatPair(rm, pair)}";
+          }
         }
-      }
-      else
-      {
-        foreach (var pair in rm.PointsMap)
-          yield return $"\t{pair.Key} = {FormatAskPoint(pair.Value)}";
+
+        yield break;
       }
 
-      yield return string.Empty;
+      foreach (var pair in rm.PointsMap)
+      {
+        yield return $"\t{pair.Key} = {FormatAskPoint(pair.Value)}";
+      }
     }
 
     private static string FormatPair(RmCommandModel rm, RmPairModel pair)
@@ -60,6 +67,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       var askPoint = rm.PointsMap.TryGetValue(pair.OkPoint, out var mappedPoint)
         ? mappedPoint
         : pair.AskInput;
+
       return $"{left} = {FormatAskPoint(askPoint)}";
     }
 

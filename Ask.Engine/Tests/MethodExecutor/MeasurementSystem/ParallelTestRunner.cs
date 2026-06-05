@@ -42,6 +42,8 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// </summary>
     public int Step { get; private set; }
 
+    public int CurrentDischargeNumber => Step + 1;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ParallelTestRunner"/>.
     /// </summary>
@@ -102,7 +104,8 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     private async Task ShowCurrentBitStep(int step)
     {
       string bitString = GetBitString();
-      await _protocolUI.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step} ({bitString})"));
+      await _protocolUI.AppendEmptyLineAsync();
+      await _protocolUI.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step + 1} ({bitString})"));
     }
 
     /// <summary>

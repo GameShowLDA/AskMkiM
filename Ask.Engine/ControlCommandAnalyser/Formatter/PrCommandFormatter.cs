@@ -1,63 +1,33 @@
-﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  internal class PrCommandFormatter : ICommandFormatter
+  internal class PrCommandFormatter : CommandFormatter<PrCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is PrCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(PrCommandModel pr)
     {
-      if (model is not PrCommandModel pr)
-        yield break;
-
-      // Первая строка: номер, мнемоника, нераспознанные параметры (если есть)
-      var firstLine = $"{pr.CommandNumber} {pr.Mnemonic}";
-      yield return firstLine;
-
-      if (!string.IsNullOrWhiteSpace(pr.UnparsedParameters))
-        yield return $"\t{pr.UnparsedParameters}";
-
-      // Ключи команды
-      if (pr.AlgorithmKey.Count > 0)
+      foreach (var line in FormatCommandStart(pr))
       {
-        yield return $"\tКлючи команды: {string.Join(", ", pr.AlgorithmKey)}";
-      }
-      else
-      {
-        yield return $"\tКлючи команды не указаны.";
+        yield return line;
       }
 
-      if (pr.Comment.Count > 0)
+      foreach (var line in FormatComments(pr))
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in pr.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
 
-      // Время
-      if (!string.IsNullOrWhiteSpace(pr.TimeSource))
-      {
-        yield return $"\tВремя выдержки: {pr.TimeSource}";
-      }
-      else
-      {
-        yield return $"\tВремя выдержки не задано.";
-      }
+      yield return TimeFormatter.FormatTime(pr, "Время выдержки");
 
-      if (CommandsModel.GetRMModel() == null)
+      if (!HasRmModel())
       {
         yield return "\tМодель РМ не задана!";
         yield break;
       }
+
       if (pr.Scheme == null || pr.Scheme.IsEmpty())
       {
         yield return "\t\tТочки не заданы!";
@@ -67,83 +37,33 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗС.ToString()))
       {
         yield return "\tПроверка на сообщение:";
-
-        // Нижний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.ConnectedLowerLimitResistanceSource))
-        {
-          yield return $"\t\tНижний порог сопротивления: {pr.ConnectedLowerLimitResistanceSource}";
-        }
-
-        // Верхний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.ConnectedHigherLimitResistanceSource))
-        {
-          yield return $"\t\tВерхний порог сопротивления: {pr.ConnectedHigherLimitResistanceSource}";
-        }
-        else
-        {
-          yield return $"\t\tВерхний порог сопротивления не задан.";
-        }
-
+        yield return ResistanceFormatter.FormatResistanceLowerLimit(pr.ConnectedLowerLimitResistanceSource);
+        yield return ResistanceFormatter.FormatHigherLimitResistance(pr.ConnectedHigherLimitResistanceSource);
         yield return "\t\tЗаданные точки:";
 
-        var j = 1;
-        for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
+        foreach (var line in SchemeFormatter.FormatConnectedChains(pr.Scheme))
         {
-          var groupChains = pr.Scheme.GetPointsConnected(pr.Scheme.GroupModels[i]);
-          if (groupChains != null)
-          {
-            foreach (var chains in groupChains.ChainModels)
-            {
-              string str = string.Empty;
-              str += $"\t\t\t{j}. *";
-              j++;
-              foreach (var point in chains.PointModels)
-              {
-                str += $"{point.Mnemonic}[{point}],";
-              }
-              yield return str.Remove(str.Length - 1);
-            }
-          }
+          yield return line;
         }
       }
 
       if (pr.Scheme.GroupModels.Count > 0 && !pr.AlgorithmKey.Contains(AlgorithmKey.ЗР.ToString()))
       {
         yield return "\tПроверка на разобщение:";
-        // Нижний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.DisconnectedLowerLimitResistanceSource))
-        {
-          yield return $"\t\tНижний порог сопротивления: {pr.DisconnectedLowerLimitResistanceSource}";
-        }
-
-        // Верхний порог сопротивления
-        if (!string.IsNullOrWhiteSpace(pr.DisconnectedHigherLimitResistanceSource))
-        {
-          yield return $"\t\tВерхний порог сопротивления: {pr.DisconnectedHigherLimitResistanceSource}";
-        }
-        else
-        {
-          yield return $"\t\tВерхний порог сопротивления не задан.";
-        }
+        yield return ResistanceFormatter.FormatResistanceLowerLimit(pr.DisconnectedLowerLimitResistanceSource);
+        yield return ResistanceFormatter.FormatHigherLimitResistance(pr.DisconnectedHigherLimitResistanceSource);
         yield return "\t\tЗаданные точки:";
-        for (int i = 0; i < pr.Scheme.GroupModels.Count; i++)
-        {
-          var points = pr.Scheme.GetPointsDisconnected(pr.Scheme.GroupModels[i]);
-          if (points != null)
-          {
-            string str = string.Empty;
-            str += $"\t\t\t{i + 1}. *";
 
-            foreach (var point in points.PointModels)
-            {
-              str += $"{point.Mnemonic}[{point}]#";
-            }
-            yield return str.Remove(str.Length - 1);
-          }
+        foreach (var line in SchemeFormatter.FormatDisconnectedPoints(pr.Scheme))
+        {
+          yield return line;
         }
       }
 
-      yield return string.Empty;
+      foreach (var line in FormatEnd())
+      {
+        yield return line;
+      }
     }
   }
 }

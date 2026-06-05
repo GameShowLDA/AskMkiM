@@ -84,7 +84,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
             type = ShowMessageModel.MessageType.Error;
           }
 
-          await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {HighestBitCount}({GetBitString()})", message: $"{answer.ToString()} мА", type: type), skipPause: true);
+          await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {CurrentDischargeNumber}({GetBitString()})", message: $"{answer.ToString()} мА", type: type), skipPause: true);
 
           return type == ShowMessageModel.MessageType.Success ? true : false;
 

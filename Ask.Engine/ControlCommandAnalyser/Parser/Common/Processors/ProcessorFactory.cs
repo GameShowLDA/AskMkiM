@@ -26,7 +26,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
     /// <typeparam name="TModel">Тип модели команды с поддержкой времени.</typeparam>
     /// <returns>Экземпляр процессора времени.</returns>
     public static IParameterProcessor<TModel> Time<TModel>()
-        where TModel : BaseCommandModel, ITimeCommandModel
+        where TModel : BaseCommandModel, IHasTime
         => new TimeProcessor<TModel>();
   }
 }

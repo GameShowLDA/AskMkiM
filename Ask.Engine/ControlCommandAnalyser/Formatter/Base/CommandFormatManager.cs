@@ -2,7 +2,7 @@
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Reflection;
 
-namespace Ask.Engine.ControlCommandAnalyser.Formatter
+namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
 {
   public class CommandFormatManager
   {
@@ -14,7 +14,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       _formatters = Assembly.GetExecutingAssembly()
         .GetTypes()
         .Where(t => !t.IsAbstract && iface.IsAssignableFrom(t))
-        .Select(t => (ICommandFormatter)Activator.CreateInstance(t))
+        .Select(t => Activator.CreateInstance(t))
+        .OfType<ICommandFormatter>()
         .ToList();
     }
 

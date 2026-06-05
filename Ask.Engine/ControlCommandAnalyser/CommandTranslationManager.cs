@@ -8,9 +8,10 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
-using Ask.Engine.ControlCommandAnalyser.Formatter;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
+using Ask.Engine.ControlCommandAnalyser.Validation;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -38,7 +39,8 @@ namespace Ask.Engine.ControlCommandAnalyser
       return Assembly.GetExecutingAssembly()
         .GetTypes()
         .Where(t => !t.IsAbstract && iface.IsAssignableFrom(t))
-        .Select(t => (ICommandParser)Activator.CreateInstance(t))
+        .Select(t => Activator.CreateInstance(t))
+        .OfType<ICommandParser>()
         .ToList();
     }
 
@@ -48,7 +50,8 @@ namespace Ask.Engine.ControlCommandAnalyser
       return Assembly.GetExecutingAssembly()
         .GetTypes()
         .Where(t => !t.IsAbstract && iface.IsAssignableFrom(t))
-        .Select(t => (ICommandFormatter)Activator.CreateInstance(t))
+        .Select(t => Activator.CreateInstance(t))
+        .OfType<ICommandFormatter>()
         .ToList();
     }
 
@@ -58,7 +61,8 @@ namespace Ask.Engine.ControlCommandAnalyser
       return Assembly.GetExecutingAssembly()
         .GetTypes()
         .Where(t => !t.IsAbstract && iface.IsAssignableFrom(t))
-        .Select(t => (ICommandBody)Activator.CreateInstance(t))
+        .Select(t => Activator.CreateInstance(t))
+        .OfType<ICommandBody>()
         .ToList();
     }
 
@@ -129,6 +133,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         return CompleteCriticalTranslation(models, progress);
 
       CheckVshModel(models);
+      CkCommandValidator.ValidateVshCompatibility(models);
 
       if (HasCriticalStructuralErrors(models))
         return CompleteCriticalTranslation(models, progress);

@@ -219,11 +219,11 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// <summary>
     /// Формирует сообщение-заголовок блока проверки разряда.
     /// </summary>
-    public static ShowMessageModel BuildDischargeCheckBlock(string dischargeView)
+    public static ShowMessageModel BuildDischargeCheckBlock(int dischargeNumber, string dischargeView)
     {
       return new ShowMessageModel
       (
-          header: $"Проверка разряда",
+          header: $"Проверка разряда {dischargeNumber}",
           message: dischargeView,
           type: ShowMessageModel.MessageType.CommandBlock
       )
@@ -235,11 +235,12 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// <summary>
     /// Формирует сообщение об ошибке при проверке разряда.
     /// </summary>
-    public static ShowMessageModel BuildDischargeCheckError(string dischargeName)
+    public static ShowMessageModel BuildDischargeCheckError(int dischargeNumber, string dischargeView)
     {
       return new ShowMessageModel
       (
-          header: $"Ошибка при проверке разряда {dischargeName}",
+          header: $"Ошибка при проверке разряда {dischargeNumber}",
+          message: dischargeView,
           type: ShowMessageModel.MessageType.Error
       )
       {

@@ -45,7 +45,7 @@ namespace Ask.Engine.Tests.Metrology
         true,
         StopDelegate: async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement(userInteractionService);
+          await testMeasurement.FinalizeMeasurement(metrologicalModeRole, userInteractionService);
         });
     }
 
@@ -110,16 +110,16 @@ namespace Ask.Engine.Tests.Metrology
         return true;
       }
 
-      public override async Task FinalizeMeasurement(IUserInteractionService messageService)
+      public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
-        await base.FinalizeMeasurement(messageService);
         await PrintResult(messageService, MeasurementTypeCommand.KN_DCW);
+        await base.FinalizeMeasurement(metrologicalModeRole, messageService);
         Measurements.Clear();
       }
 
       private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
         return result;
       }
 

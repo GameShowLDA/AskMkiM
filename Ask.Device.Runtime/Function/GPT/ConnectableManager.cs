@@ -52,6 +52,12 @@ namespace Ask.Device.Runtime.Function.GPT
     /// </summary>
     public async Task<bool> DisconnectAsync(IUserInteractionService _ = null)
     {
+      if (_gptModel == null)
+      {
+        LogWarning("[DisconnectAsync] GPT79904 уже отключен.", isDeviceLog: true);
+        return true;
+      }
+
       _gptModel.Mode = BreakdownTypeMode.None;
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -111,18 +117,7 @@ namespace Ask.Device.Runtime.Function.GPT
               LogWarning($"[{_gptModel.Name}] Ошибка при обработке COM-порта: {ex.Message}", isDeviceLog: true);
             }
 
-            try
-            {
-              _gptModel.COMPort.Dispose();
-              LogInformation($"[{_gptModel.Name}] COM-порт {portName} уничтожен (Dispose).", isDeviceLog: true);
-            }
-            catch (Exception ex)
-            {
-              LogWarning($"[{_gptModel.Name}] Ошибка при Dispose(): {ex.Message}", isDeviceLog: true);
-            }
-
-            _gptModel.DeviceProtocol = null;
-            _gptModel.COMPort = null;
+            LogInformation($"[{_gptModel.Name}] COM-порт {portName} оставлен в модели для повторного открытия.", isDeviceLog: true);
           }
         }
         catch (Exception ex)
@@ -132,12 +127,11 @@ namespace Ask.Device.Runtime.Function.GPT
         }
       }
 
-      _gptModel = null;
       GC.Collect();
       GC.WaitForPendingFinalizers();
-      Task.Delay(1000).GetAwaiter().GetResult();
+      await Task.Delay(1000);
 
-      LogInformation("[DisconnectAsync] Устройство уничтожено, COM-порт освобожден.", isDeviceLog: true);
+      LogInformation("[DisconnectAsync] COM-порт GPT79904 освобожден. Модель сохранена для повторной инициализации.", isDeviceLog: true);
       return true;
     }
 
@@ -225,7 +219,13 @@ namespace Ask.Device.Runtime.Function.GPT
     /// <returns>Текущее состояние подключения.</returns>
     public string GetConnectionStatus()
     {
-      return GetConnectionStatusAsync().GetAwaiter().GetResult();
+      return _gptModel?.Mode switch
+      {
+        BreakdownTypeMode.ACW => "Режим: ACW",
+        BreakdownTypeMode.DCW => "Режим: DCW",
+        BreakdownTypeMode.IR => "Режим: IR",
+        _ => "Режим не определён",
+      };
     }
 
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -255,28 +255,6 @@ namespace Ask.Device.Runtime.Function.GPT
       }
 
       return (isValid, msg);
-    }
-
-    /// <summary>
-    /// Получает строковое представление текущего состояния устройства.
-    /// </summary>
-    /// <returns>Строка состояния для активного режима.</returns>
-    private async Task<string> GetConnectionStatusAsync()
-    {
-      switch (_gptModel.Mode)
-      {
-        case BreakdownTypeMode.ACW:
-          return _gptModel.AcwManger.Config.GetConfigurationAsTextAsync().Result;
-
-        case BreakdownTypeMode.DCW:
-          return _gptModel.DcwManger.Config.GetConfigurationAsTextAsync().Result;
-
-        case BreakdownTypeMode.IR:
-          return _gptModel.IrManger.Config.GetConfigurationAsTextAsync().Result;
-
-        default:
-          return "Режим не определён";
-      }
     }
 
     /// <summary>
