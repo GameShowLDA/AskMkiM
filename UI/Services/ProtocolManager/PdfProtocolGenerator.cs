@@ -50,7 +50,7 @@ namespace UI.Services.ProtocolManager
     private string BuildOutputPath(string programName)
     {
 
-      var baseDir = new DirectoryInfo(AppContext.BaseDirectory);
+      var baseDir = new DirectoryInfo(Directory.GetParent(AppContext.BaseDirectory)!.FullName);
       var root = baseDir?.Parent;
       if (root != null)
       {

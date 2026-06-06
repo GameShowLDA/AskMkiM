@@ -12,7 +12,7 @@ namespace UI.Components.MultiEditorMethods
   {
     public void SaveProtocol(string programName, string content)
     {
-      var directory = new DirectoryInfo(AppContext.BaseDirectory);
+      var directory = new DirectoryInfo(Directory.GetParent(AppContext.BaseDirectory)!.FullName);
       var parent1 = directory.Parent;
       var parent2 = parent1?.Parent;
       var historyPath = Path.Combine(parent2.FullName, "History");

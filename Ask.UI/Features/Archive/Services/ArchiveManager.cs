@@ -35,7 +35,7 @@ namespace Ask.UI.Features.Archive.Services
     /// <summary>
     /// Базовый путь к директории архивов.
     /// </summary>
-    private string _archivePath = Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory);
+    private string _archivePath = Path.Combine(Directory.GetParent(AppContext.BaseDirectory)!.FullName, FileLocations.ArchiveDirectory);
 
     /// <summary>
     /// Список уведомлений о нарушениях целостности архива.

@@ -19,7 +19,7 @@ namespace Ask.UI.Features.Archive.Services
     /// </summary>
     private static readonly string[] ArchiveFolderCandidates = new[]
     {
-      Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory),
+      Path.Combine(Directory.GetParent(AppContext.BaseDirectory)!.FullName, FileLocations.ArchiveDirectory),
       Path.Combine(Directory.GetCurrentDirectory(), FileLocations.ArchiveDirectory),
     };
 

@@ -1,0 +1,59 @@
+открываем в терминате проект MainWindowProgram, в терминале пишем команду
+dotnet publish -c Release -r win-x64 --self-contained true
+в папке mainwindow/bin появится папка publish
+переходим в Inno Setup, открываем файл setup.iss(если его ее нет, то в папке с решением надо создать папку Installer и в этой папке создать Setup.iss)
+
+содержимое файла:
+
+[Setup]
+AppName=АСКМ
+AppVersion=1.0
+
+DefaultDirName=D:\AskMkiM
+DefaultGroupName=АСКМ
+
+OutputDir=Output
+OutputBaseFilename=Setup_ASKM
+
+Compression=lzma
+SolidCompression=yes
+
+PrivilegesRequired=admin
+
+
+[Files]
+
+Source: "D:\NewGit\AskMkiM\MainWindow\Bin\MainWindowProgram\win-x64\publish\*"; DestDir: "{app}\Bin"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+
+[Icons]
+
+Name: "{group}\АСКМ"; Filename: "{app}\Bin\MainWindowProgram.exe"
+
+Name: "{commondesktop}\АСКМ"; Filename: "{app}\Bin\MainWindowProgram.exe"
+
+
+[Run]
+
+Filename: "{app}\Bin\MainWindowProgram.exe"; Flags: nowait postinstall skipifsilent
+
+
+[Code]
+
+function InitializeSetup(): Boolean;
+begin
+    Result := True;
+
+    if not DirExists('D:\') then
+    begin
+        MsgBox(
+            'Не найден диск D.'#13#10+
+            'Установка невозможна.',
+            mbError,
+            MB_OK);
+
+        Result := False;
+    end;
+end;
+
+если надо, то параметры можно менять. Затем нажимает Build->Compile. В паке Installer появится папка uotput, где и будет лежать установщик

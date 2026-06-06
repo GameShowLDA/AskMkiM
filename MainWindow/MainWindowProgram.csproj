@@ -8,14 +8,16 @@
 		<UseWPF>true</UseWPF>
 		<SignAssembly>False</SignAssembly>
 		<ApplicationIcon>Resources\АСКМ.ico</ApplicationIcon>
+	  <!--
 		<PackageOutputPath>$(OutputPath)</PackageOutputPath>
 		<OutputPath>D:\AskMkiM\Bin\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		-->
 
 		<SelfContained>true</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-		<PublishSingleFile>true</PublishSingleFile>
+		<PublishSingleFile>false</PublishSingleFile>
 		<PublishTrimmed>false</PublishTrimmed>
 
 		<Version>1.0.0</Version>
@@ -76,26 +78,6 @@
 		<Content Include="Resources\АСКМ.ico" />
 	</ItemGroup>
 
-	<Target Name="FixPublishOutput" AfterTargets="Publish">
-		<ItemGroup>
-			<PublishFiles Include="$(PublishDir)**\*" />
-		</ItemGroup>
-
-		<Move SourceFiles="@(PublishFiles)" DestinationFolder="C:\AskMkiM\Bin\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
-		<RemoveDir Directories="$(PublishDir)" />
-	</Target>
-
-	<Target Name="CopyTestsNextToBin" AfterTargets="Build">
-		<ItemGroup>
-			<TestFiles Include="Тесты ПК\**\*" />
-		</ItemGroup>
-
-		<Copy
-		  SourceFiles="@(TestFiles)"
-		  DestinationFiles="@(TestFiles->'$(OutputPath)..\Тесты ПК\%(RecursiveDir)%(Filename)%(Extension)')"
-		  SkipUnchangedFiles="true" />
-	</Target>
-
+	
 
 </Project>
