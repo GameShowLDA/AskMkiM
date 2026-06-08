@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Com.Extensions;
 using Ask.Device.Communication.Common.Threading;
+using Ask.Diagnostics.Services;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
@@ -119,6 +120,7 @@ namespace Ask.Device.Communication.Com.Protocols
     private void SendCommand(string command)
     {
       LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" в порт {_serialPort.PortName}", isDeviceLog: true);
+      DiagnosticCommandHistory.RecordCommand(_device.Name, command);
       _serialPort.DiscardInBuffer();
       _serialPort.DiscardOutBuffer();
       _serialPort.Write(command + "\n");
@@ -167,6 +169,7 @@ namespace Ask.Device.Communication.Com.Protocols
       else
       {
         LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
+        DiagnosticCommandHistory.RecordResponse(_device.Name, response);
       }
 
       return response;
