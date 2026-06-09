@@ -121,5 +121,27 @@ namespace Ask.Core.Services.Errors.Translation
       Code = WarningCode.Gen_VshCommandAddedAutomatically,
       Description = $"Команда ВШ не была указана в программе контроля и была добавлена автоматически.",
     };
+
+    /// <summary>
+    /// Предупреждение: напряжение игнорируется.
+    /// </summary>
+    public static WarningItem IgnoreVoltage(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = WarningCode.Gen_IgnoreVoltage,
+      Description = $"Значение напряжения игнорируется",
+    };
+
+    /// <summary>
+    /// Предупреждение: сила тока игнорируется.
+    /// </summary>
+    public static WarningItem IgnoreAmperage(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = WarningCode.Gen_IgnoreVoltage,
+      Description = $"Значение силы тока игнорируется",
+    };
   }
 }

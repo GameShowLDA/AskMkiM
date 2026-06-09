@@ -119,7 +119,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
         return result;
       }
 

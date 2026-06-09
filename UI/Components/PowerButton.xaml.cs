@@ -2,9 +2,11 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
@@ -223,13 +225,98 @@ namespace UI.Components
       if (!await model.PowerManager.VerifyPowerAsync(null))
       {
         await model.PowerManager.StartPowerAsync();
-        await ShowCountdownMessageAsync(5, "Ожидание загрузки системы");
+        await ShowCountdownMessageAsync(5, "Питание включено. Ожидание загрузки системы перед инициализацией и сбросом устройств");
       }
+
+      await ResetConfiguredDevicesAfterPowerStartAsync();
 
       if (!await TryConnectAsync())
       {
         await HandleConnectionErrorAsync();
       }
+    }
+
+    private async Task ResetConfiguredDevicesAfterPowerStartAsync()
+    {
+      var failedDevices = new List<string>();
+      var devices = await GetStartupResetDevicesAsync();
+
+      if (devices.Count == 0)
+      {
+        return;
+      }
+
+      MessageEventAdapter.RaiseInfoMessage("Инициализация устройств перед автоматическим сбросом.");
+
+      foreach (var device in devices)
+      {
+        string deviceName = GetDeviceDisplayName(device);
+
+        try
+        {
+          MessageEventAdapter.RaiseInfoMessage($"Инициализация устройства: {deviceName}");
+          var initialized = await device.ConnectableManager.InitializeAsync();
+          if (!initialized.Connect)
+          {
+            failedDevices.Add($"{deviceName}: {initialized.Answer}");
+            continue;
+          }
+
+          MessageEventAdapter.RaiseInfoMessage($"Сброс устройства: {deviceName}");
+          bool reset = await device.ConnectableManager.ResetAsync();
+          if (!reset)
+          {
+            failedDevices.Add($"{deviceName}: сброс не выполнен");
+          }
+        }
+        catch (Exception ex)
+        {
+          failedDevices.Add($"{deviceName}: {ex.Message}");
+        }
+      }
+
+      MessageEventAdapter.RaiseClearMessage();
+
+      if (failedDevices.Count > 0)
+      {
+        ShowStartupResetWarning(failedDevices);
+      }
+    }
+
+    private async Task<List<IAttachableDevice>> GetStartupResetDevicesAsync()
+    {
+      var devices = new List<IAttachableDevice>();
+      int numberChassis = model.Number;
+
+      devices.AddRange(await RelaySwitchModules.GetDevicesByNumberChassisAsync(numberChassis));
+      devices.AddRange(await SwitchingDevices.GetDevicesByNumberChassisAsync(numberChassis));
+      devices.AddRange(await PowerSourceModules.GetDevicesByNumberChassisAsync(numberChassis));
+      devices.AddRange(await FastMeters.GetDevicesByNumberChassisAsync(numberChassis));
+      devices.AddRange(await BreakdownTesters.GetDevicesByNumberChassisAsync(numberChassis));
+
+      return devices
+        .Where(device => device.ConnectableManager != null && device is not DeviceWithCOM)
+        .GroupBy(device => (device.DeviceType, device.NumberChassis, device.Number, device.ConnectionDetails))
+        .Select(group => group.First())
+        .ToList();
+    }
+
+    private static string GetDeviceDisplayName(IAttachableDevice device)
+    {
+      string name = string.IsNullOrWhiteSpace(device.Name)
+        ? device.DeviceType.ToString()
+        : device.Name;
+
+      return $"{name} №{device.Number} (шасси {device.NumberChassis})";
+    }
+
+    private static void ShowStartupResetWarning(IEnumerable<string> failedDevices)
+    {
+      string devices = string.Join(Environment.NewLine, failedDevices.Select(device => $"• {device}"));
+      string message = $"При включении питания не удалось выполнить сброс следующих устройств:{Environment.NewLine}{Environment.NewLine}{devices}{Environment.NewLine}{Environment.NewLine}Питание системы осталось включенным.";
+
+      Application.Current.Dispatcher.Invoke(() =>
+        MessageBoxCustom.Show(message, "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning));
     }
 
     /// <summary>

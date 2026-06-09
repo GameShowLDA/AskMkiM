@@ -164,8 +164,24 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// </summary>
     static public async Task StopMeasure(IBreakdownTester breakDown)
     {
-      string response = await breakDown.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF");
-      await breakDown.DeviceProtocol.QueryAsync(response);
+      var stopCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF";
+      var statusCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ?";
+
+      while (true)
+      {
+        await breakDown.DeviceProtocol.QueryAsync(stopCommand);
+        await Task.Delay(100);
+
+        var answerDevice = await breakDown.DeviceProtocol.QueryAsync(statusCommand, responseDelay: 100, timeout: 1000);
+
+        if (!string.IsNullOrWhiteSpace(answerDevice)
+          && answerDevice.Contains("TEST OFF", StringComparison.OrdinalIgnoreCase))
+        {
+          return;
+        }
+
+        await Task.Delay(100);
+      }
     }
   }
 }

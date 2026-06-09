@@ -52,6 +52,14 @@ namespace Ask.Core.Services.Errors.Models
     [WarningCodeTag("WRNGEN008")]
     Gen_VshCommandAddedAutomatically,
 
+    /// <summary> Значение напряжения игнорируется. </summary>
+    [WarningCodeTag("WRNGEN009")]
+    Gen_IgnoreVoltage,
+
+    /// <summary> Значение силы тока игнорируется. </summary>
+    [WarningCodeTag("WRNGEN010")]
+    Gen_IgnoreAmperage,
+
     #endregion
 
     #region Режим УМ

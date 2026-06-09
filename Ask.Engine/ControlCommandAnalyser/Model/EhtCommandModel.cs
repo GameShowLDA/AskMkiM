@@ -3,6 +3,7 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -14,7 +15,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [AllowedKeys(Д)]
-  public class EhtCommandModel : BaseCommandModel, IHasScheme, ITimeCommandModel
+  public class EhtCommandModel : BaseCommandModel, IHasScheme, IHasTime, IHasResistanceLimits, IHasCableResistance, IHasUnparsedParameters, IHasAmperage
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.
@@ -93,6 +94,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// Единицы измерения силы тока.
     /// </summary>
     public string? AmperageUnit { get; set; }
+    public bool HasAmperage { get; set; } = true;
 
     /// <summary>
     /// Значение времени (например, "1c").

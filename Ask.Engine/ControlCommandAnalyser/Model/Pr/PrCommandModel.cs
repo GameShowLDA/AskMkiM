@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
   [AllowedKeys(К, ЗР, ЗС, С, П, И, Т, Г, Т1)]
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   [ResistanceRange(0, 100000.0, 10.0)]
-  public class PrCommandModel : BaseCommandModel, IError, IHasScheme, ITimeCommandModel
+  public class PrCommandModel : BaseCommandModel, IError, IHasScheme, IHasAmperage, IHasTime, IHasUnparsedParameters
   {
     /// <summary>
     /// Мнемоническое обозначение измерительной команды.
@@ -102,5 +102,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
     /// Сбор данных в сообщение.
     /// </summary>
     public override IDislpayInfo BuildDislpayInfo => new PrMessageBuild();
+
+    public double? Amperage { get; set; }
+    public string? AmperageSource { get; set; }
+    public bool HasAmperage { get; set; } = false;
+    public string? AmperageUnit { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
 }

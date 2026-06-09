@@ -1,56 +1,34 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  internal class PtCommandFormatter : ICommandFormatter
+  internal class PtCommandFormatter : CommandFormatter<PtCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is PtCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(PtCommandModel pt)
     {
-      if (model is not PtCommandModel pt)
-        yield break;
-
-      var firstLine = $"{pt.CommandNumber} {pt.Mnemonic}";
-      yield return firstLine;
-
-      // Ключи команды
-      if (pt.AlgorithmKey.Count > 0)
+      foreach (var line in FormatCommandStart(pt))
       {
-        yield return $"\tКлючи команды: {string.Join(", ", pt.AlgorithmKey)}";
-      }
-      else
-      {
-        yield return $"\tКлючи команды не указаны.";
+        yield return line;
       }
 
-      if (!string.IsNullOrWhiteSpace(pt.TimeSource))
+      yield return TimeFormatter.FormatTime(pt, "Время подключения точек");
+
+      foreach (var line in FormatBusPointGroups(pt.BusPointsDictionary, "\tТочки, подключаемые к шине"))
       {
-        yield return $"\tВремя подключения точек: {pt.TimeSource}";
+        yield return line;
       }
 
-      foreach (var bus in pt.BusPointsDictionary)
+      foreach (var line in FormatComments(pt))
       {
-        yield return $"\tТочки, подключаемые к шине: {bus.Key}";
-        foreach (var point in bus.Value)
-        {
-          yield return $"\t\t{point.Mnemonic} = {point.ToString()}";
-        }
+        yield return line;
       }
 
-      if (pt.Comment.Count > 0)
+      foreach (var line in FormatEnd())
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in pt.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
-
-      yield return string.Empty;
     }
   }
 }

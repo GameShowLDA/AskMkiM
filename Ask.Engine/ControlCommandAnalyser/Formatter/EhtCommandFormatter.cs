@@ -1,116 +1,39 @@
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  internal class EhtCommandFormatter : ICommandFormatter
+  internal class EhtCommandFormatter : CommandFormatter<EhtCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is EhtCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(EhtCommandModel eht)
     {
-      if (model is not EhtCommandModel eht)
-        yield break;
-
-      var firstLine = $"{eht.CommandNumber} {eht.Mnemonic}";
-      yield return firstLine;
-
-      if (!string.IsNullOrWhiteSpace(eht.UnparsedParameters))
-        yield return $"\t{eht.UnparsedParameters}";
-
-      // Ключи команды
-      if (eht.AlgorithmKey.Count > 0)
+      foreach (var line in FormatCommandStart(eht))
       {
-        yield return $"\tКлючи команды: {string.Join(", ", eht.AlgorithmKey)}";
-      }
-      else
-      {
-        yield return $"\tКлючи команды не указаны.";
+        yield return line;
       }
 
-      // Нижний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(eht.LowerLimitResistanceSource))
+      yield return ResistanceFormatter.FormatResistanceLowerLimit(eht);
+      yield return ResistanceFormatter.FormatHigherLimitResistance(eht);
+      yield return ResistanceFormatter.FormatCableResistance(eht);
+
+      foreach (var line in FormatComments(eht))
       {
-        yield return $"\tНижний порог сопротивления: {eht.LowerLimitResistanceSource}";
+        yield return line;
       }
 
-      // Верхний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(eht.HigherLimitResistanceSource))
+      yield return TimeFormatter.FormatTime(eht, "Время выдержки");
+
+      foreach (var line in FormatSchemeWithRmCheck(eht, "\tПроверяемые точки:", "\tМодель РМ не задана!"))
       {
-        yield return $"\tВерхний порог сопротивления: {eht.HigherLimitResistanceSource}";
-      }
-      else
-      {
-        yield return $"\tВерхний порог сопротивления не задан.";
+        yield return line;
       }
 
-      // Верхний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(eht.CabelResistanceSource))
+      foreach (var line in FormatEnd())
       {
-        yield return $"\tСопротивление проводов: {eht.CabelResistanceSource}";
+        yield return line;
       }
-      else
-      {
-        yield return $"\tСопротивление проводов не задано.";
-      }
-
-      if (eht.Comment.Count > 0)
-      {
-        yield return $"\tКомментарии:";
-        foreach (var line in eht.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
-      }
-
-      // Время
-      if (!string.IsNullOrWhiteSpace(eht.TimeSource))
-      {
-        yield return $"\tВремя выдержки: {eht.TimeSource}";
-      }
-      else
-      {
-        yield return $"\tВремя выдержки не задано";
-      }
-
-      yield return "\tПроверяемые точки:";
-      if (CommandsModel.GetRMModel() == null)
-      {
-        yield return "\tМодель РМ не задана!";
-        yield break;
-      }
-      if (eht.Scheme == null || eht.Scheme.IsEmpty())
-      {
-        yield return "\t\tТочки не заданы!";
-        yield break;
-      }
-
-      if (eht.Scheme.GroupModels.Count > 0)
-      {
-        for (int i = 0; i < eht.Scheme.GroupModels.Count; i++)
-        {
-          var groupChains = eht.Scheme.GetPointsConnected(eht.Scheme.GroupModels[i]);
-          if (groupChains != null)
-          {
-            foreach (var chains in groupChains.ChainModels)
-            {
-              string str = string.Empty;
-              str += $"\t\t{i + 1}. *";
-
-              foreach (var point in chains.PointModels)
-              {
-                str += $"{point.Mnemonic}[{point}],";
-              }
-              yield return str.Remove(str.Length - 1);
-            }
-          }
-        }
-      }
-
-      yield return string.Empty;
     }
   }
 }

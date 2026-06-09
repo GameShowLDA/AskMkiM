@@ -1,68 +1,38 @@
-using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
-using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  public class NeCommandFormatter : ICommandFormatter
+  public class NeCommandFormatter : CommandFormatter<NeCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is NeCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(NeCommandModel ne)
     {
-      if (model is not NeCommandModel ne)
-        yield break;
-
-      // Первая строка: номер, мнемоника, нераспознанные параметры (если есть)
-      var firstLine = $"{ne.CommandNumber} {ne.Mnemonic}";
-      yield return firstLine;
-
-      if (!string.IsNullOrWhiteSpace(ne.UnparsedParameters))
-        yield return $"\t{ne.UnparsedParameters}";
-
-      // Ключи команды
-      if (ne.AlgorithmKey.Count > 0)
+      foreach (var line in FormatCommandStart(ne))
       {
-        yield return $"\tКлючи команды: {string.Join(", ", ne.AlgorithmKey)}";
-      }
-      else
-      {
-        yield return $"\tКлючи команды не указаны.";
+        yield return line;
       }
 
-      // TODO: заменить на точный измеритель в дальнейшем
-      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
-      //var minResistance = Measurement.MeasurementTypeCommand.PR.GetDisplayInfo().LowerLimit;
-      if (meter == null)
+      foreach (var line in FormatMeter())
       {
-        LogError($"Не найден измеритель.");
-      }
-      else
-      {
-        yield return $"\tИспользуемый измеритель: {meter.Name}";
+        yield return line;
       }
 
-      if (ne.Comment.Count > 0)
+      foreach (var line in FormatComments(ne))
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in ne.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
 
-      if (CommandsModel.GetRMModel() == null)
+      if (!HasRmModel())
       {
         yield return "\tМодель РМ не задана!";
         yield break;
       }
+
       if (ne.Scheme == null || ne.Scheme.IsEmpty())
       {
         yield return "\t\tТочки не заданы!";
@@ -70,70 +40,48 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
       }
 
       yield return "\tПроверка диода в прямом направлении:";
-
-      // Нижний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(ne.LowerLimitVoltageSource))
-      {
-        yield return $"\t\tНижний порог напряжения: {ne.LowerLimitVoltageSource}";
-      }
-      else
-      {
-        yield return $"\t\tНижний порог напряжения не задан!";
-      }
-
-      // Верхний порог сопротивления
-      if (!string.IsNullOrWhiteSpace(ne.HigherLimitVoltageSource))
-      {
-        yield return $"\t\tВерхний порог напряжения: {ne.HigherLimitVoltageSource}";
-      }
-      else
-      {
-        yield return $"\t\tВерхний порог напряжения не задан!";
-      }
+      yield return VoltageFormatter.FormatVoltageLowerLimit(ne, "\t\t");
+      yield return VoltageFormatter.FormatVoltageHigherLimit(ne, "\t\t");
 
       if (!ne.AlgorithmKey.Contains(AlgorithmKey.Н.ToString()))
       {
         yield return "\tПроверка диода в обратном направлении:";
-
-        // Напряжение
-        if (!string.IsNullOrWhiteSpace(ne.VoltageSource))
-        {
-          yield return $"\t\tНапряжение: {ne.VoltageSource}";
-        }
-        else
-        {
-          yield return $"\t\tНапряжение не задано!";
-        }
+        yield return VoltageFormatter.FormatVoltage(ne);
       }
 
       if (ne.Scheme.GroupModels.Count > 0)
       {
         yield return "\t\tСписок проверяемых точек:";
-        if (ne.ElementEnablingType.Count > 0)
+
+        foreach (var line in SchemeFormatter.FormatConnectedChains(ne.Scheme, index => FormatElementPrefix(ne, index)))
         {
-          var j = 1;
-          for (int i = 0; i < ne.Scheme.GroupModels.Count; i++)
-          {
-            var groupChains = ne.Scheme.GetPointsConnected(ne.Scheme.GroupModels[i]);
-            if (groupChains != null)
-            {
-              foreach (var chains in groupChains.ChainModels)
-              {
-                string str = string.Empty;
-                str += $"\t\t\t{j}. *{ne.ElementEnablingType[j - 1].Item2.GetDescription()}";
-                j++;
-                foreach (var point in chains.PointModels)
-                {
-                  str += $"{point.Mnemonic}[{point}],";
-                }
-                yield return str.Remove(str.Length - 1);
-              }
-            }
-          }
+          yield return line;
         }
       }
 
-      yield return string.Empty;
+      foreach (var line in FormatEnd())
+      {
+        yield return line;
+      }
+    }
+
+    private static IEnumerable<string> FormatMeter()
+    {
+      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      if (meter == null)
+      {
+        LogError("Не найден измеритель.");
+        yield break;
+      }
+
+      yield return $"\tИспользуемый измеритель: {meter.Name}";
+    }
+
+    private static string FormatElementPrefix(NeCommandModel ne, int index)
+    {
+      return index < ne.ElementEnablingType.Count
+        ? ne.ElementEnablingType[index].Item2.GetDescription()
+        : string.Empty;
     }
   }
 }

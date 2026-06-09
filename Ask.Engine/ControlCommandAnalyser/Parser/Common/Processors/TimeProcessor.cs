@@ -14,7 +14,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
   /// </summary>
   /// <typeparam name="TModel">Тип модели команды с поддержкой времени.</typeparam>
   internal class TimeProcessor<TModel> : IParameterProcessor<TModel>
-      where TModel : BaseCommandModel, ITimeCommandModel
+      where TModel : BaseCommandModel, IHasTime
   {
     /// <summary>
     /// Выполняет разбор параметра времени и обновляет модель команды.

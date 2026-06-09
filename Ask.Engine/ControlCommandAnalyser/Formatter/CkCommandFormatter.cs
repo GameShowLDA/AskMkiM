@@ -1,38 +1,32 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter
 {
-  internal class CkCommandFormatter : ICommandFormatter
+  internal class CkCommandFormatter : CommandFormatter<CkCommandModel>
   {
-    public bool CanFormat(BaseCommandModel model) => model is CkCommandModel;
-
-    public IEnumerable<string> Format(BaseCommandModel model)
+    protected override IEnumerable<string> Format(CkCommandModel ck)
     {
-      if (model is not CkCommandModel ck)
-        yield break;
-
-      var firstLine = $"{ck.CommandNumber} {ck.Mnemonic}";
-      yield return firstLine;
-
-      yield return $"\tСбрасываемые точки с шин: ";
-      foreach (var bus in ck.BusList)
+      foreach (var line in FormatCommandStart(ck))
       {
-        yield return $"\t\t{bus}";
+        yield return line;
       }
 
-      if (ck.Comment.Count > 0)
+      foreach (var line in SchemeFormatter.FormatBusPoints(ck.BusList))
       {
-        yield return $"\tКомментарии:";
-        foreach (var line in ck.Comment)
-        {
-          var trimmed = line.Trim();
-          if (!string.IsNullOrEmpty(trimmed))
-            yield return $"\t\t{trimmed}";
-        }
+        yield return line;
       }
 
-      yield return string.Empty;
+      foreach (var line in FormatComments(ck))
+      {
+        yield return line;
+      }
+
+      foreach (var line in FormatEnd())
+      {
+        yield return line;
+      }
     }
   }
 }
