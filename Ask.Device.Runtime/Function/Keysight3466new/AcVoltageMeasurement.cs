@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -74,6 +75,34 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
       }
 
       throw new FormatException($"Неверный формат ответа прибора при измерении AC-напряжения: '{response}'.");
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> SetVoltageRangeAsync(VoltageRange mode, IUserInteractionService? userMessageService = null)
+    {
+      if (mode == VoltageRange.V_1000)
+      {
+        return false;
+      }
+
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      if (_device.TypeMode != MultimeterTypeMode.AcVoltage)
+      {
+        throw new InvalidOperationException("Прибор не установлен в режим измерения переменного напряжения.");
+      }
+
+      await _device.DeviceProtocol.QueryAsync($"SENS:VOLT:AC:RANGE {mode.GetDisplayName()}");
+      var answer = await _device.DeviceProtocol.QueryAsync(mode == VoltageRange.Auto ? "SENS:VOLT:AC:RANGE:AUTO?" : "SENS:VOLT:AC:RANGE?", timeout: 1000);
+      if (answer.Contains(mode.GetDisplayDescription()))
+      {
+        return true;
+      }
+
+      return false;
     }
   }
 }

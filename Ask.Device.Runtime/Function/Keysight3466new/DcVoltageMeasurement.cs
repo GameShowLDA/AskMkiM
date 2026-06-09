@@ -102,7 +102,6 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
       var answer = await _device.DeviceProtocol.QueryAsync(mode == VoltageRange.Auto ? "SENS:VOLT:DC:RANGE:AUTO?" : "SENS:VOLT:DC:RANGE?", timeout: 1000);
       if (answer.Contains(mode.GetDisplayDescription()))
       {
-        _device.TypeMode = MultimeterTypeMode.DcVoltage;
         return true;
       }
 

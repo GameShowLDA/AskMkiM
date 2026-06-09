@@ -84,6 +84,8 @@ namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
       return result;
     }
 
+    //TODO: Возможно нужно будет реализовать лучше SetVoltageRangeAsync в холостом.
+
     /// <inheritdoc />
     public async Task<bool> SetVoltageRangeAsync(VoltageRange mode, IUserInteractionService? userMessageService = null)
     {

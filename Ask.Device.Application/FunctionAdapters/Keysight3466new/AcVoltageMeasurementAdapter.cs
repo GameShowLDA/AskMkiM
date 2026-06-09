@@ -82,5 +82,10 @@ namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
 
       return result;
     }
+
+    public async Task<bool> SetVoltageRangeAsync(VoltageRange mode, IUserInteractionService? userMessageService = null)
+    {
+      return true;
+    }
   }
 }
