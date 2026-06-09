@@ -163,8 +163,8 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_SaveAs}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SaveFileAs" x:Name="saveAsMenuItem" Visibility="Collapsed" Command="{Binding File.SaveFileAsCommand}" utilities:HelpProvider.HelpKey="FuncSaveAs"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_OpenFolder}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFolder" x:Name="openFolderMenuItem" Visibility="Collapsed" Command="{Binding File.OpenFolderCommand}" utilities:HelpProvider.HelpKey="FuncOpenFolderInExplorer"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Print}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="PrintFile" x:Name="printMenuItem" Visibility="Collapsed" Command="{Binding File.PrintFileCommand}" utilities:HelpProvider.HelpKey="FuncPrint"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" utilities:HelpProvider.HelpKey="FuncSearch"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_SearchReplace}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SearchReplace" x:Name="searchReplaceMenuItem" Visibility="Collapsed" Command="{Binding File.SearchReplaceFileCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Search}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SearchFile" x:Name="searchMenuItem" Visibility="Collapsed" Command="{Binding File.SearchFileCommand}" utilities:HelpProvider.HelpKey="FuncSearchAndReplace"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_SearchReplace}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="SearchReplace" x:Name="searchReplaceMenuItem" Visibility="Collapsed" Command="{Binding File.SearchReplaceFileCommand}" utilities:HelpProvider.HelpKey="FuncReplace"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CompareFile" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}"/>
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
@@ -238,7 +238,7 @@
 
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_Cross_MKR}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="CrossTestMkrMenuItem" Command="{Binding Test.CrossTestMkrExecutorCommand}" utilities:HelpProvider.HelpKey="CrossTestMkr"/>
 
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Relay_Contact_Resist_RKOMM}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="RelayContactResistMenuItem" Command="{Binding Test.RelayContactResistExecutorCommand}"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Relay_Contact_Resist_RKOMM}, Path=Value}" Style="{DynamicResource StyleMenuItem}"  Name="RelayContactResistMenuItem" Command="{Binding Test.RelayContactResistExecutorCommand}" utilities:HelpProvider.HelpKey="RkommTestMkr"/>
 
                         </MenuItem>
 
