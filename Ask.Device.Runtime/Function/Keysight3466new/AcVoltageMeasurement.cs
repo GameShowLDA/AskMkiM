@@ -85,6 +85,11 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         return false;
       }
 
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
       if (!_device.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");

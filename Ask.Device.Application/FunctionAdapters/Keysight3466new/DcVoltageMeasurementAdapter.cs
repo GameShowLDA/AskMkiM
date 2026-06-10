@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Multimeter;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -84,12 +85,33 @@ namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
       return result;
     }
 
-    //TODO: Возможно нужно будет реализовать лучше SetVoltageRangeAsync в холостом.
-
     /// <inheritdoc />
     public async Task<bool> SetVoltageRangeAsync(VoltageRange mode, IUserInteractionService? userMessageService = null)
     {
-      return true;
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = ExecutionConfig.GetIsIdleModeEnabled() || await _measurement.SetVoltageRangeAsync(mode);
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка диапазона измерения постоянного напряжения",
+            $"Диапазон: {mode.GetDisplayName()}",
+            succes,
+            1,
+            userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw DcExceptionFactory.SetVoltageRangeFailed(_device.Name, _device.NumberChassis, _device.Number, mode.GetDisplayName());
+      }
+
+      return result;
     }
   }
 }
