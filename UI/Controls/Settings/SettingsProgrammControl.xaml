@@ -195,7 +195,7 @@
                         </Grid>
                     </Border>
 
-                    <AskMkiConfig:AskMkiConfigControl Grid.Row="1" x:Name="AskMkiConfigManager"/>
+                    <!--<AskMkiConfig:AskMkiConfigControl Grid.Row="1" x:Name="AskMkiConfigManager"/>-->
 
                     <Execution:ExecutionControl Grid.Row="2" x:Name="ExecutionManager"/>
 
