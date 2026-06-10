@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.AskMkiConfig;
 
@@ -74,8 +75,9 @@ public partial class AskMkiConfigControl : UserControl
 
       ProfileGroupsScrollViewer.MaxHeight = Math.Max(160, availableHeight);
     }
-    catch
+    catch (Exception ex)
     {
+      LogException(ex, customMessage: "AskMkiConfigControl.UpdateProfileGroupsScrollHeight");
       ProfileGroupsScrollViewer.MaxHeight = 600;
     }
   }
@@ -317,6 +319,7 @@ public partial class AskMkiConfigControl : UserControl
     }
     catch (Exception ex)
     {
+      LogException(ex, customMessage: "AskMkiConfigControl.SaveConfigButton_Click");
       MessageBox.Show(ex.Message, UiString("AskMki.Message.SaveErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
     }
   }
@@ -359,6 +362,7 @@ public partial class AskMkiConfigControl : UserControl
       _editorGroups = new ObservableCollection<AskMkiSettingGroup>();
       ProfileGroupsItemsControl.ItemsSource = _editorGroups;
       SetUnsavedChanges(false);
+      LogException(ex, customMessage: "AskMkiConfigControl.TryLoadConfigIntoEditor");
       MessageBox.Show(ex.Message, UiString("AskMki.Message.LoadErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
     }
   }

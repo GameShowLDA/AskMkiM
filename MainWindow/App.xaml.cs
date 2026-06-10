@@ -2,9 +2,11 @@ using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Diagnostics.Abstractions;
 using Ask.Support;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Init;
+using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -109,7 +111,7 @@ namespace MainWindowProgram
 
         LogError("FATAL OnStartup exception");
         LogError(ex.ToString());
-        SaveFatalInfo(ex, "OnStartup");
+        CreateCrashPackage(ex, "OnStartup");
         Environment.FailFast("Fatal startup error", ex);
 
         Message.MessageBoxCustom.Show("Произошла ошибка запуска приложения. Сообщите о данной ошибке вашему администратору или повторите попытку.", "FATAL ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -126,7 +128,7 @@ namespace MainWindowProgram
         LogError("GLOBAL UI EXCEPTION:");
         LogError(e.Exception.ToString());
 
-        SaveFatalInfo(e.Exception, "DispatcherUnhandledException");
+        CreateCrashPackage(e.Exception, "DispatcherUnhandledException");
       };
 
       AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -136,7 +138,7 @@ namespace MainWindowProgram
         if (e.ExceptionObject is Exception ex)
         {
           LogError(ex.ToString());
-          SaveFatalInfo(ex, "AppDomain.UnhandledException");
+          CreateCrashPackage(ex, "AppDomain.UnhandledException");
         }
         else
         {
@@ -149,10 +151,32 @@ namespace MainWindowProgram
         LogError("GLOBAL TASK EXCEPTION:");
         LogError(e.Exception.ToString());
 
-        SaveFatalInfo(e.Exception, "TaskScheduler.UnobservedTaskException");
+        CreateCrashPackage(e.Exception, "TaskScheduler.UnobservedTaskException");
 
         e.SetObserved();
       };
+    }
+
+    private static void CreateCrashPackage(Exception ex, string source)
+    {
+      try
+      {
+        ex.Data["CrashSource"] = source;
+        var service = PreStartupInitializer.AppHost?.Services.GetService<ICrashPackageService>();
+        if (service == null)
+        {
+          SaveFatalInfo(ex, source);
+          return;
+        }
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        _ = service.CreateAsync(ex, cts.Token).GetAwaiter().GetResult();
+      }
+      catch (Exception packageException)
+      {
+        LogException(packageException, customMessage: $"Crash package creation failed for {source}");
+        SaveFatalInfo(ex, source);
+      }
     }
 
     private static void SaveFatalInfo(Exception ex, string source)

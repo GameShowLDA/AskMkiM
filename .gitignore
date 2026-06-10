@@ -419,3 +419,4 @@ tmpinspect_margin*/
 .dotnet/
 /_build_check
 /_build
+/.codex-build

@@ -3,8 +3,39 @@ using System.Runtime.CompilerServices;
 
 namespace Ask.LogLib
 {
+  public sealed class LoggedExceptionEventArgs : EventArgs
+  {
+    public LoggedExceptionEventArgs(Exception exception, string? customMessage, bool isDeviceLog, string callerFilePath, int lineNumber, bool onlyProjectStack)
+    {
+      Exception = exception;
+      CustomMessage = customMessage;
+      IsDeviceLog = isDeviceLog;
+      CallerFilePath = callerFilePath;
+      LineNumber = lineNumber;
+      OnlyProjectStack = onlyProjectStack;
+    }
+
+    public Exception Exception { get; }
+
+    public string? CustomMessage { get; }
+
+    public bool IsDeviceLog { get; }
+
+    public string CallerFilePath { get; }
+
+    public int LineNumber { get; }
+
+    public bool OnlyProjectStack { get; }
+  }
+
   static public class LoggerUtility
   {
+    private static readonly AsyncLocal<bool> IsNotifyingExceptionLogged = new();
+
+    public static event EventHandler<LoggedExceptionEventArgs>? ExceptionLogged;
+
+    public static Action<LoggedExceptionEventArgs>? ExceptionLoggedCallback { get; set; }
+
     /// <summary>
     /// Логирует информационное сообщение.
     /// </summary>
@@ -74,7 +105,7 @@ namespace Ask.LogLib
     /// <param name="file">Файл, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="line">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="onlyProjectStack">Если true, логируется только часть стека, относящаяся к проекту.</param>
-    public static void LogException(Exception ex, string customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
+    public static void LogException(Exception ex, string? customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
     {
       if (ex.Message.Contains("The operation was canceled."))
       {
@@ -91,6 +122,7 @@ namespace Ask.LogLib
       if (!onlyProjectStack)
       {
         logger.Error(ex, message);
+        NotifyExceptionLogged(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
         return;
       }
 
@@ -102,6 +134,7 @@ namespace Ask.LogLib
       string filtered = string.Join(Environment.NewLine, filteredStack);
 
       logger.Error($"{message}{Environment.NewLine}{filtered}");
+      NotifyExceptionLogged(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
     }
 
     /// <summary>
@@ -114,7 +147,7 @@ namespace Ask.LogLib
     /// <param name="file">Файл, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="line">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
     /// <param name="onlyProjectStack">Если true, логируется только часть стека, относящаяся к проекту.</param>
-    public static void LogException(string userHint, Exception ex, string customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
+    public static void LogException(string userHint, Exception ex, string? customMessage = null, bool isDeviceLog = false, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0, bool onlyProjectStack = false)
     {
       var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
       if (!string.IsNullOrWhiteSpace(userHint))
@@ -142,6 +175,50 @@ namespace Ask.LogLib
       var safeMessage = message ?? string.Empty;
       var safePath = string.IsNullOrWhiteSpace(filePath) ? "unknown" : TrimPathToProject(filePath);
       return $"[{safePath}:{lineNumber}] {safeMessage}";
+    }
+
+    private static void NotifyExceptionLogged(Exception exception, string? customMessage, bool isDeviceLog, string file, int line, bool onlyProjectStack)
+    {
+      var handler = ExceptionLogged;
+      var callback = ExceptionLoggedCallback;
+      if ((handler == null && callback == null) || IsNotifyingExceptionLogged.Value)
+      {
+        return;
+      }
+
+      try
+      {
+        IsNotifyingExceptionLogged.Value = true;
+        var args = new LoggedExceptionEventArgs(exception, customMessage, isDeviceLog, file, line, onlyProjectStack);
+
+        try
+        {
+          callback?.Invoke(args);
+        }
+        catch
+        {
+        }
+
+        if (handler == null)
+        {
+          return;
+        }
+
+        foreach (EventHandler<LoggedExceptionEventArgs> subscriber in handler.GetInvocationList())
+        {
+          try
+          {
+            subscriber(null, args);
+          }
+          catch
+          {
+          }
+        }
+      }
+      finally
+      {
+        IsNotifyingExceptionLogged.Value = false;
+      }
     }
 
     private static string TrimPathToProject(string filePath)

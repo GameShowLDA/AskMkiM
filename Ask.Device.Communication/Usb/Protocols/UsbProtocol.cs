@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Common.Threading;
+using Ask.Diagnostics.Services;
 
 namespace Ask.Device.Communication.Usb.Protocols
 {
@@ -55,7 +56,9 @@ namespace Ask.Device.Communication.Usb.Protocols
     {
       using (await OperationLock.LockAsync(cancellationToken))
       {
-        return await _commandHandler.ExecuteAsync(
+        DiagnosticCommandHistory.RecordCommand(_device.Name, command);
+
+        var response = await _commandHandler.ExecuteAsync(
           _device,
           command,
           responseDelay,
@@ -63,6 +66,8 @@ namespace Ask.Device.Communication.Usb.Protocols
           port,
           delayBeforeCall,
           cancellationToken);
+        DiagnosticCommandHistory.RecordResponse(_device.Name, response);
+        return response;
       }
     }
   }
