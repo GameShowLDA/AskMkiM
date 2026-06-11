@@ -1,10 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Ethernet.Tcp;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using Ask.Device.Runtime.Base.Device;
 using System.Net;
@@ -63,6 +60,7 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public IResistanceMeasurement ResistanceManager { get; set; }
+    public ITextMessage TextMessage { get; set; }
 
     /// <inheritdoc />
     public int MaxContinuityResistance { get; set; }
@@ -102,6 +100,7 @@ namespace Ask.Device.Runtime.Device
       ResistanceManager = new Function.Keysight3466new.ResistanceMeasurement(this);
       AcVoltageManager = new Function.Keysight3466new.AcVoltageMeasurement(this);
       DcVoltageManager = new Function.Keysight3466new.DcVoltageMeasurement(this);
+      TextMessage = new Function.Keysight3466new.TextMessage(this);
       DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, Port);
