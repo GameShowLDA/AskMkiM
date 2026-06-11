@@ -26,9 +26,10 @@ namespace Ask.Device.Runtime.Device
       DeviceClass = GetType().FullName;
 
       DeviceType = DeviceType.BreakdownTester;
-      PiMaxVoltage = 700;
-      SiMaxVoltage = 1000;
-      IRMinVoltage = 50;
+      AcwMaxVoltage = 700;
+      DcwMaxVoltage = 1000;
+      IrMaxVoltage = 1000;
+      IrMinVoltage = 50;
 
       AcwManger = new Function.GPT.AcwMode(this);
       DcwManger = new Function.GPT.DcwMode(this);
@@ -62,13 +63,16 @@ namespace Ask.Device.Runtime.Device
     public ISystemSettingsBreakdown SystemManger { get; set; }
 
     /// <inheritdoc />
-    public int PiMaxVoltage { get; set; }
+    public int AcwMaxVoltage { get; set; }
 
     /// <inheritdoc />
-    public int SiMaxVoltage { get; set; }
+    public int DcwMaxVoltage { get; set; }
 
     /// <inheritdoc />
-    public int IRMinVoltage { get; set; }
+    public int IrMaxVoltage { get; set; }
+
+    /// <inheritdoc />
+    public int IrMinVoltage { get; set; }
 
     /// <inheritdoc />
     public ISelfTestCheckerBreakdownTester SelfTestManager { get; set; }
@@ -112,9 +116,10 @@ namespace Ask.Device.Runtime.Device
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
         Mode = Mode,
-        PiMaxVoltage = PiMaxVoltage,
-        SiMaxVoltage = SiMaxVoltage,
-        IRMinVoltage = IRMinVoltage
+        AcwMaxVoltage = AcwMaxVoltage,
+        DcwMaxVoltage = DcwMaxVoltage,
+        SiMaxVoltage = IrMaxVoltage,
+        IRMinVoltage = IrMinVoltage
       };
     }
   }

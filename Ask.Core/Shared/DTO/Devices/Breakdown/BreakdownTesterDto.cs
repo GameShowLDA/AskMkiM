@@ -19,7 +19,8 @@ public class BreakdownTesterDto : AttachableDeviceDto
   /// <summary>
   /// Максимально допустимое напряжение для режима ПИ.
   /// </summary>
-  public int PiMaxVoltage { get; set; }
+  public int AcwMaxVoltage { get; set; }
+  public int DcwMaxVoltage { get; set; }
 
   /// <summary>
   /// Максимально допустимое напряжение для режима СИ.

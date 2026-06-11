@@ -16,19 +16,24 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester
     BreakdownTypeMode Mode { get; set; }
 
     /// <summary>
-    /// Макссимально выдаваемое напряжение ПИ.
+    /// Макссимально выдаваемое напряжение ПИ(ACW).
     /// </summary>
-    int PiMaxVoltage { get; set; }
+    int AcwMaxVoltage { get; set; }
+
+    /// <summary>
+    /// Макссимально выдаваемое напряжение ПИ(DCW).
+    /// </summary>
+    int DcwMaxVoltage { get; set; }
 
     /// <summary>
     /// Макссимально выдаваемое напряжение СИ.
     /// </summary>
-    int SiMaxVoltage { get; set; }
+    int IrMaxVoltage { get; set; }
 
     /// <summary>
     /// Минимально выдаваемое напряжение при измерении сопротивления.
     /// </summary>
-    int IRMinVoltage { get; set; }
+    int IrMinVoltage { get; set; }
 
     /// <summary>
     /// Управление режимом переменного тока (ACW) в пробойной установке.
