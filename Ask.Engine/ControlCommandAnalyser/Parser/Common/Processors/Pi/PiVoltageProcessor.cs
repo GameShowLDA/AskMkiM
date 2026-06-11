@@ -65,12 +65,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
         {
           maxVoltage = maxDCWVoltage;
         }
+
         voltageType = model.VoltageType == VoltageEnum.Type.DCW ? "постоянного" : "переменного";
         var voltageValue = UnitsConvertor.TryConvertBack(model.Voltage.Value, unit);
+        var voltageTemp = model.VoltageType == VoltageEnum.Type.DCW ? breakdown.DcwMaxVoltage : breakdown.AcwMaxVoltage;
 
         if (value > maxVoltage)
         {
-          var maxValue = UnitsConvertor.TryConvertBack(breakdown.PiMaxVoltage, "В");
+          var maxValue = UnitsConvertor.TryConvertBack(voltageTemp, "В");
           LogError($"В команде ПИ указано напряжение, превышающее максимально допустимое напряжение пробойной установки.");
           var description = $"В команде {model.CommandNumber} {model.Mnemonic} указано напряжение ({voltageValue.Item1} {voltageValue.Item2}), " +
             $"превышающий максимально допустимое напряжение пробойной установки ({maxValue.Item1} {maxValue.Item2}  " +
