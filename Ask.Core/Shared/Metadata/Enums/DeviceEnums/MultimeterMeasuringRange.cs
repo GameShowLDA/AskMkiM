@@ -74,7 +74,7 @@ namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums
     [Display(Name = "100", Description = "+1.00000000E+02")]
     V_100,
 
-    [Display(Name = "750", Description = "+1.00000000E+02")]
+    [Display(Name = "750", Description = "+1.00000000E+03")]
     V_750,
 
     [Display(Name = "1000", Description = "+1.00000000E+03")]
