@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Runtime.Device;
+using B7783StateManagerAdapter = Ask.Device.Application.FunctionAdapters.B7783.StateManagerAdapter;
 using DbcCapacitorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.CapacitorManagerAdapter;
 using DbcConnectorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.ConnectorManagerAdapter;
 using DbcRelayManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.RelayManagerAdapter;
@@ -87,6 +88,10 @@ namespace Ask.Device.Application.Composition
           keysightDevice.AcVoltageManager = new KeysightAcVoltageMeasurementAdapter(keysightDevice);
           keysightDevice.DcVoltageManager = new KeysightDcVoltageMeasurementAdapter(keysightDevice);
           keysightDevice.DiodeManager = new KeysightDiodeMeasurementAdapter(keysightDevice);
+          break;
+
+        case MultimeterB7783 multimeterB7783:
+          multimeterB7783.ConnectableManager = new B7783StateManagerAdapter(multimeterB7783);
           break;
 
         case MikUps1101rRmDevice mikUps1101rRmDevice:
