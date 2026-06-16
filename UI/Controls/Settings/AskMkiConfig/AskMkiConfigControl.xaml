@@ -6,6 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:local="clr-namespace:UI.Controls.Settings.AskMkiConfig"
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              mc:Ignorable="d"
              d:DesignHeight="760"
              d:DesignWidth="1280">
@@ -728,6 +729,291 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <DataTemplate x:Key="AskMkiSettingItemEditorTemplate"
+                      DataType="{x:Type local:AskMkiSettingItem}">
+            <Border x:Name="ItemBorder"
+                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2.2*"/>
+                        <ColumnDefinition Width="18"/>
+                        <ColumnDefinition Width="1.3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid x:Name="InfoStack"
+                          Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox x:Name="InlineToggleCheckBox"
+                                  Grid.Column="0"
+                                  Grid.Row="0"
+                                  Grid.RowSpan="2"
+                                  Style="{StaticResource AskMkiToggleCheckBoxStyle}"
+                                  IsChecked="{Binding ToggleValue, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock x:Name="LabelText"
+                                   Grid.Column="1"
+                                   Grid.Row="0"
+                                   Text="{Binding Label}"
+                                   Style="{DynamicResource SettingsTitleStyle}"
+                                   FontWeight="SemiBold"/>
+
+                        <TextBlock Grid.Column="1"
+                                   Grid.Row="1"
+                                   Text="{Binding Description}"
+                                   Style="{StaticResource AskMkiDescriptionStyle}"/>
+                    </Grid>
+
+                    <Grid x:Name="EditorHost"
+                          Grid.Column="2">
+                        <TextBox Text="{Binding TextValue, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox"
+                                       BasedOn="{StaticResource AskMkiEditorTextBoxStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EditorKind}" Value="Text">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+
+                        <ComboBox ItemsSource="{Binding Options}"
+                                  SelectedItem="{Binding SelectedOption, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="Label"
+                                  Height="38"
+                                  VerticalContentAlignment="Center">
+                            <ComboBox.Style>
+                                <Style TargetType="ComboBox"
+                                       BasedOn="{StaticResource CustomComboBoxStyle}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EditorKind}" Value="Choice">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.Style>
+                        </ComboBox>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding EditorKind}" Value="Toggle">
+                    <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding EditorKind}" Value="Info">
+                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0"/>
+                    <Setter TargetName="ItemBorder" Property="Padding" Value="0,14,0,6"/>
+                    <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
+                    <Setter TargetName="LabelText" Property="FontSize" Value="18"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AskMkiSwitchRangeRowEditorTemplate"
+                      DataType="{x:Type local:AskMkiSwitchRangeRow}">
+            <Border BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="0,9">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="110"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid x:Name="EditablePresentPanel">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Column="0"
+                                      IsChecked="{Binding IsPresent, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource SettingsCheckBox}"
+                                      Margin="0,1,10,0"
+                                      VerticalAlignment="Center"/>
+
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       Style="{StaticResource AskMkiMatrixNameTextStyle}"/>
+                        </Grid>
+
+                        <StackPanel x:Name="FixedPresentPanel"
+                                    Visibility="Collapsed">
+                            <TextBlock Text="{Binding Name}"
+                                       Style="{StaticResource AskMkiMatrixNameTextStyle}"/>
+
+                            <TextBlock Text="{Binding FixedDescription}"
+                                       Style="{StaticResource AskMkiMatrixDescriptionTextStyle}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBox Grid.Column="1"
+                             Text="{Binding FirstBk, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource AskMkiSmallNumberTextBoxStyle}"
+                             MaxLength="2"
+                             PreviewTextInput="SmallNumberTextBox_PreviewTextInput"
+                             DataObject.Pasting="SmallNumberTextBox_Pasting"/>
+
+                    <TextBox Grid.Column="2"
+                             Text="{Binding LastBk, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource AskMkiSmallNumberTextBoxStyle}"
+                             MaxLength="2"
+                             PreviewTextInput="SmallNumberTextBox_PreviewTextInput"
+                             DataObject.Pasting="SmallNumberTextBox_Pasting"/>
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsFixedPresent}" Value="True">
+                    <Setter TargetName="EditablePresentPanel" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="FixedPresentPanel" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AskMkiGroupListItemTemplate"
+                      DataType="{x:Type local:AskMkiSettingGroup}">
+            <Border CornerRadius="10"
+                    Background="{DynamicResource BackgroundBrushes}"
+                    Margin="5"
+                    BorderThickness="0"
+                    BorderBrush="{DynamicResource ActiveColorBrushes}">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="0"/>
+                </Border.Effect>
+
+                <Border Background="{DynamicResource SettingsMainBackground}"
+                        Padding="10"
+                        CornerRadius="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Title}"
+                                   FontSize="20"
+                                   Foreground="{DynamicResource ForegrounfBrushes}"
+                                   VerticalAlignment="Center"/>
+
+                        <Button Grid.Column="1"
+                                Margin="5,0"
+                                Style="{StaticResource BackButtonStyle}"
+                                Click="EditGroupButton_Click"
+                                CommandParameter="{Binding}"
+                                ToolTip="Редактировать параметры">
+                            <askUiIcons:EditIcon Size="16"
+                                                 IsWriting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AskMkiGroupEditorTemplate"
+                      DataType="{x:Type local:AskMkiSettingGroup}">
+            <Border Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="18">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="12"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource AskMkiSectionTitleStyle}"
+                                   FontSize="18"/>
+                        <TextBlock Text="{Binding Summary}"
+                                   Style="{StaticResource AskMkiDescriptionStyle}"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding Description}"
+                               Style="{StaticResource AskMkiDescriptionStyle}"/>
+
+                    <ScrollViewer Grid.Row="4"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Background="Transparent">
+                        <Grid>
+                            <Grid x:Name="SwitchMatrixContainer"
+                                  Visibility="Collapsed"
+                                  HorizontalAlignment="Left">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="260"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="110"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="Коммутатор"
+                                               Style="{StaticResource AskMkiMatrixHeaderTextStyle}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="БКнач"
+                                               Style="{StaticResource AskMkiMatrixHeaderTextStyle}"/>
+                                    <TextBlock Grid.Column="2"
+                                               Text="БКкон"
+                                               Style="{StaticResource AskMkiMatrixHeaderTextStyle}"/>
+                                </Grid>
+
+                                <ItemsControl Grid.Row="1"
+                                              ItemsSource="{Binding SwitchRows}"
+                                              ItemTemplate="{StaticResource AskMkiSwitchRangeRowEditorTemplate}"/>
+                            </Grid>
+
+                            <StackPanel x:Name="DefaultItemsContainer">
+                                <ItemsControl ItemsSource="{Binding Items}"
+                                              ItemTemplate="{StaticResource AskMkiSettingItemEditorTemplate}"/>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsSwitchMatrixGroup}" Value="True">
+                    <Setter TargetName="SwitchMatrixContainer" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="DefaultItemsContainer" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Border x:Name="AskMkiConfigManager"
@@ -746,10 +1032,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0"
-               Text="{StaticResource AskMki.Text.HeaderTitle}"
-               Padding="10,10"
-               Style="{DynamicResource SettingsTitleStyle}"/>
+
 
                 <Grid Grid.Column="1"
           Margin="20,0">
@@ -760,17 +1043,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Icons:ArrowButton x:Name="ToggleAskMkiConfigButton"
-                           Grid.Column="0"
-                           HorizontalAlignment="Right"
-                           Width="30"
-                           Height="30"
-                           IsArrowUp="True"
-                           ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                           ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                           ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                           ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
-                           VerticalAlignment="Center"/>
+                   
 
                     <Icons:SuccessIconControlV2 
                             Visibility="Collapsed"
@@ -808,9 +1081,7 @@
                     <Style TargetType="{x:Type ContentControl}">
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ToggleAskMkiConfigButton, Path=IsArrowUp}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
+
                         </Style.Triggers>
                     </Style>
                 </ContentControl.Style>
@@ -822,93 +1093,36 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="12"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="16"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="16"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="12"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
-                                   Text="Путь к mkiw.exe"
-                                   Style="{StaticResource AskMkiSectionTitleStyle}"/>
-
-                        <TextBlock Grid.Row="1"
-                                   Text="Здесь задаются путь к старой программе и путь к mki_hrd.cfg. Ниже редактируется активная legacy-конфигурация через новый интерфейс без открытия старого MKI."
-                                   Style="{StaticResource AskMkiDescriptionStyle}"/>
-
-                        <Grid Grid.Row="3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBox x:Name="MkiPathTextBox"
-                                     Grid.Column="0"
-                                     Style="{StaticResource AskMkiPathTextBoxStyle}"/>
-
-                            <Button Grid.Column="2"
-                                    Content="Выбрать EXE"
-                                    Style="{StaticResource DeviceInputSecondaryActionButton}"
-                                    MinWidth="140"
-                                    Click="SelectMkiPathButton_Click"/>
-
-                            <Button x:Name="ClearMkiPathButton"
-                                    Grid.Column="4"
-                                    Content="Очистить"
-                                    Style="{StaticResource DeviceInputSecondaryActionButton}"
-                                    MinWidth="140"
-                                    Click="ClearMkiPathButton_Click"/>
-                        </Grid>
-
-                        <TextBlock Grid.Row="5"
-                                   Text="Путь к mki_hrd.cfg"
-                                   Style="{StaticResource AskMkiSectionTitleStyle}"/>
-
-                        <Grid Grid.Row="6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBox x:Name="ConfigPathTextBox"
-                                     Grid.Column="0"
-                                     Style="{StaticResource AskMkiPathTextBoxStyle}"/>
-
-                            <Button Grid.Column="2"
-                                    Content="Выбрать CFG"
-                                    Style="{StaticResource DeviceInputSecondaryActionButton}"
-                                    MinWidth="140"
-                                    Click="SelectConfigPathButton_Click"/>
-                        </Grid>
-
-                        <TextBlock Grid.Row="8"
                                    Text="Параметры конфигурации"
                                    Style="{StaticResource AskMkiSectionTitleStyle}"/>
 
-                        <TextBlock Grid.Row="9"
-                                   Text="Каждый старый блок конфигурации вынесен в отдельную сворачиваемую группу. Подпункты A1/B1/C1 скрыты, все параметры показаны сразу внутри основной группы."
-                                   Style="{StaticResource AskMkiDescriptionStyle}"/>
-
                         <ScrollViewer x:Name="ProfileGroupsScrollViewer"
-              Grid.Row="11"
+                                      Grid.Row="2"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      CanContentScroll="False"
+                                      Focusable="False"
+                                      PreviewMouseWheel="ProfileGroupsScrollViewer_PreviewMouseWheel">
+                            <ItemsControl x:Name="ProfileGroupsItemsControl"
+                                          ItemTemplate="{StaticResource AskMkiGroupListItemTemplate}"
+                                          PreviewMouseWheel="ProfileGroupsScrollViewer_PreviewMouseWheel"/>
+                        </ScrollViewer>
+
+                        <ScrollViewer x:Name="LegacyProfileGroupsScrollViewer"
+              Grid.Row="2"
+              Visibility="Collapsed"
               VerticalScrollBarVisibility="Auto"
               HorizontalScrollBarVisibility="Disabled"
               CanContentScroll="False"
               Focusable="False"
               PreviewMouseWheel="ProfileGroupsScrollViewer_PreviewMouseWheel">
 
-                            <ItemsControl x:Name="ProfileGroupsItemsControl"
+                            <ItemsControl x:Name="LegacyProfileGroupsItemsControl"
                   PreviewMouseWheel="ProfileGroupsScrollViewer_PreviewMouseWheel">
 
                                 <ItemsControl.Resources>

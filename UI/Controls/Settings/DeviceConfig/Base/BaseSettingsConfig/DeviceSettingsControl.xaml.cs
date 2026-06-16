@@ -116,8 +116,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       bool inheritsIP = typeof(DeviceWithIP).IsAssignableFrom(selectedType);
       bool inheritsCOM = typeof(DeviceWithCOM).IsAssignableFrom(selectedType);
       bool inheritsUSB = typeof(DeviceWithUSB).IsAssignableFrom(selectedType);
+      bool inheritsASKMKI = typeof(DeviceWithASKMKI).IsAssignableFrom(selectedType);
 
-      int count = (inheritsIP ? 1 : 0) + (inheritsCOM ? 1 : 0) + (inheritsUSB ? 1 : 0);
+      int count = (inheritsIP ? 1 : 0) + (inheritsCOM ? 1 : 0) + (inheritsUSB ? 1 : 0) + (inheritsASKMKI ? 1 : 0);
       if (count != 1)
       {
         throw new InvalidOperationException($"Ошибка: Класс {selectedType.Name} должен наследовать ровно один базовый тип подключения.");
@@ -131,6 +132,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       if (inheritsCOM)
       {
         return typeof(DeviceWithCOM);
+      }
+
+      if (inheritsASKMKI)
+      {
+        return typeof(DeviceWithASKMKI);
       }
 
       return typeof(DeviceWithUSB);

@@ -18,6 +18,11 @@ namespace Ask.DataBase.Provider.Context
     public DbSet<ChassisManagerDto> ChassisManagers { get; set; }
 
     /// <summary>
+    /// Таблица legacy-конфигураций аппаратуры АСК-МКИ.
+    /// </summary>
+    public DbSet<LegacyMkiHardwareProfileDto> LegacyMkiHardwareProfiles { get; set; }
+
+    /// <summary>
     /// Таблица модулей коммутации реле.
     /// </summary>
     public DbSet<RelaySwitchModuleDto> RelaySwitchModules { get; set; }

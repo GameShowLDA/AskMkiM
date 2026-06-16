@@ -2,6 +2,7 @@ using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Dictonary;
 using Ask.DataBase.Provider.Configuration;
 using Ask.DataBase.Provider.Context;
+using Ask.DataBase.Provider.Services.Devices;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -69,6 +70,8 @@ public static class DatabaseInitializationService
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, report, progress, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
     TraceInfo(
@@ -376,6 +379,130 @@ public static class DatabaseInitializationService
       report,
       progress,
       $"[DB] Added FastMeters.{columnName} column for existing schema.");
+  }
+
+  /// <summary>
+  /// Проверяет наличие колонок напряжений пробойной установки в старой схеме БД.
+  /// </summary>
+  private static async Task EnsureBreakdownTesterVoltageColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "BreakdownTesters", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureColumnAsync(connection, "BreakdownTesters", "PiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "BreakdownTesters", "SiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "BreakdownTesters", "IRMinVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+  }
+
+  /// <summary>
+  /// Добавляет колонку в таблицу, если она отсутствует.
+  /// </summary>
+  private static async Task EnsureColumnAsync(
+    System.Data.Common.DbConnection connection,
+    string tableName,
+    string columnName,
+    string columnDefinition,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    if (await ColumnExistsAsync(connection, tableName, columnName, cancellationToken))
+    {
+      return;
+    }
+
+    await using var command = connection.CreateCommand();
+    command.CommandText =
+      $"""
+      ALTER TABLE "{tableName}"
+      ADD COLUMN "{columnName}" {columnDefinition};
+      """;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    TraceWarning(
+      report,
+      progress,
+      $"[DB] В таблицу {tableName} добавлена колонка {columnName} для совместимости со старой схемой.");
+  }
+
+  /// <summary>
+  /// Проверяет и создает таблицу legacy-профилей аппаратуры АСК-МКИ в текущей базе данных.
+  /// </summary>
+  public static async Task EnsureLegacyMkiHardwareProfilesStorageAsync(CancellationToken cancellationToken = default)
+  {
+    var databasePath = DbPathResolver.Resolve();
+    EnsureDirectoryExists(databasePath);
+    await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, null, null, cancellationToken);
+  }
+
+  /// <summary>
+  /// Проверяет таблицу legacy-профилей аппаратуры АСК-МКИ и добавляет недостающие элементы схемы.
+  /// </summary>
+  private static async Task EnsureLegacyMkiHardwareProfilesStorageAsync(
+    string databasePath,
+    DatabaseInitializationReport? report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    await using (var createCommand = connection.CreateCommand())
+    {
+      createCommand.CommandText = LegacyMkiHardwareProfileStorageSql.CreateTableSql;
+      await createCommand.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    await EnsureLegacyMkiHardwareProfileColumnsAsync(connection, report, progress, cancellationToken);
+
+    await using (var indexCommand = connection.CreateCommand())
+    {
+      indexCommand.CommandText = LegacyMkiHardwareProfileStorageSql.CreateIndexSql;
+      await indexCommand.ExecuteNonQueryAsync(cancellationToken);
+    }
+  }
+
+  /// <summary>
+  /// Добавляет недостающие колонки в таблицу legacy-профилей аппаратуры АСК-МКИ.
+  /// </summary>
+  private static async Task EnsureLegacyMkiHardwareProfileColumnsAsync(
+    System.Data.Common.DbConnection connection,
+    DatabaseInitializationReport? report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    foreach (var column in LegacyMkiHardwareProfileStorageSql.Columns)
+    {
+      if (await ColumnExistsAsync(connection, LegacyMkiHardwareProfileStorageSql.TableName, column.Key, cancellationToken))
+      {
+        continue;
+      }
+
+      await using var command = connection.CreateCommand();
+      command.CommandText =
+        $"""
+        ALTER TABLE "{LegacyMkiHardwareProfileStorageSql.TableName}"
+        ADD COLUMN "{column.Key}" {column.Value};
+        """;
+
+      await command.ExecuteNonQueryAsync(cancellationToken);
+      if (report != null)
+      {
+        TraceWarning(
+          report,
+          progress,
+          $"[DB] В таблицу {LegacyMkiHardwareProfileStorageSql.TableName} добавлена колонка {column.Key}.");
+      }
+    }
   }
 
   private static async Task<int> EnsureSingleSettingsRowAsync<T>(

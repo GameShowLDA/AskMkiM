@@ -106,13 +106,7 @@ namespace MainWindowProgram.Init
               (exception, message) => LogException(exception, customMessage: message),
               ShowCrashPackageCreatedNotification);
 
-            services.AddDiagnosticStateProvider("Application", () => new
-            {
-              mainWindow = Application.Current?.MainWindow?.GetType().FullName,
-              dispatcherThreadId = Application.Current?.Dispatcher?.Thread.ManagedThreadId,
-              baseDirectory = AppContext.BaseDirectory,
-              currentDirectory = Environment.CurrentDirectory,
-            });
+            services.AddDiagnosticStateProvider("Application", CaptureApplicationDiagnosticState);
 
             services.AddDiagnosticConfigProvider("AppSettings", async (_, _) => new
             {
@@ -168,6 +162,36 @@ namespace MainWindowProgram.Init
       return string.IsNullOrWhiteSpace(e.CustomMessage)
         ? $"{file}:{e.LineNumber}"
         : $"{e.CustomMessage} ({file}:{e.LineNumber})";
+    }
+
+    /// <summary>
+    /// Собирает состояние приложения для crashreport с учетом WPF UI-потока.
+    /// </summary>
+    private static object CaptureApplicationDiagnosticState()
+    {
+      var application = Application.Current;
+      var dispatcher = application?.Dispatcher;
+
+      if (dispatcher == null || dispatcher.CheckAccess())
+      {
+        return BuildApplicationDiagnosticState(application?.MainWindow?.GetType().FullName, dispatcher);
+      }
+
+      return dispatcher.Invoke(() => BuildApplicationDiagnosticState(application.MainWindow?.GetType().FullName, dispatcher));
+    }
+
+    /// <summary>
+    /// Формирует объект диагностического состояния приложения.
+    /// </summary>
+    private static object BuildApplicationDiagnosticState(string? mainWindow, Dispatcher? dispatcher)
+    {
+      return new
+      {
+        mainWindow,
+        dispatcherThreadId = dispatcher?.Thread.ManagedThreadId,
+        baseDirectory = AppContext.BaseDirectory,
+        currentDirectory = Environment.CurrentDirectory,
+      };
     }
 
     private static void ShowCrashPackageCreatedNotification(string path)
