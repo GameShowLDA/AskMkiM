@@ -19,7 +19,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
       string? indent = "\t",
       bool showNotSet = true)
     {
-      return SourceValueFormatter.Format(time, title, $"{title} не задано!", indent, showNotSet);
+      return SourceValueFormatter.Format(time, title, $"{title} не задано.", indent, showNotSet);
     }
   }
 }

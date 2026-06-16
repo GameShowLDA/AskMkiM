@@ -168,7 +168,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
         {
           if (CompareSchemes(scheme, foundScheme) == false)
           {
-            scheme.GroupModels.AddRange(foundScheme.GroupModels);
+            scheme.AddGroups(foundScheme.GroupModels);
           }
           else
           {

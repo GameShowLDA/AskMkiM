@@ -85,8 +85,10 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
 
         if (deviceDto != null)
         {
-          deviceDto.PiMaxVoltage = (baseDevice as IBreakdownTester).PiMaxVoltage;
-          deviceDto.SiMaxVoltage = (baseDevice as IBreakdownTester).SiMaxVoltage;
+          deviceDto.AcwMaxVoltage = (baseDevice as IBreakdownTester).AcwMaxVoltage;
+          deviceDto.DcwMaxVoltage = (baseDevice as IBreakdownTester).DcwMaxVoltage;
+          deviceDto.SiMaxVoltage = (baseDevice as IBreakdownTester).IrMaxVoltage;
+          deviceDto.IRMinVoltage = (baseDevice as IBreakdownTester).IrMinVoltage;
 
           try
           {
