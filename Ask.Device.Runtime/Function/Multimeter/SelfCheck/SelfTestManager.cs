@@ -185,7 +185,23 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.RelayManager.ConnectCapacitor(numberCapacitor, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      double result = await meter.CapacitanceManager.MeasureCapacitanceAsync();
+
+      double result = 0;
+      List<double> measuremend = new List<double>();
+
+      for (int i = 0; i < 6; i++)
+      {
+        result = await meter.CapacitanceManager.MeasureCapacitanceAsync(userMessageService: userMessageService);
+        if (result > 0)
+        {
+          measuremend.Add(result);
+        }
+        else
+        {
+          i--;
+        }
+      }
+      result = measuremend.Average();
 
       cancellationToken.ThrowIfCancellationRequested();
       bool result_status = SelfTestHelper.InRange(idealResult, result, CapacityTolerance(idealResult));
