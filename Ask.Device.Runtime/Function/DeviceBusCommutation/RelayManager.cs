@@ -104,6 +104,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       var cmd = new DeviceCommand(9, 1, 0, 2);
       string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 
+      await Task.Delay(10);
+
       if (answer == null || answer.Length == 0) return false;
       if (!answer.Contains("disconnect")) return false;
 
