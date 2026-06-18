@@ -1,12 +1,19 @@
 using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Metrology;
 using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.View;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Diagnostics.Abstractions;
+using Ask.Diagnostics.Extensions;
+using Ask.LogLib;
 using Ask.Support;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,6 +52,8 @@ namespace MainWindowProgram.Init
   /// </remarks>
   internal class PreStartupInitializer
   {
+    private static int _loggedExceptionHookRegistered;
+
     public static IHost AppHost { get; private set; }
 
     /// <summary>
@@ -75,13 +84,122 @@ namespace MainWindowProgram.Init
             services.AddSingleton<IUsbMonitorView, UsbMonitorService>();
             services.AddSingleton<MetrologyControlFactory>();
 
+            services.AddCrashDiagnostics(
+              options =>
+              {
+                options.Path = Path.Combine(AppContext.BaseDirectory, "CrashReports");
+                options.MaxRetainedReports = 30;
+                options.IncludeScreenshot = true;
+                options.IncludeLogs = true;
+                options.IncludeConfig = true;
+                options.AutoZip = false;
+                options.CreatePackageForLoggedExceptions = true;
+                options.LoggedExceptionThrottleWindow = TimeSpan.FromMinutes(2);
+                options.LoggedExceptionReportTimeout = TimeSpan.FromSeconds(30);
+                options.MaxPendingLoggedExceptionReports = 2;
+                options.CommandHistoryCapacity = 500;
+                options.MaxLogBytes = 5 * 1024 * 1024;
+                options.LogFilePaths.Add(Path.Combine(AppContext.BaseDirectory, "logs"));
+                options.ConfigFilePaths.Add(Path.Combine(AppContext.BaseDirectory, "Settings"));
+              },
+              message => LogInformation(message),
+              (exception, message) => LogException(exception, customMessage: message),
+              ShowCrashPackageCreatedNotification);
+
+            services.AddDiagnosticStateProvider("Application", CaptureApplicationDiagnosticState);
+
+            services.AddDiagnosticConfigProvider("AppSettings", async (_, _) => new
+            {
+              execution = await ExecutionConfig.GetExecitonModel(),
+              protocol = ProtocolConfig.GetProtocolModel(),
+            });
+
             RegisterMetrologyControls(services);
           })
           .Build();
 
       ServiceLocator.Initialize(AppHost);
       AppHost.StartAsync().GetAwaiter().GetResult();
+      RegisterLoggedExceptionCrashReporting();
       _ = Task.Run(() => InitializeChassisDevices());
+    }
+
+    private static void RegisterLoggedExceptionCrashReporting()
+    {
+      if (Interlocked.Exchange(ref _loggedExceptionHookRegistered, 1) == 1)
+      {
+        return;
+      }
+
+      LoggerUtility.ExceptionLoggedCallback = args => LoggerUtility_ExceptionLogged(null, args);
+      LoggerUtility.ExceptionLogged += LoggerUtility_ExceptionLogged;
+      LogInformation($"Crash diagnostics logger hook registered. Reports path: {Path.Combine(AppContext.BaseDirectory, "CrashReports")}");
+    }
+
+    private static void LoggerUtility_ExceptionLogged(object? sender, LoggedExceptionEventArgs e)
+    {
+      try
+      {
+        var reporter = AppHost?.Services.GetService<IExceptionDiagnosticReporter>();
+        if (reporter == null)
+        {
+          return;
+        }
+
+        reporter.Report(e.Exception, BuildLoggedExceptionSource(e));
+      }
+      catch
+      {
+      }
+    }
+
+    private static string BuildLoggedExceptionSource(LoggedExceptionEventArgs e)
+    {
+      var file = string.IsNullOrWhiteSpace(e.CallerFilePath)
+        ? "unknown"
+        : Path.GetFileName(e.CallerFilePath);
+
+      return string.IsNullOrWhiteSpace(e.CustomMessage)
+        ? $"{file}:{e.LineNumber}"
+        : $"{e.CustomMessage} ({file}:{e.LineNumber})";
+    }
+
+    /// <summary>
+    /// Собирает состояние приложения для crashreport с учетом WPF UI-потока.
+    /// </summary>
+    private static object CaptureApplicationDiagnosticState()
+    {
+      var application = Application.Current;
+      var dispatcher = application?.Dispatcher;
+
+      if (dispatcher == null || dispatcher.CheckAccess())
+      {
+        return BuildApplicationDiagnosticState(application?.MainWindow?.GetType().FullName, dispatcher);
+      }
+
+      return dispatcher.Invoke(() => BuildApplicationDiagnosticState(application.MainWindow?.GetType().FullName, dispatcher));
+    }
+
+    /// <summary>
+    /// Формирует объект диагностического состояния приложения.
+    /// </summary>
+    private static object BuildApplicationDiagnosticState(string? mainWindow, Dispatcher? dispatcher)
+    {
+      return new
+      {
+        mainWindow,
+        dispatcherThreadId = dispatcher?.Thread.ManagedThreadId,
+        baseDirectory = AppContext.BaseDirectory,
+        currentDirectory = Environment.CurrentDirectory,
+      };
+    }
+
+    private static void ShowCrashPackageCreatedNotification(string path)
+    {
+      NotificationHostService.Instance.Show(
+        "Диагностика",
+        $"Отчёт об ошибке сохранён:{Environment.NewLine}{path}",
+        NotificationType.Warning);
     }
 
     /// <summary>

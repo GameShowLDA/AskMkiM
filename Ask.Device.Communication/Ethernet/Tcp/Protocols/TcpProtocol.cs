@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Common.Threading;
+using Ask.Diagnostics.Services;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -113,6 +114,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
 
           int bytesRead = await _stream.ReadAsync(buffer, timeoutCts.Token).ConfigureAwait(false);
           string answer = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+          DiagnosticCommandHistory.RecordResponse(_device.Name, answer);
           LogInformation($"[{_device.Name}] Получен ответ ({command}) - {answer}", isDeviceLog: true);
           return answer;
         }
@@ -198,6 +200,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
 
       byte[] data = Encoding.ASCII.GetBytes(command + "\n");
       await _stream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
+      DiagnosticCommandHistory.RecordCommand(_device.Name, command);
       LogInformation($"[{_device.Name}] Отправка команды - {command}", isDeviceLog: true);
     }
 

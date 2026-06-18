@@ -22,9 +22,15 @@ namespace Ask.DataBase.Provider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AcwMaxVoltage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ConnectionDetails")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("DcwMaxVoltage")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -51,9 +57,6 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PiMaxVoltage")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("SiMaxVoltage")
@@ -106,9 +109,15 @@ namespace Ask.DataBase.Provider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<double>("AcwPpuDividerCoefficientPercent")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("ConnectionDetails")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<double>("DcwPpuDividerCoefficientPercent")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -133,12 +142,6 @@ namespace Ask.DataBase.Provider.Migrations
 
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
-
-                    b.Property<double>("AcwPpuDividerCoefficientPercent")
-                        .HasColumnType("REAL");
-
-                    b.Property<double>("DcwPpuDividerCoefficientPercent")
-                        .HasColumnType("REAL");
 
                     b.Property<int>("TypeMode")
                         .HasColumnType("INTEGER");

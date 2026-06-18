@@ -67,19 +67,19 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
 
       deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
-        var processor = new DeviceSettingsProcessorBase();
-        var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
-
-        ChassisManagerDto deviceDto = processor.ProcessDevice<ChassisManagerDto>(
-            selectedDevice: baseDevice as IDevice,
-            control: deviceSettingsWindow,
-            additionalDataProcessor: this);
-
-        if (deviceDto != null)
+        try
         {
-          deviceDto.BusType = (baseDevice as IChassisManager).BusType;
-          try
+          var processor = new DeviceSettingsProcessorBase();
+          var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
+
+          ChassisManagerDto deviceDto = processor.ProcessDevice<ChassisManagerDto>(
+              selectedDevice: baseDevice as IDevice,
+              control: deviceSettingsWindow,
+              additionalDataProcessor: this);
+
+          if (deviceDto != null)
           {
+            deviceDto.BusType = (baseDevice as IChassisManager).BusType;
             var chassi = ChassisManagers.Build(deviceDto);
             var createdDevice = await ChassisManagers.CreateAsync(chassi);
             deviceDto.Id = createdDevice.Id;
@@ -87,14 +87,16 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
             ShowCreated(deviceDto);
             RequestSave?.Invoke(s, deviceDto);
           }
-          catch (DuplicateEntityException ex)
-          {
-            var messsage = ex.Message;
-            Message.MessageBoxCustom.Show(messsage, "Ошибка сохраненения данных", image: MessageBoxImage.Error);
-            throw;
-          }
         }
-
+        catch (DuplicateEntityException ex)
+        {
+          var messsage = ex.Message;
+          Message.MessageBoxCustom.Show(messsage, "Ошибка сохраненения данных", image: MessageBoxImage.Error);
+        }
+        catch (ArgumentException ex)
+        {
+          Message.MessageBoxCustom.Show(ex.Message, "Ошибка сохраненения данных", image: MessageBoxImage.Error);
+        }
       };
 
       deviceSettingsWindow.RequestClose += (s, a) =>

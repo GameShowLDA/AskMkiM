@@ -43,6 +43,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     IResistanceMeasurement ResistanceManager { get; set; }
 
     /// <summary>
+    /// Управление сообщениями.
+    /// </summary>
+    ITextMessage TextMessage { get; set; }
+
+    /// <summary>
     /// Максимальное сопротивление (Ом), при котором считается срабатывание прозвонки.
     /// </summary>
     int MaxContinuityResistance { get; set; }

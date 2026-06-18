@@ -223,15 +223,21 @@ internal static class DatabaseDeviceCreate
     {
       var breakdownTester = (IBreakdownTester)device;
       breakdownTester.Mode = ReadEnum("Режим ППУ", breakdownTester.Mode);
-      breakdownTester.PiMaxVoltage = ReadInt(
-        "Максимальное напряжение ПИ",
-        breakdownTester.PiMaxVoltage > 0 ? breakdownTester.PiMaxVoltage : 700);
-      breakdownTester.SiMaxVoltage = ReadInt(
+      breakdownTester.AcwMaxVoltage = ReadInt(
+        "Максимальное напряжение ПИ(ACW)",
+        breakdownTester.AcwMaxVoltage > 0 ? breakdownTester.AcwMaxVoltage : 700);
+
+      breakdownTester.DcwMaxVoltage = ReadInt(
+       "Максимальное напряжение ПИ(DCW)",
+       breakdownTester.DcwMaxVoltage > 0 ? breakdownTester.DcwMaxVoltage : 1000);
+
+      breakdownTester.IrMaxVoltage = ReadInt(
         "Максимальное напряжение СИ",
-        breakdownTester.SiMaxVoltage > 0 ? breakdownTester.SiMaxVoltage : 1000);
-      breakdownTester.IRMinVoltage = ReadInt(
-        "Минимальное напряжение ИС",
-        breakdownTester.IRMinVoltage > 0 ? breakdownTester.IRMinVoltage : 50);
+        breakdownTester.IrMaxVoltage > 0 ? breakdownTester.IrMaxVoltage : 1000);
+
+      breakdownTester.IrMinVoltage = ReadInt(
+        "Минимальное напряжение СИ",
+        breakdownTester.IrMinVoltage > 0 ? breakdownTester.IrMinVoltage : 50);
       return;
     }
 

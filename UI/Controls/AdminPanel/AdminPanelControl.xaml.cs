@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UI.Controls.GPT;
+using UI.Controls.Keysight;
 
 namespace UI.Controls.AdminPanel
 {
@@ -39,6 +41,11 @@ namespace UI.Controls.AdminPanel
     private void Gpt_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       RightContentPresenter.Content = new GPTPunchControl();
+    }
+
+    private async void Meter_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+      RightContentPresenter.Content = new KeysightPunchControl();
     }
   }
 

@@ -40,8 +40,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
           model,
           value,
           unit,
-          breakdown.IRMinVoltage,
-          breakdown.SiMaxVoltage,
+          breakdown.IrMinVoltage,
+          breakdown.IrMaxVoltage,
           ctx.LineNumber,
           $"{ctx.CommandNumber} {ctx.Mnemonic}");
 

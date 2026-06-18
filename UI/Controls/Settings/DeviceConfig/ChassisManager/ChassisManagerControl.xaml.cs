@@ -1,6 +1,7 @@
-﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.DataBase.Engine.Static.Devices;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -131,11 +132,19 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
       SystemsChassis.Clear();
       SystemsRack.Clear();
 
-      SelectedSystem = null;
-      SelectedRack = null;
+      ClearSelection();
 
       addChassisButton.Visibility = Visibility.Visible;
       addRackButton.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Сбрасывает выбранное шасси и выбранную стойку.
+    /// </summary>
+    public void ClearSelection()
+    {
+      SelectedSystem = null;
+      SelectedRack = null;
     }
 
     /// <summary>
@@ -145,8 +154,9 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <param name="e">Аргументы события.</param>
     private void OnSystemSelected(object sender, RoutedEventArgs e)
     {
-      if (sender is Button button && button.DataContext is IChassisManager system)
+      if (sender is Button button && button.DataContext is ChassisManagerDto dto)
       {
+        var system = ChassisManagers.Build(dto);
         SelectedSystem = system;
         SystemSelected?.Invoke(this, system);
       }

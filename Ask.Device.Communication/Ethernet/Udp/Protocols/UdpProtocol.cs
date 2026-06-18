@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Common.Threading;
+using Ask.Diagnostics.Services;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -79,6 +80,7 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
           byte[] buffer = Encoding.UTF8.GetBytes(command);
 
           await udpClient.SendAsync(buffer, buffer.Length, deviceEndpoint).ConfigureAwait(false);
+          DiagnosticCommandHistory.RecordCommand(_device.Name, command);
           LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}", isDeviceLog: true);
 
           if (responseDelay > 0)
@@ -96,6 +98,7 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
 
           UdpReceiveResult result = await udpClient.ReceiveAsync(timeoutCts.Token).ConfigureAwait(false);
           string response = Encoding.UTF8.GetString(result.Buffer);
+          DiagnosticCommandHistory.RecordResponse(_device.Name, response);
           LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
           return response;
         }

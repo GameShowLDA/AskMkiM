@@ -16,15 +16,15 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       var maxColtage = typeCommand switch
       {
-        BreakdownTypeMode.ACW => breakDown.PiMaxVoltage,
-        BreakdownTypeMode.DCW => breakDown.PiMaxVoltage,
-        BreakdownTypeMode.IR => breakDown.SiMaxVoltage,
+        BreakdownTypeMode.ACW => breakDown.AcwMaxVoltage,
+        BreakdownTypeMode.DCW => breakDown.DcwMaxVoltage,
+        BreakdownTypeMode.IR => breakDown.IrMaxVoltage,
         _ => throw new NotSupportedException($"Тип команды {typeCommand} не поддерживается в {nameof(SetVoltageAsync)}"),
       };
 
       if (value > maxColtage)
       {
-        return (false, $"Максимальное напряжение для {breakDown.Name} = {breakDown.PiMaxVoltage}");
+        return (false, $"Максимальное напряжение для {breakDown.Name}({typeCommand.ToString()})  = {maxColtage}В");
       }
 
       if (ExecutionConfig.GetIsIdleModeEnabled())

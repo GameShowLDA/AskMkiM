@@ -113,6 +113,17 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
         }
       }
     }
+
+    public void AddGroups(IEnumerable<GroupModel> groups)
+    {
+      GroupModels.AddRange(groups);
+
+      ChainConnectedPointsMap.Clear();
+      ChainDisconnectedPointsMap.Clear();
+      AllPoint = null;
+
+      InitializePoints();
+    }
     public GroupModel GetPointsConnected(GroupModel groupModel)
     {
       return ChainConnectedPointsMap.GetValueOrDefault(groupModel);

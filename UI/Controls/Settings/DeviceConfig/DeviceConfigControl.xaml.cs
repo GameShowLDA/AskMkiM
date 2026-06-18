@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -23,6 +23,7 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using UI.Controls.Settings.AskMkiConfig;
 using UI.Controls.Settings.DeviceConfig.BreakDown;
 using UI.Controls.Settings.DeviceConfig.ChassisManager;
 using UI.Controls.Settings.DeviceConfig.DeviceBusCommutation;
@@ -48,6 +49,7 @@ namespace UI.Controls.Settings.DeviceConfig
     private readonly UninterruptiblePowerSupplyDtoService _uninterruptiblePowerSupplyDtoService = new();
     private Task? _initializationTask;
     private CancellationTokenSource? _selectedChassisCancellation;
+    private int? _openedChassisId;
     private readonly SemaphoreSlim _reloadSemaphore = new(1, 1);
     private bool _isInitialized;
 
@@ -83,6 +85,21 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       try
       {
+        if (IsOpenedChassis(system))
+        {
+          CollapseSelectedChassis();
+          return;
+        }
+
+        CollapseSelectedChassis(clearSelection: false);
+        _openedChassisId = system.Id;
+
+        if (IsLegacyAskChassis(system))
+        {
+          deviceBorder.Child = new AskMkiConfigControl(system.Number);
+          return;
+        }
+
         var devices = new DeviceManagerControl();
         deviceBorder.Child = devices;
         ConfigureDeviceManagerControl(devices, system);
@@ -145,9 +162,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private void Devices_ExitEvent(object? sender, EventArgs e)
     {
-      ToggleThirdColumn(false);
-      deviceBorder.Child = null;
-      settingsBorder.Child = null;
+      CollapseSelectedChassis(clearSelection: true);
     }
 
     /// <summary>
@@ -288,6 +303,7 @@ namespace UI.Controls.Settings.DeviceConfig
       {
         deviceBorder.Child = null;
         settingsBorder.Child = null;
+        _openedChassisId = null;
         ToggleThirdColumn(false);
 
         chassisManager.Reset();
@@ -355,9 +371,9 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <summary>
     /// Обрабатывает сохранение конфигурации шасси.
     /// </summary>
-    private void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerDto device)
+    private async void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerDto device)
     {
-      deviceBorder.Child = null;
+      CollapseSelectedChassis(clearSelection: true);
       chassisManager.Visibility = Visibility.Visible;
       if (device == null)
       {
@@ -365,6 +381,7 @@ namespace UI.Controls.Settings.DeviceConfig
       }
 
       chassisManager.AddSystem(device);
+      await SelectedChassisAsync(ChassisManagers.Build(device));
     }
 
     /// <summary>
@@ -372,7 +389,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private void Setting_RequestClose(object? sender, EventArgs e)
     {
-      deviceBorder.Child = null;
+      CollapseSelectedChassis(clearSelection: true);
       chassisManager.Visibility = Visibility.Visible;
     }
 
@@ -441,6 +458,39 @@ namespace UI.Controls.Settings.DeviceConfig
       devices.UninterruptiblePowerSupplyEvent += (s, a) => Devices_UninterruptiblePowerSupplyEvent(s, a, system, devices);
       devices.EditUninterruptiblePowerSupplyEvent += (s, a) => Devices_EditUninterruptiblePowerSupplyEvent(system, devices, a);
       devices.ExitEvent += Devices_ExitEvent;
+    }
+
+    /// <summary>
+    /// Определяет, является ли выбранная стойка legacy-тестером АСК.
+    /// </summary>
+    private static bool IsLegacyAskChassis(IChassisManager system)
+    {
+      return string.Equals(system.Name, "\u0422\u0435\u0441\u0442\u0435\u0440 \u0410\u0421\u041a", StringComparison.OrdinalIgnoreCase) ||
+        system.DeviceClass.EndsWith(".ManagerASKMKI", StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Проверяет, открыты ли сейчас настройки указанного шасси.
+    /// </summary>
+    private bool IsOpenedChassis(IChassisManager system)
+    {
+      return _openedChassisId == system.Id && deviceBorder.Child != null;
+    }
+
+    /// <summary>
+    /// Сворачивает открытую панель настроек шасси.
+    /// </summary>
+    private void CollapseSelectedChassis(bool clearSelection = true)
+    {
+      ReplaceCancellationTokenSource(ref _selectedChassisCancellation);
+      _openedChassisId = null;
+      deviceBorder.Child = null;
+      settingsBorder.Child = null;
+      ToggleThirdColumn(false);
+      if (clearSelection)
+      {
+        chassisManager.ClearSelection();
+      }
     }
 
     private async Task PopulateDevicesAsync(

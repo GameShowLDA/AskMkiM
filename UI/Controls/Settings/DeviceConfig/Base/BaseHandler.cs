@@ -60,6 +60,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         return GetUsbConnection(defaultSettingControl);
       }
 
+      if (instance is DeviceWithASKMKI)
+      {
+        return string.Empty;
+      }
+
       MessageBoxCustom.Show("Устройство не принадлежит к известным типам (DeviceWithIP, DeviceWithCOM или DeviceWithUSB).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       return null;
     }
@@ -80,7 +85,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         return IPAddress.Parse($"{defaultSettingControl.IpPart1Value}.{defaultSettingControl.IpPart2Value}.{defaultSettingControl.IpPart3Value}.{defaultSettingControl.IpPart4Value}");
       }
 
-      throw new Exception("Реализовать подсветку ошибки для IP-адреса.");
+      throw new ArgumentException("Укажите корректный IP-адрес устройства.");
     }
 
     /// <summary>

@@ -1,12 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
-using Microsoft.Win32;
+using Ask.DataBase.Provider.Services.Devices;
+using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.AskMkiConfig;
 
@@ -22,6 +23,8 @@ namespace UI.Controls.Settings.AskMkiConfig;
 /// </summary>
 public partial class AskMkiConfigControl : UserControl
 {
+  private readonly int? _numberChassis;
+  private const double AskMkiConfigDrawerPanelWidth = 470d;
   private bool _isLoadingEditor;
   private bool _hasUnsavedChanges;
   private LegacyMkiHardwareConfigFile? _loadedConfigFile;
@@ -29,8 +32,21 @@ public partial class AskMkiConfigControl : UserControl
   private LegacyMkiHardwareProfile? _currentProfile;
   private LegacyMkiProfileKind _selectedProfileKind;
 
+  /// <summary>
+  /// Инициализирует контрол без заранее выбранной стойки АСК.
+  /// </summary>
   public AskMkiConfigControl()
+    : this(null)
   {
+  }
+
+  /// <summary>
+  /// Инициализирует контрол для указанной стойки АСК.
+  /// </summary>
+  public AskMkiConfigControl(int? numberChassis)
+  {
+    _numberChassis = numberChassis;
+
     InitializeComponent();
 
     Loaded += AskMkiConfigControl_Loaded;
@@ -38,22 +54,31 @@ public partial class AskMkiConfigControl : UserControl
     IsVisibleChanged += AskMkiConfigControl_IsVisibleChanged;
 
     _selectedProfileKind = LegacyMkiConfig.GetSelectedProfile();
-    LoadStoredPaths();
+    LoadProfileFromDatabaseIntoEditor();
 
-    CollapseAskMkiConfigBlock();
+    
   }
 
+  /// <summary>
+  /// Возвращает строковый ресурс интерфейса по ключу.
+  /// </summary>
   private string UiString(string resourceKey)
   {
     return FindResource(resourceKey) as string
       ?? throw new InvalidOperationException($"String resource '{resourceKey}' was not found.");
   }
 
+  /// <summary>
+  /// Форматирует строковый ресурс интерфейса с учетом текущей культуры.
+  /// </summary>
   private string UiFormat(string resourceKey, params object[] args)
   {
     return string.Format(CultureInfo.CurrentCulture, UiString(resourceKey), args);
   }
 
+  /// <summary>
+  /// Пересчитывает доступную высоту списка групп конфигурации.
+  /// </summary>
   private void UpdateProfileGroupsScrollHeight()
   {
     if (ProfileGroupsScrollViewer == null)
@@ -67,6 +92,11 @@ public partial class AskMkiConfigControl : UserControl
       return;
     }
 
+    if (!IsVisualAncestor(window, ProfileGroupsScrollViewer))
+    {
+      return;
+    }
+
     try
     {
       var point = ProfileGroupsScrollViewer.TransformToAncestor(window).Transform(new Point(0, 0));
@@ -74,44 +104,71 @@ public partial class AskMkiConfigControl : UserControl
 
       ProfileGroupsScrollViewer.MaxHeight = Math.Max(160, availableHeight);
     }
-    catch
+    catch (InvalidOperationException)
     {
+      ProfileGroupsScrollViewer.MaxHeight = 600;
+    }
+    catch (Exception ex)
+    {
+      LogException(ex, customMessage: "AskMkiConfigControl.UpdateProfileGroupsScrollHeight");
       ProfileGroupsScrollViewer.MaxHeight = 600;
     }
   }
 
+  /// <summary>
+  /// Проверяет, находится ли визуальный элемент внутри указанного визуального предка.
+  /// </summary>
+  private static bool IsVisualAncestor(DependencyObject ancestor, DependencyObject child)
+  {
+    var current = child;
+
+    while (current != null)
+    {
+      if (ReferenceEquals(current, ancestor))
+      {
+        return true;
+      }
+
+      current = VisualTreeHelper.GetParent(current);
+    }
+
+    return false;
+  }
+
+  /// <summary>
+  /// Обрабатывает загрузку контрола и обновляет начальную компоновку.
+  /// </summary>
   private void AskMkiConfigControl_Loaded(object sender, RoutedEventArgs e)
   {
-    CollapseAskMkiConfigBlock();
+
     UpdateProfileGroupsScrollHeight();
   }
 
+  /// <summary>
+  /// Обрабатывает изменение размера контрола.
+  /// </summary>
   private void AskMkiConfigControl_SizeChanged(object sender, SizeChangedEventArgs e)
   {
     UpdateProfileGroupsScrollHeight();
   }
 
+  /// <summary>
+  /// Обрабатывает появление контрола на экране.
+  /// </summary>
   private void AskMkiConfigControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
   {
     if (e.NewValue is true)
     {
-      CollapseAskMkiConfigBlock();
+
       UpdateProfileGroupsScrollHeight();
     }
   }
 
-  private void CollapseAskMkiConfigBlock()
-  {
-    ToggleAskMkiConfigButton.IsArrowUp = true;
-  }
-  private void LoadStoredPaths()
-  {
-    MkiPathTextBox.Text = LegacyMkiConfig.GetMkiPath();
-    ConfigPathTextBox.Text = LegacyMkiConfig.GetConfigPath();
-    UpdateClearButtonState();
-    TryLoadConfigIntoEditor();
-  }
 
+
+  /// <summary>
+  /// Отмечает наличие несохраненных изменений и показывает кнопки подтверждения.
+  /// </summary>
   private void SetUnsavedChanges(bool hasChanges)
   {
     _hasUnsavedChanges = hasChanges;
@@ -127,6 +184,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Подписывает элементы редактора на уведомления об изменениях.
+  /// </summary>
   private void SubscribeEditorChanges(IEnumerable<AskMkiSettingGroup> groups)
   {
     foreach (var item in EnumerateItems(groups))
@@ -143,6 +203,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Обрабатывает изменение строки матрицы СК/БК.
+  /// </summary>
   private void SwitchRow_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
   {
     if (_isLoadingEditor)
@@ -158,6 +221,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Обрабатывает изменение обычного поля редактора.
+  /// </summary>
   private void EditorItem_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
   {
     if (_isLoadingEditor)
@@ -173,128 +239,34 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
-  private void SelectMkiPathButton_Click(object sender, RoutedEventArgs e)
-  {
-    var dialog = new OpenFileDialog
-    {
-      Title = UiString("AskMki.Dialog.SelectMki.Title"),
-      Filter = UiString("AskMki.Dialog.SelectMki.Filter"),
-      CheckFileExists = true,
-      Multiselect = false
-    };
-
-    var currentPath = LegacyMkiConfig.GetMkiPath();
-    var currentDirectory = string.IsNullOrWhiteSpace(currentPath)
-      ? null
-      : Path.GetDirectoryName(currentPath);
-
-    if (!string.IsNullOrWhiteSpace(currentDirectory) && Directory.Exists(currentDirectory))
-    {
-      dialog.InitialDirectory = currentDirectory;
-    }
-
-    if (dialog.ShowDialog() != true)
-    {
-      return;
-    }
-
-    LegacyMkiConfig.SetMkiPath(dialog.FileName);
-    MkiPathTextBox.Text = dialog.FileName;
-
-    if (string.IsNullOrWhiteSpace(ConfigPathTextBox.Text))
-    {
-      ConfigPathTextBox.Text = LegacyMkiConfig.GetConfigPath();
-    }
-
-    UpdateClearButtonState();
-    TryLoadConfigIntoEditor();
-  }
-
-  private void ClearMkiPathButton_Click(object sender, RoutedEventArgs e)
-  {
-    LegacyMkiConfig.ClearMkiPath();
-    MkiPathTextBox.Text = string.Empty;
-    UpdateClearButtonState();
-  }
-
-  private void SelectConfigPathButton_Click(object sender, RoutedEventArgs e)
-  {
-    var dialog = new OpenFileDialog
-    {
-      Title = UiString("AskMki.Dialog.SelectCfg.Title"),
-      Filter = UiString("AskMki.Dialog.SelectCfg.Filter"),
-      CheckFileExists = true,
-      Multiselect = false
-    };
-
-    var currentPath = ConfigPathTextBox.Text;
-    var currentDirectory = string.IsNullOrWhiteSpace(currentPath)
-      ? null
-      : Path.GetDirectoryName(currentPath);
-
-    if (!string.IsNullOrWhiteSpace(currentDirectory) && Directory.Exists(currentDirectory))
-    {
-      dialog.InitialDirectory = currentDirectory;
-    }
-
-    if (dialog.ShowDialog() != true)
-    {
-      return;
-    }
-
-    ConfigPathTextBox.Text = dialog.FileName;
-    LegacyMkiConfig.SetConfigPath(dialog.FileName);
-    TryLoadConfigIntoEditor();
-  }
-
-  private void LoadConfigButton_Click(object sender, RoutedEventArgs e)
-  {
-    TryLoadConfigIntoEditor(showSuccessMessage: true);
-  }
-
-  private void ReloadEditorButton_Click(object sender, RoutedEventArgs e)
-  {
-    LoadSelectedProfileIntoEditor();
-  }
-
-  private void ResetEditorButton_Click(object sender, RoutedEventArgs e)
-  {
-    LoadSelectedProfileIntoEditor();
-  }
-
+  /// <summary>
+  /// Запускает сохранение профиля при нажатии на иконку подтверждения.
+  /// </summary>
   private void SaveConfigIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
   {
     SaveConfigButton_Click(sender, e);
     e.Handled = true;
   }
 
+  /// <summary>
+  /// Отменяет изменения при нажатии на иконку отмены.
+  /// </summary>
   private void CancelConfigIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
   {
     CancelConfigButton_Click(sender, e);
     e.Handled = true;
   }
-
-  private void SaveConfigButton_Click(object sender, RoutedEventArgs e)
+  /// <summary>
+  /// Сохраняет текущий профиль legacy-конфигурации в базу данных.
+  /// </summary>
+  private async void SaveConfigButton_Click(object sender, RoutedEventArgs e)
   {
     try
     {
-      var configPath = ResolveAndPersistPaths();
-      if (string.IsNullOrWhiteSpace(configPath))
-      {
-        MessageBox.Show(UiString("AskMki.Message.Warning.ConfigPathRequired"), UiString("AskMki.Message.Title"), MessageBoxButton.OK, MessageBoxImage.Warning);
-        return;
-      }
-
       if (_loadedConfigFile == null)
       {
-        if (!File.Exists(configPath))
-        {
-          MessageBox.Show(UiString("AskMki.Message.Warning.ConfigFileMissing"), UiString("AskMki.Message.Title"), MessageBoxButton.OK, MessageBoxImage.Warning);
-          return;
-        }
-
-        _loadedConfigFile = LegacyMkiHardwareConfigFileService.Load(configPath);
-        _selectedProfileKind = ResolveProfileKind(_loadedConfigFile);
+        _loadedConfigFile = new LegacyMkiHardwareConfigFile();
+        _loadedConfigFile.ActiveProfileIndex = (byte)_selectedProfileKind;
       }
 
       var profile = _loadedConfigFile.GetProfile(_selectedProfileKind);
@@ -305,64 +277,44 @@ public partial class AskMkiConfigControl : UserControl
       _loadedConfigFile.ActiveProfileIndex = (byte)_selectedProfileKind;
 
       LegacyMkiConfig.SetSelectedProfile(_selectedProfileKind);
-      LegacyMkiHardwareConfigFileService.Save(configPath, _loadedConfigFile);
+      await SaveProfileToDatabaseAsync(profile);
 
       LoadSelectedProfileIntoEditor();
 
       Message.MessageBoxCustom.Show(
-        "конфигурация оборудования сохранена, перезапустите АСК-МКИ, если была запущена",
+        "Настройки АСК сохранены",
         UiString("AskMki.Message.Title"),
         MessageBoxButton.OK,
         MessageBoxImage.Information);
     }
     catch (Exception ex)
     {
+      LogException(ex, customMessage: "AskMkiConfigControl.SaveConfigButton_Click");
       MessageBox.Show(ex.Message, UiString("AskMki.Message.SaveErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
     }
   }
 
+  /// <summary>
+  /// Перезагружает текущий профиль из последнего сохраненного состояния.
+  /// </summary>
   private void CancelConfigButton_Click(object sender, RoutedEventArgs e)
   {
     LoadSelectedProfileIntoEditor();
   }
-
-  private void TryLoadConfigIntoEditor(bool showSuccessMessage = false)
+  /// <summary>
+  /// Создает рабочий файл конфигурации из профиля, сохраненного в базе данных.
+  /// </summary>
+  private void LoadProfileFromDatabaseIntoEditor()
   {
-    try
-    {
-      var configPath = ResolveAndPersistPaths();
-      if (string.IsNullOrWhiteSpace(configPath) || !File.Exists(configPath))
-      {
-        _loadedConfigFile = null;
-        _currentProfile = null;
-        _editorGroups = new ObservableCollection<AskMkiSettingGroup>();
-        ProfileGroupsItemsControl.ItemsSource = _editorGroups;
-        SetUnsavedChanges(false);
-        return;
-      }
-
-      _loadedConfigFile = LegacyMkiHardwareConfigFileService.Load(configPath);
-      _selectedProfileKind = ResolveProfileKind(_loadedConfigFile);
-      LegacyMkiConfig.SetSelectedProfile(_selectedProfileKind);
-
-      LoadSelectedProfileIntoEditor();
-
-      if (showSuccessMessage)
-      {
-        MessageBox.Show(UiFormat("AskMki.Message.LoadSuccess", Environment.NewLine, configPath), UiString("AskMki.Message.Title"), MessageBoxButton.OK, MessageBoxImage.Information);
-      }
-    }
-    catch (Exception ex)
-    {
-      _loadedConfigFile = null;
-      _currentProfile = null;
-      _editorGroups = new ObservableCollection<AskMkiSettingGroup>();
-      ProfileGroupsItemsControl.ItemsSource = _editorGroups;
-      SetUnsavedChanges(false);
-      MessageBox.Show(ex.Message, UiString("AskMki.Message.LoadErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
-    }
+    _loadedConfigFile = new LegacyMkiHardwareConfigFile();
+    _loadedConfigFile.ActiveProfileIndex = (byte)_selectedProfileKind;
+    ApplyProfileFromDatabaseIfExists();
+    LoadSelectedProfileIntoEditor();
   }
 
+  /// <summary>
+  /// Определяет активный legacy-профиль из рабочего файла конфигурации.
+  /// </summary>
   private LegacyMkiProfileKind ResolveProfileKind(LegacyMkiHardwareConfigFile configFile)
   {
     var activeProfileIndex = Convert.ToByte(configFile.ActiveProfileIndex, CultureInfo.InvariantCulture);
@@ -378,6 +330,78 @@ public partial class AskMkiConfigControl : UserControl
     return LegacyMkiConfig.GetSelectedProfile();
   }
 
+  /// <summary>
+  /// Сохраняет профиль для текущей legacy-стойки АСК.
+  /// </summary>
+  private async Task SaveProfileToDatabaseAsync(LegacyMkiHardwareProfile profile)
+  {
+    var numberChassis = await TryResolveLegacyAskChassisNumberAsync();
+    if (numberChassis == null)
+    {
+      return;
+    }
+
+    var service = new LegacyMkiHardwareProfileDtoService();
+    await service.SaveProfileAsync(numberChassis.Value, _selectedProfileKind, profile);
+  }
+
+  /// <summary>
+  /// Подставляет в рабочий файл профиль, сохраненный в базе данных для текущей стойки.
+  /// </summary>
+  private void ApplyProfileFromDatabaseIfExists()
+  {
+    if (_loadedConfigFile == null)
+    {
+      return;
+    }
+
+    var numberChassis = TryResolveLegacyAskChassisNumberAsync()
+      .GetAwaiter()
+      .GetResult();
+
+    if (numberChassis == null)
+    {
+      return;
+    }
+
+    var service = new LegacyMkiHardwareProfileDtoService();
+    service.EnsureDefaultProfilesAsync(numberChassis.Value)
+      .GetAwaiter()
+      .GetResult();
+
+    var profileDto = service.GetByChassisAsync(numberChassis.Value, _selectedProfileKind)
+      .GetAwaiter()
+      .GetResult();
+
+    if (profileDto == null)
+    {
+      return;
+    }
+
+    _loadedConfigFile.SetProfile(_selectedProfileKind, profileDto.ToProfile());
+  }
+
+  /// <summary>
+  /// Возвращает номер выбранной legacy-стойки АСК или находит первую такую стойку в базе.
+  /// </summary>
+  private async Task<int?> TryResolveLegacyAskChassisNumberAsync()
+  {
+    if (_numberChassis != null)
+    {
+      return _numberChassis.Value;
+    }
+
+    var service = new ChassisManagerDtoService();
+    var chassis = await service.GetAllAsync();
+    var legacyAsk = chassis.FirstOrDefault(x =>
+      string.Equals(x.Name, "\u0422\u0435\u0441\u0442\u0435\u0440 \u0410\u0421\u041a", StringComparison.OrdinalIgnoreCase) ||
+      x.DeviceClass.EndsWith(".ManagerASKMKI", StringComparison.Ordinal));
+
+    return legacyAsk?.Number;
+  }
+  /// <summary>
+  /// Загружает выбранный профиль в визуальные группы редактора.
+  /// </summary>
   private void LoadSelectedProfileIntoEditor()
   {
     _isLoadingEditor = true;
@@ -389,6 +413,7 @@ public partial class AskMkiConfigControl : UserControl
         _currentProfile = null;
         _editorGroups = new ObservableCollection<AskMkiSettingGroup>();
         ProfileGroupsItemsControl.ItemsSource = _editorGroups;
+        SelectProfileGroup(null);
         SetUnsavedChanges(false);
         return;
       }
@@ -399,6 +424,7 @@ public partial class AskMkiConfigControl : UserControl
       _editorGroups = BuildEditorGroups(profile);
       SubscribeEditorChanges(_editorGroups);
       ProfileGroupsItemsControl.ItemsSource = _editorGroups;
+      SelectProfileGroup(_editorGroups.FirstOrDefault());
       SetUnsavedChanges(false);
     }
     finally
@@ -407,6 +433,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Применяет значения всех полей редактора к доменному профилю.
+  /// </summary>
   private void ApplyEditorGroupsToProfile(LegacyMkiHardwareProfile profile)
   {
     foreach (var group in _editorGroups)
@@ -423,6 +452,68 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Открывает выбранную группу параметров в правой панели редактора.
+  /// </summary>
+  private void SelectProfileGroup(AskMkiSettingGroup? group)
+  {
+    foreach (var editorGroup in _editorGroups)
+    {
+      editorGroup.IsExpanded = ReferenceEquals(editorGroup, group);
+    }
+  }
+
+  /// <summary>
+  /// Обрабатывает выбор группы параметров в левом списке.
+  /// </summary>
+  private void GroupButton_Click(object sender, RoutedEventArgs e)
+  {
+    if (sender is Button { DataContext: AskMkiSettingGroup group })
+    {
+      SelectProfileGroup(group);
+    }
+  }
+
+  /// <summary>
+  /// Открывает выбранную группу параметров в правой панели редактирования.
+  /// </summary>
+  private async void EditGroupButton_Click(object sender, RoutedEventArgs e)
+  {
+    if (sender is not Button { CommandParameter: AskMkiSettingGroup group })
+    {
+      return;
+    }
+
+    SelectProfileGroup(group);
+
+    var editor = new AskMkiGroupEditorDrawerControl
+    {
+      DataContext = group
+    };
+
+    editor.SaveRequested += (_, _) =>
+    {
+      SaveConfigButton_Click(editor, new RoutedEventArgs());
+      DrawerHostService.Instance.Close();
+    };
+
+    editor.CancelRequested += (_, _) =>
+    {
+      CancelConfigButton_Click(editor, new RoutedEventArgs());
+      DrawerHostService.Instance.Close();
+    };
+
+    await DrawerHostService.Instance.OpenContentAsync(
+      editor,
+      "Редактирование параметров",
+      "F4 - закрыть",
+      onClose: null,
+      panelWidth: AskMkiConfigDrawerPanelWidth);
+  }
+
+  /// <summary>
+  /// Создает специальную группу редактирования СК/БК в виде матрицы.
+  /// </summary>
   private AskMkiSettingGroup CreateSwitchMatrixGroup(AskMkiGroupDefinition definition, LegacyMkiHardwareProfile profile)
   {
     var group = new AskMkiSettingGroup
@@ -445,7 +536,7 @@ public partial class AskMkiConfigControl : UserControl
       {
         Name = rowName,
         IsFixedPresent = rowIndex == 0,
-        FixedDescription = "Всегда",
+        FixedDescription = "\\u0412\\u0441\\u0435\\u0433\\u0434\\u0430",
         IsPresent = rowIndex == 0 || IsTruthy(GetValueByPath(profile, $"HardwareConfig.SkIs[{rowIndex}]")),
         FirstBk = Convert.ToString(GetValueByPath(profile, $"HardwareConfig.SkBkBeg[{rowIndex}]"), CultureInfo.InvariantCulture) ?? string.Empty,
         LastBk = Convert.ToString(GetValueByPath(profile, $"HardwareConfig.SkBkEnd[{rowIndex}]"), CultureInfo.InvariantCulture) ?? string.Empty,
@@ -482,6 +573,9 @@ public partial class AskMkiConfigControl : UserControl
     return group;
   }
 
+  /// <summary>
+  /// Ограничивает ввод номера БК двумя цифрами.
+  /// </summary>
   private void SmallNumberTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
   {
     if (sender is not TextBox textBox)
@@ -494,6 +588,9 @@ public partial class AskMkiConfigControl : UserControl
     e.Handled = newText.Length > 2 || newText.Any(ch => !char.IsDigit(ch));
   }
 
+  /// <summary>
+  /// Проверяет вставляемое значение номера БК.
+  /// </summary>
   private void SmallNumberTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
   {
     if (!e.DataObject.GetDataPresent(DataFormats.Text))
@@ -517,6 +614,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Возвращает текст поля после предполагаемого ввода или вставки.
+  /// </summary>
   private static string GetProposedText(TextBox textBox, string newTextPart)
   {
     var currentText = textBox.Text ?? string.Empty;
@@ -532,6 +632,9 @@ public partial class AskMkiConfigControl : UserControl
     return currentText.Insert(selectionStart, newTextPart);
   }
 
+  /// <summary>
+  /// Перечисляет все поля редактора во всех группах.
+  /// </summary>
   private static IEnumerable<AskMkiSettingItem> EnumerateItems(IEnumerable<AskMkiSettingGroup> groups)
   {
     foreach (var group in groups)
@@ -548,28 +651,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
-  private string ResolveAndPersistPaths()
-  {
-    var mkiPath = MkiPathTextBox.Text?.Trim() ?? string.Empty;
-    var configPath = ConfigPathTextBox.Text?.Trim() ?? string.Empty;
-
-    LegacyMkiConfig.SetMkiPath(mkiPath);
-
-    if (string.IsNullOrWhiteSpace(configPath) && !string.IsNullOrWhiteSpace(mkiPath))
-    {
-      configPath = LegacyMkiConfig.GetConfigPath();
-      ConfigPathTextBox.Text = configPath;
-    }
-
-    LegacyMkiConfig.SetConfigPath(configPath);
-    return configPath;
-  }
-
-  private void UpdateClearButtonState()
-  {
-    ClearMkiPathButton.IsEnabled = !string.IsNullOrWhiteSpace(MkiPathTextBox.Text);
-  }
-
+  /// <summary>
+  /// Обрабатывает прокрутку списка групп с учетом открытых выпадающих списков.
+  /// </summary>
   private void ProfileGroupsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
   {
     if (e.OriginalSource is DependencyObject source)
@@ -602,6 +686,9 @@ public partial class AskMkiConfigControl : UserControl
     e.Handled = true;
   }
 
+  /// <summary>
+  /// Находит ближайшего визуального родителя указанного типа.
+  /// </summary>
   private static T? FindVisualParent<T>(DependencyObject? source)
     where T : DependencyObject
   {
@@ -618,6 +705,9 @@ public partial class AskMkiConfigControl : UserControl
     return null;
   }
 
+  /// <summary>
+  /// Строит коллекцию групп редактора по XAML-описанию полей.
+  /// </summary>
   private ObservableCollection<AskMkiSettingGroup> BuildEditorGroups(LegacyMkiHardwareProfile profile)
   {
     _currentProfile = profile;
@@ -639,26 +729,41 @@ public partial class AskMkiConfigControl : UserControl
     return groups;
   }
 
+  /// <summary>
+  /// Возвращает определения групп из ресурсов XAML.
+  /// </summary>
   private IReadOnlyList<AskMkiGroupDefinition> GroupDefinitions(string key)
   {
     return ((IEnumerable)FindResource(key)).Cast<AskMkiGroupDefinition>().ToArray();
   }
 
+  /// <summary>
+  /// Возвращает определения полей из ресурсов XAML.
+  /// </summary>
   private IReadOnlyList<AskMkiFieldDefinition> FieldDefinitions(string key)
   {
     return ((IEnumerable)FindResource(key)).Cast<AskMkiFieldDefinition>().ToArray();
   }
 
+  /// <summary>
+  /// Возвращает варианты выбора из ресурсов XAML.
+  /// </summary>
   private IReadOnlyList<AskMkiSettingOption> OptionsFromResource(string key)
   {
     return ((IEnumerable)FindResource(key)).Cast<AskMkiSettingOption>().ToArray();
   }
 
+  /// <summary>
+  /// Возвращает строковый список из ресурсов XAML.
+  /// </summary>
   private IReadOnlyList<string> StringsFromResource(string key)
   {
     return ((IEnumerable)FindResource(key)).Cast<string>().ToArray();
   }
 
+  /// <summary>
+  /// Создает обычную плоскую группу полей редактора.
+  /// </summary>
   private AskMkiSettingGroup CreateFlatGroupFromDefinition(AskMkiGroupDefinition definition)
   {
     var group = new AskMkiSettingGroup
@@ -675,6 +780,9 @@ public partial class AskMkiConfigControl : UserControl
     return group;
   }
 
+  /// <summary>
+  /// Рекурсивно добавляет поля дочерних определений в целевую группу.
+  /// </summary>
   private void AddFieldsRecursive(AskMkiSettingGroup targetGroup, AskMkiGroupDefinition definition)
   {
     if (!string.IsNullOrWhiteSpace(definition.FieldsKey))
@@ -688,6 +796,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Добавляет в группу поля из указанного XAML-ресурса.
+  /// </summary>
   private void AddDefinitionItems(AskMkiSettingGroup group, string resourceKey)
   {
     foreach (var definition in FieldDefinitions(resourceKey))
@@ -699,6 +810,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Разворачивает повторяющееся определение поля в отдельные элементы.
+  /// </summary>
   private IEnumerable<AskMkiFieldDefinition> ExpandDefinition(AskMkiFieldDefinition definition)
   {
     if (definition.Count <= 0)
@@ -732,6 +846,9 @@ public partial class AskMkiConfigControl : UserControl
     }
   }
 
+  /// <summary>
+  /// Создает элемент редактора по определению поля.
+  /// </summary>
   private AskMkiSettingItem CreateItemFromDefinition(AskMkiFieldDefinition definition)
   {
     if (definition.EditorKind == AskMkiSettingEditorKind.Info)
@@ -781,6 +898,9 @@ public partial class AskMkiConfigControl : UserControl
     };
   }
 
+  /// <summary>
+  /// Создает элемент редактора с выпадающим списком.
+  /// </summary>
   private AskMkiSettingItem CreateChoiceItemFromDefinition(AskMkiFieldDefinition definition, object? value)
   {
     if (string.IsNullOrWhiteSpace(definition.OptionsKey))
@@ -817,6 +937,9 @@ public partial class AskMkiConfigControl : UserControl
     return item;
   }
 
+  /// <summary>
+  /// Возвращает текущий редактируемый профиль.
+  /// </summary>
   private LegacyMkiHardwareProfile CurrentProfile()
   {
     if (_currentProfile == null)
@@ -827,6 +950,9 @@ public partial class AskMkiConfigControl : UserControl
     return _currentProfile;
   }
 
+  /// <summary>
+  /// Читает значение объекта по точечному пути с поддержкой индексов массивов.
+  /// </summary>
   private static object? GetValueByPath(object source, string path)
   {
     object? current = source;
@@ -844,6 +970,9 @@ public partial class AskMkiConfigControl : UserControl
     return current;
   }
 
+  /// <summary>
+  /// Определяет тип значения по точечному пути с поддержкой индексов массивов.
+  /// </summary>
   private static Type GetValueTypeByPath(object source, string path)
   {
     object? current = source;
@@ -874,6 +1003,9 @@ public partial class AskMkiConfigControl : UserControl
     return currentType;
   }
 
+  /// <summary>
+  /// Записывает значение объекта по точечному пути с поддержкой индексов массивов.
+  /// </summary>
   private static void SetValueByPath(object source, string path, object? value)
   {
     var parts = path.Split('.');
@@ -892,6 +1024,9 @@ public partial class AskMkiConfigControl : UserControl
     SetSegmentValue(current, parts[^1], value);
   }
 
+  /// <summary>
+  /// Читает значение одного сегмента пути.
+  /// </summary>
   private static object? GetSegmentValue(object source, string segment)
   {
     var parsed = ParseSegment(segment);
@@ -913,6 +1048,9 @@ public partial class AskMkiConfigControl : UserControl
     return array.GetValue(parsed.Index.Value);
   }
 
+  /// <summary>
+  /// Записывает значение одного сегмента пути.
+  /// </summary>
   private static void SetSegmentValue(object source, string segment, object? value)
   {
     var parsed = ParseSegment(segment);
@@ -936,6 +1074,9 @@ public partial class AskMkiConfigControl : UserControl
     array.SetValue(ConvertObjectToType(value, elementType), parsed.Index.Value);
   }
 
+  /// <summary>
+  /// Разбирает сегмент пути на имя свойства и необязательный индекс массива.
+  /// </summary>
   private static (string PropertyName, int? Index) ParseSegment(string segment)
   {
     var match = Regex.Match(segment, @"^(?<name>[A-Za-z0-9_]+)(\[(?<index>\d+)\])?$");
@@ -953,6 +1094,9 @@ public partial class AskMkiConfigControl : UserControl
       : (propertyName, null);
   }
 
+  /// <summary>
+  /// Преобразует значение legacy-поля к логическому признаку включения.
+  /// </summary>
   private static bool IsTruthy(object? value)
   {
     return value switch
@@ -968,11 +1112,17 @@ public partial class AskMkiConfigControl : UserControl
     };
   }
 
+  /// <summary>
+  /// Преобразует значение переключателя к целевому типу legacy-поля.
+  /// </summary>
   private static object ConvertToggleToType(bool value, Type targetType)
   {
     return ConvertTextToType(value ? "1" : "0", targetType);
   }
 
+  /// <summary>
+  /// Преобразует текстовое значение редактора к целевому типу legacy-поля.
+  /// </summary>
   private static object ConvertTextToType(string? text, Type targetType)
   {
     text ??= string.Empty;
@@ -1015,6 +1165,9 @@ public partial class AskMkiConfigControl : UserControl
     return Convert.ChangeType(text, targetType, CultureInfo.InvariantCulture);
   }
 
+  /// <summary>
+  /// Преобразует произвольное значение к целевому типу legacy-поля.
+  /// </summary>
   private static object ConvertObjectToType(object? value, Type targetType)
   {
     if (value != null && targetType.IsInstanceOfType(value))
