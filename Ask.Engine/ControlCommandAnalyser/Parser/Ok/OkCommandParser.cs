@@ -204,7 +204,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
             if (!uniqueKeys.Add(key))
               model.Errors.Add(OkErrors.DuplicateParameterKey(numberLine + i, $"{commandNumber} {mnemonic}", key));
           }
-          model.Comments = value.Trim();
+          model.Comments.Add(value.Trim());
         }
       }
 
