@@ -100,7 +100,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         throw new InvalidOperationException("Прибор не установлен в режим измерения переменного напряжения.");
       }
 
-      await _device.DeviceProtocol.QueryAsync($"SENS:VOLT:AC:RANGE {mode.GetDisplayName()}");
+      await _device.DeviceProtocol.QueryAsync($"SENS:VOLT:AC:RANGE{mode.GetDisplayName()}");
       var answer = await _device.DeviceProtocol.QueryAsync(mode == VoltageRange.Auto ? "SENS:VOLT:AC:RANGE:AUTO?" : "SENS:VOLT:AC:RANGE?", timeout: 1000);
       if (answer.Contains(mode.GetDisplayDescription()))
       {

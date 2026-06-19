@@ -59,25 +59,25 @@ namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums
 
   public enum VoltageRange
   {
-    [Display(Name = "AUTO ON", Description = "1")]
+    [Display(Name = ":AUTO ON", Description = "1")]
     Auto,
 
-    [Display(Name = "0.1", Description = "+1.00000000E-01")]
+    [Display(Name = " 0.1", Description = "+1.00000000E-01")]
     mV_100,
 
-    [Display(Name = "1", Description = "+1.00000000E+00")]
+    [Display(Name = " 1", Description = "+1.00000000E+00")]
     V_1,
 
-    [Display(Name = "10", Description = "+1.00000000E+01")]
+    [Display(Name = " 10", Description = "+1.00000000E+01")]
     V_10,
 
-    [Display(Name = "100", Description = "+1.00000000E+02")]
+    [Display(Name = " 100", Description = "+1.00000000E+02")]
     V_100,
 
-    [Display(Name = "750", Description = "+1.00000000E+03")]
+    [Display(Name = " 750", Description = "+1.00000000E+03")]
     V_750,
 
-    [Display(Name = "1000", Description = "+1.00000000E+03")]
+    [Display(Name = " 1000", Description = "+1.00000000E+03")]
     V_1000
   }
 
