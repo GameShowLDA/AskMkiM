@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Newtonsoft.Json.Linq;
 using YamlDotNet.Core.Tokens;
 
@@ -16,16 +17,14 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
     /// <summary>
     /// Метод для вывода сообщения пользователю о результатах измерения.
     /// </summary>
-    /// <param name="status">Статус измерения (true - в норме, false - брак)</param>
+    /// <param name="status">Статус измерения (<see langword="true"/> - в норме, <see langword="false"/> - брак)</param>
     /// <param name="result">Полученный результат</param>
     /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
     /// <param name="unit">Единица измерения результата</param>
     /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
     public static async Task IsCorrectRangeAsync(bool status, double result, string param, string? unit = null, IUserInteractionService? userMessageService = null)
     {
-      var formattedResult = string.IsNullOrWhiteSpace(unit)
-        ? $"{result.ToString("0.000###;-0.000###;0.000")}"
-        : $"{result.ToString("0.000###;-0.000###;0.000")} {unit}";
+      var formattedResult = MeasurementValueFormatter.Round(result);
 
       if (status)
       {
