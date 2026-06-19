@@ -100,7 +100,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
       }
 
       var uniqueKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-      var multiKeys = new HashSet<string> { "ОПК", "КД", "ИК", "ЦЕХ", "ПРИМ", "ПРИМЕЧ", "ПРИМЕЧАНИЕ" };
+      var multiKeys = new HashSet<string> { "ОПК", "КД", "ИК", "ЦЕХ", "ПРИМ", "ПРИМЕЧ", "ПРИМЕЧАНИЕ", "ЗАКАЗ" };
 
       for (int i = 1; i < lines.Count; i++)
       {
@@ -169,6 +169,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
         {
           var parsedValueParam = paramMatch.Groups[2].Value.Trim();
           model.ContolSystemType = parsedValueParam;
+        }
+        if (valueParams.Contains("ЗАКАЗ"))
+        {
+          var parsedValueParam = paramMatch.Groups[2].Value.Trim();
+          model.OrderNumber = parsedValueParam;
         }
         if (valueParams.Contains("ЦЕХ"))
         {
