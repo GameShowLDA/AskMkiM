@@ -107,7 +107,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       await Task.Delay(10);
 
       if (answer == null || answer.Length == 0) return false;
-      if (!answer.Contains("disconnect")) return false;
+      //if (!answer.Contains("disconnect")) return false;
 
       return true;
     }
