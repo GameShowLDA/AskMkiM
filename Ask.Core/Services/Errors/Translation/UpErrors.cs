@@ -17,6 +17,16 @@ namespace Ask.Core.Services.Errors.Translation
       Code = ErrorCode.Up_MissingOrInvalidUpLabel,
       Description = "В команде УП не указана или указана некорректная метка перехода."
     };
+    /// <summary>
+    /// Ошибка: в команде УП указана ссылка на саму себя.
+    /// </summary>
+    public static ErrorItem SelfReferenceJump(int lineNumber, string command) => new()
+    {
+      SourceLineNumber = lineNumber,
+      Command = command,
+      Code = ErrorCode.Up_SelfReferenceJump,
+      Description = "В команде УП указана ссылка на саму себя."
+    };
 
     /// <summary>
     /// Ошибка: метка перехода не найдена среди номеров команд.
