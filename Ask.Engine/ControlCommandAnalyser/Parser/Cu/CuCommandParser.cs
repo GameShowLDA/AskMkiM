@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using System.Text.RegularExpressions;
+using Ask.Core.Services.Errors.Translation;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
 {
@@ -94,6 +95,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
       if (model.CuType == CuCommandType.Question)
       {
         model.MessageText = TrimTrailingQuestionMarks(rawMessageText);
+      }
+
+      if (string.IsNullOrWhiteSpace(model.MessageText))
+      {
+        model.Warnings.Add(GeneralWarnings.EmptyMessage(numberLine, $"{commandNumber} {mnemonic}"));
       }
 
       return model;

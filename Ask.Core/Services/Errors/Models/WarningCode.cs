@@ -60,6 +60,10 @@ namespace Ask.Core.Services.Errors.Models
     [WarningCodeTag("WRNGEN010")]
     Gen_IgnoreAmperage,
 
+    /// <summary> Пустое сообщение в ЦУ. </summary>
+    [WarningCodeTag("WRNGEN011")]
+    Gen_EmptyMessage,
+
     #endregion
 
     #region Режим УМ
