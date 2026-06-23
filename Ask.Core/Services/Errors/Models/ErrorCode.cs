@@ -136,6 +136,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("UP002")]
     Up_UpLabelNotFound,
 
+    /// <summary> Метка перехода, указанная в команде УП, указывает на саму себя. </summary>
+    [ErrorCodeTag("UP003")]
+    Up_SelfReferenceJump,
+
     #endregion
 
     #region Режим ОК

@@ -127,6 +127,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 
         if (standNumber.HasValue)
         {
+          if (standList.Contains(standNumber.Value))
+          {
+            model.Errors.Add(
+                VshErrors.DuplicateStand(
+                    model.StartLineNumber,
+                    model.Mnemonic,
+                    standNumber.Value));
+
+            return busDictionary;
+          }
+
           standList.Add(standNumber.Value);
         }
       }
