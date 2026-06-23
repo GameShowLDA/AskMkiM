@@ -502,6 +502,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("VSH002")]
     Vsh_NoneVshBusStructure,
 
+    /// <summary> В команде ВШ указана дублирующаяся структура стойки коммутации в конфигурации. </summary>
+    [ErrorCodeTag("VSH003")]
+    Vsh_DuplicateStand,
+
     #endregion
 
     #region Режим НЭ

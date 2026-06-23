@@ -40,5 +40,20 @@ namespace Ask.Core.Services.Errors.Translation
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = "Системная ошибка: в конфигурации не указана структура стройки коммутации. Проверьте конфигурацию."
       };
+
+    /// <summary>
+    /// Ошибка: в команде ВШ указана дублирующаяся структура стойки коммутации в конфигурации.
+    /// </summary>
+    public static ErrorItem DuplicateStand(int startLineNumber, string command, int standNumber,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = startLineNumber,
+        Command = command,
+        Code = ErrorCode.Vsh_DuplicateStand,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Системная ошибка: стойка {standNumber} указана в структуре шин более одного раза. Проверьте конфигурацию."
+      };
   }
 }
