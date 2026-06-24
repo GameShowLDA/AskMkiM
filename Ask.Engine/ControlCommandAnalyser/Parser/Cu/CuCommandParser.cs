@@ -39,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
       {
         CommandNumber = commandNumber,
         StartLineNumber = numberLine,
-        SourceLines = new List<string>(lines)
+        SourceLines = lines is null ? new List<string>() : new List<string>(lines),
       };
 
       List<string> processedLines = CommentsParser.ParseComments(lines, model);

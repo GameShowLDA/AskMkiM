@@ -25,7 +25,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       var model = new RmCommandModel
       {
         CommandNumber = commandNumber,
-        SourceLines = new List<string>(lines),
+        SourceLines = lines == null
+                            ? new List<string>()
+                            : new List<string>(lines),
         StartLineNumber = numberLine,
       };
 

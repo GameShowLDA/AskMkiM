@@ -39,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
       var model = new OkCommandModel
       {
         CommandNumber = commandNumber,
-        SourceLines = new List<string>(lines),
+        SourceLines = lines is null ? new List<string>() : new List<string>(lines),
         StartLineNumber = numberLine,
       };
 
