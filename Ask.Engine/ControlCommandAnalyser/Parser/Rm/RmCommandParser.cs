@@ -1,5 +1,4 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
@@ -58,9 +57,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       var pairs = ParseParts(body, model);
       model.Pairs = pairs;
 
-      if (pairs.Count > 0 && ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
-        InitializeCompatibilityPointsMap(model);
-
       foreach (var pair in pairs)
         AddPair(model, pair);
 
@@ -74,6 +70,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       var sourceParts = hasPartSeparators
         ? body.Replace("\r", string.Empty).Split('*')
         : new[] { body };
+      ControlAddressTranslationEngine? translationEngine = null;
 
       foreach (var sourcePart in sourceParts)
       {
@@ -82,7 +79,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
           continue;
 
         var part = CreatePart(partText, hasPartSeparators, model);
-        var translation = new ControlAddressTranslationEngine().Translate(part.SourceText);
+        translationEngine ??= new ControlAddressTranslationEngine(CreateTranslationOptions());
+        var translation = translationEngine.Translate(part.SourceText);
         foreach (var diagnostic in translation.Diagnostics)
           AddDiagnostic(model, diagnostic);
 
@@ -91,7 +89,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
           {
             OkPoint = entry.ObjectAddress.Value,
             Synonym = entry.Synonym?.Value,
-            AskInput = entry.MachineAddress.ToString()
+            AskInput = entry.MachineAddress.ToString(),
+            LegacyAskInput = entry.SourceMachineAddress.ToString()
           })
           .ToList();
         foreach (var pair in pairs)
@@ -113,6 +112,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       }
 
       return result;
+    }
+
+    private static RmTranslationOptions CreateTranslationOptions()
+    {
+      var modules = Ask.DataBase.Engine.Static.Devices.RelaySwitchModules
+        .GetAllAsync()
+        .GetAwaiter()
+        .GetResult()
+        .Select(module => new LegacyRelaySwitchModuleInfo(module.Number, module.PointCount, module.NumberChassis))
+        .ToArray();
+
+      if (modules.Length == 0)
+        return RmTranslationOptions.Default;
+
+      ILegacyAddressMapper addressMapper = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled()
+        ? new RelaySwitchModuleLegacyAddressMapper(modules)
+        : new RelaySwitchModuleAddressValidator(modules);
+
+      return new RmTranslationOptions(SynonymBindingMode.ObjectThenSynonym, addressMapper);
     }
 
     private static RmPartModel CreatePart(string partText, bool requirePartNumber, RmCommandModel model)
@@ -151,17 +169,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         return;
       }
 
-      var askPoint = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled()
-        ? LegacyCompatibilityMapper.GetRealAddressByCompatibilityPoint(pair.AskInput)
-        : pair.AskInput;
-
       if (ContainsPointKey(model, pair.OkPoint))
       {
         return;
       }
       else
       {
-        model.PointsMap[pair.OkPoint] = askPoint;
+        model.PointsMap[pair.OkPoint] = pair.AskInput;
       }
 
       if (!string.IsNullOrWhiteSpace(pair.Synonym))
@@ -172,7 +186,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         }
         else
         {
-          model.SynonymMap[pair.Synonym] = askPoint;
+          model.SynonymMap[pair.Synonym] = pair.AskInput;
         }
       }
     }
@@ -196,44 +210,5 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         $"{model.CommandNumber} {model.Mnemonic}"));
     }
 
-    private void InitializeCompatibilityPointsMap(RmCommandModel rmCommandModel)
-    {
-      Dictionary<PointModel, PointModel> CompatibilityPointsMap = new();
-      var mkrs = Ask.DataBase.Engine.Static.Devices.RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult().OrderBy(x => x.Number).ToList();
-
-      int numberModule = 1;
-      int pointNumber = 1;
-
-      foreach (var item in mkrs)
-      {
-        for (int i = 1; i <= item.PointCount; i++)
-        {
-          var askPoint = new PointModel
-          {
-            DeviceNumber = item.NumberChassis,
-            ModuleNumber = item.Number,
-            PointNumber = i
-          };
-
-          var okPoint = new PointModel
-          {
-            DeviceNumber = item.NumberChassis,
-            ModuleNumber = numberModule,
-            PointNumber = pointNumber
-          };
-
-          CompatibilityPointsMap[askPoint] = okPoint;
-
-          pointNumber++;
-          if (pointNumber > 100)
-          {
-            pointNumber = 1;
-            numberModule++;
-          }
-        }
-      }
-
-      LegacyCompatibilityMapper.SetCompatibilityPointsMap(CompatibilityPointsMap);
-    }
   }
 }

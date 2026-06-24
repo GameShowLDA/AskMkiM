@@ -6,4 +6,7 @@ public sealed record AddressMapping(
   ObjectAddress ObjectAddress,
   MachineAddress MachineAddress,
   ObjectAddress? Synonym,
-  TextSpan SourceSpan);
+  TextSpan SourceSpan)
+{
+  public MachineAddress SourceMachineAddress { get; init; } = MachineAddress;
+}

@@ -221,9 +221,11 @@ namespace MainWindowProgram
       try
       {
         var svc = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
-        LogInformation($"OnExit: IBreakdownTester instance = {svc.GetHashCode()} | {svc.GetType().FullName}");
-
-        svc?.ConnectableManager?.DisconnectAsync();
+        if (svc != null)
+        {
+          LogInformation($"OnExit: IBreakdownTester instance = {svc.GetHashCode()} | {svc.GetType().FullName}");
+          svc.ConnectableManager?.DisconnectAsync();
+        }
       }
       catch { }
 

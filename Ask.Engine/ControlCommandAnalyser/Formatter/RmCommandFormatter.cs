@@ -1,5 +1,4 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Config.Base;
 using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
@@ -64,18 +63,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         ? pair.OkPoint
         : $"{pair.OkPoint} == {pair.Synonym}";
 
-      var askPoint = rm.PointsMap.TryGetValue(pair.OkPoint, out var mappedPoint)
+      var realAskPoint = rm.PointsMap.TryGetValue(pair.OkPoint, out var mappedPoint)
         ? mappedPoint
         : pair.AskInput;
 
-      return $"{left} = {FormatAskPoint(askPoint)}";
+      return $"{left} = {FormatAskPoint(realAskPoint, pair.LegacyAskInput)}";
     }
 
-    private static string FormatAskPoint(string askPoint)
+    private static string FormatAskPoint(string realAskPoint, string? legacyAskPoint = null)
     {
-      return ExecutionConfig.GetIsLegacyCompatibilityModeEnabled()
-        ? $"{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(askPoint)}({askPoint})"
-        : askPoint;
+      if (!ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+        return realAskPoint;
+
+      if (string.IsNullOrWhiteSpace(legacyAskPoint) ||
+          string.Equals(legacyAskPoint, realAskPoint, StringComparison.OrdinalIgnoreCase))
+      {
+        return realAskPoint;
+      }
+
+      return $"{legacyAskPoint}({realAskPoint})";
     }
   }
 }
