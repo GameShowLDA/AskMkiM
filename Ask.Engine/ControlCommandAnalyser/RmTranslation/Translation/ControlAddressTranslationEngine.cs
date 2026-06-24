@@ -8,6 +8,7 @@ namespace Ask.Engine.ControlCommandAnalyser.RmTranslation.Translation;
 public sealed class ControlAddressTranslationEngine
 {
   private readonly AddressExpansionService expansionService;
+  private readonly ILegacyAddressMapper legacyAddressMapper;
   private readonly RmSemanticValidator validator;
   private readonly RmTranslationOptions options;
 
@@ -15,6 +16,7 @@ public sealed class ControlAddressTranslationEngine
   {
     this.options = options ?? RmTranslationOptions.Default;
     expansionService = new AddressExpansionService();
+    legacyAddressMapper = this.options.LegacyAddressMapper ?? NoLegacyAddressMapper.Instance;
     validator = new RmSemanticValidator();
   }
 
@@ -48,6 +50,7 @@ public sealed class ControlAddressTranslationEngine
   {
     var diagnostics = new List<RmDiagnostic>(existingDiagnostics);
     var entries = new List<AddressMapping>();
+    var failedAddresses = new List<MachineAddress>();
 
     foreach (var mapping in ast.Mappings)
     {
@@ -91,13 +94,28 @@ public sealed class ControlAddressTranslationEngine
 
       for (var i = 0; i < objectAddresses.Count; i++)
       {
+        var mappedMachineAddress = legacyAddressMapper.Map(machineAddresses[i], mapping.Span);
+
+        if (!mappedMachineAddress.IsSuccess || mappedMachineAddress.Address is null)
+        {
+          failedAddresses.Add(machineAddresses[i]);
+          continue;
+        }
+
+        AddAddressRangeDiagnostic(failedAddresses, diagnostics, mapping.Span);
+
         entries.Add(new AddressMapping(
           objectAddresses[i],
-          machineAddresses[i],
+          mappedMachineAddress.Address.Value,
           synonyms?[i],
-          mapping.Span));
+          mapping.Span)
+        {
+          SourceMachineAddress = machineAddresses[i]
+        });
       }
     }
+
+    AddAddressRangeDiagnostic(failedAddresses, diagnostics, ast.Mappings.LastOrDefault()?.Span ?? default);
 
     diagnostics.AddRange(validator.Validate(entries));
     return new TranslationResult(entries, diagnostics);
@@ -118,4 +136,26 @@ public sealed class ControlAddressTranslationEngine
   private sealed record BoundMappingExpressions(
     AddressExpressionSyntax ObjectExpression,
     AddressExpressionSyntax? SynonymExpression);
+
+  private static void AddAddressRangeDiagnostic(
+    List<MachineAddress> failedAddresses,
+    List<RmDiagnostic> diagnostics,
+    TextSpan span)
+  {
+    if (failedAddresses.Count == 0)
+      return;
+
+    var first = failedAddresses[0];
+    var last = failedAddresses[^1];
+    var message = failedAddresses.Count == 1
+      ? $"Адрес {first} не задан в конфигурации. Проверьте RelaySwitchModules и PointCount."
+      : $"Адреса с {first} по {last} не заданы в конфигурации. Проверьте RelaySwitchModules и PointCount.";
+
+    diagnostics.Add(RmDiagnostic.Error(
+      RmDiagnosticCode.MachineAddressNotConfigured,
+      message,
+      span));
+
+    failedAddresses.Clear();
+  }
 }
