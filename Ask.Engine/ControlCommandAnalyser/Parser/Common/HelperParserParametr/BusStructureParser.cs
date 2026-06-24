@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -127,10 +128,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 
         if (standNumber.HasValue)
         {
-          if (standList.Contains(standNumber.Value))
+          var chassisManager = ChassisManagers.GetAllAsync().GetAwaiter().GetResult();
+
+          bool rackExists = chassisManager.Any(c => c.Number == standNumber.Value);
+
+          if (!rackExists)
           {
             model.Errors.Add(
-                VshErrors.DuplicateStand(
+                VshErrors.InvalidRackNumber(
                     model.StartLineNumber,
                     model.Mnemonic,
                     standNumber.Value));

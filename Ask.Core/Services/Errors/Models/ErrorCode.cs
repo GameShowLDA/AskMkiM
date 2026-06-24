@@ -506,6 +506,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("VSH003")]
     Vsh_DuplicateStand,
 
+    /// <summary> В команде ВШ указан неверный номер стойки коммутации в конфигурации. </summary>
+    [ErrorCodeTag("VSH004")]
+    Vsh_InvalidRackNumber,
+
     #endregion
 
     #region Режим НЭ
