@@ -32,7 +32,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
           yield return line;
         }
 
-        foreach (var line in FormatSchemeWithRmCheck(pi, "\tРазобщенные точки:"))
+        foreach (var line in FormatSchemeWithRmCheckConnectedPoints(pi, "\tРазобщенные точки:"))
         {
           yield return line;
         }
