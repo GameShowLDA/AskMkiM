@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -467,13 +468,15 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
   private static KsCommandModel CreateCommand(double lowerLimit, double? higherLimit, IReadOnlyList<PointModel> points, params string[] keys)
   {
+    static string FormatResistance(double value) => value.ToString("G", CultureInfo.GetCultureInfo("ru-RU"));
+
     return new KsCommandModel
     {
       CommandNumber = "10",
       LowerLimitResistance = lowerLimit,
       HigherLimitResistance = higherLimit,
-      LowerLimitResistanceSource = $"{lowerLimit} \u041E\u043C",
-      HigherLimitResistanceSource = higherLimit.HasValue ? $"{higherLimit} \u041E\u043C" : "\u221E \u041E\u043C",
+      LowerLimitResistanceSource = $"{FormatResistance(lowerLimit)} \u041E\u043C",
+      HigherLimitResistanceSource = higherLimit.HasValue ? $"{FormatResistance(higherLimit.Value)} \u041E\u043C" : "\u221E \u041E\u043C",
       ResistanceUnit = "\u041E\u043C",
       StartLineNumber = 10,
       FormattedStartLineNumber = 3,
