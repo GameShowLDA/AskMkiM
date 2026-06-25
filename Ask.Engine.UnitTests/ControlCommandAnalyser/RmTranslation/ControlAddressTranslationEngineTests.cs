@@ -6,7 +6,7 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.RmTranslation;
 
 public class ControlAddressTranslationEngineTests
 {
-  [Theory(DisplayName = "Движок РМ: все одиночные примеры из документации разбираются без ошибок")]
+  [Theory(DisplayName = "Движок РМ: одиночные примеры из документации разбираются без ошибок")]
   [InlineData("X1/A1-A30=1.1.1-1.1.30", 30, "X1/A1", "1.1.1", "X1/A30", "1.1.30")]
   [InlineData("X1/B1-B31=1.1.31-1.1.61", 31, "X1/B1", "1.1.31", "X1/B31", "1.1.61")]
   [InlineData("X10/1-50=1.2.1-50", 50, "X10/1", "1.2.1", "X10/50", "1.2.50")]
@@ -102,6 +102,45 @@ public class ControlAddressTranslationEngineTests
     AssertSuccess(result);
     var entry = Assert.Single(result.Entries);
     AssertEntry(entry, "X1/1", "1.1.1", "S1");
+  }
+
+  [Fact(DisplayName = "Движок РМ: legacy-mapper преобразует машинные адреса до семантической проверки")]
+  public void Translate_WithLegacyAddressMapper_ReturnsRealMachineAddresses()
+  {
+    var mapper = new RelaySwitchModuleLegacyAddressMapper(new[]
+    {
+      new LegacyRelaySwitchModuleInfo(2, 350),
+      new LegacyRelaySwitchModuleInfo(4, 350),
+      new LegacyRelaySwitchModuleInfo(6, 350)
+    });
+    var engine = new ControlAddressTranslationEngine(new RmTranslationOptions(
+      SynonymBindingMode.ObjectThenSynonym,
+      mapper));
+
+    var result = engine.Translate("X1/1=1.1.25 X2/1=1.2.100 X3/1=1.3.100");
+
+    AssertSuccess(result);
+    Assert.Equal(new[] { "1.2.25", "1.2.200", "1.2.300" }, result.Entries.Select(entry => entry.MachineAddress.ToString()).ToArray());
+  }
+
+  [Fact(DisplayName = "Движок РМ: отсутствующий legacy-хвост сворачивается в одну ошибку диапазона")]
+  public void Translate_WithLegacyTailOutsideConfiguredPointCount_ReturnsSingleRangeDiagnostic()
+  {
+    var mapper = new RelaySwitchModuleLegacyAddressMapper(new[]
+    {
+      new LegacyRelaySwitchModuleInfo(2, 350),
+      new LegacyRelaySwitchModuleInfo(4, 350)
+    });
+    var engine = new ControlAddressTranslationEngine(new RmTranslationOptions(
+      SynonymBindingMode.ObjectThenSynonym,
+      mapper));
+
+    var result = engine.Translate("X1-X8=1.7.93-100 X9-X18=1.8.1-10 X19-X28=1.8.11-20");
+
+    var diagnostic = Assert.Single(result.Diagnostics, diagnostic => diagnostic.Code == RmDiagnosticCode.MachineAddressNotConfigured);
+    Assert.Contains("Адреса с 1.8.1 по 1.8.20", diagnostic.Message);
+    Assert.Contains("RelaySwitchModules", diagnostic.Message);
+    Assert.Equal(new MachineAddress(1, 4, 350), result.Entries[^1].MachineAddress);
   }
 
   [Fact(DisplayName = "Движок РМ: отсутствие знака равно даёт диагностическое сообщение")]
