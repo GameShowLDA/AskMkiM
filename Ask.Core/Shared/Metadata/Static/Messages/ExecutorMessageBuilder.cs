@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using System;
+using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
@@ -19,6 +20,8 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
   /// </summary>
   public static class ExecutorMessageBuilder
   {
+    private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
+
     /// <summary>
     /// Создаёт заголовок блока проверки по алгоритму контроля.
     /// </summary>
@@ -284,9 +287,11 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
 
       if (higherLimit != -1)
       {
+        var header = BuildMeasurementHeader(chains, lowerLimit, higherLimit, attr.Unit);
+
         if ((value < lowerLimit || value > higherLimit) && (measurementTypeCommand == MeasurementTypeCommand.PI_ACW || measurementTypeCommand == MeasurementTypeCommand.PI_DCW))
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
+          return new ShowMessageModel(header, message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
         if (MeasurementValueFormatter.IsOverloadValue(value) &&
@@ -295,24 +300,26 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
              measurementTypeCommand == MeasurementTypeCommand.PR ||
              measurementTypeCommand == MeasurementTypeCommand.NE))
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+          return new ShowMessageModel(header, message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
 
         if (MeasurementValueFormatter.IsOverloadValue(value, 9.899999999999999E+46) &&
             measurementTypeCommand == MeasurementTypeCommand.IE)
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}-{higherLimit} {attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+          return new ShowMessageModel(header, message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
 
         return new ShowMessageModel(
-          $"{chains}({lowerLimit}-{higherLimit} {attr.Unit})",
+          header,
           message: $"{attr.Symbol.ToString()}изм{comparisonSign} {MeasurementValueFormatter.Format(value)} {attr.Unit}");
       }
       else
       {
+        var header = BuildMeasurementHeader(chains, lowerLimit, attr.Unit);
+
         if ((value < lowerLimit || value > higherLimit) && (measurementTypeCommand == MeasurementTypeCommand.PI_ACW || measurementTypeCommand == MeasurementTypeCommand.PI_DCW))
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
+          return new ShowMessageModel(header, message: $"{attr.Symbol.ToString()}изм{comparisonSign} ПРОБОЙ");
         }
 
         if (MeasurementValueFormatter.IsOverloadValue(value) &&
@@ -321,13 +328,28 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
              measurementTypeCommand == MeasurementTypeCommand.PR ||
              measurementTypeCommand == MeasurementTypeCommand.NE))
         {
-          return new ShowMessageModel($"{chains}({lowerLimit}<{attr.Unit})", message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
+          return new ShowMessageModel(header, message: $"{attr.Symbol.ToString()}изм{comparisonSign} Overload");
         }
 
         return new ShowMessageModel(
-          $"{chains}({lowerLimit}<{attr.Unit})",
+          header,
           message: $"{attr.Symbol.ToString()}изм{comparisonSign} {MeasurementValueFormatter.Format(value)} {attr.Unit}");
       }
+    }
+
+    private static string BuildMeasurementHeader(string chains, double lowerLimit, double higherLimit, string unit)
+    {
+      return $"{chains}({FormatMeasurementLimit(lowerLimit)}-{FormatMeasurementLimit(higherLimit)} {unit})";
+    }
+
+    private static string BuildMeasurementHeader(string chains, double lowerLimit, string unit)
+    {
+      return $"{chains}({FormatMeasurementLimit(lowerLimit)}<{unit})";
+    }
+
+    private static string FormatMeasurementLimit(double value)
+    {
+      return value.ToString("G", RussianDisplayCulture);
     }
   }
 }

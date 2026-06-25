@@ -15,6 +15,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 {
   public class RmCommandParser : ICommandParser
   {
+    private readonly Func<IReadOnlyCollection<LegacyRelaySwitchModuleInfo>> relaySwitchModuleInfoProvider;
+
+    public RmCommandParser()
+      : this(LoadRelaySwitchModuleInfoFromDatabase)
+    {
+    }
+
+    public RmCommandParser(Func<IReadOnlyCollection<LegacyRelaySwitchModuleInfo>> relaySwitchModuleInfoProvider)
+    {
+      this.relaySwitchModuleInfoProvider = relaySwitchModuleInfoProvider ?? throw new ArgumentNullException(nameof(relaySwitchModuleInfoProvider));
+    }
+
     public bool CanParse(MnemonicIdentifier mnemonic)
     => mnemonic.Mnemonic.MatchesEnum(OrganizationalComands.RM);
 
@@ -61,7 +73,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       return model;
     }
 
-    private static List<RmPairModel> ParseParts(string body, RmCommandModel model)
+    private List<RmPairModel> ParseParts(string body, RmCommandModel model)
     {
       var result = new List<RmPairModel>();
       var hasPartSeparators = body.Contains('*');
@@ -112,14 +124,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
       return result;
     }
 
-    private static RmTranslationOptions CreateTranslationOptions()
+    private RmTranslationOptions CreateTranslationOptions()
     {
-      var modules = Ask.DataBase.Engine.Static.Devices.RelaySwitchModules
-        .GetAllAsync()
-        .GetAwaiter()
-        .GetResult()
-        .Select(module => new LegacyRelaySwitchModuleInfo(module.Number, module.PointCount, module.NumberChassis))
-        .ToArray();
+      var modules = relaySwitchModuleInfoProvider().ToArray();
 
       if (modules.Length == 0)
         return RmTranslationOptions.Default;
@@ -129,6 +136,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         : new RelaySwitchModuleAddressValidator(modules);
 
       return new RmTranslationOptions(SynonymBindingMode.ObjectThenSynonym, addressMapper);
+    }
+
+    private static IReadOnlyCollection<LegacyRelaySwitchModuleInfo> LoadRelaySwitchModuleInfoFromDatabase()
+    {
+      return Ask.DataBase.Engine.Static.Devices.RelaySwitchModules
+        .GetAllAsync()
+        .GetAwaiter()
+        .GetResult()
+        .Select(module => new LegacyRelaySwitchModuleInfo(module.Number, module.PointCount, module.NumberChassis))
+        .ToArray();
     }
 
     private static RmPartModel CreatePart(string partText, bool requirePartNumber, RmCommandModel model)
