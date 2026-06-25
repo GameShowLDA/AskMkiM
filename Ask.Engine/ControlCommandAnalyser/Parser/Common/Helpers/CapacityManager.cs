@@ -182,7 +182,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       var lowerValue = UnitsConvertor.FormatNanoFarads(lower);
       model.CapacityUnit = lowerValue.Item2 ?? string.Empty;
       model.LowerLimitCapacity = lowerValue.Item1;
-      model.LowerLimitCapacitySource = $"{lowerValue.Item1} {lowerValue.Item2}";
+      model.LowerLimitCapacitySource = MeasurementSourceValueFormatter.FormatWithSpace(lowerValue.Item1, lowerValue.Item2);
 
       double finalHigher;
 
@@ -194,7 +194,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
             GeneralWarnings.DefaultCapacityHighLimit(
                 model.StartLineNumber,
                 $"{commandNumber} {mnemonic}",
-                $"{finalHigher} {model.CapacityUnit}"));
+                MeasurementSourceValueFormatter.FormatWithSpace(finalHigher, model.CapacityUnit)));
       }
       else
       {
@@ -203,7 +203,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       var higherValue = UnitsConvertor.FormatNanoFarads(finalHigher);
       model.HigherLimitCapacity = higherValue.Item1;
-      model.HigherLimitCapacitySource = $"{higherValue.Item1} {higherValue.Item2}";
+      model.HigherLimitCapacitySource = MeasurementSourceValueFormatter.FormatWithSpace(higherValue.Item1, higherValue.Item2);
     
       return model;
     }
