@@ -15,14 +15,15 @@ public class CommandMnemonicCaseTests : IDisposable
       "20 \u0441\u043f TOTAL",
       "30 \u0440\u043c X1/1=1.1.1",
       "80 \u0446\u0443 Check message",
-      "90 \u0441\u0438 100\u0412, 1<\u041c\u041e\u043c *X1/1*",
       "100 \u043e\u0441",
       "110 \u043a\u0446 Finish",
     }));
 
     Assert.DoesNotContain(models, model => model is UnknownCommandModel);
+    Assert.Contains(models, model => model.CommandNumber == "10" && model.Mnemonic == "\u041e\u041a");
+    Assert.Contains(models, model => model.CommandNumber == "30" && model.Mnemonic == "\u0420\u041c");
     Assert.Contains(models, model => model.CommandNumber == "80" && model.Mnemonic == "\u0426\u0423");
-    Assert.Contains(models, model => model.CommandNumber == "90" && model.Mnemonic == "\u0421\u0418");
+    Assert.Contains(models, model => model.CommandNumber == "110" && model.Mnemonic == "\u041a\u0426");
 
     var cuCommand = models.Single(model => model.CommandNumber == "80");
     Assert.StartsWith("80 \u0426\u0423", cuCommand.SourceLines[0]);

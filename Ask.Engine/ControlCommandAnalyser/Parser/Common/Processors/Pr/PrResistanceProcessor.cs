@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
 
@@ -116,14 +117,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
     private static void ApplyDefault(PrCommandModel model, double min, double defLower, char infinity)
     {
       model.DisconnectedLowerLimitResistance = defLower;
-      model.DisconnectedLowerLimitResistanceSource = $"{defLower} Ом";
+      model.DisconnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(defLower, "Ом");
       model.DisconnectedHigherLimitResistance = null;
       model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
       model.ConnectedLowerLimitResistance = min;
-      model.ConnectedLowerLimitResistanceSource = $"{min} Ом";
+      model.ConnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(min, "Ом");
       model.ConnectedHigherLimitResistance = defLower;
-      model.ConnectedHigherLimitResistanceSource = $"{defLower} Ом";
+      model.ConnectedHigherLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(defLower, "Ом");
 
       model.ResistanceUnit = "Ом";
 
@@ -151,14 +152,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       }
 
       model.DisconnectedLowerLimitResistance = lower;
-      model.DisconnectedLowerLimitResistanceSource = $"{valLower} {unit}";
+      model.DisconnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valLower.Value, unit);
       model.DisconnectedHigherLimitResistance = null;
       model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
       model.ConnectedLowerLimitResistance = min;
-      model.ConnectedLowerLimitResistanceSource = $"{min} Ом";
+      model.ConnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(min, "Ом");
       model.ConnectedHigherLimitResistance = lower;
-      model.ConnectedHigherLimitResistanceSource = $"{valLower} {unit}";
+      model.ConnectedHigherLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valLower.Value, unit);
     }
 
     /// <summary>
@@ -183,14 +184,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       }
 
       model.DisconnectedLowerLimitResistance = upper;
-      model.DisconnectedLowerLimitResistanceSource = $"{valUpper} {unit}";
+      model.DisconnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valUpper.Value, unit);
       model.DisconnectedHigherLimitResistance = null;
       model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
       model.ConnectedLowerLimitResistance = 0;
-      model.ConnectedLowerLimitResistanceSource = $"0 Ом";
+      model.ConnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(0, "Ом");
       model.ConnectedHigherLimitResistance = upper;
-      model.ConnectedHigherLimitResistanceSource = $"{valUpper} {unit}";
+      model.ConnectedHigherLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valUpper.Value, unit);
     }
 
     /// <summary>
@@ -219,14 +220,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
       }
 
       model.DisconnectedLowerLimitResistance = upper;
-      model.DisconnectedLowerLimitResistanceSource = $"{valUpper} {upperUnit}";
+      model.DisconnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valUpper.Value, upperUnit);
       model.DisconnectedHigherLimitResistance = null;
       model.DisconnectedHigherLimitResistanceSource = $"{infinity} Ом";
 
       model.ConnectedLowerLimitResistance = lower;
-      model.ConnectedLowerLimitResistanceSource = $"{valLower} {lowerUnit}";
+      model.ConnectedLowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valLower.Value, lowerUnit);
       model.ConnectedHigherLimitResistance = upper;
-      model.ConnectedHigherLimitResistanceSource = $"{valUpper} {upperUnit}";
+      model.ConnectedHigherLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(valUpper.Value, upperUnit);
     }
   }
 }
