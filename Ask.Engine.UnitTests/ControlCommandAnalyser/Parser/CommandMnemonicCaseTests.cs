@@ -13,7 +13,7 @@ public class CommandMnemonicCaseTests : IDisposable
     {
       "10 \u043e\u043a TEST.000.000 * TEST",
       "20 \u0441\u043f TOTAL",
-      "30 \u0440\u043c X1/1=1.1.1",
+      "30 \u0440\u043c",
       "80 \u0446\u0443 Check message",
       "100 \u043e\u0441",
       "110 \u043a\u0446 Finish",
