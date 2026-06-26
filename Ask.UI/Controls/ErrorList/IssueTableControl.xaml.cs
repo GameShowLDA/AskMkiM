@@ -52,6 +52,8 @@ namespace Ask.UI.Controls.ErrorList
 
     public event EventHandler<IssueNavigationRequestedEventArgs>? IssueNavigationRequested;
 
+    public event EventHandler<IssueBreakpointToggleRequestedEventArgs>? BreakpointToggleRequested;
+
     public IEnumerable? ItemsSource
     {
       get => (IEnumerable?)GetValue(ItemsSourceProperty);
@@ -129,6 +131,13 @@ namespace Ask.UI.Controls.ErrorList
     private void IssueTable_KeyDown(object sender, KeyEventArgs e)
     {
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      if (key == Key.F9)
+      {
+        BreakpointToggleRequested?.Invoke(this, new IssueBreakpointToggleRequestedEventArgs(SelectedIssue));
+        e.Handled = true;
+        return;
+      }
+
       if (key != Key.F8)
         return;
 
@@ -159,5 +168,15 @@ namespace Ask.UI.Controls.ErrorList
     public int Direction { get; }
 
     public IDisplayIssue? IssueUnderMouse { get; }
+  }
+
+  public sealed class IssueBreakpointToggleRequestedEventArgs : EventArgs
+  {
+    public IssueBreakpointToggleRequestedEventArgs(IDisplayIssue? issue)
+    {
+      Issue = issue;
+    }
+
+    public IDisplayIssue? Issue { get; }
   }
 }
