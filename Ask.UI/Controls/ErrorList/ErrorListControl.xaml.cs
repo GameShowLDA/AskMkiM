@@ -64,6 +64,7 @@ namespace Ask.UI.Controls.ErrorList
       GotKeyboardFocus += (_, _) => PromoteAsPreferredControl();
       DataContext = this;
       IssuesTable.IssueNavigationRequested += IssuesTable_IssueNavigationRequested;
+      IssuesTable.BreakpointToggleRequested += IssuesTable_BreakpointToggleRequested;
 
       EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
 
@@ -104,6 +105,8 @@ namespace Ask.UI.Controls.ErrorList
     public event Action<BreakpointListItem, bool>? BreakpointEnabledChanged;
 
     #endregion
+
+    public event Action<IDisplayIssue?>? BreakpointToggleRequested;
 
     public event Action<double>? DesiredHeightChanged;
 
@@ -337,6 +340,11 @@ namespace Ask.UI.Controls.ErrorList
     private void IssuesTable_IssueNavigationRequested(object? sender, IssueNavigationRequestedEventArgs e)
     {
       NavigateIssues(e.Direction);
+    }
+
+    private void IssuesTable_BreakpointToggleRequested(object? sender, IssueBreakpointToggleRequestedEventArgs e)
+    {
+      BreakpointToggleRequested?.Invoke(e.Issue);
     }
 
     private IDisplayIssue? GetAdjacentIssue(int direction)
