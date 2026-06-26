@@ -94,6 +94,12 @@ namespace Ask.Device.Runtime.Function.B7783
 
         return ReadResponse(messageSession, command);
       }
+      catch (IOTimeoutException ex)
+      {
+        throw new TimeoutException(
+          $"VISA timeout при выполнении \"{command}\" через \"{resourceName}\" за {timeout} мс.",
+          ex);
+      }
       catch (VisaException ex)
       {
         throw new InvalidOperationException($"VISA.NET ошибка при выполнении \"{command}\" через \"{resourceName}\": {ex.Message}", ex);
