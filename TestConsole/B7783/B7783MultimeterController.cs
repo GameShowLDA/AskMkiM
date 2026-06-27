@@ -98,15 +98,38 @@ namespace TestConsole.B7783
       return QueryAsync("READ?", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
     }
 
-    public async Task<double> MeasureResistanceAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<B7783CommandResult> SetResistanceModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      var configure = await QueryAsync("CONFIGURE:RESISTANCE AUTO", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
-      if (!configure.Success)
+      if (!_device.IsConnected)
       {
-        throw configure.Error ?? new InvalidOperationException("Failed to configure resistance mode.");
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
       }
 
-      return await MeasureDoubleAsync("READ?", timeoutMs, cancellationToken);
+      return await RunTimedAsync(
+        "SET RESISTANCE MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ResistanceManager.SetResistanceModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectableManager.GetConnectionStatus() : "Resistance mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<double> MeasureResistanceAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      var mode = await SetResistanceModeAsync(timeoutMs, cancellationToken);
+      if (!mode.Success)
+      {
+        throw mode.Error ?? new InvalidOperationException("Failed to configure resistance mode.");
+      }
+
+      return await _device.ResistanceManager.MeasureResistanceAsync();
     }
 
     public async Task<double> MeasureDcVoltageAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
