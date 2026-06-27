@@ -14,16 +14,17 @@ namespace TestConsole.B7783
         Console.WriteLine("2. Initialize (*IDN?)");
         Console.WriteLine("3. *IDN?");
         Console.WriteLine("4. READ?");
-        Console.WriteLine("5. Configure resistance + READ?");
-        Console.WriteLine("6. Configure DC voltage + READ?");
-        Console.WriteLine("7. Configure AC voltage + READ?");
-        Console.WriteLine("8. Custom command");
-        Console.WriteLine("9. Set USB search pattern");
-        Console.WriteLine("10. Disconnect");
+        Console.WriteLine("5. Set resistance mode");
+        Console.WriteLine("6. Set resistance mode + READ?");
+        Console.WriteLine("7. Configure DC voltage + READ?");
+        Console.WriteLine("8. Configure AC voltage + READ?");
+        Console.WriteLine("9. Custom command");
+        Console.WriteLine("10. Set USB search pattern");
+        Console.WriteLine("11. Disconnect");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 10)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 11)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -44,21 +45,24 @@ namespace TestConsole.B7783
             PrintResult(await controller.ReadAsync());
             break;
           case 5:
-            await PrintMeasurementAsync(() => controller.MeasureResistanceAsync(), "Resistance");
+            PrintResult(await controller.SetResistanceModeAsync());
             break;
           case 6:
-            await PrintMeasurementAsync(() => controller.MeasureDcVoltageAsync(), "DC voltage");
+            await PrintMeasurementAsync(() => controller.MeasureResistanceAsync(), "Resistance");
             break;
           case 7:
-            await PrintMeasurementAsync(() => controller.MeasureAcVoltageAsync(), "AC voltage");
+            await PrintMeasurementAsync(() => controller.MeasureDcVoltageAsync(), "DC voltage");
             break;
           case 8:
-            await RunCustomCommandAsync(controller);
+            await PrintMeasurementAsync(() => controller.MeasureAcVoltageAsync(), "AC voltage");
             break;
           case 9:
-            SetConnectionDetails(controller);
+            await RunCustomCommandAsync(controller);
             break;
           case 10:
+            SetConnectionDetails(controller);
+            break;
+          case 11:
             await controller.DisconnectAsync();
             break;
           case 0:
