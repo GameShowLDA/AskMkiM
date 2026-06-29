@@ -1,6 +1,5 @@
 using Ask.Device.Runtime.Device;
 using System.Diagnostics;
-using System.Globalization;
 
 namespace TestConsole.B7783
 {
@@ -121,6 +120,52 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetDcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "SET DC VOLTAGE MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.DcVoltageManager.SetDCVoltageModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectableManager.GetConnectionStatus() : "DC voltage mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> SetAcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "SET AC VOLTAGE MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.AcVoltageManager.SetACVoltageModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectableManager.GetConnectionStatus() : "AC voltage mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     public async Task<double> MeasureResistanceAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       var mode = await SetResistanceModeAsync(timeoutMs, cancellationToken);
@@ -132,26 +177,44 @@ namespace TestConsole.B7783
       return await _device.ResistanceManager.MeasureResistanceAsync();
     }
 
-    public async Task<double> MeasureDcVoltageAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<double> MeasureDcVoltageAsync(
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      int timeoutMs = MeasurementTimeoutMs,
+      CancellationToken cancellationToken = default)
     {
-      var configure = await QueryAsync("CONFIGURE:VOLTAGE:DC AUTO", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
-      if (!configure.Success)
+      if (!_device.IsConnected)
       {
-        throw configure.Error ?? new InvalidOperationException("Failed to configure DC voltage mode.");
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          throw connection.Error ?? new InvalidOperationException(connection.Response);
+        }
       }
 
-      return await MeasureDoubleAsync("READ?", timeoutMs, cancellationToken);
+      cancellationToken.ThrowIfCancellationRequested();
+      return await _device.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
     }
 
-    public async Task<double> MeasureAcVoltageAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<double> MeasureAcVoltageAsync(
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      int timeoutMs = MeasurementTimeoutMs,
+      CancellationToken cancellationToken = default)
     {
-      var configure = await QueryAsync("CONFIGURE:VOLTAGE:AC AUTO", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
-      if (!configure.Success)
+      if (!_device.IsConnected)
       {
-        throw configure.Error ?? new InvalidOperationException("Failed to configure AC voltage mode.");
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          throw connection.Error ?? new InvalidOperationException(connection.Response);
+        }
       }
 
-      return await MeasureDoubleAsync("READ?", timeoutMs, cancellationToken);
+      cancellationToken.ThrowIfCancellationRequested();
+      return await _device.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
     }
 
     public async Task<B7783CommandResult> QueryAsync(
@@ -185,23 +248,6 @@ namespace TestConsole.B7783
           delayBeforeCall: delayBeforeCallMs,
           cancellationToken: token),
         cancellationToken);
-    }
-
-    private async Task<double> MeasureDoubleAsync(string command, int timeoutMs, CancellationToken cancellationToken)
-    {
-      var result = await QueryAsync(command, timeoutMs: timeoutMs, cancellationToken: cancellationToken);
-      if (!result.Success)
-      {
-        throw result.Error ?? new InvalidOperationException($"Command {command} failed.");
-      }
-
-      string response = result.Response.Trim().Replace("+", string.Empty, StringComparison.Ordinal);
-      if (double.TryParse(response, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
-      {
-        return value;
-      }
-
-      throw new FormatException($"Invalid B7-78 response for {command}: '{result.Response}'.");
     }
 
     private async Task<B7783CommandResult> RunTimedAsync(

@@ -12,6 +12,8 @@ namespace Ask.Device.Runtime.Function.B7783
   public sealed class B7783UsbCommandHandler : IUsbCommandHandler
   {
     private const int DefaultTimeout = 5000;
+    private const int OpenRetryCount = 3;
+    private const int OpenRetryDelayMs = 150;
     private const string UsbTmcResourcePattern = "USB?*INSTR";
 
     public async Task<string> ExecuteAsync(
@@ -66,7 +68,7 @@ namespace Ask.Device.Runtime.Function.B7783
       using var resourceManager = new ResourceManager();
       string resourceName = FindInstrumentResource(resourceManager, pattern);
 
-      using IVisaSession session = resourceManager.Open(resourceName);
+      using IVisaSession session = OpenSessionWithRetry(resourceManager, resourceName);
       if (session is not MessageBasedSession messageSession)
       {
         throw new InvalidOperationException($"VISA-ресурс \"{resourceName}\" не поддерживает message-based обмен.");
@@ -122,6 +124,33 @@ namespace Ask.Device.Runtime.Function.B7783
     private static string DecodeResponse(byte[] buffer, long readCount)
     {
       return Encoding.ASCII.GetString(buffer, 0, (int)readCount).Trim('\0', '\r', '\n', ' ');
+    }
+
+    private static IVisaSession OpenSessionWithRetry(ResourceManager resourceManager, string resourceName)
+    {
+      Exception? lastError = null;
+
+      for (int attempt = 1; attempt <= OpenRetryCount; attempt++)
+      {
+        try
+        {
+          return resourceManager.Open(resourceName);
+        }
+        catch (Exception ex) when (IsRetryableVisaOpenException(ex) && attempt < OpenRetryCount)
+        {
+          lastError = ex;
+          Thread.Sleep(OpenRetryDelayMs * attempt);
+        }
+      }
+
+      throw new InvalidOperationException(
+        $"Unable to open B7-78/3 VISA session for resource \"{resourceName}\" after {OpenRetryCount} attempts. Check that the instrument is not opened by another process.",
+        lastError);
+    }
+
+    private static bool IsRetryableVisaOpenException(Exception exception)
+    {
+      return exception is VisaException || exception is NativeVisaException;
     }
 
     private static string FindInstrumentResource(ResourceManager resourceManager, string pattern)
