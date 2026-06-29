@@ -28,5 +28,17 @@
     /// </summary>
     public static DeviceException DisableFailed() =>
         new("Ошибка отключения реле");
+
+    /// <summary>
+    /// Исключение при ошибке подключения RC реле.
+    /// </summary>
+    public static DeviceException ConnectRCFailed() =>
+        new("Ошибка подключения RC реле");
+
+    /// <summary>
+    /// Исключение при ошибке отключения RC реле.
+    /// </summary>
+    public static DeviceException DisconnectRCFailed() =>
+        new("Ошибка отключения RC реле");
   }
 }

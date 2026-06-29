@@ -104,9 +104,116 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       var cmd = new DeviceCommand(9, 1, 0, 2);
       string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
 
-      if (answer == null || answer.Length == 0) return false;
-      if (!answer.Contains("disconnect")) return false;
+      await Task.Delay(10);
 
+      if (answer == null || answer.Length == 0) return false;
+      //if (!answer.Contains("disconnect")) return false;
+
+      return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectRCRelay(IUserInteractionService? userMessageService = null)
+    {
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(9, 3, 0, 1);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await Task.Delay(10);
+      return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectRCRelay(IUserInteractionService? userMessageService = null)
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(9, 3, 0, 2);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await Task.Delay(10);
+      return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectResistor(int numberResistor, IUserInteractionService? userMessageService = null)
+    {
+      if (numberResistor < 1 || numberResistor > 8)
+      {
+        return false;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(9, 3, numberResistor, 1);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await Task.Delay(10);
+      return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectResistor(int numberResistor, IUserInteractionService? userMessageService = null)
+    {
+      if (numberResistor < 1 || numberResistor > 8)
+      {
+        return false;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(9, 3, numberResistor, 2);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await Task.Delay(10);
+      return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectCapacitor(int numberCapacitor, IUserInteractionService? userMessageService = null)
+    {
+      if (numberCapacitor < 1 || numberCapacitor > 6)
+      {
+        return false;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(9, 3, numberCapacitor + 10, 1);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await Task.Delay(10);
+      return true;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectCapacitor(int numberCapacitor, IUserInteractionService? userMessageService = null)
+    {
+      if (numberCapacitor < 1 || numberCapacitor > 6)
+      {
+        return false;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      DeviceCommand cmd = new DeviceCommand(9, 3, numberCapacitor + 10, 2);
+      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      await Task.Delay(10);
       return true;
     }
   }

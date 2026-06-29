@@ -64,6 +64,15 @@ namespace Ask.Core.Services.Extensions
           .GetCustomAttribute<DisplayAttribute>()?.Name ?? enumValue.ToString();
     }
 
+    public static string GetDisplayDescription(this Enum value)
+    {
+      return value.GetType()
+          .GetMember(value.ToString())
+          .FirstOrDefault()
+          ?.GetCustomAttribute<DisplayAttribute>()
+          ?.GetDescription() ?? string.Empty;
+    }
+
     public static string GetDescription(this Enum value)
     {
       var member = value.GetType().GetMember(value.ToString())[0];
