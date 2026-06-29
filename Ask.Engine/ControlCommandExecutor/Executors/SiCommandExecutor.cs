@@ -13,6 +13,8 @@ using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using System.Diagnostics;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -43,20 +45,25 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       message += BuildSourceLinesMessage(command);
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
-      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
+      var total = Stopwatch.StartNew();
+      await TimedAsync("show command message", () => context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true));
+      await TimedAsync("show devices preparation message", () => DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context));
 
+      var stage = Stopwatch.StartNew();
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
-      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
+      LogPerformance("collect points", stage);
+      await TimedAsync("validate points", () => EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console));
 
+      stage.Restart();
       var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
-      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
+      LogPerformance("prepare relay modules", stage);
+      await TimedAsync("connect all bus lines", () => DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console));
 
       var dbc = EquipmentService.GetSwitchingDevice();
-      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
+      await TimedAsync("connect breakdown tester to switching device", () => DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console));
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-      await SettingBreakdown(breakDown, context.Console, command.Time.Value, command.Resistance.Value, command.Voltage.Value);
+      await TimedAsync("setup breakdown tester", () => SettingBreakdown(breakDown, context.Console, command.Time.Value, command.Resistance.Value, command.Voltage.Value));
 
       List<ShowMessageModel> errorMessage = new();
 
@@ -81,17 +88,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         NodeAccumulationContext = nodeAccumulationContext
       };
 
-      var messageResult = await DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest);
+      var messageResult = await TimedAsync("execute disconnection check", () => DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest));
       errorMessage.AddRange(messageResult.Errors);
 
-      await PointFormater.MessageResult(errorMessage, context.Console);
+      await TimedAsync("format result messages", () => PointFormater.MessageResult(errorMessage, context.Console));
 
       if (errorMessage.Count > 0)
       {
         protocolModel.AddErrors(nameCommand, errorMessage);
       }
 
-      await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
+      await TimedAsync("complete protocol command", () => CompleteProtocolCommandAsync(context, protocolModel, nameCommand));
+      LogInformation($"[PERF][SI] total: {total.ElapsedMilliseconds} ms", isDeviceLog: true);
     }
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
     {
@@ -121,8 +129,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        var measurement = Stopwatch.StartNew();
         var answer = (await breadDown.IrManger.Measure.MeasureAsync(value, firstValue)).value;
+        LogPerformance("node accumulation measurement device call", measurement);
+
+        measurement.Restart();
         var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer);
+        LogPerformance("node accumulation measurement message", measurement);
 
         return result;
       }, messageService);
@@ -142,14 +155,50 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
+        var measurement = Stopwatch.StartNew();
         answer = await breadDown.IrManger.Measure.MeasureAsync(value, value, 60000);
+        LogPerformance("node full measurement device call", measurement);
 
+        measurement.Restart();
         var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer.Value);
+        LogPerformance("node full measurement message", measurement);
         return result;
 
       }, messageService);
 
       return result;
+    }
+
+    private static async Task TimedAsync(string stageName, Func<Task> action)
+    {
+      var stopwatch = Stopwatch.StartNew();
+      try
+      {
+        await action();
+      }
+      finally
+      {
+        LogPerformance(stageName, stopwatch);
+      }
+    }
+
+    private static async Task<T> TimedAsync<T>(string stageName, Func<Task<T>> action)
+    {
+      var stopwatch = Stopwatch.StartNew();
+      try
+      {
+        return await action();
+      }
+      finally
+      {
+        LogPerformance(stageName, stopwatch);
+      }
+    }
+
+    private static void LogPerformance(string stageName, Stopwatch stopwatch)
+    {
+      stopwatch.Stop();
+      LogInformation($"[PERF][SI] {stageName}: {stopwatch.ElapsedMilliseconds} ms", isDeviceLog: true);
     }
   }
 }
