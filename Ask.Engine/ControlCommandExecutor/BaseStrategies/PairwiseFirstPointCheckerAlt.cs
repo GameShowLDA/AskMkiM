@@ -297,7 +297,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               var succes = result >= LowerBound && result <= UpperBound;
 
               var message = new ShowMessageModel(
-                $"Результат измерения сопротивления ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond} ({LowerBound} - {UpperBound} Ом)",
+                $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond} ({LowerBound} - {UpperBound} Ом)",
                 message: $"Rизм = {MeasurementValueFormatter.Format(result)} Ом",
                 type: succes ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error);
 

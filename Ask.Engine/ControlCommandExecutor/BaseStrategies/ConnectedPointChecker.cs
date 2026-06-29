@@ -361,7 +361,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         context.LowerLimit,
         context.HigherLimit,
         failedMeasurement.Value,
-        chains: $"{failedMeasurement.Chain} ");
+        chains: failedMeasurement.Chain);
 
       error.Status = ShowMessageModel.MessageType.Error;
       error.IndentLevel = 2;
@@ -394,15 +394,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       string chainStr,
       out string valueForProtocol)
     {
-      if (context.TypeCommand == MeasurementTypeCommand.PR)
-      {
-        valueForProtocol = string.Empty;
-        return new ShowMessageModel(chainStr, type: ShowMessageModel.MessageType.Error)
-        {
-          IndentLevel = 2
-        };
-      }
-
       var value = result.FirstFailureValue ?? 0;
       valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
 
