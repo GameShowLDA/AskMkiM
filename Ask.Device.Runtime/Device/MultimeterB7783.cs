@@ -18,6 +18,7 @@ namespace Ask.Device.Runtime.Device
       ConnectionDetails = "VID_164E&PID_0DB7";
 
       ConnectableManager = new Function.B7783.StateManager(this);
+      ResistanceManager = new Function.B7783.ResistanceMeasurement(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new UsbProtocol(this, new Function.B7783.B7783UsbCommandHandler());
 

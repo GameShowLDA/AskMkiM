@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
@@ -58,7 +59,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
 
       model.Resistance = value;
       model.ResistanceUnit = "МОм";
-      model.ResistanceSource = $"{value}<МОм";
+      model.ResistanceSource = $"{MeasurementSourceValueFormatter.FormatValue(value)}<МОм";
 
       return rest;
     }

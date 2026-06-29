@@ -1,5 +1,6 @@
 using TestConsole.GPT;
 using TestConsole.MINT;
+using TestConsole.B7783;
 
 namespace TestConsole
 {
@@ -27,9 +28,11 @@ namespace TestConsole
         Console.WriteLine("15. New DB check");
         Console.WriteLine("16. Добавить устройство в новую БД");
         Console.WriteLine("17. Скан пустых строк");
+        Console.WriteLine("18. Encoding scanner");
+        Console.WriteLine("19. B7-78/3 multimeter");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 18)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 19)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -107,6 +110,10 @@ namespace TestConsole
 
           case 18:
             EncodingScanner.Run();
+            break;
+
+          case 19:
+            await B7783MultimeterTest.RunAsync();
             break;
 
           case 0:

@@ -73,10 +73,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
 
       model.LowerLimitVoltage = lower;
-      model.LowerLimitVoltageSource = $"{valLower}{lowerUnit}";
+      model.LowerLimitVoltageSource = MeasurementSourceValueFormatter.FormatCompact(valLower.Value, lowerUnit);
 
       model.HigherLimitVoltage = higher;
-      model.HigherLimitVoltageSource = $"{valHigher}{higherUnit}";
+      model.HigherLimitVoltageSource = MeasurementSourceValueFormatter.FormatCompact(valHigher.Value, higherUnit);
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         string unit)
     {
       model.Voltage = defaultVoltage;
-      model.VoltageSource = $"{defaultVoltage}{unit}";
+      model.VoltageSource = MeasurementSourceValueFormatter.FormatCompact(defaultVoltage, unit);
       model.VoltageUnit = unit;
     }
 
@@ -126,7 +126,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       }
 
       model.Voltage = value;
-      model.VoltageSource = $"{value}{unit}";
+      model.VoltageSource = MeasurementSourceValueFormatter.FormatCompact(value, unit);
     }
 
     /// <summary>
@@ -141,7 +141,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     string unit)
     {
       model.Voltage = value;
-      model.VoltageSource = $"{value}{unit}";
+      model.VoltageSource = MeasurementSourceValueFormatter.FormatCompact(value, unit);
       model.VoltageUnit = unit;
     }
   }
