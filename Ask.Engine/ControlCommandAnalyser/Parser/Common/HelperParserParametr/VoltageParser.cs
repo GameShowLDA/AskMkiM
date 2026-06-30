@@ -27,10 +27,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         return (null, null, input);
 
       string unit = m.Groups["unit"].Value;
-
-      // 🔥 ВАЖНО: нормализация
       string rawValue = m.Groups["val"].Value.Replace(',', '.');
-
       double? value = UnitsConvertor.TryParseValue(rawValue, unit);
 
       string remainder = Regex.Replace(
