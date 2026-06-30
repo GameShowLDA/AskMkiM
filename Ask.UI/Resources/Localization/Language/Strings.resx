@@ -594,6 +594,12 @@
   <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
     <value>Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми.</value>
   </data>
+  <data name="settings.userinterface.printFont.title" xml:space="preserve">
+    <value>Шрифт печати</value>
+  </data>
+  <data name="settings.userinterface.printFont.description" xml:space="preserve">
+    <value>Единый вид печатных форм и PDF-документов.</value>
+  </data>
   <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
     <value>Заголовки команд</value>
   </data>

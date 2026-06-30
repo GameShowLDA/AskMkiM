@@ -40,6 +40,8 @@ namespace Ask.Core.Services.Config.Base
       ProtocolConfig.SetErrorTextProtocol(executionModel.ErrorTextProtocol);
       ProtocolConfig.SetCommandHeadersInProtocol(executionModel.ShowCommandHeadersInProtocol);
       ProtocolConfig.SetTestStepMessagesInProtocol(executionModel.ShowTestStepMessagesInProtocol);
+      ProtocolConfig.SetPrintFontFamily(executionModel.PrintFontFamily);
+      ProtocolConfig.SetPrintFontSize(executionModel.PrintFontSize);
     }
 
     /// <summary>

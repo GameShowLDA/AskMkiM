@@ -33,4 +33,5 @@
 
     <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_TestStepMessages_Title" Key="settings.protocol.testStepMessages.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_TestStepMessages_Description" Key="settings.protocol.testStepMessages.description" />
+
 </ResourceDictionary>

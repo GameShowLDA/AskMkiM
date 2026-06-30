@@ -67,6 +67,8 @@ namespace Ask.Core.Services.Config.AppSettings
 
     public static void SetCommandHeadersInProtocol(bool enable) => ProtocolModel.ShowCommandHeadersInProtocol = enable;
     public static void SetTestStepMessagesInProtocol(bool enable) => ProtocolModel.ShowTestStepMessagesInProtocol = enable;
+    public static void SetPrintFontFamily(string fontFamily) => ProtocolModel.PrintFontFamily = fontFamily;
+    public static void SetPrintFontSize(double fontSize) => ProtocolModel.PrintFontSize = fontSize;
 
     #endregion
 
@@ -114,6 +116,8 @@ namespace Ask.Core.Services.Config.AppSettings
     public static string GetCleanTextProtocol() => ProtocolModel.CleanTextProtocol;
     public static string GetCleanTextProtocolError() => ProtocolModel.CleanTextErrorsProtocol;
     public static string GetErrorTextProtocol() => ProtocolModel.ErrorTextProtocol;
+    public static string GetPrintFontFamily() => ProtocolModel.PrintFontFamily;
+    public static double GetPrintFontSize() => ProtocolModel.PrintFontSize;
 
     public static SettingsProtocolDto GetProtocolModel()
     {
@@ -132,7 +136,9 @@ namespace Ask.Core.Services.Config.AppSettings
         CleanTextErrorsProtocol = ProtocolModel.CleanTextErrorsProtocol,
         ErrorTextProtocol = ProtocolModel.ErrorTextProtocol,
         ShowTestStepMessagesInProtocol = ProtocolModel.ShowTestStepMessagesInProtocol,
-        ShowCommandHeadersInProtocol = ProtocolModel.ShowCommandHeadersInProtocol
+        ShowCommandHeadersInProtocol = ProtocolModel.ShowCommandHeadersInProtocol,
+        PrintFontFamily = ProtocolModel.PrintFontFamily,
+        PrintFontSize = ProtocolModel.PrintFontSize
       };
       return protocolModel;
     }
@@ -157,6 +163,8 @@ namespace Ask.Core.Services.Config.AppSettings
       ProtocolModel.ErrorTextProtocol = protocolModel.ErrorTextProtocol;
       ProtocolModel.ShowCommandHeadersInProtocol = protocolModel.ShowCommandHeadersInProtocol;
       ProtocolModel.ShowTestStepMessagesInProtocol = protocolModel.ShowTestStepMessagesInProtocol;
+      ProtocolModel.PrintFontFamily = protocolModel.PrintFontFamily;
+      ProtocolModel.PrintFontSize = protocolModel.PrintFontSize;
 
       await InvokeSaveProtocolAsync(protocolModel);
       if (testStepMessagesChanged)

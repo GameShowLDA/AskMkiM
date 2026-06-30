@@ -79,8 +79,9 @@ namespace UI.Services.ProtocolManager
       var section = document.AddSection();
 
       var paragraph = section.AddParagraph(content);
-      paragraph.Format.Font.Size = 12;
-      paragraph.Format.Font.Name = "Consolas";
+      var printSettings = Ask.Core.Services.FilesUtility.PrintSettingsService.GetSettings();
+      paragraph.Format.Font.Size = printSettings.FontSize;
+      paragraph.Format.Font.Name = printSettings.FontFamily;
 
       return document;
     }
