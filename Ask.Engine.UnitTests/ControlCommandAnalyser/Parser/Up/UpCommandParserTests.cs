@@ -111,7 +111,5 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Up
       Assert.Contains(model.Errors,
           e => e.Code == ErrorCode.Up_MissingOrInvalidUpLabel);
     }
-
-
   }
 }
