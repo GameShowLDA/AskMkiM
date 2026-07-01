@@ -539,7 +539,9 @@ namespace MainWindowProgram
 
     private async Task SwitchCurrentUserAsync()
     {
-      if (DrawerHostService.Instance.ShouldBlockGlobalInput || _isUserSwitchInProgress)
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput ||
+          SystemStateManager.GetIsLocked() ||
+          _isUserSwitchInProgress)
       {
         return;
       }
@@ -755,6 +757,11 @@ namespace MainWindowProgram
     /// </summary>
     private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
     {
+      if (TryHandleSwitchUserHotkey(e))
+      {
+        return;
+      }
+
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {
         if (e.StagingItem.Input is KeyEventArgs drawerKeyArgs && drawerKeyArgs.RoutedEvent == Keyboard.KeyDownEvent)
@@ -877,6 +884,32 @@ namespace MainWindowProgram
           return;
         }
       }
+    }
+
+    private bool TryHandleSwitchUserHotkey(PreProcessInputEventArgs e)
+    {
+      if (e.StagingItem.Input is not KeyEventArgs keyArgs ||
+          keyArgs.RoutedEvent != Keyboard.KeyDownEvent)
+      {
+        return false;
+      }
+
+      var pressedKey = keyArgs.SystemKey == Key.None ? keyArgs.Key : keyArgs.SystemKey;
+      if (pressedKey != Key.L || Keyboard.Modifiers != ModifierKeys.Alt)
+      {
+        return false;
+      }
+
+      keyArgs.Handled = true;
+
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput ||
+          SystemStateManager.GetIsLocked())
+      {
+        return true;
+      }
+
+      _ = SwitchCurrentUserAsync();
+      return true;
     }
 
     private static bool IsDrawerNavigationKey(Key key)
