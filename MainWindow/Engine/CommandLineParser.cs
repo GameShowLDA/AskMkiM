@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Usb;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.View;
 using MainWindowProgram.Init;
 using MainWindowProgram.Services;
@@ -59,7 +60,7 @@ namespace MainWindowProgram.Engine
         }
       }
 
-      _usbServices.SetUsbMonitoring(isAdmin);
+      _usbServices.SetUsbMonitoring(isAdmin && CanUseUsbAdminRights());
       OpenRequestedFiles(filesToOpen);
     }
 
@@ -69,6 +70,11 @@ namespace MainWindowProgram.Engine
     /// </summary>
     private void HandleAdminMode()
     {
+      if (!CanUseUsbAdminRights())
+      {
+        return;
+      }
+
       _usbServices.SetUsbMonitoring(true);
     }
 
@@ -100,6 +106,11 @@ namespace MainWindowProgram.Engine
 
       var token = rawArg.Trim().TrimStart('-', '/');
       return token.Equals(switchName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool CanUseUsbAdminRights()
+    {
+      return RoleAuthorizationConfig.CurrentRole == RoleType.Administrator;
     }
 
     private static void OpenRequestedFiles(IEnumerable<string> filesToOpen)

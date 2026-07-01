@@ -43,6 +43,7 @@ namespace MainWindowProgram.Init
     {
       SetAdminConsoleEnabled(true);
       SetTestsMenuVisible(true);
+      SetUsbAdminRightsEnabled(true);
     }
 
     /// <summary>
@@ -52,6 +53,7 @@ namespace MainWindowProgram.Init
     {
       SetAdminConsoleEnabled(false);
       SetTestsMenuVisible(true);
+      SetUsbAdminRightsEnabled(false);
     }
 
     /// <summary>
@@ -61,6 +63,7 @@ namespace MainWindowProgram.Init
     {
       SetAdminConsoleEnabled(false);
       SetTestsMenuVisible(false);
+      SetUsbAdminRightsEnabled(false);
     }
 
     /// <summary>
@@ -79,6 +82,18 @@ namespace MainWindowProgram.Init
     public static void SetTestsMenuVisible(bool visible)
     {
       SystemStateEventAdapter.RaiseTestsMenuVisibilityChanged(visible);
+    }
+
+    /// <summary>
+    /// Включает или отключает возможность получения дополнительных прав администратора через USB-ключ.
+    /// </summary>
+    /// <param name="enabled">Значение true разрешает USB-ключу выдавать права администратора, false сбрасывает и запрещает такие права.</param>
+    public static void SetUsbAdminRightsEnabled(bool enabled)
+    {
+      if (!enabled)
+      {
+        SystemStateEventAdapter.RaiseAdminRightsChanged(false);
+      }
     }
   }
 }

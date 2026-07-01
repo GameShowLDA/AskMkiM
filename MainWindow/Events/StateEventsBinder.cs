@@ -158,6 +158,13 @@ namespace MainWindowProgram.Events
     /// <param name="e">Новое значение режима администратора.</param>
     private void AdminModeChanged(object? sender, bool e)
     {
+      if (e && !CanUseUsbAdminRights())
+      {
+        OnAdminRightsChangedHandler(null, false);
+        _usbMonitorService.StopUsbMonitoring();
+        return;
+      }
+
       if (e)
       {
         _usbMonitorService.StopUsbMonitoring();
@@ -309,9 +316,14 @@ namespace MainWindowProgram.Events
     /// </summary>
     /// <param name="sender">Источник события (обычно <see cref="USBMonitorService"/>).</param>
     /// <param name="newRights">Новое состояние прав администратора.</param>
-    private void OnAdminRightsChangedHandler(object sender, bool newRights)
+    private void OnAdminRightsChangedHandler(object? sender, bool newRights)
     {
-      AdminConfig.SetAdminRights(newRights);
+      AdminConfig.SetAdminRights(CanUseUsbAdminRights() && newRights);
+    }
+
+    private static bool CanUseUsbAdminRights()
+    {
+      return RoleAuthorizationConfig.CurrentRole == RoleType.Administrator;
     }
 
     /// <summary>
