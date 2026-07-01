@@ -141,7 +141,7 @@ namespace Ask.Core.Services.Config.AppSettings
         {
           CreateCredential(RoleType.Administrator, "Администратор", "test"),
           CreateCredential(RoleType.Adjuster, "Регулировщик", "test"),
-          CreateCredential(RoleType.Developer, "Разработчик", "test"),
+          CreateCredential(RoleType.Developer, "Разработчик ПК", "test"),
         },
       };
     }
@@ -167,7 +167,7 @@ namespace Ask.Core.Services.Config.AppSettings
 
       var developer = CreateNormalizedCredential(
         RoleType.Developer,
-        "Разработчик",
+        "Разработчик ПК",
         FindFirstRole(roles, "Developer"));
 
       return new RoleCredentialsStoreModel
