@@ -243,17 +243,12 @@
             </RadialGradientBrush>
         </Grid.Background>
 
-        <Canvas IsHitTestVisible="False"
-                ClipToBounds="True"
-                Opacity="0.78">
-            <Ellipse Canvas.Left="268" Canvas.Top="36" Width="2" Height="2" Fill="#C8D9FF"/>
-            <Ellipse Canvas.Left="470" Canvas.Top="182" Width="1.5" Height="1.5" Fill="#8BA6D8"/>
-            <Ellipse Canvas.Left="870" Canvas.Top="284" Width="2" Height="2" Fill="#D7E2FF"/>
-            <Ellipse Canvas.Right="410" Canvas.Top="186" Width="1.5" Height="1.5" Fill="#B5C6EE"/>
-            <Ellipse Canvas.Right="260" Canvas.Top="92" Width="1.2" Height="1.2" Fill="#6E83B2"/>
-            <Ellipse Canvas.Left="76" Canvas.Top="162" Width="1.2" Height="1.2" Fill="#8DA4D6"/>
-            <Ellipse Canvas.Right="610" Canvas.Bottom="222" Width="1.4" Height="1.4" Fill="#A8BDE8"/>
-        </Canvas>
+        <Image Source="pack://application:,,,/Ask.UI;component/Resources/Assets/Image/Authorization/login_background.png"
+               Stretch="UniformToFill"
+               IsHitTestVisible="False"/>
+
+        <Rectangle Fill="#4A03060D"
+                   IsHitTestVisible="False"/>
 
         <Button x:Name="CancelButton"
                 HorizontalAlignment="Right"
