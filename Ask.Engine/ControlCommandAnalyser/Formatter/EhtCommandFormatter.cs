@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
 
       yield return TimeFormatter.FormatTime(eht, "Время выдержки");
 
-      foreach (var line in FormatSchemeWithRmCheck(eht, "\tПроверяемые точки:", "\tМодель РМ не задана!"))
+      foreach (var line in FormatSchemeWithRmCheckConnectedPoints(eht, "\tПроверяемые точки:", "\tМодель РМ не задана!"))
       {
         yield return line;
       }

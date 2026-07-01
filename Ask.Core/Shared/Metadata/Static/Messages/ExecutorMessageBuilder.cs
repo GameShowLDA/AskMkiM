@@ -344,7 +344,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
 
     private static string BuildMeasurementHeader(string chains, double lowerLimit, string unit)
     {
-      return $"{chains} ({FormatMeasurementLimit(lowerLimit)}< {unit})";
+      return $"{chains}({FormatMeasurementLimit(lowerLimit)}<{unit})";
     }
 
     private static string FormatMeasurementLimit(double value)

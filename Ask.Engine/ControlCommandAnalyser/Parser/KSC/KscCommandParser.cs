@@ -59,7 +59,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.KSC
       var model = new KscCommandModel
       {
         CommandNumber = commandNumber,
-        SourceLines = new List<string>(lines),
+        SourceLines = lines is null ? new List<string>() : new List<string>(lines),
         StartLineNumber = numberLine,
         OkCommandModel = okCommandModel,
       };

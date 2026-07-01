@@ -37,7 +37,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Oc
         var model = new OcCommandModel
         {
           CommandNumber = commandNumber,
-          SourceLines = new List<string>(lines),
+          SourceLines = lines == null
+                            ? new List<string>()
+                            : new List<string>(lines),
           StartLineNumber = numberLine,
         };
 

@@ -21,7 +21,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return line;
       }
 
-      foreach (var line in FormatSchemeWithRmCheck(si, "\tРазобщенные точки:"))
+      foreach (var line in FormatSchemeWithRmCheckDisconnectedPoints(si, "\tРазобщенные точки:"))
       {
         yield return line;
       }

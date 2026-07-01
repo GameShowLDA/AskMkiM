@@ -39,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
       var model = new OkCommandModel
       {
         CommandNumber = commandNumber,
-        SourceLines = new List<string>(lines),
+        SourceLines = lines is null ? new List<string>() : new List<string>(lines),
         StartLineNumber = numberLine,
       };
 
@@ -100,7 +100,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
       }
 
       var uniqueKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-      var multiKeys = new HashSet<string> { "ОПК", "КД", "ИК", "ЦЕХ", "ПРИМ", "ПРИМЕЧ", "ПРИМЕЧАНИЕ" };
+      var multiKeys = new HashSet<string> { "ОПК", "КД", "ИК", "ЦЕХ", "ПРИМ", "ПРИМЕЧ", "ПРИМЕЧАНИЕ", "ЗАКАЗ" };
 
       for (int i = 1; i < lines.Count; i++)
       {
@@ -170,6 +170,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
           var parsedValueParam = paramMatch.Groups[2].Value.Trim();
           model.ContolSystemType = parsedValueParam;
         }
+        if (valueParams.Contains("ЗАКАЗ"))
+        {
+          var parsedValueParam = paramMatch.Groups[2].Value.Trim();
+          model.OrderNumber = parsedValueParam;
+        }
         if (valueParams.Contains("ЦЕХ"))
         {
           var parsedValueParam = paramMatch.Groups[2].Value.Trim();
@@ -199,7 +204,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
             if (!uniqueKeys.Add(key))
               model.Errors.Add(OkErrors.DuplicateParameterKey(numberLine + i, $"{commandNumber} {mnemonic}", key));
           }
-          model.Comments = value.Trim();
+          model.Comments.Add(value.Trim());
         }
       }
 

@@ -68,9 +68,12 @@ namespace Ask.Engine.ControlCommandAnalyser.ComandBody
       {
         commandBody.Append($"\n\tЦЕХ={ok.DepartmentNumber}");
       }
-      if (!string.IsNullOrEmpty(ok.Comments))
+      if (ok.Comments != null)
       {
-        commandBody.Append($"\n\tПРИМ={ok.Comments}");
+        foreach (var comment in ok.Comments)
+        {
+          commandBody.Append($"\n\tПРИМ={comment}");
+        }
       }
 
       return newSourseLines.Append(commandBody.ToString());
