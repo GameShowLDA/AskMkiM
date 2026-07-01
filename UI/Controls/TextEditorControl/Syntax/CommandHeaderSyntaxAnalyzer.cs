@@ -45,11 +45,17 @@ namespace UI.Controls.TextEditorControl.Syntax
       if (string.IsNullOrWhiteSpace(lineText))
         return diagnostics;
 
+      string trimmedLineText = lineText.TrimStart();
+
       // Если строка не начинается с команды, но до неё уже была команда,
       // пока считаем её строкой-продолжением.
       // Это важно для многострочных команд, например ЦУ.
-      if (!char.IsDigit(lineText.TrimStart()[0]) && hasPreviousCommand)
+      if (!char.IsDigit(trimmedLineText[0]) &&
+          hasPreviousCommand &&
+          !LooksLikeCommandHeaderWithoutNumber(lineText, trimmedLineText))
+      {
         return diagnostics;
+      }
 
       // 12ЦУ Текст
       var noSpaceMatch = NoSpaceBetweenNumberAndMnemonicRegex.Match(lineText);
@@ -91,6 +97,12 @@ namespace UI.Controls.TextEditorControl.Syntax
       if (!char.IsDigit(lineText.TrimStart()[0]))
       {
         var mnemonicMatch = StartsWithMnemonicRegex.Match(lineText);
+        var startIndex = mnemonicMatch.Success
+          ? mnemonicMatch.Groups["mnemonic"].Index
+          : GetFirstNonWhiteSpaceIndex(lineText);
+        var length = mnemonicMatch.Success
+          ? mnemonicMatch.Groups["mnemonic"].Length
+          : GetNonWhiteSpaceLength(lineText, startIndex);
 
         diagnostics.Add(new TextSyntaxDiagnostic
         {
@@ -99,10 +111,10 @@ namespace UI.Controls.TextEditorControl.Syntax
           Message = mnemonicMatch.Success
             ? "Команда должна начинаться с номера."
             : "Строка не является корректной командой.",
-          StartOffset = line.Offset,
-          Length = Math.Max(1, lineText.Length),
+          StartOffset = line.Offset + startIndex,
+          Length = Math.Max(1, length),
           LineNumber = line.LineNumber,
-          ColumnNumber = 1
+          ColumnNumber = startIndex + 1
         });
 
         return diagnostics;
@@ -216,6 +228,55 @@ namespace UI.Controls.TextEditorControl.Syntax
     private static bool IsCyrillic(char ch)
     {
       return ch is >= 'А' and <= 'я' or 'Ё' or 'ё';
+    }
+
+    private bool LooksLikeCommandHeaderWithoutNumber(
+      string lineText,
+      string trimmedLineText)
+    {
+      if (lineText.Length != trimmedLineText.Length)
+      {
+        return false;
+      }
+
+      var match = StartsWithMnemonicRegex.Match(lineText);
+      if (!match.Success)
+      {
+        return false;
+      }
+
+      string token = match.Groups["mnemonic"].Value;
+      int maxMnemonicLength = _knownMnemonics.Count == 0
+        ? 0
+        : _knownMnemonics.Max(mnemonic => mnemonic.Length);
+
+      return token.Length <= maxMnemonicLength &&
+             _knownMnemonics.Any(mnemonic =>
+               mnemonic.StartsWith(token, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static int GetFirstNonWhiteSpaceIndex(string text)
+    {
+      for (int i = 0; i < text.Length; i++)
+      {
+        if (!char.IsWhiteSpace(text[i]))
+        {
+          return i;
+        }
+      }
+
+      return 0;
+    }
+
+    private static int GetNonWhiteSpaceLength(string text, int startIndex)
+    {
+      int endIndex = text.Length;
+      while (endIndex > startIndex && char.IsWhiteSpace(text[endIndex - 1]))
+      {
+        endIndex--;
+      }
+
+      return endIndex - startIndex;
     }
   }
 }

@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -77,6 +78,30 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
 
       var rawMessageText = string.Join(Environment.NewLine, textLines).Trim();
       model.MessageText = rawMessageText;
+
+      if (string.IsNullOrWhiteSpace(rawMessageText))
+      {
+        model.Errors.Add(new ErrorItem
+        {
+          SourceLineNumber = numberLine,
+          Command = $"{commandNumber} {mnemonic}",
+          Code = ErrorCode.Unknown,
+          Description = "После команды ЦУ должен быть указан текст сообщения."
+        });
+      }
+
+      if (rawMessageText.Contains('?') &&
+          !rawMessageText.EndsWith("?") &&
+          !rawMessageText.EndsWith("??"))
+      {
+        model.Warnings.Add(new WarningItem
+        {
+          SourceLineNumber = numberLine,
+          Command = $"{commandNumber} {mnemonic}",
+          Code = WarningCode.Unknown,
+          Description = "Вопросительный знак в команде ЦУ должен завершать сообщение."
+        });
+      }
 
       if (rawMessageText.EndsWith("??"))
       {

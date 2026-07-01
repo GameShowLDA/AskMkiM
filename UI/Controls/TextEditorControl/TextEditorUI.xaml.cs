@@ -18,6 +18,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.Engine.ControlCommandAnalyser;
 using Ask.Support;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit.Document;
@@ -81,8 +82,10 @@ namespace UI.Controls.TextEditorControl
 
     private readonly DispatcherTimer _syntaxDiagnosticTimer = new();
 
-    private readonly EditorSyntaxAnalyzer _syntaxAnalyzer =
-      new(KnownCommandMnemonics.Default);
+    private static readonly Lazy<EditorSyntaxAnalyzer> SharedSyntaxAnalyzer =
+      new Lazy<EditorSyntaxAnalyzer>(CreateSyntaxAnalyzer);
+
+    private static EditorSyntaxAnalyzer SyntaxAnalyzer => SharedSyntaxAnalyzer.Value;
 
     private readonly Color _syntaxErrorUnderline =
       (Color)ColorConverter.ConvertFromString("#FF0000");
@@ -92,6 +95,8 @@ namespace UI.Controls.TextEditorControl
 
     private IReadOnlyList<TextSyntaxDiagnostic> _syntaxDiagnostics =
       Array.Empty<TextSyntaxDiagnostic>();
+
+    private int _syntaxAnalysisVersion;
 
     #endregion
 
@@ -646,14 +651,35 @@ namespace UI.Controls.TextEditorControl
       _syntaxDiagnosticTimer.Start();
     }
 
-    private void AnalyzeSyntaxAndHighlight()
+    private async void AnalyzeSyntaxAndHighlight()
     {
       if (textEditor.Document == null || _markerService == null)
         return;
 
-      _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+      string textSnapshot = textEditor.Text ?? string.Empty;
+      int analysisVersion = ++_syntaxAnalysisVersion;
 
-      _syntaxDiagnostics = _syntaxAnalyzer.Analyze(textEditor.Document);
+      IReadOnlyList<TextSyntaxDiagnostic> diagnostics;
+
+      try
+      {
+        diagnostics = await Task.Run(() =>
+          SyntaxAnalyzer.Analyze(new TextDocument(textSnapshot)));
+      }
+      catch (Exception ex)
+      {
+        LogWarning($"Ошибка синтаксического анализа: {ex.Message}");
+        return;
+      }
+
+      if (analysisVersion != _syntaxAnalysisVersion ||
+          !string.Equals(textSnapshot, textEditor.Text, StringComparison.Ordinal))
+      {
+        return;
+      }
+
+      _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+      _syntaxDiagnostics = diagnostics;
 
       foreach (var diagnostic in _syntaxDiagnostics)
       {
@@ -667,6 +693,14 @@ namespace UI.Controls.TextEditorControl
           color,
           SyntaxDiagnosticMarkerTag);
       }
+    }
+
+    private static EditorSyntaxAnalyzer CreateSyntaxAnalyzer()
+    {
+      return new EditorSyntaxAnalyzer(
+        KnownCommandMnemonics.Default,
+        translationSyntaxAnalyzer: new CommandTranslationSyntaxAnalyzer(
+          new CommandTranslationManager()));
     }
 
     #region Конструкторы
@@ -721,7 +755,7 @@ namespace UI.Controls.TextEditorControl
       Loaded += (s, e) =>
       {
         ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
-        AnalyzeSyntaxAndHighlight();
+        Dispatcher.BeginInvoke(new Action(ScheduleSyntaxAnalysis), DispatcherPriority.Background);
       };
 
       HelpProvider.SetHelpKeyProvider(textEditor, () =>
@@ -745,7 +779,7 @@ namespace UI.Controls.TextEditorControl
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
 
-      _syntaxDiagnosticTimer.Interval = TimeSpan.FromMilliseconds(350);
+      _syntaxDiagnosticTimer.Interval = TimeSpan.FromMilliseconds(120);
       _syntaxDiagnosticTimer.Tick += (_, _) =>
       {
         _syntaxDiagnosticTimer.Stop();

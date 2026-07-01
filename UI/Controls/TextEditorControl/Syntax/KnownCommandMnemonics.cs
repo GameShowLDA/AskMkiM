@@ -6,20 +6,24 @@ namespace UI.Controls.TextEditorControl.Syntax
   {
     public static readonly IReadOnlyList<string> Default = new[]
     {
-      "ЦУ",
-      "РМ",
-      "ПИ",
-      "ПТ",
-      "СИ",
-      "УП",
-      "КЦ",
-      "СП",
-      "ОК",
-      "КН",
-      "КС",
+      "ВШ",
       "ИЕ",
-      "ЦИ",
-      "ПР"
+      "КС",
+      "КЦ",
+      "НЭ",
+      "ОК",
+      "ОС",
+      "ОТ",
+      "ПИ",
+      "ПР",
+      "ПТ",
+      "РМ",
+      "СИ",
+      "СК",
+      "СП",
+      "УП",
+      "ЦУ",
+      "ЭТ"
     };
   }
 }
