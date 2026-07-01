@@ -11,6 +11,7 @@ using Ask.UI.Shared.Components.Icons;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
+using MainWindowProgram.Init;
 using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
@@ -57,6 +58,7 @@ namespace MainWindowProgram
     /// </summary>
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
+    private bool _isUserSwitchInProgress;
     private Action<UserInterfaceDto>? _onUserInterfaceSaved;
 
     /// <summary>
@@ -101,6 +103,7 @@ namespace MainWindowProgram
 
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
+      UpdateCurrentUserBadge();
 
       Loaded += MainWindow_Loaded;
       _onUserInterfaceSaved = model =>
@@ -529,6 +532,87 @@ namespace MainWindowProgram
       e.Handled = true;
     }
 
+    private async void CurrentUserButton_Click(object sender, RoutedEventArgs e)
+    {
+      await SwitchCurrentUserAsync();
+    }
+
+    private async Task SwitchCurrentUserAsync()
+    {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput || _isUserSwitchInProgress)
+      {
+        return;
+      }
+
+      var loginWindowManager = new RoleLoginWindowManager();
+
+      try
+      {
+        _isUserSwitchInProgress = true;
+        CurrentUserButton.IsEnabled = false;
+
+        if (SearchWindow != null && SearchWindow.IsVisible)
+        {
+          SearchWindow.CloseDialog();
+        }
+
+        var workspaceResetCompleted = await CloseWorkspaceTabsAsync();
+        if (!workspaceResetCompleted)
+        {
+          MessageBoxCustom.Show(
+            "Смена пользователя отменена, потому что закрытие вкладок было прервано.",
+            image: MessageBoxImage.Information);
+          return;
+        }
+
+        loginWindowManager.Show();
+
+        var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
+        if (authenticatedRole == null)
+        {
+          await loginWindowManager.WaitForCloseAsync();
+          Application.Current.Shutdown();
+          return;
+        }
+
+        RoleAuthorizationConfig.SetCurrentRole(
+          authenticatedRole.Role,
+          authenticatedRole.DisplayName);
+
+        UpdateCurrentUserBadge();
+        await loginWindowManager.CloseAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка смены пользователя.", exception);
+        MessageBoxCustom.Show($"Ошибка смены пользователя: {exception.Message}", image: MessageBoxImage.Error);
+      }
+      finally
+      {
+        _isUserSwitchInProgress = false;
+        if (CurrentUserButton != null)
+        {
+          CurrentUserButton.IsEnabled = true;
+        }
+      }
+    }
+
+    private async Task<bool> CloseWorkspaceTabsAsync()
+    {
+      while (MultiWindow.GetActiveWorkspaceControl() != null)
+      {
+        var closed = await MultiWindow.TryCloseActiveTabAsync();
+        if (!closed)
+        {
+          return false;
+        }
+
+        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+      }
+
+      return true;
+    }
+
     private void OnThemeChanged(ThemeMode theme)
     {
       if (!Dispatcher.CheckAccess())
@@ -807,6 +891,18 @@ namespace MainWindowProgram
              || key == Key.PageDown
              || key == Key.Home
              || key == Key.End;
+    }
+
+    private void UpdateCurrentUserBadge()
+    {
+      if (CurrentUserNameTextBlock == null)
+      {
+        return;
+      }
+
+      CurrentUserNameTextBlock.Text = string.IsNullOrWhiteSpace(RoleAuthorizationConfig.CurrentRoleDisplayName)
+        ? "Пользователь"
+        : RoleAuthorizationConfig.CurrentRoleDisplayName;
     }
   }
 }
