@@ -1,3 +1,13 @@
+using System.IO;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using System.Xml;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
@@ -16,15 +26,7 @@ using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
-using System.IO;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Xml;
+using UI.Controls.TextEditorControl.Syntax;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.TextEditorControl
@@ -74,6 +76,22 @@ namespace UI.Controls.TextEditorControl
     private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
 
     private AvalonTextDocumentAdapter _documentAdapter;
+
+    private const string SyntaxDiagnosticMarkerTag = "SyntaxDiagnostic";
+
+    private readonly DispatcherTimer _syntaxDiagnosticTimer = new();
+
+    private readonly EditorSyntaxAnalyzer _syntaxAnalyzer =
+      new(KnownCommandMnemonics.Default);
+
+    private readonly Color _syntaxErrorUnderline =
+      (Color)ColorConverter.ConvertFromString("#FF0000");
+
+    private readonly Color _syntaxWarningUnderline =
+      (Color)ColorConverter.ConvertFromString("#0000FF");
+
+    private IReadOnlyList<TextSyntaxDiagnostic> _syntaxDiagnostics =
+      Array.Empty<TextSyntaxDiagnostic>();
 
     #endregion
 
@@ -619,6 +637,38 @@ namespace UI.Controls.TextEditorControl
         $"pack://application:,,,/Ask.UI;component/Resources/Assets/SyntaxHighlighting/{themeFolder}/{fileName}",
         UriKind.Absolute);
 
+    private void ScheduleSyntaxAnalysis()
+    {
+      if (textEditor.Document == null)
+        return;
+
+      _syntaxDiagnosticTimer.Stop();
+      _syntaxDiagnosticTimer.Start();
+    }
+
+    private void AnalyzeSyntaxAndHighlight()
+    {
+      if (textEditor.Document == null || _markerService == null)
+        return;
+
+      _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+
+      _syntaxDiagnostics = _syntaxAnalyzer.Analyze(textEditor.Document);
+
+      foreach (var diagnostic in _syntaxDiagnostics)
+      {
+        var color = diagnostic.Severity == TextSyntaxSeverity.Warning
+          ? _syntaxWarningUnderline
+          : _syntaxErrorUnderline;
+
+        _markerService.AddSquigglyUnderlineMarker(
+          diagnostic.StartOffset,
+          Math.Max(1, diagnostic.Length),
+          color,
+          SyntaxDiagnosticMarkerTag);
+      }
+    }
+
     #region Конструкторы
 
     /// <summary>
@@ -671,6 +721,7 @@ namespace UI.Controls.TextEditorControl
       Loaded += (s, e) =>
       {
         ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+        AnalyzeSyntaxAndHighlight();
       };
 
       HelpProvider.SetHelpKeyProvider(textEditor, () =>
@@ -693,6 +744,15 @@ namespace UI.Controls.TextEditorControl
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+
+      _syntaxDiagnosticTimer.Interval = TimeSpan.FromMilliseconds(350);
+      _syntaxDiagnosticTimer.Tick += (_, _) =>
+      {
+        _syntaxDiagnosticTimer.Stop();
+        AnalyzeSyntaxAndHighlight();
+      };
+
+      textEditor.TextChanged += (_, _) => ScheduleSyntaxAnalysis();
     }
 
     /// <summary>
