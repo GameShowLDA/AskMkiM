@@ -1,4 +1,5 @@
 using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using System.Windows.Threading;
 
 namespace MainWindowProgram.Init
@@ -12,7 +13,7 @@ namespace MainWindowProgram.Init
     private readonly TaskCompletionSource<bool> _windowClosedSource =
       new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    public void Show()
+    public void Show(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
     {
       if (_windowThread != null)
       {
@@ -24,7 +25,7 @@ namespace MainWindowProgram.Init
       _windowThread = new Thread(() =>
       {
         var dispatcher = Dispatcher.CurrentDispatcher;
-        var loginWindow = new RoleLoginWindow();
+        var loginWindow = new RoleLoginWindow(rolesWithSavedSessions);
         _window = loginWindow;
 
         loginWindow.Loaded += (_, _) => windowStarted.Set();

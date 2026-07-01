@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Entity.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Message;
 using System;
 using System.ComponentModel;
@@ -31,6 +32,7 @@ namespace MainWindowProgram
     private const int SW_SHOW = 5;
 
     private readonly RoleCredentialFileService _roleCredentialService = new();
+    private readonly IReadOnlySet<RoleType> _rolesWithSavedSessions;
     private readonly TaskCompletionSource<RoleCredentialModel?> _authenticationCompletionSource =
       new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly DispatcherTimer _keyboardLayoutTimer;
@@ -45,9 +47,10 @@ namespace MainWindowProgram
     /// </summary>
     public RoleCredentialModel? AuthenticatedRole { get; private set; }
 
-    public RoleLoginWindow()
+    public RoleLoginWindow(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
     {
       InitializeComponent();
+      _rolesWithSavedSessions = rolesWithSavedSessions ?? new HashSet<RoleType>();
 
       _keyboardLayoutTimer = new DispatcherTimer
       {
@@ -152,8 +155,12 @@ namespace MainWindowProgram
         var roles = await _roleCredentialService.GetRolesAsync();
         var lastSelectedRole = await _roleCredentialService.GetLastSelectedRoleAsync();
 
-        RolesListBox.ItemsSource = roles;
-        RolesListBox.SelectedItem = roles.FirstOrDefault(x => x.Role == lastSelectedRole);
+        var roleItems = roles
+          .Select(role => new RoleLoginItem(role, _rolesWithSavedSessions.Contains(role.Role)))
+          .ToList();
+
+        RolesListBox.ItemsSource = roleItems;
+        RolesListBox.SelectedItem = roleItems.FirstOrDefault(x => x.Role == lastSelectedRole);
 
         if (RolesListBox.SelectedItem == null)
         {
@@ -167,7 +174,7 @@ namespace MainWindowProgram
           return;
         }
 
-        SetSelectedRoleName(RolesListBox.SelectedItem as RoleCredentialModel);
+        SetSelectedRoleName((RolesListBox.SelectedItem as RoleLoginItem)?.Credential);
         UpdateLoginButtonState();
         FocusPasswordInput();
       }
@@ -192,12 +199,13 @@ namespace MainWindowProgram
 
     private async Task AuthorizeAsync()
     {
-      if (RolesListBox.SelectedItem is not RoleCredentialModel selectedRole)
+      if (RolesListBox.SelectedItem is not RoleLoginItem selectedRoleItem)
       {
         SetStatus("Выберите роль.");
         return;
       }
 
+      var selectedRole = selectedRoleItem.Credential;
       var enteredPassword = GetCurrentPassword();
       if (string.IsNullOrWhiteSpace(enteredPassword))
       {
@@ -239,7 +247,7 @@ namespace MainWindowProgram
         return;
       }
 
-      SetSelectedRoleName(RolesListBox.SelectedItem as RoleCredentialModel);
+      SetSelectedRoleName((RolesListBox.SelectedItem as RoleLoginItem)?.Credential);
       SetStatus(string.Empty);
       UpdateLoginButtonState();
     }
@@ -542,6 +550,23 @@ namespace MainWindowProgram
           FocusPasswordInput();
         }
       }, DispatcherPriority.ApplicationIdle);
+    }
+
+    private sealed class RoleLoginItem
+    {
+      public RoleCredentialModel Credential { get; }
+
+      public RoleType Role => Credential.Role;
+
+      public string DisplayText { get; }
+
+      public RoleLoginItem(RoleCredentialModel credential, bool hasSavedSession)
+      {
+        Credential = credential;
+        DisplayText = hasSavedSession
+          ? $"{credential.DisplayName} (выполнен вход)"
+          : credential.DisplayName;
+      }
     }
   }
 }

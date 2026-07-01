@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
@@ -19,6 +20,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using UI.Components;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
 
@@ -59,6 +61,7 @@ namespace MainWindowProgram
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
     private bool _isUserSwitchInProgress;
+    private readonly Dictionary<RoleType, MultiWindowWorkspaceSession> _workspaceSessionsByRole = new();
     private Action<UserInterfaceDto>? _onUserInterfaceSaved;
 
     /// <summary>
@@ -558,16 +561,9 @@ namespace MainWindowProgram
           SearchWindow.CloseDialog();
         }
 
-        var workspaceResetCompleted = await CloseWorkspaceTabsAsync();
-        if (!workspaceResetCompleted)
-        {
-          MessageBoxCustom.Show(
-            "Смена пользователя отменена, потому что закрытие вкладок было прервано.",
-            image: MessageBoxImage.Information);
-          return;
-        }
+        SaveCurrentWorkspaceSession();
 
-        loginWindowManager.Show();
+        loginWindowManager.Show(GetRolesWithSavedWorkspaceSessions());
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)
@@ -581,6 +577,7 @@ namespace MainWindowProgram
           authenticatedRole.Role,
           authenticatedRole.DisplayName);
 
+        RestoreWorkspaceSession(authenticatedRole.Role);
         UpdateCurrentUserBadge();
         await loginWindowManager.CloseAsync();
       }
@@ -599,20 +596,31 @@ namespace MainWindowProgram
       }
     }
 
-    private async Task<bool> CloseWorkspaceTabsAsync()
+    private void SaveCurrentWorkspaceSession()
     {
-      while (MultiWindow.GetActiveWorkspaceControl() != null)
+      if (RoleAuthorizationConfig.CurrentRole == null)
       {
-        var closed = await MultiWindow.TryCloseActiveTabAsync();
-        if (!closed)
-        {
-          return false;
-        }
-
-        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+        return;
       }
 
-      return true;
+      _workspaceSessionsByRole[RoleAuthorizationConfig.CurrentRole.Value] = MultiWindow.CaptureWorkspaceSession();
+    }
+
+    private void RestoreWorkspaceSession(RoleType role)
+    {
+      var session = _workspaceSessionsByRole.TryGetValue(role, out var savedSession)
+        ? savedSession
+        : MultiWindowWorkspaceSession.CreateEmpty();
+
+      MultiWindow.RestoreWorkspaceSession(session);
+    }
+
+    private IReadOnlySet<RoleType> GetRolesWithSavedWorkspaceSessions()
+    {
+      return _workspaceSessionsByRole
+        .Where(session => !session.Value.IsEmpty)
+        .Select(session => session.Key)
+        .ToHashSet();
     }
 
     private void OnThemeChanged(ThemeMode theme)
