@@ -89,6 +89,26 @@ namespace Ask.Core.Services.EventCore.Events
     }
 
     /// <summary>
+    /// Событие, обозначающее изменение доступа к консоли администратора.
+    /// </summary>
+    public class ConsoleAccessChanged : IEvent
+    {
+      /// <summary>
+      /// Указывает, доступна ли консоль администратора.
+      /// </summary>
+      public bool IsEnabled { get; }
+
+      /// <summary>
+      /// Создаёт новое событие изменения доступа к консоли администратора.
+      /// </summary>
+      /// <param name="isEnabled">Новое состояние доступа: true — консоль доступна; false — консоль скрыта и недоступна.</param>
+      public ConsoleAccessChanged(bool isEnabled)
+      {
+        IsEnabled = isEnabled;
+      }
+    }
+
+    /// <summary>
     /// Событие, обозначающее изменение состояния прав администратора.
     /// </summary>
     public class ControlProgramActiveChanged : IEvent

@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 
@@ -40,6 +41,7 @@ namespace MainWindowProgram.Init
     /// </summary>
     private static void ApplyAdministratorRole()
     {
+      SetAdminConsoleEnabled(true);
     }
 
     /// <summary>
@@ -47,6 +49,7 @@ namespace MainWindowProgram.Init
     /// </summary>
     private static void ApplyAdjusterRole()
     {
+      SetAdminConsoleEnabled(false);
     }
 
     /// <summary>
@@ -54,6 +57,16 @@ namespace MainWindowProgram.Init
     /// </summary>
     private static void ApplyDeveloperRole()
     {
+      SetAdminConsoleEnabled(false);
+    }
+
+    /// <summary>
+    /// Включает или отключает доступ к консоли администратора.
+    /// </summary>
+    /// <param name="enabled">Значение true включает консоль администратора, false отключает и скрывает её.</param>
+    public static void SetAdminConsoleEnabled(bool enabled)
+    {
+      SystemStateEventAdapter.RaiseConsoleAccessChanged(enabled);
     }
   }
 }

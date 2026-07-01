@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.View;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
@@ -59,6 +60,7 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
       EventAggregator.Subscribe<SystemStateEvents.AdminRightsChanged>(e => OnAdminRightsChanged(e.IsAdmin));
       EventAggregator.Subscribe<SystemStateEvents.ControlProgramActiveChanged>(e => OnControlProgramActiveRightsChanged(e.IsControlProgramActive));
+      EventAggregator.Subscribe<SystemStateEvents.ConsoleAccessChanged>(e => OnConsoleAccessChanged(e.IsEnabled));
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(OnPowerChanged);
 
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
@@ -76,6 +78,7 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<ThemeEvent.Change>(OnThemeChanged);
 
       OnIdleModeChange(null, idleMode);
+      OnConsoleAccessChanged(RoleAuthorizationConfig.CurrentRole == RoleType.Administrator);
     }
 
     private void DebugModeChanged(object? sender, bool e)
@@ -246,6 +249,22 @@ namespace MainWindowProgram.Events
         {
           _mainWindow.Admin.Visibility = Visibility.Collapsed;
         }
+      });
+    }
+
+    /// <summary>
+    /// Обрабатывает изменение доступа к консоли администратора.
+    /// </summary>
+    /// <param name="isEnabled">Флаг доступности консоли администратора.</param>
+    private void OnConsoleAccessChanged(bool isEnabled)
+    {
+      ConsoleVisibilityController.SetEnabled(isEnabled);
+
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        _mainWindow.TerminalButton.Visibility = isEnabled
+          ? Visibility.Visible
+          : Visibility.Collapsed;
       });
     }
 

@@ -9,12 +9,18 @@ namespace ConsoleUI.ConsoleLogic
     private static Thread? _uiThread;
     private static Dispatcher? _disp;
     private static ConsoleOverlay? _window;
+    private static bool _isEnabled = true;
 
     /// <summary>
     /// Показать/скрыть консольное окно.
     /// </summary>
     public static void ToggleConsole()
     {
+      if (!_isEnabled)
+      {
+        return;
+      }
+
       if (_disp is null || _window is null)
       {
         StartConsoleThread();
@@ -27,6 +33,53 @@ namespace ConsoleUI.ConsoleLogic
           _window.Hide();
         else
           _window.Show();
+      });
+    }
+
+    /// <summary>
+    /// Включить или отключить доступ к консольному окну.
+    /// </summary>
+    public static void SetEnabled(bool enabled)
+    {
+      _isEnabled = enabled;
+
+      if (!enabled)
+      {
+        SetVisible(false);
+      }
+    }
+
+    /// <summary>
+    /// Явно показать или скрыть консольное окно.
+    /// </summary>
+    public static void SetVisible(bool visible)
+    {
+      if (visible && !_isEnabled)
+      {
+        return;
+      }
+
+      if (visible && (_disp is null || _window is null))
+      {
+        StartConsoleThread();
+        return;
+      }
+
+      _disp?.BeginInvoke(() =>
+      {
+        if (_window is null)
+        {
+          return;
+        }
+
+        if (visible)
+        {
+          _window.Show();
+        }
+        else
+        {
+          _window.Hide();
+        }
       });
     }
 
