@@ -87,9 +87,7 @@ namespace MainWindowProgram
           return;
         }
 
-        RoleAuthorizationConfig.SetCurrentRole(
-          authenticatedRole.Role,
-          authenticatedRole.DisplayName);
+        RoleApplicationConfigurator.Apply(authenticatedRole);
 
         await loginWindowManager.UpdateLoadingStatusAsync("Завершение фоновой инициализации...");
         await startupInitializationTask;

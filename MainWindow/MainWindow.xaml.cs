@@ -575,9 +575,7 @@ namespace MainWindowProgram
           return;
         }
 
-        RoleAuthorizationConfig.SetCurrentRole(
-          authenticatedRole.Role,
-          authenticatedRole.DisplayName);
+        RoleApplicationConfigurator.Apply(authenticatedRole);
 
         UpdateCurrentUserBadge();
         await loginWindowManager.CloseAsync();
