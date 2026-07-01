@@ -109,6 +109,26 @@ namespace Ask.Core.Services.EventCore.Events
     }
 
     /// <summary>
+    /// Событие, обозначающее изменение видимости меню испытаний.
+    /// </summary>
+    public class TestsMenuVisibilityChanged : IEvent
+    {
+      /// <summary>
+      /// Указывает, должно ли меню испытаний отображаться.
+      /// </summary>
+      public bool IsVisible { get; }
+
+      /// <summary>
+      /// Создаёт новое событие изменения видимости меню испытаний.
+      /// </summary>
+      /// <param name="isVisible">Новое состояние видимости: true — показать меню; false — скрыть меню.</param>
+      public TestsMenuVisibilityChanged(bool isVisible)
+      {
+        IsVisible = isVisible;
+      }
+    }
+
+    /// <summary>
     /// Событие, обозначающее изменение состояния прав администратора.
     /// </summary>
     public class ControlProgramActiveChanged : IEvent

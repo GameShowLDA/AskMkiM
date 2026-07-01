@@ -42,6 +42,7 @@ namespace MainWindowProgram.Init
     private static void ApplyAdministratorRole()
     {
       SetAdminConsoleEnabled(true);
+      SetTestsMenuVisible(true);
     }
 
     /// <summary>
@@ -50,6 +51,7 @@ namespace MainWindowProgram.Init
     private static void ApplyAdjusterRole()
     {
       SetAdminConsoleEnabled(false);
+      SetTestsMenuVisible(true);
     }
 
     /// <summary>
@@ -58,6 +60,7 @@ namespace MainWindowProgram.Init
     private static void ApplyDeveloperRole()
     {
       SetAdminConsoleEnabled(false);
+      SetTestsMenuVisible(false);
     }
 
     /// <summary>
@@ -67,6 +70,15 @@ namespace MainWindowProgram.Init
     public static void SetAdminConsoleEnabled(bool enabled)
     {
       SystemStateEventAdapter.RaiseConsoleAccessChanged(enabled);
+    }
+
+    /// <summary>
+    /// Включает или отключает отображение меню испытаний.
+    /// </summary>
+    /// <param name="visible">Значение true показывает меню испытаний, false скрывает его.</param>
+    public static void SetTestsMenuVisible(bool visible)
+    {
+      SystemStateEventAdapter.RaiseTestsMenuVisibilityChanged(visible);
     }
   }
 }

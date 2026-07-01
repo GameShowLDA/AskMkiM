@@ -61,6 +61,7 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<SystemStateEvents.AdminRightsChanged>(e => OnAdminRightsChanged(e.IsAdmin));
       EventAggregator.Subscribe<SystemStateEvents.ControlProgramActiveChanged>(e => OnControlProgramActiveRightsChanged(e.IsControlProgramActive));
       EventAggregator.Subscribe<SystemStateEvents.ConsoleAccessChanged>(e => OnConsoleAccessChanged(e.IsEnabled));
+      EventAggregator.Subscribe<SystemStateEvents.TestsMenuVisibilityChanged>(e => OnTestsMenuVisibilityChanged(e.IsVisible));
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(OnPowerChanged);
 
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
@@ -79,6 +80,7 @@ namespace MainWindowProgram.Events
 
       OnIdleModeChange(null, idleMode);
       OnConsoleAccessChanged(RoleAuthorizationConfig.CurrentRole == RoleType.Administrator);
+      OnTestsMenuVisibilityChanged(RoleAuthorizationConfig.CurrentRole != RoleType.Developer);
     }
 
     private void DebugModeChanged(object? sender, bool e)
@@ -263,6 +265,20 @@ namespace MainWindowProgram.Events
       Application.Current.Dispatcher.Invoke(() =>
       {
         _mainWindow.TerminalButton.Visibility = isEnabled
+          ? Visibility.Visible
+          : Visibility.Collapsed;
+      });
+    }
+
+    /// <summary>
+    /// Обрабатывает изменение видимости меню испытаний.
+    /// </summary>
+    /// <param name="isVisible">Флаг видимости меню испытаний.</param>
+    private void OnTestsMenuVisibilityChanged(bool isVisible)
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        _mainWindow.TestMenu.Visibility = isVisible
           ? Visibility.Visible
           : Visibility.Collapsed;
       });
