@@ -106,6 +106,7 @@ namespace MainWindowProgram
       UpdateKeyboardLayoutIndicator();
       UpdatePasswordVisibility();
       UpdatePasswordPlaceholderVisibility();
+      UpdateCapsLockWarning();
       _keyboardLayoutTimer.Start();
       await LoadRolesAsync();
       BringToFront();
@@ -275,22 +276,26 @@ namespace MainWindowProgram
     {
       UpdatePasswordPlaceholderVisibility();
       UpdateKeyboardLayoutIndicator();
+      UpdateCapsLockWarning();
     }
 
     private void PasswordBox_LostFocus(object sender, RoutedEventArgs e)
     {
       UpdatePasswordPlaceholderVisibility();
+      UpdateCapsLockWarning();
     }
 
     private void VisiblePasswordTextBox_GotFocus(object sender, RoutedEventArgs e)
     {
       UpdatePasswordPlaceholderVisibility();
       UpdateKeyboardLayoutIndicator();
+      UpdateCapsLockWarning();
     }
 
     private void VisiblePasswordTextBox_LostFocus(object sender, RoutedEventArgs e)
     {
       UpdatePasswordPlaceholderVisibility();
+      UpdateCapsLockWarning();
     }
 
     private void TogglePasswordVisibilityButton_Click(object sender, RoutedEventArgs e)
@@ -310,6 +315,7 @@ namespace MainWindowProgram
     private void KeyboardLayoutTimer_Tick(object? sender, EventArgs e)
     {
       UpdateKeyboardLayoutIndicator();
+      UpdateCapsLockWarning();
     }
 
     private void Current_InputLanguageChanged(object sender, InputLanguageEventArgs e)
@@ -328,6 +334,7 @@ namespace MainWindowProgram
       SetStatus(string.Empty);
       UpdateLoginButtonState();
       UpdateKeyboardLayoutIndicator();
+      UpdateCapsLockWarning();
     }
 
     private void UpdateLoginButtonState()
@@ -368,18 +375,28 @@ namespace MainWindowProgram
       {
         VisiblePasswordTextBox.Visibility = Visibility.Visible;
         PasswordBox.Visibility = Visibility.Collapsed;
-        TogglePasswordVisibilityButton.Content = "🙈";
+        TogglePasswordVisibilityButton.Content = "\uE8F5";
         TogglePasswordVisibilityButton.ToolTip = "Скрыть пароль";
       }
       else
       {
         VisiblePasswordTextBox.Visibility = Visibility.Collapsed;
         PasswordBox.Visibility = Visibility.Visible;
-        TogglePasswordVisibilityButton.Content = "👁";
+        TogglePasswordVisibilityButton.Content = "\uE890";
         TogglePasswordVisibilityButton.ToolTip = "Показать пароль";
       }
 
       UpdatePasswordPlaceholderVisibility();
+      UpdateCapsLockWarning();
+    }
+
+    private void UpdateCapsLockWarning()
+    {
+      bool hasPasswordFocus = PasswordBox.IsKeyboardFocused || VisiblePasswordTextBox.IsKeyboardFocused;
+      CapsLockWarningTextBlock.Visibility =
+        hasPasswordFocus && Keyboard.IsKeyToggled(Key.CapsLock)
+          ? Visibility.Visible
+          : Visibility.Collapsed;
     }
 
     private void UpdateKeyboardLayoutIndicator()
