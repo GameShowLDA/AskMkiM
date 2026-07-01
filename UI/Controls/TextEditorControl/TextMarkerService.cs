@@ -28,6 +28,8 @@ namespace UI.Controls.TextEditorControl
     /// <summary>Жирность шрифта (если нужно).</summary>
     FontWeight? FontWeight { get; set; }
 
+    /// <summary>Цвет подчеркивания.</summary>
+    Color? UnderlineColor { get; set; }
     /// <summary>Удаляет маркер.</summary>
     void Delete();
   }
@@ -78,16 +80,76 @@ namespace UI.Controls.TextEditorControl
 
       foreach (var marker in markers)
       {
-        if (!marker.IsBackground)
-          continue;
-
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
         {
-          var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
-          brush.Freeze();
-          drawingContext.DrawRectangle(brush, null, new Rect(rect.Location, new Size(rect.Width, rect.Height)));
+          if (marker.IsBackground)
+          {
+            var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
+            brush.Freeze();
+
+            drawingContext.DrawRectangle(
+              brush,
+              null,
+              new Rect(rect.Location, new Size(rect.Width, rect.Height)));
+          }
+
+          if (marker.IsSquigglyUnderline)
+          {
+            DrawSquigglyUnderline(
+              drawingContext,
+              rect,
+              marker.UnderlineColor ?? Colors.Red);
+          }
         }
       }
+    }
+
+    private static void DrawSquigglyUnderline(
+      DrawingContext drawingContext,
+      Rect rect,
+      Color color)
+    {
+      if (rect.Width <= 1)
+        return;
+
+      double amplitude = 1.5;
+      double wavelength = 4.0;
+
+      double startX = rect.Left;
+      double endX = rect.Right;
+
+      // Линию рисуем почти у нижней границы текста.
+      double baseY = rect.Bottom - 2.0;
+
+      var brush = new SolidColorBrush(color);
+      brush.Freeze();
+
+      var pen = new Pen(brush, 1.2);
+      pen.Freeze();
+
+      var geometry = new StreamGeometry();
+
+      using (var context = geometry.Open())
+      {
+        context.BeginFigure(new Point(startX, baseY), false, false);
+
+        bool up = true;
+
+        for (double x = startX; x <= endX; x += wavelength / 2.0)
+        {
+          double y = up
+            ? baseY - amplitude
+            : baseY + amplitude;
+
+          context.LineTo(new Point(x, y), true, false);
+
+          up = !up;
+        }
+      }
+
+      geometry.Freeze();
+
+      drawingContext.DrawGeometry(null, pen, geometry);
     }
 
     /// <summary>
@@ -109,6 +171,26 @@ namespace UI.Controls.TextEditorControl
     }
 
     /// <summary>
+    /// Очистка маркера по его тегу. Если маркеров с таким тегом несколько, будут удалены все.
+    /// </summary>
+    public void ClearMarkersByTag(object tag)
+    {
+      if (markers == null)
+        return;
+
+      var markersToRemove = markers
+        .Where(marker => Equals(marker.Tag, tag))
+        .ToList();
+
+      foreach (var marker in markersToRemove)
+      {
+        markers.Remove(marker);
+      }
+
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>
     /// Очищает все существующие маркеры подсветки.
     /// </summary>
     public void ClearAllMarkers()
@@ -124,19 +206,27 @@ namespace UI.Controls.TextEditorControl
     /// <param name="startOffset">Начальный индекс в тексте.</param>
     /// <param name="length">Длина выделения.</param>
     /// <param name="backgroundColor">Цвет фона подсветки.</param>
-    public void AddMarker(int startOffset, int length, Color backgroundColor)
+    /// <param name="tag">Тег для маркера.</param>
+    public ITextMarker? AddMarker(
+      int startOffset,
+      int length,
+      Color backgroundColor,
+      object? tag = null)
     {
       if (!TryNormalizeRange(ref startOffset, ref length))
-        return;
+        return null;
 
       var marker = new TextMarker(startOffset, length)
       {
         BackgroundColor = backgroundColor,
+        Tag = tag
       };
 
       markers.Add(marker);
       EnsureColorizerIsLast();
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+
+      return marker;
     }
 
     public void AddStyledMarker(int startOffset, int length, Color? foreground, FontWeight? weight = null)
@@ -154,6 +244,30 @@ namespace UI.Controls.TextEditorControl
       markers.Add(marker);
       EnsureColorizerIsLast();
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    public ITextMarker? AddSquigglyUnderlineMarker(
+      int startOffset,
+      int length,
+      Color underlineColor,
+      object? tag = null)
+    {
+      if (!TryNormalizeRange(ref startOffset, ref length))
+        return null;
+
+      var marker = new TextMarker(startOffset, length)
+      {
+        UnderlineColor = underlineColor,
+        IsBackground = false,
+        IsSquigglyUnderline = true,
+        Tag = tag
+      };
+
+      markers.Add(marker);
+      EnsureColorizerIsLast();
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+
+      return marker;
     }
 
     private bool TryNormalizeRange(ref int startOffset, ref int length)
@@ -208,7 +322,7 @@ namespace UI.Controls.TextEditorControl
       public bool IsBackground { get; set; } = true;
 
       /// <inheritdoc/>
-      public object Tag { get; set; }
+      public object? Tag { get; set; }
 
       /// <inheritdoc/>
       public Color? BackgroundColor { get; set; }
@@ -220,10 +334,15 @@ namespace UI.Controls.TextEditorControl
       public FontWeight? FontWeight { get; set; }
 
       /// <inheritdoc/>
+      public Color? UnderlineColor { get; set; }
+
+      /// <inheritdoc/>
       public void Delete()
       {
         Length = 0;
       }
+
+      public bool IsSquigglyUnderline { get; set; }
     }
 
     private sealed class TextMarkerColorizer : DocumentColorizingTransformer
