@@ -41,6 +41,7 @@ namespace MainWindowProgram
     private bool _allowClose;
     private bool _isPasswordVisible;
     private bool _isSyncingPasswordText;
+    private bool _isRootLoginSelected;
 
     /// <summary>
     /// Успешно авторизованная роль.
@@ -135,6 +136,14 @@ namespace MainWindowProgram
 
     private void RoleLoginWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+      var pressedKey = e.SystemKey == Key.None ? e.Key : e.SystemKey;
+      if (pressedKey == Key.R && Keyboard.Modifiers == ModifierKeys.Alt && !_isStartupLoading)
+      {
+        SelectRootLogin();
+        e.Handled = true;
+        return;
+      }
+
       if (e.Key != Key.Tab || _isStartupLoading || RolesListBox.Items.Count == 0)
       {
         return;
@@ -199,6 +208,12 @@ namespace MainWindowProgram
 
     private async Task AuthorizeAsync()
     {
+      if (_isRootLoginSelected)
+      {
+        AuthorizeRoot();
+        return;
+      }
+
       if (RolesListBox.SelectedItem is not RoleLoginItem selectedRoleItem)
       {
         SetStatus("Выберите роль.");
@@ -247,6 +262,7 @@ namespace MainWindowProgram
         return;
       }
 
+      _isRootLoginSelected = false;
       SetSelectedRoleName((RolesListBox.SelectedItem as RoleLoginItem)?.Credential);
       SetStatus(string.Empty);
       UpdateLoginButtonState();
@@ -354,8 +370,45 @@ namespace MainWindowProgram
       }
 
       LoginButton.IsEnabled =
-        RolesListBox.SelectedItem != null &&
+        (RolesListBox.SelectedItem != null || _isRootLoginSelected) &&
         !string.IsNullOrWhiteSpace(GetCurrentPassword());
+    }
+
+    private void SelectRootLogin()
+    {
+      RolesListBox.SelectedItem = null;
+      _isRootLoginSelected = true;
+      SelectedRoleNameTextBlock.Text = "root";
+      SetStatus(string.Empty);
+      UpdateLoginButtonState();
+      FocusPasswordInput();
+    }
+
+    private void AuthorizeRoot()
+    {
+      var enteredPassword = GetCurrentPassword();
+      if (string.IsNullOrWhiteSpace(enteredPassword))
+      {
+        SetStatus("Введите пароль.");
+        return;
+      }
+
+      if (!string.Equals(enteredPassword, "root", StringComparison.Ordinal))
+      {
+        SetStatus("Неверный пароль.");
+        SelectAllPassword();
+        FocusPasswordInput();
+        UpdateLoginButtonState();
+        return;
+      }
+
+      AuthenticatedRole = new RoleCredentialModel
+      {
+        Role = RoleType.Root,
+        DisplayName = "root",
+      };
+      BeginStartupLoading("Подготовка приложения...");
+      _authenticationCompletionSource.TrySetResult(AuthenticatedRole);
     }
 
     private void SetStatus(string message)

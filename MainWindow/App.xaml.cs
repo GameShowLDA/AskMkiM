@@ -1,5 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
@@ -90,6 +91,7 @@ namespace MainWindowProgram
         RoleAuthorizationConfig.SetCurrentRole(
           authenticatedRole.Role,
           authenticatedRole.DisplayName);
+        AdminConfig.SetAdminRights(authenticatedRole.Role == RoleType.Root);
 
         await loginWindowManager.UpdateLoadingStatusAsync("Завершение фоновой инициализации...");
         await startupInitializationTask;

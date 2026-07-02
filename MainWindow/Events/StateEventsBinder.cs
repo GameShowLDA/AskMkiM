@@ -3,7 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using Ask.Core.Shared.Metadata.View;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using ConsoleUI.ConsoleCommanding.Commands;
@@ -23,11 +23,6 @@ namespace MainWindowProgram.Events
   {
     private HotkeyListenerService _hotkey;
 
-    /// <summary>
-    /// Сервис отслеживания подключения и отключения USB-устройств.
-    /// Используется для реагирования на смену прав администратора.
-    /// </summary>
-    private readonly IUsbMonitorView _usbMonitorService;
 
     /// <summary>
     /// Ссылка на главное окно приложения, интерфейс которого необходимо обновлять.
@@ -44,10 +39,8 @@ namespace MainWindowProgram.Events
     /// Инициализирует новый экземпляр класса <see cref="StateEventsBinder"/>.
     /// </summary>
     /// <param name="mainWindow">Ссылка на главное окно приложения.</param>
-    /// <param name="usbMonitorService">Сервис мониторинга USB-подключений.</param>
-    public StateEventsBinder(MainWindow mainWindow, IUsbMonitorView usbMonitorService)
+    public StateEventsBinder(MainWindow mainWindow)
     {
-      _usbMonitorService = usbMonitorService;
       _mainWindow = mainWindow;
     }
 
@@ -69,7 +62,6 @@ namespace MainWindowProgram.Events
       AdminCommand.PowerChanged += AdminCommand_PowerChanged;
       AdminCommand.UpsPowerChanged += AdminCommand_UpsPowerChanged;
 
-      _usbMonitorService.AdminRightsChanged += OnAdminRightsChangedHandler;
       _mainWindow.PreviewKeyDown += OnKeyDown;
 
       bool idleMode = ExecutionConfig.GetIsIdleModeEnabled();
@@ -153,16 +145,7 @@ namespace MainWindowProgram.Events
     /// <param name="e">Новое значение режима администратора.</param>
     private void AdminModeChanged(object? sender, bool e)
     {
-      if (e)
-      {
-        _usbMonitorService.StopUsbMonitoring();
-        OnAdminRightsChangedHandler(null, true);
-      }
-      else
-      {
-        OnAdminRightsChangedHandler(null, false);
-        _usbMonitorService.SetUsbMonitoring(false);
-      }
+      AdminConfig.SetAdminRights(e && RoleAuthorizationConfig.CurrentRole == RoleType.Root);
     }
 
     /// <summary>
@@ -266,17 +249,6 @@ namespace MainWindowProgram.Events
         _mainWindow.RunStepByStepMode.Visibility = Visibility.Visible;
         _mainWindow.RunStepByStepMode.IsEnabled = true;
       });
-    }
-
-    /// <summary>
-    /// Обрабатывает событие от <see cref="USBMonitorService"/> об изменении прав администратора
-    /// и передаёт это состояние в <see cref="SystemStateManager"/>.
-    /// </summary>
-    /// <param name="sender">Источник события (обычно <see cref="USBMonitorService"/>).</param>
-    /// <param name="newRights">Новое состояние прав администратора.</param>
-    private void OnAdminRightsChangedHandler(object sender, bool newRights)
-    {
-      AdminConfig.SetAdminRights(newRights);
     }
 
     /// <summary>

@@ -4,7 +4,6 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
@@ -52,8 +51,6 @@ namespace MainWindowProgram
     /// Сервис управления USB-устройствами.
     /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    private readonly IUsbMonitorView _usbServices;
-
     /// <summary>
     /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
     /// Связывает интерфейс с бизнес-логикой.
@@ -97,9 +94,8 @@ namespace MainWindowProgram
       this.PreviewKeyDown += MainWindow_PreviewKeyDown;
       InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
-      (var vm, var usb) = AppServices.Build(this);
+      var vm = AppServices.Build(this);
       _viewModel = vm;
-      _usbServices = usb;
 
       StatusBar.DataContext = _statusBarViewModel;
       _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
@@ -140,9 +136,9 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices, _statusBarViewModel);
+      lifecycle.Initialize(this, _statusBarViewModel);
 
-      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+      new CommandLineParser().ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
       SystemStateEventAdapter.RaiseControlProgramActiveChanged(false);
 
@@ -577,6 +573,7 @@ namespace MainWindowProgram
           authenticatedRole.Role,
           authenticatedRole.DisplayName);
 
+        AdminConfig.SetAdminRights(authenticatedRole.Role == RoleType.Root);
         RestoreWorkspaceSession(authenticatedRole.Role);
         UpdateCurrentUserBadge();
         await loginWindowManager.CloseAsync();

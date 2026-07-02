@@ -1,9 +1,7 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Metrology;
-using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.Atributes;
-using Ask.Core.Shared.Metadata.View;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Extensions;
@@ -81,7 +79,6 @@ namespace MainWindowProgram.Init
           {
             services.AddSingleton<Dispatcher>(_ => Application.Current.Dispatcher);
 
-            services.AddSingleton<IUsbMonitorView, UsbMonitorService>();
             services.AddSingleton<MetrologyControlFactory>();
 
             services.AddCrashDiagnostics(
