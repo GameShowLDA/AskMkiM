@@ -2,8 +2,8 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
@@ -19,6 +19,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using UI.Components;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
 
@@ -50,8 +51,6 @@ namespace MainWindowProgram
     /// Сервис управления USB-устройствами.
     /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    private readonly IUsbMonitorView _usbServices;
-
     /// <summary>
     /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
     /// Связывает интерфейс с бизнес-логикой.
@@ -59,6 +58,7 @@ namespace MainWindowProgram
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
     private bool _isUserSwitchInProgress;
+    private readonly Dictionary<RoleType, MultiWindowWorkspaceSession> _workspaceSessionsByRole = new();
     private Action<UserInterfaceDto>? _onUserInterfaceSaved;
 
     /// <summary>
@@ -94,9 +94,8 @@ namespace MainWindowProgram
       this.PreviewKeyDown += MainWindow_PreviewKeyDown;
       InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
-      (var vm, var usb) = AppServices.Build(this);
+      var vm = AppServices.Build(this);
       _viewModel = vm;
-      _usbServices = usb;
 
       StatusBar.DataContext = _statusBarViewModel;
       _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
@@ -137,9 +136,9 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices, _statusBarViewModel);
+      lifecycle.Initialize(this, _statusBarViewModel);
 
-      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+      new CommandLineParser().ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
       SystemStateEventAdapter.RaiseControlProgramActiveChanged(false);
 
@@ -539,7 +538,9 @@ namespace MainWindowProgram
 
     private async Task SwitchCurrentUserAsync()
     {
-      if (DrawerHostService.Instance.ShouldBlockGlobalInput || _isUserSwitchInProgress)
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput ||
+          SystemStateManager.GetIsLocked() ||
+          _isUserSwitchInProgress)
       {
         return;
       }
@@ -556,16 +557,9 @@ namespace MainWindowProgram
           SearchWindow.CloseDialog();
         }
 
-        var workspaceResetCompleted = await CloseWorkspaceTabsAsync();
-        if (!workspaceResetCompleted)
-        {
-          MessageBoxCustom.Show(
-            "Смена пользователя отменена, потому что закрытие вкладок было прервано.",
-            image: MessageBoxImage.Information);
-          return;
-        }
+        SaveCurrentWorkspaceSession();
 
-        loginWindowManager.Show();
+        loginWindowManager.Show(GetRolesWithSavedWorkspaceSessions());
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)
@@ -577,6 +571,8 @@ namespace MainWindowProgram
 
         RoleApplicationConfigurator.Apply(authenticatedRole);
 
+        AdminConfig.SetAdminRights(authenticatedRole.Role == RoleType.Root);
+        RestoreWorkspaceSession(authenticatedRole.Role);
         UpdateCurrentUserBadge();
         await loginWindowManager.CloseAsync();
       }
@@ -595,20 +591,31 @@ namespace MainWindowProgram
       }
     }
 
-    private async Task<bool> CloseWorkspaceTabsAsync()
+    private void SaveCurrentWorkspaceSession()
     {
-      while (MultiWindow.GetActiveWorkspaceControl() != null)
+      if (RoleAuthorizationConfig.CurrentRole == null)
       {
-        var closed = await MultiWindow.TryCloseActiveTabAsync();
-        if (!closed)
-        {
-          return false;
-        }
-
-        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+        return;
       }
 
-      return true;
+      _workspaceSessionsByRole[RoleAuthorizationConfig.CurrentRole.Value] = MultiWindow.CaptureWorkspaceSession();
+    }
+
+    private void RestoreWorkspaceSession(RoleType role)
+    {
+      var session = _workspaceSessionsByRole.TryGetValue(role, out var savedSession)
+        ? savedSession
+        : MultiWindowWorkspaceSession.CreateEmpty();
+
+      MultiWindow.RestoreWorkspaceSession(session);
+    }
+
+    private IReadOnlySet<RoleType> GetRolesWithSavedWorkspaceSessions()
+    {
+      return _workspaceSessionsByRole
+        .Where(session => !session.Value.IsEmpty)
+        .Select(session => session.Key)
+        .ToHashSet();
     }
 
     private void OnThemeChanged(ThemeMode theme)
@@ -753,6 +760,11 @@ namespace MainWindowProgram
     /// </summary>
     private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
     {
+      if (TryHandleSwitchUserHotkey(e))
+      {
+        return;
+      }
+
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {
         if (e.StagingItem.Input is KeyEventArgs drawerKeyArgs && drawerKeyArgs.RoutedEvent == Keyboard.KeyDownEvent)
@@ -875,6 +887,32 @@ namespace MainWindowProgram
           return;
         }
       }
+    }
+
+    private bool TryHandleSwitchUserHotkey(PreProcessInputEventArgs e)
+    {
+      if (e.StagingItem.Input is not KeyEventArgs keyArgs ||
+          keyArgs.RoutedEvent != Keyboard.KeyDownEvent)
+      {
+        return false;
+      }
+
+      var pressedKey = keyArgs.SystemKey == Key.None ? keyArgs.Key : keyArgs.SystemKey;
+      if (pressedKey != Key.L || Keyboard.Modifiers != ModifierKeys.Alt)
+      {
+        return false;
+      }
+
+      keyArgs.Handled = true;
+
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput ||
+          SystemStateManager.GetIsLocked())
+      {
+        return true;
+      }
+
+      _ = SwitchCurrentUserAsync();
+      return true;
     }
 
     private static bool IsDrawerNavigationKey(Key key)

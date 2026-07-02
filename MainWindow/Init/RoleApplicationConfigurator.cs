@@ -5,95 +5,47 @@ using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 
 namespace MainWindowProgram.Init
 {
-  /// <summary>
-  /// Применяет настройки приложения для авторизованной роли.
-  /// </summary>
   internal static class RoleApplicationConfigurator
   {
-    /// <summary>
-    /// Сохраняет текущую роль в сессии и выполняет настройку интерфейса под эту роль.
-    /// </summary>
-    /// <param name="role">Авторизованная роль пользователя.</param>
     public static void Apply(RoleCredentialModel role)
     {
       ArgumentNullException.ThrowIfNull(role);
 
       RoleAuthorizationConfig.SetCurrentRole(role.Role, role.DisplayName);
+      AdminConfig.SetAdminRights(role.Role == RoleType.Root);
 
       switch (role.Role)
       {
-        case RoleType.Administrator:
-          ApplyAdministratorRole();
+        case RoleType.Root:
+          SetAdminConsoleEnabled(true);
+          SetTestsMenuVisible(true);
           break;
 
         case RoleType.Adjuster:
-          ApplyAdjusterRole();
+          SetAdminConsoleEnabled(false);
+          SetTestsMenuVisible(true);
           break;
 
         case RoleType.Developer:
-          ApplyDeveloperRole();
+          SetAdminConsoleEnabled(false);
+          SetTestsMenuVisible(false);
+          break;
+
+        default:
+          SetAdminConsoleEnabled(false);
+          SetTestsMenuVisible(true);
           break;
       }
     }
 
-    /// <summary>
-    /// Применяет настройки, доступные для роли администратора.
-    /// </summary>
-    private static void ApplyAdministratorRole()
-    {
-      SetAdminConsoleEnabled(true);
-      SetTestsMenuVisible(true);
-      SetUsbAdminRightsEnabled(true);
-    }
-
-    /// <summary>
-    /// Применяет настройки, доступные для роли регулировщика.
-    /// </summary>
-    private static void ApplyAdjusterRole()
-    {
-      SetAdminConsoleEnabled(false);
-      SetTestsMenuVisible(true);
-      SetUsbAdminRightsEnabled(false);
-    }
-
-    /// <summary>
-    /// Применяет настройки, доступные для роли разработчика.
-    /// </summary>
-    private static void ApplyDeveloperRole()
-    {
-      SetAdminConsoleEnabled(false);
-      SetTestsMenuVisible(false);
-      SetUsbAdminRightsEnabled(false);
-    }
-
-    /// <summary>
-    /// Включает или отключает доступ к консоли администратора.
-    /// </summary>
-    /// <param name="enabled">Значение true включает консоль администратора, false отключает и скрывает её.</param>
     public static void SetAdminConsoleEnabled(bool enabled)
     {
       SystemStateEventAdapter.RaiseConsoleAccessChanged(enabled);
     }
 
-    /// <summary>
-    /// Включает или отключает отображение меню испытаний.
-    /// </summary>
-    /// <param name="visible">Значение true показывает меню испытаний, false скрывает его.</param>
     public static void SetTestsMenuVisible(bool visible)
     {
       SystemStateEventAdapter.RaiseTestsMenuVisibilityChanged(visible);
-    }
-
-    /// <summary>
-    /// Включает или отключает возможность получения дополнительных прав администратора через USB-ключ.
-    /// </summary>
-    /// <param name="enabled">Значение true разрешает USB-ключу выдавать права администратора, false сбрасывает и запрещает такие права.</param>
-    public static void SetUsbAdminRightsEnabled(bool enabled)
-    {
-      if (!enabled)
-      {
-        SystemStateEventAdapter.RaiseAdminRightsChanged(false);
-      }
     }
   }
 }

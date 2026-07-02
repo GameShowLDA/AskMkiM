@@ -1,38 +1,17 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
-using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
-using Ask.Core.Shared.Metadata.View;
 using MainWindowProgram.Init;
 using MainWindowProgram.Services;
 
 namespace MainWindowProgram.Engine
 {
-  /// <summary>
-  /// Обрабатывает аргументы командной строки и настраивает поведение приложения.
-  /// </summary>
   internal class CommandLineParser
   {
-    private readonly IUsbMonitorView _usbServices;
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="CommandLineParser"/>.
-    /// </summary>
-    /// <param name="usbServices">Сервис управления USB-мониторингом.</param>
-    public CommandLineParser(IUsbMonitorView usbServices)
-    {
-      _usbServices = usbServices ?? throw new ArgumentNullException(nameof(usbServices));
-    }
-
-    /// <summary>
-    /// Запускает обработку аргументов командной строки.
-    /// Сначала применяются значения по умолчанию, затем каждый аргумент обрабатывается отдельно.
-    /// </summary>
     internal void ProcessCommandLineArgs()
     {
       ResetDefaults();
 
-      bool isAdmin = false;
       var filesToOpen = new List<string>();
       var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -40,10 +19,10 @@ namespace MainWindowProgram.Engine
       {
         if (IsSwitch(raw, "admin"))
         {
-          isAdmin = true;
-          HandleAdminMode();
+          continue;
         }
-        else if (IsSwitch(raw, "debug"))
+
+        if (IsSwitch(raw, "debug"))
         {
           AdminConfig.SetDebugRights(true).ConfigureAwait(false);
         }
@@ -60,41 +39,12 @@ namespace MainWindowProgram.Engine
         }
       }
 
-      _usbServices.SetUsbMonitoring(isAdmin && CanUseUsbAdminRights());
       OpenRequestedFiles(filesToOpen);
     }
 
-    /// <summary>
-    /// Обрабатывает включение режима администратора.
-    /// Включает USB-мониторинг.
-    /// </summary>
-    private void HandleAdminMode()
+    private static void ResetDefaults()
     {
-      if (!CanUseUsbAdminRights())
-      {
-        return;
-      }
-
-      _usbServices.SetUsbMonitoring(true);
-    }
-
-    /// <summary>
-    /// Обрабатывает неизвестные аргументы командной строки.
-    /// Может использоваться для логирования или отладки.
-    /// </summary>
-    /// <param name="arg">Неизвестный аргумент.</param>
-    private void HandleUnknownArgument(string arg)
-    {
-      Console.WriteLine($"[Warning] Неизвестный аргумент: {arg}");
-    }
-
-    /// <summary>
-    /// Устанавливает значения по умолчанию перед обработкой аргументов.
-    /// Сбрасывает настройки в стартовое состояние.
-    /// </summary>
-    private void ResetDefaults()
-    {
-      _usbServices.SetUsbMonitoring(false);
+      AdminConfig.SetAdminRights(RoleAuthorizationConfig.CurrentRole == RoleType.Root);
     }
 
     private static bool IsSwitch(string rawArg, string switchName)
@@ -108,9 +58,9 @@ namespace MainWindowProgram.Engine
       return token.Equals(switchName, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool CanUseUsbAdminRights()
+    private static void HandleUnknownArgument(string arg)
     {
-      return RoleAuthorizationConfig.CurrentRole == RoleType.Administrator;
+      Console.WriteLine($"[Warning] Неизвестный аргумент: {arg}");
     }
 
     private static void OpenRequestedFiles(IEnumerable<string> filesToOpen)

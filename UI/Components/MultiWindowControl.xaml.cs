@@ -200,6 +200,59 @@ namespace UI.Components
       return MultiEditor.GetOpenTextEditors();
     }
 
+    public MultiWindowWorkspaceSession CaptureWorkspaceSession()
+    {
+      return new MultiWindowWorkspaceSession(
+        MultiEditor.CaptureWorkspaceSession(),
+        openPages,
+        userControls,
+        searchResultsTextBlock.Text,
+        SearchResultsRow.Height,
+        SearchResults.Visibility,
+        searchDataGrid.Visibility,
+        MultiWindowSplitter.Visibility);
+    }
+
+    public void RestoreWorkspaceSession(MultiWindowWorkspaceSession session)
+    {
+      SearchResultsTopPanel.Children.Clear();
+      ContentPanel.Children.Clear();
+
+      openPages = session.SearchOpenPages;
+      userControls = session.SearchUserControls;
+
+      foreach (var control in userControls)
+      {
+        ContentPanel.Children.Add(control);
+      }
+
+      foreach (var page in openPages)
+      {
+        SearchResultsTopPanel.Children.Add(page);
+      }
+
+      searchResultsTextBlock.Text = session.SearchResultsText;
+      SearchResultsRow.Height = session.SearchResultsRowHeight;
+      SearchResults.Visibility = session.SearchResultsVisibility;
+      searchDataGrid.Visibility = session.SearchDataGridVisibility;
+      MultiWindowSplitter.Visibility = session.SplitterVisibility;
+
+      if (openPages.Count > 0 && userControls.Count > 0)
+      {
+        var activePage = openPages.FirstOrDefault(page => page.IsActive) ?? openPages[0];
+        var activeIndex = openPages.IndexOf(activePage);
+        if (activeIndex < 0 || activeIndex >= userControls.Count)
+        {
+          activeIndex = 0;
+          activePage = openPages[0];
+        }
+
+        ShowControl(userControls[activeIndex], activePage);
+      }
+
+      MultiEditor.RestoreWorkspaceSession(session.EditorSession);
+    }
+
     /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.
     /// </summary>
