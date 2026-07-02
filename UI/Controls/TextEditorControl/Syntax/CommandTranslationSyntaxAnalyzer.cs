@@ -43,11 +43,11 @@ namespace UI.Controls.TextEditorControl.Syntax
         var commentSpans = SyntaxCommentScanner.Scan(document);
         return BuildDiagnostics(document, models, commentSpans);
       }
-      catch (Exception ex)
+      catch (Exception)
       {
         return new[]
         {
-          CreateAnalyzerFailureDiagnostic(document, ex)
+          CreateAnalyzerFailureDiagnostic(document)
         };
       }
     }
@@ -58,29 +58,52 @@ namespace UI.Controls.TextEditorControl.Syntax
       IReadOnlyList<TextSpan> commentSpans)
     {
       var diagnostics = new List<TextSyntaxDiagnostic>();
+      var modelList = models
+        .OrderBy(model => model.StartLineNumber <= 0 ? int.MaxValue : model.StartLineNumber)
+        .ToList();
 
-      foreach (var model in models)
+      for (int i = 0; i < modelList.Count; i++)
       {
+        var model = modelList[i];
+
+        diagnostics.AddRange(CommandKeySyntaxAnalyzer.Analyze(
+          document,
+          model,
+          GetModelEndLineNumber(document, modelList, i),
+          commentSpans));
+
         foreach (var error in model.Errors)
         {
           var diagnostic = CreateDiagnostic(document, model, error, commentSpans);
           if (diagnostic != null)
-          {
             diagnostics.Add(diagnostic);
-          }
         }
 
         foreach (var warning in model.Warnings)
         {
           var diagnostic = CreateDiagnostic(document, model, warning, commentSpans);
           if (diagnostic != null)
-          {
             diagnostics.Add(diagnostic);
-          }
         }
       }
 
       return diagnostics;
+    }
+
+    private static int GetModelEndLineNumber(
+      TextDocument document,
+      IReadOnlyList<BaseCommandModel> models,
+      int index)
+    {
+      var currentStartLine = models[index].StartLineNumber;
+
+      for (int i = index + 1; i < models.Count; i++)
+      {
+        if (models[i].StartLineNumber > currentStartLine)
+          return Math.Clamp(models[i].StartLineNumber - 1, 1, document.LineCount);
+      }
+
+      return document.LineCount;
     }
 
     private static TextSyntaxDiagnostic? CreateDiagnostic(
@@ -106,16 +129,14 @@ namespace UI.Controls.TextEditorControl.Syntax
       };
     }
 
-    private static TextSyntaxDiagnostic CreateAnalyzerFailureDiagnostic(
-      TextDocument document,
-      Exception exception)
+    private static TextSyntaxDiagnostic CreateAnalyzerFailureDiagnostic(TextDocument document)
     {
       var firstLine = document.GetLineByNumber(1);
 
       return new TextSyntaxDiagnostic
       {
         Code = AnalyzerFailureCode,
-        Message = $"Не удалось выполнить синтаксический анализ команд: {exception.Message}",
+        Message = "Не удалось выполнить проверку команд. Проверьте общий формат программы контроля.",
         Severity = TextSyntaxSeverity.Warning,
         StartOffset = firstLine.Offset,
         Length = Math.Max(1, firstLine.Length),

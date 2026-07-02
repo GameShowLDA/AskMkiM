@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -80,6 +81,23 @@ namespace UI.Controls.TextEditorControl
 
     private const string SyntaxDiagnosticMarkerTag = "SyntaxDiagnostic";
 
+    private static readonly string[] TechnicalDiagnosticFragments =
+    {
+      "Unknown",
+      "Exception",
+      "System.",
+      "Ask.",
+      "UI.",
+      ".cs",
+      "StackTrace",
+      "NullReference",
+      "ArgumentException",
+      "ArgumentOutOfRange",
+      "InvalidOperation",
+      "CommandTranslation",
+      "ControlCommandAnalyser"
+    };
+
     private readonly DispatcherTimer _syntaxDiagnosticTimer = new();
 
     private static readonly Lazy<EditorSyntaxAnalyzer> SharedSyntaxAnalyzer =
@@ -95,6 +113,12 @@ namespace UI.Controls.TextEditorControl
 
     private IReadOnlyList<TextSyntaxDiagnostic> _syntaxDiagnostics =
       Array.Empty<TextSyntaxDiagnostic>();
+
+    private readonly ToolTip _syntaxDiagnosticToolTip = new()
+    {
+      Placement = PlacementMode.Mouse,
+      StaysOpen = false
+    };
 
     private int _syntaxAnalysisVersion;
 
@@ -681,6 +705,9 @@ namespace UI.Controls.TextEditorControl
       _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
       _syntaxDiagnostics = diagnostics;
 
+      if (_syntaxDiagnostics.Count == 0)
+        CloseSyntaxDiagnosticToolTip();
+
       foreach (var diagnostic in _syntaxDiagnostics)
       {
         var color = diagnostic.Severity == TextSyntaxSeverity.Warning
@@ -693,6 +720,112 @@ namespace UI.Controls.TextEditorControl
           color,
           SyntaxDiagnosticMarkerTag);
       }
+    }
+
+    private void TextEditor_MouseMove(object sender, MouseEventArgs e)
+    {
+      if (textEditor.Document == null || _syntaxDiagnostics.Count == 0)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      var position = textEditor.GetPositionFromPoint(e.GetPosition(textEditor));
+      if (position == null)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      int offset;
+      try
+      {
+        offset = textEditor.Document.GetOffset(position.Value.Location);
+      }
+      catch (ArgumentOutOfRangeException)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      var diagnostic = FindSyntaxDiagnostic(offset);
+      if (diagnostic == null)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      var content = FormatSyntaxDiagnosticToolTip(diagnostic);
+      if (!Equals(_syntaxDiagnosticToolTip.Content, content))
+        _syntaxDiagnosticToolTip.Content = content;
+
+      if (_syntaxDiagnosticToolTip.IsOpen)
+        return;
+
+      _syntaxDiagnosticToolTip.PlacementTarget = textEditor;
+      _syntaxDiagnosticToolTip.IsOpen = true;
+    }
+
+    private TextSyntaxDiagnostic? FindSyntaxDiagnostic(int offset)
+    {
+      return _syntaxDiagnostics
+        .Where(diagnostic => ContainsOffset(diagnostic, offset))
+        .OrderBy(diagnostic => diagnostic.Severity == TextSyntaxSeverity.Error ? 0 : 1)
+        .ThenBy(diagnostic => diagnostic.Length)
+        .FirstOrDefault();
+    }
+
+    private static bool ContainsOffset(TextSyntaxDiagnostic diagnostic, int offset)
+    {
+      int length = Math.Max(1, diagnostic.Length);
+      return offset >= diagnostic.StartOffset &&
+             offset < diagnostic.StartOffset + length;
+    }
+
+    private static string FormatSyntaxDiagnosticToolTip(TextSyntaxDiagnostic diagnostic)
+    {
+      var severity = diagnostic.Severity == TextSyntaxSeverity.Warning
+        ? "Предупреждение"
+        : "Ошибка";
+
+      return $"{severity}: {GetUserFriendlyDiagnosticMessage(diagnostic)}";
+    }
+
+    private static string GetUserFriendlyDiagnosticMessage(TextSyntaxDiagnostic diagnostic)
+    {
+      var message = diagnostic.Message?.Trim() ?? string.Empty;
+      if (IsTechnicalDiagnosticMessage(message))
+      {
+        return diagnostic.Severity == TextSyntaxSeverity.Warning
+          ? "Проверьте запись команды: возможно, в ней есть неточность."
+          : "Проверьте запись команды: в ней найдена ошибка.";
+      }
+
+      return message;
+    }
+
+    private static bool IsTechnicalDiagnosticMessage(string message)
+    {
+      if (string.IsNullOrWhiteSpace(message))
+        return true;
+
+      if (!message.Any(IsCyrillic) && message.Any(IsLatin))
+        return true;
+
+      return TechnicalDiagnosticFragments.Any(fragment =>
+        message.Contains(fragment, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool IsLatin(char ch)
+      => ch is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
+
+    private static bool IsCyrillic(char ch)
+      => ch is >= 'А' and <= 'я' or 'Ё' or 'ё';
+
+    private void CloseSyntaxDiagnosticToolTip()
+    {
+      if (_syntaxDiagnosticToolTip.IsOpen)
+        _syntaxDiagnosticToolTip.IsOpen = false;
     }
 
     private static EditorSyntaxAnalyzer CreateSyntaxAnalyzer()
@@ -728,6 +861,12 @@ namespace UI.Controls.TextEditorControl
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
       textEditor.PreviewMouseDown += (_, _) => ResetIssueSelectionBrush();
+
+      textEditor.MouseMove += TextEditor_MouseMove;
+      textEditor.MouseLeave += (_, _) => CloseSyntaxDiagnosticToolTip();
+      ToolTipService.SetInitialShowDelay(textEditor, 250);
+      ToolTipService.SetShowDuration(textEditor, 60000);
+
 
       if (_executionMargin == null)
       {
