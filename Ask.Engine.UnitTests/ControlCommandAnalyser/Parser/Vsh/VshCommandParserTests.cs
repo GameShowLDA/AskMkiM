@@ -2,11 +2,16 @@
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Vsh;
+using Ask.Engine.UnitTests.Fixtures;
 
 namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Vsh
 {
-  public class VshCommandParserTests
+  public class VshCommandParserTests : IClassFixture<VshParserDbFixture>
   {
+    public VshCommandParserTests(VshParserDbFixture fixture)
+    {
+    }
+
     [Fact]
     public void CanParse_VshMnemonic_ReturnsTrue()
     {
