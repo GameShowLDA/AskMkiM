@@ -29,9 +29,21 @@ namespace Ask.Core.Services.Config.AppSettings
     }
 
     /// <summary>
-    /// Returns the list of available roles.
+    /// Returns the list of roles visible in the regular login window.
     /// </summary>
     public async Task<IReadOnlyList<RoleCredentialModel>> GetRolesAsync()
+    {
+      var store = await ReadStoreAsync();
+      return store.Roles
+        .Where(x => x.Role != RoleType.Root)
+        .OrderBy(x => x.Role)
+        .ToList();
+    }
+
+    /// <summary>
+    /// Returns all roles that can be managed from application settings.
+    /// </summary>
+    public async Task<IReadOnlyList<RoleCredentialModel>> GetManageableRolesAsync()
     {
       var store = await ReadStoreAsync();
       return store.Roles
@@ -63,9 +75,38 @@ namespace Ask.Core.Services.Config.AppSettings
           return null;
         }
 
-        store.LastSelectedRole = role;
+        store.LastSelectedRole = role == RoleType.Root ? store.LastSelectedRole : role;
         await SaveStoreInternalAsync(store);
         return roleCredential;
+      }
+      finally
+      {
+        SyncRoot.Release();
+      }
+    }
+
+    /// <summary>
+    /// Changes the password for the selected role without requiring the previous password.
+    /// </summary>
+    public async Task ChangePasswordAsync(RoleType role, string newPassword)
+    {
+      if (string.IsNullOrWhiteSpace(newPassword))
+      {
+        throw new ArgumentException("Password cannot be empty.", nameof(newPassword));
+      }
+
+      await SyncRoot.WaitAsync();
+      try
+      {
+        var store = await LoadStoreInternalAsync();
+        var roleCredential = store.Roles.FirstOrDefault(x => x.Role == role);
+        if (roleCredential == null)
+        {
+          throw new InvalidOperationException("Role was not found.");
+        }
+
+        UpdatePassword(roleCredential, newPassword);
+        await SaveStoreInternalAsync(store);
       }
       finally
       {
@@ -142,6 +183,7 @@ namespace Ask.Core.Services.Config.AppSettings
           CreateCredential(RoleType.Administrator, "Администратор", "test"),
           CreateCredential(RoleType.Adjuster, "Регулировщик", "test"),
           CreateCredential(RoleType.Developer, "Разработчик ПК", "test"),
+          CreateCredential(RoleType.Root, "root", "root"),
         },
       };
     }
@@ -155,29 +197,15 @@ namespace Ask.Core.Services.Config.AppSettings
 
       var roles = fileStore.Roles ?? new List<RoleCredentialFileModel>();
 
-      var administrator = CreateNormalizedCredential(
-        RoleType.Administrator,
-        "Администратор",
-        FindFirstRole(roles, "Administrator"));
-
-      var adjuster = CreateNormalizedCredential(
-        RoleType.Adjuster,
-        "Регулировщик",
-        FindFirstRole(roles, "Adjuster", "Metrology", "SystemMaintenance"));
-
-      var developer = CreateNormalizedCredential(
-        RoleType.Developer,
-        "Разработчик ПК",
-        FindFirstRole(roles, "Developer"));
-
       return new RoleCredentialsStoreModel
       {
         LastSelectedRole = NormalizeRoleName(fileStore.LastSelectedRole) ?? RoleType.Administrator,
         Roles =
         {
-          administrator,
-          adjuster,
-          developer,
+          CreateNormalizedCredential(RoleType.Administrator, "Администратор", FindFirstRole(roles, "Administrator")),
+          CreateNormalizedCredential(RoleType.Adjuster, "Регулировщик", FindFirstRole(roles, "Adjuster", "Metrology", "SystemMaintenance")),
+          CreateNormalizedCredential(RoleType.Developer, "Разработчик ПК", FindFirstRole(roles, "Developer")),
+          CreateNormalizedCredential(RoleType.Root, "root", FindFirstRole(roles, "Root")),
         },
       };
     }
@@ -191,13 +219,13 @@ namespace Ask.Core.Services.Config.AppSettings
           || string.IsNullOrWhiteSpace(persistedRole.PasswordHash)
           || string.IsNullOrWhiteSpace(persistedRole.PasswordSalt))
       {
-        return CreateCredential(role, displayName, "test");
+        return CreateCredential(role, displayName, role == RoleType.Root ? "root" : "test");
       }
 
       return new RoleCredentialModel
       {
         Role = role,
-        DisplayName = displayName,
+        DisplayName = string.IsNullOrWhiteSpace(persistedRole.DisplayName) ? displayName : persistedRole.DisplayName,
         PasswordHash = persistedRole.PasswordHash,
         PasswordSalt = persistedRole.PasswordSalt,
       };
@@ -226,6 +254,7 @@ namespace Ask.Core.Services.Config.AppSettings
       "Metrology" => RoleType.Adjuster,
       "SystemMaintenance" => RoleType.Adjuster,
       "Developer" => RoleType.Developer,
+      "Root" => RoleType.Root,
       _ => null,
     };
 
@@ -254,21 +283,29 @@ namespace Ask.Core.Services.Config.AppSettings
       RoleType.Administrator => "Administrator",
       RoleType.Adjuster => "Adjuster",
       RoleType.Developer => "Developer",
+      RoleType.Root => "Root",
       _ => throw new ArgumentOutOfRangeException(nameof(role), role, null),
     };
 
     private static RoleCredentialModel CreateCredential(RoleType role, string displayName, string password)
     {
-      var saltBytes = RandomNumberGenerator.GetBytes(SaltSize);
-      var hashBytes = HashPassword(password, saltBytes);
-
-      return new RoleCredentialModel
+      var credential = new RoleCredentialModel
       {
         Role = role,
         DisplayName = displayName,
-        PasswordSalt = Convert.ToBase64String(saltBytes),
-        PasswordHash = Convert.ToBase64String(hashBytes),
       };
+
+      UpdatePassword(credential, password);
+      return credential;
+    }
+
+    private static void UpdatePassword(RoleCredentialModel credential, string password)
+    {
+      var saltBytes = RandomNumberGenerator.GetBytes(SaltSize);
+      var hashBytes = HashPassword(password, saltBytes);
+
+      credential.PasswordSalt = Convert.ToBase64String(saltBytes);
+      credential.PasswordHash = Convert.ToBase64String(hashBytes);
     }
 
     private static bool VerifyPassword(string password, RoleCredentialModel credential)

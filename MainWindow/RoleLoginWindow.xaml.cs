@@ -210,7 +210,7 @@ namespace MainWindowProgram
     {
       if (_isRootLoginSelected)
       {
-        AuthorizeRoot();
+        await AuthorizeRootAsync();
         return;
       }
 
@@ -384,7 +384,7 @@ namespace MainWindowProgram
       FocusPasswordInput();
     }
 
-    private void AuthorizeRoot()
+    private async Task AuthorizeRootAsync()
     {
       var enteredPassword = GetCurrentPassword();
       if (string.IsNullOrWhiteSpace(enteredPassword))
@@ -393,22 +393,32 @@ namespace MainWindowProgram
         return;
       }
 
-      if (!string.Equals(enteredPassword, "root", StringComparison.Ordinal))
+      try
       {
-        SetStatus("Неверный пароль.");
-        SelectAllPassword();
-        FocusPasswordInput();
-        UpdateLoginButtonState();
-        return;
-      }
+        LoginButton.IsEnabled = false;
+        SetStatus("Проверка пароля...");
 
-      AuthenticatedRole = new RoleCredentialModel
+        var authorizedRole = await _roleCredentialService.AuthorizeAsync(RoleType.Root, enteredPassword);
+        if (authorizedRole == null)
+        {
+          SetStatus("Неверный пароль.");
+          SelectAllPassword();
+          FocusPasswordInput();
+          UpdateLoginButtonState();
+          return;
+        }
+
+        AuthenticatedRole = authorizedRole;
+        BeginStartupLoading("Подготовка приложения...");
+        _authenticationCompletionSource.TrySetResult(authorizedRole);
+
+      }
+      catch (Exception ex)
       {
-        Role = RoleType.Root,
-        DisplayName = "root",
-      };
-      BeginStartupLoading("Подготовка приложения...");
-      _authenticationCompletionSource.TrySetResult(AuthenticatedRole);
+        SetStatus("Ошибка проверки пароля.");
+        MessageBoxCustom.Show($"Ошибка авторизации: {ex.Message}", image: MessageBoxImage.Error);
+        UpdateLoginButtonState();
+      }
     }
 
     private void SetStatus(string message)
