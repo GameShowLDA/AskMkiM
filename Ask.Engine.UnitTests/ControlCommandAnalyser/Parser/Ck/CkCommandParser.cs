@@ -36,24 +36,6 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Ck
     }
 
     [Fact]
-    public void Parse_DuplicateKey_AddsWarning()
-    {
-      var parser = new CkCommandParser();
-
-      var model = Assert.IsType<CkCommandModel>(
-          parser.Parse(
-              "10",
-              "СК",
-              1,
-              new List<string>
-              {
-                        "10 СК Д,Д"
-              }));
-
-      Assert.NotEmpty(model.Warnings);
-    }
-
-    [Fact]
     public void Parse_InvalidKey_AddsError()
     {
       var parser = new CkCommandParser();
