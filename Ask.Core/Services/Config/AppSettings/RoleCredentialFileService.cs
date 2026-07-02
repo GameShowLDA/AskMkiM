@@ -90,6 +90,11 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public async Task ChangePasswordAsync(RoleType role, string newPassword)
     {
+      if (!CanCurrentRoleChangePassword(role))
+      {
+        throw new UnauthorizedAccessException("Current role is not allowed to change this password.");
+      }
+
       if (string.IsNullOrWhiteSpace(newPassword))
       {
         throw new ArgumentException("Password cannot be empty.", nameof(newPassword));
@@ -112,6 +117,16 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         SyncRoot.Release();
       }
+    }
+
+    private static bool CanCurrentRoleChangePassword(RoleType targetRole)
+    {
+      return RoleAuthorizationConfig.CurrentRole switch
+      {
+        RoleType.Root => true,
+        RoleType.Administrator => targetRole != RoleType.Root,
+        _ => false,
+      };
     }
 
     private static string GetDefaultFilePath()
