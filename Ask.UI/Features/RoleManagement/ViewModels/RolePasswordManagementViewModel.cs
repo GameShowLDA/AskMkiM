@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Commands;
@@ -114,14 +115,23 @@ namespace Ask.UI.Features.RoleManagement.ViewModels
         IsBusy = true;
         Roles.Clear();
 
+        var currentRole = RoleAuthorizationConfig.CurrentRole;
+        if (!CanManagePasswords(currentRole))
+        {
+          SelectedRole = null;
+          StatusMessage = "Недостаточно прав для изменения паролей ролей.";
+          _isLoaded = true;
+          return;
+        }
+
         var roles = await _roleCredentialService.GetManageableRolesAsync();
-        foreach (var role in roles)
+        foreach (var role in roles.Where(role => CanChangeRolePassword(currentRole, role.Role)))
         {
           Roles.Add(new RolePasswordItemViewModel(role));
         }
 
-        SelectedRole ??= Roles.FirstOrDefault();
-        StatusMessage = Roles.Count == 0 ? "Роли для управления паролями не найдены." : string.Empty;
+        SelectedRole = Roles.FirstOrDefault();
+        StatusMessage = Roles.Count == 0 ? "Нет доступных ролей для изменения пароля." : string.Empty;
         _isLoaded = true;
       }
       catch (Exception ex)
@@ -180,15 +190,26 @@ namespace Ask.UI.Features.RoleManagement.ViewModels
     {
       return !IsBusy
         && SelectedRole != null
+        && CanChangeRolePassword(RoleAuthorizationConfig.CurrentRole, SelectedRole.Role)
         && !string.IsNullOrWhiteSpace(NewPassword)
         && string.Equals(NewPassword, ConfirmPassword, StringComparison.Ordinal);
     }
 
     private string? ValidatePasswordInput()
     {
+      if (!CanManagePasswords(RoleAuthorizationConfig.CurrentRole))
+      {
+        return "Недостаточно прав для изменения паролей ролей.";
+      }
+
       if (SelectedRole == null)
       {
         return "Выберите роль.";
+      }
+
+      if (!CanChangeRolePassword(RoleAuthorizationConfig.CurrentRole, SelectedRole.Role))
+      {
+        return "Недостаточно прав для изменения пароля выбранной роли.";
       }
 
       if (string.IsNullOrWhiteSpace(NewPassword))
@@ -204,10 +225,24 @@ namespace Ask.UI.Features.RoleManagement.ViewModels
       return null;
     }
 
+    private static bool CanManagePasswords(RoleType? currentRole)
+    {
+      return currentRole is RoleType.Administrator or RoleType.Root;
+    }
+
+    private static bool CanChangeRolePassword(RoleType? currentRole, RoleType targetRole)
+    {
+      return currentRole switch
+      {
+        RoleType.Root => true,
+        RoleType.Administrator => targetRole != RoleType.Root,
+        _ => false,
+      };
+    }
+
     private void RaiseCommandStateChanged()
     {
       SavePasswordCommand.RaiseCanExecuteChanged();
     }
-
   }
 }

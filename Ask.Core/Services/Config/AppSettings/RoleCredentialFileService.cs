@@ -90,6 +90,11 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public async Task ChangePasswordAsync(RoleType role, string newPassword)
     {
+      if (!CanCurrentRoleChangePassword(role))
+      {
+        throw new UnauthorizedAccessException("Current role is not allowed to change this password.");
+      }
+
       if (string.IsNullOrWhiteSpace(newPassword))
       {
         throw new ArgumentException("Password cannot be empty.", nameof(newPassword));
@@ -112,6 +117,16 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         SyncRoot.Release();
       }
+    }
+
+    private static bool CanCurrentRoleChangePassword(RoleType targetRole)
+    {
+      return RoleAuthorizationConfig.CurrentRole switch
+      {
+        RoleType.Root => true,
+        RoleType.Administrator => targetRole != RoleType.Root,
+        _ => false,
+      };
     }
 
     private static string GetDefaultFilePath()
@@ -182,7 +197,7 @@ namespace Ask.Core.Services.Config.AppSettings
         {
           CreateCredential(RoleType.Administrator, "Администратор", "test"),
           CreateCredential(RoleType.Adjuster, "Регулировщик", "test"),
-          CreateCredential(RoleType.Developer, "Разработчик", "test"),
+          CreateCredential(RoleType.Developer, "Разработчик ПК", "test"),
           CreateCredential(RoleType.Root, "root", "root"),
         },
       };
@@ -204,7 +219,7 @@ namespace Ask.Core.Services.Config.AppSettings
         {
           CreateNormalizedCredential(RoleType.Administrator, "Администратор", FindFirstRole(roles, "Administrator")),
           CreateNormalizedCredential(RoleType.Adjuster, "Регулировщик", FindFirstRole(roles, "Adjuster", "Metrology", "SystemMaintenance")),
-          CreateNormalizedCredential(RoleType.Developer, "Разработчик", FindFirstRole(roles, "Developer")),
+          CreateNormalizedCredential(RoleType.Developer, "Разработчик ПК", FindFirstRole(roles, "Developer")),
           CreateNormalizedCredential(RoleType.Root, "root", FindFirstRole(roles, "Root")),
         },
       };

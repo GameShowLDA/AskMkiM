@@ -88,10 +88,7 @@ namespace MainWindowProgram
           return;
         }
 
-        RoleAuthorizationConfig.SetCurrentRole(
-          authenticatedRole.Role,
-          authenticatedRole.DisplayName);
-        AdminConfig.SetAdminRights(authenticatedRole.Role == RoleType.Root);
+        RoleApplicationConfigurator.Apply(authenticatedRole);
 
         await loginWindowManager.UpdateLoadingStatusAsync("Завершение фоновой инициализации...");
         await startupInitializationTask;

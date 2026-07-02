@@ -569,9 +569,7 @@ namespace MainWindowProgram
           return;
         }
 
-        RoleAuthorizationConfig.SetCurrentRole(
-          authenticatedRole.Role,
-          authenticatedRole.DisplayName);
+        RoleApplicationConfigurator.Apply(authenticatedRole);
 
         AdminConfig.SetAdminRights(authenticatedRole.Role == RoleType.Root);
         RestoreWorkspaceSession(authenticatedRole.Role);

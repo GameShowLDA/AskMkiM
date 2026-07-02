@@ -496,7 +496,8 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0"
+                <Button x:Name="TerminalButton"
+                    Grid.Column="0"
                     Width="20"
                     Height="20"
                     Margin="8,0,4,0"

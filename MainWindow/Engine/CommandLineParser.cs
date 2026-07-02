@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using MainWindowProgram.Init;
 using MainWindowProgram.Services;
 
@@ -43,7 +44,7 @@ namespace MainWindowProgram.Engine
 
     private static void ResetDefaults()
     {
-      AdminConfig.SetAdminRights(RoleAuthorizationConfig.CurrentRole == Ask.Core.Shared.Metadata.Enums.RoleEnums.RoleType.Root);
+      AdminConfig.SetAdminRights(RoleAuthorizationConfig.CurrentRole == RoleType.Root);
     }
 
     private static bool IsSwitch(string rawArg, string switchName)
