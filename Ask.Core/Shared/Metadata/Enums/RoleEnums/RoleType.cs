@@ -19,5 +19,10 @@ namespace Ask.Core.Shared.Metadata.Enums.RoleEnums
     /// Control program developer role.
     /// </summary>
     Developer = 3,
+
+    /// <summary>
+    /// Hidden root role.
+    /// </summary>
+    Root = 100,
   }
 }

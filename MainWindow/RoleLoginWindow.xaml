@@ -312,7 +312,7 @@
                                                Grid.Column="1"
                                                VerticalAlignment="Center"
                                                FontSize="16"
-                                               Text="{Binding DisplayName}"
+                                               Text="{Binding DisplayText}"
                                                Foreground="{StaticResource LoginForegroundBrush}"/>
                                 </Grid>
                                 <DataTemplate.Triggers>
