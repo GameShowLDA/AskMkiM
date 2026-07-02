@@ -60,12 +60,12 @@
                BasedOn="{StaticResource WindowActionButtonStyle}">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#1E1E1E"/>
-                    <Setter Property="Background" Value="#33FFFFFF"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="#111111"/>
-                    <Setter Property="Background" Value="#55FFFFFF"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -75,12 +75,12 @@
                BasedOn="{StaticResource WindowActionButtonStyle}">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="Background" Value="#5537404F"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="Background" Value="#7737404F"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -156,12 +156,13 @@
                                                              Duration="0:0:0.18"/>
                                         </Storyboard>
                                     </BeginStoryboard>
-                                </Trigger.ExitActions>
-                                <Setter Property="Foreground" Value="#1E1E1E"/>
-                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger.ExitActions>
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
+                                <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#32000000"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
+                                <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.55"/>
@@ -449,29 +450,62 @@
                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
 
-                    <DefaultGUI:WindowButtons 
+                    <Button x:Name="minimizeButton"
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}" 
-                        x:Name="minimizeButton" ChoiceElement="Minimize" 
-                        Command="{Binding Window.MinimizeCommand}"
-                        />
+                        Command="{Binding Window.MinimizeCommand}">
+                        <askUiIcons:WindowMinimizeIcon Size="14"
+                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
 
-                    <DefaultGUI:WindowButtons 
+                    <Button x:Name="maximizeButton"
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
-                        x:Name="maximizeButton" ChoiceElement="Maximize" 
-                        Command="{Binding Window.MaximizeCommand}"
-                        />
+                        Command="{Binding Window.MaximizeCommand}">
+                        <Grid Width="18" Height="18">
+                            <askUiIcons:WindowMaximizeIcon Size="14"
+                                IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                <askUiIcons:WindowMaximizeIcon.Style>
+                                    <Style TargetType="{x:Type askUiIcons:WindowMaximizeIcon}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=MainWinApp, Path=WindowState}" Value="Maximized">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </askUiIcons:WindowMaximizeIcon.Style>
+                            </askUiIcons:WindowMaximizeIcon>
+                            <askUiIcons:WindowRestoreIcon Size="14"
+                                IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                <askUiIcons:WindowRestoreIcon.Style>
+                                    <Style TargetType="{x:Type askUiIcons:WindowRestoreIcon}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=MainWinApp, Path=WindowState}" Value="Maximized">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </askUiIcons:WindowRestoreIcon.Style>
+                            </askUiIcons:WindowRestoreIcon>
+                        </Grid>
+                    </Button>
 
-                    <DefaultGUI:WindowButtons 
+                    <Button x:Name="exitButton"
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
-                        x:Name="exitButton" ChoiceElement="Exit" 
-                        Command="{Binding Window.CloseCommand}"
-                        />
+                        Command="{Binding Window.CloseCommand}">
+                        <askUiIcons:WindowCloseIcon Size="14"
+                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
                 </StackPanel>
             </Grid>
 

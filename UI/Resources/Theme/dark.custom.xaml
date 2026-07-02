@@ -87,6 +87,10 @@
   <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverBackgroundBrush" Color="#B55961"/>
   <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverForegroundBrush" Color="#FFFFFF"/>
   <SolidColorBrush x:Key="TopPanelTabCloseButtonDisabledForegroundBrush" Color="#6D6279"/>
+  <SolidColorBrush x:Key="TopPanelHoverBackgroundBrush" Color="#33FFFFFF"/>
+  <SolidColorBrush x:Key="TopPanelHoverForegroundBrush" Color="#1E1E1E"/>
+  <SolidColorBrush x:Key="TopPanelPressedBackgroundBrush" Color="#55FFFFFF"/>
+  <SolidColorBrush x:Key="TopPanelPressedForegroundBrush" Color="#111111"/>
   <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
     <GradientStop Color="#313B48" Offset="0"/>
     <GradientStop Color="#293340" Offset="1"/>
