@@ -90,6 +90,12 @@
     <SolidColorBrush x:Key="TopPanelHoverForegroundBrush" Color="#1E1E1E"/>
     <SolidColorBrush x:Key="TopPanelPressedBackgroundBrush" Color="#55FFFFFF"/>
     <SolidColorBrush x:Key="TopPanelPressedForegroundBrush" Color="#111111"/>
+    <SolidColorBrush x:Key="ToolTipBackgroundBrush" Color="#F01E232A"/>
+    <SolidColorBrush x:Key="ToolTipForegroundBrush" Color="#F4F7FB"/>
+    <SolidColorBrush x:Key="ToolTipBorderBrush" Color="#3E4652"/>
+    <SolidColorBrush x:Key="ToolTipHotkeyBackgroundBrush" Color="#343B45"/>
+    <SolidColorBrush x:Key="ToolTipHotkeyForegroundBrush" Color="#F4F7FB"/>
+    <SolidColorBrush x:Key="ToolTipShadowBrush" Color="#66000000"/>
     <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#2F3847" Offset="0"/>
         <GradientStop Color="#27303D" Offset="1"/>

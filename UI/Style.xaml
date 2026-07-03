@@ -52,9 +52,9 @@
     <SolidColorBrush x:Key="Cb_DisabledBrush" Color="{StaticResource ForegroundColor}"/>
 
     <Style TargetType="{x:Type ToolTip}">
-        <Setter Property="Background" Value="#EE25282D"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="BorderBrush" Value="#3F454C"/>
+        <Setter Property="Background" Value="{DynamicResource ToolTipBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ToolTipForegroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ToolTipBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="14,9"/>
         <Setter Property="MaxWidth" Value="360"/>
@@ -74,7 +74,7 @@
                         <Border x:Name="Shadow"
                                 Margin="0,8,0,8"
                                 CornerRadius="10"
-                                Background="#66000000">
+                                Background="{DynamicResource ToolTipShadowBrush}">
                             <Border.Effect>
                                 <DropShadowEffect BlurRadius="18"
                                                   ShadowDepth="0"
@@ -109,10 +109,10 @@
                                             MinWidth="38"
                                             Padding="7,4"
                                             CornerRadius="6"
-                                            Background="#3A414A"
+                                            Background="{DynamicResource ToolTipHotkeyBackgroundBrush}"
                                             Visibility="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ToolTipPartConverter}, ConverterParameter=HotkeyVisibility}">
                                         <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ToolTipPartConverter}, ConverterParameter=Hotkey}"
-                                                   Foreground="{TemplateBinding Foreground}"
+                                                   Foreground="{DynamicResource ToolTipHotkeyForegroundBrush}"
                                                    FontFamily="{DynamicResource WinstonRegular}"
                                                    FontSize="12"
                                                    HorizontalAlignment="Center"
