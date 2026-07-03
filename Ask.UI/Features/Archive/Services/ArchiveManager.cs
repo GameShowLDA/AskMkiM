@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.UI.Features.Archive.Application;
 using System.IO;
 using System.Reflection.Metadata;
 using static Ask.LogLib.LoggerUtility;
@@ -27,6 +28,8 @@ namespace Ask.UI.Features.Archive.Services
     /// </summary>
     private readonly ArchiveOpeningService _archiveOpening = new ArchiveOpeningService();
 
+    private readonly IArchiveOperationService _archiveOperations;
+
     /// <summary>
     /// Путь к текущему открытому архиву.
     /// </summary>
@@ -36,6 +39,16 @@ namespace Ask.UI.Features.Archive.Services
     /// Базовый путь к директории архивов.
     /// </summary>
     private string _archivePath = Path.Combine(AppContext.BaseDirectory, FileLocations.ArchiveDirectory);
+
+    public ArchiveManager()
+      : this(ArchiveOperationServices.Current)
+    {
+    }
+
+    public ArchiveManager(IArchiveOperationService archiveOperations)
+    {
+      _archiveOperations = archiveOperations ?? throw new ArgumentNullException(nameof(archiveOperations));
+    }
 
     /// <summary>
     /// Список уведомлений о нарушениях целостности архива.
@@ -49,9 +62,16 @@ namespace Ask.UI.Features.Archive.Services
     /// <returns>Путь к созданному архиву.</returns>
     public string CreateArchive(string archiveName)
     {
-      var createdArchivePath = _archiveCreation.Create(archiveName);
-      EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveCreated, createdArchivePath));
-      return createdArchivePath;
+      return _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.CreateArchive,
+        "Создание архива",
+        () =>
+        {
+          var createdArchivePath = _archiveCreation.Create(archiveName);
+          EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveCreated, createdArchivePath));
+          return createdArchivePath;
+        },
+        createdArchivePath => new[] { createdArchivePath });
     }
 
     /// <summary>
@@ -99,16 +119,23 @@ namespace Ask.UI.Features.Archive.Services
     {
       var openedArchivePath = EnsureArchiveIsOpen();
 
-      try
-      {
-        _archiveOpening.Close();
-        _archiveFileAdder.AddFile(openedArchivePath, filePath);
-        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
-      }
-      finally
-      {
-        _archiveOpening.Close();
-      }
+      _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.AddFile,
+        "Добавление файла в архив",
+        () =>
+        {
+          try
+          {
+            _archiveOpening.Close();
+            _archiveFileAdder.AddFile(openedArchivePath, filePath);
+            EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
+          }
+          finally
+          {
+            _archiveOpening.Close();
+          }
+        },
+        new[] { openedArchivePath });
     }
 
     /// <summary>
@@ -121,16 +148,23 @@ namespace Ask.UI.Features.Archive.Services
     {
       var openedArchivePath = EnsureArchiveIsOpen();
 
-      try
-      {
-        _archiveOpening.Close();
-        _archiveFileAdder.AddFile(sourceLines, openedArchivePath, fileName);
-        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
-      }
-      finally
-      {
-        _archiveOpening.Close();
-      }
+      _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.SaveGeneratedFile,
+        "Сохранение файла в архив",
+        () =>
+        {
+          try
+          {
+            _archiveOpening.Close();
+            _archiveFileAdder.AddFile(sourceLines, openedArchivePath, fileName);
+            EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
+          }
+          finally
+          {
+            _archiveOpening.Close();
+          }
+        },
+        new[] { openedArchivePath });
     }
 
     /// <summary>
@@ -141,16 +175,23 @@ namespace Ask.UI.Features.Archive.Services
     {
       var openedArchivePath = EnsureArchiveIsOpen();
 
-      try
-      {
-        _archiveOpening.Close();
-        _archiveFileAdder.DeleteFile(openedArchivePath, archiveEntryName);
-        EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
-      }
-      finally
-      {
-        _archiveOpening.Close();
-      }
+      _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.DeleteFile,
+        "Удаление файла из архива",
+        () =>
+        {
+          try
+          {
+            _archiveOpening.Close();
+            _archiveFileAdder.DeleteFile(openedArchivePath, archiveEntryName);
+            EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveEntriesChanged, openedArchivePath));
+          }
+          finally
+          {
+            _archiveOpening.Close();
+          }
+        },
+        new[] { openedArchivePath });
     }
 
     /// <summary>
@@ -162,7 +203,11 @@ namespace Ask.UI.Features.Archive.Services
     /// <returns>Имя скопированной записи архива.</returns>
     public string CopyFileBetweenArchives(string sourceArchivePath, string archiveEntryName, string targetArchivePath)
     {
-      return TransferFileBetweenArchives(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource: false);
+      return _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.CopyFile,
+        "Копирование файла между архивами",
+        () => TransferFileBetweenArchives(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource: false),
+        _ => new[] { targetArchivePath });
     }
 
     /// <summary>
@@ -174,7 +219,11 @@ namespace Ask.UI.Features.Archive.Services
     /// <returns>Имя перемещённой записи архива.</returns>
     public string MoveFileBetweenArchives(string sourceArchivePath, string archiveEntryName, string targetArchivePath)
     {
-      return TransferFileBetweenArchives(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource: true);
+      return _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.MoveFile,
+        "Перемещение файла между архивами",
+        () => TransferFileBetweenArchives(sourceArchivePath, archiveEntryName, targetArchivePath, removeSource: true),
+        _ => new[] { sourceArchivePath, targetArchivePath });
     }
 
     /// <summary>
@@ -190,17 +239,23 @@ namespace Ask.UI.Features.Archive.Services
         ? EnsureArchiveIsOpen()
         : archivePath;
 
-      if (!string.IsNullOrWhiteSpace(OpenedArchivePath) &&
-          string.Equals(
-            OpenedArchivePath,
-            System.IO.Path.GetFullPath(pathToDelete),
-            StringComparison.OrdinalIgnoreCase))
-      {
-        _archiveOpening.Close();
-      }
+      _archiveOperations.ExecuteMutation(
+        ArchiveOperationKind.DeleteArchive,
+        "Удаление архива",
+        () =>
+        {
+          if (!string.IsNullOrWhiteSpace(OpenedArchivePath) &&
+              string.Equals(
+                OpenedArchivePath,
+                System.IO.Path.GetFullPath(pathToDelete),
+                StringComparison.OrdinalIgnoreCase))
+          {
+            _archiveOpening.Close();
+          }
 
-      _archiveFileAdder.DeleteArchive(pathToDelete);
-      EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveDeleted, pathToDelete));
+          _archiveFileAdder.DeleteArchive(pathToDelete);
+          EventAggregator.Publish(new ArchiveEvents.Changed(ArchiveEvents.ArchiveChangeKind.ArchiveDeleted, pathToDelete));
+        });
     }
 
     /// <summary>

@@ -60,6 +60,13 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
             typeof(DeviceListControl),
             new PropertyMetadata(false, OnIsSingleDeviceOnlyChanged));
 
+    public static readonly DependencyProperty IsEditingEnabledProperty =
+        DependencyProperty.Register(
+            nameof(IsEditingEnabled),
+            typeof(bool),
+            typeof(DeviceListControl),
+            new PropertyMetadata(true, OnIsEditingEnabledChanged));
+
     /// <summary>
     /// Получает или задает заголовок списка устройств.
     /// </summary>
@@ -73,6 +80,12 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     {
       get => (bool)GetValue(IsSingleDeviceOnlyProperty);
       set => SetValue(IsSingleDeviceOnlyProperty, value);
+    }
+
+    public bool IsEditingEnabled
+    {
+      get => (bool)GetValue(IsEditingEnabledProperty);
+      set => SetValue(IsEditingEnabledProperty, value);
     }
 
     /// <summary>
@@ -115,6 +128,11 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <param name="deviceWrapper">Экземпляр <see cref="DeviceWrapper"/>.</param>
     public async Task RemoveDeviceAsync(DeviceWrapper deviceWrapper)
     {
+      if (!IsEditingEnabled)
+      {
+        return;
+      }
+
       if (!Devices.Contains(deviceWrapper))
       {
         return;
@@ -204,6 +222,11 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <param name="e">Аргументы события.</param>
     private async void RemoveDeviceButton_Click(object sender, RoutedEventArgs e)
     {
+      if (!IsEditingEnabled)
+      {
+        return;
+      }
+
       if (sender is Button button && button.CommandParameter is DeviceWrapper deviceWrapper)
       {
         await RemoveDeviceAsync(deviceWrapper);
@@ -212,6 +235,11 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
 
     private void EditDeviceButton_Click(object sender, RoutedEventArgs e)
     {
+      if (!IsEditingEnabled)
+      {
+        return;
+      }
+
       if (sender is Button button && button.CommandParameter is DeviceWrapper deviceWrapper)
       {
         EditEvent?.Invoke(this, deviceWrapper.Device);
@@ -225,6 +253,11 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     /// <param name="e">Аргументы события.</param>
     private void PlusPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+      if (!IsEditingEnabled)
+      {
+        return;
+      }
+
       if (IsSingleDeviceOnly && Devices.Count > 0)
       {
         return;
@@ -241,6 +274,14 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
       }
     }
 
+    private static void OnIsEditingEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is DeviceListControl control)
+      {
+        control.UpdateAddButtonVisibility();
+      }
+    }
+
     private void UpdateAddButtonVisibility()
     {
       if (AddButtonContainer == null)
@@ -248,7 +289,7 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
         return;
       }
 
-      AddButtonContainer.Visibility = IsSingleDeviceOnly && Devices.Count > 0
+      AddButtonContainer.Visibility = !IsEditingEnabled || IsSingleDeviceOnly && Devices.Count > 0
           ? Visibility.Collapsed
           : Visibility.Visible;
     }

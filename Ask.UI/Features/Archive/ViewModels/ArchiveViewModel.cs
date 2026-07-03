@@ -438,7 +438,14 @@ namespace Ask.UI.Features.Archive.ViewModels
     /// <param name="isReviewArchivePath">
     /// Делегат проверки принадлежности архива к архивам проверки.
     /// </param>
-    public void UpdateActionButtons(string? archivePath, string? entryName, string? reviewFilePath, bool isReviewEntry, bool hasClipboardEntry, Func<string, bool> isReviewArchivePath)
+    public void UpdateActionButtons(
+      string? archivePath,
+      string? entryName,
+      string? reviewFilePath,
+      bool isReviewEntry,
+      bool hasClipboardEntry,
+      bool canEditArchives,
+      Func<string, bool> isReviewArchivePath)
     {
       UpdatePanelTitles(archivePath, entryName);
 
@@ -453,13 +460,13 @@ namespace Ask.UI.Features.Archive.ViewModels
       SaveArchiveVisibility = ToVisibility(hasArchive && !isReviewArchive);
       ConvertArchiveToApkVisibility = ToVisibility(hasArchive && !isReviewArchive);
       PrintArchiveCatalogVisibility = ToVisibility(hasArchive && !isReviewArchive);
-      AddFileToArchiveVisibility = ToVisibility(hasArchive && !isReviewArchive);
-      PasteIntoArchiveVisibility = ToVisibility(hasArchive && hasClipboardEntry);
-      DeleteArchiveVisibility = ToVisibility(hasArchive);
-      DeleteArchiveFileVisibility = ToVisibility(canManageArchiveFiles || canDeleteReviewFile);
+      AddFileToArchiveVisibility = ToVisibility(hasArchive && !isReviewArchive && canEditArchives);
+      PasteIntoArchiveVisibility = ToVisibility(hasArchive && hasClipboardEntry && canEditArchives);
+      DeleteArchiveVisibility = ToVisibility(hasArchive && canEditArchives);
+      DeleteArchiveFileVisibility = ToVisibility((canManageArchiveFiles || canDeleteReviewFile) && canEditArchives);
       CopyArchiveFileVisibility = ToVisibility(canManageArchiveFiles);
-      CutArchiveFileVisibility = ToVisibility(canManageArchiveFiles);
-      PasteArchiveFileVisibility = ToVisibility(canManageArchiveFiles && hasClipboardEntry);
+      CutArchiveFileVisibility = ToVisibility(canManageArchiveFiles && canEditArchives);
+      PasteArchiveFileVisibility = ToVisibility(canManageArchiveFiles && hasClipboardEntry && canEditArchives);
       ConvertToPkwVisibility = ToVisibility(!isReviewEntry);
       RunInExecutorVisibility = ToVisibility(canManageArchiveFiles);
       RecheckReviewFileVisibility = ToVisibility(isReviewEntry && !string.IsNullOrWhiteSpace(reviewFilePath));
@@ -473,9 +480,9 @@ namespace Ask.UI.Features.Archive.ViewModels
     /// <param name="hasClipboardEntry">
     /// Признак наличия файла в буфере обмена архивов.
     /// </param>
-    public void UpdateContextMenu(ArchiveTreeNode? node, bool hasClipboardEntry)
+    public void UpdateContextMenu(ArchiveTreeNode? node, bool hasClipboardEntry, bool canEditArchives)
     {
-      ContextMenu.Update(node, hasClipboardEntry);
+      ContextMenu.Update(node, hasClipboardEntry, canEditArchives);
     }
 
     /// <summary>

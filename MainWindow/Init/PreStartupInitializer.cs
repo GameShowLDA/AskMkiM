@@ -7,6 +7,7 @@ using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Extensions;
 using Ask.LogLib;
 using Ask.Support;
+using Ask.UI.Features.Archive.Application;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Microsoft.Extensions.DependencyInjection;
@@ -104,6 +105,10 @@ namespace MainWindowProgram.Init
               ShowCrashPackageCreatedNotification);
 
             services.AddDiagnosticStateProvider("Application", CaptureApplicationDiagnosticState);
+            services.AddSingleton<IArchivePermissionService, RoleArchivePermissionService>();
+            services.AddSingleton<IArchiveIntegrityService, ArchiveIntegrityService>();
+            services.AddSingleton<IArchiveOperationLogger, ArchiveOperationLogger>();
+            services.AddSingleton<IArchiveOperationService, ArchiveOperationService>();
 
             services.AddDiagnosticConfigProvider("AppSettings", async (_, _) => new
             {

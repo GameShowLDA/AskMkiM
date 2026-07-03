@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.UI.Features.Archive.Application;
 using Ask.UI.Features.Archive.Contracts;
 using Ask.UI.Features.Archive.Services;
 using Ask.UI.Features.Archive.ViewModels;
@@ -73,6 +74,8 @@ namespace Ask.UI.Features.Archive.Views
     /// Менеджер для работы с архивами (чтение, изменение, операции с файлами).
     /// </summary>
     private readonly ArchiveManager _archiveManager = new ArchiveManager();
+
+    private readonly IArchiveOperationService _archiveOperations = ArchiveOperationServices.Current;
 
     /// <summary>
     /// Объект синхронизации для потокобезопасной работы с ArchiveManager.
@@ -1870,6 +1873,7 @@ namespace Ask.UI.Features.Archive.Views
         _lastSelectedReviewFilePath,
         _lastSelectedIsReviewEntry,
         hasClipboardEntry,
+        _archiveOperations.CanEditArchives,
         IsReviewArchivePath);
     }
 
@@ -2438,7 +2442,7 @@ namespace Ask.UI.Features.Archive.Views
     private void ArchivesTreeContextMenu_Closed(object sender, RoutedEventArgs e)
     {
       _contextMenuNode = null;
-      ViewModel.UpdateContextMenu(null, HasArchiveClipboardEntry());
+      ViewModel.UpdateContextMenu(null, HasArchiveClipboardEntry(), _archiveOperations.CanEditArchives);
     }
     /// <summary>
     /// Обеспечивает получение записей архива для печати (из текущего состояния или с загрузкой).
@@ -2694,7 +2698,7 @@ namespace Ask.UI.Features.Archive.Views
     private void ArchivesTreeContextMenu_Opened(object sender, RoutedEventArgs e)
     {
       var node = GetContextNode();
-      ViewModel.UpdateContextMenu(node, HasArchiveClipboardEntry());
+      ViewModel.UpdateContextMenu(node, HasArchiveClipboardEntry(), _archiveOperations.CanEditArchives);
 
       var isSupportedNode =
         node?.Kind == ArchiveTreeNodeKind.Root ||
@@ -3111,6 +3115,8 @@ namespace Ask.UI.Features.Archive.Views
     {
       try
       {
+        _archiveOperations.EnsureCanEditArchives(ArchiveOperationKind.CreateArchive);
+
         var createdArchivePath = ShowArchiveCreationDialog();
         if (string.IsNullOrWhiteSpace(createdArchivePath))
         {
@@ -3419,7 +3425,10 @@ namespace Ask.UI.Features.Archive.Views
       try
       {
         var fullReviewArchivePath = Path.GetFullPath(reviewArchivePath);
-        Directory.Delete(fullReviewArchivePath, recursive: true);
+        _archiveOperations.ExecuteMutation(
+          ArchiveOperationKind.DeleteArchive,
+          "Удаление архива на проверке",
+          () => Directory.Delete(fullReviewArchivePath, recursive: true));
         InvalidateArchiveCaches(fullReviewArchivePath);
 
         var deletedSelectedArchive = IsSameArchivePath(_lastSelectedArchivePath, fullReviewArchivePath);
@@ -3472,16 +3481,22 @@ namespace Ask.UI.Features.Archive.Views
           ? Path.GetFullPath(filePath)
           : Path.Combine(fullReviewArchivePath, Path.GetFileName(entryName));
 
-        if (File.Exists(fullFilePath))
-        {
-          File.Delete(fullFilePath);
-        }
+        _archiveOperations.ExecuteMutation(
+          ArchiveOperationKind.DeleteFile,
+          "Удаление файла из архива на проверке",
+          () =>
+          {
+            if (File.Exists(fullFilePath))
+            {
+              File.Delete(fullFilePath);
+            }
 
-        var companionOpkwPath = Path.ChangeExtension(fullFilePath, ".opkw");
-        if (!string.Equals(companionOpkwPath, fullFilePath, StringComparison.OrdinalIgnoreCase) && File.Exists(companionOpkwPath))
-        {
-          File.Delete(companionOpkwPath);
-        }
+            var companionOpkwPath = Path.ChangeExtension(fullFilePath, ".opkw");
+            if (!string.Equals(companionOpkwPath, fullFilePath, StringComparison.OrdinalIgnoreCase) && File.Exists(companionOpkwPath))
+            {
+              File.Delete(companionOpkwPath);
+            }
+          });
 
         InvalidateArchiveCaches(fullReviewArchivePath);
 
@@ -3597,7 +3612,7 @@ namespace Ask.UI.Features.Archive.Views
     /// <returns>true, если команда успешно выполнена; иначе false.</returns>
     private static bool TryExecuteRunCommand()
     {
-      var mainWindow = Application.Current?.MainWindow;
+      var mainWindow = System.Windows.Application.Current?.MainWindow;
       if (mainWindow?.DataContext == null)
       {
         return false;
@@ -4129,7 +4144,9 @@ namespace Ask.UI.Features.Archive.Views
 
       if (ex is UnauthorizedAccessException)
       {
-        return "Нет доступа к папке архивов.";
+        return !string.IsNullOrWhiteSpace(ex.Message) && ex.Message.Contains("Недостаточно прав", StringComparison.OrdinalIgnoreCase)
+          ? ex.Message
+          : "Нет доступа к папке архивов.";
       }
 
       if (ex is IOException ioException &&
@@ -4188,6 +4205,12 @@ namespace Ask.UI.Features.Archive.Views
       if (ex is InvalidDataException invalidDataException)
       {
         return invalidDataException.Message;
+      }
+
+      if (ex is UnauthorizedAccessException unauthorizedAccessException &&
+          !string.IsNullOrWhiteSpace(unauthorizedAccessException.Message))
+      {
+        return unauthorizedAccessException.Message;
       }
 
       if (ex is ArgumentException argumentException && !string.IsNullOrWhiteSpace(argumentException.Message))
