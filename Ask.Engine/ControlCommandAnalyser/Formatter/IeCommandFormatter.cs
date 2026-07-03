@@ -23,7 +23,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter
         yield return line;
       }
 
-      foreach (var line in FormatSchemeWithRmCheck(ie, "\tПроверяемые точки:"))
+      foreach (var line in FormatSchemeWithRmCheckConnectedPoints(ie, "\tПроверяемые точки:"))
       {
         yield return line;
       }

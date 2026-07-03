@@ -28,7 +28,7 @@
     </Style>
 
     <Style x:Key="ConversionDialogWindowButtonStyle"
-           TargetType="Components:WindowButtons"
+           TargetType="Button"
            BasedOn="{StaticResource WindowsButtonStyle}">
         <Setter Property="Width" Value="42"/>
         <Setter Property="Height" Value="42"/>

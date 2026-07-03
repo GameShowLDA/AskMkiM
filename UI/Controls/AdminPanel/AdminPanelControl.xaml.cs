@@ -1,4 +1,3 @@
-﻿using Ask.Core.Services.Usb;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using System.Windows.Controls;
@@ -23,10 +22,6 @@ namespace UI.Controls.AdminPanel
       RightContentPresenter.Content = new DataBaseView();
     }
 
-    private void UsbButton_Click(object sender, MouseButtonEventArgs e)
-    {
-      RightContentPresenter.Content = new USBManagementControl();
-    }
 
     private void SetCommandButton_Click(object sender, MouseButtonEventArgs e)
     {
