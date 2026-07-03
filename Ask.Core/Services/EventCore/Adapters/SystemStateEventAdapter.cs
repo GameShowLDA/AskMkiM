@@ -87,5 +87,12 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// <param name="isVisible">Новое состояние видимости меню: true — показать; false — скрыть.</param>
     public static void RaiseTestsMenuVisibilityChanged(bool isVisible) =>
       EventAggregator.Publish(new SystemStateEvents.TestsMenuVisibilityChanged(isVisible));
+
+    /// <summary>
+    /// Генерирует событие изменения доступа к редактированию конфигурации.
+    /// </summary>
+    /// <param name="isEnabled">Новое состояние доступа: true — доступно; false — скрыто и недоступно.</param>
+    public static void RaiseDeviceConfigurationEditingAccessChanged(bool isEnabled) =>
+      EventAggregator.Publish(new SystemStateEvents.DeviceConfigurationEditingAccessChanged(isEnabled));
   }
 }
