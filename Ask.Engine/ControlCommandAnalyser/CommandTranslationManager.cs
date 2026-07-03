@@ -26,6 +26,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     private static readonly Lazy<List<ICommandFormatter>> FormatterCache = new(CreateAllFormatters);
     private static readonly Lazy<List<ICommandBody>> CommandBodyBuilderCache = new(CreateAllCommandBuilders);
     private static readonly Lazy<IReadOnlyList<string>> KnownCommandMnemonicCache = new(CreateKnownCommandMnemonics);
+    private static readonly Lazy<IReadOnlyDictionary<string, IReadOnlyList<AlgorithmKey>>> KnownCommandKeysCache = new(CreateKnownCommandKeysByMnemonic);
 
     private readonly List<ICommandParser> _parsers;
     private readonly List<ICommandFormatter> _formatters;
@@ -45,6 +46,13 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </summary>
     public static IReadOnlyList<string> GetKnownCommandMnemonics()
       => KnownCommandMnemonicCache.Value;
+
+    /// <summary>
+    /// Возвращает допустимые ключи по мнемоникам команд, для которых найден парсер.
+    /// Данные собираются из моделей команд и их атрибутов <see cref="Attributes.AllowedKeysAttribute"/>.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<AlgorithmKey>> GetKnownCommandKeysByMnemonic()
+      => KnownCommandKeysCache.Value;
 
     /// <summary>
     /// Разбирает текст программы контроля и выполняет легковесный пост-анализ
@@ -95,6 +103,47 @@ namespace Ask.Engine.ControlCommandAnalyser
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .OrderBy(mnemonic => mnemonic)
         .ToList();
+    }
+
+    private static IReadOnlyDictionary<string, IReadOnlyList<AlgorithmKey>> CreateKnownCommandKeysByMnemonic()
+    {
+      var knownMnemonics = KnownCommandMnemonicCache.Value.ToHashSet(StringComparer.OrdinalIgnoreCase);
+      var result = new Dictionary<string, IReadOnlyList<AlgorithmKey>>(StringComparer.OrdinalIgnoreCase);
+
+      foreach (var type in Assembly.GetExecutingAssembly()
+                 .GetTypes()
+                 .Where(t => !t.IsAbstract && typeof(BaseCommandModel).IsAssignableFrom(t)))
+      {
+        var model = TryCreateCommandModel(type);
+        if (model == null)
+        {
+          continue;
+        }
+
+        var mnemonic = NormalizeCommandMnemonic(model.Mnemonic);
+        if (string.IsNullOrWhiteSpace(mnemonic) ||
+            !knownMnemonics.Contains(mnemonic) ||
+            result.ContainsKey(mnemonic))
+        {
+          continue;
+        }
+
+        result[mnemonic] = KeysHelper.GetAllowedKeysForModel(model);
+      }
+
+      return result;
+    }
+
+    private static BaseCommandModel? TryCreateCommandModel(Type type)
+    {
+      try
+      {
+        return Activator.CreateInstance(type) as BaseCommandModel;
+      }
+      catch
+      {
+        return null;
+      }
     }
 
     private static List<ICommandParser> CreateAllParsers()
@@ -586,7 +635,8 @@ namespace Ask.Engine.ControlCommandAnalyser
       foreach (var parser in _parsers)
         if (parser.CanParse(mnemonic))
         {
-          return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
+          var model = parser.Parse(commandNumber, mnemonic, lineNumber, lines);
+          return InitializeCommandMetadata(model, mnemonic);
         }
 
       var unknownCommandModel = new UnknownCommandModel
@@ -608,7 +658,21 @@ namespace Ask.Engine.ControlCommandAnalyser
         }
       }
 
-      return unknownCommandModel;
+      return InitializeCommandMetadata(unknownCommandModel, mnemonic);
+    }
+
+    private static BaseCommandModel InitializeCommandMetadata(BaseCommandModel model, string mnemonic)
+    {
+      mnemonic = NormalizeCommandMnemonic(mnemonic);
+
+      if (string.IsNullOrWhiteSpace(model.Mnemonic))
+      {
+        model.Mnemonic = mnemonic;
+      }
+
+      model.AllowedAlgorithmKeys = KeysHelper.GetAllowedKeysForModel(model);
+
+      return model;
     }
 
     private static string NormalizeCommandMnemonic(string mnemonic)

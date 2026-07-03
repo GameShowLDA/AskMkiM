@@ -2,6 +2,7 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser;
 using ICSharpCode.AvalonEdit.Document;
+using System.Text.RegularExpressions;
 
 namespace UI.Controls.TextEditorControl.Syntax
 {
@@ -12,6 +13,10 @@ namespace UI.Controls.TextEditorControl.Syntax
   public sealed class CommandTranslationSyntaxAnalyzer
   {
     private const string AnalyzerFailureCode = "CMD900";
+
+    private static readonly Regex InternalIdentifierPattern = new(
+      @"\b[A-Za-z_]*[a-z][A-Za-z0-9_]*\b|\b[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+\b|\.cs\b",
+      RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private readonly CommandTranslationManager _translationManager;
 
@@ -120,13 +125,42 @@ namespace UI.Controls.TextEditorControl.Syntax
       return new TextSyntaxDiagnostic
       {
         Code = issue.CodeString ?? (issue.IsWarning ? "WRN_UNKNOWN" : "ERR_UNKNOWN"),
-        Message = issue.Description,
+        Message = GetUserMessage(issue),
         Severity = issue.IsWarning ? TextSyntaxSeverity.Warning : TextSyntaxSeverity.Error,
         StartOffset = span.StartOffset,
         Length = span.Length,
         LineNumber = span.LineNumber,
         ColumnNumber = span.ColumnNumber
       };
+    }
+
+    private static string GetUserMessage(IDisplayIssue issue)
+    {
+      var message = issue.Description?.Trim();
+      if (IsUserMessage(message))
+      {
+        return message!;
+      }
+
+      return issue.IsWarning
+        ? "Проверьте запись команды: возможно, в ней есть неточность."
+        : "Проверьте запись команды: в ней найдена ошибка.";
+    }
+
+    private static bool IsUserMessage(string? message)
+    {
+      if (string.IsNullOrWhiteSpace(message))
+      {
+        return false;
+      }
+
+      return message.Any(IsCyrillic)
+        && !InternalIdentifierPattern.IsMatch(message);
+    }
+
+    private static bool IsCyrillic(char ch)
+    {
+      return ch is >= 'А' and <= 'я' or 'Ё' or 'ё';
     }
 
     private static TextSyntaxDiagnostic CreateAnalyzerFailureDiagnostic(TextDocument document)

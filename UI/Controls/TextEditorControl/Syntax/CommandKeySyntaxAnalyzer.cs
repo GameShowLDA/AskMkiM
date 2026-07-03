@@ -23,8 +23,8 @@ namespace UI.Controls.TextEditorControl.Syntax
       int endLineNumber,
       IReadOnlyList<TextSpan> commentSpans)
     {
-      var allowedKeys = KeysHelper.GetAllowedKeysForModel(model);
-      if (allowedKeys.Length == 0 || document.LineCount == 0)
+      var allowedKeys = GetAllowedKeys(model);
+      if (allowedKeys.Count == 0 || document.LineCount == 0)
         return Array.Empty<TextSyntaxDiagnostic>();
 
       if (string.Equals(model.Mnemonic, "ЦУ", StringComparison.OrdinalIgnoreCase))
@@ -85,7 +85,7 @@ namespace UI.Controls.TextEditorControl.Syntax
     private static IReadOnlyList<TextSyntaxDiagnostic> AnalyzeCuKeys(
       TextDocument document,
       BaseCommandModel model,
-      AlgorithmKey[] allowedKeys,
+      IReadOnlyList<AlgorithmKey> allowedKeys,
       IReadOnlyList<TextSpan> commentSpans)
     {
       var lineNumber = Math.Clamp(model.StartLineNumber, 1, document.LineCount);
@@ -166,6 +166,13 @@ namespace UI.Controls.TextEditorControl.Syntax
         .Any(issue =>
           issue.Description?.Contains(key, StringComparison.OrdinalIgnoreCase) == true &&
           issue.CodeString?.Contains("Key", StringComparison.OrdinalIgnoreCase) == true);
+    }
+
+    private static IReadOnlyList<AlgorithmKey> GetAllowedKeys(BaseCommandModel model)
+    {
+      return model.AllowedAlgorithmKeys.Count > 0
+        ? model.AllowedAlgorithmKeys
+        : KeysHelper.GetAllowedKeysForModel(model);
     }
 
     private static string FormatKeys(IEnumerable<AlgorithmKey> keys)

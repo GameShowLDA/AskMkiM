@@ -81,23 +81,6 @@ namespace UI.Controls.TextEditorControl
 
     private const string SyntaxDiagnosticMarkerTag = "SyntaxDiagnostic";
 
-    private static readonly string[] TechnicalDiagnosticFragments =
-    {
-      "Unknown",
-      "Exception",
-      "System.",
-      "Ask.",
-      "UI.",
-      ".cs",
-      "StackTrace",
-      "NullReference",
-      "ArgumentException",
-      "ArgumentOutOfRange",
-      "InvalidOperation",
-      "CommandTranslation",
-      "ControlCommandAnalyser"
-    };
-
     private readonly DispatcherTimer _syntaxDiagnosticTimer = new();
 
     private static readonly Lazy<EditorSyntaxAnalyzer> SharedSyntaxAnalyzer =
@@ -788,39 +771,8 @@ namespace UI.Controls.TextEditorControl
         ? "Предупреждение"
         : "Ошибка";
 
-      return $"{severity}: {GetUserFriendlyDiagnosticMessage(diagnostic)}";
+      return $"{severity}: {diagnostic.Message}";
     }
-
-    private static string GetUserFriendlyDiagnosticMessage(TextSyntaxDiagnostic diagnostic)
-    {
-      var message = diagnostic.Message?.Trim() ?? string.Empty;
-      if (IsTechnicalDiagnosticMessage(message))
-      {
-        return diagnostic.Severity == TextSyntaxSeverity.Warning
-          ? "Проверьте запись команды: возможно, в ней есть неточность."
-          : "Проверьте запись команды: в ней найдена ошибка.";
-      }
-
-      return message;
-    }
-
-    private static bool IsTechnicalDiagnosticMessage(string message)
-    {
-      if (string.IsNullOrWhiteSpace(message))
-        return true;
-
-      if (!message.Any(IsCyrillic) && message.Any(IsLatin))
-        return true;
-
-      return TechnicalDiagnosticFragments.Any(fragment =>
-        message.Contains(fragment, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private static bool IsLatin(char ch)
-      => ch is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
-
-    private static bool IsCyrillic(char ch)
-      => ch is >= 'А' and <= 'я' or 'Ё' or 'ё';
 
     private void CloseSyntaxDiagnosticToolTip()
     {
@@ -831,7 +783,7 @@ namespace UI.Controls.TextEditorControl
     private static EditorSyntaxAnalyzer CreateSyntaxAnalyzer()
     {
       return new EditorSyntaxAnalyzer(
-        KnownCommandMnemonics.Default,
+        CommandTranslationManager.GetKnownCommandMnemonics(),
         translationSyntaxAnalyzer: new CommandTranslationSyntaxAnalyzer(
           new CommandTranslationManager()));
     }

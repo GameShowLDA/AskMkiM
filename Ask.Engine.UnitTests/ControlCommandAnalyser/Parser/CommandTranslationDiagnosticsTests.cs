@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser;
 
 namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser;
@@ -13,6 +14,29 @@ public sealed class CommandTranslationDiagnosticsTests
     Assert.Contains("КС", mnemonics);
     Assert.Contains("ЭТ", mnemonics);
     Assert.Contains("НЭ", mnemonics);
+  }
+
+  [Fact]
+  public void GetKnownCommandKeysByMnemonic_UsesCommandModels()
+  {
+    var keysByMnemonic = CommandTranslationManager.GetKnownCommandKeysByMnemonic();
+
+    Assert.Contains("ЦУ", keysByMnemonic.Keys);
+    Assert.Contains(AlgorithmKey.Д, keysByMnemonic["ЦУ"]);
+    Assert.Contains("ОК", keysByMnemonic.Keys);
+    Assert.Empty(keysByMnemonic["ОК"]);
+  }
+
+  [Fact]
+  public void ParseForDiagnostics_FillsCommandMetadata()
+  {
+    var manager = new CommandTranslationManager();
+
+    var model = Assert.Single(manager.ParseForDiagnostics("1 ЦУ Д Документ"));
+
+    Assert.True(model.IsCommandMnemonic("цу"));
+    Assert.True(model.AllowsAlgorithmKey(AlgorithmKey.Д));
+    Assert.False(model.AllowsAlgorithmKey(AlgorithmKey.К));
   }
 
   [Fact]
