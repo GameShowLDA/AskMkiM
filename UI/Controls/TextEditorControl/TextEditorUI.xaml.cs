@@ -99,7 +99,12 @@ namespace UI.Controls.TextEditorControl
 
     private readonly ToolTip _syntaxDiagnosticToolTip = new()
     {
-      Placement = PlacementMode.Mouse,
+      BorderBrush = Brushes.Red,
+      BorderThickness = new Thickness(1),
+      Template = CreateSyntaxDiagnosticToolTipTemplate(),
+      Placement = PlacementMode.RelativePoint,
+      HorizontalOffset = 12,
+      VerticalOffset = 18,
       StaysOpen = false
     };
 
@@ -713,7 +718,8 @@ namespace UI.Controls.TextEditorControl
         return;
       }
 
-      var position = textEditor.GetPositionFromPoint(e.GetPosition(textEditor));
+      var mousePoint = e.GetPosition(textEditor);
+      var position = textEditor.GetPositionFromPoint(mousePoint);
       if (position == null)
       {
         CloseSyntaxDiagnosticToolTip();
@@ -742,11 +748,42 @@ namespace UI.Controls.TextEditorControl
       if (!Equals(_syntaxDiagnosticToolTip.Content, content))
         _syntaxDiagnosticToolTip.Content = content;
 
+      UpdateSyntaxDiagnosticToolTipPosition(mousePoint);
+
       if (_syntaxDiagnosticToolTip.IsOpen)
         return;
 
-      _syntaxDiagnosticToolTip.PlacementTarget = textEditor;
       _syntaxDiagnosticToolTip.IsOpen = true;
+    }
+
+    private void UpdateSyntaxDiagnosticToolTipPosition(Point mousePoint)
+    {
+      _syntaxDiagnosticToolTip.PlacementTarget = textEditor;
+      _syntaxDiagnosticToolTip.Placement = PlacementMode.RelativePoint;
+      _syntaxDiagnosticToolTip.HorizontalOffset = mousePoint.X + 12;
+      _syntaxDiagnosticToolTip.VerticalOffset = mousePoint.Y + 18;
+    }
+
+    private static ControlTemplate CreateSyntaxDiagnosticToolTipTemplate()
+    {
+      var border = new FrameworkElementFactory(typeof(Border));
+      border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
+      border.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(Control.BorderBrushProperty));
+      border.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(Control.BorderThicknessProperty));
+      border.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+      border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
+
+      var textBlock = new FrameworkElementFactory(typeof(TextBlock));
+      textBlock.SetValue(TextBlock.TextProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
+      textBlock.SetValue(TextBlock.ForegroundProperty, new TemplateBindingExtension(Control.ForegroundProperty));
+      textBlock.SetValue(TextBlock.FontSizeProperty, new TemplateBindingExtension(Control.FontSizeProperty));
+      textBlock.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap);
+      border.AppendChild(textBlock);
+
+      return new ControlTemplate(typeof(ToolTip))
+      {
+        VisualTree = border
+      };
     }
 
     private TextSyntaxDiagnostic? FindSyntaxDiagnostic(int offset)
