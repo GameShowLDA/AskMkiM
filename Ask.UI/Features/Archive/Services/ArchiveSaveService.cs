@@ -5,6 +5,7 @@ using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.UI.Features.Archive.Application;
 using Ask.UI.Features.Archive.Views;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
@@ -23,6 +24,8 @@ namespace Ask.UI.Features.Archive.Services
 
       try
       {
+        ArchiveOperationServices.Current.EnsureCanEditArchives(ArchiveOperationKind.SaveGeneratedFile);
+
         if (models == null || models.Count == 0)
         {
           LogWarning("Нет данных для сохранения в архив.");
@@ -91,6 +94,8 @@ namespace Ask.UI.Features.Archive.Services
 
       try
       {
+        ArchiveOperationServices.Current.EnsureCanEditArchives(ArchiveOperationKind.SaveGeneratedFile);
+
         if (string.IsNullOrWhiteSpace(translatedText))
         {
           LogWarning("Нет данных для сохранения в архив.");
@@ -179,7 +184,11 @@ namespace Ask.UI.Features.Archive.Services
 
           try
           {
-            var createdArchivePath = CreateArchiveInFolder(archivesFolderPath, archiveName);
+            var createdArchivePath = ArchiveOperationServices.Current.ExecuteMutation(
+              ArchiveOperationKind.CreateArchive,
+              "Создание архива для сохранения файла",
+              () => CreateArchiveInFolder(archivesFolderPath, archiveName),
+              path => new[] { path });
             content.AddArchive(createdArchivePath);
             return;
           }
@@ -288,6 +297,11 @@ namespace Ask.UI.Features.Archive.Services
           invalidOperation.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
       {
         return "Файл с таким именем уже существует в выбранном архиве.";
+      }
+
+      if (ex is UnauthorizedAccessException)
+      {
+        return "Недостаточно прав для сохранения файла в архив.";
       }
 
       if (ex is FileNotFoundException)

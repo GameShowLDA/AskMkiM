@@ -577,7 +577,9 @@ namespace UI.Controls.AdminPanel
           return;
 
         if (_historyIndex >= 0 && _historyIndex < _history.Count - 1)
+        {
           _historyIndex++;
+        }
         else
         {
           _historyIndex = -1;
