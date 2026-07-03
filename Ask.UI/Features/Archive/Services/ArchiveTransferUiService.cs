@@ -1,4 +1,5 @@
 using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Features.Archive.Application;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using System.IO;
 using Path = System.IO.Path;
@@ -48,7 +49,10 @@ namespace Ask.UI.Features.Archive.Services
 
       try
       {
-        var importResult = ArchiveTransferService.ImportArchive(archivePath);
+        var importResult = ArchiveOperationServices.Current.ExecuteImport(
+          "Загрузка готового архива",
+          () => ArchiveTransferService.ImportArchive(archivePath),
+          result => new[] { result.ImportedArchivePath });
         var manifestMessage = importResult.ManifestCreated
           ? " Файл с информацией о файлах архива был создан."
           : string.Empty;
