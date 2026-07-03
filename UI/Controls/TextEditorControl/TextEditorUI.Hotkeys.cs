@@ -713,14 +713,59 @@ namespace UI.Controls.TextEditorControl
       if (e.Key != Key.F9)
         return false;
 
+      if (!ToggleBreakpointFromMousePosition())
+        ToggleBreakpointFromKeyboardAtCaret();
+
+      e.Handled = true;
+      return true;
+    }
+
+    public bool ToggleBreakpointFromMousePosition()
+    {
       if (!_executionMargin.BreakpointsInteractive)
         return true;
 
+      if (!TryGetDocumentLineUnderMouse(out int lineNumber))
+        return false;
+
+      ToggleBreakpointFromKeyboardAtLine(lineNumber);
+      return true;
+    }
+
+    public void ToggleBreakpointFromKeyboardAtCaret()
+    {
       int lineNumber = textEditor.TextArea.Caret.Line;
+      ToggleBreakpointFromKeyboardAtLine(lineNumber);
+    }
+
+    public void ToggleBreakpointFromKeyboardAtLine(int lineNumber)
+    {
+      if (!_executionMargin.BreakpointsInteractive)
+        return;
 
       _executionMargin.ToggleBreakpointFromKeyboard(lineNumber);
+    }
 
-      e.Handled = true;
+    private bool TryGetDocumentLineUnderMouse(out int lineNumber)
+    {
+      lineNumber = -1;
+
+      var document = textEditor.Document;
+      var textView = textEditor.TextArea?.TextView;
+      if (document == null || textView == null || !textEditor.IsMouseOver)
+        return false;
+
+      textView.EnsureVisualLines();
+
+      var position = Mouse.GetPosition(textView);
+      if (position.Y < 0 || position.Y > textView.ActualHeight)
+        return false;
+
+      var documentLine = textView.GetDocumentLineByVisualTop(position.Y + textView.ScrollOffset.Y);
+      if (documentLine == null || documentLine.LineNumber < 1 || documentLine.LineNumber > document.LineCount)
+        return false;
+
+      lineNumber = documentLine.LineNumber;
       return true;
     }
 

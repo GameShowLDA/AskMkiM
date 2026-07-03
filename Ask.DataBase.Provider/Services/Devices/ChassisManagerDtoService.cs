@@ -18,5 +18,5 @@ public class ChassisManagerDtoService : CrudService<ChassisManagerDto>
     CancellationToken cancellationToken = default)
   {
     return GetFirstOrDefaultAsync(x => x.Number == numberChassis, cancellationToken);
-  }
+  }  
 }

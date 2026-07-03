@@ -136,6 +136,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("UP002")]
     Up_UpLabelNotFound,
 
+    /// <summary> Метка перехода, указанная в команде УП, указывает на саму себя. </summary>
+    [ErrorCodeTag("UP003")]
+    Up_SelfReferenceJump,
+
     #endregion
 
     #region Режим ОК
@@ -497,6 +501,14 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> В команде ВШ не указана структура стойки коммутации в конфигурации. </summary>
     [ErrorCodeTag("VSH002")]
     Vsh_NoneVshBusStructure,
+
+    /// <summary> В команде ВШ указана дублирующаяся структура стойки коммутации в конфигурации. </summary>
+    [ErrorCodeTag("VSH003")]
+    Vsh_DuplicateStand,
+
+    /// <summary> В команде ВШ указан неверный номер стойки коммутации в конфигурации. </summary>
+    [ErrorCodeTag("VSH004")]
+    Vsh_InvalidRackNumber,
 
     #endregion
 

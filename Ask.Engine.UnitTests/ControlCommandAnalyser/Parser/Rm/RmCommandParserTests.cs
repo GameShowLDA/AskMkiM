@@ -3,12 +3,13 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Rm;
+using Ask.Engine.ControlCommandAnalyser.RmTranslation.Translation;
 
 namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Rm;
 
 public class RmCommandParserTests : IDisposable
 {
-  private readonly RmCommandParser parser = new();
+  private readonly RmCommandParser parser = new(() => Array.Empty<LegacyRelaySwitchModuleInfo>());
 
   public RmCommandParserTests()
   {

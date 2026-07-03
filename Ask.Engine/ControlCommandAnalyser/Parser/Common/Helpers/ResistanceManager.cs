@@ -262,18 +262,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       double higherFinal = parsed.Higher ?? defaults.DefaultHigher;
 
       model.LowerLimitResistance = lowerFinal;
-      model.LowerLimitResistanceSource = $"{lowerFinal} {parsed.Unit}";
+      model.LowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(lowerFinal, parsed.Unit);
 
       model.HigherLimitResistance = higherFinal;
-      model.HigherLimitResistanceSource = $"{higherFinal} {parsed.Unit}";
+      model.HigherLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(higherFinal, parsed.Unit);
 
       model.ResistanceUnit = parsed.Unit;
 
       if (parsed.Cabel.HasValue)
       {
         model.CabelResistance = parsed.Cabel.Value;
-        model.CabelResistanceSource =
-            $"{parsed.Cabel.Value} {parsed.CabelUnit}";
+        model.CabelResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(parsed.Cabel.Value, parsed.CabelUnit);
 
         model.CabelResistanceUnit = parsed.CabelUnit;
       }
@@ -296,7 +295,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       double lowerFinal = parsed.Lower ?? minResistance;
 
       model.LowerLimitResistance = lowerFinal;
-      model.LowerLimitResistanceSource = $"{lowerFinal} {parsed.Unit}";
+      model.LowerLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(lowerFinal, parsed.Unit);
 
       if (parsed.Higher == null)
       {
@@ -306,7 +305,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       else
       {
         model.HigherLimitResistance = parsed.Higher.Value;
-        model.HigherLimitResistanceSource = $"{parsed.Higher.Value} {parsed.Unit}";
+        model.HigherLimitResistanceSource = MeasurementSourceValueFormatter.FormatWithSpace(parsed.Higher.Value, parsed.Unit);
       }
     }
 

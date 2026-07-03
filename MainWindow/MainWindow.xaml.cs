@@ -2,8 +2,8 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.Core.Shared.Metadata.View;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
@@ -11,6 +11,7 @@ using Ask.UI.Shared.Components.Icons;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
+using MainWindowProgram.Init;
 using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
@@ -18,6 +19,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using UI.Components;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
 
@@ -49,14 +51,14 @@ namespace MainWindowProgram
     /// Сервис управления USB-устройствами.
     /// Обеспечивает обнаружение, мониторинг и реакцию на USB-события.
     /// </summary>
-    private readonly IUsbMonitorView _usbServices;
-
     /// <summary>
     /// ViewModel главного окна, содержащая команды, свойства и логику привязки данных.
     /// Связывает интерфейс с бизнес-логикой.
     /// </summary>
     private readonly MainWindowViewModel _viewModel;
     private bool _isThemeToggleInProgress;
+    private bool _isUserSwitchInProgress;
+    private readonly Dictionary<RoleType, MultiWindowWorkspaceSession> _workspaceSessionsByRole = new();
     private Action<UserInterfaceDto>? _onUserInterfaceSaved;
 
     /// <summary>
@@ -92,15 +94,15 @@ namespace MainWindowProgram
       this.PreviewKeyDown += MainWindow_PreviewKeyDown;
       InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
-      (var vm, var usb) = AppServices.Build(this);
+      var vm = AppServices.Build(this);
       _viewModel = vm;
-      _usbServices = usb;
 
       StatusBar.DataContext = _statusBarViewModel;
       _statusBarViewModel.GetActiveEditor = () => MultiWindow.GetActiveTextEditor();
 
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
+      UpdateCurrentUserBadge();
 
       Loaded += MainWindow_Loaded;
       _onUserInterfaceSaved = model =>
@@ -134,9 +136,9 @@ namespace MainWindowProgram
     public async Task InitializeAsync()
     {
       var lifecycle = new ApplicationLifecycleManager();
-      lifecycle.Initialize(this, _usbServices, _statusBarViewModel);
+      lifecycle.Initialize(this, _statusBarViewModel);
 
-      new CommandLineParser(_usbServices).ProcessCommandLineArgs();
+      new CommandLineParser().ProcessCommandLineArgs();
       ApplicationInitializer applicationInitializer = new ApplicationInitializer(messageHandler = new(_infoBlock));
       SystemStateEventAdapter.RaiseControlProgramActiveChanged(false);
 
@@ -529,6 +531,93 @@ namespace MainWindowProgram
       e.Handled = true;
     }
 
+    private async void CurrentUserButton_Click(object sender, RoutedEventArgs e)
+    {
+      await SwitchCurrentUserAsync();
+    }
+
+    private async Task SwitchCurrentUserAsync()
+    {
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput ||
+          SystemStateManager.GetIsLocked() ||
+          _isUserSwitchInProgress)
+      {
+        return;
+      }
+
+      var loginWindowManager = new RoleLoginWindowManager();
+
+      try
+      {
+        _isUserSwitchInProgress = true;
+        CurrentUserButton.IsEnabled = false;
+
+        if (SearchWindow != null && SearchWindow.IsVisible)
+        {
+          SearchWindow.CloseDialog();
+        }
+
+        SaveCurrentWorkspaceSession();
+
+        loginWindowManager.Show(GetRolesWithSavedWorkspaceSessions());
+
+        var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
+        if (authenticatedRole == null)
+        {
+          await loginWindowManager.WaitForCloseAsync();
+          Application.Current.Shutdown();
+          return;
+        }
+
+        RoleApplicationConfigurator.Apply(authenticatedRole);
+
+        AdminConfig.SetAdminRights(authenticatedRole.Role == RoleType.Root);
+        RestoreWorkspaceSession(authenticatedRole.Role);
+        UpdateCurrentUserBadge();
+        await loginWindowManager.CloseAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка смены пользователя.", exception);
+        MessageBoxCustom.Show($"Ошибка смены пользователя: {exception.Message}", image: MessageBoxImage.Error);
+      }
+      finally
+      {
+        _isUserSwitchInProgress = false;
+        if (CurrentUserButton != null)
+        {
+          CurrentUserButton.IsEnabled = true;
+        }
+      }
+    }
+
+    private void SaveCurrentWorkspaceSession()
+    {
+      if (RoleAuthorizationConfig.CurrentRole == null)
+      {
+        return;
+      }
+
+      _workspaceSessionsByRole[RoleAuthorizationConfig.CurrentRole.Value] = MultiWindow.CaptureWorkspaceSession();
+    }
+
+    private void RestoreWorkspaceSession(RoleType role)
+    {
+      var session = _workspaceSessionsByRole.TryGetValue(role, out var savedSession)
+        ? savedSession
+        : MultiWindowWorkspaceSession.CreateEmpty();
+
+      MultiWindow.RestoreWorkspaceSession(session);
+    }
+
+    private IReadOnlySet<RoleType> GetRolesWithSavedWorkspaceSessions()
+    {
+      return _workspaceSessionsByRole
+        .Where(session => !session.Value.IsEmpty)
+        .Select(session => session.Key)
+        .ToHashSet();
+    }
+
     private void OnThemeChanged(ThemeMode theme)
     {
       if (!Dispatcher.CheckAccess())
@@ -671,6 +760,11 @@ namespace MainWindowProgram
     /// </summary>
     private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
     {
+      if (TryHandleSwitchUserHotkey(e))
+      {
+        return;
+      }
+
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {
         if (e.StagingItem.Input is KeyEventArgs drawerKeyArgs && drawerKeyArgs.RoutedEvent == Keyboard.KeyDownEvent)
@@ -795,6 +889,32 @@ namespace MainWindowProgram
       }
     }
 
+    private bool TryHandleSwitchUserHotkey(PreProcessInputEventArgs e)
+    {
+      if (e.StagingItem.Input is not KeyEventArgs keyArgs ||
+          keyArgs.RoutedEvent != Keyboard.KeyDownEvent)
+      {
+        return false;
+      }
+
+      var pressedKey = keyArgs.SystemKey == Key.None ? keyArgs.Key : keyArgs.SystemKey;
+      if (pressedKey != Key.L || Keyboard.Modifiers != ModifierKeys.Alt)
+      {
+        return false;
+      }
+
+      keyArgs.Handled = true;
+
+      if (DrawerHostService.Instance.ShouldBlockGlobalInput ||
+          SystemStateManager.GetIsLocked())
+      {
+        return true;
+      }
+
+      _ = SwitchCurrentUserAsync();
+      return true;
+    }
+
     private static bool IsDrawerNavigationKey(Key key)
     {
       return key == Key.Up
@@ -807,6 +927,18 @@ namespace MainWindowProgram
              || key == Key.PageDown
              || key == Key.Home
              || key == Key.End;
+    }
+
+    private void UpdateCurrentUserBadge()
+    {
+      if (CurrentUserNameTextBlock == null)
+      {
+        return;
+      }
+
+      CurrentUserNameTextBlock.Text = string.IsNullOrWhiteSpace(RoleAuthorizationConfig.CurrentRoleDisplayName)
+        ? "Пользователь"
+        : RoleAuthorizationConfig.CurrentRoleDisplayName;
     }
   }
 }

@@ -73,5 +73,19 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// </example>
     public static void RaiseDebugRightsChanged(bool isDebug) =>
       EventAggregator.Publish(new SystemStateEvents.DebugRightsChanged(isDebug));
+
+    /// <summary>
+    /// Генерирует событие изменения доступа к консоли администратора.
+    /// </summary>
+    /// <param name="isEnabled">Новое состояние доступа к консоли: true — доступна; false — скрыта и недоступна.</param>
+    public static void RaiseConsoleAccessChanged(bool isEnabled) =>
+      EventAggregator.Publish(new SystemStateEvents.ConsoleAccessChanged(isEnabled));
+
+    /// <summary>
+    /// Генерирует событие изменения видимости меню испытаний.
+    /// </summary>
+    /// <param name="isVisible">Новое состояние видимости меню: true — показать; false — скрыть.</param>
+    public static void RaiseTestsMenuVisibilityChanged(bool isVisible) =>
+      EventAggregator.Publish(new SystemStateEvents.TestsMenuVisibilityChanged(isVisible));
   }
 }

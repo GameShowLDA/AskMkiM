@@ -143,5 +143,16 @@ namespace Ask.Core.Services.Errors.Translation
       Code = WarningCode.Gen_IgnoreVoltage,
       Description = $"Значение силы тока игнорируется",
     };
+
+    /// <summary>
+    /// Предупреждение: в ЦУ пустое сообщение.
+    /// </summary>
+    public static WarningItem EmptyMessage(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = WarningCode.Gen_EmptyMessage,
+      Description = $"В команде {command} сообщение отсутствует",
+    };
   }
 }

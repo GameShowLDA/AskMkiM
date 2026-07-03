@@ -1,5 +1,3 @@
-﻿using Ask.Core.Services.Usb;
-using Ask.Core.Shared.Metadata.View;
 using MainWindowProgram.Events;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
@@ -45,12 +43,12 @@ namespace MainWindowProgram.Engine
     /// После создания агрегатора вызывается метод <see cref="ApplicationEventsBinder.BindAll"/>, 
     /// обеспечивающий привязку всех событий к их обработчикам.
     /// </remarks>
-    public void Initialize(MainWindow window, IUsbMonitorView usb, TextEditorStatusViewModel statusBarViewModel)
+    public void Initialize(MainWindow window, TextEditorStatusViewModel statusBarViewModel)
     {
       ApplicationEvents = new ApplicationEventsBinder(
         new SystemEventsBinder(),
         new UiEventsBinder(window, window.MultiWindow, statusBarViewModel),
-        new StateEventsBinder(window, usb)
+        new StateEventsBinder(window)
       );
 
       ApplicationEvents.BindAll();

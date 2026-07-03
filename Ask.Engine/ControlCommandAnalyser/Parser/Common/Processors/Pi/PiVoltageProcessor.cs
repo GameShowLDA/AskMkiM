@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
 
@@ -58,7 +59,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
       if (model.VoltageSource != null)
       {
         model.Voltage = CommonParameterParser.ParseToDouble(model.VoltageSource);
-        model.VoltageSource += unit;
+        model.VoltageSource = MeasurementSourceValueFormatter.FormatCompact(model.Voltage.Value, unit);
         var maxVoltage = maxACWVoltage;
         var voltageType = string.Empty;
         if (model.VoltageType == VoltageEnum.Type.DCW)
@@ -92,7 +93,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
       else
       {
         model.Voltage = model.Voltage.Value;
-        model.VoltageSource = model.Voltage.Value.ToString() + unit;
+        model.VoltageSource = MeasurementSourceValueFormatter.FormatCompact(model.Voltage.Value, unit);
       }
       return rest;
     }
