@@ -129,6 +129,26 @@ namespace Ask.Core.Services.EventCore.Events
     }
 
     /// <summary>
+    /// Событие, обозначающее изменение доступа к редактированию конфигурации.
+    /// </summary>
+    public class DeviceConfigurationEditingAccessChanged : IEvent
+    {
+      /// <summary>
+      /// Указывает, доступно ли редактирование конфигурации.
+      /// </summary>
+      public bool IsEnabled { get; }
+
+      /// <summary>
+      /// Создаёт новое событие изменения доступа к редактированию конфигурации.
+      /// </summary>
+      /// <param name="isEnabled">Новое состояние доступа: true — редактирование доступно; false — редактирование скрыто и недоступно.</param>
+      public DeviceConfigurationEditingAccessChanged(bool isEnabled)
+      {
+        IsEnabled = isEnabled;
+      }
+    }
+
+    /// <summary>
     /// Событие, обозначающее изменение состояния прав администратора.
     /// </summary>
     public class ControlProgramActiveChanged : IEvent

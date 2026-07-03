@@ -16,24 +16,34 @@ namespace MainWindowProgram.Init
 
       switch (role.Role)
       {
+        case RoleType.Administrator:
+          SetAdminConsoleEnabled(false);
+          SetTestsMenuVisible(true);
+          SetDeviceConfigurationEditingEnabled(true);
+          break;
+
         case RoleType.Root:
           SetAdminConsoleEnabled(true);
           SetTestsMenuVisible(true);
+          SetDeviceConfigurationEditingEnabled(true);
           break;
 
         case RoleType.Adjuster:
           SetAdminConsoleEnabled(false);
           SetTestsMenuVisible(true);
+          SetDeviceConfigurationEditingEnabled(false);
           break;
 
         case RoleType.Developer:
           SetAdminConsoleEnabled(false);
           SetTestsMenuVisible(false);
+          SetDeviceConfigurationEditingEnabled(false);
           break;
 
         default:
           SetAdminConsoleEnabled(false);
           SetTestsMenuVisible(true);
+          SetDeviceConfigurationEditingEnabled(false);
           break;
       }
     }
@@ -46,6 +56,11 @@ namespace MainWindowProgram.Init
     public static void SetTestsMenuVisible(bool visible)
     {
       SystemStateEventAdapter.RaiseTestsMenuVisibilityChanged(visible);
+    }
+
+    public static void SetDeviceConfigurationEditingEnabled(bool enabled)
+    {
+      SystemStateEventAdapter.RaiseDeviceConfigurationEditingAccessChanged(enabled);
     }
   }
 }

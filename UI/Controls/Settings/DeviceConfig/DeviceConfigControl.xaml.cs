@@ -52,6 +52,7 @@ namespace UI.Controls.Settings.DeviceConfig
     private int? _openedChassisId;
     private readonly SemaphoreSlim _reloadSemaphore = new(1, 1);
     private bool _isInitialized;
+    private bool _isEditingEnabled = true;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceConfigControl"/>.
@@ -74,7 +75,19 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="deviceManagerControl">Контрол для управления устройствами.</param>
     public void SetDevisesControl(DeviceManagerControl deviceManagerControl)
     {
+      deviceManagerControl.SetEditingEnabled(_isEditingEnabled);
       deviceBorder.Child = deviceManagerControl;
+    }
+
+    public void SetEditingEnabled(bool isEnabled)
+    {
+      _isEditingEnabled = isEnabled;
+      chassisManager.SetEditingEnabled(isEnabled);
+
+      if (deviceBorder.Child is DeviceManagerControl devices)
+      {
+        devices.SetEditingEnabled(isEnabled);
+      }
     }
 
     /// <summary>
@@ -101,6 +114,7 @@ namespace UI.Controls.Settings.DeviceConfig
         }
 
         var devices = new DeviceManagerControl();
+        devices.SetEditingEnabled(_isEditingEnabled);
         deviceBorder.Child = devices;
         ConfigureDeviceManagerControl(devices, system);
 
@@ -118,6 +132,11 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private async void Devices_FastMeterEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       FastMeterWindow fastMeterWindow = new FastMeterWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -129,6 +148,11 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private async void Devices_PowerModuleEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       ModuleVoltageCurrentSourceWindow fastMeterWindow = new ModuleVoltageCurrentSourceWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -140,6 +164,11 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private async void Devices_ModuleRalayEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       ModuleRelayControlWindow fastMeterWindow = new ModuleRelayControlWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -151,6 +180,11 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private async void Devices_DeviceBusCommutationSelected(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
       deviceSettingsWindow.SetSettings(sender, e);
       deviceSettingsWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -170,6 +204,11 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private async void Devices_AddBreakdownEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       BreakDownWindow fastMeterWindow = new BreakDownWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -178,6 +217,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterDto entity)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       BreakDownWindow window = new BreakDownWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -186,6 +230,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceDto entity)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       DeviceBusCommutationWindow window = new DeviceBusCommutationWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -194,6 +243,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleDto entity)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       ModuleVoltageCurrentSourceWindow window = new ModuleVoltageCurrentSourceWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -202,6 +256,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleDto entity)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       ModuleRelayControlWindow window = new ModuleRelayControlWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -210,6 +269,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterDto entity)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       FastMeterWindow window = new FastMeterWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -218,6 +282,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_UninterruptiblePowerSupplyEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(sender, e);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -226,6 +295,11 @@ namespace UI.Controls.Settings.DeviceConfig
 
     private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyDto entity)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
@@ -361,6 +435,11 @@ namespace UI.Controls.Settings.DeviceConfig
     /// </summary>
     private async void NewSystem()
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       ChassisManagerWindow chassisManagerWindow = new ChassisManagerWindow();
       chassisManagerWindow.SetSettings();
       chassisManagerWindow.RequestSave += ChassisManagerSettings_DeviceSaved;
