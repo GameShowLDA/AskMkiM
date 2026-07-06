@@ -120,6 +120,80 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetContinuityModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "SET CONTINUITY MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ContinuityManager.SetContinuityModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectableManager.GetConnectionStatus() : "Continuity mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> CheckContinuityAsync(bool expectedOutcome, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"CHECK CONTINUITY (expected {expectedOutcome})",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ContinuityManager.CheckContinuityAsync(expectedOutcome);
+          token.ThrowIfCancellationRequested();
+          return result.ToString();
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> MeasureContinuityResistanceAsync(
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      int timeoutMs = MeasurementTimeoutMs,
+      CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "MEASURE CONTINUITY RESISTANCE",
+        timeoutMs,
+        async token =>
+        {
+          double result = await _device.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+          token.ThrowIfCancellationRequested();
+          return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+        },
+        cancellationToken);
+    }
+
     public async Task<B7783CommandResult> SetDcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       if (!_device.IsConnected)
