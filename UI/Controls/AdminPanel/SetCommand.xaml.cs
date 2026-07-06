@@ -1,15 +1,11 @@
 using Ask.Core.Shared.DTO.Devices.Base;
-using System;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace UI.Controls.AdminPanel
 {
@@ -581,7 +577,9 @@ namespace UI.Controls.AdminPanel
           return;
 
         if (_historyIndex >= 0 && _historyIndex < _history.Count - 1)
+        {
           _historyIndex++;
+        }
         else
         {
           _historyIndex = -1;
@@ -675,7 +673,7 @@ namespace UI.Controls.AdminPanel
 
         await SendUdpAsync(command, ip);
       }
-      catch (Exception e)
+      catch (Exception)
       {
         AddConsoleLine("Incorrect IP", Brushes.Red);
       }
