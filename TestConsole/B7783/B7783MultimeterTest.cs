@@ -22,13 +22,16 @@ namespace TestConsole.B7783
         Console.WriteLine("8. Measure DC voltage");
         Console.WriteLine("9. Set AC voltage mode");
         Console.WriteLine("10. Measure AC voltage");
-        Console.WriteLine("11. Custom command");
-        Console.WriteLine("12. Set USB search pattern");
-        Console.WriteLine("13. Disconnect");
+        Console.WriteLine("11. Set capacitance mode");
+        Console.WriteLine("12. Set capacitance range");
+        Console.WriteLine("13. Measure capacitance");
+        Console.WriteLine("14. Custom command");
+        Console.WriteLine("15. Set USB search pattern");
+        Console.WriteLine("16. Disconnect");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 13)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 16)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -73,12 +76,25 @@ namespace TestConsole.B7783
               "AC voltage");
             break;
           case 11:
-            await RunCustomCommandAsync(controller);
+            PrintResult(await controller.SetCapacitanceModeAsync());
             break;
           case 12:
-            SetConnectionDetails(controller);
+            double rangeNanofarads = ReadDouble("Capacitance range, nF", 1000);
+            PrintResult(await controller.SetCapacitanceRangeAsync(rangeNanofarads));
             break;
           case 13:
+            var capacitanceParameters = ReadCapacitanceParameters();
+            await PrintMeasurementAsync(
+              () => controller.MeasureCapacitanceAsync(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo),
+              "Capacitance, nF");
+            break;
+          case 14:
+            await RunCustomCommandAsync(controller);
+            break;
+          case 15:
+            SetConnectionDetails(controller);
+            break;
+          case 16:
             await controller.DisconnectAsync();
             break;
           case 0:
@@ -90,6 +106,15 @@ namespace TestConsole.B7783
     private static (double Param, double RangeFrom, double RangeTo) ReadVoltageParameters()
     {
       Console.WriteLine("Leave expected/range values unchanged for AUTO range.");
+      double param = ReadDouble("Expected value", 0);
+      double rangeFrom = ReadDouble("Range from", -1);
+      double rangeTo = ReadDouble("Range to", -1);
+      return (param, rangeFrom, rangeTo);
+    }
+
+    private static (double Param, double RangeFrom, double RangeTo) ReadCapacitanceParameters()
+    {
+      Console.WriteLine("Values are in nF. Leave expected/range values unchanged for AUTO range.");
       double param = ReadDouble("Expected value", 0);
       double rangeFrom = ReadDouble("Range from", -1);
       double rangeTo = ReadDouble("Range to", -1);
