@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Newtonsoft.Json.Linq;
-using YamlDotNet.Core.Tokens;
 
 namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 {
@@ -21,16 +15,26 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
     /// <param name="result">Полученный результат</param>
     /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
     /// <param name="unit">Единица измерения результата</param>
+    /// <param name="idealResult">Идеальный результат</param>
+    /// <param name="percentageError">Процент погрешности от идеального результата</param>
     /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    public static async Task IsCorrectRangeAsync(bool status, double result, string param, string? unit = null, IUserInteractionService? userMessageService = null)
+    public static async Task IsCorrectRangeAsync(bool status, double result, string param, string unit, double idealResult, int percentageError, IUserInteractionService? userMessageService = null)
     {
-      var formattedResult = MeasurementValueFormatter.Round(result);
+      string formattedResult;
+      if (MeasurementValueFormatter.IsOverloadValue(result))
+      {
+        formattedResult = "Overload";
+      }
+      else 
+      {
+        formattedResult = MeasurementValueFormatter.Round(result).ToString();
+      }
 
       if (status)
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
-            header: $"Тест {param}",
+            header: $"Тест {param}, {unit} ({idealResult} ± {percentageError}%)",
             message: $"{formattedResult} [НОРМА]",
             type: ShowMessageModel.MessageType.Success));
       }
@@ -38,7 +42,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
-            header: $"Тест {param}",
+            header: $"Тест {param}, {unit} ({idealResult} ± {percentageError}%)",
             message: $"{formattedResult} [БРАК]",
             type: ShowMessageModel.MessageType.Error));
       }

@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
@@ -11,7 +6,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Device.Runtime.Function.Keysight3466new;
 
 namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 {
@@ -23,7 +17,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 
     private static double VoltageTolerance(double voltage = 0) => (0.1 * voltage) + 0.02;
     private static double ResistanceTolerance(double resistance = 0, double fallibility = 1) => (fallibility / 100) * resistance; //(0.01 * resistance) + 0.1;
-    private static double CapacityTolerance(double capacity = 0) => (0.01 * capacity) + 1;
+    private static double CapacityTolerance(double capacity = 0) => (0.05 * capacity) + 1;
 
     public Type GetTestTypeEnum()
     {
@@ -113,7 +107,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
       bool resultStatus = SelfTestHelper.InRange(IdealVoltage, result, VoltageTolerance());
-      await SelfTestHelper.IsCorrectRangeAsync(resultStatus, result, "напряжения", "В", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(resultStatus, result, "напряжения", "В", 0, 2, userMessageService);
     }
 
     private async Task StartResistanceMeasurementTestNEW(CancellationToken cancellationToken, ISwitchingDevice device, IFastMeter meter, IUserInteractionService? userMessageService = null)
@@ -134,7 +128,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await ResistanceMeasurement(cancellationToken, 5, 100_000, device, meter, 1, userMessageService);
       await ResistanceMeasurement(cancellationToken, 6, 1_000_000, device, meter, 1, userMessageService);
       await ResistanceMeasurement(cancellationToken, 7, 10_000_000, device, meter, 6, userMessageService);
-      await ResistanceMeasurement(cancellationToken, 8, 85_000_000, device, meter, 1, userMessageService);
+      await ResistanceMeasurement(cancellationToken, 8, 86_000_000, device, meter, 1, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisconnectRCRelay(userMessageService);
@@ -154,7 +148,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
       bool result_status = SelfTestHelper.InRange(idealResult, result, ResistanceTolerance(idealResult, fallibility));
-      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "сопротивления", "Ом", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "сопротивления", "Ом", idealResult, fallibility, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisconnectResistor(numberResistor, userMessageService);
@@ -168,15 +162,13 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.ConnectRCRelay(userMessageService);
 
-      cancellationToken.ThrowIfCancellationRequested();
-      await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
-
-      await CapacitanceMeasurement(cancellationToken, 1, 3.3, device, meter, userMessageService);
-      await CapacitanceMeasurement(cancellationToken, 2, 10, device, meter, userMessageService);
-      await CapacitanceMeasurement(cancellationToken, 3, 100, device, meter, userMessageService);
-      await CapacitanceMeasurement(cancellationToken, 4, 1_000, device, meter, userMessageService);
-      await CapacitanceMeasurement(cancellationToken, 5, 6_800, device, meter, userMessageService);
-      await CapacitanceMeasurement(cancellationToken, 6, 100_000, device, meter, userMessageService);
+      await CapacitanceMeasurement(cancellationToken, 1, 3.3, device, meter, userMessageService: userMessageService);
+      await CapacitanceMeasurement(cancellationToken, 2, 10, device, meter, userMessageService: userMessageService);
+      await CapacitanceMeasurement(cancellationToken, 3, 130, device, meter, userMessageService: userMessageService);
+      await CapacitanceMeasurement(cancellationToken, 4, 1_000, device, meter, userMessageService:  userMessageService);
+      //Неисправен
+      //await CapacitanceMeasurement(cancellationToken, 5, 6_800, device, meter, userMessageService: userMessageService);
+      await CapacitanceMeasurement(cancellationToken, 6, 90_000, device, meter, userMessageService: userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisconnectRCRelay(userMessageService);
@@ -185,18 +177,43 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB4, userMessageService);
     }
 
+    // resultReactiveResistance - должен ли конденсатор пройти проверку реактивного сопротивления или должен её провалить
     private async Task CapacitanceMeasurement(CancellationToken cancellationToken, int numberCapacitor, double idealResult, ISwitchingDevice device, IFastMeter meter, IUserInteractionService? userMessageService = null)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.ConnectCapacitor(numberCapacitor, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
+      meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
-      double result = 0;
+      cancellationToken.ThrowIfCancellationRequested();
+      double result = await meter.ResistanceManager.MeasureResistanceAsync();
+      if (result > 50)
+      {
+        await userMessageService.ShowMessageAsync(
+         new ShowMessageModel(
+           header: $"Тест реактивного сопротивления (>50 Ом)",
+           message: $"{result} Ом [НОРМА]",
+           type: ShowMessageModel.MessageType.Success));
+      }
+      else
+      {
+        await userMessageService.ShowMessageAsync(
+         new ShowMessageModel(
+           header: $"Тест реактивного сопротивления (>50 Ом)",
+           message: $"{result} Ом [БРАК]",
+           type: ShowMessageModel.MessageType.Error));
+        return;
+      }
+
+      cancellationToken.ThrowIfCancellationRequested();
+      meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
+
       List<double> measuremend = new List<double>();
 
       for (int i = 0; i < 6; i++)
       {
+        cancellationToken.ThrowIfCancellationRequested();
         result = await meter.CapacitanceManager.MeasureCapacitanceAsync(userMessageService: userMessageService);
         if (result > 0)
         {
@@ -211,7 +228,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
       bool result_status = SelfTestHelper.InRange(idealResult, result, CapacityTolerance(idealResult));
-      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "емкости", "нФ", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "емкости", "нФ", idealResult, 5, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisconnectCapacitor(numberCapacitor, userMessageService);

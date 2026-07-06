@@ -35,5 +35,10 @@ namespace Ask.Device.Runtime.Function.B7783
     {
       return MeasureVoltageAsync(param, rangeFrom, rangeTo, userMessageService);
     }
+
+    public Task<bool> SetVoltageRangeAsync(VoltageRange mode, IUserInteractionService? userMessageService = null)
+    {
+      return SetVoltageRangeCoreAsync(mode, userMessageService);
+    }
   }
 }
