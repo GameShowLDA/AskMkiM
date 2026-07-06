@@ -16,22 +16,31 @@ namespace TestConsole.B7783
         Console.WriteLine("2. Initialize (*IDN?)");
         Console.WriteLine("3. *IDN?");
         Console.WriteLine("4. READ?");
-        Console.WriteLine("5. Set resistance mode");
+
+        Console.WriteLine("\r\n5. Set resistance mode");
         Console.WriteLine("6. Set resistance mode + READ?");
-        Console.WriteLine("7. Set DC voltage mode");
+
+        Console.WriteLine("\r\n7. Set DC voltage mode");
         Console.WriteLine("8. Measure DC voltage");
-        Console.WriteLine("9. Set AC voltage mode");
+
+        Console.WriteLine("\r\n9. Set AC voltage mode");
         Console.WriteLine("10. Measure AC voltage");
-        Console.WriteLine("11. Set capacitance mode");
-        Console.WriteLine("12. Set capacitance range");
-        Console.WriteLine("13. Measure capacitance");
-        Console.WriteLine("14. Custom command");
-        Console.WriteLine("15. Set USB search pattern");
-        Console.WriteLine("16. Disconnect");
+
+        Console.WriteLine("\r\n11. Set continuity mode");
+        Console.WriteLine("12. Check continuity (true/false)");
+        Console.WriteLine("13. Measure continuity resistance");
+
+        Console.WriteLine("\r\n14. Set capacitance mode");
+        Console.WriteLine("15. Set capacitance range");
+        Console.WriteLine("16. Measure capacitance");
+
+        Console.WriteLine("17. Custom command");
+        Console.WriteLine("18. Set USB search pattern");
+        Console.WriteLine("19. Disconnect");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 16)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 19)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -76,25 +85,35 @@ namespace TestConsole.B7783
               "AC voltage");
             break;
           case 11:
-            PrintResult(await controller.SetCapacitanceModeAsync());
+            PrintResult(await controller.SetContinuityModeAsync());
             break;
           case 12:
+            bool expectedContinuity = ReadBoolean("Expected continuity");
+            PrintResult(await controller.CheckContinuityAsync(expectedContinuity));
+            break;
+          case 13:
+            PrintResult(await controller.MeasureContinuityResistanceAsync());
+            break;
+          case 14:
+            PrintResult(await controller.SetCapacitanceModeAsync());
+            break;
+          case 15:
             double rangeNanofarads = ReadDouble("Capacitance range, nF", 1000);
             PrintResult(await controller.SetCapacitanceRangeAsync(rangeNanofarads));
             break;
-          case 13:
+          case 16:
             var capacitanceParameters = ReadCapacitanceParameters();
             await PrintMeasurementAsync(
               () => controller.MeasureCapacitanceAsync(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo),
               "Capacitance, nF");
             break;
-          case 14:
+          case 17:
             await RunCustomCommandAsync(controller);
             break;
-          case 15:
+          case 18:
             SetConnectionDetails(controller);
             break;
-          case 16:
+          case 19:
             await controller.DisconnectAsync();
             break;
           case 0:
@@ -161,6 +180,22 @@ namespace TestConsole.B7783
       {
         controller.ConnectionDetails = value.Trim();
       }
+    }
+
+    private static bool ReadBoolean(string title)
+    {
+      Console.Write($"{title} [y/n]: ");
+      string? value = Console.ReadLine();
+      if (string.IsNullOrWhiteSpace(value))
+      {
+        return true;
+      }
+
+      value = value.Trim();
+      return value.Equals("y", StringComparison.OrdinalIgnoreCase)
+        || value.Equals("yes", StringComparison.OrdinalIgnoreCase)
+        || value.Equals("true", StringComparison.OrdinalIgnoreCase)
+        || value == "1";
     }
 
     private static async Task PrintMeasurementAsync(Func<Task<double>> measureAsync, string title)

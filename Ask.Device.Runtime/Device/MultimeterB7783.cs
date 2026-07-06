@@ -19,6 +19,7 @@ namespace Ask.Device.Runtime.Device
 
       ConnectableManager = new Function.B7783.StateManager(this);
       ResistanceManager = new Function.B7783.ResistanceMeasurement(this);
+      ContinuityManager = new Function.B7783.ContinuityMeasurement(this);
       CapacitanceManager = new Function.B7783.CapacitanceMeasurement(this);
       AcVoltageManager = new Function.B7783.AcVoltageMeasurement(this);
       DcVoltageManager = new Function.B7783.DcVoltageMeasurement(this);
