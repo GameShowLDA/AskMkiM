@@ -64,8 +64,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
       {
         targetLabel = lines[1].Trim();
       }
+      var model = new UpCommandModel();
+      if (lines == null || lines.Count == 0)
+      {
+        model = new UpCommandModel
+        {
+          CommandNumber = commandNumber,
+          StartLineNumber = numberLine,
+          SourceLines = new List<string>()
+        };
 
-      var model = new UpCommandModel
+        model.Errors.Add(
+            UpErrors.MissingOrInvalidLabel(
+                numberLine,
+                $"{commandNumber} {mnemonic}"));
+
+        return model;
+      }
+
+      model = new UpCommandModel
       {
         CommandNumber = commandNumber,
         StartLineNumber = numberLine,
@@ -82,6 +99,32 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
       if (string.IsNullOrWhiteSpace(targetLabel))
       {
         model.Errors.Add(UpErrors.MissingOrInvalidLabel(numberLine, $"{commandNumber} {mnemonic}"));
+      }
+
+      // Валидация
+      if (string.IsNullOrWhiteSpace(targetLabel))
+      {
+        model.Errors.Add(
+          UpErrors.MissingOrInvalidLabel(
+            numberLine,
+            $"{commandNumber} {mnemonic}"));
+      }
+      else
+      {
+        if (!int.TryParse(targetLabel, out int targetCommand))
+        {
+          model.Errors.Add(
+            UpErrors.MissingOrInvalidLabel(
+              numberLine,
+              $"{commandNumber} {mnemonic}"));
+        }
+        else if (targetLabel == commandNumber)
+        {
+          model.Errors.Add(
+            UpErrors.SelfReferenceJump(
+              numberLine,
+              $"{commandNumber} {mnemonic}"));
+        }
       }
 
       return model;

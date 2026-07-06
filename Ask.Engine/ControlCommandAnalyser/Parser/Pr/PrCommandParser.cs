@@ -68,7 +68,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       var model = new PrCommandModel
       {
         CommandNumber = commandNumber,
-        SourceLines = new List<string>(lines),
+        SourceLines = lines is null ? new List<string>() : new List<string>(lines),
         StartLineNumber = numberLine,
       };
 

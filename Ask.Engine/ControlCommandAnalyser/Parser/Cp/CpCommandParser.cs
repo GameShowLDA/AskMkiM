@@ -35,7 +35,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cp
       var model = new CpCommandModel
       {
         CommandNumber = commandNumber,
-        SourceLines = new List<string>(lines),
+        SourceLines = lines is null ? new List<string>() : new List<string>(lines),
         StartLineNumber = numberLine,
       };
       List<string> processedLines = CommentsParser.ParseComments(lines, model);

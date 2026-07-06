@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using MainWindowProgram.Test.Protocol;
-using System.Windows;
 using UI.Controls.AdminPanel;
 using UI.Controls.DeviceHealthView;
 using UI.Controls.GPT;
@@ -20,11 +19,6 @@ namespace MainWindowProgram.Services
     private readonly MultiWindowService _multiWindow;
 
     /// <summary>
-    /// Ссылка на главное окно приложения.
-    /// </summary>
-    private readonly MainWindow _mainWindow;
-
-    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AdminServices"/>.
     /// </summary>
     /// <param name="mainWindow">Главное окно приложения.</param>
@@ -32,7 +26,6 @@ namespace MainWindowProgram.Services
     public AdminServices(MainWindow mainWindow, MultiWindowService multiWindow)
     {
       _multiWindow = multiWindow;
-      _mainWindow = mainWindow;
     }
 
     /// <summary>
@@ -40,23 +33,6 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
     public void OpenGptServiceAsync() => _multiWindow.WorkspaceService.AddControl("GptManagement", new GPTPunchControl(), TypeWindow.DeviceControl);
-
-    /// <summary>
-    /// Открывает элемент управления для работы с USB-устройствами (например, флешками).
-    /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию.</returns>
-    public async Task OpenUsbServiceAsync()
-    {
-      _mainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
-
-      await Application.Current.Dispatcher.InvokeAsync(() =>
-      {
-        var keyManagementWindow = new KeyManagementWindow();
-        keyManagementWindow.ShowDialog();
-      });
-
-      _mainWindow.Effect = null;
-    }
 
     public async Task StartConsoleTest() => await Test.ConsoleTest.TestData.PrintTestData();
 

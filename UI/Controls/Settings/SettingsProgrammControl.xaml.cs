@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
@@ -20,14 +21,18 @@ namespace UI.Controls.Settings
   public partial class SettingsProgrammControl : UserControl
   {
     private readonly Action<SystemStateEvents.AdminRightsChanged> _adminRightsChangedHandler;
+    private readonly Action<SystemStateEvents.DeviceConfigurationEditingAccessChanged> _deviceConfigurationEditingAccessChangedHandler;
     private DeviceConfigControl? _deviceConfigManager;
     private bool _isAdminRightsSubscribed;
+    private bool _isDeviceConfigurationEditingAccessSubscribed;
     private bool _deviceConfigWarmupStarted;
+    private bool _canEditDeviceConfiguration;
 
     public SettingsProgrammControl()
     {
       InitializeComponent();
       _adminRightsChangedHandler = OnAdminRightsChanged;
+      _deviceConfigurationEditingAccessChangedHandler = OnDeviceConfigurationEditingAccessChanged;
       Loaded += SettingsProgrammControl_Loaded;
       Unloaded += SettingsProgrammControl_Unloaded;
       ToggleSettingsButton.Click += ToggleSettingsButton_Click;
@@ -36,7 +41,8 @@ namespace UI.Controls.Settings
     private void SettingsProgrammControl_Loaded(object sender, RoutedEventArgs e)
     {
       LocalizationService.RefreshCurrentLanguage();
-      UpdateImportExportVisibility(AdminConfig.GetAdminRights());
+      _canEditDeviceConfiguration = CanEditDeviceConfiguration();
+      UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
 
       if (_isAdminRightsSubscribed)
       {
@@ -44,7 +50,9 @@ namespace UI.Controls.Settings
       }
 
       EventAggregator.Subscribe(_adminRightsChangedHandler);
+      EventAggregator.Subscribe(_deviceConfigurationEditingAccessChangedHandler);
       _isAdminRightsSubscribed = true;
+      _isDeviceConfigurationEditingAccessSubscribed = true;
 
       _ = WarmUpDeviceConfigManagerAsync();
     }
@@ -58,25 +66,49 @@ namespace UI.Controls.Settings
 
       EventAggregator.Unsubscribe(_adminRightsChangedHandler);
       _isAdminRightsSubscribed = false;
+
+      if (_isDeviceConfigurationEditingAccessSubscribed)
+      {
+        EventAggregator.Unsubscribe(_deviceConfigurationEditingAccessChangedHandler);
+        _isDeviceConfigurationEditingAccessSubscribed = false;
+      }
     }
 
     private void OnAdminRightsChanged(SystemStateEvents.AdminRightsChanged eventData)
     {
       if (Dispatcher.CheckAccess())
       {
-        UpdateImportExportVisibility(eventData.IsAdmin);
+        UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
       }
       else
       {
-        Dispatcher.Invoke(() => UpdateImportExportVisibility(eventData.IsAdmin));
+        Dispatcher.Invoke(() => UpdateConfigurationEditingAccess(_canEditDeviceConfiguration));
       }
     }
 
-    private void UpdateImportExportVisibility(bool isAdmin)
+    private void OnDeviceConfigurationEditingAccessChanged(SystemStateEvents.DeviceConfigurationEditingAccessChanged eventData)
     {
-      var visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-      ExportConfigButton.Visibility = visibility;
+      _canEditDeviceConfiguration = eventData.IsEnabled;
+
+      if (Dispatcher.CheckAccess())
+      {
+        UpdateConfigurationEditingAccess(eventData.IsEnabled);
+      }
+      else
+      {
+        Dispatcher.Invoke(() => UpdateConfigurationEditingAccess(eventData.IsEnabled));
+      }
+    }
+
+    private void UpdateConfigurationEditingAccess(bool isEnabled)
+    {
+      var visibility = isEnabled ? Visibility.Visible : Visibility.Collapsed;
       ImportConfigButton.Visibility = visibility;
+
+      if (_deviceConfigManager != null)
+      {
+        _deviceConfigManager.SetEditingEnabled(isEnabled);
+      }
     }
 
     private async void ToggleSettingsButton_Click(object sender, RoutedEventArgs e)
@@ -97,6 +129,7 @@ namespace UI.Controls.Settings
       }
 
       var deviceConfigManager = new DeviceConfigControl();
+      deviceConfigManager.SetEditingEnabled(_canEditDeviceConfiguration);
       DeviceConfigHost.Content = deviceConfigManager;
       _deviceConfigManager = deviceConfigManager;
 
@@ -180,6 +213,11 @@ namespace UI.Controls.Settings
 
     private async void ImportConfig(object sender, MouseButtonEventArgs e)
     {
+      if (!_canEditDeviceConfiguration)
+      {
+        return;
+      }
+
       try
       {
         var openDialog = new OpenFileDialog
@@ -226,6 +264,11 @@ namespace UI.Controls.Settings
           ex.Message,
           NotificationType.Error);
       }
+    }
+
+    private static bool CanEditDeviceConfiguration()
+    {
+      return RoleAuthorizationConfig.CurrentRole is RoleType.Administrator or RoleType.Root;
     }
   }
 }

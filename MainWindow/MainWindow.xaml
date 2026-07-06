@@ -60,12 +60,12 @@
                BasedOn="{StaticResource WindowActionButtonStyle}">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#1E1E1E"/>
-                    <Setter Property="Background" Value="#33FFFFFF"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="#111111"/>
-                    <Setter Property="Background" Value="#55FFFFFF"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -75,14 +75,102 @@
                BasedOn="{StaticResource WindowActionButtonStyle}">
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="Background" Value="#5537404F"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
-                    <Setter Property="Background" Value="#7737404F"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CurrentUserButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource WindowActionButtonStyle}">
+            <Setter Property="Padding" Value="10,0,12,0"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="MaxWidth" Value="260"/>
+            <Setter Property="Height" Value="{Binding ActualHeight, ElementName=mainMenu}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Background" Value="#12000000"/>
+            <Setter Property="BorderBrush" Value="#16000000"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ProfileRoot"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                Padding="{TemplateBinding Padding}">
+                            <Border.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform x:Name="ProfileScaleTransform"
+                                                    ScaleX="1"
+                                                    ScaleY="1"/>
+                                    <TranslateTransform x:Name="ProfileTranslateTransform"
+                                                        Y="0"/>
+                                </TransformGroup>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard FillBehavior="HoldEnd">
+                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1.03"
+                                                             Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1.03"
+                                                             Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetName="ProfileTranslateTransform"
+                                                             Storyboard.TargetProperty="Y"
+                                                             To="-1"
+                                                             Duration="0:0:0.18"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard FillBehavior="Stop">
+                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1"
+                                                             Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1"
+                                                             Duration="0:0:0.18"/>
+                                            <DoubleAnimation Storyboard.TargetName="ProfileTranslateTransform"
+                                                             Storyboard.TargetProperty="Y"
+                                                             To="0"
+                                                             Duration="0:0:0.18"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                            </Trigger.ExitActions>
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
+                                <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
+                                <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -301,6 +389,43 @@
                     Background="Transparent"
                     >
 
+                    <Button x:Name="CurrentUserButton"
+                        Style="{StaticResource CurrentUserButtonStyle}"
+                        Tag="SwitchUser"
+                        Click="CurrentUserButton_Click"
+                        ToolTip="Сменить пользователя">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="24"
+                                    Height="24"
+                                    VerticalAlignment="Center"
+                                    CornerRadius="12"
+                                    BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                    BorderThickness="1">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="12"
+                                           Text="&#xE77B;"
+                                           Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+
+                            <TextBlock x:Name="CurrentUserNameTextBlock"
+                                       Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="190"
+                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                       FontSize="13"
+                                       Text="Пользователь"/>
+                        </Grid>
+                    </Button>
+
                     <Button x:Name="DarkThemeButton"
                         Style="{StaticResource DarkThemeToggleButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}"
@@ -325,29 +450,62 @@
                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
 
-                    <DefaultGUI:WindowButtons 
+                    <Button x:Name="minimizeButton"
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}" 
-                        x:Name="minimizeButton" ChoiceElement="Minimize" 
-                        Command="{Binding Window.MinimizeCommand}"
-                        />
+                        Command="{Binding Window.MinimizeCommand}">
+                        <askUiIcons:WindowMinimizeIcon Size="14"
+                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
 
-                    <DefaultGUI:WindowButtons 
+                    <Button x:Name="maximizeButton"
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
-                        x:Name="maximizeButton" ChoiceElement="Maximize" 
-                        Command="{Binding Window.MaximizeCommand}"
-                        />
+                        Command="{Binding Window.MaximizeCommand}">
+                        <Grid Width="18" Height="18">
+                            <askUiIcons:WindowMaximizeIcon Size="14"
+                                IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                <askUiIcons:WindowMaximizeIcon.Style>
+                                    <Style TargetType="{x:Type askUiIcons:WindowMaximizeIcon}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=MainWinApp, Path=WindowState}" Value="Maximized">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </askUiIcons:WindowMaximizeIcon.Style>
+                            </askUiIcons:WindowMaximizeIcon>
+                            <askUiIcons:WindowRestoreIcon Size="14"
+                                IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                <askUiIcons:WindowRestoreIcon.Style>
+                                    <Style TargetType="{x:Type askUiIcons:WindowRestoreIcon}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=MainWinApp, Path=WindowState}" Value="Maximized">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </askUiIcons:WindowRestoreIcon.Style>
+                            </askUiIcons:WindowRestoreIcon>
+                        </Grid>
+                    </Button>
 
-                    <DefaultGUI:WindowButtons 
+                    <Button x:Name="exitButton"
                         Style="{DynamicResource StyleWindowsButtons}"
                         Width="{Binding ActualHeight, ElementName=mainMenu}" 
                         Height="{Binding ActualHeight, ElementName=mainMenu}"
-                        x:Name="exitButton" ChoiceElement="Exit" 
-                        Command="{Binding Window.CloseCommand}"
-                        />
+                        Command="{Binding Window.CloseCommand}">
+                        <askUiIcons:WindowCloseIcon Size="14"
+                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
                 </StackPanel>
             </Grid>
 
@@ -373,7 +531,8 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0"
+                <Button x:Name="TerminalButton"
+                    Grid.Column="0"
                     Width="20"
                     Height="20"
                     Margin="8,0,4,0"

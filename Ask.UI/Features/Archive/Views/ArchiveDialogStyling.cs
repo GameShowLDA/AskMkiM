@@ -13,7 +13,7 @@ namespace Ask.UI.Features.Archive.Views
         return brush;
       }
 
-      if (Application.Current?.Resources[key] is Brush appBrush)
+      if (System.Windows.Application.Current?.Resources[key] is Brush appBrush)
       {
         return appBrush;
       }
@@ -35,7 +35,7 @@ namespace Ask.UI.Features.Archive.Views
 
     public static FontFamily? GetMediumFontFamily()
     {
-      return Application.Current?.Resources["WinstonMedium"] as FontFamily;
+      return System.Windows.Application.Current?.Resources["WinstonMedium"] as FontFamily;
     }
   }
 }

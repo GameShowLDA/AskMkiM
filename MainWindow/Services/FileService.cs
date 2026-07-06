@@ -9,6 +9,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Features.Archive.Application;
 using MainWindowProgram.Services.Conversion;
 using MainWindowProgram.Windows;
 using Microsoft.Win32;
@@ -448,6 +449,16 @@ namespace MainWindowProgram.Services
 
       if (_multiWindow.GetActiveWorkspaceControl() is ArchiveControl archiveControl)
       {
+        try
+        {
+          ArchiveOperationServices.Current.EnsureCanEditArchives(ArchiveOperationKind.CreateArchive);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+          Message.MessageBoxCustom.Show(ex.Message, "Доступ запрещён", MessageBoxButton.OK);
+          return;
+        }
+
         archiveControl.ShowCreateArchiveDialog();
       }
     }

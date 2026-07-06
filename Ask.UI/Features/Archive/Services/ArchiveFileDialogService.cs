@@ -89,7 +89,7 @@ namespace Ask.UI.Features.Archive.Services
     {
       var owner = ownerElement != null
         ? Window.GetWindow(ownerElement)
-        : Application.Current?.MainWindow;
+        : System.Windows.Application.Current?.MainWindow;
 
       return owner != null
         ? dialog.ShowDialog(owner) == true

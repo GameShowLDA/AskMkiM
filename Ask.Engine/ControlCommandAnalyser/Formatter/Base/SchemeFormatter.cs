@@ -9,7 +9,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
 {
   internal class SchemeFormatter
   {
-    public static IEnumerable<string> FormatSchemePoints(
+    public static IEnumerable<string> FormatSchemeConnectedPoints(
       IHasScheme model,
       string indent = "\t\t")
     {
