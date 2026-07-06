@@ -91,7 +91,7 @@ namespace Ask.Device.Runtime.Device
       Name = "Мультиметр 34465A";
       Description = "Реализовать описание в Ask.Device.Runtime.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.FastMeter;
+      DeviceType = DeviceType.FastMeter;
       IsConnected = false;
 
       CapacitanceManager = new Function.Keysight3466new.CapacitanceMeasurement(this);

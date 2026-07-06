@@ -34,7 +34,7 @@ namespace TestConsole.B7783
         Console.WriteLine("15. Set capacitance range");
         Console.WriteLine("16. Measure capacitance");
 
-        Console.WriteLine("17. Custom command");
+        Console.WriteLine("\r\n17. Custom command");
         Console.WriteLine("18. Set USB search pattern");
         Console.WriteLine("19. Disconnect");
         Console.WriteLine("0. Back");
