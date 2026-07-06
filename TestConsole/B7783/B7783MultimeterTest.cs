@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace TestConsole.B7783
 {
   internal static class B7783MultimeterTest
@@ -16,15 +18,20 @@ namespace TestConsole.B7783
         Console.WriteLine("4. READ?");
         Console.WriteLine("5. Set resistance mode");
         Console.WriteLine("6. Set resistance mode + READ?");
-        Console.WriteLine("7. Configure DC voltage + READ?");
-        Console.WriteLine("8. Configure AC voltage + READ?");
-        Console.WriteLine("9. Custom command");
-        Console.WriteLine("10. Set USB search pattern");
-        Console.WriteLine("11. Disconnect");
+        Console.WriteLine("7. Set DC voltage mode");
+        Console.WriteLine("8. Measure DC voltage");
+        Console.WriteLine("9. Set AC voltage mode");
+        Console.WriteLine("10. Measure AC voltage");
+        Console.WriteLine("11. Set capacitance mode");
+        Console.WriteLine("12. Set capacitance range");
+        Console.WriteLine("13. Measure capacitance");
+        Console.WriteLine("14. Custom command");
+        Console.WriteLine("15. Set USB search pattern");
+        Console.WriteLine("16. Disconnect");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 11)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 16)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -51,24 +58,67 @@ namespace TestConsole.B7783
             await PrintMeasurementAsync(() => controller.MeasureResistanceAsync(), "Resistance");
             break;
           case 7:
-            await PrintMeasurementAsync(() => controller.MeasureDcVoltageAsync(), "DC voltage");
+            PrintResult(await controller.SetDcVoltageModeAsync());
             break;
           case 8:
-            await PrintMeasurementAsync(() => controller.MeasureAcVoltageAsync(), "AC voltage");
+            var dcParameters = ReadVoltageParameters();
+            await PrintVoltageMeasurementAsync(
+              () => controller.MeasureDcVoltageAsync(dcParameters.Param, dcParameters.RangeFrom, dcParameters.RangeTo),
+              "DC voltage");
             break;
           case 9:
-            await RunCustomCommandAsync(controller);
+            PrintResult(await controller.SetAcVoltageModeAsync());
             break;
           case 10:
-            SetConnectionDetails(controller);
+            var acParameters = ReadVoltageParameters();
+            await PrintVoltageMeasurementAsync(
+              () => controller.MeasureAcVoltageAsync(acParameters.Param, acParameters.RangeFrom, acParameters.RangeTo),
+              "AC voltage");
             break;
           case 11:
+            PrintResult(await controller.SetCapacitanceModeAsync());
+            break;
+          case 12:
+            double rangeNanofarads = ReadDouble("Capacitance range, nF", 1000);
+            PrintResult(await controller.SetCapacitanceRangeAsync(rangeNanofarads));
+            break;
+          case 13:
+            var capacitanceParameters = ReadCapacitanceParameters();
+            await PrintMeasurementAsync(
+              () => controller.MeasureCapacitanceAsync(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo),
+              "Capacitance, nF");
+            break;
+          case 14:
+            await RunCustomCommandAsync(controller);
+            break;
+          case 15:
+            SetConnectionDetails(controller);
+            break;
+          case 16:
             await controller.DisconnectAsync();
             break;
           case 0:
             return;
         }
       }
+    }
+
+    private static (double Param, double RangeFrom, double RangeTo) ReadVoltageParameters()
+    {
+      Console.WriteLine("Leave expected/range values unchanged for AUTO range.");
+      double param = ReadDouble("Expected value", 0);
+      double rangeFrom = ReadDouble("Range from", -1);
+      double rangeTo = ReadDouble("Range to", -1);
+      return (param, rangeFrom, rangeTo);
+    }
+
+    private static (double Param, double RangeFrom, double RangeTo) ReadCapacitanceParameters()
+    {
+      Console.WriteLine("Values are in nF. Leave expected/range values unchanged for AUTO range.");
+      double param = ReadDouble("Expected value", 0);
+      double rangeFrom = ReadDouble("Range from", -1);
+      double rangeTo = ReadDouble("Range to", -1);
+      return (param, rangeFrom, rangeTo);
     }
 
     private static void PrintState(B7783MultimeterController controller)
@@ -118,12 +168,35 @@ namespace TestConsole.B7783
       try
       {
         double value = await measureAsync();
-        Console.WriteLine($"{title}: {value}");
+        Console.WriteLine($"{title}: {value.ToString("G17", CultureInfo.InvariantCulture)}");
       }
       catch (Exception ex)
       {
         Console.WriteLine($"Error: {ex.Message}");
       }
+    }
+
+    private static async Task PrintVoltageMeasurementAsync(Func<Task<double>> measureAsync, string title)
+    {
+      try
+      {
+        double valueInVolts = await measureAsync();
+        Console.WriteLine($"{title}: {FormatVolts(valueInVolts)} V");
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error: {ex.Message}");
+      }
+    }
+
+    private static string FormatVolts(double value)
+    {
+      if (double.IsNaN(value) || double.IsInfinity(value))
+      {
+        return value.ToString(CultureInfo.InvariantCulture);
+      }
+
+      return value.ToString("0.#################", CultureInfo.InvariantCulture);
     }
 
     private static void PrintResult(B7783CommandResult result)
@@ -143,6 +216,21 @@ namespace TestConsole.B7783
       Console.Write($"{title} [{defaultValue}]: ");
       string? value = Console.ReadLine();
       return int.TryParse(value, out int result) ? result : defaultValue;
+    }
+
+    private static double ReadDouble(string title, double defaultValue)
+    {
+      Console.Write($"{title} [{defaultValue.ToString("G", CultureInfo.InvariantCulture)}]: ");
+      string? value = Console.ReadLine();
+      if (string.IsNullOrWhiteSpace(value))
+      {
+        return defaultValue;
+      }
+
+      value = value.Replace(',', '.');
+      return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result)
+        ? result
+        : defaultValue;
     }
   }
 }

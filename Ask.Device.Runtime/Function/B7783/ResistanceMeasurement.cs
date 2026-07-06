@@ -31,21 +31,43 @@ namespace Ask.Device.Runtime.Function.B7783
         return true;
       }
 
-      if (!_device.IsConnected)
-      {
-        throw new InvalidOperationException("Прибор не подключен.");
-      }
+      EnsureConnected();
 
-      await _device.DeviceProtocol.QueryAsync("CONFIGURE:RESISTANCE AUTO", timeout: CommandTimeoutMs);
-      string function = await _device.DeviceProtocol.QueryAsync("FUNCTION?", timeout: CommandTimeoutMs);
+      _device.TypeMode = MultimeterTypeMode.None;
+      await _device.DeviceProtocol.QueryAsync("*CLS", timeout: CommandTimeoutMs);
+      await TryAbortAsync();
 
-      if (function.Contains("RES", StringComparison.OrdinalIgnoreCase))
+      if (await TrySetResistanceModeAsync("FUNC \"RES\"", "CONF:RES"))
       {
-        _device.TypeMode = MultimeterTypeMode.Resistance;
         return true;
       }
 
-      return false;
+      if (await TrySetResistanceModeAsync("SENSE:FUNCTION \"RES\"", "CONF:RES"))
+      {
+        return true;
+      }
+
+      if (await TrySetResistanceModeAsync("CONF:RES"))
+      {
+        return true;
+      }
+
+      if (await TrySetResistanceModeAsync("CONFIGURE:RESISTANCE AUTO"))
+      {
+        return true;
+      }
+
+      await _device.DeviceProtocol.QueryAsync("*RST", timeout: CommandTimeoutMs);
+      await Task.Delay(500);
+      await _device.DeviceProtocol.QueryAsync("*CLS", timeout: CommandTimeoutMs);
+      if (await TrySetResistanceModeAsync("FUNC \"RES\"", "CONF:RES"))
+      {
+        return true;
+      }
+
+      string function = await _device.DeviceProtocol.QueryAsync("FUNCTION?", timeout: CommandTimeoutMs);
+      string error = await ReadInstrumentErrorAsync();
+      throw new InvalidOperationException($"Failed to set B7-78/3 resistance mode. FUNCTION?={function}; SYSTEM:ERROR?={error}");
     }
 
     public async Task<double> MeasureResistanceAsync(
@@ -59,17 +81,14 @@ namespace Ask.Device.Runtime.Function.B7783
         return MeasurementAdapterHelper.Round(param);
       }
 
-      if (!_device.IsConnected)
-      {
-        throw new InvalidOperationException("Прибор не подключен.");
-      }
+      EnsureConnected();
 
       if (_device.TypeMode != MultimeterTypeMode.Resistance)
       {
         bool modeSet = await SetResistanceModeAsync(userMessageService);
         if (!modeSet)
         {
-          throw new InvalidOperationException("Не удалось установить режим измерения сопротивления.");
+          throw new InvalidOperationException("Failed to set B7-78/3 resistance measurement mode.");
         }
       }
 
@@ -81,7 +100,57 @@ namespace Ask.Device.Runtime.Function.B7783
         return MeasurementAdapterHelper.Round(resistance);
       }
 
-      throw new FormatException($"Неверный формат ответа прибора при измерении сопротивления: '{response}'.");
+      throw new FormatException($"Invalid B7-78/3 resistance response: '{response}'.");
+    }
+
+    private async Task<bool> TrySetResistanceModeAsync(params string[] commands)
+    {
+      foreach (string command in commands)
+      {
+        await _device.DeviceProtocol.QueryAsync(command, timeout: CommandTimeoutMs);
+      }
+
+      string function = await _device.DeviceProtocol.QueryAsync("FUNCTION?", timeout: CommandTimeoutMs);
+
+      if (function.Contains("RES", StringComparison.OrdinalIgnoreCase))
+      {
+        _device.TypeMode = MultimeterTypeMode.Resistance;
+        return true;
+      }
+
+      _device.TypeMode = MultimeterTypeMode.None;
+      return false;
+    }
+
+    private async Task TryAbortAsync()
+    {
+      try
+      {
+        await _device.DeviceProtocol.QueryAsync("ABORT", timeout: CommandTimeoutMs);
+      }
+      catch
+      {
+      }
+    }
+
+    private async Task<string> ReadInstrumentErrorAsync()
+    {
+      try
+      {
+        return await _device.DeviceProtocol.QueryAsync("SYSTEM:ERROR?", timeout: CommandTimeoutMs);
+      }
+      catch (Exception ex)
+      {
+        return ex.Message;
+      }
+    }
+
+    private void EnsureConnected()
+    {
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Device is not connected.");
+      }
     }
   }
 }
