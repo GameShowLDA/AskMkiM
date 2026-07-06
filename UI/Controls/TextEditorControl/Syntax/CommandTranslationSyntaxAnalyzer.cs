@@ -14,7 +14,7 @@ namespace UI.Controls.TextEditorControl.Syntax
   {
     private const string AnalyzerFailureCode = "CMD900";
 
-    private static readonly Regex InternalIdentifierPattern = new(
+    private static readonly Regex InternalIdentifierPattern = new Regex(
       @"\b[A-Za-z_]*[a-z][A-Za-z0-9_]*\b|\b[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+\b|\.cs\b",
       RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
@@ -57,6 +57,13 @@ namespace UI.Controls.TextEditorControl.Syntax
       }
     }
 
+    /// <summary>
+    /// Формирует список диагностик редактора по моделям команд и найденным комментариям.
+    /// </summary>
+    /// <param name="document">Документ AvalonEdit.</param>
+    /// <param name="models">Модели команд, полученные из командного анализатора.</param>
+    /// <param name="commentSpans">Диапазоны комментариев в исходном документе.</param>
+    /// <returns>Список диагностик редактора.</returns>
     private static IReadOnlyList<TextSyntaxDiagnostic> BuildDiagnostics(
       TextDocument document,
       IEnumerable<BaseCommandModel> models,
@@ -70,23 +77,17 @@ namespace UI.Controls.TextEditorControl.Syntax
       for (int i = 0; i < modelList.Count; i++)
       {
         var model = modelList[i];
+        int endLineNumber = GetModelEndLineNumber(document, modelList, i);
 
         diagnostics.AddRange(CommandKeySyntaxAnalyzer.Analyze(
           document,
           model,
-          GetModelEndLineNumber(document, modelList, i),
+          endLineNumber,
           commentSpans));
 
-        foreach (var error in model.Errors)
+        foreach (var issue in GetIssues(model))
         {
-          var diagnostic = CreateDiagnostic(document, model, error, commentSpans);
-          if (diagnostic != null)
-            diagnostics.Add(diagnostic);
-        }
-
-        foreach (var warning in model.Warnings)
-        {
-          var diagnostic = CreateDiagnostic(document, model, warning, commentSpans);
+          var diagnostic = CreateDiagnostic(document, model, issue, endLineNumber, commentSpans);
           if (diagnostic != null)
             diagnostics.Add(diagnostic);
         }
@@ -95,29 +96,70 @@ namespace UI.Controls.TextEditorControl.Syntax
       return diagnostics;
     }
 
+    /// <summary>
+    /// Возвращает общий поток ошибок и предупреждений команды.
+    /// </summary>
+    /// <param name="model">Модель команды.</param>
+    /// <returns>Последовательность диагностик команды.</returns>
+    private static IEnumerable<IDisplayIssue> GetIssues(BaseCommandModel model)
+    {
+      return model.Errors.Cast<IDisplayIssue>().Concat(model.Warnings);
+    }
+
+    /// <summary>
+    /// Определяет последнюю строку команды по её исходным строкам и позиции следующей команды.
+    /// </summary>
+    /// <param name="document">Документ AvalonEdit.</param>
+    /// <param name="models">Список моделей команд в порядке исходного текста.</param>
+    /// <param name="index">Индекс текущей модели команды.</param>
+    /// <returns>Номер последней строки текущей команды.</returns>
     private static int GetModelEndLineNumber(
       TextDocument document,
       IReadOnlyList<BaseCommandModel> models,
       int index)
     {
-      var currentStartLine = models[index].StartLineNumber;
+      var model = models[index];
+      int startLine = model.StartLineNumber;
+      int sourceLineCount = model.SourceLines?.Count ?? 0;
+      int sourceEndLine = sourceLineCount > 0
+        ? startLine + sourceLineCount - 1
+        : startLine;
 
       for (int i = index + 1; i < models.Count; i++)
       {
-        if (models[i].StartLineNumber > currentStartLine)
-          return Math.Clamp(models[i].StartLineNumber - 1, 1, document.LineCount);
+        if (models[i].StartLineNumber > startLine)
+        {
+          int previousLine = models[i].StartLineNumber - 1;
+          return Math.Clamp(Math.Min(sourceEndLine, previousLine), 1, document.LineCount);
+        }
       }
 
-      return document.LineCount;
+      return Math.Clamp(sourceEndLine, 1, document.LineCount);
     }
 
+    /// <summary>
+    /// Создаёт UI-диагностику AvalonEdit из диагностики командного анализатора.
+    /// </summary>
+    /// <param name="document">Документ AvalonEdit.</param>
+    /// <param name="model">Модель команды, к которой относится диагностика.</param>
+    /// <param name="issue">Ошибка или предупреждение командного анализатора.</param>
+    /// <param name="modelEndLineNumber">Последняя строка команды в исходном документе.</param>
+    /// <param name="commentSpans">Диапазоны комментариев.</param>
+    /// <returns>Диагностика для редактора или null, если диапазон не найден.</returns>
     private static TextSyntaxDiagnostic? CreateDiagnostic(
       TextDocument document,
       BaseCommandModel model,
       IDisplayIssue issue,
+      int modelEndLineNumber,
       IReadOnlyList<TextSpan> commentSpans)
     {
-      if (!TryResolveIssueSpan(document, model, issue, commentSpans, out var span))
+      if (!CommandIssueSpanResolver.TryResolve(
+            document,
+            model,
+            issue,
+            modelEndLineNumber,
+            commentSpans,
+            out var span))
       {
         return null;
       }
@@ -134,6 +176,11 @@ namespace UI.Controls.TextEditorControl.Syntax
       };
     }
 
+    /// <summary>
+    /// Возвращает пользовательский текст подсказки для диагностики.
+    /// </summary>
+    /// <param name="issue">Ошибка или предупреждение командного анализатора.</param>
+    /// <returns>Текст, пригодный для отображения в подсказке редактора.</returns>
     private static string GetUserMessage(IDisplayIssue issue)
     {
       var message = issue.Description?.Trim();
@@ -147,6 +194,12 @@ namespace UI.Controls.TextEditorControl.Syntax
         : "Проверьте запись команды: в ней найдена ошибка.";
     }
 
+    /// <summary>
+    /// Проверяет, что сообщение выглядит как пользовательский русский текст,
+    /// а не как технический идентификатор или имя метода.
+    /// </summary>
+    /// <param name="message">Текст сообщения диагностики.</param>
+    /// <returns>Значение true, если сообщение можно показывать пользователю без замены.</returns>
     private static bool IsUserMessage(string? message)
     {
       if (string.IsNullOrWhiteSpace(message))
@@ -155,14 +208,24 @@ namespace UI.Controls.TextEditorControl.Syntax
       }
 
       return message.Any(IsCyrillic)
-        && !InternalIdentifierPattern.IsMatch(message);
+             && !InternalIdentifierPattern.IsMatch(message);
     }
 
+    /// <summary>
+    /// Проверяет, относится ли символ к русскому алфавиту.
+    /// </summary>
+    /// <param name="ch">Проверяемый символ.</param>
+    /// <returns>Значение true, если символ является кириллическим.</returns>
     private static bool IsCyrillic(char ch)
     {
       return ch is >= 'А' and <= 'я' or 'Ё' or 'ё';
     }
 
+    /// <summary>
+    /// Создаёт запасную диагностику на случай сбоя самого анализатора.
+    /// </summary>
+    /// <param name="document">Документ AvalonEdit.</param>
+    /// <returns>Предупреждение, указывающее на невозможность выполнить проверку команд.</returns>
     private static TextSyntaxDiagnostic CreateAnalyzerFailureDiagnostic(TextDocument document)
     {
       var firstLine = document.GetLineByNumber(1);
@@ -178,154 +241,5 @@ namespace UI.Controls.TextEditorControl.Syntax
         ColumnNumber = 1
       };
     }
-
-    private static bool TryResolveIssueSpan(
-      TextDocument document,
-      BaseCommandModel model,
-      IDisplayIssue issue,
-      IReadOnlyList<TextSpan> commentSpans,
-      out CommandIssueSpan span)
-    {
-      int lineNumber = ResolveLineNumber(document, model, issue);
-      var line = document.GetLineByNumber(lineNumber);
-      string lineText = document.GetText(line);
-      string lineTextWithoutComments = SyntaxCommentScanner.RemoveCommentsFromLine(
-        lineText,
-        line.Offset,
-        commentSpans);
-
-      if (IssueSelectionHintResolver.TryResolve(issue, lineTextWithoutComments, out var hint)
-          && IsValidHint(lineTextWithoutComments, hint))
-      {
-        span = new CommandIssueSpan(
-          line.Offset + hint.StartIndex,
-          hint.Length,
-          lineNumber,
-          hint.StartIndex + 1);
-        return true;
-      }
-
-      if (TryResolveCommandHeaderSpan(lineTextWithoutComments, model, issue, out hint)
-          && IsValidHint(lineTextWithoutComments, hint))
-      {
-        span = new CommandIssueSpan(
-          line.Offset + hint.StartIndex,
-          hint.Length,
-          lineNumber,
-          hint.StartIndex + 1);
-        return true;
-      }
-
-      return TryResolveNonWhiteSpaceLineSpan(line, lineTextWithoutComments, out span);
-    }
-
-    private static int ResolveLineNumber(
-      TextDocument document,
-      BaseCommandModel model,
-      IDisplayIssue issue)
-    {
-      int lineNumber = issue.SourceLineNumber > 0
-        ? issue.SourceLineNumber
-        : model.StartLineNumber;
-
-      if (lineNumber <= 0)
-      {
-        lineNumber = 1;
-      }
-
-      return Math.Clamp(lineNumber, 1, document.LineCount);
-    }
-
-    private static bool TryResolveCommandHeaderSpan(
-      string lineText,
-      BaseCommandModel model,
-      IDisplayIssue issue,
-      out IssueSelectionHint hint)
-    {
-      foreach (var candidate in GetHeaderCandidates(model, issue))
-      {
-        int index = lineText.IndexOf(candidate, StringComparison.OrdinalIgnoreCase);
-        if (index < 0)
-        {
-          continue;
-        }
-
-        hint = new IssueSelectionHint(index, candidate.Length);
-        return true;
-      }
-
-      hint = default;
-      return false;
-    }
-
-    private static IEnumerable<string> GetHeaderCandidates(
-      BaseCommandModel model,
-      IDisplayIssue issue)
-    {
-      if (!string.IsNullOrWhiteSpace(issue.Command))
-      {
-        yield return issue.Command;
-      }
-
-      if (!string.IsNullOrWhiteSpace(model.CommandNumber)
-          && !string.IsNullOrWhiteSpace(model.Mnemonic))
-      {
-        yield return $"{model.CommandNumber} {model.Mnemonic}";
-      }
-
-      if (!string.IsNullOrWhiteSpace(model.Mnemonic))
-      {
-        yield return model.Mnemonic;
-      }
-
-      if (!string.IsNullOrWhiteSpace(model.CommandNumber))
-      {
-        yield return model.CommandNumber;
-      }
-    }
-
-    private static bool TryResolveNonWhiteSpaceLineSpan(
-      DocumentLine line,
-      string lineText,
-      out CommandIssueSpan span)
-    {
-      int start = 0;
-      while (start < lineText.Length && char.IsWhiteSpace(lineText[start]))
-      {
-        start++;
-      }
-
-      int end = lineText.Length;
-      while (end > start && char.IsWhiteSpace(lineText[end - 1]))
-      {
-        end--;
-      }
-
-      if (end <= start)
-      {
-        span = default;
-        return false;
-      }
-
-      span = new CommandIssueSpan(
-        line.Offset + start,
-        end - start,
-        line.LineNumber,
-        start + 1);
-      return true;
-    }
-
-    private static bool IsValidHint(string lineText, IssueSelectionHint hint)
-    {
-      return hint.StartIndex >= 0
-             && hint.Length > 0
-             && hint.StartIndex + hint.Length <= lineText.Length;
-    }
-
-    private readonly record struct CommandIssueSpan(
-      int StartOffset,
-      int Length,
-      int LineNumber,
-      int ColumnNumber);
   }
 }
