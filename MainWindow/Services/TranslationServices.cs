@@ -949,7 +949,10 @@ namespace MainWindowProgram.Services
               82d);
 
           translateEditor.Text = translationResult.FormattedText;
-
+          foreach (var model in models)
+          {
+            translateEditor.TextEditorModel.SourceLines.AddRange(model.SourceLines);
+          }
           // ЛЕВЫЙ редактор — исходные строки
           editor.ConfigureBreakpoints(interactive: true, visible: false);
           editor.RightBreakpoint = allowed

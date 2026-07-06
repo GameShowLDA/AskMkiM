@@ -290,6 +290,7 @@ namespace UI.Controls
     private bool SaveTranslatedFileToDisk()
     {
       var rightBox = GetRightBox();
+      var leftTextEditor = GetLeftBox()?.GetTextEditor();
       var rightTextEditor = rightBox?.GetTextEditor();
       if (rightTextEditor?.TextEditorModel == null)
       {
@@ -302,7 +303,7 @@ namespace UI.Controls
 
       return _translatedFileSaveService.SaveToDisk(
         this,
-        rightTextEditor.Text,
+        rightTextEditor.TextEditorModel.SourceLines,
         rightTextEditor.TextEditorModel.FilePath);
     }
 
