@@ -143,6 +143,29 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetDiodeModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "SET DIODE MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.DiodeManager.SetDiodeModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectableManager.GetConnectionStatus() : "Diode mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     public async Task<B7783CommandResult> CheckContinuityAsync(bool expectedOutcome, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       if (!_device.IsConnected)
@@ -188,6 +211,34 @@ namespace TestConsole.B7783
         async token =>
         {
           double result = await _device.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+          token.ThrowIfCancellationRequested();
+          return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> MeasureDiodeAsync(
+    double param = 0,
+    double rangeFrom = -1,
+    double rangeTo = -1,
+    int timeoutMs = MeasurementTimeoutMs,
+    CancellationToken cancellationToken = default)
+    {
+      if (!_device.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "MEASURE DIODE",
+        timeoutMs,
+        async token =>
+        {
+          double result = await _device.DiodeManager.CheckDiodeAsync(param, rangeFrom, rangeTo);
           token.ThrowIfCancellationRequested();
           return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
         },

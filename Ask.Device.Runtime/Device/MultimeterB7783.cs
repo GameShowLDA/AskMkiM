@@ -26,6 +26,7 @@ namespace Ask.Device.Runtime.Device
       CapacitanceManager = new CapacitanceMeasurementBase(this);
       AcVoltageManager = new ACVMeasurementBase(this);
       DcVoltageManager = new DCVMeasurementBase(this);
+      DiodeManager = new DiodeMeasurementBase(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new UsbProtocol(this, new Function.B7783.B7783UsbCommandHandler());
       ResistanceCommands = new ResistanceMeasurementParameters()
@@ -52,6 +53,11 @@ namespace Ask.Device.Runtime.Device
       };
 
       ContinuityCommands = new ContinuityMeasurementParameters()
+      {
+        Measure = "READ?",
+      };
+
+      DiodeCommands = new DiodeMeasurementParameters()
       {
         Measure = "READ?",
       };
@@ -97,6 +103,9 @@ namespace Ask.Device.Runtime.Device
     public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
 
     public ContinuityMeasurementParameters ContinuityCommands { get; set; }
+
+    public DiodeMeasurementParameters DiodeCommands { get; set; }
+
 
     public FastMeterDto Convert()
     {

@@ -33,13 +33,16 @@ namespace TestConsole.B7783
         Console.WriteLine("\r\n14. Set capacitance mode");
         Console.WriteLine("15. Measure capacitance");
 
-        Console.WriteLine("\r\n16. Custom command");
-        Console.WriteLine("17. Set USB search pattern");
-        Console.WriteLine("18. Disconnect");
+        Console.WriteLine("\r\n16. Set diode mode");
+        Console.WriteLine("17. Measure diode");
+
+        Console.WriteLine("\r\n18. Custom command");
+        Console.WriteLine("19. Set USB search pattern");
+        Console.WriteLine("20. Disconnect");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 19)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 20)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -102,13 +105,21 @@ namespace TestConsole.B7783
               () => controller.MeasureCapacitanceAsync(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo),
               "Capacitance, nF");
             break;
+
           case 16:
-            await RunCustomCommandAsync(controller);
+            PrintResult(await controller.SetDiodeModeAsync());
             break;
           case 17:
+            PrintResult(await controller.MeasureDiodeAsync());
+            break;
+
+          case 18:
+            await RunCustomCommandAsync(controller);
+            break;
+          case 19:
             SetConnectionDetails(controller);
             break;
-          case 18:
+          case 20:
             await controller.DisconnectAsync();
             break;
           case 0:

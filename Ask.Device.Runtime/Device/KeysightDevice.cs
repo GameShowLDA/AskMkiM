@@ -81,6 +81,8 @@ namespace Ask.Device.Runtime.Device
     public DCVMeasurementParameters DCVCommands { get; set; }
     public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
     public ContinuityMeasurementParameters ContinuityCommands { get; set; }
+    public DiodeMeasurementParameters DiodeCommands { get; set; }
+
 
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
@@ -108,7 +110,7 @@ namespace Ask.Device.Runtime.Device
       AcVoltageManager = new ACVMeasurementBase(this);
       DcVoltageManager = new DCVMeasurementBase(this);
       TextMessage = new Function.Keysight3466new.TextMessage(this);
-      DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
+      DiodeManager = new DiodeMeasurementBase(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, Port);
 
@@ -117,6 +119,7 @@ namespace Ask.Device.Runtime.Device
       DCVCommands = new DCVMeasurementParameters();
       CapacitanceCommands = new CapacitanceMeasurementParameters();
       ContinuityCommands = new ContinuityMeasurementParameters();
+      DiodeCommands = new DiodeMeasurementParameters();
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;
