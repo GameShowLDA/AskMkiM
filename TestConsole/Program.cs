@@ -49,7 +49,7 @@ namespace TestConsole
             break;
 
           case 3:
-            TestKeysight.RunAsync();
+            await TestKeysight.RunAsync();
             break;
 
           case 4:

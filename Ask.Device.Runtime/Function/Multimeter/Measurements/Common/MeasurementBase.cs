@@ -1,8 +1,11 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Function.Helpers;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
@@ -59,16 +62,37 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await device.DeviceProtocol.QueryAsync(device.CapacitanceCommands.Measure, responseDelay: 1500, timeout: device.CapacitanceCommands.Timeout);
-      response = response.Trim().Replace("+", "");
+      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, responseDelay: 1500, timeout: profile.Timeout);
+      LogInformation($"[{header}] ответ мультиметра: {response}");
 
-      if (double.TryParse(response, System.Globalization.NumberStyles.Float,
-                          System.Globalization.CultureInfo.InvariantCulture, out double capacitance))
+      response = response.Trim().Replace("+", "");
+      string numericResponse = ExtractNumericValue(response);
+
+      if (double.TryParse(numericResponse, NumberStyles.Float, CultureInfo.InvariantCulture, out double measurementValue))
       {
-        return MeasurementAdapterHelper.Round(capacitance * 1e9);
+        if (profile.Unit is CapacitanceUnit)
+        {
+          return MeasurementAdapterHelper.Round(measurementValue * 1e9);
+        }
+
+        return MeasurementAdapterHelper.Round(measurementValue);
       }
 
       throw new InvalidOperationException(LogError($"Не удалось обработать значение при \"{header}\": {response}", isDeviceLog: true));
+    }
+
+    static private string ExtractNumericValue(string response)
+    {
+      var match = Regex.Match(
+        response,
+        @"^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eE][+-]?\d+)?");
+
+      if (!match.Success)
+      {
+        return response;
+      }
+
+      return match.Value.Replace(',', '.');
     }
   }
 }
