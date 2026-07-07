@@ -2,8 +2,10 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 
 namespace UI.Components
 {
@@ -248,10 +250,30 @@ namespace UI.Components
           return true;
         }
 
-        current = VisualTreeHelper.GetParent(current);
+        current = GetSafeParent(current);
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Возвращает родительский элемент для визуальных и текстовых элементов выпадающего списка.
+    /// </summary>
+    /// <param name="current">Текущий элемент дерева WPF.</param>
+    /// <returns>Родительский элемент или <c>null</c>, если родителя нет.</returns>
+    private static DependencyObject? GetSafeParent(DependencyObject current)
+    {
+      if (current is FrameworkContentElement contentElement)
+      {
+        return contentElement.Parent ?? ContentOperations.GetParent(contentElement);
+      }
+
+      if (current is not Visual && current is not Visual3D)
+      {
+        return LogicalTreeHelper.GetParent(current);
+      }
+
+      return VisualTreeHelper.GetParent(current) ?? LogicalTreeHelper.GetParent(current);
     }
 
     /// <summary>

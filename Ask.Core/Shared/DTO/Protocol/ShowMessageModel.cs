@@ -321,6 +321,11 @@ namespace Ask.Core.Shared.DTO.Protocol
         Message = message;
       }
 
+      if (debug != null)
+      {
+        Debug = debug;
+      }
+
       Status = type;
     }
   }

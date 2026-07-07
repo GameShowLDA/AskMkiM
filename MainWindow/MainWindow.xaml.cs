@@ -11,6 +11,7 @@ using Ask.UI.Shared.Components.Icons;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Engine;
 using MainWindowProgram.HotkeyBindings;
+using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
@@ -102,6 +103,10 @@ namespace MainWindowProgram
       this.DataContext = _viewModel;
       GuiInitializer.Apply(this);
 
+      TestMenu.SubmenuOpened += (_, _) => ApplyLegacyAskMenuMode();
+      Metrology.SubmenuOpened += (_, _) => ApplyLegacyAskMenuMode();
+      TestControl.SubmenuOpened += (_, _) => ApplyLegacyAskMenuMode();
+
       Loaded += MainWindow_Loaded;
       _onUserInterfaceSaved = model =>
       {
@@ -166,6 +171,38 @@ namespace MainWindowProgram
     {
       var uiConfig = await UserInterfaceConfig.GetParameterModel();
       ApplyFileMenuTopIconMode(uiConfig.UseTopMenuIcons);
+      ApplyLegacyAskMenuMode();
+    }
+
+    /// <summary>
+    /// Переключает пункты меню тестов между набором АСКМ и legacy-набором АСК.
+    /// </summary>
+    private void ApplyLegacyAskMenuMode()
+    {
+      bool useLegacyAsk = LegacyAskUiModeResolver.ShouldUseLegacyAsk();
+      var legacyVisibility = useLegacyAsk ? Visibility.Visible : Visibility.Collapsed;
+      var askmVisibility = useLegacyAsk ? Visibility.Collapsed : Visibility.Visible;
+
+      LegacyAskMetrologyMenuItem.Visibility = legacyVisibility;
+      LegacyAskAdditionalTestsMenuItem.Visibility = legacyVisibility;
+      LegacyAskRelayTrainingMenuItem.Visibility = legacyVisibility;
+      LegacyAskSwitchingTimeMenuItem.Visibility = legacyVisibility;
+
+      ModeKSMenuItem.Visibility = askmVisibility;
+      ModeIEMenuItem.Visibility = askmVisibility;
+      ModeCIMenuItem.Visibility = askmVisibility;
+      ModePrMenuItem.Visibility = askmVisibility;
+      ModeEhtMenuItem.Visibility = askmVisibility;
+      ModePIDCWMenuItem.Visibility = askmVisibility;
+      ModePIACWMenuItem.Visibility = askmVisibility;
+      ModeKNDCWMenuItem.Visibility = askmVisibility;
+      ModeKNACWMenuItem.Visibility = askmVisibility;
+
+      AskmCiTestsMenuItem.Visibility = askmVisibility;
+      AskmPiDcwTestsMenuItem.Visibility = askmVisibility;
+      AskmPiAcwTestsMenuItem.Visibility = askmVisibility;
+      CrossTestMkrMenuItem.Visibility = askmVisibility;
+      RelayContactResistMenuItem.Visibility = askmVisibility;
     }
 
     private void ApplyFileMenuTopIconMode(bool useTopMenuIcons)

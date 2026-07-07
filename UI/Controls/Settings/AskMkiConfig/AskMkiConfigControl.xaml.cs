@@ -271,6 +271,7 @@ public partial class AskMkiConfigControl : UserControl
 
       var profile = _loadedConfigFile.GetProfile(_selectedProfileKind);
       ApplyEditorGroupsToProfile(profile);
+      LegacyMkiHardwareProfileValidator.ThrowIfInvalid(profile);
 
       profile.HardwareConfig.Nas = (byte)_selectedProfileKind;
       _loadedConfigFile.SetProfile(_selectedProfileKind, profile);

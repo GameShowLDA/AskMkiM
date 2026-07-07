@@ -8,7 +8,16 @@ namespace Ask.UI.Components.ProtocolListBox
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
       var message = value as string;
-      return string.IsNullOrEmpty(message) ? "" : ":";
+      if (string.IsNullOrEmpty(message))
+      {
+        return "";
+      }
+
+      var trimmedMessage = message.TrimStart();
+      return trimmedMessage.StartsWith("$TST", StringComparison.Ordinal) ||
+             trimmedMessage.StartsWith("$DOC", StringComparison.Ordinal)
+        ? ""
+        : ":";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

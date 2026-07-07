@@ -3,7 +3,9 @@ using Ask.Core.Services.Metrology;
 using Ask.Core.Shared.Metadata.Enums.MetrologyEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View;
+using Ask.Engine.Tests.LegacyAsk;
 using NLog.Config;
+using UI.Controls.ExecutorControls.LegacyAsk;
 using UI.Controls.ExecutorControls.MetrologyControls;
 using static UI.Components.Invoke.OpenFileButton;
 
@@ -33,8 +35,23 @@ namespace MainWindowProgram.Services
 
     public void OpenMetrologyMode(MetrologyType type)
     {
+      if (LegacyAskUiModeResolver.ShouldUseLegacyAsk())
+      {
+        OpenLegacyAskMeasurementAccuracyTest(string.Empty);
+        return;
+      }
+
       var (control, title) = _factory.Create(type);
       _multiWindow.WorkspaceService.AddControl(title, control, TypeWindow.DeviceControl);
+    }
+
+    /// <inheritdoc />
+    public void OpenLegacyAskMeasurementAccuracyTest(string testCode)
+    {
+      _multiWindow.WorkspaceService.AddControl(
+        "Погрешности измерения АСК",
+        new LegacyAskTestControl(LegacyAskTestKind.MeasurementAccuracy, testCode),
+        TypeWindow.DeviceControl);
     }
   }
 }

@@ -1,4 +1,4 @@
-using Ask.Core.Services.App;
+﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
@@ -24,32 +24,32 @@ namespace Ask.UI.Controls.ProtocolNew
   /// <inheritdoc />
   public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider
   {
-    #region Поля.
+    #region РџРѕР»СЏ.
 
     /// <summary>
-    /// Последнее отображенное сообщение в протоколе.
+    /// РџРѕСЃР»РµРґРЅРµРµ РѕС‚РѕР±СЂР°Р¶РµРЅРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РІ РїСЂРѕС‚РѕРєРѕР»Рµ.
     /// </summary>
     private ShowMessageModel LastModelMeassage;
 
     /// <summary>
-    /// Возвращает текущий статус пошагового режима.
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ С‚РµРєСѓС‰РёР№ СЃС‚Р°С‚СѓСЃ РїРѕС€Р°РіРѕРІРѕРіРѕ СЂРµР¶РёРјР°.
     /// </summary>
     public bool StepMode => ActionExecutor.StepMode;
 
     /// <summary>
-    /// Флаг, указывающий, что текущее сообщение является последним.
+    /// Р¤Р»Р°Рі, СѓРєР°Р·С‹РІР°СЋС‰РёР№, С‡С‚Рѕ С‚РµРєСѓС‰РµРµ СЃРѕРѕР±С‰РµРЅРёРµ СЏРІР»СЏРµС‚СЃСЏ РїРѕСЃР»РµРґРЅРёРј.
     /// </summary>
     public bool LastMessage { get; set; } = false;
 
     public IButtonService ButtonService { get; set; }
 
     /// <summary>
-    /// Действие, которое будет вызвано при нажатии на кнопку "Повторить".
+    /// Р”РµР№СЃС‚РІРёРµ, РєРѕС‚РѕСЂРѕРµ Р±СѓРґРµС‚ РІС‹Р·РІР°РЅРѕ РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° РєРЅРѕРїРєСѓ "РџРѕРІС‚РѕСЂРёС‚СЊ".
     /// </summary>
     private Func<Task> _retryAction;
 
     /// <summary>
-    /// Экземпляр <see cref="ActionExecutor"/>, используемый для выполнения действий.
+    /// Р­РєР·РµРјРїР»СЏСЂ <see cref="ActionExecutor"/>, РёСЃРїРѕР»СЊР·СѓРµРјС‹Р№ РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РґРµР№СЃС‚РІРёР№.
     /// </summary>
     private readonly ActionExecutor ActionExecutor;
 
@@ -59,20 +59,20 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public ErrorManager Errors;
 
-    #region Делегаты выполнения.
+    #region Р”РµР»РµРіР°С‚С‹ РІС‹РїРѕР»РЅРµРЅРёСЏ.
 
     /// <summary>
-    /// Делегат, вызываемый для начала действия.
+    /// Р”РµР»РµРіР°С‚, РІС‹Р·С‹РІР°РµРјС‹Р№ РґР»СЏ РЅР°С‡Р°Р»Р° РґРµР№СЃС‚РІРёСЏ.
     /// </summary>
     private StartDelegate _startDelegate;
 
     /// <summary>
-    /// Делегат, вызываемый для остановки действия.
+    /// Р”РµР»РµРіР°С‚, РІС‹Р·С‹РІР°РµРјС‹Р№ РґР»СЏ РѕСЃС‚Р°РЅРѕРІРєРё РґРµР№СЃС‚РІРёСЏ.
     /// </summary>
     private StopDelegate _stopDelegate;
 
     /// <summary>
-    /// Делегат, вызываемый для возврата к предыдущему состоянию.
+    /// Р”РµР»РµРіР°С‚, РІС‹Р·С‹РІР°РµРјС‹Р№ РґР»СЏ РІРѕР·РІСЂР°С‚Р° Рє РїСЂРµРґС‹РґСѓС‰РµРјСѓ СЃРѕСЃС‚РѕСЏРЅРёСЋ.
     /// </summary>
     private ReturnDelegate _returnDelegate;
 
@@ -84,17 +84,17 @@ namespace Ask.UI.Controls.ProtocolNew
 
     #endregion
 
-    #region Основные настройки.
+    #region РћСЃРЅРѕРІРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё.
 
     /// <summary>
-    /// Устанавливает основные настройки выполнения действий.
+    /// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РѕСЃРЅРѕРІРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё РІС‹РїРѕР»РЅРµРЅРёСЏ РґРµР№СЃС‚РІРёР№.
     /// </summary>
-    /// <param name="MainWindow">Главное окно приложения.</param>
-    /// <param name="StartDelegate">Делегат запуска.</param>
-    /// <param name="isRepeatEnabled">Флаг разрешения повторного выполнения.</param>
-    /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
-    /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
-    /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
+    /// <param name="MainWindow">Р“Р»Р°РІРЅРѕРµ РѕРєРЅРѕ РїСЂРёР»РѕР¶РµРЅРёСЏ.</param>
+    /// <param name="StartDelegate">Р”РµР»РµРіР°С‚ Р·Р°РїСѓСЃРєР°.</param>
+    /// <param name="isRepeatEnabled">Р¤Р»Р°Рі СЂР°Р·СЂРµС€РµРЅРёСЏ РїРѕРІС‚РѕСЂРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ.</param>
+    /// <param name="StopDelegate">Р”РµР»РµРіР°С‚ РѕСЃС‚Р°РЅРѕРІРєРё (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ).</param>
+    /// <param name="ReturnDelegate">Р”РµР»РµРіР°С‚ РІРѕР·РІСЂР°С‚Р° Рє РїСЂРµРґС‹РґСѓС‰РµРјСѓ СЃРѕСЃС‚РѕСЏРЅРёСЋ (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ).</param>
+    /// <param name="preActionDelegate">Р”РµР»РµРіР°С‚ РїСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹С… РґРµР№СЃС‚РІРёР№ РїРµСЂРµРґ Р·Р°РїСѓСЃРєРѕРј (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ).</param>
     public void SetSettings(
       StartDelegate StartDelegate,
       bool isRepeatEnabled,
@@ -119,13 +119,13 @@ namespace Ask.UI.Controls.ProtocolNew
       }
       catch (Exception ex)
       {
-        LogException("Ошибка загрузки элемента", ex);
+        LogException("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё СЌР»РµРјРµРЅС‚Р°", ex);
         throw;
       }
     }
 
     /// <summary>
-    /// Настраивает события для элементов управления.
+    /// РќР°СЃС‚СЂР°РёРІР°РµС‚ СЃРѕР±С‹С‚РёСЏ РґР»СЏ СЌР»РµРјРµРЅС‚РѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ.
     /// </summary>
     public void SetEventControls()
     {
@@ -143,75 +143,75 @@ namespace Ask.UI.Controls.ProtocolNew
     }
     #endregion
 
-    #region Основные методы кнопок.
+    #region РћСЃРЅРѕРІРЅС‹Рµ РјРµС‚РѕРґС‹ РєРЅРѕРїРѕРє.
 
-    #region Начало и конец.
+    #region РќР°С‡Р°Р»Рѕ Рё РєРѕРЅРµС†.
 
     /// <summary>
-    /// Прерывает выполнение текущего процесса.
+    /// РџСЂРµСЂС‹РІР°РµС‚ РІС‹РїРѕР»РЅРµРЅРёРµ С‚РµРєСѓС‰РµРіРѕ РїСЂРѕС†РµСЃСЃР°.
     /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
+    /// <returns>Р—Р°РґР°С‡Р°, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰Р°СЏ Р°СЃРёРЅС…СЂРѕРЅРЅСѓСЋ РѕРїРµСЂР°С†РёСЋ РїСЂРµСЂС‹РІР°РЅРёСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ.</returns>
     public async Task AbortExecution() => await ActionExecutor.StopAsync(_stopDelegate, _userActionTcs);
 
     /// <summary>
-    /// Начинает запуск измерения.
+    /// РќР°С‡РёРЅР°РµС‚ Р·Р°РїСѓСЃРє РёР·РјРµСЂРµРЅРёСЏ.
     /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
+    /// <returns>Р—Р°РґР°С‡Р°, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰Р°СЏ Р°СЃРёРЅС…СЂРѕРЅРЅСѓСЋ РѕРїРµСЂР°С†РёСЋ РёР·РјРµСЂРµРЅРёСЏ.</returns>
     public async Task StartAsync() => await ActionExecutor.StartAsync(_startDelegate, _stopDelegate, header.Text, _isRepeatEnabled, _preActionDelegate, _checkPower);
 
     /// <summary>
-    /// Завершение текущей выполняемой задачи.
+    /// Р—Р°РІРµСЂС€РµРЅРёРµ С‚РµРєСѓС‰РµР№ РІС‹РїРѕР»РЅСЏРµРјРѕР№ Р·Р°РґР°С‡Рё.
     /// </summary>
-    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    /// <returns>Р—Р°РґР°С‡Р°, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰Р°СЏ Р°СЃРёРЅС…СЂРѕРЅРЅСѓСЋ РѕРїРµСЂР°С†РёСЋ Р·Р°РІРµСЂС€РµРЅРёСЏ.</returns>
     private async Task StopAsync() => await ActionExecutor.StopAsync(_stopDelegate, _userActionTcs);
 
     /// <summary>
-    /// Выполняет завершающие действия после завершения процесса.
+    /// Р’С‹РїРѕР»РЅСЏРµС‚ Р·Р°РІРµСЂС€Р°СЋС‰РёРµ РґРµР№СЃС‚РІРёСЏ РїРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ РїСЂРѕС†РµСЃСЃР°.
     /// </summary>
-    /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
-    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    /// <param name="stopDelegate">Р”РµР»РµРіР°С‚ Р·Р°РІРµСЂС€РµРЅРёСЏ РїСЂРѕС†РµСЃСЃР° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ).</param>
+    /// <returns>Р—Р°РґР°С‡Р°, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰Р°СЏ Р°СЃРёРЅС…СЂРѕРЅРЅСѓСЋ РѕРїРµСЂР°С†РёСЋ Р·Р°РІРµСЂС€РµРЅРёСЏ.</returns>
     public async Task FinalizeAsync(StopDelegate stopDelegate = null) => await ActionExecutor.FinalizeAsync(stopDelegate);
 
     #endregion
 
-    #region Пауза и продолжить.
+    #region РџР°СѓР·Р° Рё РїСЂРѕРґРѕР»Р¶РёС‚СЊ.
 
     /// <summary>
-    /// Приостанавливает метод на паузу.
+    /// РџСЂРёРѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РјРµС‚РѕРґ РЅР° РїР°СѓР·Сѓ.
     /// </summary>
     /// <returns></returns>
     public async Task PauseAsync() => await ActionExecutor.PauseAsync(GetCancellationToken(), this);
 
     /// <summary>
-    /// Возобновляет метод после паузы.
+    /// Р’РѕР·РѕР±РЅРѕРІР»СЏРµС‚ РјРµС‚РѕРґ РїРѕСЃР»Рµ РїР°СѓР·С‹.
     /// </summary>
     public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this, _userActionTcs);
 
     #endregion
 
-    #region Повтор и зацикливание.
+    #region РџРѕРІС‚РѕСЂ Рё Р·Р°С†РёРєР»РёРІР°РЅРёРµ.
 
     /// <summary>
-    /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
+    /// Р—Р°РїСѓСЃРєР°РµС‚ С†РёРєР» РІС‹РїРѕР»РЅРµРЅРёСЏ РґРµР»РµРіР°С‚Р° РёР·РјРµСЂРµРЅРёСЏ, РѕС‚РѕР±СЂР°Р¶Р°СЏ РєРЅРѕРїРєРё "РћСЃС‚Р°РЅРѕРІРёС‚СЊ" Рё "Р—Р°РІРµСЂС€РёС‚СЊ".
     /// </summary>
     private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_returnDelegate, _stopDelegate);
 
     /// <summary>
-    /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
+    /// Р’С‹РїРѕР»РЅСЏРµС‚ РґРµР»РµРіР°С‚ РёР·РјРµСЂРµРЅРёСЏ РѕРґРёРЅ СЂР°Р·. Р•СЃР»Рё РґРµР»РµРіР°С‚ null, РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ Р·Р°РІРµСЂС€РµРЅРёРµ.
     /// </summary>
     private async void ReturnMeasureEvent() => await ActionExecutor.ReturnMeasureEvent(this, _userActionTcs);
 
     #endregion
 
-    #region По шагам.
+    #region РџРѕ С€Р°РіР°Рј.
 
     /// <summary>
-    /// Обработчик события нажатия на кнопку "Поверх".
+    /// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ "РџРѕРІРµСЂС…".
     /// </summary>
     private void StepAround_PreviewMouseDown(object sender, MouseButtonEventArgs e) => ActionExecutor.StepAround_PreviewMouseDown(sender, e);
 
     /// <summary>
-    /// Обработчик события нажатия на кнопку "Вглубь".
+    /// РћР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ РЅР° РєРЅРѕРїРєСѓ "Р’РіР»СѓР±СЊ".
     /// </summary>
     private void StepIn_PreviewMouseDown(object sender, MouseButtonEventArgs e) => ActionExecutor.StepIn_PreviewMouseDown(sender, e);
 
@@ -219,13 +219,13 @@ namespace Ask.UI.Controls.ProtocolNew
 
     #endregion
 
-    #region Методы.
+    #region РњРµС‚РѕРґС‹.
 
     /// <summary>
-    /// Выводит информацию в протокол.
+    /// Р’С‹РІРѕРґРёС‚ РёРЅС„РѕСЂРјР°С†РёСЋ РІ РїСЂРѕС‚РѕРєРѕР».
     /// </summary>
-    /// <param name="showMessageModel">Модель сообщения.</param>
-    /// <returns>Возвращает режим по шагам.</returns>
+    /// <param name="showMessageModel">РњРѕРґРµР»СЊ СЃРѕРѕР±С‰РµРЅРёСЏ.</param>
+    /// <returns>Р’РѕР·РІСЂР°С‰Р°РµС‚ СЂРµР¶РёРј РїРѕ С€Р°РіР°Рј.</returns>
     public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
@@ -240,13 +240,17 @@ namespace Ask.UI.Controls.ProtocolNew
 
       if (AdminConfig.GetDebugRights())
       {
-        if (string.IsNullOrEmpty(showMessageModel.Debug))
+        if (showMessageModel.Debug == " ")
         {
-          showMessageModel.Debug = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
+          // Пробел используется для строк MKI-протокола, где C#-путь вызова не должен выводиться.
+        }
+        else if (string.IsNullOrEmpty(showMessageModel.Debug))
+        {
+          showMessageModel.Debug = $"{Path.GetFileName(callerFile)} -> {callerName} (строка {callerLine})";
         }
         else
         {
-          showMessageModel.Debug += $"|| {Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
+          showMessageModel.Debug += $"|| {Path.GetFileName(callerFile)} -> {callerName} (строка {callerLine})";
         }
       }
 
@@ -320,9 +324,9 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Асинхронно добавляет пустую строку в протокол с заданным уровнем отступа.
+    /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ РґРѕР±Р°РІР»СЏРµС‚ РїСѓСЃС‚СѓСЋ СЃС‚СЂРѕРєСѓ РІ РїСЂРѕС‚РѕРєРѕР» СЃ Р·Р°РґР°РЅРЅС‹Рј СѓСЂРѕРІРЅРµРј РѕС‚СЃС‚СѓРїР°.
     /// </summary>
-    /// <param name="indentLevel">Уровень отступа (не используется в текущей реализации).</param>
+    /// <param name="indentLevel">РЈСЂРѕРІРµРЅСЊ РѕС‚СЃС‚СѓРїР° (РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ С‚РµРєСѓС‰РµР№ СЂРµР°Р»РёР·Р°С†РёРё).</param>
     public async Task AppendEmptyLineAsync(int indentLevel = 0)
     {
       await protocolTextBox.AppendEmptyLineAsync();
@@ -344,9 +348,9 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Проверяет, необходимо ли начать новый блок. Если да — завершает предыдущий и начинает новый.
+    /// РџСЂРѕРІРµСЂСЏРµС‚, РЅРµРѕР±С…РѕРґРёРјРѕ Р»Рё РЅР°С‡Р°С‚СЊ РЅРѕРІС‹Р№ Р±Р»РѕРє. Р•СЃР»Рё РґР° вЂ” Р·Р°РІРµСЂС€Р°РµС‚ РїСЂРµРґС‹РґСѓС‰РёР№ Рё РЅР°С‡РёРЅР°РµС‚ РЅРѕРІС‹Р№.
     /// </summary>
-    /// <param name="IsBlockStart">Признак начала нового блока.</param>
+    /// <param name="IsBlockStart">РџСЂРёР·РЅР°Рє РЅР°С‡Р°Р»Р° РЅРѕРІРѕРіРѕ Р±Р»РѕРєР°.</param>
     private async Task CheckBlockStart(bool IsBlockStart)
     {
       if (IsBlockStart)
@@ -361,9 +365,9 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
+    /// РџСЂРѕРІРµСЂСЏРµС‚ СЃС‚Р°С‚СѓСЃ СЃРѕРѕР±С‰РµРЅРёСЏ Рё РґРѕР±Р°РІР»СЏРµС‚ С‚РµРєСЃС‚РѕРІСѓСЋ РїСЂРёСЃС‚Р°РІРєСѓ Рё С†РІРµС‚, РµСЃР»Рё СЃС‚Р°С‚СѓСЃ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅС‹Рј.
     /// </summary>
-    /// <param name="showMessageModel">Модель отображаемого сообщения, передаётся по ссылке.</param>
+    /// <param name="showMessageModel">РњРѕРґРµР»СЊ РѕС‚РѕР±СЂР°Р¶Р°РµРјРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ, РїРµСЂРµРґР°С‘С‚СЃСЏ РїРѕ СЃСЃС‹Р»РєРµ.</param>
     private async Task CheckStatus(ShowMessageModel showMessageModel)
     {
       if (showMessageModel.Status != MessageType.Info)
@@ -385,9 +389,9 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Если статус сообщения — ошибка и включена остановка при ошибке, выполнение ставится на паузу.
+    /// Р•СЃР»Рё СЃС‚Р°С‚СѓСЃ СЃРѕРѕР±С‰РµРЅРёСЏ вЂ” РѕС€РёР±РєР° Рё РІРєР»СЋС‡РµРЅР° РѕСЃС‚Р°РЅРѕРІРєР° РїСЂРё РѕС€РёР±РєРµ, РІС‹РїРѕР»РЅРµРЅРёРµ СЃС‚Р°РІРёС‚СЃСЏ РЅР° РїР°СѓР·Сѓ.
     /// </summary>
-    /// <param name="Status">Тип сообщения (ошибка, информация, успех).</param>
+    /// <param name="Status">РўРёРї СЃРѕРѕР±С‰РµРЅРёСЏ (РѕС€РёР±РєР°, РёРЅС„РѕСЂРјР°С†РёСЏ, СѓСЃРїРµС…).</param>
     private async Task CheckPause(ShowMessageModel.MessageType? Status)
     {
       if (Status == MessageType.Error && await ExecutionConfig.GetIsStopOnErrorEnabled())
@@ -397,10 +401,10 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Проверяет, нужно ли отображать детализированный протокол.
-    /// Если не нужно, удаляет последнее сообщение, если оно допускает удаление и не содержит ошибки выполнения.
+    /// РџСЂРѕРІРµСЂСЏРµС‚, РЅСѓР¶РЅРѕ Р»Рё РѕС‚РѕР±СЂР°Р¶Р°С‚СЊ РґРµС‚Р°Р»РёР·РёСЂРѕРІР°РЅРЅС‹Р№ РїСЂРѕС‚РѕРєРѕР».
+    /// Р•СЃР»Рё РЅРµ РЅСѓР¶РЅРѕ, СѓРґР°Р»СЏРµС‚ РїРѕСЃР»РµРґРЅРµРµ СЃРѕРѕР±С‰РµРЅРёРµ, РµСЃР»Рё РѕРЅРѕ РґРѕРїСѓСЃРєР°РµС‚ СѓРґР°Р»РµРЅРёРµ Рё РЅРµ СЃРѕРґРµСЂР¶РёС‚ РѕС€РёР±РєРё РІС‹РїРѕР»РЅРµРЅРёСЏ.
     /// </summary>
-    /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
+    /// <param name="showMessageModel">РњРѕРґРµР»СЊ С‚РµРєСѓС‰РµРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ, РєРѕС‚РѕСЂРѕРµ РїРѕС‚РµРЅС†РёР°Р»СЊРЅРѕ Р±СѓРґРµС‚ СЃРѕС…СЂР°РЅРµРЅРѕ РєР°Рє РїРѕСЃР»РµРґРЅРµРµ.</param>
     private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
     {
       if (!ProtocolConfig.GetShowDetailedProtocol())
@@ -427,9 +431,9 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Полностью очищает протокол и сбрасывает последнее сообщение.
+    /// РџРѕР»РЅРѕСЃС‚СЊСЋ РѕС‡РёС‰Р°РµС‚ РїСЂРѕС‚РѕРєРѕР» Рё СЃР±СЂР°СЃС‹РІР°РµС‚ РїРѕСЃР»РµРґРЅРµРµ СЃРѕРѕР±С‰РµРЅРёРµ.
     /// </summary>
-    /// <returns>Возвращает признак успешного завершения операции.</returns>
+    /// <returns>Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСЂРёР·РЅР°Рє СѓСЃРїРµС€РЅРѕРіРѕ Р·Р°РІРµСЂС€РµРЅРёСЏ РѕРїРµСЂР°С†РёРё.</returns>
     public async Task<bool> ClearAllMessagesAsync()
     {
       await protocolTextBox.ClearAsync();
@@ -445,14 +449,14 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Асинхронно удаляет блок, содержащий указанную строку, из RichTextBox.
+    /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ СѓРґР°Р»СЏРµС‚ Р±Р»РѕРє, СЃРѕРґРµСЂР¶Р°С‰РёР№ СѓРєР°Р·Р°РЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ, РёР· RichTextBox.
     /// </summary>
-    /// <param name="textToRemove">Строка для поиска и удаления.</param>
-    /// <returns>True, если блок был найден и удален; иначе False.</returns>
+    /// <param name="textToRemove">РЎС‚СЂРѕРєР° РґР»СЏ РїРѕРёСЃРєР° Рё СѓРґР°Р»РµРЅРёСЏ.</param>
+    /// <returns>True, РµСЃР»Рё Р±Р»РѕРє Р±С‹Р» РЅР°Р№РґРµРЅ Рё СѓРґР°Р»РµРЅ; РёРЅР°С‡Рµ False.</returns>
     public async Task<bool> RemoveLineContainingTextAsync(string textToRemove) => await protocolTextBox.RemoveLineContainingTextAsync(textToRemove);
 
     /// <summary>
-    /// Сохраняет протокол в файл с автоматически сгенерированным именем в фоновом режиме асинхронно.
+    /// РЎРѕС…СЂР°РЅСЏРµС‚ РїСЂРѕС‚РѕРєРѕР» РІ С„Р°Р№Р» СЃ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅРЅС‹Рј РёРјРµРЅРµРј РІ С„РѕРЅРѕРІРѕРј СЂРµР¶РёРјРµ Р°СЃРёРЅС…СЂРѕРЅРЅРѕ.
     /// </summary>
     public async Task SaveProtocolAsync(string name, string extention)
     {
@@ -513,9 +517,9 @@ namespace Ask.UI.Controls.ProtocolNew
     #endregion
 
     /// <summary>
-    /// Возвращает токен отмены для текущего действия, если источник не уничтожен.
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ С‚РѕРєРµРЅ РѕС‚РјРµРЅС‹ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РґРµР№СЃС‚РІРёСЏ, РµСЃР»Рё РёСЃС‚РѕС‡РЅРёРє РЅРµ СѓРЅРёС‡С‚РѕР¶РµРЅ.
     /// </summary>
-    /// <returns>Токен отмены <see cref="CancellationToken"/> или <see cref="CancellationToken.None"/>.</returns>
+    /// <returns>РўРѕРєРµРЅ РѕС‚РјРµРЅС‹ <see cref="CancellationToken"/> РёР»Рё <see cref="CancellationToken.None"/>.</returns>
     public CancellationToken GetCancellationToken()
     {
       try
@@ -530,24 +534,24 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public Task<bool> AwaitAdminDecisionAsync(string message)
     {
-      MessageBoxCustom.Show("В будущем добавить сюда реализацию выбора", image: MessageBoxImage.Error);
+      MessageBoxCustom.Show("Р’ Р±СѓРґСѓС‰РµРј РґРѕР±Р°РІРёС‚СЊ СЃСЋРґР° СЂРµР°Р»РёР·Р°С†РёСЋ РІС‹Р±РѕСЂР°", image: MessageBoxImage.Error);
       return Task.FromResult(true);
     }
 
     /// <summary>
-    /// Асинхронно ожидает действие пользователя после возникновения ошибки или остановки.
+    /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ РѕР¶РёРґР°РµС‚ РґРµР№СЃС‚РІРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїРѕСЃР»Рµ РІРѕР·РЅРёРєРЅРѕРІРµРЅРёСЏ РѕС€РёР±РєРё РёР»Рё РѕСЃС‚Р°РЅРѕРІРєРё.
     /// </summary>
     /// <remarks>
-    /// Метод создаёт новый <see cref="TaskCompletionSource{TResult}"/> для ожидания выбора пользователя 
-    /// (например, продолжить, пропустить или остановить выполнение).  
-    /// Если в конфигурации установлено свойство <c>IsStopOnErrorEnabled</c>,  
-    /// интерфейс переходит в режим паузы — скрываются все кнопки и отображаются кнопки управления паузой.  
-    /// После выбора действия пользователем результат возвращается как значение перечисления 
+    /// РњРµС‚РѕРґ СЃРѕР·РґР°С‘С‚ РЅРѕРІС‹Р№ <see cref="TaskCompletionSource{TResult}"/> РґР»СЏ РѕР¶РёРґР°РЅРёСЏ РІС‹Р±РѕСЂР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ 
+    /// (РЅР°РїСЂРёРјРµСЂ, РїСЂРѕРґРѕР»Р¶РёС‚СЊ, РїСЂРѕРїСѓСЃС‚РёС‚СЊ РёР»Рё РѕСЃС‚Р°РЅРѕРІРёС‚СЊ РІС‹РїРѕР»РЅРµРЅРёРµ).  
+    /// Р•СЃР»Рё РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРё СѓСЃС‚Р°РЅРѕРІР»РµРЅРѕ СЃРІРѕР№СЃС‚РІРѕ <c>IsStopOnErrorEnabled</c>,  
+    /// РёРЅС‚РµСЂС„РµР№СЃ РїРµСЂРµС…РѕРґРёС‚ РІ СЂРµР¶РёРј РїР°СѓР·С‹ вЂ” СЃРєСЂС‹РІР°СЋС‚СЃСЏ РІСЃРµ РєРЅРѕРїРєРё Рё РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РєРЅРѕРїРєРё СѓРїСЂР°РІР»РµРЅРёСЏ РїР°СѓР·РѕР№.  
+    /// РџРѕСЃР»Рµ РІС‹Р±РѕСЂР° РґРµР№СЃС‚РІРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј СЂРµР·СѓР»СЊС‚Р°С‚ РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ РєР°Рє Р·РЅР°С‡РµРЅРёРµ РїРµСЂРµС‡РёСЃР»РµРЅРёСЏ 
     /// <see cref="IUserInteractionService.UserAction"/>.
     /// </remarks>
     /// <returns>
-    /// Задача, представляющая ожидаемое действие пользователя.  
-    /// Если режим остановки на ошибке отключён, возвращается <see cref="IUserInteractionService.UserAction.None"/>.
+    /// Р—Р°РґР°С‡Р°, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰Р°СЏ РѕР¶РёРґР°РµРјРѕРµ РґРµР№СЃС‚РІРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.  
+    /// Р•СЃР»Рё СЂРµР¶РёРј РѕСЃС‚Р°РЅРѕРІРєРё РЅР° РѕС€РёР±РєРµ РѕС‚РєР»СЋС‡С‘РЅ, РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ <see cref="IUserInteractionService.UserAction.None"/>.
     /// </returns>
     public async Task<UserAction> WaitUserActionAsync(bool loop = false, bool deviceTask = false)
     {

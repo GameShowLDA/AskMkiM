@@ -14,6 +14,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Engine.Tests.SelfControl;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
@@ -86,6 +87,12 @@ namespace UI.Components
 
       void TryGet()
       {
+        if (RelayData.SelectedItem is LegacyAskSelfControlTarget legacyAskTarget)
+        {
+          device = legacyAskTarget;
+          return;
+        }
+
         var type = GetSelectedRelayDeviceType();
 
         device = type switch
@@ -221,10 +228,14 @@ namespace UI.Components
         var enumType = checker5.GetTestTypeEnum();
         SetSelfControlEnum(enumType);
       }
+      else if (selectedDevice is LegacyAskSelfControlTarget)
+      {
+        SelfControlPartSelectionVisibility = Visibility.Collapsed;
+      }
 
       _isHasDevice = true;
 
-      if (Ask.Core.Services.Config.AppSettings.AdminConfig.GetAdminRights())
+      if (Ask.Core.Services.Config.AppSettings.AdminConfig.GetAdminRights() && selectedDevice is not LegacyAskSelfControlTarget)
       {
         SelfControlPartSelectionVisibility = Visibility.Visible;
       }
@@ -236,6 +247,7 @@ namespace UI.Components
     /// </summary>
     private void LoadAllSelectableDevices()
     {
+      var chassisManagers = ChassisManagers.GetAllAsync().GetAwaiter().GetResult();
       var relaySwitchModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
       var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
       var breakdowns = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
@@ -253,6 +265,15 @@ namespace UI.Components
       var combined = new List<object>();
       var displayNames = new List<string>();
 
+      foreach (var legacyChassis in chassisManagers.Where(IsLegacyAskChassis))
+      {
+        foreach (var target in LegacyAskSelfControlTarget.CreateForChassis(legacyChassis))
+        {
+          combined.Add(target);
+          displayNames.Add($"{target.ChassisName} {target.NumberChassis}: {LegacyAskSelfControlModuleMetadata.GetDisplayName(target.Module)}");
+        }
+      }
+
       foreach (var list in sources)
       {
         foreach (var item in list)
@@ -264,6 +285,15 @@ namespace UI.Components
 
       RelayData.ItemsSource = combined;
       RelayData.DisplayFields = displayNames;
+    }
+
+    /// <summary>
+    /// Проверяет, что стойка относится к старому тестеру АСК.
+    /// </summary>
+    private static bool IsLegacyAskChassis(Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.IChassisManager chassis)
+    {
+      return string.Equals(chassis.Name, "Тестер АСК", StringComparison.OrdinalIgnoreCase)
+        || (chassis.DeviceClass?.EndsWith(".ManagerASKMKI", StringComparison.Ordinal) ?? false);
     }
 
     /// <summary>

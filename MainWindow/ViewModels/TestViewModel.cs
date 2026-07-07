@@ -5,7 +5,7 @@ namespace MainWindowProgram.ViewModels
 {
   /// <summary>
   /// ViewModel для управления тестами.
-  /// Содержит команды для отображения элементов управления различных типов тестов в редакторе.
+  /// Содержит команды для отображения элементов управления разных групп тестов.
   /// </summary>
   public partial class TestViewModel
   {
@@ -20,36 +20,48 @@ namespace MainWindowProgram.ViewModels
       _testService = testService;
     }
 
-    /// <summary>Метод узла СИ.</summary>
+    /// <summary>Открывает метод узла СИ.</summary>
     [RelayCommand]
     private void CiNodeMethod() => _testService.AddCiNodeMethodControlAsync();
 
-    /// <summary>Метод узла ПИ (DCW).</summary>
+    /// <summary>Открывает метод узла ПИ (DCW).</summary>
     [RelayCommand]
     private void PiDCWNodeMethod() => _testService.AddPiDCWNodeMethodControlAsync();
 
-    /// <summary>Метод узла ПИ (ACW).</summary>
+    /// <summary>Открывает метод узла ПИ (ACW).</summary>
     [RelayCommand]
     private void PiACWNodeMethod() => _testService.AddPiACWNodeMethodControlAsync();
 
-    /// <summary>Групповой метод СИ.</summary>
+    /// <summary>Открывает групповой метод СИ.</summary>
     [RelayCommand]
     private void CiMethodExecutor() => _testService.AddCiMethodExecutorControlAsync();
 
-    /// <summary>Групповой метод ПИ (ACW).</summary>
+    /// <summary>Открывает групповой метод ПИ (ACW).</summary>
     [RelayCommand]
     private void PiACWMethodExecutor() => _testService.AddPiACWMethodExecutorControlAsync();
 
-    /// <summary>Групповой метод ПИ (DCW).</summary>
+    /// <summary>Открывает групповой метод ПИ (DCW).</summary>
     [RelayCommand]
     private void PiDCWMethodExecutor() => _testService.AddPiDCWMethodExecutorControlAsync();
 
-    /// <summary>Перекрёстный тест МКР.</summary>
+    /// <summary>Открывает перекрестный тест МКР.</summary>
     [RelayCommand]
     private void CrossTestMkrExecutor() => _testService.AddCrossTestMkrExecutorControlAsync();
 
-    /// <summary>Контроль контактов сопротивления коммутатора.</summary>
+    /// <summary>Открывает контроль сопротивления контактов реле коммутатора.</summary>
     [RelayCommand]
     private void RelayContactResistExecutor() => _testService.AddRelayContactResistExecutorControlAsync();
+
+    /// <summary>Открывает дополнительные тесты старой АСК.</summary>
+    [RelayCommand]
+    private void LegacyAskAdditionalTests() => _testService.AddLegacyAskAdditionalTestsControl();
+
+    /// <summary>Открывает тренировку реле старой АСК.</summary>
+    [RelayCommand]
+    private void LegacyAskRelayTraining() => _testService.AddLegacyAskRelayTrainingControl();
+
+    /// <summary>Открывает измерение времени срабатывания старой АСК.</summary>
+    [RelayCommand]
+    private void LegacyAskSwitchingTime() => _testService.AddLegacyAskSwitchingTimeControl();
   }
 }

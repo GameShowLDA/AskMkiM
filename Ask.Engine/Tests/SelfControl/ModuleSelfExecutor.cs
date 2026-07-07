@@ -14,6 +14,11 @@ namespace Ask.Engine.Tests.SelfControl
   public class ModuleSelfExecutor
   {
     private IDeviceSelectorProvider _deviceSelectorProvider;
+    private readonly LegacyAskSelfControlNativeExecutor _legacyAskExecutor = new();
+
+    /// <summary>
+    /// Создаёт исполнитель самоконтроля выбранного модуля.
+    /// </summary>
     public ModuleSelfExecutor(IDeviceSelectorProvider deviceSelectorProvider)
     {
       _deviceSelectorProvider = deviceSelectorProvider;
@@ -37,6 +42,13 @@ namespace Ask.Engine.Tests.SelfControl
       IDeviceSelector deviceSelector = _deviceSelectorProvider.GetDeviceSelector();
 
       var device = deviceSelector.GetSelectedRelayDeviceByTypeSafe();
+
+      if (device is LegacyAskSelfControlTarget legacyAskTarget)
+      {
+        await _legacyAskExecutor.ExecuteAsync(legacyAskTarget, _messageService, cancellationToken);
+        return;
+      }
+
       var type = deviceSelector.GetSelectedRelayDeviceType();
       var part = deviceSelector.GetSelectedSelfControlEnumUntypedSafe();
 

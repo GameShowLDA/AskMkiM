@@ -398,7 +398,8 @@ public static class DatabaseInitializationService
       return;
     }
 
-    await EnsureColumnAsync(connection, "BreakdownTesters", "PiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "BreakdownTesters", "AcwMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "BreakdownTesters", "DcwMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "BreakdownTesters", "SiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "BreakdownTesters", "IRMinVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
   }

@@ -1,4 +1,6 @@
-﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Engine.Tests.LegacyAsk;
+using UI.Controls.ExecutorControls.LegacyAsk;
 using UI.Controls.ExecutorControls.TestsControls;
 using UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI;
 using UI.Controls.ExecutorControls.TestsControls.MethodExecutor.PI;
@@ -64,15 +66,42 @@ namespace MainWindowProgram.Services
        _multiWindow.WorkspaceService.AddControl("Групповой метод ПИ(DCW)", new PiDCWMethodExecutorControl(), TypeWindow.DeviceControl);
 
     /// <summary>
-    /// Добавляет элемент управления для перекрёстного теста МКР в multiEditors.
+    /// Добавляет элемент управления для перекрестного теста МКР в multiEditors.
     /// </summary>
     public void AddCrossTestMkrExecutorControlAsync() =>
-       _multiWindow.WorkspaceService.AddControl("Перекрёстный тест МКР", new CrossConnectionControl(), TypeWindow.DeviceControl);
+       _multiWindow.WorkspaceService.AddControl("Перекрестный тест МКР", new CrossConnectionControl(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для контроля сопротивления контактов реле коммутатора в multiEditors.
     /// </summary>
     public void AddRelayContactResistExecutorControlAsync() =>
       _multiWindow.WorkspaceService.AddControl("Сопротивление коммутатора", new RkommConnectionControl(), TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для дополнительных тестов старой АСК.
+    /// </summary>
+    public void AddLegacyAskAdditionalTestsControl() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "Дополнительные тесты АСК",
+        new LegacyAskTestControl(LegacyAskTestKind.AdditionalService),
+        TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для тренировки реле старой АСК.
+    /// </summary>
+    public void AddLegacyAskRelayTrainingControl() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "Тренировка реле АСК",
+        new LegacyAskTestControl(LegacyAskTestKind.RelayTraining),
+        TypeWindow.DeviceControl);
+
+    /// <summary>
+    /// Добавляет элемент управления для измерения времени срабатывания старой АСК.
+    /// </summary>
+    public void AddLegacyAskSwitchingTimeControl() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "Время срабатывания АСК",
+        new LegacyAskTestControl(LegacyAskTestKind.SwitchingTime),
+        TypeWindow.DeviceControl);
   }
 }
