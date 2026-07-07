@@ -44,7 +44,6 @@ namespace Ask.Device.Runtime.Device
       DCVCommands = new DCVMeasurementProfile()
       {
         Measure = "READ?",
-        CheckMode = "VOLT"
       };
 
       CapacitanceCommands = new CapacitanceMeasurementProfile()
