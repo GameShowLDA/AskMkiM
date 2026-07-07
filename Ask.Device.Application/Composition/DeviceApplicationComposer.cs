@@ -17,7 +17,6 @@ using KeysightConnectionAdapter = Ask.Device.Application.FunctionAdapters.Keysig
 using KeysightContinuityMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.ContinuityMeasurementAdapter;
 using KeysightDcVoltageMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.DcVoltageMeasurementAdapter;
 using KeysightDiodeMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.DiodeMeasurementAdapter;
-using KeysightResistanceMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.ResistanceMeasurementAdapter;
 using MintBusManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.BusManagerAdapter;
 using MintCurrentManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.CurrentManagerAdapter;
 using MintStateManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.StateManagerAdapter;
@@ -84,7 +83,6 @@ namespace Ask.Device.Application.Composition
           keysightDevice.CapacitanceManager = new KeysightCapacitanceMeasurementAdapter(keysightDevice);
           keysightDevice.ConnectableManager = new KeysightConnectionAdapter(keysightDevice);
           keysightDevice.ContinuityManager = new KeysightContinuityMeasurementAdapter(keysightDevice);
-          keysightDevice.ResistanceManager = new KeysightResistanceMeasurementAdapter(keysightDevice);
           keysightDevice.AcVoltageManager = new KeysightAcVoltageMeasurementAdapter(keysightDevice);
           keysightDevice.DcVoltageManager = new KeysightDcVoltageMeasurementAdapter(keysightDevice);
           keysightDevice.DiodeManager = new KeysightDiodeMeasurementAdapter(keysightDevice);

@@ -1,33 +1,24 @@
-using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Application.Execution;
-using Ask.Device.Application.Function.Helpers;
-using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.Helpers;
-using Ask.Device.Runtime.Function.Keysight3466new;
 
-namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
+namespace Ask.Device.Runtime.Function.Multimeter.Measurements
 {
-  internal class ResistanceMeasurementAdapter : IResistanceMeasurement
+  internal class ResistanceMeasurementBase : IResistanceMeasurement
   {
-    private readonly KeysightDevice _device;
-    private readonly ResistanceMeasurement _resistanceMeasurement;
 
-    /// <summary>
-    /// Создаёт экземпляр класса <see cref="ResistanceMeasurement"/>.
-    /// </summary>
-    /// <param name="device">Экземпляр устройства Keysight.</param>
-    /// <exception cref="ArgumentNullException">Выбрасывается, если переданный прибор <c>null</c>.</exception>
-    public ResistanceMeasurementAdapter(KeysightDevice device)
+    private readonly IFastMeter _device;
+
+    public ResistanceMeasurementBase(IFastMeter device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _resistanceMeasurement = new ResistanceMeasurement(device);
     }
-    /// <inheritdoc />
+
     public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       if (rangeTo == -1)
@@ -44,7 +35,7 @@ namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         _device,
         "Измерение сопротивления",
-        () => _resistanceMeasurement.MeasureResistanceAsync(param, rangeFrom, rangeTo));
+        () => MeasureResistanceCoreAsync(param, rangeFrom, rangeTo));
 
       if (!execution.Success)
       {
@@ -57,12 +48,11 @@ namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
       return resistance;
     }
 
-    /// <inheritdoc />
     public async Task<bool> SetResistanceModeAsync(IUserInteractionService? userMessageService = null)
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _resistanceMeasurement.SetResistanceModeAsync();
+        var succes = await SetResistanceModeCoreAsync();
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -79,6 +69,52 @@ namespace Ask.Device.Application.FunctionAdapters.Keysight3466new
 
       _device.TypeMode = MultimeterTypeMode.Resistance;
       return result;
+    }
+
+    private async Task<bool> SetResistanceModeCoreAsync()
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+      if (_device.TypeMode == MultimeterTypeMode.Resistance)
+      {
+        return true;
+      }
+
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      await _device.DeviceProtocol.QueryAsync(_device.ResistanceCommands.SetMode);
+      var answer = await _device.DeviceProtocol.QueryAsync(_device.ResistanceCommands.GetMode, timeout: _device.ResistanceCommands.Timeout);
+
+      if (answer.Contains("RES"))
+      {
+        _device.TypeMode = MultimeterTypeMode.Resistance;
+        return true;
+      }
+
+      return false;
+    }
+
+    private async Task<double> MeasureResistanceCoreAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    {
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      string response = await _device.DeviceProtocol.QueryAsync(_device.ResistanceCommands.Measure, timeout: _device.ResistanceCommands.Timeout);
+      response = response.Trim().Replace("+", "");
+
+      if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double resistance))
+      {
+        return MeasurementAdapterHelper.Round(resistance);
+      }
+
+      throw new FormatException($"Неверный формат ответа прибора при измерении сопротивления: '{response}'.");
     }
   }
 }

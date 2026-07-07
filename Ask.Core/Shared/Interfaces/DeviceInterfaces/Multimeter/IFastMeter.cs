@@ -1,7 +1,7 @@
 ﻿using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
 {
@@ -63,5 +63,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     double DcwPpuDividerCoefficientPercent { get; set; }
 
     ISelfTestCheckerMultimeter SelfTestManager { get; set; }
+
+    ResistanceMeasurementParameters ResistanceCommands { get; set; }
   }
 }

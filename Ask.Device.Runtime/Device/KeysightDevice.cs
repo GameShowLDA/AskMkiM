@@ -2,8 +2,10 @@ using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Multimeter.Measurements;
 using System.Net;
 using System.Net.Sockets;
 
@@ -74,6 +76,7 @@ namespace Ask.Device.Runtime.Device
     /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
+    public ResistanceMeasurementParameters ResistanceCommands { get; set; }
 
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
@@ -97,13 +100,14 @@ namespace Ask.Device.Runtime.Device
       CapacitanceManager = new Function.Keysight3466new.CapacitanceMeasurement(this);
       ConnectableManager = new Function.Keysight3466new.KeysightConnection(this);
       ContinuityManager = new Function.Keysight3466new.ContinuityMeasurement(this);
-      ResistanceManager = new Function.Keysight3466new.ResistanceMeasurement(this);
+      ResistanceManager = new ResistanceMeasurementBase(this);
       AcVoltageManager = new Function.Keysight3466new.AcVoltageMeasurement(this);
       DcVoltageManager = new Function.Keysight3466new.DcVoltageMeasurement(this);
       TextMessage = new Function.Keysight3466new.TextMessage(this);
       DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, Port);
+      ResistanceCommands = new ResistanceMeasurementParameters();
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;
       DcwPpuDividerCoefficientPercent = 100d;

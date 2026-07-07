@@ -2,8 +2,10 @@ using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Multimeter.Measurements;
 
 namespace Ask.Device.Runtime.Device
 {
@@ -18,13 +20,17 @@ namespace Ask.Device.Runtime.Device
       ConnectionDetails = "VID_164E&PID_0DB7";
 
       ConnectableManager = new Function.B7783.StateManager(this);
-      ResistanceManager = new Function.B7783.ResistanceMeasurement(this);
+      ResistanceManager = new ResistanceMeasurementBase(this);
       ContinuityManager = new Function.B7783.ContinuityMeasurement(this);
       CapacitanceManager = new Function.B7783.CapacitanceMeasurement(this);
       AcVoltageManager = new Function.B7783.AcVoltageMeasurement(this);
       DcVoltageManager = new Function.B7783.DcVoltageMeasurement(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new UsbProtocol(this, new Function.B7783.B7783UsbCommandHandler());
+      ResistanceCommands = new ResistanceMeasurementParameters()
+      {
+        Timeout = 2500
+      };
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;
@@ -60,6 +66,7 @@ namespace Ask.Device.Runtime.Device
     public bool IsConnected { get; set; }
 
     public string LastResolvedDevicePath { get; set; } = string.Empty;
+    public ResistanceMeasurementParameters ResistanceCommands { get; set; }
 
     public FastMeterDto Convert()
     {

@@ -53,5 +53,10 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     /// Механизм обмена данными с устройством.
     /// </summary>
     IDeviceProtocol DeviceProtocol { get; set; }
+
+    /// <summary>
+    /// Флаг состояния подключения устройства.
+    /// </summary>
+    public bool IsConnected { get; set; }
   }
 }
