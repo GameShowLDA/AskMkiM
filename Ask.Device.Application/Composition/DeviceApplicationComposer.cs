@@ -11,7 +11,6 @@ using GptConnectableManagerAdapter = Ask.Device.Application.FunctionAdapters.GPT
 using GptDcwModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.DcwModeAdapter;
 using GptIrModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.IrModeAdapter;
 using GptSystemSettingsAdapter = Ask.Device.Application.FunctionAdapters.GPT.SystemSettingsAdapter;
-using KeysightCapacitanceMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.CapacitanceMeasurementAdapter;
 using KeysightConnectionAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.KeysightConnectionAdapter;
 using KeysightContinuityMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.ContinuityMeasurementAdapter;
 using KeysightDiodeMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.DiodeMeasurementAdapter;
@@ -78,7 +77,6 @@ namespace Ask.Device.Application.Composition
           break;
 
         case KeysightDevice keysightDevice:
-          keysightDevice.CapacitanceManager = new KeysightCapacitanceMeasurementAdapter(keysightDevice);
           keysightDevice.ConnectableManager = new KeysightConnectionAdapter(keysightDevice);
           keysightDevice.ContinuityManager = new KeysightContinuityMeasurementAdapter(keysightDevice);
           keysightDevice.DiodeManager = new KeysightDiodeMeasurementAdapter(keysightDevice);

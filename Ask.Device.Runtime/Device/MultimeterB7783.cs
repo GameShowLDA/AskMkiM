@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Multimeter.Measurements;
+using System.Windows.Controls;
 
 namespace Ask.Device.Runtime.Device
 {
@@ -22,7 +23,7 @@ namespace Ask.Device.Runtime.Device
       ConnectableManager = new Function.B7783.StateManager(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
       ContinuityManager = new Function.B7783.ContinuityMeasurement(this);
-      CapacitanceManager = new Function.B7783.CapacitanceMeasurement(this);
+      CapacitanceManager = new CapacitanceMeasurementBase(this);
       AcVoltageManager = new ACVMeasurementBase(this);
       DcVoltageManager = new DCVMeasurementBase(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
@@ -43,6 +44,11 @@ namespace Ask.Device.Runtime.Device
       {
         Measure = "READ?",
         CheckMode = "VOLT"
+      };
+
+      CapacitanceCommands = new CapacitanceMeasurementParameters()
+      {
+        Measure = "READ?",
       };
 
       MaxContinuityResistance = 100000;
@@ -82,6 +88,8 @@ namespace Ask.Device.Runtime.Device
     public ResistanceMeasurementParameters ResistanceCommands { get; set; }
     public ACVMeasurementParameters ACVCommands { get; set; }
     public DCVMeasurementParameters DCVCommands { get; set; }
+    public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
+
 
 
     public FastMeterDto Convert()

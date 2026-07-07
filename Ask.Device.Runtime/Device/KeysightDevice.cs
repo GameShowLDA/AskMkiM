@@ -79,6 +79,7 @@ namespace Ask.Device.Runtime.Device
     public ResistanceMeasurementParameters ResistanceCommands { get; set; }
     public ACVMeasurementParameters ACVCommands { get; set; }
     public DCVMeasurementParameters DCVCommands { get; set; }
+    public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
 
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
@@ -99,7 +100,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.FastMeter;
       IsConnected = false;
 
-      CapacitanceManager = new Function.Keysight3466new.CapacitanceMeasurement(this);
+      CapacitanceManager = new CapacitanceMeasurementBase(this);
       ConnectableManager = new Function.Keysight3466new.KeysightConnection(this);
       ContinuityManager = new Function.Keysight3466new.ContinuityMeasurement(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
@@ -113,6 +114,7 @@ namespace Ask.Device.Runtime.Device
       ResistanceCommands = new ResistanceMeasurementParameters();
       ACVCommands = new ACVMeasurementParameters();
       DCVCommands = new DCVMeasurementParameters();
+      CapacitanceCommands = new CapacitanceMeasurementParameters();
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;

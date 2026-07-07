@@ -67,5 +67,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     ResistanceMeasurementParameters ResistanceCommands { get; set; }
     ACVMeasurementParameters ACVCommands { get; set; }
     DCVMeasurementParameters DCVCommands { get; set; }
+    CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
   }
 }
