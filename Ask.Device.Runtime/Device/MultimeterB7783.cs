@@ -24,7 +24,7 @@ namespace Ask.Device.Runtime.Device
       ContinuityManager = new Function.B7783.ContinuityMeasurement(this);
       CapacitanceManager = new Function.B7783.CapacitanceMeasurement(this);
       AcVoltageManager = new ACVMeasurementBase(this);
-      DcVoltageManager = new Function.B7783.DcVoltageMeasurement(this);
+      DcVoltageManager = new DCVMeasurementBase(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new UsbProtocol(this, new Function.B7783.B7783UsbCommandHandler());
       ResistanceCommands = new ResistanceMeasurementParameters()
@@ -34,8 +34,15 @@ namespace Ask.Device.Runtime.Device
 
       ACVCommands = new ACVMeasurementParameters()
       {
-        Timeout = 1000,
-        Measure = "READ?"
+        Measure = "READ?",
+        Timeout = 2000,
+      };
+
+
+      DCVCommands = new DCVMeasurementParameters()
+      {
+        Measure = "READ?",
+        CheckMode = "VOLT"
       };
 
       MaxContinuityResistance = 100000;
@@ -74,6 +81,8 @@ namespace Ask.Device.Runtime.Device
     public string LastResolvedDevicePath { get; set; } = string.Empty;
     public ResistanceMeasurementParameters ResistanceCommands { get; set; }
     public ACVMeasurementParameters ACVCommands { get; set; }
+    public DCVMeasurementParameters DCVCommands { get; set; }
+
 
     public FastMeterDto Convert()
     {

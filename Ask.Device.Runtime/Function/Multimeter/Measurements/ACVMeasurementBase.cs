@@ -76,7 +76,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
     }
 
     /// <inheritdoc />
-    public async Task<bool> SetACVoltageModeCoreAsync(IUserInteractionService? userMessageService = null)
+    private async Task<bool> SetACVoltageModeCoreAsync(IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -93,8 +93,8 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
       }
 
       await _device.DeviceProtocol.QueryAsync(_device.ACVCommands.SetMode);
-      var answer = await _device.DeviceProtocol.QueryAsync(_device.ACVCommands.GetMode, timeout: _device.ResistanceCommands.Timeout);
-      if (answer.Contains("VOLT:AC"))
+      var answer = await _device.DeviceProtocol.QueryAsync(_device.ACVCommands.GetMode, timeout: _device.ACVCommands.Timeout);
+      if (answer.Contains(_device.ACVCommands.CheckMode))
       {
         _device.TypeMode = MultimeterTypeMode.AcVoltage;
         return true;
@@ -104,7 +104,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureACVoltageCoreAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    private async Task<double> MeasureACVoltageCoreAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -116,7 +116,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _device.DeviceProtocol.QueryAsync(_device.ACVCommands.Measure, timeout: _device.ResistanceCommands.Timeout);
+      string response = await _device.DeviceProtocol.QueryAsync(_device.ACVCommands.Measure, timeout: _device.ACVCommands.Timeout);
       response = response.Trim().Replace("+", "");
 
       if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))

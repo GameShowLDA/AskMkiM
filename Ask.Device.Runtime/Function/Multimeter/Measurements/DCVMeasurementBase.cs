@@ -1,0 +1,131 @@
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.Multimeter;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Function.Helpers;
+
+namespace Ask.Device.Runtime.Function.Multimeter.Measurements
+{
+  internal class DCVMeasurementBase : IDcVoltageMeasurement
+  {
+    private readonly IFastMeter _device;
+    public DCVMeasurementBase(IFastMeter device)
+    {
+      _device = device ?? throw new ArgumentNullException(nameof(device));
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> SetDCVoltageModeAsync(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var succes = await SetDCVoltageModeCoreAsync();
+
+        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка режима измерения постоянного напряжения", succes, 1, userMessageService);
+        }
+
+        return succes;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw DcExceptionFactory.SetModeFailed(_device.Name, _device.NumberChassis, _device.Number);
+      }
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<double> MeasureDCVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    {
+      if (_device.TypeMode != MultimeterTypeMode.DcVoltage)
+      {
+        await SetDCVoltageModeAsync(userMessageService);
+      }
+
+      if (rangeTo == -1)
+      {
+        rangeTo = double.MaxValue;
+      }
+
+      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.DCVoltage);
+      if (random != -1)
+      {
+        return random;
+      }
+
+      var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+        _device,
+        "Измерение постоянного напряжения",
+        () => MeasureDCVoltageCoreAsync(param, rangeFrom, rangeTo));
+
+      if (!execution.Success)
+      {
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при измерении DC-напряжения", execution.ErrorMessage, false, 2, userMessageService);
+        return -1;
+      }
+
+      double result = execution.Value;
+      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Результат измерения постоянного напряжения", $"{result}В", true, 2, userMessageService);
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    private async Task<bool> SetDCVoltageModeCoreAsync(IUserInteractionService? userMessageService = null)
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+      if (_device.TypeMode == MultimeterTypeMode.DcVoltage)
+      {
+        return true;
+      }
+
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      await _device.DeviceProtocol.QueryAsync(_device.DCVCommands.SetMode);
+      var answer = await _device.DeviceProtocol.QueryAsync(_device.DCVCommands.GetMode, timeout: _device.DCVCommands.Timeout);
+      if (answer.Contains(_device.DCVCommands.CheckMode))
+      {
+        _device.TypeMode = MultimeterTypeMode.DcVoltage;
+        return true;
+      }
+
+      return false;
+    }
+
+    /// <inheritdoc />
+    private async Task<double> MeasureDCVoltageCoreAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return MeasurementAdapterHelper.Round(param);
+      }
+
+      if (!_device.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      string response = await _device.DeviceProtocol.QueryAsync(_device.DCVCommands.Measure, timeout: _device.DCVCommands.Timeout);
+      response = response.Trim().Replace("+", "");
+
+      if (double.TryParse(response, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double voltage))
+      {
+        return MeasurementAdapterHelper.Round(voltage);
+      }
+
+      throw new FormatException($"Неверный формат ответа прибора при измерении DC-напряжения: '{response}'.");
+    }
+  }
+}

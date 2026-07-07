@@ -14,7 +14,6 @@ using GptSystemSettingsAdapter = Ask.Device.Application.FunctionAdapters.GPT.Sys
 using KeysightCapacitanceMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.CapacitanceMeasurementAdapter;
 using KeysightConnectionAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.KeysightConnectionAdapter;
 using KeysightContinuityMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.ContinuityMeasurementAdapter;
-using KeysightDcVoltageMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.DcVoltageMeasurementAdapter;
 using KeysightDiodeMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.DiodeMeasurementAdapter;
 using MintBusManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.BusManagerAdapter;
 using MintCurrentManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.CurrentManagerAdapter;
@@ -82,9 +81,8 @@ namespace Ask.Device.Application.Composition
           keysightDevice.CapacitanceManager = new KeysightCapacitanceMeasurementAdapter(keysightDevice);
           keysightDevice.ConnectableManager = new KeysightConnectionAdapter(keysightDevice);
           keysightDevice.ContinuityManager = new KeysightContinuityMeasurementAdapter(keysightDevice);
-          keysightDevice.DcVoltageManager = new KeysightDcVoltageMeasurementAdapter(keysightDevice);
           keysightDevice.DiodeManager = new KeysightDiodeMeasurementAdapter(keysightDevice);
-          break;
+          break; 
 
         case MultimeterB7783 multimeterB7783:
           multimeterB7783.ConnectableManager = new B7783StateManagerAdapter(multimeterB7783);

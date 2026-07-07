@@ -90,7 +90,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
       await _device.DeviceProtocol.QueryAsync(_device.ResistanceCommands.SetMode);
       var answer = await _device.DeviceProtocol.QueryAsync(_device.ResistanceCommands.GetMode, timeout: _device.ResistanceCommands.Timeout);
 
-      if (answer.Contains("RES"))
+      if (answer.Contains(_device.ResistanceCommands.CheckMode))
       {
         _device.TypeMode = MultimeterTypeMode.Resistance;
         return true;

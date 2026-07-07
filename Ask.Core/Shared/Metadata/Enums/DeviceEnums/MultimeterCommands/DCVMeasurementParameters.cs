@@ -1,14 +1,14 @@
 ﻿namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands
 {
-  public class ResistanceMeasurementParameters
+  public class DCVMeasurementParameters
   {
-    public string SetMode { get; init; } = "CONF:RES";
+    public string SetMode { get; init; } = "CONF:VOLT:DC";
 
-    public string CheckMode { get; init; } = "RES";
+    public string CheckMode { get; init; } = "VOLT:DC";
 
     public string GetMode { get; init; } = "FUNC?";
 
-    public string Measure { get; init; } = "MEAS:RES?";
+    public string Measure { get; init; } = "MEAS:VOLT:DC?";
 
     /// <summary>
     /// Время ожидания ответа.
