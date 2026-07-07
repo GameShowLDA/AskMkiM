@@ -1,7 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Runtime.Function.Multimeter.Measurements
+namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
 {
   /// <summary>
   /// Результат выполнения измерительной операции адаптера.

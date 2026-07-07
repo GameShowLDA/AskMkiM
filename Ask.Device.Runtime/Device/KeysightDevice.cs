@@ -76,12 +76,12 @@ namespace Ask.Device.Runtime.Device
     /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
-    public ResistanceMeasurementParameters ResistanceCommands { get; set; }
-    public ACVMeasurementParameters ACVCommands { get; set; }
-    public DCVMeasurementParameters DCVCommands { get; set; }
-    public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
-    public ContinuityMeasurementParameters ContinuityCommands { get; set; }
-    public DiodeMeasurementParameters DiodeCommands { get; set; }
+    public ResistanceMeasurementProfile ResistanceCommands { get; set; }
+    public ACVMeasurementProfile ACVCommands { get; set; }
+    public DCVMeasurementProfile DCVCommands { get; set; }
+    public CapacitanceMeasurementProfile CapacitanceCommands { get; set; }
+    public ContinuityMeasurementProfile ContinuityCommands { get; set; }
+    public DiodeMeasurementProfile DiodeCommands { get; set; }
 
 
     /// <summary>
@@ -114,12 +114,12 @@ namespace Ask.Device.Runtime.Device
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, Port);
 
-      ResistanceCommands = new ResistanceMeasurementParameters();
-      ACVCommands = new ACVMeasurementParameters();
-      DCVCommands = new DCVMeasurementParameters();
-      CapacitanceCommands = new CapacitanceMeasurementParameters();
-      ContinuityCommands = new ContinuityMeasurementParameters();
-      DiodeCommands = new DiodeMeasurementParameters();
+      ResistanceCommands = new ResistanceMeasurementProfile();
+      ACVCommands = new ACVMeasurementProfile();
+      DCVCommands = new DCVMeasurementProfile();
+      CapacitanceCommands = new CapacitanceMeasurementProfile();
+      ContinuityCommands = new ContinuityMeasurementProfile();
+      DiodeCommands = new DiodeMeasurementProfile();
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;

@@ -64,11 +64,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
 
     ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
-    ResistanceMeasurementParameters ResistanceCommands { get; set; }
-    ACVMeasurementParameters ACVCommands { get; set; }
-    DCVMeasurementParameters DCVCommands { get; set; }
-    CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
-    ContinuityMeasurementParameters ContinuityCommands { get; set; }
-    DiodeMeasurementParameters DiodeCommands { get; set; }
+    ResistanceMeasurementProfile ResistanceCommands { get; set; }
+    ACVMeasurementProfile ACVCommands { get; set; }
+    DCVMeasurementProfile DCVCommands { get; set; }
+    CapacitanceMeasurementProfile CapacitanceCommands { get; set; }
+    ContinuityMeasurementProfile ContinuityCommands { get; set; }
+    DiodeMeasurementProfile DiodeCommands { get; set; }
   }
 }

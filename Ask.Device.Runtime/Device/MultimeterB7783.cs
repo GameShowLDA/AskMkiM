@@ -29,35 +29,35 @@ namespace Ask.Device.Runtime.Device
       DiodeManager = new DiodeMeasurementBase(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
       DeviceProtocol = new UsbProtocol(this, new Function.B7783.B7783UsbCommandHandler());
-      ResistanceCommands = new ResistanceMeasurementParameters()
+      ResistanceCommands = new ResistanceMeasurementProfile()
       {
         Timeout = 2500
       };
 
-      ACVCommands = new ACVMeasurementParameters()
+      ACVCommands = new ACVMeasurementProfile()
       {
         Measure = "READ?",
         Timeout = 2000,
       };
 
 
-      DCVCommands = new DCVMeasurementParameters()
+      DCVCommands = new DCVMeasurementProfile()
       {
         Measure = "READ?",
         CheckMode = "VOLT"
       };
 
-      CapacitanceCommands = new CapacitanceMeasurementParameters()
+      CapacitanceCommands = new CapacitanceMeasurementProfile()
       {
         Measure = "READ?",
       };
 
-      ContinuityCommands = new ContinuityMeasurementParameters()
+      ContinuityCommands = new ContinuityMeasurementProfile()
       {
         Measure = "READ?",
       };
 
-      DiodeCommands = new DiodeMeasurementParameters()
+      DiodeCommands = new DiodeMeasurementProfile()
       {
         Measure = "READ?",
       };
@@ -97,14 +97,14 @@ namespace Ask.Device.Runtime.Device
     public bool IsConnected { get; set; }
 
     public string LastResolvedDevicePath { get; set; } = string.Empty;
-    public ResistanceMeasurementParameters ResistanceCommands { get; set; }
-    public ACVMeasurementParameters ACVCommands { get; set; }
-    public DCVMeasurementParameters DCVCommands { get; set; }
-    public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
+    public ResistanceMeasurementProfile ResistanceCommands { get; set; }
+    public ACVMeasurementProfile ACVCommands { get; set; }
+    public DCVMeasurementProfile DCVCommands { get; set; }
+    public CapacitanceMeasurementProfile CapacitanceCommands { get; set; }
 
-    public ContinuityMeasurementParameters ContinuityCommands { get; set; }
+    public ContinuityMeasurementProfile ContinuityCommands { get; set; }
 
-    public DiodeMeasurementParameters DiodeCommands { get; set; }
+    public DiodeMeasurementProfile DiodeCommands { get; set; }
 
 
     public FastMeterDto Convert()

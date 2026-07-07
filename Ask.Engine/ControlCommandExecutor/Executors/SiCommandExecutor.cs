@@ -1,7 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -9,7 +8,6 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -20,7 +18,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class SiCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
 
     private double firstValue = 0;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)

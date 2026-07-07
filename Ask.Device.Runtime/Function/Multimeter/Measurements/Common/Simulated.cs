@@ -1,7 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace Ask.Device.Runtime.Function.Multimeter.Measurements
+namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
 {
   internal class Simulated
   {

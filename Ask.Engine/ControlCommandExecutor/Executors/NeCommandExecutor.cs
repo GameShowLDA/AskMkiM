@@ -7,21 +7,15 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class NeCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
     private double firstValue = 0;
     private double secondValue = -1;
 

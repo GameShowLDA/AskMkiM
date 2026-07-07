@@ -10,7 +10,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// </summary>
   public class RmCommandModel : BaseCommandModel
   {
-    public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.RM).DisplayName;
+    public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.RM).DisplayName;
 
     /// <summary>
     /// Словарь: "точка источника" → "точка назначения".

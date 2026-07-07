@@ -17,7 +17,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class PrCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
     private double lowValue = 0;
     private double hightValue = -1;
     private bool continuityManager = true;

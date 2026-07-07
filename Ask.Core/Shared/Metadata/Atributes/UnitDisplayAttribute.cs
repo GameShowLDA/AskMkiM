@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using System.Reflection;
 
 namespace Ask.Core.Shared.Metadata.Atributes
 {
@@ -9,7 +10,7 @@ namespace Ask.Core.Shared.Metadata.Atributes
   [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
   public sealed class UnitDisplayAttribute : Attribute
   {
-    public string Value { get; }
+    public string Display { get; }
 
     /// <summary>
     /// Обозначение величины (например: R, U, I, C).
@@ -18,7 +19,7 @@ namespace Ask.Core.Shared.Metadata.Atributes
 
     public UnitDisplayAttribute(string value, QuantitySymbol quantitySymbol)
     {
-      Value = value;
+      Display = value;
       Symbol = quantitySymbol;
     }
   }

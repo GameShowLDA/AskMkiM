@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
     /// Используется для отображения команды в пользовательском интерфейсе,
     /// протоколах выполнения и диагностических сообщениях.
     /// </summary>
-    public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
+    public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
 
     /// <summary>
     /// Тип измерительной команды.

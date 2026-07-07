@@ -30,9 +30,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
       var (voltage, unit, rest) =
           CommonParameterParser.VoltageParser.ParseVoltage(remainder);
 
-      var maxDCWVoltage = MeasurementTypeCommand.PI_DCW.GetDisplayInfo().UpperLimit;
-      var minVoltage = MeasurementTypeCommand.PI_ACW.GetDisplayInfo().LowerLimit;
-      var maxACWVoltage = MeasurementTypeCommand.PI_ACW.GetDisplayInfo().UpperLimit;
+      var maxDCWVoltage = MeasurementTypeCommand.PI_DCW.GetUpperLimit();
+      var minVoltage = MeasurementTypeCommand.PI_ACW.GetLowerLimit();
+      var maxACWVoltage = MeasurementTypeCommand.PI_ACW.GetUpperLimit();
 
       if (string.IsNullOrWhiteSpace(voltage))
       {

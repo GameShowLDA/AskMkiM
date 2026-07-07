@@ -9,7 +9,7 @@ public class MeasurementErrorDefaultsTests
   [Fact]
   public void EhtDisplayInfo_UsesInstructionResistanceRange()
   {
-    var displayInfo = MeasurementTypeCommand.EHT.GetDisplayInfo();
+    var displayInfo = MeasurementTypeCommand.EHT.GetCommandDisplayInfo();
 
     Assert.NotNull(displayInfo);
     Assert.Equal(0.01, displayInfo.LowerLimit);

@@ -8,7 +8,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class CpCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.CP).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.CP).DisplayName;
 
     public Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
