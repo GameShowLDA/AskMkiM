@@ -263,37 +263,6 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
-    public async Task<B7783CommandResult> SetCapacitanceRangeAsync(
-      double rangeNanofarads,
-      int timeoutMs = DefaultTimeoutMs,
-      CancellationToken cancellationToken = default)
-    {
-      if (!_device.IsConnected)
-      {
-        var connection = await ConnectAsync(timeoutMs, cancellationToken);
-        if (!connection.Success)
-        {
-          return connection;
-        }
-      }
-
-      return await RunTimedAsync(
-        $"SET CAPACITANCE RANGE {rangeNanofarads:G17} nF",
-        timeoutMs,
-        async token =>
-        {
-          if (_device.CapacitanceManager is not Ask.Device.Runtime.Function.B7783.CapacitanceMeasurement measurement)
-          {
-            throw new InvalidOperationException("B7-78/3 capacitance range control is not available.");
-          }
-
-          bool result = await measurement.SetCapacitanceRangeAsync(rangeNanofarads);
-          token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Capacitance range was not confirmed.";
-        },
-        cancellationToken);
-    }
-
     public async Task<double> MeasureResistanceAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       var mode = await SetResistanceModeAsync(timeoutMs, cancellationToken);

@@ -31,12 +31,11 @@ namespace TestConsole.B7783
         Console.WriteLine("13. Measure continuity resistance");
 
         Console.WriteLine("\r\n14. Set capacitance mode");
-        Console.WriteLine("15. Set capacitance range");
-        Console.WriteLine("16. Measure capacitance");
+        Console.WriteLine("15. Measure capacitance");
 
-        Console.WriteLine("\r\n17. Custom command");
-        Console.WriteLine("18. Set USB search pattern");
-        Console.WriteLine("19. Disconnect");
+        Console.WriteLine("\r\n16. Custom command");
+        Console.WriteLine("17. Set USB search pattern");
+        Console.WriteLine("18. Disconnect");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
@@ -98,22 +97,18 @@ namespace TestConsole.B7783
             PrintResult(await controller.SetCapacitanceModeAsync());
             break;
           case 15:
-            double rangeNanofarads = ReadDouble("Capacitance range, nF", 1000);
-            PrintResult(await controller.SetCapacitanceRangeAsync(rangeNanofarads));
-            break;
-          case 16:
             var capacitanceParameters = ReadCapacitanceParameters();
             await PrintMeasurementAsync(
               () => controller.MeasureCapacitanceAsync(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo),
               "Capacitance, nF");
             break;
-          case 17:
+          case 16:
             await RunCustomCommandAsync(controller);
             break;
-          case 18:
+          case 17:
             SetConnectionDetails(controller);
             break;
-          case 19:
+          case 18:
             await controller.DisconnectAsync();
             break;
           case 0:

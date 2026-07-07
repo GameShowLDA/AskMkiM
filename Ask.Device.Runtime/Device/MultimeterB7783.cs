@@ -22,7 +22,7 @@ namespace Ask.Device.Runtime.Device
 
       ConnectableManager = new Function.B7783.StateManager(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
-      ContinuityManager = new Function.B7783.ContinuityMeasurement(this);
+      ContinuityManager = new ContinuityMeasurementBase(this);
       CapacitanceManager = new CapacitanceMeasurementBase(this);
       AcVoltageManager = new ACVMeasurementBase(this);
       DcVoltageManager = new DCVMeasurementBase(this);
@@ -50,6 +50,12 @@ namespace Ask.Device.Runtime.Device
       {
         Measure = "READ?",
       };
+
+      ContinuityCommands = new ContinuityMeasurementParameters()
+      {
+        Measure = "READ?",
+      };
+
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;
@@ -90,7 +96,7 @@ namespace Ask.Device.Runtime.Device
     public DCVMeasurementParameters DCVCommands { get; set; }
     public CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
 
-
+    public ContinuityMeasurementParameters ContinuityCommands { get; set; }
 
     public FastMeterDto Convert()
     {

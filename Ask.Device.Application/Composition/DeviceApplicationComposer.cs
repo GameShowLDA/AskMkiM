@@ -12,7 +12,6 @@ using GptDcwModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.DcwModeAda
 using GptIrModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.IrModeAdapter;
 using GptSystemSettingsAdapter = Ask.Device.Application.FunctionAdapters.GPT.SystemSettingsAdapter;
 using KeysightConnectionAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.KeysightConnectionAdapter;
-using KeysightContinuityMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.ContinuityMeasurementAdapter;
 using KeysightDiodeMeasurementAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.DiodeMeasurementAdapter;
 using MintBusManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.BusManagerAdapter;
 using MintCurrentManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.CurrentManagerAdapter;
@@ -78,8 +77,6 @@ namespace Ask.Device.Application.Composition
 
         case KeysightDevice keysightDevice:
           keysightDevice.ConnectableManager = new KeysightConnectionAdapter(keysightDevice);
-          keysightDevice.ContinuityManager = new KeysightContinuityMeasurementAdapter(keysightDevice);
-          keysightDevice.DiodeManager = new KeysightDiodeMeasurementAdapter(keysightDevice);
           break; 
 
         case MultimeterB7783 multimeterB7783:

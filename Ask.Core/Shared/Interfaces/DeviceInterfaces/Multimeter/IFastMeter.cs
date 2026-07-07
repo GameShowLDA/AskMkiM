@@ -68,5 +68,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     ACVMeasurementParameters ACVCommands { get; set; }
     DCVMeasurementParameters DCVCommands { get; set; }
     CapacitanceMeasurementParameters CapacitanceCommands { get; set; }
+    ContinuityMeasurementParameters ContinuityCommands { get; set; }
   }
 }
