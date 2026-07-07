@@ -65,5 +65,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
     ResistanceMeasurementParameters ResistanceCommands { get; set; }
+    ACVMeasurementParameters ACVCommands { get; set; }
   }
 }
