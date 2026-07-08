@@ -1,6 +1,7 @@
 using TestConsole.GPT;
 using TestConsole.MINT;
 using TestConsole.B7783;
+using TestConsole.ModuleRelayControlTests;
 
 namespace TestConsole
 {
@@ -30,9 +31,10 @@ namespace TestConsole
         Console.WriteLine("17. Скан пустых строк");
         Console.WriteLine("18. Encoding scanner");
         Console.WriteLine("19. B7-78/3 multimeter");
+        Console.WriteLine("20. ModuleRelayControl");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 19)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 20)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -114,6 +116,10 @@ namespace TestConsole
 
           case 19:
             await B7783MultimeterTest.RunAsync();
+            break;
+
+          case 20:
+            await ModuleRelayControlTest.RunAsync();
             break;
 
           case 0:
