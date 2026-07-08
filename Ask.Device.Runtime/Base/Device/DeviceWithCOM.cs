@@ -152,6 +152,9 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задаёт транспортный протокол устройства.
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
+
+    public ConnectionType ConnectionType { get; init; } = ConnectionType.COM;
+
     public bool IsConnected { get; set; }
   }
 }

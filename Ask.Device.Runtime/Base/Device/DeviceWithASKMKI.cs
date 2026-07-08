@@ -52,6 +52,9 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задает протокол обмена.
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
+
+    public ConnectionType ConnectionType { get; init; }
+
     public bool IsConnected { get; set; }
   }
 }

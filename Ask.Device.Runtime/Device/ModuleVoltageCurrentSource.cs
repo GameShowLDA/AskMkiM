@@ -1,11 +1,14 @@
 using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
-using Ask.Device.Communication.Ethernet;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck;
+
 using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Ask.Device.Runtime.Device
 {
@@ -22,7 +25,9 @@ namespace Ask.Device.Runtime.Device
       Name = "Модуль МиНТ";
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
 
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.PowerSourceModule;
+      DeviceType = DeviceType.PowerSourceModule;
+      ConnectionType = ConnectionType.IP_UDP;
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       BusManager = new Function.ModuleVoltageCurrentSource.BusManager(this);
       CurrentManager = new Function.ModuleVoltageCurrentSource.CurrentManager(this);

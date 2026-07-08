@@ -2,8 +2,8 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Ethernet;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
@@ -23,6 +23,8 @@ namespace Ask.Device.Runtime.Device
       MeterManager = new Function.ModuleRelayControl.MeterManager(this);
       PointManager = new Function.ModuleRelayControl.PointManager(this);
       SelfTestManager = new SelfTestManager(this);
+      ConnectionType = ConnectionType.IP_UDP;
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       DeviceType = DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";

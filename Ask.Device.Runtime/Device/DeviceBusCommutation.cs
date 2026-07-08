@@ -1,8 +1,9 @@
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
-using Ask.Device.Communication.Ethernet;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
@@ -20,7 +21,9 @@ namespace Ask.Device.Runtime.Device
       Name = "Устройство УКШ";
       Description = "Реализовать описание в Ask.Device.Runtime.Device.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.SwitchingDevice;
+      DeviceType = DeviceType.SwitchingDevice;
+      ConnectionType = ConnectionType.IP_UDP;
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       ConnectableManager = new Function.DeviceBusCommutation.StateManager(this);
       ConnectorManager = new Function.DeviceBusCommutation.ConnectorManager(this);

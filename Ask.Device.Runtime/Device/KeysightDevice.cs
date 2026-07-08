@@ -3,8 +3,10 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.Multimeter.Measurements;
 using System.Net;
 using System.Net.Sockets;
@@ -17,31 +19,6 @@ namespace Ask.Device.Runtime.Device
   /// </summary>
   public class KeysightDevice : DeviceWithIP, IMultimeter
   {
-    /// <summary>
-    /// IP-адрес устройства.
-    /// </summary>
-    public IPAddress IP { get; set; }
-
-    /// <summary>
-    /// Флаг состояния подключения устройства.
-    /// </summary>
-    public bool IsConnected { get; set; }
-
-    /// <summary>
-    /// Порт, используемый для связи с устройством (по умолчанию 5025).
-    /// </summary>
-    public int Port => 5025;
-
-    /// <summary>
-    /// TCP-клиент для установления соединения с устройством.
-    /// </summary>
-    internal TcpClient Client { get; set; }
-
-    /// <summary>
-    /// Сетевой поток для передачи команд и получения данных.
-    /// </summary>
-    internal NetworkStream Stream { get; set; }
-
     /// <inheritdoc />
     public int NumberChassis { get; set; }
 
@@ -90,7 +67,7 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     /// <param name="ip">IP-адрес устройства.</param>
     public KeysightDevice(IPAddress ip)
-        : this() => IP = ip;
+        : this() => IPAddress = ip;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KeysightDevice"/>.
@@ -102,9 +79,11 @@ namespace Ask.Device.Runtime.Device
       DeviceClass = GetType().FullName;
       DeviceType = DeviceType.FastMeter;
       IsConnected = false;
+      ConnectionType = ConnectionType.IP_TCP;
+      ConnectedProfile.Port = 5025;
 
       CapacitanceManager = new CapacitanceMeasurementBase(this);
-      ConnectableManager = new Function.Keysight3466new.KeysightConnection(this);
+      ConnectableManager = new Transport(this);
       ContinuityManager = new ContinuityMeasurementBase(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
       AcVoltageManager = new ACVMeasurementBase(this);
@@ -112,7 +91,7 @@ namespace Ask.Device.Runtime.Device
       TextMessage = new Function.Keysight3466new.TextMessage(this);
       DiodeManager = new DiodeMeasurementBase(this);
       SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
-      DeviceProtocol = new TcpProtocol(this, Port);
+      DeviceProtocol = new TcpProtocol(this, ConnectedProfile.Port);
 
       ResistanceCommands = new ResistanceMeasurementProfile();
       ACVCommands = new ACVMeasurementProfile();
@@ -120,6 +99,7 @@ namespace Ask.Device.Runtime.Device
       CapacitanceCommands = new CapacitanceMeasurementProfile();
       ContinuityCommands = new ContinuityMeasurementProfile();
       DiodeCommands = new DiodeMeasurementProfile();
+
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;

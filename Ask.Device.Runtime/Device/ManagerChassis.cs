@@ -1,9 +1,10 @@
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Device.Communication.Ethernet;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Function.ManagerChassis;
 
 namespace Ask.Device.Runtime.Device
@@ -20,7 +21,9 @@ namespace Ask.Device.Runtime.Device
     {
       ConnectableManager = new StateManager(this);
       PowerManager = new PowerManager(this);
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.ChassisManager;
+      DeviceType = DeviceType.ChassisManager;
+      ConnectionType = ConnectionType.IP_UDP;
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       Name = "Тестер АСКМ";
       Description = "Добавить описание сюда";

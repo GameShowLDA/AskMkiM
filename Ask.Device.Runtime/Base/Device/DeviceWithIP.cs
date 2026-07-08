@@ -1,6 +1,9 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Ethernet.Udp.Protocols;
+using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.Runtime.Device;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
 
@@ -60,6 +63,9 @@ namespace Ask.Device.Runtime.Base.Device
     /// </summary>
     public bool IsAttachableDevice { get; set; }
 
+    public IpConnectedProfile ConnectedProfile { get; } = new IpConnectedProfile();
+
+
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceWithIP"/> с заданным IP-адресом.
     /// </summary>
@@ -86,6 +92,8 @@ namespace Ask.Device.Runtime.Base.Device
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
     public bool IsConnected { get; set; }
+
+    public ConnectionType ConnectionType { get; init; }
 
     /// <summary>
     /// Возвращает строковое представление IP-адреса.
@@ -114,6 +122,82 @@ namespace Ask.Device.Runtime.Base.Device
         DeviceProtocol = null;
         LogError("Некорректный формат IP-адреса.", isDeviceLog: true);
       }
+    }
+
+    virtual public(bool Success, string Message) InitializationValidationDelegate(string result, IDevice _device)
+    {
+      if (_device is IAttachableDevice attachableDevice)
+      {
+        BaseResponse baseResponse = BaseResponse.FromJson(result);
+        if (baseResponse != null)
+        {
+          if (baseResponse.NumberChassis == attachableDevice.NumberChassis &&
+        baseResponse.NumberDevice == attachableDevice.Number)
+          {
+            return (true, result);
+          }
+          else
+          {
+            string errorMessage = string.Empty;
+
+            if (baseResponse.NumberChassis != attachableDevice.NumberChassis)
+            {
+              errorMessage += $"Несовпадение по NumberChassis: ожидается {attachableDevice.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+            }
+
+            if (baseResponse.NumberDevice != attachableDevice.Number)
+            {
+              errorMessage += $"Несовпадение по NumberDevice: ожидается {attachableDevice.Number}, получено {baseResponse.NumberDevice}.";
+            }
+
+            return (false, errorMessage.Trim());
+          }
+        }
+      }
+      else
+      {
+        return result == "1.0.1" ? (true, string.Empty) : (false, result);
+      }
+
+      return (false, result);
+    }
+
+    virtual public bool ResetValidationDelegate(string result, IDevice _device)
+    {
+      if (_device is IAttachableDevice attachableDevice)
+      {
+        BaseResponse baseResponse = BaseResponse.FromJson(result);
+        if (baseResponse != null)
+        {
+          if (baseResponse.NumberChassis == attachableDevice.NumberChassis &&
+        baseResponse.NumberDevice == attachableDevice.Number && baseResponse.Answer.Contains("2.0"))
+          {
+            return true;
+          }
+          else
+          {
+            string errorMessage = string.Empty;
+
+            if (baseResponse.NumberChassis != attachableDevice.NumberChassis)
+            {
+              errorMessage += $"Несовпадение по NumberChassis: ожидается {attachableDevice.NumberChassis}, получено {baseResponse.NumberChassis}. ";
+            }
+
+            if (baseResponse.NumberDevice != attachableDevice.Number)
+            {
+              errorMessage += $"Несовпадение по NumberDevice: ожидается {attachableDevice.Number}, получено {baseResponse.NumberDevice}.";
+            }
+
+            return false;
+          }
+        }
+      }
+      else
+      {
+        return result == "2.0.1";
+      }
+
+      return false;
     }
   }
 }

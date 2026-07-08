@@ -60,7 +60,9 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задаёт транспортный протокол устройства.
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
-    public bool IsConnected { get; set ; }
+    public bool IsConnected { get; set; }
+
+    public ConnectionType ConnectionType { get; init; } = ConnectionType.USB;
 
     /// <summary>
     /// Хранит строку шаблона для поиска USB-устройства.

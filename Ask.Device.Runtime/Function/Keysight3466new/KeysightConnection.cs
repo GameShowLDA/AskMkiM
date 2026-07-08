@@ -46,7 +46,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
 
       if ((await ConnectAsync()).Connect)
       {
-        string idn = await _device.DeviceProtocol.QueryAsync("*IDN?", timeout: 1000, port: _device.Port);
+        string idn = await _device.DeviceProtocol.QueryAsync("*IDN?", timeout: 1000, port: _device.ConnectedProfile.Port);
         if (!string.IsNullOrEmpty(idn))
         {
           return (true, string.Empty);
@@ -64,11 +64,11 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         return (true, string.Empty);
       }
 
-      if (_device.IP == null)
+      if (_device.IPAddress == null)
       {
         if (IPAddress.TryParse(_device.ConnectionDetails, out IPAddress ip))
         {
-          _device.IP = ip;
+          _device.IPAddress = ip;
         }
         else
         {
@@ -80,9 +80,9 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
 
       try
       {
-        _device.Client = new TcpClient();
-        await _device.Client.ConnectAsync(_device.IP.ToString(), _device.Port, token.Token);
-        _device.Stream = _device.Client.GetStream();
+        _device.ConnectedProfile.TcpClient = new TcpClient();
+        await _device.ConnectedProfile.TcpClient.ConnectAsync(_device.IPAddress.ToString(), _device.ConnectedProfile.Port, token.Token);
+        _device.ConnectedProfile.Stream = _device.ConnectedProfile.TcpClient.GetStream();
         _device.IsConnected = true;
         return (true, string.Empty);
       }
@@ -110,11 +110,11 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
       await _device.DeviceProtocol.OperationLock.WaitAsync();
       try
       {
-        _device.Stream?.Close();
-        _device.Stream = null;
+        _device.ConnectedProfile.Stream?.Close();
+        _device.ConnectedProfile.Stream = null;
 
-        _device.Client?.Close();
-        _device.Client = null;
+        _device.ConnectedProfile.TcpClient?.Close();
+        _device.ConnectedProfile.TcpClient = null;
 
         _device.IsConnected = false;
 

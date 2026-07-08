@@ -15,7 +15,7 @@ namespace TestConsole.Keysight
     {
       _device = device ?? new KeysightDevice();
       _log = log ?? Console.WriteLine;
-      _device.IPAddress = IPAddress.Parse("192.168.1.16");
+      _device.IPAddress = IPAddress.Parse("192.168.1.119");
     }
 
     public string Name => _device.Name;

@@ -21,8 +21,4 @@
     <ProjectReference Include="..\Ask.Device.Communication\Ask.Device.Communication.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Function\Новая папка\" />
-  </ItemGroup>
-
 </Project>
