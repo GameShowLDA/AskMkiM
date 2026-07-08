@@ -45,7 +45,7 @@ namespace Ask.Device.Runtime.Function.Connected
       switch (connectionType)
       {
         case ConnectionType.IP_UDP:
-          break;
+          return await new UdpTransport((DeviceWithIP)_device).DisconnectAsync(userMessageService);
         case ConnectionType.IP_TCP:
           return await new TcpTransport((DeviceWithIP)_device).DisconnectAsync(userMessageService);
         case ConnectionType.COM:
@@ -62,7 +62,7 @@ namespace Ask.Device.Runtime.Function.Connected
       switch (connectionType)
       {
         case ConnectionType.IP_UDP:
-          break;
+          return new UdpTransport((DeviceWithIP)_device).GetConnectionStatus();
         case ConnectionType.IP_TCP:
           return new TcpTransport((DeviceWithIP)_device).GetConnectionStatus();
         case ConnectionType.COM:
@@ -79,7 +79,7 @@ namespace Ask.Device.Runtime.Function.Connected
       switch (connectionType)
       {
         case ConnectionType.IP_UDP:
-          break;
+          return new UdpTransport((DeviceWithIP)_device).InitializeAsync(userMessageService);
         case ConnectionType.IP_TCP:
           return new TcpTransport((DeviceWithIP)_device).InitializeAsync(userMessageService);
         case ConnectionType.COM:
@@ -96,7 +96,7 @@ namespace Ask.Device.Runtime.Function.Connected
       switch (connectionType)
       {
         case ConnectionType.IP_UDP:
-          break;
+          return new UdpTransport((DeviceWithIP)_device).ResetAsync(userMessageService);
         case ConnectionType.IP_TCP:
           return new TcpTransport((DeviceWithIP)_device).ResetAsync(userMessageService);
         case ConnectionType.COM:
@@ -104,7 +104,7 @@ namespace Ask.Device.Runtime.Function.Connected
         case ConnectionType.USB:
           break;
       }
-
+      
       throw new NotSupportedException("Unsupported connection type");
     }
   }

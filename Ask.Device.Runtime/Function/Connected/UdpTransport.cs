@@ -2,18 +2,12 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Device;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
   internal class UdpTransport : IConnectable
   {
-    DeviceWithIP _device;
+    private DeviceWithIP _device;
     public event Action IsReset;
 
     public UdpTransport(DeviceWithIP device)
