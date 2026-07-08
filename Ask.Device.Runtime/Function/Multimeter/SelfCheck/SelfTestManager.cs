@@ -27,7 +27,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
     {
       return typeof(MultimeterTypeConnector);
     }
-    public async Task StartSelfCheck(CancellationToken cancellationToken, Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IFastMeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage());
 
@@ -60,7 +60,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.RelayManager.DisableRelay(userMessageService);
     }
 
-    private async Task StartVoltageMeasurementTest(CancellationToken cancellationToken, ISwitchingDevice device, IFastMeter meter, IUserInteractionService? userMessageService = null)
+    private async Task StartVoltageMeasurementTest(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService? userMessageService = null)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
@@ -91,7 +91,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB1, userMessageService);
     }
 
-    private async Task StartResistanceMeasurementTest(CancellationToken cancellationToken, ISwitchingDevice device, IFastMeter meter, IUserInteractionService? userMessageService = null)
+    private async Task StartResistanceMeasurementTest(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService? userMessageService = null)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB2, userMessageService);
@@ -111,7 +111,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB2, userMessageService);
     }
 
-    private async Task StartCapacitanceMeasurementTest(CancellationToken cancellationToken, ISwitchingDevice device, IFastMeter meter, IUserInteractionService? userMessageService = null)
+    private async Task StartCapacitanceMeasurementTest(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService? userMessageService = null)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);

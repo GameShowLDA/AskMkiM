@@ -81,7 +81,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         await fastMeter.DcVoltageManager.SetDCVoltageModeAsync(messageService);
       }
@@ -90,7 +90,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0)
       {
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(fastMeter, protocolUI, param);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_DCW, resultReferenceMeterMeasured);
@@ -117,13 +117,13 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
+      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
         var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
         return result;
       }
 
-      private async Task<double> MeasuredReferenceMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param)
+      private async Task<double> MeasuredReferenceMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param)
       {
         var result = await _reference.RequestReferenceVoltageAsync(userMessageService.GetControl());
         return result == null ? -1 : result.Value;

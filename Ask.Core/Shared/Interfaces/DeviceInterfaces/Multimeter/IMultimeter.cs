@@ -8,7 +8,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
   /// <summary>
   /// Интерфейс для быстрого измерителя.
   /// </summary>
-  public interface IFastMeter : IAttachableDevice, IDeviceToDtoConverter<FastMeterDto>
+  public interface IMultimeter : IAttachableDevice, IDeviceToDtoConverter<FastMeterDto>
   {
     MultimeterTypeMode TypeMode { get; set; }
 

@@ -169,7 +169,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService, bool fast = false)
     {
       if (!fast)
       {

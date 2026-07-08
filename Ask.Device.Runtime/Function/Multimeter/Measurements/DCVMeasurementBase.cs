@@ -7,8 +7,8 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
 {
   internal class DCVMeasurementBase : IDcVoltageMeasurement
   {
-    private readonly IFastMeter _device;
-    public DCVMeasurementBase(IFastMeter device)
+    private readonly IMultimeter _device;
+    public DCVMeasurementBase(IMultimeter device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }

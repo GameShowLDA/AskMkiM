@@ -74,7 +74,7 @@ namespace Ask.Engine.Tests.SelfControl
             await breakdown.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, breakdown, switcher2, meter);
             break;
 
-          case DeviceType.FastMeter when device is IFastMeter multimeter:
+          case DeviceType.FastMeter when device is IMultimeter multimeter:
             var numberMultimeter = multimeter.NumberChassis;
             var switcher3 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberMultimeter)).FirstOrDefault();
             await multimeter.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, switcher3, multimeter);

@@ -140,13 +140,13 @@ namespace Ask.Engine.Tests.Base
     /// Используется для точного измерения электрического сопротивления.
     /// </summary>
     /// <param name="numberChassis">Номер шасси, в котором требуется найти мультиметр.</param>
-    /// <returns>Экземпляр <see cref="IFastMeter"/>.</returns>
+    /// <returns>Экземпляр <see cref="IMultimeter"/>.</returns>
     /// <exception cref="DeviceException">
     /// Генерируется, если мультиметр не найден в конфигурации.
     /// </exception>
-    public static IFastMeter ResolveFastMeter(int numberChassis)
+    public static IMultimeter ResolveFastMeter(int numberChassis)
     {
-      var fastMeter = FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult().OfType<IFastMeter>().FirstOrDefault();
+      var fastMeter = FastMeters.GetDevicesByNumberChassisAsync(numberChassis).GetAwaiter().GetResult().OfType<IMultimeter>().FirstOrDefault();
       return fastMeter ?? throw ConnectionExceptionAdapter.NotFoundInConfiguration("Мультиметр (FastMeter)");
     }
 
@@ -210,7 +210,7 @@ namespace Ask.Engine.Tests.Base
     /// Генерируется, если не удалось установить режим измерения сопротивления.
     /// </exception>
     public static async Task EnsureResistanceModeAsync(
-      IFastMeter meter,
+      IMultimeter meter,
       IUserInteractionService ui,
       CancellationToken token)
     {
@@ -236,7 +236,7 @@ namespace Ask.Engine.Tests.Base
     /// Генерируется при ошибке выполнения измерения.
     /// </exception>
     public static async Task<double> MeasureResistanceAsync(
-      IFastMeter meter,
+      IMultimeter meter,
       IUserInteractionService ui,
       CancellationToken token,
       int pointNumber,
@@ -264,12 +264,12 @@ namespace Ask.Engine.Tests.Base
     /// <param name="token">Токен отмены операции.</param>
     /// <returns>
     /// Кортеж, содержащий инициализированные:
-    /// <see cref="ISwitchingDevice"/> и <see cref="IFastMeter"/>.
+    /// <see cref="ISwitchingDevice"/> и <see cref="IMultimeter"/>.
     /// </returns>
     /// <exception cref="DeviceException">
     /// Генерируется при любой ошибке подготовки оборудования.
     /// </exception>
-    public static async Task<(ISwitchingDevice Uksh, IFastMeter Meter)> PrepareUkshAndMeterAsync(
+    public static async Task<(ISwitchingDevice Uksh, IMultimeter Meter)> PrepareUkshAndMeterAsync(
       int numberChassis,
       SwitchingBusNew pairBus,
       IUserInteractionService ui,
@@ -315,7 +315,7 @@ namespace Ask.Engine.Tests.Base
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
     public static async Task ShutdownMeterAsync(
-      IFastMeter meter,
+      IMultimeter meter,
       IUserInteractionService ui,
       CancellationToken token)
     {

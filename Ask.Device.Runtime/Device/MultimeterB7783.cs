@@ -10,11 +10,11 @@ using System.Windows.Controls;
 
 namespace Ask.Device.Runtime.Device
 {
-  public class MultimeterB7783 : DeviceWithUSB, IFastMeter
+  public class MultimeterB7783 : DeviceWithUSB, IMultimeter
   {
     public MultimeterB7783()
     {
-      Name = "Мультиметр B7-78/3";
+      Name = "АКИП B7-78/3";
       Description = "Мультиметр В7-78/3, подключение по USB.";
       DeviceClass = GetType().FullName ?? string.Empty;
       DeviceType = DeviceType.FastMeter;
@@ -63,8 +63,8 @@ namespace Ask.Device.Runtime.Device
 
 
       MaxContinuityResistance = 100000;
-      AcwPpuDividerCoefficientPercent = 100d;
-      DcwPpuDividerCoefficientPercent = 100d;
+      AcwPpuDividerCoefficientPercent = 48d;
+      DcwPpuDividerCoefficientPercent = 8d;
     }
 
     public MultimeterTypeMode TypeMode { get; set; }

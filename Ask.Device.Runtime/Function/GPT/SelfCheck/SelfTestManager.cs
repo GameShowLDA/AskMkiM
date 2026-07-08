@@ -35,7 +35,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       IR = 3,
     }
 
-    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IFastMeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester));
       await InitDevices(userMessageService, device, meter, breakdownTester);
@@ -81,7 +81,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       CancellationToken cancellationToken,
       IBreakdownTester breakdownTester,
       ISwitchingDevice device,
-      IFastMeter meter,
+      IMultimeter meter,
       IUserInteractionService? userMessageService = null)
     {
       try
@@ -132,7 +132,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       CancellationToken cancellationToken,
       IBreakdownTester breakdownTester,
       ISwitchingDevice device,
-      IFastMeter meter,
+      IMultimeter meter,
       IUserInteractionService? userMessageService = null)
     {
       try
@@ -192,7 +192,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       CancellationToken cancellationToken,
       IBreakdownTester breakdownTester,
       ISwitchingDevice device,
-      IFastMeter meter,
+      IMultimeter meter,
       IUserInteractionService? userMessageService = null)
     {
       try
@@ -249,7 +249,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       return typeof(TypeConnector);
     }
 
-    private async Task InitDevices(IUserInteractionService userMessageService, ISwitchingDevice switchingDevice, IFastMeter meter, IBreakdownTester breakdownTester)
+    private async Task InitDevices(IUserInteractionService userMessageService, ISwitchingDevice switchingDevice, IMultimeter meter, IBreakdownTester breakdownTester)
     {
       string name = breakdownTester.Name;
       int numberChassis = breakdownTester.NumberChassis;

@@ -11,7 +11,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
   internal class SetModeBase
   {
     /// <inheritdoc />
-    static public async Task<bool> SetModeAsync(IFastMeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
+    static public async Task<bool> SetModeAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
     {
       var header = EnumExtensions.GetDescription(profile.TypeMode);
 
@@ -37,7 +37,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
     }
 
     /// <inheritdoc />
-    static private async Task<bool> SetModeCoreAsync(IFastMeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
+    static private async Task<bool> SetModeCoreAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {

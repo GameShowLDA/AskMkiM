@@ -137,7 +137,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Возвращает значение проверки диода с учётом холостого режима и ожидаемой перегрузки.
     /// </summary>
     private async Task<double> GetDiodeMeasurementValueAsync(
-      IFastMeter meter,
+      IMultimeter meter,
       double value,
       ConnectedPointContext pointContext)
     {
@@ -157,7 +157,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       && !ExecutionConfig.GetIsErrorSimulationEnabled().Result
       && pointContext.IsOverloadExpected;
 
-    private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.DiodeManager.SetDiodeModeAsync(userMessageService);
     }

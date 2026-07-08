@@ -145,7 +145,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         protocolModel.AddInfo(nameCommand, infoMessage);
       }
     }
-    private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       string name = meter.Name;
       int numberChassis = meter.NumberChassis;

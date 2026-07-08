@@ -8,7 +8,7 @@ namespace Ask.Core.Shared.ParserContext
     string Mnemonic,
     int LineNumber,
     IBreakdownTester? Breakdown = null,
-    IFastMeter? Fastmeter = null)
+    IMultimeter? Fastmeter = null)
   {
     public string CommandId => $"{CommandNumber} {Mnemonic}";
 
@@ -21,7 +21,7 @@ namespace Ask.Core.Shared.ParserContext
     public ParameterContext WithBreakdown(IBreakdownTester breakdown)
         => this with { Breakdown = breakdown };
 
-    public ParameterContext WithFastMeter(IFastMeter fastmeter)
+    public ParameterContext WithFastMeter(IMultimeter fastmeter)
         => this with { Fastmeter = fastmeter };
   }
 }

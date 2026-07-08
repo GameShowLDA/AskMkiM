@@ -15,7 +15,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
   {
 
     /// <inheritdoc />
-    public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice dbc = null, IPowerSourceModule powerDevice = null, IFastMeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice dbc = null, IPowerSourceModule powerDevice = null, IMultimeter meter = null)
     {
       if (selectedType is not PowerSourceModuleTypeConnector type)
       {
@@ -73,7 +73,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 
     }
 
-    private static async Task<bool> CheckConnectionsAsync(IUserInteractionService messageService, ISwitchingDevice device, IFastMeter meter, IPowerSourceModule powerSource)
+    private static async Task<bool> CheckConnectionsAsync(IUserInteractionService messageService, ISwitchingDevice device, IMultimeter meter, IPowerSourceModule powerSource)
     {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
@@ -110,7 +110,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       return false;
     }
 
-    private static async Task SettingsMeter(IFastMeter meter, IUserInteractionService messageService)
+    private static async Task SettingsMeter(IMultimeter meter, IUserInteractionService messageService)
     {
       await meter.ConnectableManager.ConnectAsync(messageService);
       await meter.DcVoltageManager.SetDCVoltageModeAsync(messageService);

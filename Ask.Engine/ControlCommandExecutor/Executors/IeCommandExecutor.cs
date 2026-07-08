@@ -124,7 +124,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
     }

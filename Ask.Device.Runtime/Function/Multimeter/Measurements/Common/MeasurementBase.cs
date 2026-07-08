@@ -12,7 +12,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
 {
   static internal class MeasurementBase
   {
-    static public async Task<double> MeasureAsync(IFastMeter device, IMeasurementProfile profile, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    static public async Task<double> MeasureAsync(IMultimeter device, IMeasurementProfile profile, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
       var unit = profile.Unit.GetUnit();
@@ -50,7 +50,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
     }
 
     /// <inheritdoc />
-    static private async Task<double> MeasureCoreAsync(IFastMeter device, IMeasurementProfile profile, string header, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    static private async Task<double> MeasureCoreAsync(IMultimeter device, IMeasurementProfile profile, string header, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {

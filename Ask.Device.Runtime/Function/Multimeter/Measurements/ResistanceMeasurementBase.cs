@@ -8,9 +8,9 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
   internal class ResistanceMeasurementBase : IResistanceMeasurement
   {
 
-    private readonly IFastMeter _device;
+    private readonly IMultimeter _device;
 
-    public ResistanceMeasurementBase(IFastMeter device)
+    public ResistanceMeasurementBase(IMultimeter device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }

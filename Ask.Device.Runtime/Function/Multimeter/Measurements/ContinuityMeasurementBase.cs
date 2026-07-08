@@ -13,14 +13,14 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
     /// <summary>
     /// Экземпляр прибора Keysight.
     /// </summary>
-    private readonly IFastMeter _device;
+    private readonly IMultimeter _device;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ContinuityMeasurement"/>.
     /// </summary>
     /// <param name="device">Экземпляр устройства Keysight.</param>
     /// <exception cref="ArgumentNullException">Выбрасывается, если переданный прибор равен <c>null</c>.</exception>
-    public ContinuityMeasurementBase(IFastMeter device)
+    public ContinuityMeasurementBase(IMultimeter device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }

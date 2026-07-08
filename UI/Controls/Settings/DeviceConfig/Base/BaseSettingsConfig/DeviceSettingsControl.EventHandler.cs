@@ -93,9 +93,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           CapacitanceContainer.Visibility = Visibility.Collapsed;
         }
 
-        if (typeof(IFastMeter).IsAssignableFrom(selectedType))
+        if (typeof(IMultimeter).IsAssignableFrom(selectedType))
         {
-          ShowFastMeterAdditionalSettings();
+          ShowFastMeterAdditionalSettings(sender as IMultimeter);
         }
         else
         {
@@ -114,7 +114,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
-    private void ShowFastMeterAdditionalSettings()
+    private void ShowFastMeterAdditionalSettings(IMultimeter multimeter)
     {
       _acwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_acwPpuDividerCoefficientPercentTextBox);
       _dcwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_dcwPpuDividerCoefficientPercentTextBox);

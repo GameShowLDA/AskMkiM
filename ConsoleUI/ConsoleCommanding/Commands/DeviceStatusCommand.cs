@@ -208,7 +208,7 @@ namespace ConsoleUI.ConsoleCommanding.Commands
           context.Console.WriteLine($"  Пределы: PI(ACW)={breakdownTester.AcwMaxVoltage} В, PI(DCW)={breakdownTester.DcwMaxVoltage} В, IrMax={breakdownTester.IrMaxVoltage} В, IrMin={breakdownTester.IrMinVoltage} В");
           break;
 
-        case IFastMeter fastMeter:
+        case IMultimeter fastMeter:
           context.Console.WriteLine($"  Режим измерителя: {fastMeter.TypeMode}");
           context.Console.WriteLine($"  Порог прозвонки: {fastMeter.MaxContinuityResistance} Ом");
           break;

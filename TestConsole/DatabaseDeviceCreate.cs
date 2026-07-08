@@ -203,9 +203,9 @@ internal static class DatabaseDeviceCreate
       return;
     }
 
-    if (interfaceType == typeof(IFastMeter))
+    if (interfaceType == typeof(IMultimeter))
     {
-      var fastMeter = (IFastMeter)device;
+      var fastMeter = (IMultimeter)device;
       fastMeter.TypeMode = ReadEnum("Режим мультиметра", fastMeter.TypeMode);
       fastMeter.MaxContinuityResistance = ReadInt(
         "Максимальное сопротивление прозвонки",

@@ -7,9 +7,9 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
 {
   internal class CapacitanceMeasurementBase : ICapacitanceMeasurement
   {
-    private readonly IFastMeter _device;
+    private readonly IMultimeter _device;
 
-    public CapacitanceMeasurementBase(IFastMeter device)
+    public CapacitanceMeasurementBase(IMultimeter device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }

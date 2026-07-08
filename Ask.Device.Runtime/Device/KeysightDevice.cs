@@ -15,7 +15,7 @@ namespace Ask.Device.Runtime.Device
   /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
   /// Работает через сетевое подключение (TCP/IP).
   /// </summary>
-  public class KeysightDevice : DeviceWithIP, IFastMeter
+  public class KeysightDevice : DeviceWithIP, IMultimeter
   {
     /// <summary>
     /// IP-адрес устройства.
@@ -97,7 +97,7 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public KeysightDevice()
     {
-      Name = "Мультиметр 34465A";
+      Name = "Keysight 34465A";
       Description = "Реализовать описание в Ask.Device.Runtime.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
       DeviceType = DeviceType.FastMeter;

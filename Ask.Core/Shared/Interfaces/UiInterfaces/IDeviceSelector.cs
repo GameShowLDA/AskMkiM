@@ -8,6 +8,6 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     object? GetSelectedRelayDeviceByTypeSafe();
     DeviceType GetSelectedRelayDeviceType();
     Enum? GetSelectedSelfControlEnumUntypedSafe();
-    IFastMeter? GetFastMeterSafe();
+    IMultimeter? GetFastMeterSafe();
   }
 }
