@@ -1,14 +1,15 @@
 {
-  "generatedAt": "2026-07-09T18:12:22.800893+04:00",
-  "elapsed": "00:01:50.9885830",
+  "generatedAt": "2026-07-09T18:44:15.0916637+04:00",
+  "elapsed": "00:01:42.4473755",
   "statistics": {
-    "Method": 163,
+    "Method": 127,
     "Interface": 7,
     "Enum": 2,
-    "Class": 55,
+    "Class": 31,
     "Event": 4
   },
-  "total": 231,
+  "emptyFoldersCount": 59,
+  "total": 230,
   "findings": [
     {
       "Kind": 5,
@@ -291,26 +292,6 @@
       "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
     },
     {
-      "Kind": 0,
-      "FullName": "Ask.Device.Runtime.Function.ObjectHelper",
-      "Project": "Ask.Device.Runtime",
-      "Namespace": "Ask.Device.Runtime.Function",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Device.Runtime\\Function\\ObjectHelper.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Device.Runtime.Function.ObjectHelper.CopyProperties(object, object)",
-      "Project": "Ask.Device.Runtime",
-      "Namespace": "Ask.Device.Runtime.Function",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Device.Runtime\\Function\\ObjectHelper.cs",
-      "Line": 16,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
       "Kind": 5,
       "FullName": "Ask.Diagnostics.Models.\u003Cinvalid-global-code\u003E.CommandHistoryEntry(DateTimeOffset, string)",
       "Project": "Ask.Diagnostics",
@@ -321,82 +302,12 @@
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
     {
-      "Kind": 0,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.ComandBody.OcCommandBodyBuilder",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.ComandBody",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\ComandBody\\OcCommandBodyBuilder.cs",
-      "Line": 7,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.ComandBody.OcCommandBodyBuilder.CanCreate(Ask.Core.Shared.DTO.Executor.BaseCommandModel)",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.ComandBody",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\ComandBody\\OcCommandBodyBuilder.cs",
-      "Line": 9,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.ComandBody.OcCommandBodyBuilder.Create(Ask.Core.Shared.DTO.Executor.BaseCommandModel, StringBuilder)",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.ComandBody",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\ComandBody\\OcCommandBodyBuilder.cs",
-      "Line": 11,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
       "Kind": 5,
       "FullName": "Ask.Engine.ControlCommandAnalyser.Model.Chains.\u003Cinvalid-global-code\u003E.ParsedExprPart(string, char?)",
       "Project": "Ask.Engine",
       "Namespace": "Ask.Engine.ControlCommandAnalyser.Model.Chains",
       "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\Model\\Chains\\ParsedExprPart.cs",
       "Line": 3,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.Parser.ParserKeyHelper",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\Parser\\ParserKeyHelper.cs",
-      "Line": 11,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.Parser.ParserKeyHelper.GetAllowedKeys(Ask.Engine.ControlCommandAnalyser.Parser.ICommandParser)",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\Parser\\ParserKeyHelper.cs",
-      "Line": 26,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers.AmperageManager",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\Parser\\Common\\Helpers\\AmperageManager.cs",
-      "Line": 9,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers.AmperageManager.Parse(string, string)",
-      "Project": "Ask.Engine",
-      "Namespace": "Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine\\ControlCommandAnalyser\\Parser\\Common\\Helpers\\AmperageManager.cs",
-      "Line": 19,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -622,26 +533,6 @@
     },
     {
       "Kind": 0,
-      "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.CommandMnemonicCaseTests",
-      "Project": "Ask.Engine.UnitTests",
-      "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandAnalyser\\Parser\\CommandMnemonicCaseTests.cs",
-      "Line": 6,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.CriticalStructureTranslationTests",
-      "Project": "Ask.Engine.UnitTests",
-      "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandAnalyser\\Parser\\CriticalStructureTranslationTests.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
       "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.IndentationChekerTests",
       "Project": "Ask.Engine.UnitTests",
       "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
@@ -649,46 +540,6 @@
       "Line": 5,
       "References": 0,
       "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.CommandMnemonicCaseTests.Dispose()",
-      "Project": "Ask.Engine.UnitTests",
-      "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandAnalyser\\Parser\\CommandMnemonicCaseTests.cs",
-      "Line": 32,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.CommandMnemonicCaseTests.ParseAll_WithLowercaseCyrillicMnemonics_NormalizesToUppercase()",
-      "Project": "Ask.Engine.UnitTests",
-      "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandAnalyser\\Parser\\CommandMnemonicCaseTests.cs",
-      "Line": 9,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.CriticalStructureTranslationTests.Analyze_WithCriticalStructureError_SkipsSecondaryPostAnalysis()",
-      "Project": "Ask.Engine.UnitTests",
-      "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandAnalyser\\Parser\\CriticalStructureTranslationTests.cs",
-      "Line": 11,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.CriticalStructureTranslationTests.Dispose()",
-      "Project": "Ask.Engine.UnitTests",
-      "Namespace": "Ask.Engine.UnitTests.ControlCommandAnalyser.Parser",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandAnalyser\\Parser\\CriticalStructureTranslationTests.cs",
-      "Line": 40,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
     {
       "Kind": 5,
@@ -931,26 +782,6 @@
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
     {
-      "Kind": 0,
-      "FullName": "Ask.UI.Components.ProtocolListBox.HeaderVisibilityConverter",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\HeaderVisibilityConverter.cs",
-      "Line": 7,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.UI.Components.ProtocolListBox.MessageToLeadingNewLineConverter",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\MessageToLeadingNewLineConverter.cs",
-      "Line": 6,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
       "Kind": 5,
       "FullName": "Ask.UI.Components.ProtocolListBox.ColorToBrushConverter.Convert(object, Type, object, CultureInfo)",
       "Project": "Ask.UI",
@@ -972,26 +803,6 @@
     },
     {
       "Kind": 5,
-      "FullName": "Ask.UI.Components.ProtocolListBox.HeaderVisibilityConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\HeaderVisibilityConverter.cs",
-      "Line": 9,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Components.ProtocolListBox.HeaderVisibilityConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\HeaderVisibilityConverter.cs",
-      "Line": 22,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
       "FullName": "Ask.UI.Components.ProtocolListBox.MessageToColonConverter.Convert(object, Type, object, CultureInfo)",
       "Project": "Ask.UI",
       "Namespace": "Ask.UI.Components.ProtocolListBox",
@@ -1007,26 +818,6 @@
       "Namespace": "Ask.UI.Components.ProtocolListBox",
       "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\MessageToColonConverter.cs",
       "Line": 14,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Components.ProtocolListBox.MessageToLeadingNewLineConverter.Convert(object[], Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\MessageToLeadingNewLineConverter.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Components.ProtocolListBox.MessageToLeadingNewLineConverter.ConvertBack(object, Type[], object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Components\\ProtocolListBox\\MessageToLeadingNewLineConverter.cs",
-      "Line": 17,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -1131,26 +922,6 @@
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
     {
-      "Kind": 0,
-      "FullName": "Ask.UI.Controls.TextEditorControl.AvalonSegmentExtensions",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Controls.TextEditorControl",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Controls\\TextEditorControl\\AvalonSegmentExtensions.cs",
-      "Line": 16,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Controls.TextEditorControl.AvalonSegmentExtensions.ToAvalon(Ask.Core.Shared.Metadata.View.EditorHost.TextEditor.ITextSegment)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Controls.TextEditorControl",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Controls\\TextEditorControl\\AvalonSegmentExtensions.cs",
-      "Line": 25,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
       "Kind": 5,
       "FullName": "Ask.UI.Features.Archive.Services.\u003Cinvalid-global-code\u003E.ApkwEntry(string, string)",
       "Project": "Ask.UI",
@@ -1207,96 +978,6 @@
       "Namespace": "Ask.UI.Features.Notifications.Views",
       "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\Notifications\\Views\\WindowNotificationManagerControl.xaml.cs",
       "Line": 245,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.BoolToFontWeightConverter",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\BoolToFontWeightConverter.cs",
-      "Line": 33,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.BoolToOpacityConverter",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\BoolToOpacityConverter.cs",
-      "Line": 24,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.InverseBooleanToVisibilityConverter",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\InverseBooleanToVisibilityConverter.cs",
-      "Line": 20,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.BoolToFontWeightConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\BoolToFontWeightConverter.cs",
-      "Line": 54,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.BoolToFontWeightConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\BoolToFontWeightConverter.cs",
-      "Line": 73,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.BoolToOpacityConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\BoolToOpacityConverter.cs",
-      "Line": 45,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.BoolToOpacityConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\BoolToOpacityConverter.cs",
-      "Line": 54,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.InverseBooleanToVisibilityConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\InverseBooleanToVisibilityConverter.cs",
-      "Line": 37,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "Ask.UI.Shared.Converters.Boolean.InverseBooleanToVisibilityConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "Ask.UI",
-      "Namespace": "Ask.UI.Shared.Converters.Boolean",
-      "File": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Converters\\Boolean\\InverseBooleanToVisibilityConverter.cs",
-      "Line": 59,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -1631,16 +1312,6 @@
       "Reason": "\u041D\u0430 \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
     },
     {
-      "Kind": 0,
-      "FullName": "MainWindowProgram.Test.Protocol.TestBaseProtocol",
-      "Project": "MainWindowProgram",
-      "Namespace": "MainWindowProgram.Test.Protocol",
-      "File": "D:\\GitRep\\AskMkiM\\MainWindow\\Test\\Protocol\\TestBaseProtocol.xaml.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
       "Kind": 7,
       "FullName": "MainWindowProgram.ViewModels.TextEditorStatusViewModel.ChangeEncodingMouseCommand.CanExecuteChanged",
       "Project": "MainWindowProgram",
@@ -1666,7 +1337,7 @@
       "Project": "TestConsole",
       "Namespace": "\u003Cglobal\u003E",
       "File": "D:\\GitRep\\AskMkiM\\TestConsole\\UnusedCode\\UnusedCodeModels.cs",
-      "Line": 104,
+      "Line": 117,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -1712,6 +1383,16 @@
     },
     {
       "Kind": 5,
+      "FullName": "TestConsole.UnusedCode.\u003Cinvalid-global-code\u003E.EmptyFolderFinding(string, string, string)",
+      "Project": "TestConsole",
+      "Namespace": "TestConsole.UnusedCode",
+      "File": "D:\\GitRep\\AskMkiM\\TestConsole\\UnusedCode\\UnusedCodeModels.cs",
+      "Line": 84,
+      "References": 0,
+      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
+    },
+    {
+      "Kind": 5,
       "FullName": "TestConsole.UnusedCode.\u003Cinvalid-global-code\u003E.SymbolCandidate(ISymbol, TestConsole.UnusedCode.UnusedSymbolKind, string, Document)",
       "Project": "TestConsole",
       "Namespace": "TestConsole.UnusedCode",
@@ -1732,11 +1413,11 @@
     },
     {
       "Kind": 5,
-      "FullName": "TestConsole.UnusedCode.\u003Cinvalid-global-code\u003E.UnusedCodeAnalysisResult(IReadOnlyList\u003CUnusedCodeFinding\u003E, TimeSpan)",
+      "FullName": "TestConsole.UnusedCode.\u003Cinvalid-global-code\u003E.UnusedCodeAnalysisResult(IReadOnlyList\u003CUnusedCodeFinding\u003E, IReadOnlyList\u003CEmptyFolderFinding\u003E, TimeSpan)",
       "Project": "TestConsole",
       "Namespace": "TestConsole.UnusedCode",
       "File": "D:\\GitRep\\AskMkiM\\TestConsole\\UnusedCode\\UnusedCodeModels.cs",
-      "Line": 83,
+      "Line": 95,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -1781,36 +1462,6 @@
       "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
     },
     {
-      "Kind": 0,
-      "FullName": "UI.LoadColorScheme",
-      "Project": "UI",
-      "Namespace": "UI",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\LoadColorScheme.cs",
-      "Line": 3,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Components.DeviceSelectorControl",
-      "Project": "UI",
-      "Namespace": "UI.Components",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\DeviceSelectorControl.xaml.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Components.TopPanelControl",
-      "Project": "UI",
-      "Namespace": "UI.Components",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\TopPanelControl.xaml.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
       "Kind": 5,
       "FullName": "UI.Components.MarginConverter.Convert(object, Type, object, CultureInfo)",
       "Project": "UI",
@@ -1827,126 +1478,6 @@
       "Namespace": "UI.Components",
       "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\TextBoxPlaceholder.xaml.cs",
       "Line": 349,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Components.ProtocolListBox.HeaderVisibilityConverter",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\HeaderVisibilityConverter.cs",
-      "Line": 7,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Components.ProtocolListBox.MessageToLeadingNewLineConverter",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\MessageToLeadingNewLineConverter.cs",
-      "Line": 6,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.ColorToBrushConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\ColorToBrushConverter.cs",
-      "Line": 9,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.ColorToBrushConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\ColorToBrushConverter.cs",
-      "Line": 14,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.HeaderVisibilityConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\HeaderVisibilityConverter.cs",
-      "Line": 9,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.HeaderVisibilityConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\HeaderVisibilityConverter.cs",
-      "Line": 22,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.MessageToColonConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\MessageToColonConverter.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.MessageToColonConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\MessageToColonConverter.cs",
-      "Line": 14,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.MessageToLeadingNewLineConverter.Convert(object[], Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\MessageToLeadingNewLineConverter.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.MessageToLeadingNewLineConverter.ConvertBack(object, Type[], object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\MessageToLeadingNewLineConverter.cs",
-      "Line": 17,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.TimeToSeparatorConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\TimeToSeparatorConverter.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Components.ProtocolListBox.TimeToSeparatorConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Components.ProtocolListBox",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Components\\ProtocolListBox\\TimeToSeparatorConverter.cs",
-      "Line": 14,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -2041,96 +1572,6 @@
       "Reason": "\u0421\u043E\u0431\u044B\u0442\u0438\u0435 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F."
     },
     {
-      "Kind": 0,
-      "FullName": "UI.Controls.Calendar.BoolToBrushConverter",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Controls.Calendar.BoolToFontWeightConverter",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 29,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Controls.Calendar.BoolToOpacityConverter",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 22,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.Calendar.BoolToBrushConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 10,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.Calendar.BoolToBrushConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 19,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.Calendar.BoolToFontWeightConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 31,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.Calendar.BoolToFontWeightConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 33,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.Calendar.BoolToOpacityConverter.Convert(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 24,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.Calendar.BoolToOpacityConverter.ConvertBack(object, Type, object, CultureInfo)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.Calendar",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Calendar\\BoolToBrushConverter.cs",
-      "Line": 26,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
       "Kind": 5,
       "FullName": "UI.Controls.ErrorList.ErrorCountToHeaderConverter.Convert(object, Type, object, CultureInfo)",
       "Project": "UI",
@@ -2167,26 +1608,6 @@
       "Namespace": "UI.Controls.GPT",
       "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\GPT\\GPTController.xaml.cs",
       "Line": 31,
-      "References": 0,
-      "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Controls.TextEditorControl.AvalonSegmentExtensions",
-      "Project": "UI",
-      "Namespace": "UI.Controls.TextEditorControl",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\TextEditorControl\\AvalonSegmentExtensions.cs",
-      "Line": 16,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 5,
-      "FullName": "UI.Controls.TextEditorControl.AvalonSegmentExtensions.ToAvalon(Ask.Core.Shared.Metadata.View.EditorHost.TextEditor.ITextSegment)",
-      "Project": "UI",
-      "Namespace": "UI.Controls.TextEditorControl",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Controls\\TextEditorControl\\AvalonSegmentExtensions.cs",
-      "Line": 25,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
     },
@@ -2239,26 +1660,6 @@
       "Line": 15,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Icon.ErrorIconControl",
-      "Project": "UI",
-      "Namespace": "UI.Icon",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Icon\\ErrorIconControl.xaml.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
-    },
-    {
-      "Kind": 0,
-      "FullName": "UI.Icon.SuccessIconControl",
-      "Project": "UI",
-      "Namespace": "UI.Icon",
-      "File": "D:\\GitRep\\AskMkiM\\UI\\Icon\\SuccessIconControl.xaml.cs",
-      "Line": 8,
-      "References": 0,
-      "Reason": "\u041D\u0430 \u043A\u043B\u0430\u0441\u0441 \u043E\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0443\u044E\u0442 \u0441\u0441\u044B\u043B\u043A\u0438."
     },
     {
       "Kind": 5,
@@ -2319,6 +1720,303 @@
       "Line": 20,
       "References": 0,
       "Reason": "\u041C\u0435\u0442\u043E\u0434 \u043D\u0438\u0433\u0434\u0435 \u043D\u0435 \u0432\u044B\u0437\u044B\u0432\u0430\u0435\u0442\u0441\u044F."
+    }
+  ],
+  "emptyFolders": [
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Services\\Device",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Services\\Files",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Services\\Translator\\Unit\\Converter",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\DTO\\Analyser",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Entity\\MeasurementError",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\DeviceInterfaces\\MikUps1101rRm",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\DeviceInterfaces\\Rack\\Capabilities",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\DeviceInterfaces\\UsbInput",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\UiInterfaces\\EditorHost",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\UiInterfaces\\RunView",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\UiInterfaces\\TextEditorView",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\UiInterfaces\\TranslarotView",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Interfaces\\UiInterfaces\\View",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Core",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Core\\Shared\\Metadata\\Delegates",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.DataBase.Provider",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.DataBase.Provider\\DataAccess",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Device.Application",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Device.Application\\FunctionAdapters\\UsbInput",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Device.Communication",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Device.Communication\\Usb\\Clients",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Device.Runtime",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Device.Runtime\\Base\\Singleton",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Device.Runtime",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Device.Runtime\\Device\\Multimeter",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Device.Runtime",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Device.Runtime\\Ethernet\\Udp\\Commands",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Device.Runtime",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Device.Runtime\\Function\\UsbInput",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.Engine.UnitTests",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.Engine.UnitTests\\ControlCommandExecutor\\BaseStrategies",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Controls\\Archive",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\Archive\\Domain",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\Archive\\Models",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\CommandPalette\\Models",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\CommandPalette\\Services",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\CommandPalette\\ViewModels",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\CommandPalette\\Views",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\Diagnostics\\Views",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Features\\ExecutionSelection\\Services",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\Archive",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\DI",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\Messaging",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\State",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\UI\\Focus",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\UI\\Overlay\\Drawer\\Focus",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\UI\\Overlay\\Drawer\\Visual",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Infrastructure\\UI\\ViewResolution",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Resources\\Assets\\Fonts",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Resources\\Theme",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Services",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Components\\FilePicker",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "Ask.UI",
+      "Path": "D:\\GitRep\\AskMkiM\\Ask.UI\\Shared\\Validation",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "MainWindowProgram",
+      "Path": "D:\\GitRep\\AskMkiM\\MainWindow\\\u0422\u0435\u0441\u0442\u044B \u041F\u041A\\\u0410\u0432\u0442\u043E\u0442\u0435\u0441\u0442\u044B\\1 \u0422\u0435\u0441\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435 \u043A\u043E\u043C\u0430\u043D\u0434\u044B \u0420\u041C\\\u0413\u0440\u0443\u043F\u043F\u043E\u0432\u0430\u044F \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0430",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "MainWindowProgram",
+      "Path": "D:\\GitRep\\AskMkiM\\MainWindow\\\u0422\u0435\u0441\u0442\u044B \u041F\u041A\\\u0426\u0435\u0445 15\\12312",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "MainWindowProgram",
+      "Path": "D:\\GitRep\\AskMkiM\\MainWindow\\Engine\\Events",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "MainWindowProgram",
+      "Path": "D:\\GitRep\\AskMkiM\\MainWindow\\Resources\\LoginWindow",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "MainWindowProgram",
+      "Path": "D:\\GitRep\\AskMkiM\\MainWindow\\Services\\LegacyConversion",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "TestConsole",
+      "Path": "D:\\GitRep\\AskMkiM\\TestConsole\\AbstractTest",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "TestConsole",
+      "Path": "D:\\GitRep\\AskMkiM\\TestConsole\\COM",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Components\\MultiEditorMethods\\Helpers",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Components\\MultiEditorMethods\\Models",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Components\\MultiEditorMethods\\Services",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Settings\\ConfigDevice",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Controls\\Settings\\RoleManagement",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Resources\\ColorsUI",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Resources\\Theme\\AppleDataGrid",
+      "Reason": "Folder does not contain files or subfolders."
+    },
+    {
+      "Project": "UI",
+      "Path": "D:\\GitRep\\AskMkiM\\UI\\Resources\\Theme\\ModernDataGrid",
+      "Reason": "Folder does not contain files or subfolders."
     }
   ]
 }

@@ -76,12 +76,25 @@ internal sealed record UnusedCodeFinding(
   string Reason);
 
 /// <summary>
+/// Describes an empty project folder found during solution scanning.
+/// </summary>
+/// <param name="Project">The project that owns the folder.</param>
+/// <param name="Path">The empty folder path.</param>
+/// <param name="Reason">The reason why the folder is suspicious.</param>
+internal sealed record EmptyFolderFinding(
+  string Project,
+  string Path,
+  string Reason);
+
+/// <summary>
 /// Stores aggregate analyzer output.
 /// </summary>
 /// <param name="Findings">The suspicious symbols.</param>
+/// <param name="EmptyFolders">The empty project folders.</param>
 /// <param name="Elapsed">The total analysis duration.</param>
 internal sealed record UnusedCodeAnalysisResult(
   IReadOnlyList<UnusedCodeFinding> Findings,
+  IReadOnlyList<EmptyFolderFinding> EmptyFolders,
   TimeSpan Elapsed)
 {
   /// <summary>

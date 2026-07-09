@@ -109,6 +109,8 @@ internal static class UnusedCodeAnalyzer
           DateTimeOffset.UtcNow - projectStarted);
       }
 
+      var emptyFolderScanner = new EmptyFolderScanner();
+      var emptyFolders = await emptyFolderScanner.ScanAsync(projects, cancellationToken).ConfigureAwait(false);
       var result = new UnusedCodeAnalysisResult(
         findings
           .OrderBy(finding => finding.Project)
@@ -116,6 +118,7 @@ internal static class UnusedCodeAnalyzer
           .ThenBy(finding => finding.Kind)
           .ThenBy(finding => finding.FullName)
           .ToArray(),
+        emptyFolders,
         DateTimeOffset.UtcNow - started);
 
       var reportBuilder = new ReportBuilder();
@@ -130,8 +133,9 @@ internal static class UnusedCodeAnalyzer
       }
 
       Logger.Info(
-        "Unused-code analysis completed. Findings: {Findings}. Elapsed: {Elapsed}",
+        "Unused-code analysis completed. Findings: {Findings}. Empty folders: {EmptyFolders}. Elapsed: {Elapsed}",
         result.Findings.Count,
+        result.EmptyFolders.Count,
         result.Elapsed);
     }
     catch (Exception ex) when (ex is not OperationCanceledException)
@@ -213,6 +217,15 @@ internal static class UnusedCodeAnalyzer
       Console.WriteLine($"Reason: {finding.Reason}");
     }
 
+    foreach (var folder in result.EmptyFolders)
+    {
+      Console.WriteLine();
+      Console.WriteLine("EmptyFolder");
+      Console.WriteLine(folder.Path);
+      Console.WriteLine($"Project: {folder.Project}");
+      Console.WriteLine($"Reason: {folder.Reason}");
+    }
+
     Console.WriteLine();
     Console.WriteLine("==================================");
     Console.WriteLine($"Unused classes: {GetCount(result, UnusedSymbolKind.Class)}");
@@ -222,7 +235,8 @@ internal static class UnusedCodeAnalyzer
     Console.WriteLine($"Unused interfaces: {GetCount(result, UnusedSymbolKind.Interface)}");
     Console.WriteLine($"Unused enums: {GetCount(result, UnusedSymbolKind.Enum)}");
     Console.WriteLine($"Unused events: {GetCount(result, UnusedSymbolKind.Event)}");
-    Console.WriteLine($"Total: {result.Findings.Count}");
+    Console.WriteLine($"Empty folders: {result.EmptyFolders.Count}");
+    Console.WriteLine($"Total: {result.Findings.Count + result.EmptyFolders.Count}");
     Console.WriteLine("==================================");
   }
 
