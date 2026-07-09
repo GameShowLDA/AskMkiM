@@ -154,10 +154,7 @@ namespace Ask.Device.Runtime.Base.Device
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
 
-    public ConnectionType ConnectionType { get; init; } = ConnectionType.COM;
-
-    public bool IsConnected { get; set; }
-
     public ComConnectedProfile ConnectedProfile { get; set; } = new ComConnectedProfile();
+    public IConnectionInfo ConnectionInfo { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
 }

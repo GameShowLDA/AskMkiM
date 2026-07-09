@@ -61,7 +61,7 @@ namespace Ask.Device.Runtime.Function.Connected
         _device.ConnectedProfile.TcpClient = new TcpClient();
         await _device.ConnectedProfile.TcpClient.ConnectAsync(_device.IPAddress.ToString(), _device.ConnectedProfile.Port, token.Token);
         _device.ConnectedProfile.Stream = _device.ConnectedProfile.TcpClient.GetStream();
-        _device.IsConnected = true;
+        _device.ConnectionInfo.IsConnected = true;
         return (true, string.Empty);
       }
       catch (OperationCanceledException)
@@ -71,7 +71,7 @@ namespace Ask.Device.Runtime.Function.Connected
       catch (Exception ex)
       {
         Console.WriteLine($"Ошибка подключения: {ex.Message}");
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         return (false, ex.Message);
       }
     }
@@ -92,7 +92,7 @@ namespace Ask.Device.Runtime.Function.Connected
         _device.ConnectedProfile.TcpClient?.Close();
         _device.ConnectedProfile.TcpClient = null;
 
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
 
         IsReset?.Invoke();
 
@@ -107,11 +107,6 @@ namespace Ask.Device.Runtime.Function.Connected
     public Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
       return Task.FromResult(true);
-    }
-
-    public string GetConnectionStatus()
-    {
-      return null;
     }
   }
 }

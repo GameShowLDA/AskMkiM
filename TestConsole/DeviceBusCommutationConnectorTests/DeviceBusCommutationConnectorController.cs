@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.DeviceBusCommutation;
@@ -11,8 +12,6 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
     private const int DefaultTimeoutMs = 5000;
     private readonly DeviceBusCommutation _device;
     private readonly Action<string> _log;
-    private bool _connected;
-
     public DeviceBusCommutationConnectorController(DeviceBusCommutation? device = null, Action<string>? log = null)
     {
       _device = device ?? new DeviceBusCommutation();
@@ -38,9 +37,7 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
       get => _device.Number;
       set => _device.Number = value;
     }
-
-    public bool IsConnected => _connected;
-
+    public IConnectionInfo ConnectionInfo => _device.ConnectionInfo;
     public async Task<DeviceBusCommutationCommandResult> ConnectAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       EnsureProtocolConfigured();
@@ -52,7 +49,7 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
         {
           var result = await _device.ConnectableManager.ConnectAsync();
           token.ThrowIfCancellationRequested();
-          _connected = result.Connect;
+          _device.ConnectionInfo.IsConnected = result.Connect;
           return result.Connect ? result.Answer : throw new InvalidOperationException(result.Answer);
         },
         cancellationToken);
@@ -69,7 +66,7 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
         {
           var result = await _device.ConnectableManager.InitializeAsync();
           token.ThrowIfCancellationRequested();
-          _connected = result.Connect;
+          _device.ConnectionInfo.IsConnected = result.Connect;
           return result.Connect ? result.Answer : throw new InvalidOperationException(result.Answer);
         },
         cancellationToken);
@@ -88,7 +85,7 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
           token.ThrowIfCancellationRequested();
           if (result)
           {
-            _connected = false;
+            _device.ConnectionInfo.IsConnected = false;
           }
 
           return result.ToString();
@@ -107,7 +104,7 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
         {
           bool result = await _device.ConnectableManager.DisconnectAsync();
           token.ThrowIfCancellationRequested();
-          _connected = false;
+          _device.ConnectionInfo.IsConnected = false;
           return result.ToString();
         },
         cancellationToken);

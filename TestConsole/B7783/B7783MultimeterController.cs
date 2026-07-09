@@ -23,12 +23,9 @@ namespace TestConsole.B7783
       get => _device.ConnectionDetails;
       set => _device.ConnectionDetails = value;
     }
-
-    public bool IsConnected => _device.IsConnected;
-
     public string LastResolvedDevicePath => _device.LastResolvedDevicePath;
 
-    public string ConnectionStatus => _device.ConnectableManager.GetConnectionStatus();
+    public string ConnectionStatus => _device.ConnectionInfo.GetConnectionStatus();
 
     public async Task<B7783CommandResult> InitializeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
@@ -99,7 +96,7 @@ namespace TestConsole.B7783
 
     public async Task<B7783CommandResult> SetResistanceModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -115,14 +112,14 @@ namespace TestConsole.B7783
         {
           bool result = await _device.ResistanceManager.SetResistanceModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Resistance mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Resistance mode was not confirmed.";
         },
         cancellationToken);
     }
 
     public async Task<B7783CommandResult> SetContinuityModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -138,14 +135,14 @@ namespace TestConsole.B7783
         {
           bool result = await _device.ContinuityManager.SetContinuityModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Continuity mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Continuity mode was not confirmed.";
         },
         cancellationToken);
     }
 
     public async Task<B7783CommandResult> SetDiodeModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -161,14 +158,14 @@ namespace TestConsole.B7783
         {
           bool result = await _device.DiodeManager.SetDiodeModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Diode mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Diode mode was not confirmed.";
         },
         cancellationToken);
     }
 
     public async Task<B7783CommandResult> CheckContinuityAsync(bool expectedOutcome, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -196,7 +193,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -224,7 +221,7 @@ namespace TestConsole.B7783
     int timeoutMs = MeasurementTimeoutMs,
     CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -247,7 +244,7 @@ namespace TestConsole.B7783
 
     public async Task<B7783CommandResult> SetDcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -263,14 +260,14 @@ namespace TestConsole.B7783
         {
           bool result = await _device.DcVoltageManager.SetDCVoltageModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "DC voltage mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "DC voltage mode was not confirmed.";
         },
         cancellationToken);
     }
 
     public async Task<B7783CommandResult> SetAcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -286,14 +283,14 @@ namespace TestConsole.B7783
         {
           bool result = await _device.AcVoltageManager.SetACVoltageModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "AC voltage mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage mode was not confirmed.";
         },
         cancellationToken);
     }
 
     public async Task<B7783CommandResult> SetCapacitanceModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -309,7 +306,7 @@ namespace TestConsole.B7783
         {
           bool result = await _device.CapacitanceManager.SetCapacitanceModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Capacitance mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -332,7 +329,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -352,7 +349,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -372,7 +369,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -397,7 +394,7 @@ namespace TestConsole.B7783
         throw new ArgumentException("Command is empty.", nameof(command));
       }
 
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)

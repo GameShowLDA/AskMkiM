@@ -141,7 +141,7 @@ namespace TestConsole
       Console.WriteLine($"Device: {controller.Name}");
       Console.WriteLine($"IP: {controller.ConnectionDetails}");
       Console.WriteLine($"Status: {controller.ConnectionStatus}");
-      Console.WriteLine($"Connected: {controller.IsConnected}");
+      Console.WriteLine($"Connected: {controller.ConnectionInfo.IsConnected}");
       Console.WriteLine();
     }
 

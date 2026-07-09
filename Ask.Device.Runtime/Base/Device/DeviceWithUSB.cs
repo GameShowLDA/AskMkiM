@@ -61,8 +61,6 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задаёт транспортный протокол устройства.
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
-    public bool IsConnected { get; set; }
-
     public ConnectionType ConnectionType { get; init; } = ConnectionType.USB;
 
     /// <summary>
@@ -71,5 +69,6 @@ namespace Ask.Device.Runtime.Base.Device
     /// 
     private string _connectionDetails = string.Empty;
     public UsbConnectedProfile ConnectedProfile { get; set; } = new UsbConnectedProfile();
+    public IConnectionInfo ConnectionInfo { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
   }
 }

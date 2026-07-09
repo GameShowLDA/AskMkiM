@@ -22,11 +22,6 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
     public event Action IsReset;
 
     /// <summary>
-    /// Возвращает состояние подключения к прибору.
-    /// </summary>
-    public bool IsConnected => _device.IsConnected;
-
-    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KeysightConnection"/>.
     /// </summary>
     /// <param name="device">Экземпляр устройства Keysight.</param>
@@ -83,7 +78,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         _device.ConnectedProfile.TcpClient = new TcpClient();
         await _device.ConnectedProfile.TcpClient.ConnectAsync(_device.IPAddress.ToString(), _device.ConnectedProfile.Port, token.Token);
         _device.ConnectedProfile.Stream = _device.ConnectedProfile.TcpClient.GetStream();
-        _device.IsConnected = true;
+        _device.ConnectionInfo.IsConnected = true;
         return (true, string.Empty);
       }
       catch (OperationCanceledException)
@@ -93,7 +88,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
       catch (Exception ex)
       {
         Console.WriteLine($"Ошибка подключения: {ex.Message}");
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         return (false, ex.Message);
       }
 
@@ -116,7 +111,7 @@ namespace Ask.Device.Runtime.Function.Keysight3466new
         _device.ConnectedProfile.TcpClient?.Close();
         _device.ConnectedProfile.TcpClient = null;
 
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
 
         IsReset?.Invoke();
 

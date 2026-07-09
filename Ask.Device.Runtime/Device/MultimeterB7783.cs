@@ -21,6 +21,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.FastMeter;
       ConnectionDetails = "VID_164E&PID_0DB7";
 
+
       ConnectableManager = new Transport(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
       ContinuityManager = new ContinuityMeasurementBase(this);
@@ -93,9 +94,6 @@ namespace Ask.Device.Runtime.Device
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
     public int NumberChassis { get; set; }
-
-    public bool IsConnected { get; set; }
-
     public string LastResolvedDevicePath { get; set; } = string.Empty;
     public ResistanceMeasurementProfile ResistanceCommands { get; set; }
     public ACVMeasurementProfile ACVCommands { get; set; }

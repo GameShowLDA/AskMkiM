@@ -80,7 +80,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
     private async Task<bool> CheckContinuityCoreAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }

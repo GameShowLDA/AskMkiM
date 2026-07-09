@@ -160,7 +160,7 @@ namespace TestConsole.ModuleRelayControlTests
       Console.WriteLine($"NumberChassis: {controller.NumberChassis}");
       Console.WriteLine($"Number: {controller.Number}");
       Console.WriteLine($"PointCount: {controller.PointCount}");
-      Console.WriteLine($"Connected: {controller.IsConnected}");
+      Console.WriteLine($"Connected: {controller.ConnectionInfo.IsConnected}");
       Console.WriteLine();
     }
 

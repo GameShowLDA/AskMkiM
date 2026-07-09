@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using System.Diagnostics;
@@ -10,7 +11,6 @@ namespace TestConsole.ModuleRelayControlTests
     private const int DefaultTimeoutMs = 5000;
     private readonly ModuleRelayControl _device;
     private readonly Action<string> _log;
-    private bool _connected;
 
     public ModuleRelayControlController(ModuleRelayControl? device = null, Action<string>? log = null)
     {
@@ -43,7 +43,8 @@ namespace TestConsole.ModuleRelayControlTests
       set => _device.PointCount = value;
     }
 
-    public bool IsConnected => _connected;
+    public IConnectionInfo ConnectionInfo => _device.ConnectionInfo;
+
 
     public async Task<ModuleRelayControlCommandResult> ConnectAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
@@ -56,7 +57,7 @@ namespace TestConsole.ModuleRelayControlTests
         {
           var result = await _device.ConnectableManager.ConnectAsync();
           token.ThrowIfCancellationRequested();
-          _connected = result.Connect;
+          _device.ConnectionInfo.IsConnected = result.Connect;
           return result.Connect ? result.Answer : throw new InvalidOperationException(result.Answer);
         },
         cancellationToken);
@@ -73,7 +74,7 @@ namespace TestConsole.ModuleRelayControlTests
         {
           var result = await _device.ConnectableManager.InitializeAsync();
           token.ThrowIfCancellationRequested();
-          _connected = result.Connect;
+          _device.ConnectionInfo.IsConnected = result.Connect;
           return result.Connect ? result.Answer : throw new InvalidOperationException(result.Answer);
         },
         cancellationToken);
@@ -92,7 +93,7 @@ namespace TestConsole.ModuleRelayControlTests
           token.ThrowIfCancellationRequested();
           if (result)
           {
-            _connected = false;
+            _device.ConnectionInfo.IsConnected = false;
           }
 
           return result.ToString();
@@ -111,7 +112,7 @@ namespace TestConsole.ModuleRelayControlTests
         {
           bool result = await _device.ConnectableManager.DisconnectAsync();
           token.ThrowIfCancellationRequested();
-          _connected = false;
+          _device.ConnectionInfo.IsConnected = false;
           return result.ToString();
         },
         cancellationToken);

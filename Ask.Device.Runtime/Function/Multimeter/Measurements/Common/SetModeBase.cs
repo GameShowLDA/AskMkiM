@@ -49,7 +49,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
         return true;
       }
 
-      if (!device.IsConnected)
+      if (!device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }

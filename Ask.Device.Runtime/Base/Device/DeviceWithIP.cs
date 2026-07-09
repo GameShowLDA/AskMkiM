@@ -91,9 +91,8 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задаёт транспортный протокол устройства.
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
-    public bool IsConnected { get; set; }
-
     public ConnectionType ConnectionType { get; init; }
+    public IConnectionInfo ConnectionInfo { get; set; }
 
     /// <summary>
     /// Возвращает строковое представление IP-адреса.
@@ -124,7 +123,7 @@ namespace Ask.Device.Runtime.Base.Device
       }
     }
 
-    virtual public(bool Success, string Message) InitializationValidationDelegate(string result, IDevice _device)
+    virtual public (bool Success, string Message) InitializationValidationDelegate(string result, IDevice _device)
     {
       if (_device is IAttachableDevice attachableDevice)
       {

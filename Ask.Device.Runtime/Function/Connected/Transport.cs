@@ -18,7 +18,7 @@ namespace Ask.Device.Runtime.Function.Connected
     public Transport(IDevice device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      connectionType = _device.ConnectionType;
+      connectionType = _device.ConnectionInfo.ConnectionType;
     }
 
     public event Action IsReset;
@@ -56,24 +56,6 @@ namespace Ask.Device.Runtime.Function.Connected
 
       throw new NotSupportedException("Unsupported connection type");
     }
-
-    public string GetConnectionStatus()
-    {
-      switch (connectionType)
-      {
-        case ConnectionType.IP_UDP:
-          return new UdpTransport((DeviceWithIP)_device).GetConnectionStatus();
-        case ConnectionType.IP_TCP:
-          return new TcpTransport((DeviceWithIP)_device).GetConnectionStatus();
-        case ConnectionType.COM:
-          break;
-        case ConnectionType.USB:
-          return new UsbTransport((DeviceWithUSB)_device).GetConnectionStatus();
-      }
-
-      throw new NotSupportedException("Unsupported connection type");
-    }
-
     public Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
       switch (connectionType)

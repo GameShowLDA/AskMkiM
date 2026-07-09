@@ -164,15 +164,15 @@ namespace ConsoleUI.ConsoleCommanding.Commands
 
     private static void WriteConnectionStatus(CommandContext context, IDevice device)
     {
-      if (device.ConnectableManager == null)
+      if (device.ConnectionInfo == null)
       {
-        context.Console.WriteLine("  Статус подключения: нет менеджера подключения");
+        context.Console.WriteLine("  Статус подключения: нет информации о подключении");
         return;
       }
 
       try
       {
-        var status = device.ConnectableManager.GetConnectionStatus();
+        var status = device.ConnectionInfo.GetConnectionStatus();
         WriteMultiline(context, "  Статус подключения", status);
       }
       catch (Exception ex)

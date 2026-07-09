@@ -30,12 +30,12 @@ namespace Ask.Device.Runtime.Function.Connected
       string pattern = GetUsbSearchPattern();
       if (!UsbDeviceLocator.TryFindByName(pattern, out var descriptor))
       {
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         _device.ConnectedProfile.LastResolvedDevicePath = string.Empty;
         return (false, $"USB-устройство {_device.Name} не найдено по шаблону \"{pattern}\".");
       }
 
-      _device.IsConnected = true;
+      _device.ConnectionInfo.IsConnected = true;
       _device.ConnectedProfile.LastResolvedDevicePath = descriptor.DeviceId;
       return (true, descriptor.Name);
     }
@@ -49,7 +49,7 @@ namespace Ask.Device.Runtime.Function.Connected
 
       using (await _device.DeviceProtocol.OperationLock.LockAsync())
       {
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
 
         if (_device is IMultimeter multimeter)
         {
@@ -59,11 +59,6 @@ namespace Ask.Device.Runtime.Function.Connected
         IsReset?.Invoke();
         return true;
       }
-    }
-
-    public string GetConnectionStatus()
-    {
-      return null;
     }
 
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)

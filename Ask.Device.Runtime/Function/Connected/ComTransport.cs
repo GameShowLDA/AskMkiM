@@ -144,22 +144,6 @@ namespace Ask.Device.Runtime.Function.Connected
     }
 
     /// <summary>
-    /// Возвращает текстовое состояние COM-подключения.
-    /// </summary>
-    /// <returns>Состояние порта или сообщение об отсутствии настроенного COM-порта.</returns>
-    public string GetConnectionStatus()
-    {
-      if (_device.COMPort == null)
-      {
-        return "COM-порт не задан";
-      }
-
-      return _device.COMPort.IsOpen
-        ? $"COM-порт {_device.COMPort.PortName} открыт"
-        : $"COM-порт {_device.COMPort.PortName} закрыт";
-    }
-
-    /// <summary>
     /// Выполняет команду инициализации и проверяет, что ответ содержит ожидаемый признак устройства.
     /// </summary>
     /// <returns>Результат инициализации и текст ошибки, если устройство не подтвердило подключение.</returns>
@@ -176,19 +160,19 @@ namespace Ask.Device.Runtime.Function.Connected
 
           if (IsExpectedInitializeAnswer(answer))
           {
-            _device.IsConnected = true;
+            _device.ConnectionInfo.IsConnected = true;
             return (true, string.Empty);
           }
         }
 
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         return string.IsNullOrEmpty(answer)
           ? (false, "Устройство не ответило на команду инициализации.")
           : (false, $"Неожиданный ответ от устройства: {answer}");
       }
       catch (Exception ex)
       {
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         LogWarning($"[{_device.Name}] Ошибка при опросе команды инициализации: {ex.Message}", isDeviceLog: true);
         return (false, ex.Message);
       }
@@ -266,7 +250,7 @@ namespace Ask.Device.Runtime.Function.Connected
       CancelPendingIo(port);
       ClosePort(port);
 
-      _device.IsConnected = false;
+      _device.ConnectionInfo.IsConnected = false;
       LogInformation($"[{_device.Name}] COM-порт {portName} оставлен в модели для повторного открытия.", isDeviceLog: true);
     }
 

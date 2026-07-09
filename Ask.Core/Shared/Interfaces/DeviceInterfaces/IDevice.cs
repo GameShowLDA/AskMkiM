@@ -40,11 +40,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     DeviceType DeviceType { get; }
 
     /// <summary>
-    /// Тип подключения.
-    /// </summary>
-    ConnectionType ConnectionType { get; init; }
-
-    /// <summary>
     /// Возвращает полный путь к экземпляру класса.
     /// </summary>
     string DeviceClass { get; set; }
@@ -60,9 +55,8 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     IDeviceProtocol DeviceProtocol { get; set; }
 
     /// <summary>
-    /// Флаг состояния подключения устройства.
+    /// Информация о текущем состоянии подключения устройства.
     /// </summary>
-    public bool IsConnected { get; set; }
-
+    IConnectionInfo ConnectionInfo { get; set; }
   }
 }

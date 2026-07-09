@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Runtime.Device;
 using System.Diagnostics;
 using System.Net;
@@ -10,6 +11,7 @@ namespace TestConsole.Keysight
     private const int MeasurementTimeoutMs = 10000;
     private readonly KeysightDevice _device;
     private readonly Action<string> _log;
+
 
     public KeysightMultimeterController(KeysightDevice? device = null, Action<string>? log = null)
     {
@@ -25,10 +27,9 @@ namespace TestConsole.Keysight
       get => _device.ConnectionDetails;
       set => _device.ConnectionDetails = value;
     }
+    public IConnectionInfo ConnectionInfo => _device.ConnectionInfo;
 
-    public bool IsConnected => _device.IsConnected;
-
-    public string ConnectionStatus => _device.ConnectableManager.GetConnectionStatus();
+    public string ConnectionStatus => _device.ConnectionInfo.GetConnectionStatus();
 
     public async Task<KeysightCommandResult> InitializeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
@@ -103,7 +104,7 @@ namespace TestConsole.Keysight
         {
           bool result = await _device.ResistanceManager.SetResistanceModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Resistance mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Resistance mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -119,7 +120,7 @@ namespace TestConsole.Keysight
         {
           bool result = await _device.ContinuityManager.SetContinuityModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Continuity mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Continuity mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -135,7 +136,7 @@ namespace TestConsole.Keysight
         {
           bool result = await _device.DiodeManager.SetDiodeModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Diode mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Diode mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -151,7 +152,7 @@ namespace TestConsole.Keysight
         {
           bool result = await _device.DcVoltageManager.SetDCVoltageModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "DC voltage mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "DC voltage mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -167,7 +168,7 @@ namespace TestConsole.Keysight
         {
           bool result = await _device.AcVoltageManager.SetACVoltageModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "AC voltage mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -183,7 +184,7 @@ namespace TestConsole.Keysight
         {
           bool result = await _device.CapacitanceManager.SetCapacitanceModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Capacitance mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance mode was not confirmed.";
         },
         cancellationToken);
     }
@@ -274,7 +275,7 @@ namespace TestConsole.Keysight
 
     private async Task EnsureConnectedAsync(int timeoutMs, CancellationToken cancellationToken)
     {
-      if (_device.IsConnected)
+      if (_device.ConnectionInfo.IsConnected)
       {
         return;
       }

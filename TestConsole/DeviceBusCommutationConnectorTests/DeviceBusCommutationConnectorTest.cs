@@ -138,7 +138,7 @@ namespace TestConsole.DeviceBusCommutationConnectorTests
       Console.WriteLine($"IP: {controller.ConnectionDetails}");
       Console.WriteLine($"NumberChassis: {controller.NumberChassis}");
       Console.WriteLine($"Number: {controller.Number}");
-      Console.WriteLine($"Connected: {controller.IsConnected}");
+      Console.WriteLine($"Connected: {controller.ConnectionInfo.IsConnected}");
       Console.WriteLine();
     }
 

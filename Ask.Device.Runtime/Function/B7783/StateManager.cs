@@ -48,12 +48,12 @@ namespace Ask.Device.Runtime.Function.B7783
       string pattern = GetUsbSearchPattern();
       if (!UsbDeviceLocator.TryFindByName(pattern, out var descriptor))
       {
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         _device.LastResolvedDevicePath = string.Empty;
         return Task.FromResult((false, $"USB-устройство В7-78/3 не найдено по шаблону \"{pattern}\"."));
       }
 
-      _device.IsConnected = true;
+      _device.ConnectionInfo.IsConnected = true;
       _device.LastResolvedDevicePath = descriptor.DeviceId;
       return Task.FromResult((true, descriptor.Name));
     }
@@ -67,7 +67,7 @@ namespace Ask.Device.Runtime.Function.B7783
 
       using (await _device.DeviceProtocol.OperationLock.LockAsync())
       {
-        _device.IsConnected = false;
+        _device.ConnectionInfo.IsConnected = false;
         _device.TypeMode = MultimeterTypeMode.None;
         IsReset?.Invoke();
         return true;
@@ -83,7 +83,7 @@ namespace Ask.Device.Runtime.Function.B7783
 
     public string GetConnectionStatus()
     {
-      string connection = _device.IsConnected ? "Подключен" : "Не подключен";
+      string connection = _device.ConnectionInfo.IsConnected ? "Подключен" : "Не подключен";
       string mode = _device.TypeMode switch
       {
         MultimeterTypeMode.Resistance => "измерение сопротивления",

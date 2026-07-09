@@ -69,9 +69,5 @@ namespace Ask.Device.Runtime.Function.Connected
       return false;
     }
 
-    public string GetConnectionStatus()
-    {
-      throw new NotImplementedException();
-    }
   }
 }
