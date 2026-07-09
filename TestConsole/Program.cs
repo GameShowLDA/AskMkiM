@@ -2,6 +2,7 @@ using TestConsole.GPT;
 using TestConsole.MINT;
 using TestConsole.B7783;
 using TestConsole.ModuleRelayControlTests;
+using TestConsole.DeviceBusCommutationConnectorTests;
 
 namespace TestConsole
 {
@@ -32,9 +33,10 @@ namespace TestConsole
         Console.WriteLine("18. Encoding scanner");
         Console.WriteLine("19. B7-78/3 multimeter");
         Console.WriteLine("20. ModuleRelayControl");
+        Console.WriteLine("21. DeviceBusCommutation ConnectorManager");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 20)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 21)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -120,6 +122,10 @@ namespace TestConsole
 
           case 20:
             await ModuleRelayControlTest.RunAsync();
+            break;
+
+          case 21:
+            await DeviceBusCommutationConnectorTest.RunAsync();
             break;
 
           case 0:

@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 
 namespace Ask.Device.Runtime.Base.Device
 {
@@ -67,6 +68,8 @@ namespace Ask.Device.Runtime.Base.Device
     /// <summary>
     /// Хранит строку шаблона для поиска USB-устройства.
     /// </summary>
+    /// 
     private string _connectionDetails = string.Empty;
+    public UsbConnectedProfile ConnectedProfile { get; set; } = new UsbConnectedProfile();
   }
 }

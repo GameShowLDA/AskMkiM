@@ -28,13 +28,13 @@ namespace Ask.Device.Runtime.Function.Connected
       switch (connectionType)
       {
         case ConnectionType.IP_UDP:
-          break;
+          return await new UdpTransport((DeviceWithIP)_device).ConnectAsync(userMessageService);
         case ConnectionType.IP_TCP:
           return await new TcpTransport((DeviceWithIP)_device).ConnectAsync(userMessageService);
         case ConnectionType.COM:
           break;
         case ConnectionType.USB:
-          break;
+          return await new UsbTransport((DeviceWithUSB)_device).ConnectAsync(userMessageService);
       }
 
       throw new NotSupportedException("Unsupported connection type");
@@ -51,7 +51,7 @@ namespace Ask.Device.Runtime.Function.Connected
         case ConnectionType.COM:
           break;
         case ConnectionType.USB:
-          break;
+          return await new UsbTransport((DeviceWithUSB)_device).DisconnectAsync(userMessageService);
       }
 
       throw new NotSupportedException("Unsupported connection type");
@@ -68,7 +68,7 @@ namespace Ask.Device.Runtime.Function.Connected
         case ConnectionType.COM:
           break;
         case ConnectionType.USB:
-          break;
+          return new UsbTransport((DeviceWithUSB)_device).GetConnectionStatus();
       }
 
       throw new NotSupportedException("Unsupported connection type");
@@ -85,7 +85,7 @@ namespace Ask.Device.Runtime.Function.Connected
         case ConnectionType.COM:
           break;
         case ConnectionType.USB:
-          break;
+          return new UsbTransport((DeviceWithUSB)_device).InitializeAsync();
       }
 
       throw new NotSupportedException("Unsupported connection type");
@@ -102,9 +102,9 @@ namespace Ask.Device.Runtime.Function.Connected
         case ConnectionType.COM:
           break;
         case ConnectionType.USB:
-          break;
+          return new UsbTransport((DeviceWithUSB)_device).ResetAsync();
       }
-      
+
       throw new NotSupportedException("Unsupported connection type");
     }
   }

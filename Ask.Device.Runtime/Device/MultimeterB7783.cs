@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.Multimeter.Measurements;
 using System.Windows.Controls;
 
@@ -20,7 +21,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.FastMeter;
       ConnectionDetails = "VID_164E&PID_0DB7";
 
-      ConnectableManager = new Function.B7783.StateManager(this);
+      ConnectableManager = new Transport(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
       ContinuityManager = new ContinuityMeasurementBase(this);
       CapacitanceManager = new CapacitanceMeasurementBase(this);
