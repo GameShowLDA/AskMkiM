@@ -56,9 +56,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       protocolModel.ProgramPath = string.IsNullOrWhiteSpace(opkPath)
           ? string.Empty
           : opkPath;
+
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(opkPath);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1)
+      {
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
+      }
+        
+      var protocolProgramName = 
       protocolModel.ProgramName = string.IsNullOrWhiteSpace(opkPath)
           ? "Название программы контроля"
-          : Path.GetFileName(opkPath);
+          : $"{uniqueNameWithoutExtention}{Path.GetExtension(opkPath)}";
 
       if (ProtocolConfig.GetGenerateProtocol())
       {
