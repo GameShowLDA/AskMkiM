@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
+using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -484,7 +485,7 @@ namespace MainWindowProgram.Services
         return;
       }
 
-      if (runContainer != null)
+      /*if (runContainer != null)
       {
         var runControl = runContainer.GetDockControl().DockItems[0].Content as RunControl;
         if (runControl != null)
@@ -492,7 +493,13 @@ namespace MainWindowProgram.Services
           await runControl.Start(runControl.TranslationModels);
           return;
         }
-      }
+      }*/
+
+      /*if (runContainer != null && runContainer.GetDockControl().DockItems.Count > 0)
+      {
+        _multiWindow.RunService.CloseRunItem(runContainer.GetDockControl().DockItems[0].Content as RunControl, EditorType.Run);
+      }*/
+
 
       if (container == null && runContainer == null && editor == null)
       {
