@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.ManagerChassis;
 
 namespace Ask.Device.Runtime.Device
@@ -19,7 +20,7 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public ManagerChassis()
     {
-      ConnectableManager = new StateManager(this);
+      ConnectableManager = new Transport(this);
       PowerManager = new PowerManager(this);
       DeviceType = DeviceType.ChassisManager;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();

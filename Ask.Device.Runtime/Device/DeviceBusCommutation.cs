@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
@@ -24,7 +25,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.SwitchingDevice;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
-      ConnectableManager = new Function.DeviceBusCommutation.StateManager(this);
+      ConnectableManager = new Transport(this);
       ConnectorManager = new Function.DeviceBusCommutation.ConnectorManager(this);
       CapacitorManager = new Function.DeviceBusCommutation.CapacitorManager(this);
       RelayManager = new Function.DeviceBusCommutation.RelayManager(this);

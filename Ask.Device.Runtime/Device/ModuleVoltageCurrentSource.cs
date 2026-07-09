@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck;
 
 using System.ComponentModel.DataAnnotations.Schema;
@@ -30,7 +31,7 @@ namespace Ask.Device.Runtime.Device
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
       BusManager = new Function.ModuleVoltageCurrentSource.BusManager(this);
       CurrentManager = new Function.ModuleVoltageCurrentSource.CurrentManager(this);
-      ConnectableManager = new Function.ModuleVoltageCurrentSource.StateManager(this);
+      ConnectableManager = new Transport(this);
       VoltageManager = new Function.ModuleVoltageCurrentSource.VoltageManager(this);
       SelfTestManager = new SelfTestManager();
       DeviceClass = GetType().FullName;
