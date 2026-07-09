@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace TestConsole.UnusedCode;
 
@@ -156,11 +157,11 @@ internal sealed class HtmlReportBuilder : IReportBuilder
     builder.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
     builder.AppendLine("<title>Unused code report</title>");
     builder.AppendLine("<style>");
-    builder.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#202124;background:#f7f8fa}main{max-width:1280px;margin:auto}h1{font-size:28px}label{font-weight:600}select,input,button{height:34px;margin:4px 12px 12px 0;padding:0 10px;border:1px solid #b8bdc7;border-radius:6px;background:white}.toolbar{position:sticky;top:0;background:#f7f8fa;padding:12px 0;border-bottom:1px solid #d8dce3}.item{background:white;border:1px solid #d8dce3;border-radius:8px;margin:10px 0;padding:12px}summary{cursor:pointer;font-weight:700}.meta{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin-top:10px}.kind{font-size:12px;text-transform:uppercase;color:#5f6368}.reason{color:#7a3b00}.stats{white-space:pre;background:#111827;color:#f9fafb;border-radius:8px;padding:16px}.hidden{display:none}");
+    builder.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#202124;background:#f7f8fa}main{max-width:1280px;margin:auto}h1{font-size:28px}label{font-weight:600}select,input,button{height:34px;margin:4px 12px 12px 0;padding:0 10px;border:1px solid #b8bdc7;border-radius:6px;background:white}.toolbar{position:sticky;top:0;background:#f7f8fa;padding:12px 0;border-bottom:1px solid #d8dce3;z-index:2}.toolbar-row{display:flex;align-items:center;flex-wrap:wrap;gap:0 8px}.ignore-input{min-width:420px;flex:1}.item{background:white;border:1px solid #d8dce3;border-radius:8px;margin:10px 0;padding:12px;transition:opacity .18s ease,background .18s ease,border-color .18s ease}summary{cursor:pointer;font-weight:700;list-style:none}summary::-webkit-details-marker{display:none}.summary-row{display:flex;align-items:center;gap:10px}.done-check{width:18px;height:18px;margin:0;flex:0 0 auto;accent-color:#2f7d32}.symbol-title{line-height:1.35}.meta{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin-top:10px}.kind{font-size:12px;text-transform:uppercase;color:#5f6368}.reason{color:#7a3b00}.item.done{background:#f1f3f4;border-color:#c8d3c8;opacity:.72}.item.done .symbol-title{text-decoration:line-through;text-decoration-thickness:2px;color:#5f6368}.item.done .reason{text-decoration:line-through;color:#6b7280}.stats{white-space:pre;background:#111827;color:#f9fafb;border-radius:8px;padding:16px}.hidden{display:none}");
     builder.AppendLine("</style></head><body><main>");
     builder.AppendLine("<h1>Unused code report</h1>");
     builder.AppendLine($"<p>Generated: {encoder.Encode(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))}; Elapsed: {encoder.Encode(result.Elapsed.ToString())}</p>");
-    builder.AppendLine("<section class=\"toolbar\">");
+    builder.AppendLine("<section class=\"toolbar\"><div class=\"toolbar-row\">");
     builder.AppendLine("<label>Project</label><select id=\"project\"><option value=\"\">All</option>");
     foreach (var project in projects)
     {
@@ -174,27 +175,37 @@ internal sealed class HtmlReportBuilder : IReportBuilder
     }
 
     builder.AppendLine("</select><label>Search</label><input id=\"search\" type=\"search\" placeholder=\"Symbol, file, namespace\">");
-    builder.AppendLine("<button id=\"sort\">Sort by references</button></section>");
+    builder.AppendLine("<button id=\"sort\">Sort by references</button></div>");
+    builder.AppendLine("<div class=\"toolbar-row\"><label>Ignored folders</label><input id=\"ignoredFolders\" class=\"ignore-input\" type=\"text\" placeholder=\"Folder paths separated by ;\"><button id=\"clearIgnoredFolders\">Clear ignored</button></div></section>");
 
     builder.AppendLine("<section id=\"items\">");
+    var order = 0;
     foreach (var finding in result.Findings.OrderBy(f => f.Project).ThenBy(f => f.Namespace).ThenBy(f => f.Kind).ThenBy(f => f.FullName))
     {
+      var id = BuildFindingId(finding);
+      var folder = Path.GetDirectoryName(finding.File) ?? string.Empty;
       builder.AppendLine(
-        $"<details class=\"item\" data-project=\"{encoder.Encode(finding.Project)}\" data-kind=\"{finding.Kind}\" data-references=\"{finding.References}\" data-search=\"{encoder.Encode((finding.FullName + " " + finding.Namespace + " " + finding.File).ToLowerInvariant())}\">");
-      builder.AppendLine($"<summary><span class=\"kind\">{finding.Kind}</span> {encoder.Encode(finding.FullName)}</summary>");
+        $"<details class=\"item\" data-id=\"{id}\" data-order=\"{order++}\" data-project=\"{encoder.Encode(finding.Project)}\" data-kind=\"{finding.Kind}\" data-references=\"{finding.References}\" data-folder=\"{encoder.Encode(folder)}\" data-file=\"{encoder.Encode(finding.File)}\" data-search=\"{encoder.Encode((finding.FullName + " " + finding.Namespace + " " + finding.File).ToLowerInvariant())}\">");
+      builder.AppendLine("<summary>");
+      builder.AppendLine("<span class=\"summary-row\">");
+      builder.AppendLine($"<input class=\"done-check\" type=\"checkbox\" aria-label=\"Done\" data-id=\"{id}\">");
+      builder.AppendLine($"<span class=\"symbol-title\"><span class=\"kind\">{finding.Kind}</span> {encoder.Encode(finding.FullName)}</span>");
+      builder.AppendLine("</span>");
+      builder.AppendLine("</summary>");
       builder.AppendLine("<div class=\"meta\">");
       builder.AppendLine($"<div>Project</div><div>{encoder.Encode(finding.Project)}</div>");
       builder.AppendLine($"<div>Namespace</div><div>{encoder.Encode(finding.Namespace)}</div>");
       builder.AppendLine($"<div>File</div><div>{encoder.Encode(finding.File)}:{finding.Line}</div>");
       builder.AppendLine($"<div>References</div><div>{finding.References}</div>");
       builder.AppendLine($"<div>Reason</div><div class=\"reason\">{encoder.Encode(finding.Reason)}</div>");
+      builder.AppendLine($"<div>Folder</div><div>{encoder.Encode(folder)} <button class=\"ignore-folder\" type=\"button\">Ignore folder</button></div>");
       builder.AppendLine("</div></details>");
     }
 
     builder.AppendLine("</section>");
     builder.AppendLine($"<pre class=\"stats\">{encoder.Encode(BuildStatistics(result))}</pre>");
     builder.AppendLine("<script>");
-    builder.AppendLine("const project=document.getElementById('project'),kind=document.getElementById('kind'),search=document.getElementById('search'),items=document.getElementById('items');function apply(){const p=project.value,k=kind.value,q=search.value.toLowerCase();for(const item of items.children){const ok=(!p||item.dataset.project===p)&&(!k||item.dataset.kind===k)&&(!q||item.dataset.search.includes(q));item.classList.toggle('hidden',!ok)}}project.onchange=kind.onchange=search.oninput=apply;document.getElementById('sort').onclick=()=>{[...items.children].sort((a,b)=>Number(a.dataset.references)-Number(b.dataset.references)).forEach(x=>items.appendChild(x));apply()};");
+    builder.AppendLine("const project=document.getElementById('project'),kind=document.getElementById('kind'),search=document.getElementById('search'),items=document.getElementById('items'),ignoredFolders=document.getElementById('ignoredFolders'),storePrefix='unused-code-done:',ignoredKey='unused-code-ignored-folders';let sortByRefs=false;function readIgnored(){return (localStorage.getItem(ignoredKey)||'').split(';').map(x=>x.trim().toLowerCase()).filter(Boolean)}function writeIgnored(values){const normalized=[...new Set(values.map(x=>x.trim()).filter(Boolean))];localStorage.setItem(ignoredKey,normalized.join('; '));ignoredFolders.value=normalized.join('; ')}function isIgnored(item){const file=(item.dataset.file||'').toLowerCase(),folder=(item.dataset.folder||'').toLowerCase();return readIgnored().some(x=>file.includes(x)||folder.includes(x))}function isDone(item){return localStorage.getItem(storePrefix+item.dataset.id)==='1'}function syncDone(item){const done=isDone(item);item.classList.toggle('done',done);const check=item.querySelector('.done-check');if(check)check.checked=done}function reorder(){[...items.children].sort((a,b)=>{const done=Number(isDone(a))-Number(isDone(b));if(done!==0)return done;if(sortByRefs){const refs=Number(a.dataset.references)-Number(b.dataset.references);if(refs!==0)return refs}return Number(a.dataset.order)-Number(b.dataset.order)}).forEach(x=>items.appendChild(x))}function apply(){const p=project.value,k=kind.value,q=search.value.toLowerCase();for(const item of items.children){syncDone(item);const ok=(!p||item.dataset.project===p)&&(!k||item.dataset.kind===k)&&(!q||item.dataset.search.includes(q))&&!isIgnored(item);item.classList.toggle('hidden',!ok)}reorder()}for(const check of document.querySelectorAll('.done-check')){check.addEventListener('click',event=>event.stopPropagation());check.addEventListener('change',event=>{const id=event.target.dataset.id;if(event.target.checked)localStorage.setItem(storePrefix+id,'1');else localStorage.removeItem(storePrefix+id);apply()})}for(const button of document.querySelectorAll('.ignore-folder')){button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const folder=event.target.closest('.item').dataset.folder;if(folder){writeIgnored([...readIgnored(),folder]);apply()}})}ignoredFolders.value=(localStorage.getItem(ignoredKey)||'');ignoredFolders.onchange=()=>{writeIgnored(ignoredFolders.value.split(';'));apply()};document.getElementById('clearIgnoredFolders').onclick=()=>{writeIgnored([]);apply()};project.onchange=kind.onchange=search.oninput=apply;document.getElementById('sort').onclick=()=>{sortByRefs=!sortByRefs;apply()};apply();");
     builder.AppendLine("</script></main></body></html>");
 
     await File.WriteAllTextAsync(filePath, builder.ToString(), Encoding.UTF8, cancellationToken)
@@ -221,6 +232,13 @@ internal sealed class HtmlReportBuilder : IReportBuilder
   private static int GetCount(UnusedCodeAnalysisResult result, UnusedSymbolKind kind)
   {
     return result.Counts.TryGetValue(kind, out var count) ? count : 0;
+  }
+
+  private static string BuildFindingId(UnusedCodeFinding finding)
+  {
+    var source = $"{finding.Project}|{finding.Kind}|{finding.FullName}|{finding.File}|{finding.Line}";
+    var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(source));
+    return Convert.ToHexString(bytes);
   }
 }
 

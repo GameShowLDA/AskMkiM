@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NLog;
+using System.Xml.Linq;
 
 namespace TestConsole.UnusedCode;
 
@@ -13,7 +14,9 @@ internal sealed class SymbolAnalyzer
   private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
   private readonly SemanticModelCache _semanticModelCache;
   private readonly object _dbSetEntityCacheSync = new();
+  private readonly object _xamlTypeCacheSync = new();
   private Task<HashSet<ITypeSymbol>>? _dbSetEntityCache;
+  private Task<HashSet<string>>? _xamlTypeCache;
 
   /// <summary>
   /// Initializes a new instance of the <see cref="SymbolAnalyzer"/> class.
@@ -91,6 +94,7 @@ internal sealed class SymbolAnalyzer
       IsInterfaceImplementation(symbol) ||
       IsOverride(symbol) ||
       IsFrameworkExtensibilityMember(symbol) ||
+      await IsXamlReferencedSymbolAsync(symbol, solution, cancellationToken).ConfigureAwait(false) ||
       IsXamlBackedSymbol(symbol) ||
       await HasDerivedImplementationAsync(symbol, solution, cancellationToken).ConfigureAwait(false))
     {
@@ -338,6 +342,117 @@ internal sealed class SymbolAnalyzer
         InheritsFrom(type, "System.Windows.Controls.Control") ||
         InheritsFrom(type, "System.Windows.Application") ||
         InheritsFrom(type, "System.Windows.Markup.IComponentConnector"));
+  }
+
+  private async Task<bool> IsXamlReferencedSymbolAsync(
+    ISymbol symbol,
+    Solution solution,
+    CancellationToken cancellationToken)
+  {
+    if (symbol is not INamedTypeSymbol namedType)
+    {
+      return false;
+    }
+
+    var xamlTypes = await GetXamlReferencedTypesAsync(solution, cancellationToken).ConfigureAwait(false);
+    return xamlTypes.Contains(namedType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) ||
+      xamlTypes.Contains(namedType.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat));
+  }
+
+  private Task<HashSet<string>> GetXamlReferencedTypesAsync(
+    Solution solution,
+    CancellationToken cancellationToken)
+  {
+    lock (_xamlTypeCacheSync)
+    {
+      _xamlTypeCache ??= BuildXamlReferencedTypesAsync(solution, cancellationToken);
+      return _xamlTypeCache;
+    }
+  }
+
+  private static async Task<HashSet<string>> BuildXamlReferencedTypesAsync(
+    Solution solution,
+    CancellationToken cancellationToken)
+  {
+    var referencedTypes = new HashSet<string>(StringComparer.Ordinal);
+    var xamlFiles = GetXamlFiles(solution);
+
+    foreach (var xamlFile in xamlFiles)
+    {
+      cancellationToken.ThrowIfCancellationRequested();
+
+      try
+      {
+        await using var stream = File.OpenRead(xamlFile);
+        var document = await XDocument.LoadAsync(stream, LoadOptions.None, cancellationToken).ConfigureAwait(false);
+        foreach (var element in document.Descendants())
+        {
+          AddXamlElementType(element, referencedTypes);
+        }
+      }
+      catch (Exception ex) when (ex is not OperationCanceledException)
+      {
+        Logger.Warn(ex, "XAML file could not be parsed: {XamlFile}", xamlFile);
+      }
+    }
+
+    Logger.Info("XAML referenced types indexed: {Count}", referencedTypes.Count);
+    return referencedTypes;
+  }
+
+  private static IReadOnlyList<string> GetXamlFiles(Solution solution)
+  {
+    var projectDirectories = solution.Projects
+      .Select(project => project.FilePath)
+      .Where(path => !string.IsNullOrWhiteSpace(path))
+      .Select(path => Path.GetDirectoryName(path!))
+      .Where(path => !string.IsNullOrWhiteSpace(path))
+      .Distinct(StringComparer.OrdinalIgnoreCase)
+      .ToArray();
+
+    return projectDirectories
+      .SelectMany(directory => Directory.EnumerateFiles(directory!, "*.xaml", SearchOption.AllDirectories))
+      .Where(path => !IsIgnoredXamlPath(path))
+      .Distinct(StringComparer.OrdinalIgnoreCase)
+      .ToArray();
+  }
+
+  private static bool IsIgnoredXamlPath(string path)
+  {
+    return path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase) ||
+      path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase);
+  }
+
+  private static void AddXamlElementType(XElement element, ISet<string> referencedTypes)
+  {
+    var namespaceName = element.Name.NamespaceName;
+    if (!TryGetClrNamespace(namespaceName, out var clrNamespace))
+    {
+      return;
+    }
+
+    var localName = element.Name.LocalName;
+    if (string.IsNullOrWhiteSpace(localName) || localName.Contains('.', StringComparison.Ordinal))
+    {
+      return;
+    }
+
+    referencedTypes.Add($"{clrNamespace}.{localName}");
+  }
+
+  private static bool TryGetClrNamespace(string namespaceName, out string clrNamespace)
+  {
+    clrNamespace = string.Empty;
+    const string prefix = "clr-namespace:";
+    if (!namespaceName.StartsWith(prefix, StringComparison.Ordinal))
+    {
+      return false;
+    }
+
+    var value = namespaceName[prefix.Length..];
+    var separatorIndex = value.IndexOf(';', StringComparison.Ordinal);
+    clrNamespace = separatorIndex >= 0 ? value[..separatorIndex] : value;
+    return !string.IsNullOrWhiteSpace(clrNamespace);
   }
 
   private static async Task<bool> HasDerivedImplementationAsync(
