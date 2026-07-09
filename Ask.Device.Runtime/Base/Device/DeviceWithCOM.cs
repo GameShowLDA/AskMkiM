@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Communication.Com.Interop;
 using Ask.Device.Communication.Com.Protocols;
+using Ask.Device.Runtime.Function.Base.Status;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -14,6 +15,11 @@ namespace Ask.Device.Runtime.Base.Device
   /// </summary>
   public abstract class DeviceWithCOM : IDevice
   {
+    public DeviceWithCOM()
+    {
+      ConnectionInfo = new ConnectionInfoBase(this, ConnectionType.COM);
+    }
+
     /// <summary>
     /// Получает или задаёт имя устройства.
     /// </summary>
@@ -155,6 +161,6 @@ namespace Ask.Device.Runtime.Base.Device
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
 
     public ComConnectedProfile ConnectedProfile { get; set; } = new ComConnectedProfile();
-    public IConnectionInfo ConnectionInfo { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public IConnectionInfo ConnectionInfo { get; }
   }
 }

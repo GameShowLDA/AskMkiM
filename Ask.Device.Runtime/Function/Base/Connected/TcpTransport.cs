@@ -9,10 +9,10 @@ namespace Ask.Device.Runtime.Function.Connected
 {
   internal class TcpTransport : IConnectable
   {
-    private DeviceWithIP _device;
+    private DeviceWithTcpIp _device;
     public event Action IsReset;
 
-    public TcpTransport(DeviceWithIP device)
+    public TcpTransport(DeviceWithTcpIp device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }

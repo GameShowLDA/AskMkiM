@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Function.Base.Status;
 
 namespace Ask.Device.Runtime.Base.Device
 {
@@ -52,6 +53,6 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задает протокол обмена.
     /// </summary>
     public IDeviceProtocol DeviceProtocol { get; set; } = null!;
-    public IConnectionInfo ConnectionInfo { get; set; }
+    public IConnectionInfo ConnectionInfo { get; init; }
   }
 }

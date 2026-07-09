@@ -3,7 +3,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Ethernet.Udp.Protocols;
 using Ask.Device.Runtime.Base.DeviceResponses;
-using Ask.Device.Runtime.Device;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
 
@@ -14,49 +13,47 @@ namespace Ask.Device.Runtime.Base.Device
   /// </summary>
   public abstract class DeviceWithIP : IDevice
   {
-    /// <summary>
-    /// Получает или задаёт имя устройства.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Получает или задаёт описание устройства.
-    /// </summary>
-    public string Description { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Получает или задаёт IP-адрес устройства.
-    /// </summary>
-    public IPAddress IPAddress { get; set; } = IPAddress.None;
-
-    /// <summary>
-    /// Получает или задаёт номер устройства.
-    /// </summary>
-    public int Number { get; set; }
-
-    /// <summary>
-    /// Получает или задаёт идентификатор устройства.
-    /// </summary>
+    #region IDevice
+    /// <inheritdoc />
     public int Id { get; set; }
 
-    /// <summary>
-    /// Получает или задаёт полное имя CLR-типа устройства.
-    /// </summary>
+    /// <inheritdoc />
+    public string Name { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    public string Description { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    public int Number { get; set; }
+
+    /// <inheritdoc />
+    public DeviceType DeviceType { get; set; }
+
+    /// <inheritdoc />
     public string DeviceClass { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Получает или задаёт строку с параметрами подключения устройства.
-    /// </summary>
+    /// <inheritdoc />
+    public IConnectable ConnectableManager { get; set; } = null!;
+
+    /// <inheritdoc />
+    public IDeviceProtocol DeviceProtocol { get; set; } = null!;
+
+    /// <inheritdoc />
+    public IConnectionInfo ConnectionInfo { get; init; }
+
+    /// <inheritdoc />
     public string ConnectionDetails
     {
       get => GetIPAddress(IPAddress);
       set => SetIPAddress(value);
     }
 
+    #endregion
+
     /// <summary>
-    /// Получает или задаёт тип устройства.
+    /// Получает или задаёт IP-адрес устройства.
     /// </summary>
-    public DeviceType DeviceType { get; set; }
+    public IPAddress IPAddress { get; set; } = IPAddress.None;
 
     /// <summary>
     /// Получает или задаёт признак подключения устройства в составе стенда.
@@ -70,7 +67,7 @@ namespace Ask.Device.Runtime.Base.Device
     /// Инициализирует новый экземпляр <see cref="DeviceWithIP"/> с заданным IP-адресом.
     /// </summary>
     /// <param name="ipAddress">IP-адрес устройства.</param>
-    public DeviceWithIP(IPAddress ipAddress)
+    protected DeviceWithIP(IPAddress ipAddress) : this()
     {
       IPAddress = ipAddress;
     }
@@ -78,21 +75,12 @@ namespace Ask.Device.Runtime.Base.Device
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceWithIP"/>.
     /// </summary>
-    public DeviceWithIP()
-    {
-    }
+    protected DeviceWithIP()
+    { }
 
     /// <summary>
     /// Получает или задаёт менеджер подключения устройства.
     /// </summary>
-    public IConnectable ConnectableManager { get; set; } = null!;
-
-    /// <summary>
-    /// Получает или задаёт транспортный протокол устройства.
-    /// </summary>
-    public IDeviceProtocol DeviceProtocol { get; set; } = null!;
-    public ConnectionType ConnectionType { get; init; }
-    public IConnectionInfo ConnectionInfo { get; set; }
 
     /// <summary>
     /// Возвращает строковое представление IP-адреса.
@@ -123,6 +111,18 @@ namespace Ask.Device.Runtime.Base.Device
       }
     }
 
+    /// <summary>
+    /// Проверяет корректность ответа устройства на команду инициализации.
+    /// </summary>
+    /// <param name="result">Ответ устройства.</param>
+    /// <param name="_device">Экземпляр устройства.</param>
+    /// <returns>
+    /// Кортеж, содержащий:
+    /// <list type="bullet">
+    /// <item><description><c>Success</c> — признак успешной проверки.</description></item>
+    /// <item><description><c>Message</c> — сообщение об ошибке или исходный ответ устройства.</description></item>
+    /// </list>
+    /// </returns>
     virtual public (bool Success, string Message) InitializationValidationDelegate(string result, IDevice _device)
     {
       if (_device is IAttachableDevice attachableDevice)
@@ -161,6 +161,15 @@ namespace Ask.Device.Runtime.Base.Device
       return (false, result);
     }
 
+    /// <summary>
+    /// Проверяет корректность ответа устройства на команду сброса.
+    /// </summary>
+    /// <param name="result">Ответ устройства.</param>
+    /// <param name="_device">Экземпляр устройства.</param>
+    /// <returns>
+    /// <see langword="true"/>, если ответ соответствует ожидаемому;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     virtual public bool ResetValidationDelegate(string result, IDevice _device)
     {
       if (_device is IAttachableDevice attachableDevice)

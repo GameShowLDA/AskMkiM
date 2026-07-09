@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -20,6 +21,7 @@ namespace Ask.Device.Runtime.Function.Connected
 
     public event Action IsReset;
 
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -40,6 +42,7 @@ namespace Ask.Device.Runtime.Function.Connected
       return (true, descriptor.Name);
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -60,7 +63,8 @@ namespace Ask.Device.Runtime.Function.Connected
         return true;
       }
     }
-
+    
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -80,6 +84,7 @@ namespace Ask.Device.Runtime.Function.Connected
         : (true, idn.Trim());
     }
 
+    /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
       if (_device is IMultimeter multimeter)

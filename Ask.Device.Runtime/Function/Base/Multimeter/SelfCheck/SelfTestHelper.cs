@@ -8,7 +8,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Newtonsoft.Json.Linq;
 using YamlDotNet.Core.Tokens;
 
-namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
+namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
   public static class SelfTestHelper
   {

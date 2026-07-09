@@ -3,10 +3,10 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.Helpers;
-using Ask.Device.Runtime.Function.Multimeter.Measurements.Common;
 
-namespace Ask.Device.Runtime.Function.Multimeter.Measurements
+namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 {
   internal class ContinuityMeasurementBase : IContinuityMeasurement
   {

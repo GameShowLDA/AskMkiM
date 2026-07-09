@@ -57,6 +57,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     /// <summary>
     /// Информация о текущем состоянии подключения устройства.
     /// </summary>
-    IConnectionInfo ConnectionInfo { get; set; }
+    IConnectionInfo ConnectionInfo { get; }
   }
 }

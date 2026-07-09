@@ -1,16 +1,14 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Base.Multimeter.Measurements;
+using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
 using Ask.Device.Runtime.Function.Connected;
-using Ask.Device.Runtime.Function.Multimeter.Measurements;
 using System.Net;
-using System.Net.Sockets;
 
 namespace Ask.Device.Runtime.Device
 {
@@ -18,7 +16,7 @@ namespace Ask.Device.Runtime.Device
   /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
   /// Работает через сетевое подключение (TCP/IP).
   /// </summary>
-  public class KeysightDevice : DeviceWithIP, IMultimeter
+  public class KeysightDevice : DeviceWithTcpIp, IMultimeter
   {
     /// <inheritdoc />
     public int NumberChassis { get; set; }
@@ -79,8 +77,7 @@ namespace Ask.Device.Runtime.Device
       Description = "Реализовать описание в Ask.Device.Runtime.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
       DeviceType = DeviceType.FastMeter;
-      ConnectionInfo.IsConnected= false;
-      ConnectionType = ConnectionType.IP_TCP;
+      ConnectionInfo.IsConnected = false;
       ConnectedProfile.Port = 5025;
 
       CapacitanceManager = new CapacitanceMeasurementBase(this);
@@ -91,7 +88,7 @@ namespace Ask.Device.Runtime.Device
       DcVoltageManager = new DCVMeasurementBase(this);
       TextMessage = new Function.Keysight3466new.TextMessage(this);
       DiodeManager = new DiodeMeasurementBase(this);
-      SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
+      SelfTestManager = new SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, ConnectedProfile.Port);
 
       ResistanceCommands = new ResistanceMeasurementProfile();

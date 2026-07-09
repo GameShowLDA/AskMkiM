@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using static Ask.LogLib.LoggerUtility;
 
-namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
+namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 {
   static internal class MeasurementBase
   {

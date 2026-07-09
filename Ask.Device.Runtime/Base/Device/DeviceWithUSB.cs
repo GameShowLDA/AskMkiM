@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
+using Ask.Device.Runtime.Function.Base.Status;
 
 namespace Ask.Device.Runtime.Base.Device
 {
@@ -9,6 +10,11 @@ namespace Ask.Device.Runtime.Base.Device
   /// </summary>
   public abstract class DeviceWithUSB : IDevice
   {
+    public DeviceWithUSB()
+    {
+      ConnectionInfo = new ConnectionInfoBase(this, ConnectionType.USB);
+    }
+
     /// <summary>
     /// Получает или задаёт имя устройства.
     /// </summary>
@@ -69,6 +75,6 @@ namespace Ask.Device.Runtime.Base.Device
     /// 
     private string _connectionDetails = string.Empty;
     public UsbConnectedProfile ConnectedProfile { get; set; } = new UsbConnectedProfile();
-    public IConnectionInfo ConnectionInfo { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public IConnectionInfo ConnectionInfo { get; }
   }
 }

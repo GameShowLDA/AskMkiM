@@ -1,13 +1,14 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Base.Multimeter.Measurements;
+using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
 using Ask.Device.Runtime.Function.Connected;
-using Ask.Device.Runtime.Function.Multimeter.Measurements;
-using System.Windows.Controls;
 
 namespace Ask.Device.Runtime.Device
 {
@@ -21,7 +22,6 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.FastMeter;
       ConnectionDetails = "VID_164E&PID_0DB7";
 
-
       ConnectableManager = new Transport(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
       ContinuityManager = new ContinuityMeasurementBase(this);
@@ -29,7 +29,7 @@ namespace Ask.Device.Runtime.Device
       AcVoltageManager = new ACVMeasurementBase(this);
       DcVoltageManager = new DCVMeasurementBase(this);
       DiodeManager = new DiodeMeasurementBase(this);
-      SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
+      SelfTestManager = new SelfTestManager();
       DeviceProtocol = new UsbProtocol(this, new Function.B7783.B7783UsbCommandHandler());
       ResistanceCommands = new ResistanceMeasurementProfile()
       {

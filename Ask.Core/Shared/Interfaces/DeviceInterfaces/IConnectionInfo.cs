@@ -15,7 +15,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     /// <summary>
     /// Тип подключения устройства.
     /// </summary>
-    ConnectionType ConnectionType { get; }
+    ConnectionType ConnectionType { get; init; }
 
     /// <summary>
     /// Возвращает текстовое описание текущего состояния подключения.

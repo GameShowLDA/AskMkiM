@@ -7,10 +7,10 @@ namespace Ask.Device.Runtime.Function.Connected
 {
   internal class UdpTransport : IConnectable
   {
-    private DeviceWithIP _device;
+    private DeviceWithUdpIp _device;
     public event Action IsReset;
 
-    public UdpTransport(DeviceWithIP device)
+    public UdpTransport(DeviceWithUdpIp device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }

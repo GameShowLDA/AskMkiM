@@ -11,7 +11,7 @@ namespace Ask.Device.Runtime.Device
   /// <summary>
   /// Устройство коммутации шин, обеспечивающее подключение различных измерителей системы.
   /// </summary>
-  public class DeviceBusCommutation : DeviceWithIP, ISwitchingDevice
+  public class DeviceBusCommutation : DeviceWithUdpIp, ISwitchingDevice
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceBusCommutation"/>.
@@ -22,7 +22,6 @@ namespace Ask.Device.Runtime.Device
       Description = "Реализовать описание в Ask.Device.Runtime.Device.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
       DeviceType = DeviceType.SwitchingDevice;
-      ConnectionType = ConnectionType.IP_UDP;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       ConnectableManager = new Function.DeviceBusCommutation.StateManager(this);

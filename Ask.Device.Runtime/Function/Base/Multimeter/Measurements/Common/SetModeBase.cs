@@ -6,7 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Function.Helpers;
 
-namespace Ask.Device.Runtime.Function.Multimeter.Measurements.Common
+namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 {
   internal class SetModeBase
   {

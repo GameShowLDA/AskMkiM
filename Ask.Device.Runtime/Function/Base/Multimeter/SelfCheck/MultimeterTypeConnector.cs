@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
+namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
   /// <summary>
   /// Тип проверки мультиметра.

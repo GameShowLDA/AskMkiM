@@ -12,7 +12,7 @@ namespace Ask.Device.Runtime.Device
   /// <summary>
   /// Модуль коммутации реле, обеспечивающее подключение объектов контроля.
   /// </summary>
-  public class ModuleRelayControl : DeviceWithIP, IRelaySwitchModule
+  public class ModuleRelayControl : DeviceWithUdpIp, IRelaySwitchModule
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControl"/>.
@@ -31,7 +31,6 @@ namespace Ask.Device.Runtime.Device
       MeterManager = new Function.ModuleRelayControl.MeterManager(this);
       PointManager = new Function.ModuleRelayControl.PointManager(this);
       SelfTestManager = new SelfTestManager(this);
-      ConnectionType = ConnectionType.IP_UDP;
     }
 
     /// <inheritdoc />

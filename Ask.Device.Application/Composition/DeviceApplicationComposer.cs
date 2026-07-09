@@ -1,25 +1,19 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Runtime.Device;
-using B7783StateManagerAdapter = Ask.Device.Application.FunctionAdapters.B7783.StateManagerAdapter;
 using DbcCapacitorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.CapacitorManagerAdapter;
 using DbcConnectorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.ConnectorManagerAdapter;
 using DbcRelayManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.RelayManagerAdapter;
 using DbcResistorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.ResistorManagerAdapter;
-using DbcStateManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.StateManagerAdapter;
 using GptAcwModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.AcwModeAdapter;
-using GptConnectableManagerAdapter = Ask.Device.Application.FunctionAdapters.GPT.ConnectableManagerAdapter;
 using GptDcwModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.DcwModeAdapter;
 using GptIrModeAdapter = Ask.Device.Application.FunctionAdapters.GPT.IrModeAdapter;
 using GptSystemSettingsAdapter = Ask.Device.Application.FunctionAdapters.GPT.SystemSettingsAdapter;
-using KeysightConnectionAdapter = Ask.Device.Application.FunctionAdapters.Keysight3466new.KeysightConnectionAdapter;
 using MintBusManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.BusManagerAdapter;
 using MintCurrentManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.CurrentManagerAdapter;
-using MintStateManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.StateManagerAdapter;
 using MintVoltageManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent.VoltageManagerAdapter;
 using RelayBusManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleRelayControl.BusManagerAdapter;
 using RelayMeterManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleRelayControl.MeterManagerAdapter;
 using RelayPointManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleRelayControl.PointManagerAdapter;
-using RelayStateManagerAdapter = Ask.Device.Application.FunctionAdapters.ModuleRelayControl.StateManagerAdapter;
 using UpsConnectableManagerAdapter = Ask.Device.Application.FunctionAdapters.MikUps1101rRm.ConnectableManagerAdapter;
 using UpsPowerManagerAdapter = Ask.Device.Application.FunctionAdapters.MikUps1101rRm.PowerManagerAdapter;
 
@@ -49,37 +43,25 @@ namespace Ask.Device.Application.Composition
           gpt.DcwManger = new GptDcwModeAdapter(gpt);
           gpt.IrManger = new GptIrModeAdapter(gpt);
           gpt.SystemManger = new GptSystemSettingsAdapter(gpt);
-          gpt.ConnectableManager = new GptConnectableManagerAdapter(gpt);
           break;
 
         case ModuleVoltageCurrentSource moduleVoltageCurrentSource:
           moduleVoltageCurrentSource.BusManager = new MintBusManagerAdapter(moduleVoltageCurrentSource);
           moduleVoltageCurrentSource.CurrentManager = new MintCurrentManagerAdapter(moduleVoltageCurrentSource);
-          moduleVoltageCurrentSource.ConnectableManager = new MintStateManagerAdapter(moduleVoltageCurrentSource);
           moduleVoltageCurrentSource.VoltageManager = new MintVoltageManagerAdapter(moduleVoltageCurrentSource);
           break;
 
         case ModuleRelayControl moduleRelayControl:
-          moduleRelayControl.ConnectableManager = new RelayStateManagerAdapter(moduleRelayControl);
           moduleRelayControl.BusManager = new RelayBusManagerAdapter(moduleRelayControl);
           moduleRelayControl.MeterManager = new RelayMeterManagerAdapter(moduleRelayControl);
           moduleRelayControl.PointManager = new RelayPointManagerAdapter(moduleRelayControl);
           break;
 
         case DeviceBusCommutation deviceBusCommutation:
-          deviceBusCommutation.ConnectableManager = new DbcStateManagerAdapter(deviceBusCommutation);
           deviceBusCommutation.ConnectorManager = new DbcConnectorManagerAdapter(deviceBusCommutation);
           deviceBusCommutation.CapacitorManager = new DbcCapacitorManagerAdapter(deviceBusCommutation);
           deviceBusCommutation.RelayManager = new DbcRelayManagerAdapter(deviceBusCommutation);
           deviceBusCommutation.ResistorManager = new DbcResistorManagerAdapter(deviceBusCommutation);
-          break;
-
-        case KeysightDevice keysightDevice:
-          keysightDevice.ConnectableManager = new KeysightConnectionAdapter(keysightDevice);
-          break; 
-
-        case MultimeterB7783 multimeterB7783:
-          multimeterB7783.ConnectableManager = new B7783StateManagerAdapter(multimeterB7783);
           break;
 
         case MikUps1101rRmDevice mikUps1101rRmDevice:

@@ -12,7 +12,7 @@ namespace Ask.Device.Runtime.Device
   /// <summary>
   /// Класс ManagerChassis представляет устройство с подключением по IP-адресу.
   /// </summary>
-  public class ManagerChassis : DeviceWithIP, IChassisManager
+  public class ManagerChassis : DeviceWithUdpIp, IChassisManager
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ManagerChassis"/>.
@@ -22,7 +22,6 @@ namespace Ask.Device.Runtime.Device
       ConnectableManager = new StateManager(this);
       PowerManager = new PowerManager(this);
       DeviceType = DeviceType.ChassisManager;
-      ConnectionType = ConnectionType.IP_UDP;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       Name = "Тестер АСКМ";
