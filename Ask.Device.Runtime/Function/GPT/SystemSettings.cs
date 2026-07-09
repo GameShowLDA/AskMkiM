@@ -2,7 +2,6 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Com.Interop;
 using Ask.Device.Runtime.Device;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;

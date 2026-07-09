@@ -4,12 +4,12 @@
   {
     public string Initialize { get; set; } = "*IDN?";
 
-    public string CheckMode { get; init; }
+    public string CheckMode { get; set; }
 
 
     /// <summary>
     /// Время ожидания ответа.
     /// </summary>
-    public int Timeout { get; init; } = 1000;
+    public int Timeout { get; set; } = 1000;
   }
 }

@@ -30,6 +30,7 @@ namespace Ask.Device.Runtime.Device
       DcwMaxVoltage = 1000;
       IrMaxVoltage = 1000;
       IrMinVoltage = 50;
+      ConnectedProfile.CheckMode = "GPT";
 
       AcwManger = new Function.GPT.AcwMode(this);
       DcwManger = new Function.GPT.DcwMode(this);

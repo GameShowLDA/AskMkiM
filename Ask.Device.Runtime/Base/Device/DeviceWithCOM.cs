@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Communication.Com.Interop;
 using Ask.Device.Communication.Com.Protocols;
@@ -156,5 +157,7 @@ namespace Ask.Device.Runtime.Base.Device
     public ConnectionType ConnectionType { get; init; } = ConnectionType.COM;
 
     public bool IsConnected { get; set; }
+
+    public ComConnectedProfile ConnectedProfile { get; set; } = new ComConnectedProfile();
   }
 }
