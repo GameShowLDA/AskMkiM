@@ -3,6 +3,7 @@ using TestConsole.MINT;
 using TestConsole.B7783;
 using TestConsole.ModuleRelayControlTests;
 using TestConsole.DeviceBusCommutationConnectorTests;
+using TestConsole.UnusedCode;
 
 namespace TestConsole
 {
@@ -34,9 +35,10 @@ namespace TestConsole
         Console.WriteLine("19. B7-78/3 multimeter");
         Console.WriteLine("20. ModuleRelayControl");
         Console.WriteLine("21. DeviceBusCommutation ConnectorManager");
+        Console.WriteLine("22. Unused code Roslyn analyzer");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 21)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 22)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -126,6 +128,10 @@ namespace TestConsole
 
           case 21:
             await DeviceBusCommutationConnectorTest.RunAsync();
+            break;
+
+          case 22:
+            await UnusedCodeAnalyzer.RunAsync();
             break;
 
           case 0:
