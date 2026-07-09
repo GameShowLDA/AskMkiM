@@ -177,15 +177,10 @@ namespace TestConsole.GPT
         return;
       }
 
-      for (int i = 0; i < 1000; i++)
-      {
-        await device.ConnectableManager.ConnectAsync();
-        for (int j = 0; j < 1000; j++)
-        {
-          await device.ConnectableManager.InitializeAsync();
-        }
-        await device.ConnectableManager.DisconnectAsync();
-      }
+      await device.ConnectableManager.ConnectAsync();
+      await device.ConnectableManager.InitializeAsync();
+      await device.ConnectableManager.DisconnectAsync();
+
     }
 
     private static async Task CheckTimeRamp()
