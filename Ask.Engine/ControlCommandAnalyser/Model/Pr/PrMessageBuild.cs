@@ -7,6 +7,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
 {
   internal class PrMessageBuild : IDislpayInfo
   {
+    /// <inheritdoc />
     public string BuildErrorChainStringAsync(ChainModel chain)
     {
       var chainStr = PointFormater.GetFormatConnectPoint(chain);

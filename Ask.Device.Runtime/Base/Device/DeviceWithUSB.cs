@@ -2,6 +2,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Function.Base.Status;
+using System.Net;
 
 namespace Ask.Device.Runtime.Base.Device
 {
@@ -15,40 +16,35 @@ namespace Ask.Device.Runtime.Base.Device
       ConnectionInfo = new ConnectionInfoBase(this, ConnectionType.USB);
     }
 
-    /// <summary>
-    /// Получает или задаёт имя устройства.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Получает или задаёт описание устройства.
-    /// </summary>
-    public string Description { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Получает или задаёт номер устройства.
-    /// </summary>
-    public int Number { get; set; }
-
-    /// <summary>
-    /// Получает или задаёт идентификатор устройства.
-    /// </summary>
+    #region IDevice
+    /// <inheritdoc />
     public int Id { get; set; }
 
-    /// <summary>
-    /// Получает или задаёт полное имя CLR-типа устройства.
-    /// </summary>
-    public string DeviceClass { get; set; } = string.Empty;
+    /// <inheritdoc />
+    public string Name { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Получает или задаёт тип устройства.
-    /// </summary>
+    /// <inheritdoc />
+    public string Description { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    public int Number { get; set; }
+
+    /// <inheritdoc />
     public DeviceType DeviceType { get; set; }
 
-    /// <summary>
-    /// Получает или задаёт строку подключения USB-устройства.
-    /// Используется как шаблон имени для поиска в системе.
-    /// </summary>
+    /// <inheritdoc />
+    public string DeviceClass { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    public IConnectable ConnectableManager { get; set; } = null!;
+
+    /// <inheritdoc />
+    public IDeviceProtocol DeviceProtocol { get; set; } = null!;
+
+    /// <inheritdoc />
+    public IConnectionInfo ConnectionInfo { get; init; }
+
+    /// <inheritdoc />
     public string ConnectionDetails
     {
       get => _connectionDetails;
@@ -58,23 +54,21 @@ namespace Ask.Device.Runtime.Base.Device
       }
     }
 
-    /// <summary>
-    /// Получает или задаёт менеджер подключения устройства.
-    /// </summary>
-    public IConnectable ConnectableManager { get; set; } = null!;
+    #endregion
 
     /// <summary>
-    /// Получает или задаёт транспортный протокол устройства.
+    /// Тип подключения устройства.
     /// </summary>
-    public IDeviceProtocol DeviceProtocol { get; set; } = null!;
     public ConnectionType ConnectionType { get; init; } = ConnectionType.USB;
 
     /// <summary>
-    /// Хранит строку шаблона для поиска USB-устройства.
+    /// Строка с дополнительной информацией о подключении устройства.
     /// </summary>
-    /// 
     private string _connectionDetails = string.Empty;
+
+    /// <summary>
+    /// Профиль параметров подключения устройства по USB.
+    /// </summary>
     public UsbConnectedProfile ConnectedProfile { get; set; } = new UsbConnectedProfile();
-    public IConnectionInfo ConnectionInfo { get; }
   }
 }

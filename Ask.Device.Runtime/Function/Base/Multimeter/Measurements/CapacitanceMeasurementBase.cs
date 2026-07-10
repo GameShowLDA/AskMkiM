@@ -5,10 +5,21 @@ using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 {
+  /// <summary>
+  /// Реализует операции измерения ёмкости мультиметра.
+  /// </summary>
   internal class CapacitanceMeasurementBase : ICapacitanceMeasurement
   {
+
+    /// <summary>
+    /// Мультиметр, с которым выполняются измерения.
+    /// </summary>
     private readonly IMultimeter _device;
 
+    /// <summary>
+    /// Инициализирует обработчик измерения ёмкости.
+    /// </summary>
+    /// <param name="device">Мультиметр.</param>
     public CapacitanceMeasurementBase(IMultimeter device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));

@@ -5,16 +5,31 @@ using Ask.Device.Runtime.Base.Device;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
+  /// <summary>
+  /// Реализует подключение и обмен данными с устройством по протоколу UDP/IP.
+  /// </summary>
   internal class UdpTransport : IConnectable
   {
-    private DeviceWithUdpIp _device;
-    public event Action IsReset;
+    /// <summary>
+    /// Устройство, с которым выполняется взаимодействие.
+    /// </summary>
+    private readonly DeviceWithUdpIp _device;
 
+    /// <summary>
+    /// Возникает после выполнения операции сброса устройства.
+    /// </summary>
+    public event Action? IsReset;
+
+    /// <summary>
+    /// Инициализирует транспорт UDP/IP для указанного устройства.
+    /// </summary>
+    /// <param name="device">Устройство, работающее по протоколу UDP/IP.</param>
     public UdpTransport(DeviceWithUdpIp device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -39,16 +54,19 @@ namespace Ask.Device.Runtime.Function.Connected
       return (false, initializationResult.Message);
     }
 
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
       return await InitializeAsync();
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
       return await ResetAsync();
     }
 
+    /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())

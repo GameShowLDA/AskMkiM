@@ -21,11 +21,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   [MeasurementDevice(MeasurementDevice.BreakdownTester)]
   public class SiCommandModel : BaseCommandModel, IHasScheme, IHasTime, IHasResistance, IHasVoltage, IHasUnparsedParameters
   {
-    /// <summary>
-    /// Мнемоническое обозначение измерительной команды.
-    /// Используется для отображения команды в пользовательском интерфейсе,
-    /// протоколах выполнения и диагностических сообщениях.
-    /// </summary>
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
 
     /// <summary>

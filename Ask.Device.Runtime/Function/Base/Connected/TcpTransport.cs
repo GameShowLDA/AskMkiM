@@ -7,15 +7,28 @@ using System.Net.Sockets;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
+  /// <summary>
+  /// Реализует подключение и обмен данными с устройством по протоколу TCP/IP.
+  /// </summary>
   internal class TcpTransport : IConnectable
   {
     private DeviceWithTcpIp _device;
+
+    /// <summary>
+    /// Возникает после выполнения сброса устройства.
+    /// </summary>
     public event Action IsReset;
 
+    /// <summary>
+    /// Инициализирует транспорт TCP/IP для указанного устройства.
+    /// </summary>
+    /// <param name="device">Устройство, работающее по протоколу TCP/IP.</param>
     public TcpTransport(DeviceWithTcpIp device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
     }
+
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -35,6 +48,7 @@ namespace Ask.Device.Runtime.Function.Connected
       return (false, $"Нет подключения к {_device.Name}");
     }
 
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -76,6 +90,7 @@ namespace Ask.Device.Runtime.Function.Connected
       }
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -104,6 +119,7 @@ namespace Ask.Device.Runtime.Function.Connected
       }
     }
 
+    /// <inheritdoc />
     public Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
       return Task.FromResult(true);

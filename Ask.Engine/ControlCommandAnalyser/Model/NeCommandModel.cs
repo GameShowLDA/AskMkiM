@@ -19,8 +19,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   public class NeCommandModel : BaseCommandModel, IError, IHasScheme, IHasAmperage, IHasVoltage, IHasVoltageLimits, IHasUnparsedParameters
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
 
+    /// <inheritdoc />
     public override MeasurementTypeCommand TypeCommand => MeasurementTypeCommand.NE;
 
     /// <summary>

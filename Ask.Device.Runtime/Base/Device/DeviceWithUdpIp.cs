@@ -4,9 +4,15 @@ using Ask.Device.Runtime.Function.Base.Status;
 
 namespace Ask.Device.Runtime.Base.Device
 {
+  /// <summary>
+  /// Базовый класс устройств с подключением по протоколу UDP/IP.
+  /// </summary>
   public abstract class DeviceWithUdpIp : DeviceWithIP, IDevice
   {
-    public DeviceWithUdpIp()
+    /// <summary>
+    /// Инициализирует устройство с подключением по UDP/IP.
+    /// </summary>
+    protected DeviceWithUdpIp()
     {
       ConnectionInfo = new ConnectionInfoBase(this, ConnectionType.IP_UDP);
     }

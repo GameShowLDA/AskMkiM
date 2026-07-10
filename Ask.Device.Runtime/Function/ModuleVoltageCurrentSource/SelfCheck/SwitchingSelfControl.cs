@@ -7,11 +7,23 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
+  /// <summary>
+  /// Содержит методы самоконтроля коммутационного устройства.
+  /// </summary>
   internal static class SwitchingSelfControl
   {
+    /// <summary>
+    /// Выполняет проверку коммутации с использованием мультиметра,
+    /// источника питания и коммутационного устройства.
+    /// </summary>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="fastMeter">Мультиметр, используемый для измерений.</param>
+    /// <param name="powerSourceModule">Источник питания.</param>
+    /// <param name="switchingDevice">Коммутационное устройство.</param>
+    /// <returns>Асинхронная задача выполнения проверки коммутации.</returns>
     static internal async Task CheckSwitching(CancellationToken cancellationToken, IUserInteractionService messageService, IMultimeter fastMeter, IPowerSourceModule powerSourceModule, ISwitchingDevice switchingDevice)
     {
-
       await messageService.ShowMessageAsync(new ShowMessageModel("Начало проверки коммутации"));
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
       await powerSourceModule.VoltageManager.SetSourceVoltageAsync(VoltageSources.Supply12V, messageService);
@@ -69,6 +81,15 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       await powerSourceModule.ConnectableManager.ResetAsync(messageService);
     }
 
+    /// <summary>
+    /// Выполняет проверку указанной шины коммутационного устройства.
+    /// </summary>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="switchingBus">Проверяемая шина.</param>
+    /// <param name="switchingDevice">Коммутационное устройство.</param>
+    /// <param name="powerSource">Источник питания.</param>
+    /// <param name="fastMeter">Мультиметр, используемый для измерения напряжения.</param>
+    /// <returns>Асинхронная задача выполнения проверки шины.</returns>
     static private async Task CheckBus(IUserInteractionService messageService, SwitchingBus switchingBus, ISwitchingDevice switchingDevice, IPowerSourceModule powerSource, IMultimeter fastMeter)
     {
       var busSwitch = GetAbPair(switchingBus);
@@ -117,6 +138,14 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       await switchingDevice.ConnectorManager.DisconnectMultimeter(busSwitch, messageService);
     }
 
+    /// <summary>
+    /// Возвращает объединённую шину AB, соответствующую указанной шине A или B.
+    /// </summary>
+    /// <param name="bus">Шина, для которой требуется определить пару AB.</param>
+    /// <returns>Соответствующая объединённая шина.</returns>
+    /// <exception cref="Exception">
+    /// Выбрасывается, если для указанной шины невозможно определить соответствующую шину AB.
+    /// </exception>
     private static SwitchingBusNew GetAbPair(SwitchingBus bus)
     {
       if (bus.ToString().StartsWith("A") || bus.ToString().StartsWith("B"))

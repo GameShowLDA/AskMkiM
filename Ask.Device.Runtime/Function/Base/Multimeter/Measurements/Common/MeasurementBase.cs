@@ -10,8 +10,21 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 {
+  /// <summary>
+  /// Предоставляет базовые методы выполнения измерений мультиметром.
+  /// </summary>
   static internal class MeasurementBase
   {
+    /// <summary>
+    /// Выполняет измерение с использованием указанного профиля.
+    /// </summary>
+    /// <param name="device">Мультиметр.</param>
+    /// <param name="profile">Профиль измерения.</param>
+    /// <param name="param">Значение, используемое в режиме имитации.</param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Измеренное значение.</returns>
     static public async Task<double> MeasureAsync(IMultimeter device, IMeasurementProfile profile, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
@@ -49,7 +62,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return result;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Выполняет непосредственное измерение и преобразование ответа устройства.
+    /// </summary>
+    /// <param name="device">Мультиметр.</param>
+    /// <param name="profile">Профиль измерения.</param>
+    /// <param name="header">Наименование выполняемой операции.</param>
+    /// <param name="param">Значение, используемое в режиме имитации.</param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Измеренное значение.</returns>
     static private async Task<double> MeasureCoreAsync(IMultimeter device, IMeasurementProfile profile, string header, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -81,6 +104,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       throw new InvalidOperationException(LogError($"Не удалось обработать значение при \"{header}\": {response}", isDeviceLog: true));
     }
 
+    /// <summary>
+    /// Извлекает числовое значение из ответа устройства.
+    /// </summary>
+    /// <param name="response">Строка ответа устройства.</param>
+    /// <returns>Строковое представление числового значения.</returns>
     static private string ExtractNumericValue(string response)
     {
       var match = Regex.Match(

@@ -8,9 +8,19 @@ using Ask.Device.Runtime.Function.Helpers;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
+  /// <summary>
+  /// Универсальный транспорт для подключения и обмена данными с устройством.
+  /// </summary>
   internal class Transport : IConnectable
   {
+    /// <summary>
+    /// Устройство, с которым выполняется обмен данными.
+    /// </summary>
     private readonly IDevice _device;
+
+    /// <summary>
+    /// Тип подключения, используемый для взаимодействия с устройством.
+    /// </summary>
     private ConnectionType connectionType;
 
     /// <summary>
@@ -24,8 +34,10 @@ namespace Ask.Device.Runtime.Function.Connected
       connectionType = _device.ConnectionInfo.ConnectionType;
     }
 
+    /// <inheritdoc />
     public event Action IsReset;
 
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
       Func<IUserInteractionService, Task<(bool Connect, string Answer)>> connectDelegate;
@@ -66,6 +78,8 @@ namespace Ask.Device.Runtime.Function.Connected
 
       return (connect, answer);
     }
+
+    /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
       Func<IUserInteractionService, Task<bool>> disconnectDelegate;
@@ -104,6 +118,7 @@ namespace Ask.Device.Runtime.Function.Connected
       return connect;
     }
 
+    /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
       Func<IUserInteractionService, Task<(bool Connect, string Answer)>> initDelegate;
@@ -142,6 +157,7 @@ namespace Ask.Device.Runtime.Function.Connected
       return (connect, answer);
     }
 
+    /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
       Func<IUserInteractionService, Task<bool>> resetDelegate;

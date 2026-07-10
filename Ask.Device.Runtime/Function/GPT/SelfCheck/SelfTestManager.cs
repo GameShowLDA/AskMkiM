@@ -35,6 +35,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       IR = 3,
     }
 
+    /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester));
@@ -72,7 +73,6 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       await device.ConnectorManager.DisconnectBreakdownTester(userMessageService);
       await device.ConnectorManager.DisableDivider(userMessageService);
     }
-
 
     /// <summary>
     /// Выполняет самопроверку режима IR (сопротивление изоляции).
@@ -244,11 +244,21 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       }
     }
 
+    /// <inheritdoc />
     public Type GetTestTypeEnum()
     {
       return typeof(TypeConnector);
     }
 
+    /// <summary>
+    /// Выполняет инициализацию пробойной установки, мультиметра
+    /// и коммутационного устройства.
+    /// </summary>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="switchingDevice">Коммутационное устройство.</param>
+    /// <param name="meter">Мультиметр.</param>
+    /// <param name="breakdownTester">Пробойная установка.</param>
+    /// <returns>Асинхронная задача инициализации устройств.</returns>
     private async Task InitDevices(IUserInteractionService userMessageService, ISwitchingDevice switchingDevice, IMultimeter meter, IBreakdownTester breakdownTester)
     {
       string name = breakdownTester.Name;

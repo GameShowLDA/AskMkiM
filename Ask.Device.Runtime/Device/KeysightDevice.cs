@@ -38,6 +38,8 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public IResistanceMeasurement ResistanceManager { get; set; }
+
+    /// <inheritdoc />
     public ITextMessage TextMessage { get; set; }
 
     /// <inheritdoc />
@@ -51,12 +53,40 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
+
+    /// <summary>
+    /// Менеджер выполнения самотестирования мультиметра.
+    /// </summary>
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения электрического сопротивления.
+    /// </summary>
     public ResistanceMeasurementProfile ResistanceCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения переменного напряжения.
+    /// </summary>
     public ACVMeasurementProfile ACVCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения постоянного напряжения.
+    /// </summary>
     public DCVMeasurementProfile DCVCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения ёмкости.
+    /// </summary>
     public CapacitanceMeasurementProfile CapacitanceCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд режима прозвонки.
+    /// </summary>
     public ContinuityMeasurementProfile ContinuityCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд проверки диодов.
+    /// </summary>
     public DiodeMeasurementProfile DiodeCommands { get; set; }
 
 
@@ -104,6 +134,10 @@ namespace Ask.Device.Runtime.Device
       DcwPpuDividerCoefficientPercent = 100d;
     }
 
+    /// <summary>
+    /// Преобразует текущий экземпляр мультиметра в объект передачи данных.
+    /// </summary>
+    /// <returns>Объект <see cref="FastMeterDto"/> с параметрами мультиметра.</returns>
     public FastMeterDto Convert()
     {
       return new FastMeterDto

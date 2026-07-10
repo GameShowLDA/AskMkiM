@@ -68,6 +68,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       return execution.Value;
     }
 
+    /// <inheritdoc />
     public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
         => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, param, rangeFrom, rangeTo, userMessageService);
 

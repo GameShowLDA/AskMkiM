@@ -3,10 +3,26 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 {
+  /// <summary>
+  /// Предоставляет генерацию имитированных результатов измерений.
+  /// </summary>
   internal class Simulated
   {
+
+    /// <summary>
+    /// Генератор случайных чисел.
+    /// </summary>
     private static readonly Random _rnd = new();
 
+    /// <summary>
+    /// Возвращает имитированное значение измерения.
+    /// </summary>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="measurementTypeCommand">Тип выполняемого электрического испытания.</param>
+    /// <returns>
+    /// Сгенерированное значение измерения либо <c>-1</c>, если режим имитации отключён.
+    /// </returns>
     internal static double GetSimulatedValue(double rangeFrom, double rangeTo, ElectricalTestFunction measurementTypeCommand)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())

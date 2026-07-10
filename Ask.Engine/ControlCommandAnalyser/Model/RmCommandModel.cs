@@ -10,6 +10,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// </summary>
   public class RmCommandModel : BaseCommandModel
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.RM).DisplayName;
 
     /// <summary>

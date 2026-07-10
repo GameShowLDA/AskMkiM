@@ -8,6 +8,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   internal class NeMessageBuild : IDislpayInfo
   {
+    /// <inheritdoc />
     public string BuildErrorChainStringAsync(ChainModel chain)
     {
       var chainStr = string.Empty;

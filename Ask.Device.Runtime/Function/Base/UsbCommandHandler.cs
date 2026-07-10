@@ -13,18 +13,56 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.Base
 {
+  /// <summary>
+  /// Обрабатывает выполнение USB-команд для устройств, поддерживающих обмен данными
+  /// через USBTMC (VISA) и ViewPower.
+  /// </summary>
   public sealed class UsbCommandHandler : IUsbCommandHandler
   {
+    /// <summary>
+    /// Время ожидания ответа устройства по умолчанию, в миллисекундах.
+    /// </summary>
     private const int DefaultTimeout = 5000;
+
+    /// <summary>
+    /// Команда проверки доступности ИБП через USB.
+    /// </summary>
     private const string UpsConnectCommand = "UPS:CONNECT";
+
+    /// <summary>
+    /// Команда включения выходного питания ИБП.
+    /// </summary>
     private const string UpsStartPowerCommand = "UPS:POWER:START";
+
+    /// <summary>
+    /// Команда отключения выходного питания ИБП.
+    /// </summary>
     private const string UpsStopPowerCommand = "UPS:POWER:STOP";
+
+    /// <summary>
+    /// Команда проверки состояния выходного питания ИБП.
+    /// </summary>
     private const string UpsVerifyPowerCommand = "UPS:POWER:VERIFY";
+
+    /// <summary>
+    /// Задержка выполнения команды управления ИБП в минутах,
+    /// передаваемая протоколу ViewPower.
+    /// </summary>
     private const string ControlDelayMinutes = "0.2";
 
+    /// <summary>
+    /// Максимальное время ожидания подтверждения включения выходного питания ИБП.
+    /// </summary>
     private static readonly TimeSpan StartStateConfirmationTimeout = TimeSpan.FromSeconds(8);
+
+    /// <summary>
+    /// Максимальное время ожидания подтверждения отключения выходного питания ИБП.
+    /// </summary>
     private static readonly TimeSpan StopStateConfirmationTimeout = TimeSpan.FromSeconds(5);
 
+    /// <summary>
+    /// Список режимов работы, при которых выходное питание ИБП считается включённым.
+    /// </summary>
     private static readonly string[] ActiveWorkModes =
     {
       "Line mode",
@@ -37,6 +75,7 @@ namespace Ask.Device.Runtime.Function.Base
       "Power on mode",
     };
 
+    /// <inheritdoc />
     public async Task<string> ExecuteAsync(
       IDevice device,
       string command,
@@ -74,6 +113,25 @@ namespace Ask.Device.Runtime.Function.Base
       return response;
     }
 
+    /// <summary>
+    /// Выполняет SCPI-команду через интерфейс VISA.
+    /// </summary>
+    /// <param name="command">SCPI-команда для отправки устройству.</param>
+    /// <param name="pattern">Шаблон поиска USB-ресурса VISA.</param>
+    /// <param name="profile">Профиль параметров USB-подключения.</param>
+    /// <param name="timeout">Время ожидания ответа устройства, в миллисекундах.</param>
+    /// <param name="responseDelay">Дополнительная задержка перед чтением ответа, в миллисекундах.</param>
+    /// <returns>Ответ устройства либо пустая строка, если команда не предполагает ответа.</returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если команда не указана.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если ресурс VISA не поддерживает обмен сообщениями
+    /// либо произошла ошибка библиотеки VISA.
+    /// </exception>
+    /// <exception cref="TimeoutException">
+    /// Выбрасывается при превышении времени ожидания ответа устройства.
+    /// </exception>
     private static string ExecuteVisaCommand(
       string command,
       string pattern,
@@ -128,6 +186,22 @@ namespace Ask.Device.Runtime.Function.Base
       }
     }
 
+    /// <summary>
+    /// Выполняет команду управления ИБП через ViewPower и возвращает
+    /// сериализованный ответ протокола.
+    /// </summary>
+    /// <param name="device">Устройство, для которого выполняется команда.</param>
+    /// <param name="command">Команда управления ИБП.</param>
+    /// <param name="found">Признак успешного обнаружения USB-устройства.</param>
+    /// <param name="descriptor">Описание обнаруженного USB-устройства.</param>
+    /// <param name="responseDelay">Дополнительная задержка перед возвратом результата, в миллисекундах.</param>
+    /// <param name="timeout">Время ожидания выполнения команды, в миллисекундах.</param>
+    /// <param name="port">Номер порта, используемый при взаимодействии.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>JSON-строка с результатом выполнения команды.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если устройство не поддерживает работу через ViewPower.
+    /// </exception>
     private static async Task<string> ExecuteViewPowerCommandAsync(
       IDevice device,
       string command,
@@ -156,6 +230,15 @@ namespace Ask.Device.Runtime.Function.Base
       return JsonSerializer.Serialize(payload);
     }
 
+    /// <summary>
+    /// Выполняет команду управления ИБП через ViewPower.
+    /// </summary>
+    /// <param name="device">Устройство, для которого выполняется команда.</param>
+    /// <param name="command">Команда управления ИБП.</param>
+    /// <param name="found">Признак успешного обнаружения USB-устройства.</param>
+    /// <param name="descriptor">Описание обнаруженного USB-устройства.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Объект с результатом выполнения команды.</returns>
     private static async Task<UpsProtocolResponse> ExecuteUpsCommandAsync(
       IDevice device,
       string command,
@@ -233,6 +316,22 @@ namespace Ask.Device.Runtime.Function.Base
       }
     }
 
+    /// <summary>
+    /// Выполняет команду управления выходным питанием ИБП через ViewPower
+    /// и ожидает подтверждения изменения состояния.
+    /// </summary>
+    /// <param name="client">Клиент взаимодействия с ViewPower.</param>
+    /// <param name="response">Объект, в который записывается результат выполнения команды.</param>
+    /// <param name="snapshot">Текущее состояние ИБП.</param>
+    /// <param name="expectedState">
+    /// Ожидаемое состояние выходного питания после выполнения команды.
+    /// </param>
+    /// <param name="controlType">Тип команды управления ViewPower.</param>
+    /// <param name="confirmationTimeout">
+    /// Максимальное время ожидания подтверждения изменения состояния.
+    /// </param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Объект с результатом выполнения команды управления.</returns>
     private static async Task<UpsProtocolResponse> ExecuteRealtimeControlAsync(
       ViewPowerClient client,
       UpsProtocolResponse response,
@@ -293,6 +392,16 @@ namespace Ask.Device.Runtime.Function.Base
       return response;
     }
 
+    /// <summary>
+    /// Считывает ответ устройства из сеанса VISA.
+    /// </summary>
+    /// <param name="session">Сеанс обмена сообщениями VISA.</param>
+    /// <param name="command">Команда, для которой ожидается ответ.</param>
+    /// <param name="readBufferSize">Размер буфера чтения в байтах.</param>
+    /// <returns>Ответ устройства в виде строки.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если устройство не вернуло данных.
+    /// </exception>
     private static string ReadResponse(MessageBasedSession session, string command, int readBufferSize)
     {
       int bufferSize = readBufferSize <= 0 ? 4096 : readBufferSize;
@@ -307,6 +416,17 @@ namespace Ask.Device.Runtime.Function.Base
       return Encoding.ASCII.GetString(buffer, 0, (int)readCount).Trim('\0', '\r', '\n', ' ');
     }
 
+    /// <summary>
+    /// Открывает сеанс VISA с повторными попытками при возникновении
+    /// временных ошибок подключения.
+    /// </summary>
+    /// <param name="resourceManager">Менеджер ресурсов VISA.</param>
+    /// <param name="resourceName">Имя ресурса VISA.</param>
+    /// <param name="profile">Профиль параметров USB-подключения.</param>
+    /// <returns>Открытый сеанс VISA.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если не удалось открыть сеанс после всех попыток.
+    /// </exception>
     private static IVisaSession OpenSessionWithRetry(
       ResourceManager resourceManager,
       string resourceName,
@@ -334,11 +454,30 @@ namespace Ask.Device.Runtime.Function.Base
         lastError);
     }
 
+    /// <summary>
+    /// Определяет, является ли ошибка открытия сеанса VISA временной
+    /// и допускает повторную попытку подключения.
+    /// </summary>
+    /// <param name="exception">Проверяемое исключение.</param>
+    /// <returns>
+    /// <see langword="true"/>, если исключение допускает повторную попытку открытия сеанса;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     private static bool IsRetryableVisaOpenException(Exception exception)
     {
       return exception is VisaException || exception is NativeVisaException;
     }
 
+    /// <summary>
+    /// Находит ресурс USBTMC VISA, соответствующий заданному шаблону поиска.
+    /// </summary>
+    /// <param name="resourceManager">Менеджер ресурсов VISA.</param>
+    /// <param name="pattern">Шаблон поиска USB-устройства.</param>
+    /// <param name="profile">Профиль параметров USB-подключения.</param>
+    /// <returns>Имя найденного ресурса VISA.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если подходящий ресурс VISA не найден.
+    /// </exception>
     private static string FindInstrumentResource(
       ResourceManager resourceManager,
       string pattern,
@@ -369,6 +508,15 @@ namespace Ask.Device.Runtime.Function.Base
         $"USBTMC VISA resource was not found by pattern \"{pattern}\". Found USBTMC resources: {foundResources}");
     }
 
+    /// <summary>
+    /// Проверяет соответствие ресурса VISA заданному шаблону поиска.
+    /// </summary>
+    /// <param name="resource">Имя ресурса VISA.</param>
+    /// <param name="pattern">Шаблон поиска устройства.</param>
+    /// <returns>
+    /// <see langword="true"/>, если ресурс соответствует шаблону;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     private static bool IsResourceMatch(string resource, string pattern)
     {
       if (string.IsNullOrWhiteSpace(pattern))
@@ -397,6 +545,11 @@ namespace Ask.Device.Runtime.Function.Base
              resource.Contains(pid, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Добавляет символ окончания строки к команде, если он отсутствует.
+    /// </summary>
+    /// <param name="command">Команда для отправки устройству.</param>
+    /// <returns>Команда, оканчивающаяся символом новой строки.</returns>
     private static string EnsureLineEnding(string command)
     {
       return command.EndsWith("\n", StringComparison.Ordinal)
@@ -404,6 +557,14 @@ namespace Ask.Device.Runtime.Function.Base
         : command + "\n";
     }
 
+    /// <summary>
+    /// Возвращает шаблон поиска USB-устройства.
+    /// </summary>
+    /// <param name="device">Устройство, для которого выполняется поиск.</param>
+    /// <returns>
+    /// Строка поиска, основанная на сведениях о подключении устройства
+    /// или его имени.
+    /// </returns>
     private static string GetUsbSearchPattern(IDevice device)
     {
       return string.IsNullOrWhiteSpace(device.ConnectionDetails)
@@ -411,11 +572,33 @@ namespace Ask.Device.Runtime.Function.Base
         : device.ConnectionDetails;
     }
 
+    /// <summary>
+    /// Возвращает эффективное время ожидания ответа устройства.
+    /// </summary>
+    /// <param name="profile">Профиль параметров USB-подключения.</param>
+    /// <returns>
+    /// Время ожидания в миллисекундах.
+    /// Если в профиле указано недопустимое значение, возвращается значение по умолчанию.
+    /// </returns>
     private static int GetProfileTimeout(UsbConnectedProfile profile)
     {
       return profile.Timeout <= 0 ? DefaultTimeout : profile.Timeout;
     }
 
+    /// <summary>
+    /// Выполняет поиск USB-устройства и сохраняет сведения
+    /// о последнем успешно найденном устройстве.
+    /// </summary>
+    /// <param name="device">Устройство, для которого выполняется поиск.</param>
+    /// <param name="usbDevice">USB-устройство с профилем подключения.</param>
+    /// <param name="pattern">Шаблон поиска USB-устройства.</param>
+    /// <param name="descriptor">
+    /// При успешном поиске содержит описание найденного USB-устройства.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/>, если устройство найдено;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     private static bool ResolveUsbDevice(
       IDevice device,
       DeviceWithUSB usbDevice,
@@ -430,6 +613,12 @@ namespace Ask.Device.Runtime.Function.Base
       return found;
     }
 
+    /// <summary>
+    /// Сохраняет путь к последнему найденному USB-устройству
+    /// в совместимом свойстве устройства, если оно существует.
+    /// </summary>
+    /// <param name="device">Устройство, для которого обновляется путь.</param>
+    /// <param name="path">Путь к последнему найденному USB-устройству.</param>
     private static void SetCompatibleLastResolvedDevicePath(IDevice device, string path)
     {
       var property = device.GetType().GetProperty("LastResolvedDevicePath");
@@ -439,6 +628,14 @@ namespace Ask.Device.Runtime.Function.Base
       }
     }
 
+    /// <summary>
+    /// Определяет, включено ли выходное питание ИБП.
+    /// </summary>
+    /// <param name="snapshot">Текущее состояние ИБП.</param>
+    /// <returns>
+    /// <see langword="true"/>, если выходное питание включено;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     private static bool IsPowerEnabled(ViewPowerMonitorSnapshot snapshot)
     {
       if (snapshot.OutputOn)
@@ -449,6 +646,13 @@ namespace Ask.Device.Runtime.Function.Base
       return ActiveWorkModes.Any(mode => string.Equals(mode, snapshot.WorkMode, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// Создаёт базовый объект ответа для выполнения команды управления ИБП.
+    /// </summary>
+    /// <param name="command">Выполняемая команда.</param>
+    /// <param name="found">Признак успешного обнаружения USB-устройства.</param>
+    /// <param name="descriptor">Описание обнаруженного USB-устройства.</param>
+    /// <returns>Инициализированный объект ответа.</returns>
     private static UpsProtocolResponse CreateBaseResponse(string command, bool found, UsbDeviceDescriptor descriptor)
     {
       return new UpsProtocolResponse
@@ -464,46 +668,110 @@ namespace Ask.Device.Runtime.Function.Base
       };
     }
 
+    /// <summary>
+    /// Представляет результат выполнения команды управления ИБП,
+    /// полученный через USB или ViewPower.
+    /// </summary>
     private sealed class UpsProtocolResponse
     {
+      /// <summary>
+      /// Наименование используемого транспорта.
+      /// </summary>
       public string Transport { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Тип устройства.
+      /// </summary>
       public string DeviceType { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Выполненная команда.
+      /// </summary>
       public string Command { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Признак успешного обнаружения устройства.
+      /// </summary>
       public bool Found { get; set; }
 
+      /// <summary>
+      /// Признак успешного выполнения команды.
+      /// </summary>
       public bool Success { get; set; }
 
+      /// <summary>
+      /// Признак доступности сервиса ViewPower.
+      /// </summary>
       public bool ViewPowerAvailable { get; set; }
 
+      /// <summary>
+      /// Признак включённого выходного питания ИБП.
+      /// </summary>
       public bool OutputOn { get; set; }
 
+      /// <summary>
+      /// Имя обнаруженного устройства.
+      /// </summary>
       public string DeviceName { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Идентификатор устройства.
+      /// </summary>
       public string DeviceId { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Идентификатор устройства Plug and Play.
+      /// </summary>
       public string PnpDeviceId { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Имя системной службы, обслуживающей устройство.
+      /// </summary>
       public string Service { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Имя COM-порта, используемого ViewPower.
+      /// </summary>
       public string PortName { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Тип протокола, используемого ViewPower.
+      /// </summary>
       public string ProtocolType { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Идентификатор устройства в ViewPower.
+      /// </summary>
       public string ViewPowerDeviceId { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Текущий режим работы ИБП.
+      /// </summary>
       public string WorkMode { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Информационное сообщение о результате выполнения команды.
+      /// </summary>
       public string Message { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Сообщение об ошибке, если выполнение завершилось неуспешно.
+      /// </summary>
       public string Error { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Необработанный ответ, полученный от ViewPower.
+      /// </summary>
       public string RawResponse { get; set; } = string.Empty;
 
+      /// <summary>
+      /// Время ожидания выполнения команды, в миллисекундах.
+      /// </summary>
       public int Timeout { get; set; }
 
+      /// <summary>
+      /// Номер порта, используемого при выполнении команды.
+      /// </summary>
       public int Port { get; set; }
     }
   }

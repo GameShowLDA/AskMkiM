@@ -10,6 +10,9 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
   /// </summary>
   public interface IMultimeter : IAttachableDevice, IDeviceToDtoConverter<FastMeterDto>
   {
+    /// <summary>
+    /// Текущий режим работы мультиметра.
+    /// </summary>
     MultimeterTypeMode TypeMode { get; set; }
 
     /// <summary>
@@ -62,13 +65,39 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
     /// </summary>
     double DcwPpuDividerCoefficientPercent { get; set; }
 
+    /// <summary>
+    /// Менеджер выполнения самотестирования мультиметра.
+    /// </summary>
     ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
+    /// <summary>
+    /// Профиль команд измерения сопротивления.
+    /// </summary>
     ResistanceMeasurementProfile ResistanceCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения переменного напряжения.
+    /// </summary>
     ACVMeasurementProfile ACVCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения постоянного напряжения.
+    /// </summary>
     DCVMeasurementProfile DCVCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения ёмкости.
+    /// </summary>
     CapacitanceMeasurementProfile CapacitanceCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд режима прозвонки.
+    /// </summary>
     ContinuityMeasurementProfile ContinuityCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд проверки диодов.
+    /// </summary>
     DiodeMeasurementProfile DiodeCommands { get; set; }
   }
 }

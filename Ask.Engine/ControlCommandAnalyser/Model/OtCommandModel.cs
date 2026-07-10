@@ -12,6 +12,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   [AllowedKeys(Б, П, С)]
   public class OtCommandModel : BaseCommandModel, IHasTime, Ask.Core.Shared.Interfaces.ExecutionInterfaces.IHasUnparsedParameters
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.OT).DisplayName;
 
     /// <summary>

@@ -4,22 +4,48 @@ using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 
 namespace Ask.Core.Shared.Metadata.Commands.MultimeterCommands
 {
+  /// <summary>
+  /// Профиль команд измерения ёмкости.
+  /// </summary>
   public class CapacitanceMeasurementProfile : IMeasurementProfile
   {
+    /// <summary>
+    /// Режим работы мультиметра.
+    /// </summary>
     public MultimeterTypeMode TypeMode => MultimeterTypeMode.Capacitance;
+
+    /// <summary>
+    /// Тип выполняемого электрического испытания.
+    /// </summary>
     public ElectricalTestFunction ElectricalTest => ElectricalTestFunction.Capacitance;
+
+    /// <summary>
+    /// Единица измерения результата.
+    /// </summary>
     public Enum Unit => CapacitanceUnit.NanoFarad;
 
+    /// <summary>
+    /// Команда перевода мультиметра в режим измерения ёмкости.
+    /// </summary>
     public string SetMode { get; init; } = "CONF:CAP";
 
+    /// <summary>
+    /// Ожидаемое значение режима, возвращаемое устройством.
+    /// </summary>
     public string CheckMode { get; init; } = "CAP";
 
+    /// <summary>
+    /// Команда получения текущего режима работы мультиметра.
+    /// </summary>
     public string GetMode { get; init; } = "FUNC?";
 
+    /// <summary>
+    /// Команда выполнения измерения ёмкости.
+    /// </summary>
     public string Measure { get; init; } = "MEAS:CAP?";
 
     /// <summary>
-    /// Время ожидания ответа.
+    /// Время ожидания ответа устройства, в миллисекундах.
     /// </summary>
     public int Timeout { get; init; } = 1000;
   }

@@ -13,6 +13,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   [AllowedKeys(Б, П, С)]
   public class PtCommandModel : BaseCommandModel, IHasTime, IHasUnparsedParameters
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.PT).DisplayName;
 
     /// <summary>

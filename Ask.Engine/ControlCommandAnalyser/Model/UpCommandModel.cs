@@ -9,6 +9,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// </summary>
   public class UpCommandModel : BaseCommandModel
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.UP).DisplayName;
 
     /// <summary>
