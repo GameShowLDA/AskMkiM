@@ -246,7 +246,7 @@ namespace UI.Controls.Runner
       rightEditor.BackButton.Visibility = CanReturnToSourceFile() && !isLocked
         ? Visibility.Visible
         : Visibility.Collapsed;
-      var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.FileName);
+      var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.OriginalFileName);
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = fileName;
       rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
@@ -555,10 +555,19 @@ namespace UI.Controls.Runner
       {
         return fileName;
       }
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(filePath);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1)
+      {
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
+      }
+      return string.IsNullOrWhiteSpace(uniqueNameWithoutExtention)
+         ? string.Empty
+        : uniqueNameWithoutExtention + Path.GetExtension(filePath);
 
-      return string.IsNullOrWhiteSpace(filePath)
+      /*return string.IsNullOrWhiteSpace(filePath)
         ? string.Empty
-        : Path.GetFileName(filePath);
+        : Path.GetFileName(filePath);*/
     }
 
     private static string BuildDerivedFileName(string? sourceFilePath, string? sourceFileName, string extension, string fallbackFileName)

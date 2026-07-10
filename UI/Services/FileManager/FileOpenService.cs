@@ -114,7 +114,14 @@ namespace UI.Services.FileManager
     private void OpenNewFile(string path, string fileName, string fileContent, Encoding encoding, FileType fileType, TextEditorContainer container)
     {
       var uniqueName = _fileManager.FileService.Name.EnsureUniqueFileName(path, fileName);
-      var textEditorModel = new TextEditorModel(path, uniqueName, encoding);
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(uniqueName);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1)
+      {
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
+      }
+      var originalName = uniqueNameWithoutExtention + Path.GetExtension(uniqueName);
+      var textEditorModel = new TextEditorModel(path, uniqueName, originalName, encoding);
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, fileContent, fileType);
       textEditor.ConfigureBreakpoints(interactive: false, visible: false);
       textEditor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
@@ -148,7 +155,7 @@ namespace UI.Services.FileManager
         textEditor.IsReadOnly = true;
 
       EditorEventAdapter.RaiseTextEditorActivated(textEditor);
-      _fileManager.DockItemService.ShowEditorDockItem(uniqueName, container, textEditor);
+      _fileManager.DockItemService.ShowEditorDockItem(originalName, container, textEditor);
       _fileManager.ControlManagerService.ShowEditorContainer(container, EditorType.TextEditor);
     }
 
