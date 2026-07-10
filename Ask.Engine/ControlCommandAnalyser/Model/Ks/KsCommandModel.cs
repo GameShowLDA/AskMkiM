@@ -19,7 +19,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ks
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   public class KsCommandModel : BaseCommandModel, IHasScheme, IHasResistanceLimits, IHasUnparsedParameters
   {
-
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
 
     /// <summary>

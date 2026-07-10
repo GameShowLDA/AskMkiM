@@ -6,6 +6,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   public class CpCommandModel : BaseCommandModel
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.CP).DisplayName;
   }
 }

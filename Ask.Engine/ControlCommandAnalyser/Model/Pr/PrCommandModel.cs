@@ -19,11 +19,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Pr
   [ResistanceRange(0, 100000.0, 10.0)]
   public class PrCommandModel : BaseCommandModel, IError, IHasScheme, IHasAmperage, IHasTime, IHasUnparsedParameters
   {
-    /// <summary>
-    /// Мнемоническое обозначение измерительной команды.
-    /// Используется для отображения команды в пользовательском интерфейсе,
-    /// протоколах выполнения и диагностических сообщениях.
-    /// </summary>
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PR).DisplayName;
 
     /// <summary>

@@ -25,6 +25,9 @@ internal enum UnusedSymbolKind
   /// <summary>A method or constructor declaration.</summary>
   Method,
 
+  /// <summary>A constructor declaration.</summary>
+  Constructor,
+
   /// <summary>A property declaration.</summary>
   Property,
 
@@ -59,6 +62,8 @@ internal sealed record SymbolReferenceInfo(int ReferenceCount);
 /// </summary>
 /// <param name="Kind">The symbol category.</param>
 /// <param name="FullName">The fully qualified symbol name.</param>
+/// <param name="OwnerName">The namespace or containing type that owns the symbol.</param>
+/// <param name="MemberName">The simple type or member signature.</param>
 /// <param name="Project">The project that declares the symbol.</param>
 /// <param name="Namespace">The containing namespace.</param>
 /// <param name="File">The source file path.</param>
@@ -68,6 +73,8 @@ internal sealed record SymbolReferenceInfo(int ReferenceCount);
 internal sealed record UnusedCodeFinding(
   UnusedSymbolKind Kind,
   string FullName,
+  string OwnerName,
+  string MemberName,
   string Project,
   string Namespace,
   string File,

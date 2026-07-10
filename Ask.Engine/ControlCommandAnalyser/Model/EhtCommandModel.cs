@@ -17,11 +17,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   [AllowedKeys(Д)]
   public class EhtCommandModel : BaseCommandModel, IHasScheme, IHasTime, IHasResistanceLimits, IHasCableResistance, IHasUnparsedParameters, IHasAmperage
   {
-    /// <summary>
-    /// Мнемоническое обозначение измерительной команды.
-    /// Используется для отображения команды в пользовательском интерфейсе,
-    /// протоколах выполнения и диагностических сообщениях.
-    /// </summary>
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.EHT).DisplayName;
 
     /// <summary>

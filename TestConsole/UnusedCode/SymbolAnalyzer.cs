@@ -119,7 +119,9 @@ internal sealed class SymbolAnalyzer
 
     return new UnusedCodeFinding(
       candidate.Kind,
-      symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
+      SymbolDisplayFormatter.GetFullName(symbol),
+      SymbolDisplayFormatter.GetOwnerName(symbol),
+      SymbolDisplayFormatter.GetMemberName(symbol),
       candidate.ProjectName,
       GetNamespace(symbol),
       file,
@@ -149,7 +151,7 @@ internal sealed class SymbolAnalyzer
       _ => null
     };
 
-    if (symbol is null || symbol.IsImplicitlyDeclared)
+    if (symbol is null || symbol.IsImplicitlyDeclared || IsRecordConstructor(symbol, node))
     {
       return;
     }
@@ -174,7 +176,7 @@ internal sealed class SymbolAnalyzer
       EnumDeclarationSyntax => UnusedSymbolKind.Enum,
       ClassDeclarationSyntax => UnusedSymbolKind.Class,
       MethodDeclarationSyntax => UnusedSymbolKind.Method,
-      ConstructorDeclarationSyntax => UnusedSymbolKind.Method,
+      ConstructorDeclarationSyntax => UnusedSymbolKind.Constructor,
       PropertyDeclarationSyntax => UnusedSymbolKind.Property,
       EventDeclarationSyntax => UnusedSymbolKind.Event,
       VariableDeclaratorSyntax when symbol.Kind == SymbolKind.Field => UnusedSymbolKind.Field,
@@ -355,8 +357,8 @@ internal sealed class SymbolAnalyzer
     }
 
     var xamlTypes = await GetXamlReferencedTypesAsync(solution, cancellationToken).ConfigureAwait(false);
-    return xamlTypes.Contains(namedType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) ||
-      xamlTypes.Contains(namedType.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat));
+    return xamlTypes.Contains(SymbolDisplayFormatter.GetTypeName(namedType)) ||
+      xamlTypes.Contains(SymbolDisplayFormatter.GetTypeName(namedType.OriginalDefinition));
   }
 
   private Task<HashSet<string>> GetXamlReferencedTypesAsync(
@@ -619,6 +621,24 @@ internal sealed class SymbolAnalyzer
       document.FilePath.EndsWith(".designer.cs", StringComparison.OrdinalIgnoreCase);
   }
 
+  private static bool IsRecordConstructor(ISymbol symbol, SyntaxNode node)
+  {
+    if (symbol is not IMethodSymbol { MethodKind: MethodKind.Constructor })
+    {
+      return false;
+    }
+
+    if (symbol.ContainingType?.IsRecord == true || node is RecordDeclarationSyntax)
+    {
+      return true;
+    }
+
+    return symbol.DeclaringSyntaxReferences
+      .Select(reference => reference.GetSyntax())
+      .Any(syntax => syntax is RecordDeclarationSyntax ||
+        syntax.AncestorsAndSelf().OfType<RecordDeclarationSyntax>().Any(record => record.ParameterList is not null));
+  }
+
   private static string GetNamespace(ISymbol symbol)
   {
     var containingNamespace = symbol.ContainingNamespace;
@@ -637,6 +657,7 @@ internal sealed class SymbolAnalyzer
       UnusedSymbolKind.Interface => "На интерфейс отсутствуют ссылки.",
       UnusedSymbolKind.Enum => "На enum отсутствуют ссылки.",
       UnusedSymbolKind.Method => "Метод нигде не вызывается.",
+      UnusedSymbolKind.Constructor => "Конструктор нигде не вызывается.",
       UnusedSymbolKind.Property => "Свойство нигде не используется.",
       UnusedSymbolKind.Event => "Событие нигде не используется.",
       UnusedSymbolKind.Field => "Поле нигде не используется.",

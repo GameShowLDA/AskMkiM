@@ -7,6 +7,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   public class CkCommandModel : BaseCommandModel, Ask.Core.Shared.Interfaces.ExecutionInterfaces.IHasUnparsedParameters
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.CK).DisplayName;
 
     /// <summary>

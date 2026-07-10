@@ -58,7 +58,7 @@ internal sealed class ReferenceAnalyzer
     var count = locations.Count;
     Logger.Debug(
       "References found. Symbol: {Symbol}. Count: {Count}. Elapsed: {Elapsed}",
-      symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
+      SymbolDisplayFormatter.GetFullName(symbol),
       count,
       DateTimeOffset.UtcNow - started);
 
@@ -188,7 +188,7 @@ internal sealed class ReferenceAnalyzer
     {
       Logger.Debug(
         "Semantic usage index references found. Symbol: {Symbol}. Count: {Count}",
-        targetSymbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
+        SymbolDisplayFormatter.GetFullName(targetSymbol),
         locations.Count);
     }
   }

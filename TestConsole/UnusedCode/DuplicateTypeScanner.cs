@@ -104,7 +104,7 @@ internal sealed class DuplicateTypeScanner
 
       declarations.Add(new TypeDeclarationInfo(
         kind.Value,
-        symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
+        SymbolDisplayFormatter.GetFullName(symbol),
         GetNamespace(symbol),
         projectName,
         file,

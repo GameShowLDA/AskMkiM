@@ -7,6 +7,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   public class KscCommandModel : BaseCommandModel
   {
     public OkCommandModel OkCommandModel { get; set; }
+
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.KSC).DisplayName;
   }
 }

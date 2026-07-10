@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Security.Cryptography;
@@ -97,6 +97,8 @@ internal sealed class MarkdownReportBuilder : IReportBuilder
             builder.AppendLine($"**{finding.Kind}**");
             builder.AppendLine();
             builder.AppendLine(finding.FullName);
+            builder.AppendLine($"Owner: {finding.OwnerName}");
+            builder.AppendLine($"Member: {finding.MemberName}");
             builder.AppendLine($"Project: {finding.Project}");
             builder.AppendLine($"File: {MakeRelative(finding.File)}:{finding.Line}");
             builder.AppendLine($"References: {finding.References}");
@@ -156,6 +158,7 @@ internal sealed class MarkdownReportBuilder : IReportBuilder
     builder.AppendLine("==================================");
     builder.AppendLine($"Unused classes: {GetCount(result, UnusedSymbolKind.Class)}");
     builder.AppendLine($"Unused methods: {GetCount(result, UnusedSymbolKind.Method)}");
+    builder.AppendLine($"Unused constructors: {GetCount(result, UnusedSymbolKind.Constructor)}");
     builder.AppendLine($"Unused properties: {GetCount(result, UnusedSymbolKind.Property)}");
     builder.AppendLine($"Unused fields: {GetCount(result, UnusedSymbolKind.Field)}");
     builder.AppendLine($"Unused interfaces: {GetCount(result, UnusedSymbolKind.Interface)}");
@@ -208,7 +211,7 @@ internal sealed class HtmlReportBuilder : IReportBuilder
     builder.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
     builder.AppendLine("<title>Unused code report</title>");
     builder.AppendLine("<style>");
-    builder.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#202124;background:#f7f8fa}main{max-width:1280px;margin:auto}h1{font-size:28px}h2{font-size:20px;margin-top:28px}label{font-weight:600}select,input,button{height:34px;margin:4px 12px 12px 0;padding:0 10px;border:1px solid #b8bdc7;border-radius:6px;background:white}button{cursor:pointer}.toolbar{position:sticky;top:0;background:#f7f8fa;padding:12px 0;border-bottom:1px solid #d8dce3;z-index:2}.toolbar-row{display:flex;align-items:center;flex-wrap:wrap;gap:0 8px}.ignore-input{min-width:420px;flex:1}.ignore-list{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px 0}.ignore-rule{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:6px 8px;border:1px solid #cfd4dc;border-radius:6px;background:#fff}.ignore-rule.disabled{opacity:.55}.ignore-rule input{height:auto;margin:0}.ignore-rule span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:720px}.ignore-rule button{height:24px;margin:0;padding:0 8px}.item{background:white;border:1px solid #d8dce3;border-radius:8px;margin:10px 0;padding:12px;transition:opacity .18s ease,background .18s ease,border-color .18s ease}summary{cursor:pointer;font-weight:700;list-style:none}summary::-webkit-details-marker{display:none}.summary-row{display:flex;align-items:center;gap:10px}.done-check{width:18px;height:18px;margin:0;flex:0 0 auto;accent-color:#2f7d32}.symbol-title{line-height:1.35;min-width:0}.meta{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin-top:10px}.kind{font-size:12px;text-transform:uppercase;color:#5f6368}.reason{color:#7a3b00}.item.done{background:#f1f3f4;border-color:#c8d3c8;opacity:.72}.item.done .symbol-title{text-decoration:line-through;text-decoration-thickness:2px;color:#5f6368}.item.done .reason{text-decoration:line-through;color:#6b7280}.stats{white-space:pre;background:#111827;color:#f9fafb;border-radius:8px;padding:16px}.hidden{display:none}");
+    builder.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:24px;color:#202124;background:#f7f8fa}main{max-width:1280px;margin:auto}h1{font-size:28px}h2{font-size:20px;margin-top:28px}label{font-weight:600}select,input,button{height:34px;margin:4px 12px 12px 0;padding:0 10px;border:1px solid #b8bdc7;border-radius:6px;background:white}button{cursor:pointer}.toolbar{position:sticky;top:0;background:#f7f8fa;padding:12px 0;border-bottom:1px solid #d8dce3;z-index:2}.toolbar-row{display:flex;align-items:center;flex-wrap:wrap;gap:0 8px}.ignore-input{min-width:420px;flex:1}.ignore-list{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px 0}.ignore-rule{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:6px 8px;border:1px solid #cfd4dc;border-radius:6px;background:#fff}.ignore-rule.disabled{opacity:.55}.ignore-rule input{height:auto;margin:0}.ignore-rule span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:720px}.ignore-rule button{height:24px;margin:0;padding:0 8px}.item{background:white;border:1px solid #d8dce3;border-radius:8px;margin:10px 0;padding:12px;transition:opacity .18s ease,background .18s ease,border-color .18s ease}summary{cursor:pointer;font-weight:700;list-style:none}summary::-webkit-details-marker{display:none}.summary-row{display:flex;align-items:center;gap:10px}.done-check{width:18px;height:18px;margin:0;flex:0 0 auto;accent-color:#2f7d32}.symbol-title{line-height:1.35;min-width:0}.owner-name{color:#374151}.member-name{font-weight:800;color:#111827}.meta{display:grid;grid-template-columns:120px 1fr;gap:4px 12px;margin-top:10px}.kind{font-size:12px;text-transform:uppercase;color:#5f6368}.reason{color:#7a3b00}.item.done{background:#f1f3f4;border-color:#c8d3c8;opacity:.72}.item.done .symbol-title{text-decoration:line-through;text-decoration-thickness:2px;color:#5f6368}.item.done .reason{text-decoration:line-through;color:#6b7280}.stats{white-space:pre;background:#111827;color:#f9fafb;border-radius:8px;padding:16px}.hidden{display:none}");
     builder.AppendLine("</style></head><body><main>");
     builder.AppendLine("<h1>Unused code report</h1>");
     builder.AppendLine($"<p>Generated: {encoder.Encode(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))}; Elapsed: {encoder.Encode(result.Elapsed.ToString())}</p>");
@@ -236,16 +239,19 @@ internal sealed class HtmlReportBuilder : IReportBuilder
       var id = BuildFindingId(finding);
       var folder = Path.GetDirectoryName(finding.File) ?? string.Empty;
       builder.AppendLine(
-        $"<details class=\"item\" data-id=\"{id}\" data-order=\"{order++}\" data-project=\"{encoder.Encode(finding.Project)}\" data-kind=\"{finding.Kind}\" data-references=\"{finding.References}\" data-folder=\"{encoder.Encode(folder)}\" data-file=\"{encoder.Encode(finding.File)}\" data-search=\"{encoder.Encode((finding.FullName + " " + finding.Namespace + " " + finding.File).ToLowerInvariant())}\">");
+        $"<details class=\"item\" data-id=\"{id}\" data-order=\"{order++}\" data-project=\"{encoder.Encode(finding.Project)}\" data-kind=\"{finding.Kind}\" data-references=\"{finding.References}\" data-folder=\"{encoder.Encode(folder)}\" data-file=\"{encoder.Encode(finding.File)}\" data-search=\"{encoder.Encode((finding.FullName + " " + finding.OwnerName + " " + finding.MemberName + " " + finding.Namespace + " " + finding.File).ToLowerInvariant())}\">");
       builder.AppendLine("<summary>");
       builder.AppendLine("<span class=\"summary-row\">");
       builder.AppendLine($"<input class=\"done-check\" type=\"checkbox\" aria-label=\"Done\" data-id=\"{id}\">");
-      builder.AppendLine($"<span class=\"symbol-title\"><span class=\"kind\">{finding.Kind}</span> {encoder.Encode(finding.FullName)}</span>");
+      builder.AppendLine($"<span class=\"symbol-title\"><span class=\"kind\">{finding.Kind}</span> <span class=\"owner-name\">{encoder.Encode(finding.OwnerName)}</span><span class=\"member-name\">.{encoder.Encode(finding.MemberName)}</span></span>");
       builder.AppendLine("</span>");
       builder.AppendLine("</summary>");
       builder.AppendLine("<div class=\"meta\">");
       builder.AppendLine($"<div>Project</div><div>{encoder.Encode(finding.Project)}</div>");
       builder.AppendLine($"<div>Namespace</div><div>{encoder.Encode(finding.Namespace)}</div>");
+      builder.AppendLine($"<div>Owner</div><div>{encoder.Encode(finding.OwnerName)}</div>");
+      builder.AppendLine($"<div>Member</div><div>{encoder.Encode(finding.MemberName)}</div>");
+      builder.AppendLine($"<div>Full name</div><div>{encoder.Encode(finding.FullName)}</div>");
       builder.AppendLine($"<div>File</div><div>{encoder.Encode(finding.File)}:{finding.Line}</div>");
       builder.AppendLine($"<div>References</div><div>{finding.References}</div>");
       builder.AppendLine($"<div>Reason</div><div class=\"reason\">{encoder.Encode(finding.Reason)}</div>");
@@ -319,6 +325,7 @@ internal sealed class HtmlReportBuilder : IReportBuilder
       "==================================",
       $"Unused classes: {GetCount(result, UnusedSymbolKind.Class)}",
       $"Unused methods: {GetCount(result, UnusedSymbolKind.Method)}",
+      $"Unused constructors: {GetCount(result, UnusedSymbolKind.Constructor)}",
       $"Unused properties: {GetCount(result, UnusedSymbolKind.Property)}",
       $"Unused fields: {GetCount(result, UnusedSymbolKind.Field)}",
       $"Unused interfaces: {GetCount(result, UnusedSymbolKind.Interface)}",
@@ -398,3 +405,4 @@ internal sealed class JsonReportBuilder : IReportBuilder
     await JsonSerializer.SerializeAsync(stream, payload, options, cancellationToken).ConfigureAwait(false);
   }
 }
+

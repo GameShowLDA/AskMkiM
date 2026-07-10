@@ -74,7 +74,7 @@ internal static class UnusedCodeAnalyzer
               Logger.Info(
                 "Symbol references analyzed. Project: {Project}. Symbol: {Symbol}. References: {References}",
                 candidate.ProjectName,
-                candidate.Symbol.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
+                SymbolDisplayFormatter.GetFullName(candidate.Symbol),
                 referenceInfo.ReferenceCount);
 
               if (referenceInfo.ReferenceCount != 0 ||
@@ -215,6 +215,8 @@ internal static class UnusedCodeAnalyzer
       Console.WriteLine();
       Console.WriteLine(finding.Kind);
       Console.WriteLine(finding.FullName);
+      Console.WriteLine($"Owner: {finding.OwnerName}");
+      Console.WriteLine($"Member: {finding.MemberName}");
       Console.WriteLine($"Project: {finding.Project}");
       Console.WriteLine($"File: {finding.File}:{finding.Line}");
       Console.WriteLine($"References: {finding.References}");
@@ -250,6 +252,7 @@ internal static class UnusedCodeAnalyzer
     Console.WriteLine("==================================");
     Console.WriteLine($"Unused classes: {GetCount(result, UnusedSymbolKind.Class)}");
     Console.WriteLine($"Unused methods: {GetCount(result, UnusedSymbolKind.Method)}");
+    Console.WriteLine($"Unused constructors: {GetCount(result, UnusedSymbolKind.Constructor)}");
     Console.WriteLine($"Unused properties: {GetCount(result, UnusedSymbolKind.Property)}");
     Console.WriteLine($"Unused fields: {GetCount(result, UnusedSymbolKind.Field)}");
     Console.WriteLine($"Unused interfaces: {GetCount(result, UnusedSymbolKind.Interface)}");

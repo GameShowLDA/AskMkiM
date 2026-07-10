@@ -26,6 +26,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   [AllowedKeys(Ask.Core.Shared.Metadata.Enums.TranslationEnums.AlgorithmKey.Д)]
   public class CuCommandModel : BaseCommandModel
   {
+    /// <inheritdoc />
     public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.CU).DisplayName;
 
     /// <summary>
