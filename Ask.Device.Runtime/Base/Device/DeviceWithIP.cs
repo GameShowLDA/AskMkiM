@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Communication.Ethernet.Udp.Protocols;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using System.Net;

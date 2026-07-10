@@ -1,7 +1,7 @@
 ﻿using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter
 {

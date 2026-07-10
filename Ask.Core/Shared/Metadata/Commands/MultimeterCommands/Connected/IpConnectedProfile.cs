@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected
+namespace Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected
 {
   public class IpConnectedProfile : ConnectedBaseProfile
   {

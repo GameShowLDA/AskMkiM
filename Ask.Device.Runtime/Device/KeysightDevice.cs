@@ -1,8 +1,8 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements;

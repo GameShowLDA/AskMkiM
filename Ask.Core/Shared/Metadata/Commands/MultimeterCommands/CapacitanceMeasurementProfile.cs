@@ -1,7 +1,8 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 
-namespace Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands
+namespace Ask.Core.Shared.Metadata.Commands.MultimeterCommands
 {
   public class CapacitanceMeasurementProfile : IMeasurementProfile
   {

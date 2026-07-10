@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums.MultimeterCommands.Connected;
 using Ask.Device.Runtime.Function.Base.Status;
 
 namespace Ask.Device.Runtime.Base.Device
