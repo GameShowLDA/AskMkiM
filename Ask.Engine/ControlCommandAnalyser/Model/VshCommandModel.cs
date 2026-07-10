@@ -8,7 +8,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   public class VshCommandModel : BaseCommandModel, IHasRackStructure
   {
-    public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.VSH).DisplayName;
+    /// <inheritdoc />
+    public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.VSH).DisplayName;
 
     public Dictionary<BusStructureEnum.Type, List<int?>> BusStructure { get; set; }
   }

@@ -2,8 +2,9 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Ethernet;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
@@ -11,24 +12,25 @@ namespace Ask.Device.Runtime.Device
   /// <summary>
   /// Модуль коммутации реле, обеспечивающее подключение объектов контроля.
   /// </summary>
-  public class ModuleRelayControl : DeviceWithIP, IRelaySwitchModule
+  public class ModuleRelayControl : DeviceWithUdpIp, IRelaySwitchModule
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControl"/>.
     /// </summary>
     public ModuleRelayControl()
     {
-      ConnectableManager = new Function.ModuleRelayControl.StateManager(this);
-      BusManager = new Function.ModuleRelayControl.BusManager(this);
-      MeterManager = new Function.ModuleRelayControl.MeterManager(this);
-      PointManager = new Function.ModuleRelayControl.PointManager(this);
-      SelfTestManager = new SelfTestManager(this);
-
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
       DeviceType = DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-350";
       Description = "Добавить описание сюда";
       PointCount = 350;
       DeviceClass = GetType().FullName;
+
+      ConnectableManager = new Transport(this);
+      BusManager = new Function.ModuleRelayControl.BusManager(this);
+      MeterManager = new Function.ModuleRelayControl.MeterManager(this);
+      PointManager = new Function.ModuleRelayControl.PointManager(this);
+      SelfTestManager = new SelfTestManager(this);
     }
 
     /// <inheritdoc />

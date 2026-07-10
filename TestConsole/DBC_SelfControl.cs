@@ -125,7 +125,7 @@ namespace TestConsole
     /// </summary>
     /// <param name="testType">Тип цепи для проверки.</param>
     /// <returns>True, если проверка успешна, иначе false.</returns>
-    private static async Task<bool> SelfCheckCircuitAsync(SwitchingDeviceTypeConnector testType, ISwitchingDevice device = null, IFastMeter meter = null)
+    private static async Task<bool> SelfCheckCircuitAsync(SwitchingDeviceTypeConnector testType, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       if (device == null)
       {
@@ -204,7 +204,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
-    private static async Task<bool> PerformCircuitTestAsync(ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
     {
       LogInformation($"Запуск теста: {circuitName}");
 
@@ -260,7 +260,7 @@ namespace TestConsole
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если все реле прошли проверку, иначе false.</returns>
-    private static async Task<bool> PerformRelayCheck(ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IFastMeter meter)
+    private static async Task<bool> PerformRelayCheck(ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IMultimeter meter)
     {
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)
@@ -306,11 +306,11 @@ namespace TestConsole
       return true;
     }
 
-    private static async Task SettingsMeter(IFastMeter meter)
+    private static async Task SettingsMeter(IMultimeter meter)
     {
       await meter.ContinuityManager.SetContinuityModeAsync();
     }
-    private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter)
+    private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IMultimeter meter)
     {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
@@ -428,7 +428,7 @@ namespace TestConsole
       };
     }
 
-    private static IFastMeter SelectMeter()
+    private static IMultimeter SelectMeter()
     {
       var dbc = FastMeters.GetAllAsync().GetAwaiter().GetResult();
 

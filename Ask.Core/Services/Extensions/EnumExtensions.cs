@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Atributes;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -6,69 +7,149 @@ using System.Reflection;
 namespace Ask.Core.Services.Extensions
 {
   /// <summary>
-  /// Набор методов-расширений для работы с перечислениями,
-  /// поддерживающими отображаемые мнемоники через атрибуты.
-  /// Позволяет получать информацию об отображении и сравнивать
-  /// строковые мнемоники с значениями enum.
+  /// Предоставляет набор методов-расширений для работы с перечислениями,
+  /// использующими атрибуты метаданных.
+  /// <para>
+  /// Позволяет получать описания, отображаемые имена, сведения о командах,
+  /// единицах измерения и выполнять сравнение строковых представлений
+  /// с элементами перечислений.
+  /// </para>
   /// </summary>
   public static class EnumExtensions
   {
     /// <summary>
-    /// Возвращает атрибут с отображаемой информацией команды
-    /// <see cref="CommandDisplayInfoAttribute"/> для указанного значения перечисления.
+    /// Возвращает атрибут указанного типа, применённый к значению перечисления.
     /// </summary>
-    public static CommandDisplayInfoAttribute? GetDisplayInfo(this Enum value)
+    /// <typeparam name="TAttribute">Тип искомого атрибута.</typeparam>
+    /// <param name="value">Значение перечисления.</param>
+    /// <returns>
+    /// Найденный атрибут либо <see langword="null"/>, если атрибут отсутствует.
+    /// </returns>
+    public static TAttribute GetAttribute<TAttribute>(this Enum value)
+      where TAttribute : Attribute
     {
-      var member = value.GetType().GetMember(value.ToString()).FirstOrDefault();
-      return member?.GetCustomAttribute<CommandDisplayInfoAttribute>();
+      var member = value.GetType()
+                        .GetMember(value.ToString())
+                        .FirstOrDefault();
+
+      return member?.GetCustomAttribute<TAttribute>();
     }
 
     /// <summary>
-    /// Возвращает организационный атрибут отображения команды
-    /// <see cref="CommandOrganizationalAttribute"/> для указанного значения перечисления.
+    /// Возвращает атрибут указанного типа, применённый к значению перечисления.
     /// </summary>
-    public static CommandOrganizationalAttribute? GetDisplayOrganizationalInfo(this Enum value)
+    /// <typeparam name="TAttribute">Тип искомого атрибута.</typeparam>
+    /// <param name="value">Значение перечисления.</param>
+    /// <returns>Найденный атрибут.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если атрибут отсутствует.
+    /// </exception>
+    public static TAttribute GetRequiredAttribute<TAttribute>(this Enum value)
+      where TAttribute : Attribute
     {
-      var member = value.GetType().GetMember(value.ToString()).FirstOrDefault();
-      return member?.GetCustomAttribute<CommandOrganizationalAttribute>();
+      return value.GetAttribute<TAttribute>()
+          ?? throw new InvalidOperationException(
+              $"Для значения '{value}' отсутствует атрибут {typeof(TAttribute).Name}.");
     }
 
     /// <summary>
-    /// Проверяет, соответствует ли указанная строковая мнемоника значению перечисления,
-    /// учитывая отображаемое имя из атрибутов или название элемента enum.
-    /// Сравнение выполняется без учёта регистра.
+    /// Возвращает нижнюю границу диапазона, указанную в атрибуте
+    /// <see cref="CommandDisplayInfoAttribute"/>.
     /// </summary>
+    /// <param name="value">Значение перечисления.</param>
+    /// <returns>Нижняя граница диапазона.</returns>
+    public static double GetLowerLimit(this Enum value)
+    {
+      return value.GetRequiredAttribute<CommandDisplayInfoAttribute>()
+                  .LowerLimit;
+    }
+
+    /// <summary>
+    /// Возвращает верхнюю границу диапазона, указанную в атрибуте
+    /// <see cref="CommandDisplayInfoAttribute"/>.
+    /// </summary>
+    /// <param name="value">Значение перечисления.</param>
+    /// <returns>Верхняя граница диапазона.</returns>
+    public static double GetUpperLimit(this Enum value)
+    {
+      return value.GetRequiredAttribute<CommandDisplayInfoAttribute>()
+                  .UpperLimit;
+    }
+
+    /// <summary>
+    /// Возвращает атрибут отображения команды.
+    /// </summary>
+    public static CommandDisplayInfoAttribute GetCommandDisplayInfo(this Enum value)
+      => value.GetAttribute<CommandDisplayInfoAttribute>();
+
+    /// <summary>
+    /// Возвращает организационный атрибут отображения команды.
+    /// </summary>
+    public static CommandOrganizationalAttribute GetCommandOrganizationalInfo(this Enum value)
+      => value.GetAttribute<CommandOrganizationalAttribute>();
+
+    /// <summary>
+    /// Возвращает атрибут единицы измерения.
+    /// </summary>
+    public static UnitDisplayAttribute GetUnitDisplay(this Enum value)
+      => value.GetAttribute<UnitDisplayAttribute>();
+
+    /// <summary>
+    /// Возвращает отображаемое обозначение единицы измерения
+    /// (например: «В», «Ом», «мА»).
+    /// </summary>
+    public static string GetUnit(this Enum value)
+      => value.GetRequiredAttribute<UnitDisplayAttribute>().Display;
+
+    /// <summary>
+    /// Возвращает обозначение физической величины
+    /// (например: U, I, R, C).
+    /// </summary>
+    public static QuantitySymbol GetQuantitySymbol(this Enum value)
+      => value.GetRequiredAttribute<UnitDisplayAttribute>().Symbol;
+
+    /// <summary>
+    /// Проверяет, соответствует ли указанная строка отображаемому имени
+    /// элемента перечисления без учёта регистра.
+    /// </summary>
+    /// <param name="mnemonic">Строковое представление.</param>
+    /// <param name="value">Значение перечисления.</param>
+    /// <returns>
+    /// <see langword="true"/>, если строки совпадают;
+    /// иначе — <see langword="false"/>.
+    /// </returns>
     public static bool MatchesEnum(this string mnemonic, Enum value)
     {
-      var display = value.GetDisplayInfo() ?? (object?)value.GetDisplayOrganizationalInfo();
+      var display = value.GetCommandDisplayInfo()
+                    ?? (object?)value.GetCommandOrganizationalInfo();
 
-      var displayMnemonic =
-          display switch
-          {
-            CommandDisplayInfoAttribute info => info.DisplayName,
-            CommandOrganizationalAttribute org => org.DisplayName,
-            _ => value.ToString()
-          };
+      var displayMnemonic = display switch
+      {
+        CommandDisplayInfoAttribute info => info.DisplayName,
+        CommandOrganizationalAttribute org => org.DisplayName,
+        _ => value.ToString()
+      };
 
-      return string.Equals(mnemonic, displayMnemonic, StringComparison.OrdinalIgnoreCase);
+      return string.Equals(
+          mnemonic,
+          displayMnemonic,
+          StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// Получает локализованное отображаемое имя для значения перечисления (Display.Name).
+    /// Возвращает отображаемое имя из атрибута
+    /// <see cref="DisplayAttribute"/>.
+    /// Если атрибут отсутствует, возвращает имя элемента перечисления.
     /// </summary>
-    public static string GetDisplayName(this Enum enumValue)
-    {
-      return enumValue.GetType()
-          .GetMember(enumValue.ToString())
-          .First()
-          .GetCustomAttribute<DisplayAttribute>()?.Name ?? enumValue.ToString();
-    }
+    public static string GetDisplayName(this Enum value)
+      => value.GetAttribute<DisplayAttribute>()?.Name ?? value.ToString();
 
+    /// <summary>
+    /// Возвращает описание из атрибута
+    /// <see cref="DescriptionAttribute"/>.
+    /// Если атрибут отсутствует, возвращает имя элемента перечисления.
+    /// </summary>
     public static string GetDescription(this Enum value)
-    {
-      var member = value.GetType().GetMember(value.ToString())[0];
-      var attr = member.GetCustomAttribute<DescriptionAttribute>();
-      return attr?.Description ?? value.ToString();
-    }
+      => value.GetAttribute<DescriptionAttribute>()?.Description ?? value.ToString();
   }
 }

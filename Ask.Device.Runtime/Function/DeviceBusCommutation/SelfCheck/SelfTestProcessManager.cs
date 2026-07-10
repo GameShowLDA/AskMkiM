@@ -25,7 +25,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="userMessageService">Элемент управления для вывода информации.</param>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice device = null, IFastMeter meter = null)
+    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       SelfTestManager.MeterConnect = false;
       SelfTestManager.DbcConnect = false;
@@ -104,7 +104,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// </summary>
     /// <param name="testType">Тип цепи для проверки.</param>
     /// <returns>True, если проверка успешна, иначе false.</returns>
-    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, ISwitchingDevice device = null, IFastMeter meter = null)
+    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       if (!SelfTestManager.MeterConnect && !SelfTestManager.DbcConnect)
       {
@@ -170,7 +170,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если тест пройден успешно, иначе false.</returns>
-    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IFastMeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
 
@@ -224,7 +224,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="circuitName">Название цепи.</param>
     /// <param name="busContact">Контакт шины.</param>
     /// <returns>True, если все реле прошли проверку, иначе false.</returns>
-    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IFastMeter meter)
+    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IMultimeter meter)
     {
       int relayCount = await selfTestChecker.GetRelayCountAsync(testType, busContact);
       if (relayCount < 0)

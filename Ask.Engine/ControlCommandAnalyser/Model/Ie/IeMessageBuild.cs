@@ -5,6 +5,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ie
 {
   internal class IeMessageBuild : IDislpayInfo
   {
+    /// <inheritdoc />
     public string BuildErrorChainStringAsync(ChainModel chain)
     {
       var chainStr = PointFormater.GetFormatConnectPoint(chain);

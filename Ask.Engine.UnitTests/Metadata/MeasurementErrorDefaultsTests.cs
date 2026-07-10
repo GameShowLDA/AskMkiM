@@ -4,18 +4,30 @@ using Ask.Core.Shared.Metadata.Static;
 
 namespace Ask.Engine.UnitTests.Metadata;
 
+/// <summary>
+/// Содержит модульные тесты для проверки значений погрешностей
+/// и диапазонов допуска измерений.
+/// </summary>
 public class MeasurementErrorDefaultsTests
 {
+  /// <summary>
+  /// Проверяет, что для команды EHT используются корректные
+  /// пределы измерения, заданные в инструкции.
+  /// </summary>
   [Fact]
   public void EhtDisplayInfo_UsesInstructionResistanceRange()
   {
-    var displayInfo = MeasurementTypeCommand.EHT.GetDisplayInfo();
+    var displayInfo = MeasurementTypeCommand.EHT.GetCommandDisplayInfo();
 
     Assert.NotNull(displayInfo);
     Assert.Equal(0.01, displayInfo.LowerLimit);
     Assert.Equal(100, displayInfo.UpperLimit);
   }
 
+  /// <summary>
+  /// Проверяет, что для команды EHT используются диапазоны
+  /// погрешностей, заданные в инструкции.
+  /// </summary>
   [Fact]
   public void EhtDefaultErrors_UseInstructionDefinedRanges()
   {
@@ -39,6 +51,14 @@ public class MeasurementErrorDefaultsTests
       });
   }
 
+  /// <summary>
+  /// Проверяет корректность расчёта диапазона допуска
+  /// для команды EHT.
+  /// </summary>
+  /// <param name="measuredValue">Измеренное значение.</param>
+  /// <param name="expectedLowerBound">Ожидаемая нижняя граница допуска.</param>
+  /// <param name="expectedUpperBound">Ожидаемая верхняя граница допуска.</param>
+  /// <param name="expectedDelta">Ожидаемая абсолютная погрешность.</param>
   [Theory]
   [InlineData(0.5, 0.45, 0.55, 0.05)]
   [InlineData(10, 9.5, 10.5, 0.5)]
@@ -56,6 +76,10 @@ public class MeasurementErrorDefaultsTests
     Assert.Equal(expectedDelta, delta, precision: 10);
   }
 
+  /// <summary>
+  /// Проверяет, что при измерении значения ниже допустимого диапазона
+  /// для команды EHT генерируется исключение.
+  /// </summary>
   [Fact]
   public void CalculateToleranceRange_ForEhtBelowDefinedAccuracy_Throws()
   {

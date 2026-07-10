@@ -14,7 +14,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class CuCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.CU).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.CU).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {

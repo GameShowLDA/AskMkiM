@@ -42,7 +42,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     static internal async Task PerformResistanceCheckAsync(
         CancellationToken cancellationToken,
         IUserInteractionService messageService,
-        IFastMeter fastMeter,
+        IMultimeter fastMeter,
         IPowerSourceModule powerSource,
         ISwitchingDevice relayModule)
     {

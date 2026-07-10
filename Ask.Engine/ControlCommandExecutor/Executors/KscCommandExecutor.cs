@@ -5,8 +5,6 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -16,7 +14,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class KscCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.KSC).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.KSC).DisplayName;
 
     private void OnProtocolClose(FileInteractionEvents.ProtocolInfoClose e)
     {

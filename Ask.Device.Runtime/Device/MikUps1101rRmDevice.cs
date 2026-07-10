@@ -3,9 +3,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Communication.Usb;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Base;
 
 namespace Ask.Device.Runtime.Device
 {
@@ -22,8 +22,9 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.UninterruptiblePowerSupply;
 
       ConnectionDetails = "VID_0665&PID_5161";
+      ConnectedProfile.UseViewPower = true;
       ConnectableManager = new Function.MikUps1101rRm.ConnectableManager(this);
-      DeviceProtocol = new UsbProtocol(this, new Function.MikUps1101rRm.ViewPowerUpsUsbCommandHandler());
+      DeviceProtocol = new UsbProtocol(this, new UsbCommandHandler());
       PowerManager = new Function.MikUps1101rRm.PowerManager(this);
     }
 
