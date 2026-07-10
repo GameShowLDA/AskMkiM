@@ -111,6 +111,8 @@ internal static class UnusedCodeAnalyzer
 
       var emptyFolderScanner = new EmptyFolderScanner();
       var emptyFolders = await emptyFolderScanner.ScanAsync(projects, cancellationToken).ConfigureAwait(false);
+      var duplicateTypeScanner = new DuplicateTypeScanner(semanticModelCache);
+      var duplicateTypes = await duplicateTypeScanner.ScanAsync(projects, cancellationToken).ConfigureAwait(false);
       var result = new UnusedCodeAnalysisResult(
         findings
           .OrderBy(finding => finding.Project)
@@ -119,6 +121,7 @@ internal static class UnusedCodeAnalyzer
           .ThenBy(finding => finding.FullName)
           .ToArray(),
         emptyFolders,
+        duplicateTypes,
         DateTimeOffset.UtcNow - started);
 
       var reportBuilder = new ReportBuilder();
@@ -133,9 +136,10 @@ internal static class UnusedCodeAnalyzer
       }
 
       Logger.Info(
-        "Unused-code analysis completed. Findings: {Findings}. Empty folders: {EmptyFolders}. Elapsed: {Elapsed}",
+        "Unused-code analysis completed. Findings: {Findings}. Empty folders: {EmptyFolders}. Duplicate types: {DuplicateTypes}. Elapsed: {Elapsed}",
         result.Findings.Count,
         result.EmptyFolders.Count,
+        result.DuplicateTypes.Count,
         result.Elapsed);
     }
     catch (Exception ex) when (ex is not OperationCanceledException)
@@ -226,6 +230,22 @@ internal static class UnusedCodeAnalyzer
       Console.WriteLine($"Reason: {folder.Reason}");
     }
 
+    foreach (var duplicate in result.DuplicateTypes)
+    {
+      Console.WriteLine();
+      Console.WriteLine("DuplicateType");
+      Console.WriteLine(duplicate.FullName);
+      Console.WriteLine($"Kind: {duplicate.Kind}");
+      Console.WriteLine($"Namespace: {duplicate.Namespace}");
+      Console.WriteLine($"Occurrences: {duplicate.Occurrences.Count}");
+      foreach (var occurrence in duplicate.Occurrences)
+      {
+        Console.WriteLine($"- {occurrence.Project}: {occurrence.File}:{occurrence.Line}");
+      }
+
+      Console.WriteLine($"Reason: {duplicate.Reason}");
+    }
+
     Console.WriteLine();
     Console.WriteLine("==================================");
     Console.WriteLine($"Unused classes: {GetCount(result, UnusedSymbolKind.Class)}");
@@ -236,7 +256,8 @@ internal static class UnusedCodeAnalyzer
     Console.WriteLine($"Unused enums: {GetCount(result, UnusedSymbolKind.Enum)}");
     Console.WriteLine($"Unused events: {GetCount(result, UnusedSymbolKind.Event)}");
     Console.WriteLine($"Empty folders: {result.EmptyFolders.Count}");
-    Console.WriteLine($"Total: {result.Findings.Count + result.EmptyFolders.Count}");
+    Console.WriteLine($"Duplicate types: {result.DuplicateTypes.Count}");
+    Console.WriteLine($"Total: {result.Findings.Count + result.EmptyFolders.Count + result.DuplicateTypes.Count}");
     Console.WriteLine("==================================");
   }
 

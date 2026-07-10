@@ -125,6 +125,26 @@ internal sealed class MarkdownReportBuilder : IReportBuilder
       }
     }
 
+    if (result.DuplicateTypes.Count > 0)
+    {
+      builder.AppendLine();
+      builder.AppendLine("## Duplicate types");
+      foreach (var duplicate in result.DuplicateTypes.OrderBy(f => f.FullName))
+      {
+        builder.AppendLine();
+        builder.AppendLine($"**DuplicateType: {duplicate.Kind}**");
+        builder.AppendLine();
+        builder.AppendLine(duplicate.FullName);
+        builder.AppendLine($"Namespace: {duplicate.Namespace}");
+        builder.AppendLine($"Occurrences: {duplicate.Occurrences.Count}");
+        builder.AppendLine($"Reason: {duplicate.Reason}");
+        foreach (var occurrence in duplicate.Occurrences)
+        {
+          builder.AppendLine($"- {occurrence.Project}: {MakeRelative(occurrence.File)}:{occurrence.Line}");
+        }
+      }
+    }
+
     AppendStatistics(builder, result);
     await File.WriteAllTextAsync(filePath, builder.ToString(), Encoding.UTF8, cancellationToken)
       .ConfigureAwait(false);
@@ -142,7 +162,8 @@ internal sealed class MarkdownReportBuilder : IReportBuilder
     builder.AppendLine($"Unused enums: {GetCount(result, UnusedSymbolKind.Enum)}");
     builder.AppendLine($"Unused events: {GetCount(result, UnusedSymbolKind.Event)}");
     builder.AppendLine($"Empty folders: {result.EmptyFolders.Count}");
-    builder.AppendLine($"Total: {result.Findings.Count + result.EmptyFolders.Count}");
+    builder.AppendLine($"Duplicate types: {result.DuplicateTypes.Count}");
+    builder.AppendLine($"Total: {result.Findings.Count + result.EmptyFolders.Count + result.DuplicateTypes.Count}");
     builder.AppendLine("==================================");
   }
 
@@ -172,11 +193,13 @@ internal sealed class HtmlReportBuilder : IReportBuilder
     var builder = new StringBuilder();
     var projects = result.Findings.Select(f => f.Project)
       .Concat(result.EmptyFolders.Select(f => f.Project))
+      .Concat(result.DuplicateTypes.SelectMany(f => f.Occurrences.Select(o => o.Project)))
       .Distinct()
       .Order()
       .ToArray();
     var kinds = result.Findings.Select(f => f.Kind.ToString())
       .Append("EmptyFolder")
+      .Append("DuplicateType")
       .Distinct()
       .Order()
       .ToArray();
@@ -249,10 +272,40 @@ internal sealed class HtmlReportBuilder : IReportBuilder
       builder.AppendLine("</div></details>");
     }
 
+    foreach (var duplicate in result.DuplicateTypes.OrderBy(f => f.FullName))
+    {
+      var id = BuildDuplicateTypeId(duplicate);
+      var projectsValue = string.Join("|", duplicate.Occurrences.Select(o => o.Project).Distinct().Order());
+      var filesValue = string.Join(" ", duplicate.Occurrences.Select(o => o.File));
+      var folderValue = string.Join(" ", duplicate.Occurrences.Select(o => Path.GetDirectoryName(o.File) ?? string.Empty));
+      builder.AppendLine(
+        $"<details class=\"item duplicate-type\" data-id=\"{id}\" data-order=\"{order++}\" data-project=\"{encoder.Encode(projectsValue)}\" data-kind=\"DuplicateType\" data-references=\"0\" data-folder=\"{encoder.Encode(folderValue)}\" data-file=\"{encoder.Encode(filesValue)}\" data-search=\"{encoder.Encode((duplicate.FullName + " " + duplicate.Namespace + " " + filesValue).ToLowerInvariant())}\">");
+      builder.AppendLine("<summary>");
+      builder.AppendLine("<span class=\"summary-row\">");
+      builder.AppendLine($"<input class=\"done-check\" type=\"checkbox\" aria-label=\"Done\" data-id=\"{id}\">");
+      builder.AppendLine($"<span class=\"symbol-title\"><span class=\"kind\">DuplicateType</span> {encoder.Encode(duplicate.FullName)}</span>");
+      builder.AppendLine("</span>");
+      builder.AppendLine("</summary>");
+      builder.AppendLine("<div class=\"meta\">");
+      builder.AppendLine($"<div>Kind</div><div>{duplicate.Kind}</div>");
+      builder.AppendLine($"<div>Namespace</div><div>{encoder.Encode(duplicate.Namespace)}</div>");
+      builder.AppendLine($"<div>Occurrences</div><div>{duplicate.Occurrences.Count}</div>");
+      builder.AppendLine($"<div>Reason</div><div class=\"reason\">{encoder.Encode(duplicate.Reason)}</div>");
+      builder.AppendLine("<div>Files</div><div>");
+      foreach (var occurrence in duplicate.Occurrences)
+      {
+        var occurrenceFolder = Path.GetDirectoryName(occurrence.File) ?? string.Empty;
+        builder.AppendLine($"<div>{encoder.Encode(occurrence.Project)}: {encoder.Encode(occurrence.File)}:{occurrence.Line} <button class=\"ignore-folder\" type=\"button\" data-folder=\"{encoder.Encode(occurrenceFolder)}\">Ignore folder</button></div>");
+      }
+
+      builder.AppendLine("</div>");
+      builder.AppendLine("</div></details>");
+    }
+
     builder.AppendLine("</section>");
     builder.AppendLine($"<pre class=\"stats\">{encoder.Encode(BuildStatistics(result))}</pre>");
     builder.AppendLine("<script>");
-    builder.AppendLine("const project=document.getElementById('project'),kind=document.getElementById('kind'),search=document.getElementById('search'),items=document.getElementById('items'),ignoredFolderInput=document.getElementById('ignoredFolderInput'),ignoredFolderList=document.getElementById('ignoredFolderList'),storePrefix='unused-code-done:',ignoredKey='unused-code-ignored-folders';let sortByRefs=false;function readIgnored(){const raw=localStorage.getItem(ignoredKey)||'';if(!raw)return[];try{const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed.map(x=>({path:String(x.path||'').trim(),enabled:x.enabled!==false})).filter(x=>x.path)}catch{}return raw.split(';').map(x=>x.trim()).filter(Boolean).map(path=>({path,enabled:true}))}function writeIgnored(values){const normalized=[];for(const value of values){const path=String(value.path||value).trim();if(path&&!normalized.some(x=>x.path.toLowerCase()===path.toLowerCase()))normalized.push({path,enabled:value.enabled!==false})}localStorage.setItem(ignoredKey,JSON.stringify(normalized));renderIgnored();apply()}function renderIgnored(){ignoredFolderList.innerHTML='';for(const rule of readIgnored()){const item=document.createElement('label');item.className='ignore-rule'+(rule.enabled?'':' disabled');const check=document.createElement('input');check.type='checkbox';check.checked=rule.enabled;check.onchange=()=>{writeIgnored(readIgnored().map(x=>x.path===rule.path?{path:x.path,enabled:check.checked}:x))};const text=document.createElement('span');text.textContent=rule.path;const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.onclick=event=>{event.preventDefault();writeIgnored(readIgnored().filter(x=>x.path!==rule.path))};item.append(check,text,remove);ignoredFolderList.appendChild(item)}}function addIgnored(path){if(path)writeIgnored([...readIgnored(),{path,enabled:true}]);ignoredFolderInput.value=''}function activeIgnored(){return readIgnored().filter(x=>x.enabled).map(x=>x.path.toLowerCase())}function isIgnored(item){const file=(item.dataset.file||'').toLowerCase(),folder=(item.dataset.folder||'').toLowerCase();return activeIgnored().some(x=>file.includes(x)||folder.includes(x))}function isDone(item){return localStorage.getItem(storePrefix+item.dataset.id)==='1'}function syncDone(item){const done=isDone(item);item.classList.toggle('done',done);const check=item.querySelector('.done-check');if(check)check.checked=done}function reorder(){[...items.children].sort((a,b)=>{const done=Number(isDone(a))-Number(isDone(b));if(done!==0)return done;if(sortByRefs){const refs=Number(a.dataset.references)-Number(b.dataset.references);if(refs!==0)return refs}return Number(a.dataset.order)-Number(b.dataset.order)}).forEach(x=>items.appendChild(x))}function apply(){const p=project.value,k=kind.value,q=search.value.toLowerCase();for(const item of items.children){syncDone(item);const ok=(!p||item.dataset.project===p)&&(!k||item.dataset.kind===k)&&(!q||item.dataset.search.includes(q))&&!isIgnored(item);item.classList.toggle('hidden',!ok)}reorder()}for(const check of document.querySelectorAll('.done-check')){check.addEventListener('click',event=>event.stopPropagation());check.addEventListener('change',event=>{const id=event.target.dataset.id;if(event.target.checked)localStorage.setItem(storePrefix+id,'1');else localStorage.removeItem(storePrefix+id);apply()})}for(const button of document.querySelectorAll('.ignore-folder')){button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const folder=event.target.closest('.item').dataset.folder;if(folder)addIgnored(folder)})}ignoredFolderInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();addIgnored(ignoredFolderInput.value)}});document.getElementById('addIgnoredFolder').onclick=()=>addIgnored(ignoredFolderInput.value);document.getElementById('clearIgnoredFolders').onclick=()=>writeIgnored([]);project.onchange=kind.onchange=search.oninput=apply;document.getElementById('sort').onclick=()=>{sortByRefs=!sortByRefs;apply()};renderIgnored();apply();");
+    builder.AppendLine("const project=document.getElementById('project'),kind=document.getElementById('kind'),search=document.getElementById('search'),items=document.getElementById('items'),ignoredFolderInput=document.getElementById('ignoredFolderInput'),ignoredFolderList=document.getElementById('ignoredFolderList'),storePrefix='unused-code-done:',ignoredKey='unused-code-ignored-folders';let sortByRefs=false;function readIgnored(){const raw=localStorage.getItem(ignoredKey)||'';if(!raw)return[];try{const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed.map(x=>({path:String(x.path||'').trim(),enabled:x.enabled!==false})).filter(x=>x.path)}catch{}return raw.split(';').map(x=>x.trim()).filter(Boolean).map(path=>({path,enabled:true}))}function writeIgnored(values){const normalized=[];for(const value of values){const path=String(value.path||value).trim();if(path&&!normalized.some(x=>x.path.toLowerCase()===path.toLowerCase()))normalized.push({path,enabled:value.enabled!==false})}localStorage.setItem(ignoredKey,JSON.stringify(normalized));renderIgnored();apply()}function renderIgnored(){ignoredFolderList.innerHTML='';for(const rule of readIgnored()){const item=document.createElement('label');item.className='ignore-rule'+(rule.enabled?'':' disabled');const check=document.createElement('input');check.type='checkbox';check.checked=rule.enabled;check.onchange=()=>{writeIgnored(readIgnored().map(x=>x.path===rule.path?{path:x.path,enabled:check.checked}:x))};const text=document.createElement('span');text.textContent=rule.path;const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.onclick=event=>{event.preventDefault();writeIgnored(readIgnored().filter(x=>x.path!==rule.path))};item.append(check,text,remove);ignoredFolderList.appendChild(item)}}function addIgnored(path){if(path)writeIgnored([...readIgnored(),{path,enabled:true}]);ignoredFolderInput.value=''}function activeIgnored(){return readIgnored().filter(x=>x.enabled).map(x=>x.path.toLowerCase())}function isIgnored(item){const file=(item.dataset.file||'').toLowerCase(),folder=(item.dataset.folder||'').toLowerCase();return activeIgnored().some(x=>file.includes(x)||folder.includes(x))}function isDone(item){return localStorage.getItem(storePrefix+item.dataset.id)==='1'}function syncDone(item){const done=isDone(item);item.classList.toggle('done',done);const check=item.querySelector('.done-check');if(check)check.checked=done}function matchesProject(item,p){return !p||item.dataset.project.split('|').includes(p)}function reorder(){[...items.children].sort((a,b)=>{const done=Number(isDone(a))-Number(isDone(b));if(done!==0)return done;if(sortByRefs){const refs=Number(a.dataset.references)-Number(b.dataset.references);if(refs!==0)return refs}return Number(a.dataset.order)-Number(b.dataset.order)}).forEach(x=>items.appendChild(x))}function apply(){const p=project.value,k=kind.value,q=search.value.toLowerCase();for(const item of items.children){syncDone(item);const ok=matchesProject(item,p)&&(!k||item.dataset.kind===k)&&(!q||item.dataset.search.includes(q))&&!isIgnored(item);item.classList.toggle('hidden',!ok)}reorder()}for(const check of document.querySelectorAll('.done-check')){check.addEventListener('click',event=>event.stopPropagation());check.addEventListener('change',event=>{const id=event.target.dataset.id;if(event.target.checked)localStorage.setItem(storePrefix+id,'1');else localStorage.removeItem(storePrefix+id);apply()})}for(const button of document.querySelectorAll('.ignore-folder')){button.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const folder=event.target.dataset.folder||event.target.closest('.item').dataset.folder;if(folder)addIgnored(folder)})}ignoredFolderInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();addIgnored(ignoredFolderInput.value)}});document.getElementById('addIgnoredFolder').onclick=()=>addIgnored(ignoredFolderInput.value);document.getElementById('clearIgnoredFolders').onclick=()=>writeIgnored([]);project.onchange=kind.onchange=search.oninput=apply;document.getElementById('sort').onclick=()=>{sortByRefs=!sortByRefs;apply()};renderIgnored();apply();");
     builder.AppendLine("</script></main></body></html>");
 
     await File.WriteAllTextAsync(filePath, builder.ToString(), Encoding.UTF8, cancellationToken)
@@ -272,7 +325,8 @@ internal sealed class HtmlReportBuilder : IReportBuilder
       $"Unused enums: {GetCount(result, UnusedSymbolKind.Enum)}",
       $"Unused events: {GetCount(result, UnusedSymbolKind.Event)}",
       $"Empty folders: {result.EmptyFolders.Count}",
-      $"Total: {result.Findings.Count + result.EmptyFolders.Count}",
+      $"Duplicate types: {result.DuplicateTypes.Count}",
+      $"Total: {result.Findings.Count + result.EmptyFolders.Count + result.DuplicateTypes.Count}",
       "=================================="
     });
   }
@@ -295,6 +349,13 @@ internal sealed class HtmlReportBuilder : IReportBuilder
     var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(source));
     return Convert.ToHexString(bytes);
   }
+
+  private static string BuildDuplicateTypeId(DuplicateTypeFinding finding)
+  {
+    var source = $"{finding.Kind}|DuplicateType|{finding.FullName}|{string.Join("|", finding.Occurrences.Select(o => o.File))}";
+    var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(source));
+    return Convert.ToHexString(bytes);
+  }
 }
 
 /// <summary>
@@ -314,7 +375,8 @@ internal sealed class JsonReportBuilder : IReportBuilder
       elapsed = result.Elapsed,
       statistics = result.Counts.ToDictionary(pair => pair.Key.ToString(), pair => pair.Value),
       emptyFoldersCount = result.EmptyFolders.Count,
-      total = result.Findings.Count + result.EmptyFolders.Count,
+      duplicateTypesCount = result.DuplicateTypes.Count,
+      total = result.Findings.Count + result.EmptyFolders.Count + result.DuplicateTypes.Count,
       findings = result.Findings
         .OrderBy(f => f.Project)
         .ThenBy(f => f.Namespace)
@@ -322,7 +384,9 @@ internal sealed class JsonReportBuilder : IReportBuilder
         .ThenBy(f => f.FullName),
       emptyFolders = result.EmptyFolders
         .OrderBy(f => f.Project)
-        .ThenBy(f => f.Path)
+        .ThenBy(f => f.Path),
+      duplicateTypes = result.DuplicateTypes
+        .OrderBy(f => f.FullName)
     };
 
     var options = new JsonSerializerOptions

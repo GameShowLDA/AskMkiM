@@ -87,14 +87,42 @@ internal sealed record EmptyFolderFinding(
   string Reason);
 
 /// <summary>
+/// Describes a duplicated type declaration occurrence.
+/// </summary>
+/// <param name="Project">The project containing the type declaration.</param>
+/// <param name="File">The source file path.</param>
+/// <param name="Line">The one-based declaration line number.</param>
+internal sealed record DuplicateTypeOccurrence(
+  string Project,
+  string File,
+  int Line);
+
+/// <summary>
+/// Describes a type that is declared in multiple solution locations.
+/// </summary>
+/// <param name="Kind">The duplicated type kind.</param>
+/// <param name="FullName">The fully qualified type name.</param>
+/// <param name="Namespace">The containing namespace.</param>
+/// <param name="Occurrences">The declaration locations.</param>
+/// <param name="Reason">The reason why the duplicated type is suspicious.</param>
+internal sealed record DuplicateTypeFinding(
+  UnusedSymbolKind Kind,
+  string FullName,
+  string Namespace,
+  IReadOnlyList<DuplicateTypeOccurrence> Occurrences,
+  string Reason);
+
+/// <summary>
 /// Stores aggregate analyzer output.
 /// </summary>
 /// <param name="Findings">The suspicious symbols.</param>
 /// <param name="EmptyFolders">The empty project folders.</param>
+/// <param name="DuplicateTypes">The duplicated type declarations.</param>
 /// <param name="Elapsed">The total analysis duration.</param>
 internal sealed record UnusedCodeAnalysisResult(
   IReadOnlyList<UnusedCodeFinding> Findings,
   IReadOnlyList<EmptyFolderFinding> EmptyFolders,
+  IReadOnlyList<DuplicateTypeFinding> DuplicateTypes,
   TimeSpan Elapsed)
 {
   /// <summary>
