@@ -105,16 +105,6 @@ namespace Ask.Device.Runtime.Base.Device
     private SerialPort _comPort = null!;
 
     /// <summary>
-    /// Получает или задаёт идентификатор производителя устройства.
-    /// </summary>
-    public string VID { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Получает или задаёт идентификатор продукта устройства.
-    /// </summary>
-    public string PID { get; set; } = string.Empty;
-
-    /// <summary>
     /// Хранит сериализованные параметры подключения.
     /// </summary>
     private string _connectionDetails = string.Empty;
@@ -123,31 +113,6 @@ namespace Ask.Device.Runtime.Base.Device
     /// Получает или задаёт признак подключения устройства в составе стенда.
     /// </summary>
     public bool IsAttachableDevice { get; set; }
-
-    /// <summary>
-    /// Получает или задаёт скорость передачи данных для COM-порта.
-    /// </summary>
-    public int BaudRate { get; set; } = 9600;
-
-    /// <summary>
-    /// Получает или задаёт количество стоп-бит для COM-порта.
-    /// </summary>
-    public StopBits StopBits { get; set; } = StopBits.One;
-
-    /// <summary>
-    /// Получает или задаёт количество бит данных для COM-порта.
-    /// </summary>
-    public int DataBits { get; set; } = 8;
-
-    /// <summary>
-    /// Получает или задаёт режим чётности для COM-порта.
-    /// </summary>
-    public Parity Parity { get; set; } = Parity.None;
-
-    /// <summary>
-    /// Получает или задаёт режим управления потоком для COM-порта.
-    /// </summary>
-    public string FlowControl { get; set; } = "Нет";
 
     /// <summary>
     /// Профиль параметров подключения устройства по COM-интерфейсу.

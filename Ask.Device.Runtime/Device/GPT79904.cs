@@ -20,10 +20,6 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public GPT79904()
     {
-      BaudRate = 115200;
-      StopBits = StopBits.One;
-      DataBits = 8;
-      Parity = Parity.None;
       DeviceClass = GetType().FullName;
 
       DeviceType = DeviceType.BreakdownTester;
