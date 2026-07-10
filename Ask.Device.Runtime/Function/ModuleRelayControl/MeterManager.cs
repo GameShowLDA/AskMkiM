@@ -37,7 +37,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       DeviceCommand cmd = new DeviceCommand(5, 1);
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
+      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return true;
     }
 
@@ -56,7 +56,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
 
       DeviceCommand cmd = new DeviceCommand(5, 2);
-      await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString());
+      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
       return true;
     }
 

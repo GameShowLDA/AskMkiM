@@ -1,10 +1,12 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -47,6 +49,8 @@ namespace UI.Components
     /// Объект, управляющий операциями с поиском по тексту.
     /// </summary>
     internal TextReplacementManager textReplacementManager;
+
+    private NotifyCollectionChangedEventHandler _userControlsChangedHandler;
 
     /// <summary>
     /// Объект, управляющий операциями связанные с пользовательскими элементами управления.
@@ -122,11 +126,76 @@ namespace UI.Components
       ProtocolUI.AnotherKeyPressed += MultiWindowControl_KeyDown;
       InitializeManagers();
 
+      SubscribeWorkspaceCounts();
+    }
+
+    public EditorWorkspaceSession CaptureWorkspaceSession()
+    {
+      return new EditorWorkspaceSession(
+        fileManager.EditorWorkspaceModel.OpenPages,
+        fileManager.EditorWorkspaceModel.UserControls,
+        fileManager.EditorWorkspaceModel.FilePaths);
+    }
+
+    public void RestoreWorkspaceSession(EditorWorkspaceSession session)
+    {
+      UnsubscribeWorkspaceCounts();
+
+      TopPanel.Children.Clear();
+      ContentPanel.Children.Clear();
+
+      fileManager.EditorWorkspaceModel.OpenPages = session.OpenPages;
+      fileManager.EditorWorkspaceModel.UserControls = session.UserControls;
+      fileManager.EditorWorkspaceModel.FilePaths = session.FilePaths;
+
+      foreach (var control in session.UserControls)
+      {
+        ContentPanel.Children.Add(control);
+      }
+
+      foreach (var page in session.OpenPages)
+      {
+        TopPanel.Children.Add(page);
+      }
+
+      SubscribeWorkspaceCounts();
+
+      if (session.OpenPages.Count == 0 || session.UserControls.Count == 0)
+      {
+        SystemStateManager.SetIsControlProgramActive(false);
+        return;
+      }
+
+      var activePage = session.OpenPages.FirstOrDefault(page => page.IsActive) ?? session.OpenPages[0];
+      var activeIndex = session.OpenPages.IndexOf(activePage);
+      if (activeIndex < 0 || activeIndex >= session.UserControls.Count)
+      {
+        activeIndex = 0;
+        activePage = session.OpenPages[0];
+      }
+
+      controlManager.ShowControl(session.UserControls[activeIndex], activePage);
+    }
+
+    private void SubscribeWorkspaceCounts()
+    {
       Counts = fileManager.EditorWorkspaceModel.UserControls.Count;
-      fileManager.EditorWorkspaceModel.UserControls.CollectionChanged += (s, a) =>
+      _userControlsChangedHandler = (_, _) =>
       {
         Counts = fileManager.EditorWorkspaceModel.UserControls.Count;
       };
+      fileManager.EditorWorkspaceModel.UserControls.CollectionChanged += _userControlsChangedHandler;
+    }
+
+    private void UnsubscribeWorkspaceCounts()
+    {
+      if (_userControlsChangedHandler == null)
+      {
+        return;
+      }
+
+      fileManager.EditorWorkspaceModel.UserControls.CollectionChanged -= _userControlsChangedHandler;
+      _userControlsChangedHandler = null;
     }
 
     #region События.

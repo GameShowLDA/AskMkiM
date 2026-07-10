@@ -123,6 +123,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           continue;
         }
 
+        if (TryExtractQuotedComment(lines, model, current, ref nextLine, index))
+        {
+          changed = true;
+          continue;
+        }
+
         if (TryExtractCStyleComment(lines, model, current, ref nextLine, index))
         {
           changed = true;
@@ -185,6 +191,50 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           AddComment(model, block, "{…}(2 строки)");
 
           current.Remove(openBrace, current.Length - openBrace);
+          lines[index + 1] = nextLine.Substring(nextClose + 1);
+          nextLine = lines[index + 1];
+
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private static bool TryExtractQuotedComment(List<string> lines, BaseCommandModel model, StringBuilder current, ref string? nextLine, int index)
+    {
+      int open = current.ToString().IndexOf('"');
+      if (open < 0) return false;
+
+      int close = current.ToString().IndexOf('"', open + 1);
+
+      // Однострочный
+      if (close >= 0)
+      {
+        string block = current.ToString().Substring(open + 1, close - open - 1);
+
+        AddComment(model, block, "\"...\"");
+        current.Remove(open, close - open + 1);
+
+        return true;
+      }
+
+      // Двухстрочный
+      if (nextLine != null)
+      {
+        int nextClose = nextLine.IndexOf('"');
+
+        if (nextClose >= 0)
+        {
+          string thisTail = lines[index].Substring(open).Replace('"','{');
+          string nextHead = nextLine.Substring(0, nextClose + 1).Replace('"', '}');
+
+          string block = thisTail + "\n" + nextHead;
+
+          AddComment(model, block, "\"...\" (2 строки)");
+
+          current.Remove(open, current.Length - open);
+
           lines[index + 1] = nextLine.Substring(nextClose + 1);
           nextLine = lines[index + 1];
 

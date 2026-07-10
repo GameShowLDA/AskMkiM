@@ -24,10 +24,6 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void Gpt() => _service.OpenGptServiceAsync();
 
-    /// <summary>Команда открытия интерфейса работы с USB-устройствами.</summary>
-    [RelayCommand]
-    private async Task Usb() => await _service.OpenUsbServiceAsync();
-
     [RelayCommand]
     private async Task AdminPanel() => _service.AdminPanel();
 

@@ -106,6 +106,7 @@ namespace UI.Controls.Runner
       // Вкладка "Точки остановки"
       ErrorListBoxVertical.BreakpointItemDoubleClicked += BreakpointItemDoubleClicked;
       ErrorListBoxVertical.BreakpointEnabledChanged += BreakpointEnabledChanged;
+      ErrorListBoxVertical.BreakpointToggleRequested += BreakpointToggleRequested;
 
       // События брейкпоинтов, чтобы вкладка обновлялась в Run
       EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => OnBreakpointSet(e));
@@ -665,6 +666,31 @@ namespace UI.Controls.Runner
         editor.EnableBreakpoint(bp.CommandNumber, raiseEvents: true);
       else
         editor.DisableBreakpoint(bp.CommandNumber, raiseEvents: true);
+    }
+
+    private void BreakpointToggleRequested(IDisplayIssue? issue)
+    {
+      var editor = ChildTextEditorContainer.GetTextEditor()
+        ?? GetTranslatorEditor()?.GetTextEditor();
+      if (editor == null)
+        return;
+
+      if (editor.ToggleBreakpointFromMousePosition())
+        return;
+
+      int lineNumber = issue?.FormattedLineNumber > 0
+        ? issue.FormattedLineNumber
+        : issue?.SourceLineNumber > 0
+          ? issue.SourceLineNumber
+          : -1;
+
+      if (lineNumber > 0)
+      {
+        editor.ToggleBreakpointFromKeyboardAtLine(lineNumber);
+        return;
+      }
+
+      editor.ToggleBreakpointFromKeyboardAtCaret();
     }
 
     /// <summary>

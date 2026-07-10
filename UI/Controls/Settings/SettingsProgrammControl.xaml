@@ -11,6 +11,7 @@
              xmlns:Config="clr-namespace:UI.Controls.Settings.DeviceConfig"
              xmlns:UiSetting="clr-namespace:UI.Controls.Settings.UserInterface"
              xmlns:AskMkiConfig="clr-namespace:UI.Controls.Settings.AskMkiConfig"
+             xmlns:RoleManagement="clr-namespace:Ask.UI.Features.RoleManagement.Views;assembly=Ask.UI"
              xmlns:Icons="clr-namespace:UI.Icon"
              xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
@@ -86,6 +87,7 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -202,6 +204,8 @@
                     <Procol:ProtocolControl Grid.Row="3" x:Name="ProtocolManager"/>
 
                     <UiSetting:UiSettingsControl Grid.Row="4" x:Name="InterfaceManager"/>
+
+                    <RoleManagement:RolePasswordManagementControl Grid.Row="5" x:Name="RolePasswordManager"/>
 
 
                 </Grid>

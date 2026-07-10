@@ -597,7 +597,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         if (commentsLineProp != null)
         {
           var comments = commentsLineProp.GetValue(model) as IEnumerable<string>;
-          if (comments != null)
+          if (comments != null && comments.Count() > 0)
           {
             var commentsList = comments.ToList();
             for (int i = 0; i < commentsList.Count; i++)

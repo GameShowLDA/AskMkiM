@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UI.Controls.AdminPanel.AdminPanelControl"
+<UserControl x:Class="UI.Controls.AdminPanel.AdminPanelControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -33,11 +33,10 @@
                 />
 
             <Button Grid.Row="1" Style="{DynamicResource ButtonStyleV13}" Content="База данных" Margin="10" PreviewMouseDown="DatabaseButton_Click"/>
-            <Button Grid.Row="2" Style="{DynamicResource ButtonStyleV13}" Content="USB" Margin="10" PreviewMouseDown="UsbButton_Click"/>
-            <Button Grid.Row="3" Style="{DynamicResource ButtonStyleV13}" Content="SetCommand" Margin="10" PreviewMouseDown="SetCommandButton_Click"/>
-            <Button Grid.Row="4" Style="{DynamicResource ButtonStyleV13}" Content="Сопротивление МКР" Margin="10" PreviewMouseDown="ResistanceButton_Click"/>
-            <Button Grid.Row="5" Style="{DynamicResource ButtonStyleV13}" Content="GPT" Margin="10" PreviewMouseDown="Gpt_PreviewMouseDown"/>
-            <Button Grid.Row="6" Style="{DynamicResource ButtonStyleV13}" Content="Meter" Margin="10" PreviewMouseDown="Meter_PreviewMouseDown"/>
+            <Button Grid.Row="2" Style="{DynamicResource ButtonStyleV13}" Content="SetCommand" Margin="10" PreviewMouseDown="SetCommandButton_Click"/>
+            <Button Grid.Row="3" Style="{DynamicResource ButtonStyleV13}" Content="Сопротивление МКР" Margin="10" PreviewMouseDown="ResistanceButton_Click"/>
+            <Button Grid.Row="4" Style="{DynamicResource ButtonStyleV13}" Content="GPT" Margin="10" PreviewMouseDown="Gpt_PreviewMouseDown"/>
+            <Button Grid.Row="5" Style="{DynamicResource ButtonStyleV13}" Content="Meter" Margin="10" PreviewMouseDown="Meter_PreviewMouseDown"/>
 
         </Grid>
 

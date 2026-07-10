@@ -93,10 +93,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.CommandModel.FormattedStartLineNumber));
           errorChains.AddRange(chain.Chain);
 
-          var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, chain.Value, chainStr);
-          err.Status = ShowMessageModel.MessageType.Error;
-          err.IndentLevel = 3;
-          //var err = new ShowMessageModel($"{chainStr}", message: $"Rизм = {chain.Item2}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 };
+          var err = await FaultChainMeasurementService.MeasureAsync(
+            context,
+            chain.Chain,
+            chainStr,
+            (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
+            context.VoltageType);
+
           ErrorMessage.Add(err);
           await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {err.ToString()}"));
         }

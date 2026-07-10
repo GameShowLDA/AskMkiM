@@ -15,5 +15,7 @@ public enum RmDiagnosticCode
   SynonymObjectCollision,
   EmptyInput,
   EmptyExpression,
-  UnexpectedToken
+  UnexpectedToken,
+  LegacyCompatibilityAddress,
+  MachineAddressNotConfigured
 }

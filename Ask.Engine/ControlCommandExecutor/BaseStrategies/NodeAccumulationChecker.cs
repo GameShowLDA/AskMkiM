@@ -80,12 +80,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var localized = await LocalizeFaultyPointAsync(context.PerformMeasurementAsync, chains, context.Value, messageService, cancellationToken, context.VoltageType, context.IsPolarityReversed);
           if (localized != null)
           {
-            var strError = await PointFormater.GetFormatDisconnectPoint(new List<ChainModel>() { chain, localized });
+            var faultChain = new List<ChainModel>() { chain, localized };
+            var strError = await PointFormater.GetFormatDisconnectPoint(faultChain);
             errorChains.Add((chain, localized));
 
-            var err = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, measured.Value, strError);
-            err.Status = ShowMessageModel.MessageType.Error;
-            err.IndentLevel = 3;
+            var err = await FaultChainMeasurementService.MeasureAsync(
+              context,
+              faultChain,
+              strError,
+              (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
+              context.VoltageType);
 
             await messageService.ShowMessageAsync(err);
 
@@ -95,7 +99,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 context.CommandModel.PointErrors.ChainPairError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
                 PointModel.ConvertToPointStrings(chain.PointModels),
                 PointModel.ConvertToPointStrings(localized.PointModels),
-                MeasurementValueFormatter.Format(measured.Value),
+                err.Message,
                 messageService.GetLastLineNumber(),
                 context.CommandModel.FormattedStartLineNumber));
             }

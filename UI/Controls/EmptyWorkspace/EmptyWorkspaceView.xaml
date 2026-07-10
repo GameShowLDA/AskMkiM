@@ -136,29 +136,6 @@
             </Grid>
         </Border>
 
-        <!-- ===== ПЛАШКА ПРИВЕТСТВИЯ ВНИЗУ ===== -->
-        <Border x:Name="GreetingBar"
-            HorizontalAlignment="Center"
-            Cursor="Hand"
-            VerticalAlignment="Bottom"
-            Margin="0,0,0,20"
-            Padding="20,10"
-            CornerRadius="10"
-                
-            Background="{DynamicResource MainGreetingBackgroundBrush}"
-            BorderBrush="{DynamicResource MainGreetingBorderBrush}"
-                
-            BorderThickness="1"
-            Panel.ZIndex="100">
-            <TextBlock Text="{Binding CurrentDateTime,
-                                RelativeSource={RelativeSource AncestorType=UserControl},
-                                Converter={StaticResource TimeOfDayGreeting}}"
-                 Foreground="{DynamicResource MainTitleSolidColorBrush}"
-                 FontFamily="{DynamicResource WinstonBold}"
-                 FontSize="18"
-                 TextAlignment="Center"/>
-        </Border>
-
         <!-- ===== ВЕРСИЯ ПО / ДАТА СБОРКИ (внизу справа) ===== -->
         <TextBlock HorizontalAlignment="Right"
                VerticalAlignment="Bottom"
@@ -166,7 +143,7 @@
                FontFamily="{DynamicResource WinstonLight}"
                FontSize="18"
                Opacity="0.45"
-               Foreground="{DynamicResource ForegroundSolidColorBrush}"
+               Foreground="{DynamicResource ForegrounfBrushes}"
                 Text="{Binding AppVersion, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
     </Grid>
 </UserControl>

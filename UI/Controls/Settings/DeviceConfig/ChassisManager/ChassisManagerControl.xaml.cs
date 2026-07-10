@@ -14,6 +14,8 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
   /// </summary>
   public partial class ChassisManagerControl : UserControl
   {
+    private bool _isEditingEnabled = true;
+
     /// <summary>
     /// Коллекция доступных систем шасси.
     /// </summary>
@@ -89,7 +91,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     {
       InitializeComponent();
       DataContext = this;
-      addRackButton.Visibility = Visibility.Collapsed;
+      UpdateAddButtonsVisibility();
     }
 
     /// <summary>
@@ -104,8 +106,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
       }
 
       SystemsChassis.Add(chassisManager);
-      addChassisButton.Visibility = Visibility.Collapsed;
-      addRackButton.Visibility = Visibility.Visible;
+      UpdateAddButtonsVisibility();
     }
 
     /// <summary>
@@ -120,8 +121,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
       }
 
       SystemsRack.Add(rack);
-      addChassisButton.Visibility = Visibility.Collapsed;
-      addRackButton.Visibility = Visibility.Visible;
+      UpdateAddButtonsVisibility();
     }
 
     /// <summary>
@@ -134,8 +134,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
 
       ClearSelection();
 
-      addChassisButton.Visibility = Visibility.Visible;
-      addRackButton.Visibility = Visibility.Collapsed;
+      UpdateAddButtonsVisibility();
     }
 
     /// <summary>
@@ -183,6 +182,11 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <param name="e">Аргументы события.</param>
     private void addChassisButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       NewSystem?.Invoke(this, e);
     }
 
@@ -193,7 +197,34 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <param name="e">Аргументы события.</param>
     private void addRackButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      if (!_isEditingEnabled)
+      {
+        return;
+      }
+
       NewRack?.Invoke(this, e);
+    }
+
+    public void SetEditingEnabled(bool isEnabled)
+    {
+      _isEditingEnabled = isEnabled;
+      UpdateAddButtonsVisibility();
+    }
+
+    private void UpdateAddButtonsVisibility()
+    {
+      if (addChassisButton == null || addRackButton == null)
+      {
+        return;
+      }
+
+      addChassisButton.Visibility = _isEditingEnabled && SystemsChassis.Count == 0
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+
+      addRackButton.Visibility = _isEditingEnabled && SystemsChassis.Count > 0
+        ? Visibility.Visible
+        : Visibility.Collapsed;
     }
   }
 }

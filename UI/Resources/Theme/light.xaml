@@ -76,6 +76,16 @@
     <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverBackgroundBrush" Color="#D96E65"/>
     <SolidColorBrush x:Key="TopPanelTabCloseButtonHoverForegroundBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TopPanelTabCloseButtonDisabledForegroundBrush" Color="#B5ACBF"/>
+    <SolidColorBrush x:Key="TopPanelHoverBackgroundBrush" Color="#5537404F"/>
+    <SolidColorBrush x:Key="TopPanelHoverForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TopPanelPressedBackgroundBrush" Color="#7737404F"/>
+    <SolidColorBrush x:Key="TopPanelPressedForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ToolTipBackgroundBrush" Color="#F7FFFFFF"/>
+    <SolidColorBrush x:Key="ToolTipForegroundBrush" Color="#20242A"/>
+    <SolidColorBrush x:Key="ToolTipBorderBrush" Color="#C7D0DB"/>
+    <SolidColorBrush x:Key="ToolTipHotkeyBackgroundBrush" Color="#E8EEF5"/>
+    <SolidColorBrush x:Key="ToolTipHotkeyForegroundBrush" Color="#253041"/>
+    <SolidColorBrush x:Key="ToolTipShadowBrush" Color="#26000000"/>
     <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#73849A" Offset="0"/>
         <GradientStop Color="#64758A" Offset="1"/>
@@ -158,12 +168,30 @@
 
     <!--#region Кнопки свернуть, развернуть, закрыть -->
 
-    <Style x:Key="StyleWindowsButtons" TargetType="Components:WindowButtons">
+    <Style x:Key="StyleWindowsButtons" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Foreground" Value="{DynamicResource ActiveColorBrushes}"/>
+                <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -303,11 +331,11 @@
                             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </MultiTrigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuHeader">
@@ -432,11 +460,11 @@
                     <!-- Триггеры -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource ActiveColorBrushes}"/>
+                            <Setter TargetName="ItemBg" Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
                             <Setter TargetName="HeaderText" Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuHeader">

@@ -32,54 +32,57 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Введите данные для протокола" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
-                       FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Row="1" Text="Заводской номер" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+            <TextBlock Grid.Row="0" Text="Введите данные для протокола"  
+                Style="{DynamicResource SettingsHeaderStyle}" FontSize="20"
+            VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+            <TextBlock Grid.Row="1" Text="Заводской номер" Style="{DynamicResource SettingsHeaderStyle}" 
                        FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
-            <Border Grid.Row="2" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+
+            <Border Grid.Row="2" Style="{DynamicResource DeviceInputSectionCardStyle}"  Margin="20,10" Padding="5,0">
                 <TextBox 
                  Background="Transparent" 
                  BorderThickness="0" 
                  VerticalAlignment="Center" 
-                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
                  KeyDown="Input_KeyDown"
                 Name="NumberInput"
                  />
             </Border>
-            <TextBlock Grid.Row="3" Text="Исполнитель" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+            <TextBlock Grid.Row="3" Text="Исполнитель" Style="{DynamicResource SettingsHeaderStyle}" 
                        FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,0"/>
-            <Border Grid.Row="4" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+            <Border Grid.Row="4" Style="{DynamicResource DeviceInputSectionCardStyle}"  Margin="20,10" Padding="5,0">
                 <TextBox 
                  Background="Transparent" 
                  BorderThickness="0" 
                  VerticalAlignment="Center" 
-                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
                  KeyDown="Input_KeyDown"
                  Name="ExecutorInput"
                  />
             </Border>
-            <TextBlock Grid.Row="5" Text="Представитель ОК" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+            <TextBlock Grid.Row="5" Text="Представитель ОК" Style="{DynamicResource SettingsHeaderStyle}" 
                        FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
-            <Border Grid.Row="6" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+            <Border Grid.Row="6" Style="{DynamicResource DeviceInputSectionCardStyle}"  Margin="20,10" Padding="5,0">
                 <TextBox 
                  Background="Transparent" 
                  BorderThickness="0" 
                  VerticalAlignment="Center" 
-                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
                  KeyDown="Input_KeyDown"
 
                 Name="AgentInput"
                  />
             </Border>
 
-            <TextBlock Grid.Row="7" Text="Представитель заказчика (ОК)" Foreground="{DynamicResource ForegroundSolidColorBrush}" 
+            <TextBlock Grid.Row="7" Text="Представитель заказчика (ОК)" Style="{DynamicResource SettingsHeaderStyle}" 
                        FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
-            <Border Grid.Row="8" Background="{DynamicResource PrimarySolidColorBrush}" CornerRadius="5" Margin="20,10">
+            <Border Grid.Row="8" Style="{DynamicResource DeviceInputSectionCardStyle}"  Margin="20,10" Padding="5,0">
                 <TextBox 
                  Background="Transparent" 
                  BorderThickness="0" 
                  VerticalAlignment="Center" 
-                 FontSize="20" Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                 FontSize="20" Foreground="{DynamicResource ForegrounfBrushes}"
                  KeyDown="Input_KeyDown"
                 Name="CustomerAgentInput"
                  />
