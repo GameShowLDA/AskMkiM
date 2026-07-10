@@ -8,6 +8,7 @@ namespace Ask.Core.Shared.DTO.TextEditor
     public string FileName { get; set; }
     public Encoding Encoding { get; set; }
     public string? SavedTextSnapshot { get; set; }
+    public List<string>? SourceLines { get; set; } = new();
 
     public TextEditorModel(string filePath, Encoding encoding = null)
     {

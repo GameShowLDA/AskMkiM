@@ -1,3 +1,4 @@
+using Ask.Core.Services.FilesUtility;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Microsoft.Win32;
@@ -37,14 +38,14 @@ namespace UI.Services
     /// Файл сохраняется в кодировке UTF-8 с расширением .opkw.
     /// В случае ошибки пользователю отображается уведомление.
     /// </remarks>
-    public bool SaveToDisk(FrameworkElement ownerElement, string translatedText, string? sourceFilePath)
+    public bool SaveToDisk(FrameworkElement ownerElement, List<string> translatedText, string? sourceFilePath)
     {
       if (ownerElement == null)
       {
         throw new ArgumentNullException(nameof(ownerElement));
       }
 
-      if (string.IsNullOrWhiteSpace(translatedText))
+      if (translatedText.Count == 0 || translatedText == null)
       {
         ShowNotification(
           "Сохранение на диск",
@@ -68,7 +69,9 @@ namespace UI.Services
       var filePath = EnsureOpkwExtension(saveFileDialog.FileName);
       try
       {
-        File.WriteAllText(filePath, translatedText, Encoding.UTF8);
+        var text = FileFormatter.NormalizeProgramWhitespace(string.Join(Environment.NewLine, translatedText));
+
+        File.WriteAllText(filePath, text, Encoding.UTF8);
         LogInformation($"Файл {filePath} сохранен на диск.");
         ShowNotification(
           "Сохранение на диск",
