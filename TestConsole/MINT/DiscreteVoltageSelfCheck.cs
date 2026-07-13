@@ -13,7 +13,7 @@ namespace TestConsole.MINT
     /// Проверка формирования дискрет напряжения.
     /// </summary>
     /// <param name="token">Токен для отмены операции.</param>
-    static private async Task GenerateDiscreteVoltageCheck(IFastMeter fastMeter, IPowerSourceModule powerSource)
+    static private async Task GenerateDiscreteVoltageCheck(IMultimeter fastMeter, IPowerSourceModule powerSource)
     {
       LogInformation("Начало проверки формирования дискрет напряжения");
 
@@ -32,7 +32,7 @@ namespace TestConsole.MINT
     /// <param name="step">Шаг напряжения.</param>
     /// <param name="delay">Задержка между измерениями.</param>
     /// <param name="token">Токен для отмены операции.</param>
-    static private async Task CheckVoltageLevelsAsync(double startVoltage, double endVoltage, double step, int delay, IFastMeter fastMeter, IPowerSourceModule powerSource)
+    static private async Task CheckVoltageLevelsAsync(double startVoltage, double endVoltage, double step, int delay, IMultimeter fastMeter, IPowerSourceModule powerSource)
     {
       LogInformation($"Проверка уровней напряжения от {startVoltage} до {endVoltage} с шагом {step}");
       for (double voltage = startVoltage; voltage <= endVoltage; voltage += step)
@@ -75,7 +75,7 @@ namespace TestConsole.MINT
     /// <param name="voltage">Ожидаемое напряжение.</param>
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
-    static private async Task MeasureAndCompareVoltage(double voltage, int delay, IFastMeter fastMeter)
+    static private async Task MeasureAndCompareVoltage(double voltage, int delay, IMultimeter fastMeter)
     {
       double tolerance = 0.0001;
       double firstNorm = voltage - ((0.01 * voltage) + 0.1);
@@ -98,11 +98,11 @@ namespace TestConsole.MINT
       await Task.Delay(1);
     }
 
-    private static async Task SettingsMeter(IFastMeter meter)
+    private static async Task SettingsMeter(IMultimeter meter)
     {
       await meter.DcVoltageManager.SetDCVoltageModeAsync();
     }
-    private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter, IPowerSourceModule powerSource)
+    private static async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IMultimeter meter, IPowerSourceModule powerSource)
     {
       Console.ForegroundColor = ConsoleColor.Green;
       Console.WriteLine("Проверка подключения устройств");
@@ -222,7 +222,7 @@ namespace TestConsole.MINT
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
     /// <returns>Результат измерения.</returns>
-    static private async Task<double> GetMeasurementResult(double voltage, int delay, IFastMeter meter)
+    static private async Task<double> GetMeasurementResult(double voltage, int delay, IMultimeter meter)
     {
       await Task.Delay(delay);
       double result = await meter.DcVoltageManager.MeasureDCVoltageAsync();

@@ -46,7 +46,7 @@ namespace TestConsole.MINT
     {
       IChassisManager chassisManager = GetDeviceInstance(SelectManagerChassis);
       ISwitchingDevice dbc = GetDeviceInstance(SelectDeviceBusCommutationAsync);
-      IFastMeter meter = GetDeviceInstance(SelectMeter);
+      IMultimeter meter = GetDeviceInstance(SelectMeter);
       IPowerSourceModule powerSource = GetDeviceInstance(SelectPowerSource);
 
       await chassisManager.PowerManager.StartPowerAsync();
@@ -170,7 +170,7 @@ namespace TestConsole.MINT
 
       return null;
     }
-    private static IFastMeter SelectMeter()
+    private static IMultimeter SelectMeter()
     {
       var dbc = FastMeters.GetAllAsync().GetAwaiter().GetResult();
 

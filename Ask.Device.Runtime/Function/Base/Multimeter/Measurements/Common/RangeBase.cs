@@ -1,0 +1,200 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Extensions;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Function.Helpers;
+using System.Globalization;
+
+namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
+{
+  internal static class RangeBase
+  {
+
+    public static Task<bool> SetRangeAsync(
+        IMultimeter device,
+        double range,
+        IUserInteractionService? userMessageService = null)
+    {
+      return device.TypeMode switch
+      {
+        MultimeterTypeMode.AcVoltage => SetACVoltageRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.DcVoltage => SetDCVoltageRangeAsync(device, range, userMessageService),
+        _ => throw new InvalidOperationException($"Невозможно установить диапазон для режима {device.TypeMode}.")
+      };
+    }
+
+    private static Task<bool> SetACVoltageRangeAsync(
+      IMultimeter device,
+      double range,
+      IUserInteractionService? userMessageService = null)
+    {
+      return SetVoltageRangeAsync(
+        device,
+        device.ACVCommands,
+        range,
+        profile => profile.SetRange,
+        profile => profile.SetAutoRange,
+        profile => profile.GetRangeError,
+        profile => profile.SupportedRanges,
+        userMessageService);
+    }
+
+    private static Task<bool> SetDCVoltageRangeAsync(
+      IMultimeter device,
+      double range,
+      IUserInteractionService? userMessageService = null)
+    {
+      return SetVoltageRangeAsync(
+        device,
+        device.DCVCommands,
+        range,
+        profile => profile.SetRange,
+        profile => profile.SetAutoRange,
+        profile => profile.GetRangeError,
+        profile => profile.SupportedRanges,
+        userMessageService);
+    }
+
+    private static async Task<bool> SetVoltageRangeAsync<TProfile>(
+      IMultimeter device,
+      TProfile profile,
+      double range,
+      Func<TProfile, string> setRangeCommand,
+      Func<TProfile, string> setAutoRangeCommand,
+      Func<TProfile, string?> getRangeErrorCommand,
+      Func<TProfile, double[]> getSupportedRanges,
+      IUserInteractionService? userMessageService)
+      where TProfile : IMeasurementProfile
+    {
+      var header = EnumExtensions.GetDescription(profile.TypeMode);
+      var rangeText = range <= 0
+        ? "Авто"
+        : $"{ResolveRange(range, getSupportedRanges(profile)).ToString("G", CultureInfo.InvariantCulture)} {profile.Unit.GetUnit()}";
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        var success = await SetVoltageRangeCoreAsync(
+          device,
+          profile,
+          range,
+          setRangeCommand(profile),
+          setAutoRangeCommand(profile),
+          getRangeErrorCommand(profile),
+          getSupportedRanges(profile));
+
+        if (!success || DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            device,
+            $"Установка диапазона \"{header}\"",
+            rangeText,
+            success,
+            1,
+            userMessageService);
+        }
+
+        return success;
+      }, userMessageService, deviceTask: true);
+
+      if (!result)
+      {
+        throw new InvalidOperationException($"Ошибка установки диапазона \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}).");
+      }
+
+      return true;
+    }
+
+    private static async Task<bool> SetVoltageRangeCoreAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      double range,
+      string setRangeCommand,
+      string setAutoRangeCommand,
+      string? getRangeErrorCommand,
+      double[] supportedRanges)
+    {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      if (!device.ConnectionInfo.IsConnected)
+      {
+        throw new InvalidOperationException("Прибор не подключен.");
+      }
+
+      if (device.TypeMode != profile.TypeMode)
+      {
+        await SetModeBase.SetModeAsync(device, profile);
+      }
+
+      var command = range <= 0
+        ? setAutoRangeCommand
+        : BuildRangeCommand(setRangeCommand, ResolveRange(range, supportedRanges));
+
+      await device.DeviceProtocol.QueryAsync(command, timeout: profile.Timeout);
+      await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
+
+      return true;
+    }
+
+    private static string BuildRangeCommand(string template, double range)
+    {
+      return string.Format(
+        CultureInfo.InvariantCulture,
+        template,
+        range,
+        ResolveResolution(range));
+    }
+
+    private static double ResolveRange(double requestedRange, double[] supportedRanges)
+    {
+      var requested = Math.Abs(requestedRange);
+      if (supportedRanges.Length == 0)
+      {
+        return requested;
+      }
+
+      foreach (var supportedRange in supportedRanges.OrderBy(value => value))
+      {
+        if (requested <= supportedRange)
+        {
+          return supportedRange;
+        }
+      }
+
+      return supportedRanges.Max();
+    }
+
+    private static double ResolveResolution(double range)
+    {
+      return range switch
+      {
+        <= 0.1d => 0.0000001d,
+        <= 1d => 0.000001d,
+        <= 10d => 0.00001d,
+        <= 100d => 0.0001d,
+        _ => 0.001d
+      };
+    }
+
+    private static async Task EnsureNoInstrumentErrorAsync(
+      IMultimeter device,
+      string? getRangeErrorCommand,
+      int timeout)
+    {
+      if (string.IsNullOrWhiteSpace(getRangeErrorCommand))
+      {
+        return;
+      }
+
+      var error = await device.DeviceProtocol.QueryAsync(getRangeErrorCommand, timeout: timeout);
+      if (!string.IsNullOrWhiteSpace(error) && !error.TrimStart().StartsWith("+0", StringComparison.Ordinal))
+      {
+        throw new InvalidOperationException($"Ошибка установки диапазона: {error}");
+      }
+    }
+  }
+}

@@ -31,7 +31,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// <summary>
     /// Сохранённый экземпляр быстрого измерителя (FastMeter), получаемый по запросу.
     /// </summary>
-    private static IFastMeter? ValidFastMeter { get; set; }
+    private static IMultimeter? ValidFastMeter { get; set; }
 
     /// <summary>
     /// Сохранённый список точек подключения, переданных при вызове <see cref="AnalyzePoints"/>.
@@ -347,13 +347,13 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     }
 
     /// <summary>
-    /// Возвращает устройство быстрого измерителя (<see cref="IFastMeter"/>), связанное с одним из задействованных МКР.
+    /// Возвращает устройство быстрого измерителя (<see cref="IMultimeter"/>), связанное с одним из задействованных МКР.
     /// Если устройство ещё не найдено — выполняется попытка поиска по номеру шасси.
     /// </summary>
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
-    /// <returns>Экземпляр <see cref="IFastMeter"/>.</returns>
+    /// <returns>Экземпляр <see cref="IMultimeter"/>.</returns>
     /// <exception cref="Exception">Если устройство не найдено или <see cref="ValidRelayModules"/> ещё не проинициализировано.</exception>
-    public static IFastMeter GetFastMeterOrThrow(IUserInteractionService messageService)
+    public static IMultimeter GetFastMeterOrThrow(IUserInteractionService messageService)
     {
       if (ValidFastMeter != null)
         return ValidFastMeter;

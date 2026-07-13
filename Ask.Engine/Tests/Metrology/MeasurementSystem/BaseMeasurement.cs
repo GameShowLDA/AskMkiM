@@ -320,7 +320,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         max = 0;
       }
 
-      var info = command.GetDisplayInfo();
+      var info = command.GetCommandDisplayInfo();
       string displayName = info?.DisplayName ?? command.ToString();
       string unit = info?.Unit ?? "";
 

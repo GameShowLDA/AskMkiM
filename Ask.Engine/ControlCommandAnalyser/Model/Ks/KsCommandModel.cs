@@ -19,8 +19,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ks
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   public class KsCommandModel : BaseCommandModel, IHasScheme, IHasResistanceLimits, IHasUnparsedParameters
   {
-
-    public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
+    /// <inheritdoc />
+    public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
 
     /// <summary>
     /// Единицы измерения сопротивления (например, "МОм", "кОм" и т.п.)

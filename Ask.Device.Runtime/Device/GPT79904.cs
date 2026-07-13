@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Connected;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -19,10 +20,6 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public GPT79904()
     {
-      BaudRate = 115200;
-      StopBits = StopBits.One;
-      DataBits = 8;
-      Parity = Parity.None;
       DeviceClass = GetType().FullName;
 
       DeviceType = DeviceType.BreakdownTester;
@@ -30,12 +27,13 @@ namespace Ask.Device.Runtime.Device
       DcwMaxVoltage = 1000;
       IrMaxVoltage = 1000;
       IrMinVoltage = 50;
+      ConnectedProfile.CheckMode = "GPT";
 
       AcwManger = new Function.GPT.AcwMode(this);
       DcwManger = new Function.GPT.DcwMode(this);
       IrManger = new Function.GPT.IrMode(this);
       SystemManger = new Function.GPT.SystemSettings(this);
-      ConnectableManager = new Function.GPT.ConnectableManager(this);
+      ConnectableManager = new Transport(this);
       SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
       LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
       Mode = BreakdownTypeMode.None;

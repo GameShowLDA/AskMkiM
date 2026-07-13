@@ -143,9 +143,15 @@ namespace UI.Services
     private static string BuildDerivedFileName(string? sourceFilePath, string extension, string fallbackFileName)
     {
       string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
-      return string.IsNullOrWhiteSpace(baseName)
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(sourceFilePath);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1) 
+      { 
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index]; 
+      }
+      return string.IsNullOrWhiteSpace(uniqueNameWithoutExtention)
         ? fallbackFileName
-        : $"{baseName}{extension}";
+        : $"{uniqueNameWithoutExtention}{extension}";
     }
 
     private static string GetDisplayFileName(string? filePath, string? fileName)

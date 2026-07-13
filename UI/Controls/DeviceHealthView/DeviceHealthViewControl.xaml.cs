@@ -45,7 +45,7 @@ namespace UI.Controls.DeviceHealthView
 
     private void HandleDeviceClick(IDevice device)
     {
-      var str = device.ConnectableManager.GetConnectionStatus();
+      var str = device.ConnectionInfo.GetConnectionStatus();
       Desription.Text = str;
     }
   }

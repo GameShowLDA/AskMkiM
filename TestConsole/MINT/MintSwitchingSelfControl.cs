@@ -12,7 +12,7 @@ namespace TestConsole.MINT
     /// </summary>
     /// <param name="token">Токен отмены операции.</param>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
-    static private async Task CheckMintSwitching(IFastMeter fastMeter, IPowerSourceModule powerSource, ISwitchingDevice switching)
+    static private async Task CheckMintSwitching(IMultimeter fastMeter, IPowerSourceModule powerSource, ISwitchingDevice switching)
     {
       await powerSource.ConnectableManager.ResetAsync();
       await switching.ConnectableManager.ResetAsync();

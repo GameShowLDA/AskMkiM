@@ -1,6 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Services.FilesUtility;
 using Ask.Device.Communication.Com.Configuration;
 using System.Globalization;
 using System.IO.Ports;
@@ -33,8 +34,6 @@ public static class DeviceConfigurationPrintService
   {
     var paragraph = new Paragraph(new Run(text))
     {
-      FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
-      FontSize = 12,
       Margin = new Thickness(30, 20, 30, 20),
       TextAlignment = TextAlignment.Left
     };
@@ -42,13 +41,14 @@ public static class DeviceConfigurationPrintService
     var document = new FlowDocument(paragraph)
     {
       PagePadding = new Thickness(50),
-      FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
-      FontSize = 12,
       ColumnWidth = double.PositiveInfinity,
       ColumnGap = 0,
       IsColumnWidthFlexible = false,
       TextAlignment = TextAlignment.Left
     };
+    PrintSettingsService.ApplyTo(document);
+    paragraph.FontFamily = document.FontFamily;
+    paragraph.FontSize = document.FontSize;
 
     var printDialog = new PrintDialog();
     if (printDialog.ShowDialog() == true)

@@ -162,7 +162,6 @@ namespace UI.Controls.Settings.Protocol
       model.CleanTextErrorsProtocol = BaseTextProtocolErrors.Text;
       model.ShowCommandHeadersInProtocol = CommandHeadersCheckBox.IsChecked;
       model.ShowTestStepMessagesInProtocol = TestStepChecker.IsChecked;
-
       return model;
     }
 

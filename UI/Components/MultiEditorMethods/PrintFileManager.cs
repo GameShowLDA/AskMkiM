@@ -1,9 +1,9 @@
-﻿using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Services.FilesUtility;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
 using UI.Components.Invoke;
 
 namespace UI.Components.MultiEditorMethods
@@ -29,11 +29,10 @@ namespace UI.Components.MultiEditorMethods
       FlowDocument flowDocument = new FlowDocument
       {
         PageWidth = printDialog.PrintableAreaWidth,
-        FontFamily = new FontFamily("Consolas"),
-        FontSize = 12,
         TextAlignment = TextAlignment.Left,
         PagePadding = new Thickness(40)
       };
+      PrintSettingsService.ApplyTo(flowDocument);
 
       if (printDialog.ShowDialog() == true)
       {

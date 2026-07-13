@@ -70,16 +70,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ConnectionTypeUSBItem.Visibility = baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
-        ConnectionTypeContainer.Visibility = baseClass == typeof(DeviceWithASKMKI) ? Visibility.Collapsed : Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;
         IPAddressContainer.Visibility = Visibility.Collapsed;
         COMContainer.Visibility = Visibility.Collapsed;
         USBContainer.Visibility = Visibility.Collapsed;
-        if (baseClass != typeof(DeviceWithASKMKI))
-        {
-          ConnectionTypeSelectionBox.SelectedIndex = 0;
-        }
-
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
         {
           BusTypeContainer.Visibility = Visibility.Visible;
@@ -93,9 +87,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           CapacitanceContainer.Visibility = Visibility.Collapsed;
         }
 
-        if (typeof(IFastMeter).IsAssignableFrom(selectedType))
+        if (typeof(IMultimeter).IsAssignableFrom(selectedType))
         {
-          ShowFastMeterAdditionalSettings();
+          ShowFastMeterAdditionalSettings(sender as IMultimeter);
         }
         else
         {
@@ -114,7 +108,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
-    private void ShowFastMeterAdditionalSettings()
+    private void ShowFastMeterAdditionalSettings(IMultimeter multimeter)
     {
       _acwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_acwPpuDividerCoefficientPercentTextBox);
       _dcwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_dcwPpuDividerCoefficientPercentTextBox);
