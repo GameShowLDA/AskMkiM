@@ -29,6 +29,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     public async Task<bool> SetCapacitanceModeAsync(IUserInteractionService? userMessageService = null) => await SetModeBase.SetModeAsync(_device, _device.CapacitanceCommands, userMessageService);
 
     /// <inheritdoc />
+    public async Task<bool> SetCapacitanceRangeAsync(double range, IUserInteractionService? userMessageService = null)
+    {
+      if (_device.TypeMode != _device.CapacitanceCommands.TypeMode)
+      {
+        await SetModeBase.SetModeAsync(_device, _device.CapacitanceCommands, userMessageService);
+      }
+
+      return await RangeBase.SetRangeAsync(_device, range, userMessageService);
+    }
+
+    /// <inheritdoc />
     public async Task<double> MeasureCapacitanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
         => await MeasurementBase.MeasureAsync(_device, _device.CapacitanceCommands, param, rangeFrom, rangeTo, userMessageService);
   }

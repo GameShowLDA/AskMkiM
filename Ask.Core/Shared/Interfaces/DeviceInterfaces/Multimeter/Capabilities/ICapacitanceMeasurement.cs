@@ -13,6 +13,15 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     Task<bool> SetCapacitanceModeAsync(IUserInteractionService? userMessageService = null);
 
     /// <summary>
+    /// Устанавливает диапазон измерения ёмкости.
+    /// Значение меньше или равное нулю включает автоматический выбор диапазона.
+    /// </summary>
+    /// <param name="range">Диапазон измерения в нФ.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, возвращающая результат установки диапазона.</returns>
+    Task<bool> SetCapacitanceRangeAsync(double range, IUserInteractionService? userMessageService = null);
+
+    /// <summary>
     /// Выполняет измерение ёмкости.
     /// </summary>
     /// <param name="param">Ожиданемео знчение.</param>

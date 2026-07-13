@@ -30,5 +30,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
     /// <inheritdoc />
     public async Task<bool> SetResistanceModeAsync(IUserInteractionService? userMessageService = null) => await SetModeBase.SetModeAsync(_device, _device.ResistanceCommands, userMessageService);
+
+    /// <inheritdoc />
+    public async Task<bool> SetResistanceRangeAsync(double range, IUserInteractionService? userMessageService = null)
+    {
+      if (_device.TypeMode != _device.ResistanceCommands.TypeMode)
+      {
+        await SetModeBase.SetModeAsync(_device, _device.ResistanceCommands, userMessageService);
+      }
+
+      return await RangeBase.SetRangeAsync(_device, range, userMessageService);
+    }
   }
 }

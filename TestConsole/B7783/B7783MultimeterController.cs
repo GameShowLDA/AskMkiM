@@ -405,6 +405,29 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetResistanceRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET RESISTANCE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ResistanceManager.SetResistanceRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Resistance range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     public async Task<B7783CommandResult> SetDcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       if (!_device.ConnectionInfo.IsConnected)
@@ -505,6 +528,29 @@ namespace TestConsole.B7783
           bool result = await _device.CapacitanceManager.SetCapacitanceModeAsync();
           token.ThrowIfCancellationRequested();
           return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> SetCapacitanceRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET CAPACITANCE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.CapacitanceManager.SetCapacitanceRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance range was not confirmed.";
         },
         cancellationToken);
     }
