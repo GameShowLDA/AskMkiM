@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Runtime.Device;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 
 namespace TestConsole.Keysight
@@ -157,6 +158,22 @@ namespace TestConsole.Keysight
         cancellationToken);
     }
 
+    public async Task<KeysightCommandResult> SetDcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      await EnsureConnectedAsync(timeoutMs, cancellationToken);
+
+      return await RunTimedAsync(
+        $"SET DC VOLTAGE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.DcVoltageManager.SetDCVoltageRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "DC voltage range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     public async Task<KeysightCommandResult> SetAcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
@@ -169,6 +186,22 @@ namespace TestConsole.Keysight
           bool result = await _device.AcVoltageManager.SetACVoltageModeAsync();
           token.ThrowIfCancellationRequested();
           return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<KeysightCommandResult> SetAcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      await EnsureConnectedAsync(timeoutMs, cancellationToken);
+
+      return await RunTimedAsync(
+        $"SET AC VOLTAGE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.AcVoltageManager.SetACVoltageRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage range was not confirmed.";
         },
         cancellationToken);
     }
@@ -285,6 +318,11 @@ namespace TestConsole.Keysight
       {
         throw connection.Error ?? new InvalidOperationException(connection.Response);
       }
+    }
+
+    private static string FormatRange(double range)
+    {
+      return range <= 0 ? "AUTO" : range.ToString("G", CultureInfo.InvariantCulture);
     }
 
     private async Task<KeysightCommandResult> RunTimedAsync(

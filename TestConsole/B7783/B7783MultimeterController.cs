@@ -405,6 +405,29 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetDcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET DC VOLTAGE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.DcVoltageManager.SetDCVoltageRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "DC voltage range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     /// <summary>
     /// Переводит мультиметр в режим измерения переменного напряжения.
     /// </summary>
@@ -430,6 +453,29 @@ namespace TestConsole.B7783
           bool result = await _device.AcVoltageManager.SetACVoltageModeAsync();
           token.ThrowIfCancellationRequested();
           return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> SetAcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET AC VOLTAGE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.AcVoltageManager.SetACVoltageRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage range was not confirmed.";
         },
         cancellationToken);
     }
@@ -632,6 +678,11 @@ namespace TestConsole.B7783
           delayBeforeCall: delayBeforeCallMs,
           cancellationToken: token),
         cancellationToken);
+    }
+
+    private static string FormatRange(double range)
+    {
+      return range <= 0 ? "AUTO" : range.ToString("G", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>

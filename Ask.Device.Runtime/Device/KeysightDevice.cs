@@ -122,8 +122,14 @@ namespace Ask.Device.Runtime.Device
       DeviceProtocol = new TcpProtocol(this, ConnectedProfile.Port);
 
       ResistanceCommands = new ResistanceMeasurementProfile();
-      ACVCommands = new ACVMeasurementProfile();
-      DCVCommands = new DCVMeasurementProfile();
+      ACVCommands = new ACVMeasurementProfile()
+      {
+        SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 750d },
+      };
+      DCVCommands = new DCVMeasurementProfile()
+      {
+        SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 1000d },
+      };
       CapacitanceCommands = new CapacitanceMeasurementProfile();
       ContinuityCommands = new ContinuityMeasurementProfile();
       DiodeCommands = new DiodeMeasurementProfile();

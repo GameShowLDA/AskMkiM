@@ -40,6 +40,10 @@ namespace Ask.Device.Runtime.Device
       ACVCommands = new ACVMeasurementProfile()
       {
         Measure = "READ?",
+        SetRange = "CONF:VOLT:AC {0},{1}",
+        SetAutoRange = "CONF:VOLT:AC AUTO",
+        GetRangeError = "SYSTEM:ERROR?",
+        SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 750d },
         Timeout = 2000,
       };
 
@@ -47,6 +51,10 @@ namespace Ask.Device.Runtime.Device
       DCVCommands = new DCVMeasurementProfile()
       {
         Measure = "READ?",
+        SetRange = "CONF:VOLT:DC {0},{1}",
+        SetAutoRange = "CONF:VOLT:DC AUTO",
+        GetRangeError = "SYSTEM:ERROR?",
+        SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 1000d },
       };
 
       CapacitanceCommands = new CapacitanceMeasurementProfile()
