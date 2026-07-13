@@ -2518,8 +2518,6 @@ namespace Ask.UI.Features.Archive.Views
 
       var doc = new FlowDocument
       {
-        FontFamily = new FontFamily("Segoe UI"),
-        FontSize = 9.5,
         PagePadding = new Thickness(
           hardMarginX,
           hardMarginY,
@@ -2529,12 +2527,13 @@ namespace Ask.UI.Features.Archive.Views
         PageHeight = printableAreaHeight + (hardMarginY * 2),
         ColumnWidth = double.PositiveInfinity
       };
+      Ask.Core.Services.FilesUtility.PrintSettingsService.ApplyTo(doc);
 
       var availableTableWidth = Math.Max(0, printableAreaWidth - doc.PagePadding.Left - doc.PagePadding.Right);
 
       doc.Blocks.Add(new Paragraph(new Run($"Каталог архива {archiveName}"))
       {
-        FontSize = 14,
+        FontSize = doc.FontSize,
         FontWeight = FontWeights.Bold,
         TextAlignment = TextAlignment.Center,
         Margin = new Thickness(0, 0, 0, 12)

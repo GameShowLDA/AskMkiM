@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
     /// <returns>Строка без обработанного параметра.</returns>
     public string Process(SiCommandModel model, string remainder, ParameterContext ctx)
     {
-      var info = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.SI);
+      var info = EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.SI);
 
       var (resistance, unit, rest) =
           CommonParameterParser.ResistanceParser.ParseResistance(remainder);

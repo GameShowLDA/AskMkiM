@@ -48,7 +48,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     internal static async Task<bool> CheckRelayStateAsync(
         CancellationToken cancellation,
         IUserInteractionService messageService,
-        IFastMeter meter,
+        IMultimeter meter,
         int relay)
     {
       cancellation.ThrowIfCancellationRequested();

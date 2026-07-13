@@ -1,9 +1,11 @@
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Device.Communication.Ethernet;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.ManagerChassis;
 
 namespace Ask.Device.Runtime.Device
@@ -11,16 +13,17 @@ namespace Ask.Device.Runtime.Device
   /// <summary>
   /// Класс ManagerChassis представляет устройство с подключением по IP-адресу.
   /// </summary>
-  public class ManagerChassis : DeviceWithIP, IChassisManager
+  public class ManagerChassis : DeviceWithUdpIp, IChassisManager
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ManagerChassis"/>.
     /// </summary>
     public ManagerChassis()
     {
-      ConnectableManager = new StateManager(this);
+      ConnectableManager = new Transport(this);
       PowerManager = new PowerManager(this);
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.ChassisManager;
+      DeviceType = DeviceType.ChassisManager;
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
       Name = "Тестер АСКМ";
       Description = "Добавить описание сюда";

@@ -482,7 +482,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       if (scheme?.GroupModels == null || scheme.GroupModels.Count == 0)
         return;
 
-      if (model.Mnemonic != EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.PR).DisplayName)
+      if (model.Mnemonic != EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PR).DisplayName)
         return;
 
       int disconnectedCount = 0;

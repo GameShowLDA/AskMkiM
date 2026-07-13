@@ -66,7 +66,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// </summary>
     private static ResistanceDefaults GetResistanceDefaults(MeasurementTypeCommand typeCommand)
     {
-      var commandInfo = EnumExtensions.GetDisplayInfo(typeCommand);
+      var commandInfo = EnumExtensions.GetCommandDisplayInfo(typeCommand);
 
       return new ResistanceDefaults(
           commandInfo.LowerLimit,

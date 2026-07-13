@@ -20,7 +20,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class IeCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
     private double firstValue = 0;
     private double secondValue = 1000;
     private double fixtureCapacitance = 0;
@@ -124,7 +124,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
     }

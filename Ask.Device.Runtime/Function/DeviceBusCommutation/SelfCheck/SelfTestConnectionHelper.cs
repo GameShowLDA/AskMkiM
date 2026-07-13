@@ -10,7 +10,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
   /// </summary>
   static internal class SelfTestConnectionHelper
   {
-    static internal async Task<bool> SettingsMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    static internal async Task<bool> SettingsMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       var connect = false;
       connect = (await meter.ConnectableManager.ConnectAsync(userMessageService)).Connect;
@@ -23,7 +23,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
       return connect;
     }
-    static internal async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IFastMeter meter, IUserInteractionService userMessageService)
+    static internal async Task<bool> CheckConnectionsAsync(ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
       var result1 = await device.ConnectableManager.InitializeAsync(userMessageService);
       var result2 = await meter.ConnectableManager.InitializeAsync(userMessageService);

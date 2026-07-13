@@ -40,7 +40,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <summary>
     /// Интерфейс для управления мультиметром.
     /// </summary>
-    private IFastMeter _fastMeter;
+    private IMultimeter _fastMeter;
 
     /// <summary>
     /// Коммутационная пара шин.

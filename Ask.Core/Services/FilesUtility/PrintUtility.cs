@@ -23,6 +23,7 @@ namespace Ask.Core.Services.FilesUtility
         PagePadding = new Thickness(50),
         ColumnWidth = double.PositiveInfinity
       };
+      PrintSettingsService.ApplyTo(document);
 
       foreach (var model in messages)
       {
@@ -33,7 +34,7 @@ namespace Ask.Core.Services.FilesUtility
           paragraph.Inlines.Add(new Run(model.Header)
           {
             Foreground = new SolidColorBrush(Colors.Black),
-            FontSize = 10,
+            FontSize = document.FontSize,
             FontWeight = FontWeights.Bold
           });
         }
@@ -45,7 +46,7 @@ namespace Ask.Core.Services.FilesUtility
           paragraph.Inlines.Add(new Run(model.Message)
           {
             Foreground = new SolidColorBrush(Colors.Black),
-            FontSize = 10
+            FontSize = document.FontSize
           });
         }
 
@@ -66,12 +67,11 @@ namespace Ask.Core.Services.FilesUtility
 
         FlowDocument document = new FlowDocument
         {
-          FontFamily = new FontFamily("Consolas"),
-          FontSize = 10,
           PagePadding = new Thickness(50),
           TextAlignment = TextAlignment.Left,
           ColumnWidth = double.PositiveInfinity
         };
+        PrintSettingsService.ApplyTo(document);
 
         var protocolArray = protocolText.Split('\n');
 
@@ -83,7 +83,7 @@ namespace Ask.Core.Services.FilesUtility
             paragraph.Inlines.Add(new Run(str)
             {
               Foreground = new SolidColorBrush(Colors.Black),
-              FontSize = 10,
+              FontSize = document.FontSize,
             });
           }
 

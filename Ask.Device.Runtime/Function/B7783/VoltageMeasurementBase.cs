@@ -212,7 +212,7 @@ namespace Ask.Device.Runtime.Function.B7783
 
     private void EnsureConnected()
     {
-      if (!Device.IsConnected)
+      if (!Device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Device is not connected.");
       }

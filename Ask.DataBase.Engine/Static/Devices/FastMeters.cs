@@ -7,7 +7,7 @@ namespace Ask.DataBase.Engine.Static.Devices;
 /// <summary>
 /// Статический фасад для работы с быстрыми измерителями.
 /// Предоставляет типобезопасный доступ к операциям <see cref="DeviceRuntime"/>
-/// для устройств типа <see cref="IFastMeter"/>.
+/// для устройств типа <see cref="IMultimeter"/>.
 /// </summary>
 /// <remarks>
 /// Является обёрткой над универсальным движком устройств и не содержит
@@ -23,8 +23,8 @@ public static class FastMeters
   /// <returns>
   /// Найденное устройство или <c>null</c>, если устройство не существует.
   /// </returns>
-  public static Task<IFastMeter?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
-    DeviceRuntime.GetByIdAsync<IFastMeter>(id, cancellationToken);
+  public static Task<IMultimeter?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.GetByIdAsync<IMultimeter>(id, cancellationToken);
 
   /// <summary>
   /// Получает все быстрые измерители.
@@ -33,8 +33,8 @@ public static class FastMeters
   /// <returns>
   /// Список устройств. Если устройства отсутствуют — возвращается пустой список.
   /// </returns>
-  public static Task<List<IFastMeter>> GetAllAsync(CancellationToken cancellationToken = default) =>
-    DeviceRuntime.GetAllAsync<IFastMeter>(cancellationToken);
+  public static Task<List<IMultimeter>> GetAllAsync(CancellationToken cancellationToken = default) =>
+    DeviceRuntime.GetAllAsync<IMultimeter>(cancellationToken);
 
   /// <summary>
   /// Получает быстрый измеритель по его номеру.
@@ -44,8 +44,8 @@ public static class FastMeters
   /// <returns>
   /// Найденное устройство или <c>null</c>, если устройство не найдено.
   /// </returns>
-  public static Task<IFastMeter?> GetByNumberAsync(int number, CancellationToken cancellationToken = default) =>
-    DeviceRuntime.GetByNumberAsync<IFastMeter>(number, cancellationToken);
+  public static Task<IMultimeter?> GetByNumberAsync(int number, CancellationToken cancellationToken = default) =>
+    DeviceRuntime.GetByNumberAsync<IMultimeter>(number, cancellationToken);
 
   /// <summary>
   /// Получает список быстрых измерителей, относящихся к указанному шасси.
@@ -55,10 +55,10 @@ public static class FastMeters
   /// <returns>
   /// Список устройств. Если устройства отсутствуют — возвращается пустой список.
   /// </returns>
-  public static Task<List<IFastMeter>> GetDevicesByNumberChassisAsync(
+  public static Task<List<IMultimeter>> GetDevicesByNumberChassisAsync(
     int numberChassis,
     CancellationToken cancellationToken = default) =>
-    DeviceRuntime.GetDevicesByNumberChassisAsync<IFastMeter>(numberChassis, cancellationToken);
+    DeviceRuntime.GetDevicesByNumberChassisAsync<IMultimeter>(numberChassis, cancellationToken);
 
   /// <summary>
   /// Получает быстрый измеритель по номеру шасси и номеру устройства.
@@ -69,11 +69,11 @@ public static class FastMeters
   /// <returns>
   /// Найденное устройство или <c>null</c>, если соответствующее устройство не найдено.
   /// </returns>
-  public static Task<IFastMeter?> GetDeviceByNumberChassisAsync(
+  public static Task<IMultimeter?> GetDeviceByNumberChassisAsync(
     int numberChassis,
     int number,
     CancellationToken cancellationToken = default) =>
-    DeviceRuntime.GetDeviceByNumberChassisAsync<IFastMeter>(numberChassis, number, cancellationToken);
+    DeviceRuntime.GetDeviceByNumberChassisAsync<IMultimeter>(numberChassis, number, cancellationToken);
 
   /// <summary>
   /// Создаёт новый быстрый измеритель.
@@ -83,7 +83,7 @@ public static class FastMeters
   /// <returns>
   /// Созданный runtime-объект устройства с актуальными данными.
   /// </returns>
-  public static Task<IFastMeter> CreateAsync(IFastMeter device, CancellationToken cancellationToken = default) =>
+  public static Task<IMultimeter> CreateAsync(IMultimeter device, CancellationToken cancellationToken = default) =>
     DeviceRuntime.CreateAsync(device, cancellationToken);
 
   /// <summary>
@@ -94,7 +94,7 @@ public static class FastMeters
   /// <returns>
   /// Список созданных runtime-объектов устройств с актуальными данными.
   /// </returns>
-  public static Task<List<IFastMeter>> CreateRangeAsync(IEnumerable<IFastMeter> devices, CancellationToken cancellationToken = default) =>
+  public static Task<List<IMultimeter>> CreateRangeAsync(IEnumerable<IMultimeter> devices, CancellationToken cancellationToken = default) =>
     DeviceRuntime.CreateRangeAsync(devices, cancellationToken);
 
   /// <summary>
@@ -105,7 +105,7 @@ public static class FastMeters
   /// <returns>
   /// Обновлённый runtime-объект устройства.
   /// </returns>
-  public static Task<IFastMeter> UpdateAsync(IFastMeter device, CancellationToken cancellationToken = default) =>
+  public static Task<IMultimeter> UpdateAsync(IMultimeter device, CancellationToken cancellationToken = default) =>
     DeviceRuntime.UpdateAsync(device, cancellationToken);
 
   /// <summary>
@@ -116,7 +116,7 @@ public static class FastMeters
   /// <returns>
   /// <c>true</c>, если устройство успешно удалено; иначе <c>false</c>.
   /// </returns>
-  public static Task<bool> DeleteAsync(IFastMeter device, CancellationToken cancellationToken = default) =>
+  public static Task<bool> DeleteAsync(IMultimeter device, CancellationToken cancellationToken = default) =>
     DeviceRuntime.DeleteAsync(device, cancellationToken);
 
   /// <summary>
@@ -128,13 +128,13 @@ public static class FastMeters
   /// <c>true</c>, если устройство найдено и удалено; иначе <c>false</c>.
   /// </returns>
   public static Task<bool> DeleteByIdAsync(int id, CancellationToken cancellationToken = default) =>
-    DeviceRuntime.DeleteByIdAsync<IFastMeter>(id, cancellationToken);
+    DeviceRuntime.DeleteByIdAsync<IMultimeter>(id, cancellationToken);
 
   /// <summary>
   /// Удаляет все быстрые измерители из таблицы данных.
   /// </summary>
   public static Task<bool> DeleteAllAsync(CancellationToken cancellationToken = default) =>
-    DeviceRuntime.DeleteAllAsync<IFastMeter>(cancellationToken);
+    DeviceRuntime.DeleteAllAsync<IMultimeter>(cancellationToken);
 
   /// <summary>
   /// Создаёт runtime-объект стойки на основе DTO.
@@ -143,6 +143,6 @@ public static class FastMeters
   /// <returns>
   /// Готовый runtime-объект стойки.
   /// </returns>
-  public static IFastMeter Build(DeviceDto dto) =>
-    DeviceRuntime.Build<IFastMeter>(dto);
+  public static IMultimeter Build(DeviceDto dto) =>
+    DeviceRuntime.Build<IMultimeter>(dto);
 }

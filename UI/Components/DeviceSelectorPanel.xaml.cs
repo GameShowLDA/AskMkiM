@@ -94,7 +94,7 @@ namespace UI.Components
           DeviceType.SwitchingDevice => GetSelectedRelayDevice<ISwitchingDevice>(),
           DeviceType.PowerSourceModule => GetSelectedRelayDevice<IPowerSourceModule>(),
           DeviceType.BreakdownTester => GetSelectedRelayDevice<IBreakdownTester>(),
-          DeviceType.FastMeter => GetSelectedRelayDevice<IFastMeter>(),
+          DeviceType.FastMeter => GetSelectedRelayDevice<IMultimeter>(),
           _ => null
         };
       }
@@ -140,7 +140,7 @@ namespace UI.Components
           ISwitchingDevice => DeviceType.SwitchingDevice,
           IPowerSourceModule => DeviceType.PowerSourceModule,
           IBreakdownTester => DeviceType.BreakdownTester,
-          IFastMeter => DeviceType.FastMeter,
+          IMultimeter => DeviceType.FastMeter,
           _ => DeviceType.Unknown
         };
       }
@@ -178,9 +178,9 @@ namespace UI.Components
     /// Возвращает выбранное устройство как IFastMeter, если возможно.
     /// </summary>
     /// <returns>Объект типа IFastMeter или null, если выбранное устройство не реализует IFastMeter.</returns>
-    public IFastMeter GetFastMeterSafe()
+    public IMultimeter GetFastMeterSafe()
     {
-      IFastMeter? result = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      IMultimeter? result = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
 
       return result;
     }
@@ -216,7 +216,7 @@ namespace UI.Components
         var enumType = checker4.GetTestTypeEnum();
         SetSelfControlEnum(enumType);
       }
-      else if (selectedDevice is IFastMeter fastMeter && fastMeter.SelfTestManager is ISelfTestCheckerMultimeter checker5)
+      else if (selectedDevice is IMultimeter fastMeter && fastMeter.SelfTestManager is ISelfTestCheckerMultimeter checker5)
       {
         var enumType = checker5.GetTestTypeEnum();
         SetSelfControlEnum(enumType);
@@ -303,7 +303,7 @@ namespace UI.Components
         DeviceType.SwitchingDevice when typeof(T) == typeof(ISwitchingDevice) => selected as T,
         DeviceType.PowerSourceModule when typeof(T) == typeof(IPowerSourceModule) => selected as T,
         DeviceType.BreakdownTester when typeof(T) == typeof(IBreakdownTester) => selected as T,
-        DeviceType.FastMeter when typeof(T) == typeof(IFastMeter) => selected as T,
+        DeviceType.FastMeter when typeof(T) == typeof(IMultimeter) => selected as T,
         _ => null
       };
     }

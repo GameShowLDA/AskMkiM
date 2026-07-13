@@ -28,7 +28,7 @@ public static class DeviceMapperRegistry
   private static readonly Dictionary<Type, Action<IDevice, object>> MapActions = new()
   {
     { typeof(IBreakdownTester), (device, dto) => BreakdownTesterMapper.ApplyDto((IBreakdownTester)device, (BreakdownTesterDto)dto) },
-    { typeof(IFastMeter), (device, dto) => FastMeterMapper.ApplyDto((IFastMeter)device, (FastMeterDto)dto) },
+    { typeof(IMultimeter), (device, dto) => FastMeterMapper.ApplyDto((IMultimeter)device, (FastMeterDto)dto) },
     { typeof(IRelaySwitchModule), (device, dto) => RelaySwitchModuleMapper.ApplyDto((IRelaySwitchModule)device, (RelaySwitchModuleDto)dto) },
     { typeof(IPowerSourceModule), (device, dto) => PowerSourceModuleMapper.ApplyDto((IPowerSourceModule)device, (PowerSourceModuleDto)dto) },
     { typeof(ISwitchingDevice), (device, dto) => SwitchingDeviceMapper.ApplyDto((ISwitchingDevice)device, (SwitchingDeviceDto)dto) },

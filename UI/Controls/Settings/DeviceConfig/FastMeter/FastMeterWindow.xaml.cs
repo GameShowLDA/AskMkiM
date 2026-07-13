@@ -66,8 +66,8 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
     public void SetSettings(object? sender, IHeadUnit e, FastMeterDto? editingEntity = null)
     {
       _editingDto = editingEntity;
-      deviceSettingsWindow.NameDevice = "Измеритель (быстрый)";
-      deviceSettingsWindow.LoadDeviceModels<IFastMeter>();
+      deviceSettingsWindow.NameDevice = "Мультиметр";
+      deviceSettingsWindow.LoadDeviceModels<IMultimeter>();
       deviceSettingsWindow.SetHeadUnit(e);
       if (editingEntity != null)
       {
@@ -86,7 +86,7 @@ namespace UI.Controls.Settings.DeviceConfig.FastMeter
 
         if (deviceDto != null)
         {
-          deviceDto.MaxContinuityResistance = (baseDevice as IFastMeter).MaxContinuityResistance;
+          deviceDto.MaxContinuityResistance = (baseDevice as IMultimeter).MaxContinuityResistance;
           deviceDto.AcwPpuDividerCoefficientPercent = deviceSettingsWindow.GetAcwPpuDividerCoefficientPercent();
           deviceDto.DcwPpuDividerCoefficientPercent = deviceSettingsWindow.GetDcwPpuDividerCoefficientPercent();
 

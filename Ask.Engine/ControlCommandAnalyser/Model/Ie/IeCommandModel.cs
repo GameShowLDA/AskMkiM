@@ -19,7 +19,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ie
   [MeasurementDevice(MeasurementDevice.Multimeter)]
   public class IeCommandModel : BaseCommandModel, IHasScheme, IHasCapacityLimits, IHasUnparsedParameters
   {
-    public override string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
+    /// <inheritdoc />
+    public override string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
 
     /// <summary>
     /// Единицы измерения электрической ёмкости (например, "МОм", "кОм" и т.п.)
