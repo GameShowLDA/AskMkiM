@@ -65,6 +65,11 @@ namespace Ask.Device.Runtime.Device
       CapacitanceCommands = new CapacitanceMeasurementProfile()
       {
         Measure = "READ?",
+        SetRange = "CONF:CAP {0}",
+        SetAutoRange = "CONF:CAP AUTO",
+        GetRangeError = "SYSTEM:ERROR?",
+        SupportedRanges = new[] { 1d, 10d, 100d, 1_000d, 10_000d, 100_000d, 1_000_000d, 10_000_000d },
+        Timeout = 2500,
       };
 
       ContinuityCommands = new ContinuityMeasurementProfile()

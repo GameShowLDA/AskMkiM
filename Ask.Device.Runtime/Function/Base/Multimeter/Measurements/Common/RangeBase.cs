@@ -25,6 +25,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       {
         MultimeterTypeMode.AcVoltage => SetACVoltageRangeAsync(device, range, userMessageService),
         MultimeterTypeMode.DcVoltage => SetDCVoltageRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.Capacitance => SetCapacitanceRangeAsync(device, range, userMessageService),
         MultimeterTypeMode.Resistance => SetResistanceRangeAsync(device, range, userMessageService),
         _ => throw new InvalidOperationException($"Невозможно установить диапазон для режима {device.TypeMode}.")
       };
@@ -55,6 +56,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile => profile.SetAutoRange,
         profile => profile.GetRangeError,
         profile => profile.SupportedRanges,
+        profile => 1d,
         userMessageService);
     }
 
@@ -71,6 +73,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile => profile.SetAutoRange,
         profile => profile.GetRangeError,
         profile => profile.SupportedRanges,
+        profile => 1d,
         userMessageService);
     }
 
@@ -87,6 +90,24 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile => profile.SetAutoRange,
         profile => profile.GetRangeError,
         profile => profile.SupportedRanges,
+        profile => 1d,
+        userMessageService);
+    }
+
+    private static Task<bool> SetCapacitanceRangeAsync(
+      IMultimeter device,
+      double range,
+      IUserInteractionService? userMessageService = null)
+    {
+      return SetMeasurementRangeAsync(
+        device,
+        device.CapacitanceCommands,
+        range,
+        profile => profile.SetRange,
+        profile => profile.SetAutoRange,
+        profile => profile.GetRangeError,
+        profile => profile.SupportedRanges,
+        profile => profile.RangeCommandMultiplier,
         userMessageService);
     }
 
@@ -98,6 +119,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       Func<TProfile, string> setAutoRangeCommand,
       Func<TProfile, string?> getRangeErrorCommand,
       Func<TProfile, double[]> getSupportedRanges,
+      Func<TProfile, double>? getRangeCommandMultiplier,
       IUserInteractionService? userMessageService)
       where TProfile : IMeasurementProfile
     {
@@ -116,7 +138,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           setRangeCommand(profile),
           setAutoRangeCommand(profile),
           getRangeErrorCommand(profile),
-          Array.Empty<double>());
+          Array.Empty<double>(),
+          getRangeCommandMultiplier?.Invoke(profile) ?? 1d);
 
         if (!success || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -148,7 +171,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       string setRangeCommand,
       string setAutoRangeCommand,
       string? getRangeErrorCommand,
-      double[] supportedRanges)
+      double[] supportedRanges,
+      double rangeCommandMultiplier)
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
@@ -167,7 +191,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       var command = range <= 0
         ? setAutoRangeCommand
-        : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges));
+        : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
       await device.DeviceProtocol.QueryAsync(command, timeout: profile.Timeout);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
@@ -175,13 +199,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return true;
     }
 
-    private static string BuildRangeCommand(string template, IMeasurementProfile profile, double range)
+    private static string BuildRangeCommand(string template, IMeasurementProfile profile, double range, double rangeCommandMultiplier)
     {
+      var commandRange = range * rangeCommandMultiplier;
       return string.Format(
         CultureInfo.InvariantCulture,
         template,
-        range,
-        ResolveResolution(profile, range));
+        commandRange,
+        ResolveResolution(profile, commandRange));
     }
 
     private static double ResolveRange(double requestedRange, double[] supportedRanges)
