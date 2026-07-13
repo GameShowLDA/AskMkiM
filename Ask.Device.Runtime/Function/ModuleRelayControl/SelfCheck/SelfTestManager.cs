@@ -18,13 +18,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <summary>
     /// Устройство коммутации шин.
     /// </summary>
-    private readonly Device.ModuleRelayControl _moduleRelay;
+    private readonly IRelaySwitchModule _moduleRelay;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public SelfTestManager(Device.ModuleRelayControl moduleRelay) => _moduleRelay = moduleRelay;
+    public SelfTestManager(IRelaySwitchModule moduleRelay) => _moduleRelay = moduleRelay;
     public Type GetTestTypeEnum()
     {
       return typeof(RelaySwitchTypeConnector);
@@ -71,7 +71,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       await _moduleRelay.MeterManager.ConnectMeterAsync();
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
-      for (int point = 1; point <= 350; point++)
+      for (int point = 1; point <= _moduleRelay.PointCount; point++)
       {
         await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, userMessageService), userMessageService);
       }
@@ -79,7 +79,15 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
     private async Task CheckBusesConnection(CancellationToken token, IRelaySwitchModule relaySwitchModule, ISwitchingDevice switchingDevice, IUserInteractionService? userMessageService = null)
     {
+
+      if (switchingDevice == null)
+      {
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Устройство коммутации шин не задана в конфигурации!", type: MessageType.Error));
+        return;
+      }
+
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
+
       if (!(await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
         return;
