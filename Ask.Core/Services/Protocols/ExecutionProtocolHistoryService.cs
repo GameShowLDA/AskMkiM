@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Services.FilesUtility;
 using System.IO;
 using System.Text;
 
@@ -28,6 +29,7 @@ public static class ExecutionProtocolHistoryService
       .Where(static line => !string.IsNullOrWhiteSpace(line));
 
     await File.WriteAllLinesAsync(filePath, lines, Utf8NoBom);
+    FileEncryptionManager.EncryptFile(filePath);
     return Path.GetFullPath(filePath);
   }
 

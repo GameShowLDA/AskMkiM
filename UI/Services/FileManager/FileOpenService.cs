@@ -1,4 +1,5 @@
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
@@ -192,12 +193,25 @@ namespace UI.Services.FileManager
         encoding = Encoding.GetEncoding(866);
       }
 
-      var content = File.ReadAllText(path, encoding)
+      var content = ReadTextFile(path, encoding, extention)
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
 
       return (content, encoding);
     }
+
+    private static string ReadTextFile(string path, Encoding encoding, string extension)
+    {
+      if (IsProtocolFileExtension(extension) && FileEncryptionManager.IsFileEncrypted(path))
+      {
+        return FileEncryptionManager.ReadEncryptedFileText(path, encoding);
+      }
+
+      return File.ReadAllText(path, encoding);
+    }
+
+    private static bool IsProtocolFileExtension(string extension)
+      => extension is ".lst" or ".lstw";
 
     /// <summary>
     /// Определяет тип файла по его расширению.

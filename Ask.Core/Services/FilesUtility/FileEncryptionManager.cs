@@ -75,6 +75,30 @@ namespace Ask.Core.Services.FilesUtility
     }
 
     /// <summary>
+    /// Reads a file encrypted by FileEncryptionManager without changing the file on disk.
+    /// </summary>
+    /// <param name="filePath">Path to the encrypted file.</param>
+    /// <returns>Decrypted source bytes.</returns>
+    static public byte[] ReadEncryptedFileBytes(string filePath)
+    {
+      string fullPath = ValidateFilePath(filePath);
+      string cipherText = ReadEncryptedFileCipherText(fullPath);
+      string decryptedBase64 = Decrypt(cipherText);
+      return Convert.FromBase64String(decryptedBase64);
+    }
+
+    /// <summary>
+    /// Reads a file encrypted by FileEncryptionManager as text without changing the file on disk.
+    /// </summary>
+    /// <param name="filePath">Path to the encrypted file.</param>
+    /// <param name="encoding">Text encoding for decrypted bytes.</param>
+    /// <returns>Decrypted file text.</returns>
+    static public string ReadEncryptedFileText(string filePath, Encoding encoding)
+    {
+      return encoding.GetString(ReadEncryptedFileBytes(filePath));
+    }
+
+    /// <summary>
     /// Шифрует обычный текст с использованием AES и возвращает зашифрованный текст в формате base64.
     /// </summary>
     /// <param name="plainText">Обычный текст для шифрования.</param>
@@ -172,23 +196,7 @@ namespace Ask.Core.Services.FilesUtility
         return;
       }
 
-      string encryptedFileContent = File.ReadAllText(fullPath, Encoding.UTF8);
-      if (encryptedFileContent.Length > 0 && encryptedFileContent[0] == '\uFEFF')
-      {
-        encryptedFileContent = encryptedFileContent[1..];
-      }
-
-      if (!encryptedFileContent.StartsWith(EncryptedFilePrefix, StringComparison.Ordinal))
-      {
-        throw new InvalidDataException("Неподдерживаемый формат зашифрованного файла.");
-      }
-
-      string cipherText = encryptedFileContent[EncryptedFilePrefix.Length..].Trim();
-      if (string.IsNullOrWhiteSpace(cipherText))
-      {
-        throw new InvalidDataException("Зашифрованный файл не содержит данных.");
-      }
-
+      string cipherText = ReadEncryptedFileCipherText(fullPath);
       string decryptedBase64 = Decrypt(cipherText);
       byte[] decryptedBytes = Convert.FromBase64String(decryptedBase64);
       File.WriteAllBytes(fullPath, decryptedBytes);
@@ -213,6 +221,28 @@ namespace Ask.Core.Services.FilesUtility
       }
 
       return fullPath;
+    }
+
+    static private string ReadEncryptedFileCipherText(string fullPath)
+    {
+      string encryptedFileContent = File.ReadAllText(fullPath, Encoding.UTF8);
+      if (encryptedFileContent.Length > 0 && encryptedFileContent[0] == '\uFEFF')
+      {
+        encryptedFileContent = encryptedFileContent[1..];
+      }
+
+      if (!encryptedFileContent.StartsWith(EncryptedFilePrefix, StringComparison.Ordinal))
+      {
+        throw new InvalidDataException("Неподдерживаемый формат зашифрованного файла.");
+      }
+
+      string cipherText = encryptedFileContent[EncryptedFilePrefix.Length..].Trim();
+      if (string.IsNullOrWhiteSpace(cipherText))
+      {
+        throw new InvalidDataException("Зашифрованный файл не содержит данных.");
+      }
+
+      return cipherText;
     }
 
     static private bool MatchesPrefixAtOffset(byte[] source, int sourceLength, byte[] prefix, int offset)
