@@ -1,10 +1,10 @@
-using Ask.Core.Services.FilesUtility;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Services.Notifications;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -144,7 +144,7 @@ namespace Ask.UI.Components.ProtocolListBox
         DispatcherPriority.Loaded);
     }
 
-    private void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
+    private async void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (HandleZoomShortcuts(e))
       {
@@ -155,19 +155,8 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         e.Handled = true;
 
-        try
-        {
-          var text = GetText();
-          TextPrintHelper.PrintText(text, "Печать протокола");
-        }
-        catch (Exception ex)
-        {
-          MessageBox.Show(
-            $"Ошибка при печати: {ex.Message}",
-            "Ошибка печати",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-        }
+        var text = GetText();
+        await PrintOperationNotificationService.PrintTextAsync(text, "Печать протокола");
       }
     }
 
