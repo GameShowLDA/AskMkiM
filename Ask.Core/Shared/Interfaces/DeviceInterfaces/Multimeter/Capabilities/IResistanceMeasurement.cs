@@ -14,6 +14,15 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     Task<bool> SetResistanceModeAsync(IUserInteractionService? userMessageService = null);
 
     /// <summary>
+    /// Асинхронно устанавливает диапазон измерения сопротивления.
+    /// Значение меньше или равное нулю включает автоматический выбор диапазона.
+    /// </summary>
+    /// <param name="range">Диапазон измерения в Омах.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, возвращающая результат установки диапазона.</returns>
+    Task<bool> SetResistanceRangeAsync(double range, IUserInteractionService? userMessageService = null);
+
+    /// <summary>
     /// Асинхронно выполняет измерение сопротивления.
     /// </summary>
     /// <returns>Задача, возвращающая измеренное значение сопротивления в Омах.</returns>

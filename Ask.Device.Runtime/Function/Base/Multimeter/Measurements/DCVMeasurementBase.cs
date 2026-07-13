@@ -32,6 +32,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         => await MeasurementBase.MeasureAsync(_device, _device.DCVCommands, param, rangeFrom, rangeTo, userMessageService);
 
     /// <inheritdoc />
-    public async Task<bool> SetDCVoltageRangeAsync(double range, IUserInteractionService? userMessageService = null) => await RangeBase.SetRangeAsync(_device, range, userMessageService);
+    public async Task<bool> SetDCVoltageRangeAsync(double range, IUserInteractionService? userMessageService = null)
+    {
+      if (_device.TypeMode != _device.DCVCommands.TypeMode)
+      {
+        await SetModeBase.SetModeAsync(_device, _device.DCVCommands, userMessageService);
+      }
+
+      return await RangeBase.SetRangeAsync(_device, range, userMessageService);
+    }
   }
 }

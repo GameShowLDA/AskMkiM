@@ -4,13 +4,17 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Function.Helpers;
+using System.Collections.Concurrent;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 {
   internal static class RangeBase
   {
+    private static readonly ConcurrentDictionary<string, double> SelectedRanges = new();
 
     public static Task<bool> SetRangeAsync(
         IMultimeter device,
@@ -21,8 +25,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       {
         MultimeterTypeMode.AcVoltage => SetACVoltageRangeAsync(device, range, userMessageService),
         MultimeterTypeMode.DcVoltage => SetDCVoltageRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.Resistance => SetResistanceRangeAsync(device, range, userMessageService),
         _ => throw new InvalidOperationException($"Невозможно установить диапазон для режима {device.TypeMode}.")
       };
+    }
+
+    public static Task<bool> SetRangeForMeasurementAsync(
+        IMultimeter device,
+        double range,
+        IUserInteractionService? userMessageService = null)
+    {
+      var effectiveRange = range <= 0
+        ? GetSelectedRange(device)
+        : range;
+
+      return SetRangeAsync(device, effectiveRange, userMessageService);
     }
 
     private static Task<bool> SetACVoltageRangeAsync(
@@ -30,7 +47,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double range,
       IUserInteractionService? userMessageService = null)
     {
-      return SetVoltageRangeAsync(
+      return SetMeasurementRangeAsync(
         device,
         device.ACVCommands,
         range,
@@ -46,7 +63,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double range,
       IUserInteractionService? userMessageService = null)
     {
-      return SetVoltageRangeAsync(
+      return SetMeasurementRangeAsync(
         device,
         device.DCVCommands,
         range,
@@ -57,7 +74,23 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
-    private static async Task<bool> SetVoltageRangeAsync<TProfile>(
+    private static Task<bool> SetResistanceRangeAsync(
+      IMultimeter device,
+      double range,
+      IUserInteractionService? userMessageService = null)
+    {
+      return SetMeasurementRangeAsync(
+        device,
+        device.ResistanceCommands,
+        range,
+        profile => profile.SetRange,
+        profile => profile.SetAutoRange,
+        profile => profile.GetRangeError,
+        profile => profile.SupportedRanges,
+        userMessageService);
+    }
+
+    private static async Task<bool> SetMeasurementRangeAsync<TProfile>(
       IMultimeter device,
       TProfile profile,
       double range,
@@ -69,20 +102,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       where TProfile : IMeasurementProfile
     {
       var header = EnumExtensions.GetDescription(profile.TypeMode);
+      var effectiveRange = range <= 0 ? 0 : ResolveRange(range, getSupportedRanges(profile));
       var rangeText = range <= 0
         ? "Авто"
-        : $"{ResolveRange(range, getSupportedRanges(profile)).ToString("G", CultureInfo.InvariantCulture)} {profile.Unit.GetUnit()}";
+        : $"{effectiveRange.ToString("G", CultureInfo.InvariantCulture)} {profile.Unit.GetUnit()}";
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var success = await SetVoltageRangeCoreAsync(
+        var success = await SetMeasurementRangeCoreAsync(
           device,
           profile,
-          range,
+          effectiveRange,
           setRangeCommand(profile),
           setAutoRangeCommand(profile),
           getRangeErrorCommand(profile),
-          getSupportedRanges(profile));
+          Array.Empty<double>());
 
         if (!success || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -103,10 +137,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException($"Ошибка установки диапазона \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}).");
       }
 
+      SelectedRanges[BuildRangeKey(device, profile.TypeMode)] = effectiveRange;
       return true;
     }
 
-    private static async Task<bool> SetVoltageRangeCoreAsync(
+    private static async Task<bool> SetMeasurementRangeCoreAsync(
       IMultimeter device,
       IMeasurementProfile profile,
       double range,
@@ -132,7 +167,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       var command = range <= 0
         ? setAutoRangeCommand
-        : BuildRangeCommand(setRangeCommand, ResolveRange(range, supportedRanges));
+        : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges));
 
       await device.DeviceProtocol.QueryAsync(command, timeout: profile.Timeout);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
@@ -140,13 +175,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return true;
     }
 
-    private static string BuildRangeCommand(string template, double range)
+    private static string BuildRangeCommand(string template, IMeasurementProfile profile, double range)
     {
       return string.Format(
         CultureInfo.InvariantCulture,
         template,
         range,
-        ResolveResolution(range));
+        ResolveResolution(profile, range));
     }
 
     private static double ResolveRange(double requestedRange, double[] supportedRanges)
@@ -168,7 +203,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return supportedRanges.Max();
     }
 
-    private static double ResolveResolution(double range)
+    private static double ResolveResolution(IMeasurementProfile profile, double range)
+    {
+      return profile.Unit switch
+      {
+        VoltageUnit => ResolveVoltageResolution(range),
+        ResistanceUnit => ResolveResistanceResolution(range),
+        _ => range * 0.000001d
+      };
+    }
+
+    private static double ResolveVoltageResolution(double range)
     {
       return range switch
       {
@@ -178,6 +223,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         <= 100d => 0.0001d,
         _ => 0.001d
       };
+    }
+
+    private static double ResolveResistanceResolution(double range)
+    {
+      return Math.Max(range * 0.000001d, 0.000001d);
     }
 
     private static async Task EnsureNoInstrumentErrorAsync(
@@ -191,10 +241,25 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       var error = await device.DeviceProtocol.QueryAsync(getRangeErrorCommand, timeout: timeout);
-      if (!string.IsNullOrWhiteSpace(error) && !error.TrimStart().StartsWith("+0", StringComparison.Ordinal))
+      var normalizedError = error?.TrimStart();
+      if (!string.IsNullOrWhiteSpace(normalizedError)
+        && !normalizedError.StartsWith("+0", StringComparison.Ordinal)
+        && !normalizedError.StartsWith("0", StringComparison.Ordinal))
       {
         throw new InvalidOperationException($"Ошибка установки диапазона: {error}");
       }
+    }
+
+    private static double GetSelectedRange(IMultimeter device)
+    {
+      return SelectedRanges.TryGetValue(BuildRangeKey(device, device.TypeMode), out var range)
+        ? range
+        : 0;
+    }
+
+    private static string BuildRangeKey(IMultimeter device, MultimeterTypeMode typeMode)
+    {
+      return $"{RuntimeHelpers.GetHashCode(device)}:{typeMode}";
     }
   }
 }

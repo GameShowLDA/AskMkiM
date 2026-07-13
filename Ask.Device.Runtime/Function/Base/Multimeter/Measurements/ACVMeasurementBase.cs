@@ -31,6 +31,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     public async Task<double> MeasureACVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
         => await MeasurementBase.MeasureAsync(_device, _device.ACVCommands, param, rangeFrom, rangeTo, userMessageService);
 
-    public async Task<bool> SetACVoltageRangeAsync(double range, IUserInteractionService? userMessageService = null) => await RangeBase.SetRangeAsync(_device, range, userMessageService);
+    public async Task<bool> SetACVoltageRangeAsync(double range, IUserInteractionService? userMessageService = null)
+    {
+      if (_device.TypeMode != _device.ACVCommands.TypeMode)
+      {
+        await SetModeBase.SetModeAsync(_device, _device.ACVCommands, userMessageService);
+      }
+
+      return await RangeBase.SetRangeAsync(_device, range, userMessageService);
+    }
   }
 }
