@@ -45,7 +45,7 @@ namespace Ask.Device.Runtime.Function.Connected
         }
       }
 
-      return (false, $"Нет подключения к {_device.Name}");
+      return (false, $"Нет связи с {_device.Name}");
     }
 
     /// <inheritdoc />
