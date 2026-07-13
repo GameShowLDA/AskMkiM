@@ -4,11 +4,13 @@ using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Usb;
 using Ask.Device.Runtime.Base.Device;
+using Ask.UI.Infrastructure.Localization;
 using Message;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
@@ -129,19 +131,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
       };
 
-      titleBar.Child = new TextBlock
-      {
-        Text = "Коэффициент делителя ППУ, %",
-        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
-        FontSize = 20,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
-      };
-
-      if (titleBar.Child is TextBlock acwTitle)
-      {
-        acwTitle.Text = "Коэффициент делителя ППУ ACW, %";
-      }
+      titleBar.Child = CreateLocalizedAdditionalSettingsTitle("settings.device.multimeter.additionalDividerCoefficient.acw");
 
       var inputBorder = new Border
       {
@@ -156,14 +146,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
       };
 
-      dcwTitleBar.Child = new TextBlock
-      {
-        Text = "Коэффициент делителя ППУ DCW, %",
-        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
-        FontSize = 20,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
-      };
+      dcwTitleBar.Child = CreateLocalizedAdditionalSettingsTitle("settings.device.multimeter.additionalDividerCoefficient.dcw");
 
       var dcwInputBorder = new Border
       {
@@ -180,6 +163,26 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       grid.Children.Add(dcwInputBorder);
       container.Child = grid;
       AdditionalSettingsContainer.Content = container;
+    }
+
+    private TextBlock CreateLocalizedAdditionalSettingsTitle(string localizationKey)
+    {
+      var title = new TextBlock
+      {
+        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
+        FontSize = 20,
+        FontWeight = FontWeights.Bold,
+        Margin = new Thickness(7, 0, 7, 0)
+      };
+
+      title.SetBinding(
+        TextBlock.TextProperty,
+        new Binding(nameof(LocalizedString.Value))
+        {
+          Source = new LocalizedString(localizationKey)
+        });
+
+      return title;
     }
 
     private TextBox PreparePpuDividerTextBox(TextBox? textBox)

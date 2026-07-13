@@ -131,7 +131,7 @@ namespace Ask.UI.Controls.ProtocolNew
         await ProtocolSelfCheck.ClearAllMessagesAsync();
         if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
         {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет подключения к системе. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
           await FinalizeAsync();
           return;
         }

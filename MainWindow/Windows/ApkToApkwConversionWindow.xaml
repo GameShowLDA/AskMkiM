@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="РљРѕРЅРІРµСЂС‚Р°С†РёСЏ APK РІ APKW"
+        Title="Конвертация APK в APKW"
         Width="820"
         MinWidth="820"
         SizeToContent="Height"
@@ -51,7 +51,7 @@
                         <Button Grid.Column="1"
                                 Margin="0,0,2,0"
                                 Style="{StaticResource ConversionDialogWindowButtonStyle}"
-                                ToolTip="Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ"
+                                ToolTip="Закрыть окно"
                                 PreviewMouseDown="CloseButton_PreviewMouseDown">
                             <askUiIcons:WindowCloseIcon Size="14"
                                 IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
@@ -70,14 +70,14 @@
 
                     <TextBlock Grid.Row="0"
                                Margin="0,0,0,18"
-                               Text="Р’С‹Р±РµСЂРёС‚Рµ СЃС‚Р°СЂС‹Р№ Р°СЂС…РёРІ APK. РќРѕРІС‹Р№ Р°СЂС…РёРІ APKW Р±СѓРґРµС‚ СЃРѕР·РґР°РЅ РІРѕ РІРЅСѓС‚СЂРµРЅРЅРµРј С…СЂР°РЅРёР»РёС‰Рµ Archives РїСЂРёР»РѕР¶РµРЅРёСЏ Рё СЃСЂР°Р·Сѓ РѕС‚РєСЂС‹С‚."
+                               Text="Выберите старый архив APK. Новый архив APKW будет создан во внутреннем хранилище Archives приложения и сразу открыт."
                                Style="{StaticResource ConversionDialogDescriptionTextStyle}" />
 
                     <Border Grid.Row="1"
                             Style="{StaticResource ConversionDialogSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Margin="0,0,0,12"
-                                       Text="РСЃС…РѕРґРЅС‹Р№ Р°СЂС…РёРІ APK"
+                                       Text="Исходный архив APK"
                                        Style="{StaticResource ConversionDialogSectionTitleStyle}" />
 
                             <Grid>
@@ -94,7 +94,7 @@
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"
-                                        Content="Р’С‹Р±СЂР°С‚СЊ С„Р°Р№Р»"
+                                        Content="Выбрать файл"
                                         Style="{StaticResource ConversionDialogBrowseButtonStyle}"
                                         Click="SelectInputFileButton_Click" />
                             </Grid>
@@ -105,7 +105,7 @@
                             Style="{StaticResource ConversionDialogHintBorderStyle}"
                             Margin="0,0,0,0">
                         <TextBlock x:Name="StateTextBlock"
-                                   Text="Р’С‹Р±РµСЂРёС‚Рµ РёСЃС…РѕРґРЅС‹Р№ APK-Р°СЂС…РёРІ."
+                                   Text="Выберите исходный APK-архив."
                                    Style="{StaticResource ConversionDialogHintTextStyle}" />
                     </Border>
 
@@ -118,13 +118,13 @@
 
                         <Button Grid.Column="1"
                                 MinWidth="132"
-                                Content="РћС‚РјРµРЅР°"
+                                Content="Отмена"
                                 Style="{StaticResource ConversionDialogSecondaryButtonStyle}"
                                 IsCancel="True" />
                         <Button x:Name="ConvertButton"
                                 Grid.Column="2"
                                 Margin="12,0,0,0"
-                                Content="РљРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ"
+                                Content="Конвертировать"
                                 Style="{StaticResource ConversionDialogPrimaryButtonStyle}"
                                 IsDefault="True"
                                 Click="ConvertButton_Click" />

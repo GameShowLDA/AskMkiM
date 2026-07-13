@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="РљРѕРЅРІРµСЂС‚Р°С†РёСЏ OPK РІ PK"
+        Title="Конвертация OPK в PK"
         Width="860"
         Height="620"
         MinWidth="860"
@@ -58,7 +58,7 @@
                         <Button Grid.Column="1"
                                 Margin="0,0,2,0"
                                 Style="{StaticResource ConversionDialogWindowButtonStyle}"
-                                ToolTip="Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ"
+                                ToolTip="Закрыть окно"
                                 PreviewMouseDown="CloseButton_PreviewMouseDown">
                             <askUiIcons:WindowCloseIcon Size="14"
                                 IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
@@ -78,7 +78,7 @@
                     <TextBlock x:Name="DescriptionTextBlock"
                                Grid.Row="0"
                                Margin="0,0,0,18"
-                               Text="Р’С‹Р±РµСЂРёС‚Рµ РѕРґРёРЅ РёР»Рё РЅРµСЃРєРѕР»СЊРєРѕ С„Р°Р№Р»РѕРІ OPK Рё РїР°РїРєСѓ, РІ РєРѕС‚РѕСЂСѓСЋ РЅСѓР¶РЅРѕ СЃРѕС…СЂР°РЅРёС‚СЊ СЂРµР·СѓР»СЊС‚Р°С‚С‹ РєРѕРЅРІРµСЂС‚Р°С†РёРё."
+                               Text="Выберите один или несколько файлов OPK и папку, в которую нужно сохранить результаты конвертации."
                                Style="{StaticResource ConversionDialogDescriptionTextStyle}" />
 
                     <Border Grid.Row="1"
@@ -86,7 +86,7 @@
                         <StackPanel>
                             <TextBlock x:Name="OutputDirectoryLabelTextBlock"
                                        Margin="0,0,0,12"
-                                       Text="РџР°РїРєР° РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ PK"
+                                       Text="Папка для сохранения PK"
                                        Style="{StaticResource ConversionDialogSectionTitleStyle}" />
 
                             <Grid>
@@ -103,7 +103,7 @@
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"
-                                        Content="Р’С‹Р±СЂР°С‚СЊ РїР°РїРєСѓ"
+                                        Content="Выбрать папку"
                                         Style="{StaticResource ConversionDialogBrowseButtonStyle}"
                                         Click="SelectOutputDirectoryButton_Click" />
                             </Grid>
@@ -128,17 +128,17 @@
 
                                 <TextBlock Grid.Column="0"
                                            VerticalAlignment="Center"
-                                           Text="Р¤Р°Р№Р»С‹ OPK"
+                                           Text="Файлы OPK"
                                            Style="{StaticResource ConversionDialogSectionTitleStyle}" />
 
                                 <StackPanel Grid.Column="1"
                                             Orientation="Horizontal"
                                             HorizontalAlignment="Right">
-                                    <Button Content="Р’С‹Р±СЂР°С‚СЊ С„Р°Р№Р»С‹"
+                                    <Button Content="Выбрать файлы"
                                             Style="{StaticResource ConversionDialogBrowseButtonStyle}"
                                             Click="SelectFilesButton_Click" />
                                     <Button Margin="10,0,0,0"
-                                            Content="РћС‡РёСЃС‚РёС‚СЊ СЃРїРёСЃРѕРє"
+                                             Content="Очистить список"
                                             Style="{StaticResource ConversionDialogSecondaryButtonStyle}"
                                             Click="ClearFilesButton_Click" />
                                 </StackPanel>
@@ -147,7 +147,7 @@
                             <TextBlock x:Name="SelectedFilesSummaryTextBlock"
                                        Grid.Row="1"
                                        Margin="0,12,0,12"
-                                       Text="Р¤Р°Р№Р»С‹ РЅРµ РІС‹Р±СЂР°РЅС‹."
+                                       Text="Файлы не выбраны."
                                        Style="{StaticResource ConversionDialogSummaryTextStyle}" />
 
                             <ListBox x:Name="SelectedFilesListBox"
@@ -165,12 +165,12 @@
                                 HorizontalAlignment="Right"
                                 Margin="0,18,0,0">
                         <Button MinWidth="132"
-                                Content="РћС‚РјРµРЅР°"
+                                Content="Отмена"
                                 Style="{StaticResource ConversionDialogSecondaryButtonStyle}"
                                 IsCancel="True" />
                         <Button x:Name="ConvertButton"
                                 Margin="12,0,0,0"
-                                Content="РљРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ"
+                                Content="Конвертировать"
                                 Style="{StaticResource ConversionDialogPrimaryButtonStyle}"
                                 IsDefault="True"
                                 Click="ConvertButton_Click" />
