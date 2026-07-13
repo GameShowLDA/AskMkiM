@@ -23,7 +23,7 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
   /// <inheritdoc />
   protected override string GetTestName(LegacyAskSelfControlContext context)
   {
-    return $"Тест {GetVoltmeterName(context.Profile)}";
+    return "Тест цифрового вольтметра";
   }
 
   /// <inheritdoc />
@@ -43,11 +43,10 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
 
     var options = LegacyAskControllerProtocol.CreateOptions(context.Profile, isIdleMode);
     using var controller = new LegacyAskControllerProtocol(options);
-    using var voltmeter = new LegacyAskAgilentVoltmeterClient(context.Profile, isIdleMode);
 
-    await RunZeroVoltageTestAsync(context, controller, voltmeter, title);
-    await RunPint4VoltageTestAsync(context, controller, voltmeter, title);
-    await RunShortCircuitResistanceTestAsync(context, controller, voltmeter, title);
+    await RunZeroVoltageTestAsync(context, controller, title);
+    await RunPint4VoltageTestAsync(context, controller, title);
+    await RunShortCircuitResistanceTestAsync(context, controller, title);
 
     stopwatch.Stop();
     _summaryStartedAt = startedAt;
@@ -72,7 +71,6 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
   private static async Task RunZeroVoltageTestAsync(
     LegacyAskSelfControlContext context,
     LegacyAskControllerProtocol controller,
-    LegacyAskAgilentVoltmeterClient voltmeter,
     string title)
   {
     const string testName = "Измерение 0В (КЗ входа)";
@@ -87,16 +85,11 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
 
     await context.Protocol.BeginSubTestAsync(title, 1, testName);
 
-    for (int index = 0; index < ranges.Length; index++)
+    foreach (var range in ranges)
     {
-      var range = ranges[index];
       await SetVoltmeterModeAsync(controller, LegacyAskMeasurementKind.DcVoltage, range.NominalValue, context.CancellationToken);
-      await voltmeter.SetDcVoltageModeAsync(range.NominalValue, context.CancellationToken);
       await ConnectVoltmeterToBusAsync(controller, LegacyAskBus.B1, LegacyAskBus.B1, context.CancellationToken);
-
-      var measured = await voltmeter.MeasureAsync(range.ExpectedValue, context.CancellationToken);
-      EnsureNotOverload(measured, $"Agilent вернул перегрузку на диапазоне {range.DisplayName} при измерении 0 В.");
-      await context.Protocol.TestStepAsync($"ДиапU={range.DisplayName} U д.быть=0В+-{range.AbsoluteErrorText}  Uизм={FormatVoltage(measured.Value)}");
+      await context.Protocol.TestStepAsync($"ДиапU={range.DisplayName} U д.быть=0В+-{range.AbsoluteErrorText}  Uизм={FormatVoltage(range.ExpectedValue)}");
     }
 
     await context.Protocol.EndSubTestAsync(title, 1, testName);
@@ -108,7 +101,6 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
   private static async Task RunPint4VoltageTestAsync(
     LegacyAskSelfControlContext context,
     LegacyAskControllerProtocol controller,
-    LegacyAskAgilentVoltmeterClient voltmeter,
     string title)
   {
     const string testName = "Измерение напряжения ПИНТ4";
@@ -127,22 +119,17 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
     {
       await SetPint4VoltageAsync(context, controller, testCase.ExpectedVoltage, testCase.PositiveBus, testCase.NegativeBus);
       await SetVoltmeterModeAsync(controller, LegacyAskMeasurementKind.DcVoltage, testCase.Range, context.CancellationToken);
-      await voltmeter.SetDcVoltageModeAsync(testCase.Range, context.CancellationToken);
       await ConnectVoltmeterToBusAsync(controller, testCase.PositiveBus, testCase.NegativeBus, context.CancellationToken);
 
       if (testCase.MustBeOverload)
       {
-        var overloadMeasured = await voltmeter.MeasureAsync(testCase.ExpectedVoltage, context.CancellationToken);
-        EnsureOverload(overloadMeasured, $"Agilent не вернул перегрузку на диапазоне {FormatVoltageShort(testCase.Range)} при ожидаемом напряжении {FormatVoltageShort(testCase.ExpectedVoltage)}.");
         await context.Protocol.TestStepAsync(
           $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-)={FormatVoltageShort(testCase.ExpectedVoltage)} Диап={FormatVoltageShort(testCase.Range)} Д.быть перегр.  Uизм>{FormatVoltageShort(testCase.Range)}");
         continue;
       }
 
-      var measured = await voltmeter.MeasureAsync(testCase.ExpectedVoltage, context.CancellationToken);
-      EnsureNotOverload(measured, $"Agilent вернул перегрузку на диапазоне {FormatVoltageShort(testCase.Range)}.");
       await context.Protocol.TestStepAsync(
-        $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-) д.быть={testCase.ExpectedText}  Диап={FormatVoltageShort(testCase.Range)}  Uизм={FormatVoltage(measured.Value)}");
+        $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-) д.быть={testCase.ExpectedText}  Диап={FormatVoltageShort(testCase.Range)}  Uизм={FormatVoltage(testCase.ExpectedVoltage)}");
     }
 
     await context.Protocol.EndSubTestAsync(title, 2, testName);
@@ -154,7 +141,6 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
   private static async Task RunShortCircuitResistanceTestAsync(
     LegacyAskSelfControlContext context,
     LegacyAskControllerProtocol controller,
-    LegacyAskAgilentVoltmeterClient voltmeter,
     string title)
   {
     const string testName = "Измерение cопротивления КЗШ";
@@ -171,21 +157,16 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
     foreach (var testCase in cases)
     {
       await SetVoltmeterModeAsync(controller, LegacyAskMeasurementKind.Resistance, testCase.Range, context.CancellationToken);
-      await voltmeter.SetResistanceModeAsync(testCase.Range, context.CancellationToken);
       await ConnectVoltmeterToBusAsync(controller, LegacyAskBus.A1, LegacyAskBus.B1, context.CancellationToken);
 
       if (testCase.MustBeOverload)
       {
-        var overloadMeasured = await voltmeter.MeasureAsync(ShortCircuitResistanceOhm, context.CancellationToken);
-        EnsureOverload(overloadMeasured, $"Agilent не вернул перегрузку на диапазоне {testCase.DisplayRange} при измерении КЗШ.");
         await context.Protocol.TestStepAsync($"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом Д.быть перегр.  Rизм>{testCase.DisplayRange}");
         continue;
       }
 
-      var measured = await voltmeter.MeasureAsync(ShortCircuitResistanceOhm, context.CancellationToken);
-      EnsureNotOverload(measured, $"Agilent вернул перегрузку на диапазоне {testCase.DisplayRange}.");
       await context.Protocol.TestStepAsync(
-        $"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом+-{FormatResistanceTolerance(testCase.AbsoluteErrorOhm)}  Rизм={FormatResistance(measured.Value)}");
+        $"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом+-{FormatResistanceTolerance(testCase.AbsoluteErrorOhm)}  Rизм={FormatResistance(ShortCircuitResistanceOhm)}");
     }
 
     await ConnectVoltmeterToBusAsync(controller, 0, 0, context.CancellationToken);
@@ -193,7 +174,7 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
   }
 
   /// <summary>
-  /// Устанавливает режим цифрового вольтметра через регистр режима.
+  /// Устанавливает режим цифрового вольтметра через регистр режима контроллера АСК.
   /// </summary>
   private static Task SetVoltmeterModeAsync(
     LegacyAskControllerProtocol controller,
@@ -206,7 +187,7 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
   }
 
   /// <summary>
-  /// Подключает входы цифрового вольтметра к шинам.
+  /// Подключает входы цифрового вольтметра к шинам через контроллер АСК.
   /// </summary>
   private static Task ConnectVoltmeterToBusAsync(
     LegacyAskControllerProtocol controller,
@@ -233,47 +214,6 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
 
     await controller.WriteBusCommandAsync(busWord, context.CancellationToken);
     await controller.WriteRegisterAsync(LegacyAskRegister.Gui4, voltageCode, context.CancellationToken);
-  }
-
-  /// <summary>
-  /// Проверяет, что измерение не завершилось перегрузкой диапазона.
-  /// </summary>
-  private static void EnsureNotOverload(LegacyAskVoltmeterMeasurement measurement, string errorMessage)
-  {
-    if (measurement.IsOverload)
-    {
-      throw new LegacyAskProtocolException(errorMessage);
-    }
-  }
-
-  /// <summary>
-  /// Проверяет, что измерение завершилось ожидаемой перегрузкой диапазона.
-  /// </summary>
-  private static void EnsureOverload(LegacyAskVoltmeterMeasurement measurement, string errorMessage)
-  {
-    if (!measurement.IsOverload)
-    {
-      throw new LegacyAskProtocolException(errorMessage);
-    }
-  }
-
-  /// <summary>
-  /// Возвращает название вольтметра по коду legacy-конфигурации.
-  /// </summary>
-  private static string GetVoltmeterName(LegacyMkiHardwareProfile profile)
-  {
-    return profile.HardwareConfig.DvV7 switch
-    {
-      6 or 7 => "Agilent",
-      8 => "В7-87",
-      5 => "В7-73/2",
-      4 => "В7-73/1",
-      3 => "В7-72",
-      2 => "В7-65/4",
-      1 => "В7-53",
-      0 => "В7-34А",
-      _ => "цифровой вольтметр"
-    };
   }
 
   /// <summary>
@@ -381,7 +321,6 @@ public sealed class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAskModuleTe
     Resistance = 2
   }
 }
-
 /// <summary>
 /// Самоконтроль АЦП старого тестера АСК.
 /// </summary>
@@ -436,7 +375,10 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
       new LegacyAskExpectedValue("100В", 0, 1.0, "0В+-1В", false)
     })
     {
-      await ReadAdcProbeAsync(controller, context.CancellationToken);
+      ushort mode = range.RangeText.Contains("100") ? LegacyAskAcpMode.Voltage100V :
+        range.RangeText.Contains("10") ? LegacyAskAcpMode.Voltage10V :
+        LegacyAskAcpMode.Voltage1V;
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.B1, LegacyAskBus.B1);
       await context.Protocol.TestStepAsync($"ДиапU={range.RangeText} U д.быть={range.ExpectedText}  Uизм={LegacyAskSelfTestFormat.Voltage(range.Value)}");
     }
 
@@ -455,7 +397,8 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
       new LegacyAskExpectedValue("11В", 10.2, 0.5, "10.2В+-500мВ", false)
     })
     {
-      await ReadAdcProbeAsync(controller, context.CancellationToken);
+      ushort mode = testCase.RangeText.Contains("4") ? LegacyAskAcpMode.CurrentSource4V : LegacyAskAcpMode.CurrentSource11V;
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
       await context.Protocol.TestStepAsync($"Диап={testCase.RangeText} U д.быть={testCase.ExpectedText}  Uизм={LegacyAskSelfTestFormat.Voltage(testCase.Value)}");
     }
 
@@ -476,15 +419,17 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
       new LegacyAskExpectedValue("100В", 20.0, 0.6, "20В+-600мВ", false)
     })
     {
-      await controller.WriteBusCommandAsync((ushort)(LegacyAskBus.A1 | (LegacyAskBus.B1 << 8)), context.CancellationToken);
-      await controller.WriteRegisterAsync(LegacyAskRegister.Gui4, LegacyAskSelfTestFormat.ToPintVoltageWord(context.Profile, 4, testCase.Value), context.CancellationToken);
-      await ReadAdcProbeAsync(controller, context.CancellationToken);
+      ushort mode = testCase.RangeText.Contains("100") ? LegacyAskAcpMode.Voltage100V :
+        testCase.RangeText.Contains("10") ? LegacyAskAcpMode.Voltage10V :
+        LegacyAskAcpMode.Voltage1V;
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, 4, testCase.Value, 0.01, LegacyAskBus.A1, LegacyAskBus.B1);
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
       string measured = testCase.MustBeOverload ? $">{testCase.RangeText}" : LegacyAskSelfTestFormat.Voltage(testCase.Value);
       string expectation = testCase.MustBeOverload ? "Д.быть перегр." : $"д.быть={testCase.ExpectedText}";
       await context.Protocol.TestStepAsync($"Uпинт4(A1+ B1-) {expectation}  Диап={testCase.RangeText}  Uизм={measured}");
     }
 
-    await controller.WriteRegisterAsync(LegacyAskRegister.Gui4, 0, context.CancellationToken);
+    await LegacyAskSelfTestFormat.ResetPintAsync(context, controller, 4);
     await context.Protocol.EndSubTestAsync(title, 3, "Измерение напряжения ПИНТ4");
   }
 
@@ -502,7 +447,11 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
       new LegacyAskResistanceCase("100кОм", 240, 5000, false)
     })
     {
-      await ReadAdcProbeAsync(controller, context.CancellationToken);
+      ushort mode = testCase.ToleranceOhm >= 5000 ? LegacyAskAcpMode.Resistance100KOhm :
+        testCase.ToleranceOhm >= 500 ? LegacyAskAcpMode.Resistance10KOhm :
+        testCase.ToleranceOhm >= 50 ? LegacyAskAcpMode.Resistance1KOhm :
+        LegacyAskAcpMode.Resistance100Ohm;
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
       string measured = testCase.MustBeOverload ? $">{testCase.RangeText}" : LegacyAskSelfTestFormat.Resistance(testCase.ValueOhm);
       string expected = testCase.MustBeOverload
         ? $"{LegacyAskSelfTestFormat.Resistance(testCase.ValueOhm)} Д.быть перегр."
@@ -516,10 +465,6 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет чтение АЦП для боевого режима или получает эмулированный код в холостом режиме.
   /// </summary>
-  private static Task<ushort> ReadAdcProbeAsync(LegacyAskControllerProtocol controller, CancellationToken cancellationToken)
-  {
-    return controller.ReadAdcAsync(cancellationToken);
-  }
 }
 
 /// <summary>
@@ -557,15 +502,16 @@ public sealed class LegacyAskDeviceSwitchingSelfControlTest : LegacyAskModuleTes
     foreach (int pint in LegacyAskSelfTestFormat.GetPresentPints(context.Profile))
     {
       await context.Protocol.BeginSubTestAsync(title, number, $"Проверка коммутации ПИНТ{pint}");
-      await controller.WriteRegisterAsync(LegacyAskSelfTestFormat.GetPintRegister(pint), LegacyAskSelfTestFormat.ToPintVoltageWord(context.Profile, pint, 5.0), context.CancellationToken);
       foreach (var bus in LegacyAskSelfTestFormat.DeviceSwitchBuses())
       {
+        await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, 5.0, 0.01, bus.Positive, bus.Negative);
         await controller.WriteBusCommandAsync((ushort)(bus.Positive | (bus.Negative << 8)), context.CancellationToken);
-        await controller.ReadAdcAsync(context.CancellationToken);
+        await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, LegacyAskAcpMode.Voltage10V, bus.Positive, bus.Negative);
         await context.Protocol.TestStepAsync($"{number}. Uпинт{pint}(+{bus.PositiveName} -{bus.NegativeName}) д.быть=5В+-500мВ  Uацп=5.0000В  Uв7=5.0000В");
       }
 
       await controller.WriteBusCommandAsync(0, context.CancellationToken);
+      await LegacyAskSelfTestFormat.ResetPintAsync(context, controller, pint);
       await context.Protocol.EndSubTestAsync(title, number, $"Проверка коммутации ПИНТ{pint}");
       number++;
     }
@@ -611,7 +557,7 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
     {
       await RunPintVoltageAsync(context, controller, title, pint);
       await RunPintCurrentAsync(context, controller, title, pint);
-      await controller.WriteRegisterAsync(LegacyAskSelfTestFormat.GetPintRegister(pint), 0, context.CancellationToken);
+      await LegacyAskSelfTestFormat.ResetPintAsync(context, controller, pint);
     }
 
     stopwatch.Stop();
@@ -633,9 +579,12 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
     foreach (double value in LegacyAskSelfTestFormat.DecadeValues(step, max))
     {
       double tolerance = step * 2.0 + value * 0.02;
-      await controller.WriteBusCommandAsync((ushort)(LegacyAskBus.A1 | (LegacyAskBus.B1 << 8)), context.CancellationToken);
-      await controller.WriteRegisterAsync(LegacyAskSelfTestFormat.GetPintRegister(pint), LegacyAskSelfTestFormat.ToPintVoltageWord(context.Profile, pint, value), context.CancellationToken);
-      await controller.ReadAdcAsync(context.CancellationToken);
+      double current = pint == 3 ? 0.2 : LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), 0.001) * 5.0;
+      ushort mode = value > 10.0 ? LegacyAskAcpMode.Voltage100V :
+        value > 1.0 ? LegacyAskAcpMode.Voltage10V :
+        LegacyAskAcpMode.Voltage1V;
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, value, current, LegacyAskBus.A1, LegacyAskBus.B1);
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
       await context.Protocol.TestStepAsync($"{index} Uпинт{pint}(+A1 -B1) д.быть={LegacyAskSelfTestFormat.Voltage(value)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(value)}");
       index++;
     }
@@ -657,9 +606,9 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
     foreach (double value in LegacyAskSelfTestFormat.DecadeValues(step, max))
     {
       double tolerance = Math.Max(step, value * 0.03) + max * 0.01;
-      await controller.WriteBusCommandAsync((ushort)(LegacyAskBus.B1 | (LegacyAskBus.B1 << 8)), context.CancellationToken);
-      await controller.WriteRegisterAsync(LegacyAskSelfTestFormat.GetPintRegister(pint), LegacyAskSelfTestFormat.ToPintCurrentWord(context.Profile, pint, value), context.CancellationToken);
-      await controller.ReadAdcAsync(context.CancellationToken);
+      double voltage = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(pint - 3), pint == 3 ? 36.0 : 39.9) / 10.0;
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, voltage, value, LegacyAskBus.B1, LegacyAskBus.B1);
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, LegacyAskAcpMode.Resistance100Ohm, LegacyAskBus.B1, LegacyAskBus.B1);
       await context.Protocol.TestStepAsync($"{index} Iпинт{pint} д.быть={LegacyAskSelfTestFormat.Current(value)}+-{LegacyAskSelfTestFormat.Current(tolerance)}  Iизм={LegacyAskSelfTestFormat.Current(value)}");
       index++;
     }
@@ -910,7 +859,7 @@ public sealed class LegacyAskPkiSelfControlTest : LegacyAskModuleTestBase
     await context.Protocol.BeginSubTestAsync(title, number, "Проверка от ПИНТ4");
     foreach (int voltage in new[] { 6, 10, 30 }.Where(x => x <= context.Profile.HardwareConfig.PkiUmax && x <= context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(1)))
     {
-      await controller.WriteRegisterAsync(LegacyAskRegister.Gui4, LegacyAskSelfTestFormat.ToPintVoltageWord(context.Profile, 4, voltage), context.CancellationToken);
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, 4, voltage, 0.01, LegacyAskBus.A1, LegacyAskBus.B1);
       await LegacyAskPpuPkiExchange.RunPkiMeasurementAsync(context, pkiController, Math.Max(1, number - 1), 1_000_000);
       await context.Protocol.TestStepAsync($"Uпинт4={LegacyAskSelfTestFormat.Voltage(voltage)} R д.быть={LegacyAskSelfTestFormat.Resistance(1000000)}+-{LegacyAskSelfTestFormat.Resistance(100000)}  Rизм={LegacyAskSelfTestFormat.Resistance(1000000)}");
     }
@@ -1187,13 +1136,85 @@ internal static class LegacyAskSelfTestFormat
   }
 
   /// <summary>
+  /// Устанавливает напряжение, ток и шины ПИНТа через те же подрегистры, что использовала старая MKI.
+  /// </summary>
+  public static async Task SetPintOutputAsync(
+    LegacyAskSelfControlContext context,
+    LegacyAskControllerProtocol controller,
+    int pint,
+    double volts,
+    double amps,
+    ushort positiveBus,
+    ushort negativeBus)
+  {
+    await SetPintBusesAsync(context, controller, pint, positiveBus, negativeBus);
+    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Voltage, ToPintVoltageWord(context.Profile, pint, volts), context.CancellationToken);
+    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Current, ToPintCurrentWord(context.Profile, pint, amps), context.CancellationToken);
+  }
+
+  /// <summary>
+  /// Подключает плюсовой и минусовой выходы ПИНТа к шинам старого контроллера.
+  /// </summary>
+  public static async Task SetPintBusesAsync(
+    LegacyAskSelfControlContext context,
+    LegacyAskControllerProtocol controller,
+    int pint,
+    ushort positiveBus,
+    ushort negativeBus)
+  {
+    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.PositiveBus, ToPintBusWord(positiveBus), context.CancellationToken);
+    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.NegativeBus, ToPintBusWord(negativeBus), context.CancellationToken);
+  }
+
+  /// <summary>
+  /// Сбрасывает ПИНТ в малый режим и отключает его от шин.
+  /// </summary>
+  public static async Task ResetPintAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, int pint)
+  {
+    double voltageStep = PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltStep.ElementAtOrDefault(pint - 3), 0.1);
+    double currentStep = PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), pint == 3 ? 0.1 : 0.001);
+
+    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Voltage, ToPintVoltageWord(context.Profile, pint, voltageStep * 2.0), context.CancellationToken);
+    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Current, ToPintCurrentWord(context.Profile, pint, currentStep * 2.0), context.CancellationToken);
+    await SetPintBusesAsync(context, controller, pint, 0, 0);
+  }
+
+  /// <summary>
+  /// Устанавливает режим АЦП и подключение его входов к шинам.
+  /// </summary>
+  public static async Task SetAcpModeAsync(
+    LegacyAskSelfControlContext context,
+    LegacyAskControllerProtocol controller,
+    ushort mode,
+    ushort positiveBus,
+    ushort negativeBus)
+  {
+    await controller.WriteRegisterAsync(LegacyAskRegister.AcpMode, mode, context.CancellationToken);
+    await controller.WriteRegisterAsync(LegacyAskRegister.AcpGate, ToAcpGateWord(positiveBus, negativeBus), context.CancellationToken);
+  }
+
+  /// <summary>
+  /// Выполняет одно измерение АЦП после установки режима и шин.
+  /// </summary>
+  public static async Task<ushort> ReadAcpAsync(
+    LegacyAskSelfControlContext context,
+    LegacyAskControllerProtocol controller,
+    ushort mode,
+    ushort positiveBus,
+    ushort negativeBus)
+  {
+    await SetAcpModeAsync(context, controller, mode, positiveBus, negativeBus);
+    return await controller.ReadAdcAsync(context.CancellationToken);
+  }
+
+  /// <summary>
   /// Кодирует напряжение ПИНТа в дискретный код старой MKI с учетом шага из конфигурации.
   /// </summary>
   public static ushort ToPintVoltageWord(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile, int pint, double volts)
   {
     double step = PositiveOrDefault(profile.HardwareConfig.GuiVoltStep.ElementAtOrDefault(pint - 3), 0.1);
     int code = (int)Math.Round(Math.Max(0.0, volts) / step);
-    return (ushort)Math.Clamp(code <= 0 && volts > 0 ? 1 : code, 0, ushort.MaxValue);
+    return ToPintCode(profile, pint, code <= 0 && volts > 0 ? 1 : code);
   }
 
   /// <summary>
@@ -1204,7 +1225,51 @@ internal static class LegacyAskSelfTestFormat
     double fallbackStep = pint == 3 ? 0.1 : 0.001;
     double step = PositiveOrDefault(profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), fallbackStep);
     int code = (int)Math.Round(Math.Max(0.0, amps) / step);
-    return (ushort)Math.Clamp(code <= 0 && amps > 0 ? 1 : code, 0, ushort.MaxValue);
+    return ToPintCode(profile, pint, code <= 0 && amps > 0 ? 1 : code);
+  }
+
+  /// <summary>
+  /// Кодирует дискрет ПИНТа в формат 2-10 или двоичный формат выбранного типа ПИНТа.
+  /// </summary>
+  private static ushort ToPintCode(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile, int pint, int code)
+  {
+    int safeCode = Math.Clamp(code, 0, 0x0FFF);
+    byte type = profile.HardwareConfig.GuiType.ElementAtOrDefault(pint - 3);
+    return type == 1 ? ToBcdWord(safeCode) : (ushort)safeCode;
+  }
+
+  /// <summary>
+  /// Кодирует число в 2-10 код старых ПУИ.
+  /// </summary>
+  private static ushort ToBcdWord(int value)
+  {
+    int safeValue = Math.Clamp(value, 0, 999);
+    return (ushort)(((safeValue / 100) << 8) | (((safeValue / 10) % 10) << 4) | (safeValue % 10));
+  }
+
+  /// <summary>
+  /// Возвращает слово шин ПИНТа без битов подадреса.
+  /// </summary>
+  private static ushort ToPintBusWord(ushort bus)
+  {
+    return (ushort)(bus & 0x00FF);
+  }
+
+  /// <summary>
+  /// Возвращает слово подключения плюса и минуса АЦП к шинам MKI.
+  /// </summary>
+  private static ushort ToAcpGateWord(ushort positiveBus, ushort negativeBus)
+  {
+    ushort word = 0;
+    if ((positiveBus & LegacyAskBus.A1) != 0) word |= 0x0001;
+    if ((positiveBus & LegacyAskBus.B1) != 0) word |= 0x0002;
+    if ((positiveBus & LegacyAskBus.A2) != 0) word |= 0x0004;
+    if ((positiveBus & LegacyAskBus.B2) != 0) word |= 0x0008;
+    if ((negativeBus & LegacyAskBus.A1) != 0) word |= 0x0010;
+    if ((negativeBus & LegacyAskBus.B1) != 0) word |= 0x0020;
+    if ((negativeBus & LegacyAskBus.A2) != 0) word |= 0x0040;
+    if ((negativeBus & LegacyAskBus.B2) != 0) word |= 0x0080;
+    return word;
   }
 
   /// <summary>

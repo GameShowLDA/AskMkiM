@@ -276,6 +276,83 @@ public static class LegacyAskCommandBits
 }
 
 /// <summary>
+/// Подрегистры ПИНТа в старом составном регистре MKI.
+/// </summary>
+public static class LegacyAskPintSubRegister
+{
+  /// <summary>
+  /// Уставка напряжения.
+  /// </summary>
+  public const byte Voltage = 1;
+
+  /// <summary>
+  /// Уставка тока.
+  /// </summary>
+  public const byte Current = 2;
+
+  /// <summary>
+  /// Подключение плюсового выхода к шинам.
+  /// </summary>
+  public const byte PositiveBus = 3;
+
+  /// <summary>
+  /// Подключение минусового выхода к шинам.
+  /// </summary>
+  public const byte NegativeBus = 4;
+}
+
+/// <summary>
+/// Режимы АЦП из <c>acp.h</c> старой MKI.
+/// </summary>
+public static class LegacyAskAcpMode
+{
+  /// <summary>
+  /// Измерение напряжения, предел 100 В.
+  /// </summary>
+  public const ushort Voltage100V = 0x1000;
+
+  /// <summary>
+  /// Измерение напряжения, предел 10 В.
+  /// </summary>
+  public const ushort Voltage10V = 0x1400;
+
+  /// <summary>
+  /// Измерение напряжения, предел 1 В.
+  /// </summary>
+  public const ushort Voltage1V = 0x1800;
+
+  /// <summary>
+  /// Источник тока АЦП с ограничением 4 В.
+  /// </summary>
+  public const ushort CurrentSource4V = 0x25B0;
+
+  /// <summary>
+  /// Источник тока АЦП с ограничением 11 В.
+  /// </summary>
+  public const ushort CurrentSource11V = 0x25D0;
+
+  /// <summary>
+  /// Режим сопротивления около 0.1 кОм.
+  /// </summary>
+  public const ushort Resistance100Ohm = 0x29B0;
+
+  /// <summary>
+  /// Режим сопротивления около 1 кОм.
+  /// </summary>
+  public const ushort Resistance1KOhm = 0x25D0;
+
+  /// <summary>
+  /// Режим сопротивления около 10 кОм.
+  /// </summary>
+  public const ushort Resistance10KOhm = 0x2550;
+
+  /// <summary>
+  /// Режим сопротивления около 100 кОм.
+  /// </summary>
+  public const ushort Resistance100KOhm = 0x24D0;
+}
+
+/// <summary>
 /// Режимы ППУ, совпадающие с абстрактными битами старой MKI.
 /// </summary>
 public static class LegacyAskPpuMode

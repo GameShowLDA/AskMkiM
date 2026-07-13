@@ -71,6 +71,29 @@ public sealed class LegacyAskControllerProtocol : IDisposable
   }
 
   /// <summary>
+  /// Записывает слово в подрегистр старого составного регистра MKI.
+  /// </summary>
+  /// <param name="register">Базовый регистр контроллера.</param>
+  /// <param name="subRegister">Номер подрегистра, который старый код передавал через ADWR.</param>
+  /// <param name="value">Значение без битов подадреса.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  public Task WriteSubRegisterAsync(LegacyAskRegister register, byte subRegister, ushort value, CancellationToken cancellationToken)
+  {
+    if (subRegister is 0 or > 7)
+    {
+      throw new LegacyAskProtocolException("Некорректный номер подрегистра MKI.");
+    }
+
+    if ((value & 0xE000) != 0)
+    {
+      throw new LegacyAskProtocolException("Значение подрегистра MKI содержит занятые биты подадреса.");
+    }
+
+    ushort addressedValue = (ushort)(value | (subRegister << 13));
+    return WriteRegisterAsync(register, addressedValue, cancellationToken);
+  }
+
+  /// <summary>
   /// Читает результат АЦП командой старого контроллера <c>funRDADC</c>.
   /// </summary>
   /// <param name="cancellationToken">Токен отмены операции.</param>

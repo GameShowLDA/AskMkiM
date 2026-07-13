@@ -48,7 +48,7 @@
     /// Исключение: устройство не найдено в конфигурации системы.
     /// </summary>
     /// <param name="deviceName">Имя или тип устройства (например, "мультиметр").</param>
-    /// <param name="reason">Дополнительная причина, если известна.</param>
+    /// <param name="reason">Доп. причина, если известна.</param>
     public static DeviceException NotFoundInConfiguration(string deviceName, string? reason = null) =>
       new($"Устройство \"{deviceName}\" не найдено в конфигурации{Format(reason)}.");
 

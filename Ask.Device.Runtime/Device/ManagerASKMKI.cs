@@ -9,21 +9,22 @@ using Ask.Device.Runtime.Function.ManagerChassis;
 namespace Ask.Device.Runtime.Device
 {
   /// <summary>
-  /// Представляет legacy-тестер АСК-МКИ без выбора типа подключения.
+  /// Стойка старого тестера АСК без внешнего типа подключения.
   /// </summary>
   public class ManagerASKMKI : DeviceWithASKMKI, IChassisManager
   {
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="ManagerASKMKI"/>.
+    /// Создает стойку старого тестера АСК.
     /// </summary>
     public ManagerASKMKI()
     {
       PowerManager = new PowerManager(this);
       DeviceType = DeviceType.ChassisManager;
       Name = "Тестер АСК";
-      Description = "Legacy-конфигурация оборудования АСК-МКИ";
+      Description = "Конфигурация старого тестера АСК";
       DeviceClass = GetType().FullName ?? string.Empty;
       BusType = BusStructureEnum.Type.Bus2;
+      ConnectionDetails = string.Empty;
     }
 
     /// <inheritdoc />
@@ -32,9 +33,7 @@ namespace Ask.Device.Runtime.Device
     /// <inheritdoc />
     public BusStructureEnum.Type BusType { get; set; }
 
-    /// <summary>
-    /// Преобразует runtime-модель legacy-тестера АСК-МКИ в DTO стойки.
-    /// </summary>
+    /// <inheritdoc />
     public ChassisManagerDto Convert()
     {
       return new ChassisManagerDto
@@ -43,7 +42,7 @@ namespace Ask.Device.Runtime.Device
         Name = Name ?? string.Empty,
         Description = Description ?? string.Empty,
         Number = Number,
-        ConnectionDetails = ConnectionDetails ?? string.Empty,
+        ConnectionDetails = string.Empty,
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
         BusType = BusType

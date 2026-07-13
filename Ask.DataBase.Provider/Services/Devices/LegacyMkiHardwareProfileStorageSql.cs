@@ -151,7 +151,7 @@ internal static class LegacyMkiHardwareProfileStorageSql
     ["UpdatedAtUtc"] = "TEXT NOT NULL DEFAULT ''",
     ["Nas"] = "INTEGER NOT NULL DEFAULT 0",
     ["DvAcp"] = "INTEGER NOT NULL DEFAULT 0",
-    ["DvV7"] = "INTEGER NOT NULL DEFAULT 0",
+    ["DvV7"] = "INTEGER NOT NULL DEFAULT 6",
     ["EtGui4"] = "INTEGER NOT NULL DEFAULT 0",
     ["SkIs"] = "BLOB NOT NULL DEFAULT X''",
     ["SkBkBeg"] = "BLOB NOT NULL DEFAULT X''",

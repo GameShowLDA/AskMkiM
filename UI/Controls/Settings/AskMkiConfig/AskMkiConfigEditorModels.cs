@@ -201,6 +201,8 @@ public sealed class AskMkiSettingItem : INotifyPropertyChanged
 
   public string Description { get; set; } = string.Empty;
 
+  public string Path { get; set; } = string.Empty;
+
   public AskMkiSettingEditorKind EditorKind { get; set; }
 
   public string? TextValue

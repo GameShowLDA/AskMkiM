@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="UI.Controls.Settings.AskMkiConfig.AskMkiConfigControl"
+<UserControl x:Class="UI.Controls.Settings.AskMkiConfig.AskMkiConfigControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -93,19 +93,6 @@
             <local:AskMkiSettingOption Value="1" Label="20"/>
             <local:AskMkiSettingOption Value="2" Label="50"/>
             <local:AskMkiSettingOption Value="3" Label="100"/>
-        </x:Array>
-
-        <x:Array x:Key="AskMki.Options.Voltmeter" Type="{x:Type local:AskMkiSettingOption}">
-            <local:AskMkiSettingOption Value="0" Label="В7-34А (СКУ)"/>
-            <local:AskMkiSettingOption Value="1" Label="В7-53 (КОП)"/>
-            <local:AskMkiSettingOption Value="2" Label="В7-65/4 (КОП)"/>
-            <local:AskMkiSettingOption Value="3" Label="В7-72 (КОП)"/>
-            <local:AskMkiSettingOption Value="4" Label="В7-73/1 (КОП)"/>
-            <local:AskMkiSettingOption Value="5" Label="В7-73/2 (COM)"/>
-            <local:AskMkiSettingOption Value="6" Label="Agilent (COM)"/>
-            <local:AskMkiSettingOption Value="7" Label="Agilent (USB)"/>
-            <local:AskMkiSettingOption Value="8" Label="В7-87 (COM)"/>
-            <local:AskMkiSettingOption Value="9" Label="Вольтметр неисправен/отсутствует"/>
         </x:Array>
 
         <x:Array x:Key="AskMki.Options.CurrentSource" Type="{x:Type local:AskMkiSettingOption}">
@@ -230,12 +217,11 @@
                 </local:AskMkiGroupDefinition.Children>
             </local:AskMkiGroupDefinition>
 
-            <local:AskMkiGroupDefinition Code="F" Title="Параметры цифрового вольтметра" Description="Тип вольтметра, Agilent, КОП и задержки." Summary="Тип, адрес, КОП, задержки.">
+            <local:AskMkiGroupDefinition Code="F" Title="Параметры цифрового вольтметра" Description="Настройки цифрового вольтметра, совместимого с интерфейсом Agilent." Summary="Модель, подключение, адреса, задержки.">
                 <local:AskMkiGroupDefinition.Children>
                     <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.Main"/>
                     <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.Kop"/>
                     <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.CommonTiming"/>
-                    <local:AskMkiGroupDefinition FieldsKey="AskMki.Fields.F.ModeTiming"/>
                 </local:AskMkiGroupDefinition.Children>
             </local:AskMkiGroupDefinition>
 
@@ -362,7 +348,7 @@
         <x:Array x:Key="AskMki.Fields.C.Timing" Type="{x:Type local:AskMkiFieldDefinition}">
             <local:AskMkiFieldDefinition Label="Задержка включения питания ПКИ, мс" EditorKind="Text" Path="Timing.PkiPwr"/>
             <local:AskMkiFieldDefinition Label="Задержка установки режима ПКИ, мс" EditorKind="Text" Path="Timing.PkiMod"/>
-            <local:AskMkiFieldDefinition Label="Дополнительная задержка перед измерением ПКИ, мс" EditorKind="Text" Path="Timing.PkiBef"/>
+            <local:AskMkiFieldDefinition Label="Доп. задержка перед измерением ПКИ, мс" EditorKind="Text" Path="Timing.PkiBef"/>
         </x:Array>
 
         <x:Array x:Key="AskMki.Fields.D.Main" Type="{x:Type local:AskMkiFieldDefinition}">
@@ -394,16 +380,11 @@
         <x:Array x:Key="AskMki.Fields.E.Timing" Type="{x:Type local:AskMkiFieldDefinition}">
             <local:AskMkiFieldDefinition Label="Задержка установки режима АЦП, мс" EditorKind="Text" Path="Timing.AcpMod"/>
             <local:AskMkiFieldDefinition Label="Задержка коммутации АЦП к шинам, мс" EditorKind="Text" Path="Timing.AcpGat"/>
-            <local:AskMkiFieldDefinition Label="Дополнительная задержка перед измерением АЦП, мс" EditorKind="Text" Path="Timing.AcpBef"/>
+            <local:AskMkiFieldDefinition Label="Доп. задержка перед измерением АЦП, мс" EditorKind="Text" Path="Timing.AcpBef"/>
             <local:AskMkiFieldDefinition Label="Время измерения контроллером, мкс" EditorKind="Text" Path="HardwareAux.MksAcpTmr"/>
         </x:Array>
 
         <x:Array x:Key="AskMki.Fields.F.Main" Type="{x:Type local:AskMkiFieldDefinition}">
-            <local:AskMkiFieldDefinition Label="Тип вольтметра" EditorKind="Choice" Path="HardwareConfig.DvV7" OptionsKey="AskMki.Options.Voltmeter"/>
-            <local:AskMkiFieldDefinition Label="Agilent USB-адрес" EditorKind="Text" Path="HardwareAux.UsbAddrVm"/>
-            <local:AskMkiFieldDefinition Label="Задавать ДУ" EditorKind="Toggle" Path="HardwareAux.PortVm.Base"/>
-            <local:AskMkiFieldDefinition Label="Отключать звук" EditorKind="Toggle" Path="HardwareAux.BeepOff"/>
-            <local:AskMkiFieldDefinition Label="Отбрасывать первый замер" EditorKind="Toggle" Path="HardwareAux.Meas2"/>
             <local:AskMkiFieldDefinition Label="U вольтметра для теста АЦП, В" EditorKind="Text" Path="HardwareAux.Uv7R"/>
             <local:AskMkiFieldDefinition Label="R короткозамкнутого входа вольтметра, Ом" EditorKind="Text" Path="HardwareAux.RwirV7"/>
         </x:Array>
@@ -415,19 +396,7 @@
 
         <x:Array x:Key="AskMki.Fields.F.CommonTiming" Type="{x:Type local:AskMkiFieldDefinition}">
             <local:AskMkiFieldDefinition Label="Задержка коммутации вольтметра к шинам, мс" EditorKind="Text" Path="Timing.V7Gat"/>
-            <local:AskMkiFieldDefinition Label="Дополнительная задержка перед измерением вольтметром, мс" EditorKind="Text" Path="Timing.V7Bef"/>
-        </x:Array>
-
-        <x:Array x:Key="AskMki.Fields.F.ModeTiming" Type="{x:Type local:AskMkiFieldDefinition}">
-            <local:AskMkiFieldDefinition Label="В7-34: установка режима, мс" EditorKind="Text" Path="Timing.V734Mod"/>
-            <local:AskMkiFieldDefinition Label="В7-53: установка режима, мс" EditorKind="Text" Path="Timing.V753Mod"/>
-            <local:AskMkiFieldDefinition Label="В7-65/72/73/87: установка режима, мс" EditorKind="Text" Path="Timing.V765Mod"/>
-            <local:AskMkiFieldDefinition Label="В7-53: пуск R, мс" EditorKind="Text" Path="Timing.V753RunR"/>
-            <local:AskMkiFieldDefinition Label="В7-53: пуск U=, мс" EditorKind="Text" Path="Timing.V753RunU"/>
-            <local:AskMkiFieldDefinition Label="В7-53: пуск Uперем, мс" EditorKind="Text" Path="Timing.V753RunV"/>
-            <local:AskMkiFieldDefinition Label="В7-65/73: пуск R, мс" EditorKind="Text" Path="Timing.V765RunR"/>
-            <local:AskMkiFieldDefinition Label="В7-65/73: пуск U=, мс" EditorKind="Text" Path="Timing.V765RunU"/>
-            <local:AskMkiFieldDefinition Label="В7-65/73: пуск Uперем, мс" EditorKind="Text" Path="Timing.V765RunUv"/>
+            <local:AskMkiFieldDefinition Label="Доп. задержка перед измерением вольтметром, мс" EditorKind="Text" Path="Timing.V7Bef"/>
         </x:Array>
 
         <x:Array x:Key="AskMki.Fields.G.Main" Type="{x:Type local:AskMkiFieldDefinition}">

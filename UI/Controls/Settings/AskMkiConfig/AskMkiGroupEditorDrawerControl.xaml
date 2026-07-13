@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:UI.Controls.Settings.AskMkiConfig"
              mc:Ignorable="d"
              d:DesignHeight="760"
-             d:DesignWidth="430">
+             d:DesignWidth="400">
 
     <UserControl.Resources>
         <DropShadowEffect x:Key="ShadowEffect"
@@ -58,7 +58,8 @@
                                    FontSize="20"
                                    FontWeight="Bold"
                                    Margin="7,0"
-                                   TextWrapping="Wrap"/>
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap"/>
                     </Border>
 
                     <Grid Grid.Row="1">

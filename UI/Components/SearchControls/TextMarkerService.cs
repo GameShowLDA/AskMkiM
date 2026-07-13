@@ -17,7 +17,7 @@ namespace UI.Components.SearchControls
     /// <summary>Длина выделяемого текста.</summary>
     int Length { get; }
 
-    /// <summary>Дополнительная информация, прикреплённая к маркеру.</summary>
+    /// <summary>Доп. информация, прикреплённая к маркеру.</summary>
     object Tag { get; set; }
 
     /// <summary>Цвет фона подсветки.</summary>

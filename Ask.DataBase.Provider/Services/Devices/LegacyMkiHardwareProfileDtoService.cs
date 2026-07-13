@@ -159,6 +159,10 @@ public sealed class LegacyMkiHardwareProfileDtoService : CrudService<LegacyMkiHa
       profile.HardwareConfig.SkIs = [1, 0, 0, 0, 0, 0, 0, 0];
       profile.HardwareConfig.SkBkBeg = [1, 1, 1, 1, 1, 1, 1, 1];
       profile.HardwareConfig.SkBkEnd = [12, 24, 24, 24, 24, 24, 24, 24];
+      if (profile.HardwareConfig.DvV7 is not (6 or 7))
+      {
+        profile.HardwareConfig.DvV7 = 6;
+      }
     }
   }
 
