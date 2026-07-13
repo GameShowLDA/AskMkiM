@@ -226,7 +226,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       StartProcessing?.Invoke(false);
 
-      await ProtocolSelfCheck.SaveProtocolAsync(ProtocolSelfCheck.Header, ".lst");
+      await ProtocolSelfCheck.SaveProtocolAsync(ProtocolSelfCheck.Header);
       ProtocolSelfCheck.ShowProtocolManager();
     }
 
@@ -728,11 +728,6 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     private async Task HandleProtocolActionsAsync(string name)
     {
-      if (ProtocolConfig.GetSaveProtocol())
-      {
-        await ProtocolSelfCheck.SaveProtocolAsync(name, ".txt");
-      }
-
       if (ProtocolConfig.GetPrintProtocol())
       {
         PrintUtility.PrintProtocol(ProtocolSelfCheck.GetShowMessageModels());
