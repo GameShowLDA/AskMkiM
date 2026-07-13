@@ -123,7 +123,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
 
       await ResistanceMeasurement(cancellationToken, 1, 2, device, meter, 50, userMessageService);
       await ResistanceMeasurement(cancellationToken, 2, 100, device, meter, 1, userMessageService);
-      await ResistanceMeasurement(cancellationToken, 3, 1_000, device, meter, 1, userMessageService);
+      await ResistanceMeasurement(cancellationToken, 3, 1_050, device, meter, 1, userMessageService);
       await ResistanceMeasurement(cancellationToken, 4, 10_000, device, meter, 1, userMessageService);
       await ResistanceMeasurement(cancellationToken, 5, 100_000, device, meter, 1, userMessageService);
       await ResistanceMeasurement(cancellationToken, 6, 1_000_000, device, meter, 1, userMessageService);
@@ -168,7 +168,7 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await CapacitanceMeasurement(cancellationToken, 4, 1_000, device, meter, userMessageService:  userMessageService);
       //Неисправен
       //await CapacitanceMeasurement(cancellationToken, 5, 6_800, device, meter, userMessageService: userMessageService);
-      await CapacitanceMeasurement(cancellationToken, 6, 90_000, device, meter, userMessageService: userMessageService);
+      await CapacitanceMeasurement(cancellationToken, 6, 86_000, device, meter, userMessageService: userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await device.RelayManager.DisconnectRCRelay(userMessageService);
@@ -184,30 +184,35 @@ namespace Ask.Device.Runtime.Function.Multimeter.SelfCheck
       await device.RelayManager.ConnectCapacitor(numberCapacitor, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
+      await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       double result = await meter.ResistanceManager.MeasureResistanceAsync();
+      ShowMessageModel.MessageType resultType;
+      string status;
+      string meaning;
       if (result > 50)
       {
-        await userMessageService.ShowMessageAsync(
-         new ShowMessageModel(
-           header: $"Тест реактивного сопротивления (>50 Ом)",
-           message: $"{result} Ом [НОРМА]",
-           type: ShowMessageModel.MessageType.Success));
+        resultType = ShowMessageModel.MessageType.Success;
+        status = "НОРМА";
+        meaning = MeasurementValueFormatter.IsOverloadValue(result) ? "Overload" : $"{result} Ом";
       }
       else
       {
-        await userMessageService.ShowMessageAsync(
-         new ShowMessageModel(
-           header: $"Тест реактивного сопротивления (>50 Ом)",
-           message: $"{result} Ом [БРАК]",
-           type: ShowMessageModel.MessageType.Error));
+        resultType = ShowMessageModel.MessageType.Error;
+        status = "БРАК";
+        meaning = $"{result} Ом";
         return;
       }
 
+      await userMessageService.ShowMessageAsync(
+         new ShowMessageModel(
+           header: $"Тест активного сопротивления (>50 Ом)",
+           message: $"{meaning} [{status}]",
+           type: resultType));
+
       cancellationToken.ThrowIfCancellationRequested();
-      meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
+      await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
 
       List<double> measuremend = new List<double>();
 
