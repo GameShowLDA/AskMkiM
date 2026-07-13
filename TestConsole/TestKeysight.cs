@@ -41,10 +41,12 @@ namespace TestConsole
         Console.WriteLine("\r\n19. Пользовательская команда");
         Console.WriteLine("20. Установить IP");
         Console.WriteLine("21. Отключиться");
+        Console.WriteLine("22. Set DC voltage range");
+        Console.WriteLine("23. Set AC voltage range");
         Console.WriteLine("0. Назад");
         Console.Write("Выберите действие: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 21)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 23)
         {
           Console.WriteLine("Неверный выбор.");
           continue;
@@ -129,6 +131,12 @@ namespace TestConsole
           case 21:
             await controller.DisconnectAsync();
             break;
+          case 22:
+            PrintResult(await controller.SetDcVoltageRangeAsync(ReadVoltageRange()));
+            break;
+          case 23:
+            PrintResult(await controller.SetAcVoltageRangeAsync(ReadVoltageRange()));
+            break;
           case 0:
             return;
         }
@@ -200,6 +208,11 @@ namespace TestConsole
       double rangeFrom = ReadDouble("Range from", -1);
       double rangeTo = ReadDouble("Range to", -1);
       return (param, rangeFrom, rangeTo);
+    }
+
+    private static double ReadVoltageRange()
+    {
+      return ReadDouble("Voltage range in V (<= 0 for AUTO)", 0);
     }
 
     private static (double Param, double RangeFrom, double RangeTo) ReadCapacitanceParameters()

@@ -39,10 +39,12 @@ namespace TestConsole.B7783
         Console.WriteLine("\r\n18. Custom command");
         Console.WriteLine("19. Set USB search pattern");
         Console.WriteLine("20. Disconnect");
+        Console.WriteLine("21. Set DC voltage range");
+        Console.WriteLine("22. Set AC voltage range");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 20)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 22)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -122,6 +124,12 @@ namespace TestConsole.B7783
           case 20:
             await controller.DisconnectAsync();
             break;
+          case 21:
+            PrintResult(await controller.SetDcVoltageRangeAsync(ReadVoltageRange()));
+            break;
+          case 22:
+            PrintResult(await controller.SetAcVoltageRangeAsync(ReadVoltageRange()));
+            break;
           case 0:
             return;
         }
@@ -135,6 +143,11 @@ namespace TestConsole.B7783
       double rangeFrom = ReadDouble("Range from", -1);
       double rangeTo = ReadDouble("Range to", -1);
       return (param, rangeFrom, rangeTo);
+    }
+
+    private static double ReadVoltageRange()
+    {
+      return ReadDouble("Voltage range in V (<= 0 for AUTO)", 0);
     }
 
     private static (double Param, double RangeFrom, double RangeTo) ReadCapacitanceParameters()

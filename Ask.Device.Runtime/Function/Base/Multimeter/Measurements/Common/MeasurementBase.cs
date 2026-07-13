@@ -46,6 +46,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return random;
       }
 
+      await RangeBase.SetRangeAsync(device, param, userMessageService);
+
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
         header,
