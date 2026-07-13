@@ -7,11 +7,21 @@ namespace MainWindowProgram.Init
 {
   internal static class ApplicationActivator
   {
+    private sealed record WindowPlacementSnapshot(
+      WindowState WindowState,
+      double Left,
+      double Top,
+      double Width,
+      double Height);
+
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsIconic(IntPtr hWnd);
 
     private const int SwRestore = 9;
     private const string OpenFileCommandPrefix = "OPENFILE|";
@@ -73,10 +83,54 @@ namespace MainWindowProgram.Init
         }
 
         var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+        var wasMinimized = window.WindowState == WindowState.Minimized || IsIconic(handle);
+        var placementSnapshot = wasMinimized ? null : CapturePlacement(window);
 
-        ShowWindow(handle, SwRestore);
+        if (wasMinimized)
+        {
+          ShowWindow(handle, SwRestore);
+        }
+        else if (!window.IsVisible)
+        {
+          window.Show();
+        }
+
         SetForegroundWindow(handle);
+        RestorePlacementIfNeeded(window, placementSnapshot);
       });
+    }
+
+    private static WindowPlacementSnapshot CapturePlacement(Window window)
+      => new(
+        window.WindowState,
+        window.Left,
+        window.Top,
+        window.Width,
+        window.Height);
+
+    private static void RestorePlacementIfNeeded(Window window, WindowPlacementSnapshot? snapshot)
+    {
+      if (snapshot == null || window.WindowState == WindowState.Minimized)
+      {
+        return;
+      }
+
+      if (snapshot.WindowState == WindowState.Maximized)
+      {
+        window.WindowState = WindowState.Maximized;
+        return;
+      }
+
+      if (snapshot.WindowState != WindowState.Normal)
+      {
+        return;
+      }
+
+      window.WindowState = WindowState.Normal;
+      window.Left = snapshot.Left;
+      window.Top = snapshot.Top;
+      window.Width = snapshot.Width;
+      window.Height = snapshot.Height;
     }
 
     private static bool TryDecodeFilePath(string encodedPath, out string filePath)
