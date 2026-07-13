@@ -238,6 +238,22 @@ namespace TestConsole.Keysight
         cancellationToken);
     }
 
+    public async Task<KeysightCommandResult> SetCapacitanceRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      await EnsureConnectedAsync(timeoutMs, cancellationToken);
+
+      return await RunTimedAsync(
+        $"SET CAPACITANCE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.CapacitanceManager.SetCapacitanceRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     public async Task<KeysightCommandResult> CheckContinuityAsync(bool expectedOutcome, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);

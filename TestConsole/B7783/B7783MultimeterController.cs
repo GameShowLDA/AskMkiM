@@ -532,6 +532,29 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetCapacitanceRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET CAPACITANCE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.CapacitanceManager.SetCapacitanceRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
     /// <summary>
     /// Выполняет измерение электрического сопротивления.
     /// </summary>

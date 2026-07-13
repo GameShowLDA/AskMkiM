@@ -42,10 +42,11 @@ namespace TestConsole.B7783
         Console.WriteLine("21. Set DC voltage range");
         Console.WriteLine("22. Set AC voltage range");
         Console.WriteLine("23. Set resistance range");
+        Console.WriteLine("24. Set capacitance range");
         Console.WriteLine("0. Back");
         Console.Write("Select action: ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 23)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 24)
         {
           Console.WriteLine("Invalid selection.");
           continue;
@@ -134,6 +135,9 @@ namespace TestConsole.B7783
           case 23:
             PrintResult(await controller.SetResistanceRangeAsync(ReadResistanceRange()));
             break;
+          case 24:
+            PrintResult(await controller.SetCapacitanceRangeAsync(ReadCapacitanceRange()));
+            break;
           case 0:
             return;
         }
@@ -157,6 +161,11 @@ namespace TestConsole.B7783
     private static double ReadResistanceRange()
     {
       return ReadDouble("Resistance range in Ohm (<= 0 for AUTO)", 0);
+    }
+
+    private static double ReadCapacitanceRange()
+    {
+      return ReadDouble("Capacitance range in nF (<= 0 for AUTO)", 0);
     }
 
     private static (double Param, double RangeFrom, double RangeTo) ReadCapacitanceParameters()
