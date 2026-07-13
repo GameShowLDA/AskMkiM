@@ -11,6 +11,14 @@ namespace TestConsole
   {
     private static async Task Main(string[] args)
     {
+      if (args.Any(static arg =>
+            string.Equals(arg, "encoding-scanner", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(arg, "encoding", StringComparison.OrdinalIgnoreCase)))
+      {
+        EncodingScanner.Run();
+        return;
+      }
+
       while (true)
       {
         Console.WriteLine("\nВыберите действие:");
@@ -38,7 +46,8 @@ namespace TestConsole
         Console.WriteLine("22. Unused code Roslyn analyzer");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 22)
+        string? input = Console.ReadLine()?.Trim().Trim('\uFEFF');
+        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 22)
         {
           Console.Write("Введите номер действия: ");
           continue;
