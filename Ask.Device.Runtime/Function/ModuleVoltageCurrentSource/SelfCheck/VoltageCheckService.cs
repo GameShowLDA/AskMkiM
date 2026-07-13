@@ -12,7 +12,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// Проверка формирования дискрет напряжения.
     /// </summary>
     /// <param name="token">Токен для отмены операции.</param>
-    static internal async Task GenerateDiscreteVoltageCheck(CancellationToken cancellationToken, IUserInteractionService messageService, IFastMeter fastMeter, IPowerSourceModule powerSource)
+    static internal async Task GenerateDiscreteVoltageCheck(CancellationToken cancellationToken, IUserInteractionService messageService, IMultimeter fastMeter, IPowerSourceModule powerSource)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel("Начало проверки формирования дискрет напряжения"));
 
@@ -29,7 +29,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="step">Шаг напряжения.</param>
     /// <param name="delay">Задержка между измерениями.</param>
     /// <param name="token">Токен для отмены операции.</param>
-    static private async Task CheckVoltageLevelsAsync(CancellationToken cancellationToken, IUserInteractionService messageService, double startVoltage, double endVoltage, double step, int delay, IFastMeter fastMeter, IPowerSourceModule powerSource)
+    static private async Task CheckVoltageLevelsAsync(CancellationToken cancellationToken, IUserInteractionService messageService, double startVoltage, double endVoltage, double step, int delay, IMultimeter fastMeter, IPowerSourceModule powerSource)
     {
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка уровней напряжения от {startVoltage} до {endVoltage} с шагом {step}"));
       for (double voltage = startVoltage; voltage <= endVoltage; voltage += step)
@@ -59,7 +59,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="voltage">Ожидаемое напряжение.</param>
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
-    static private async Task MeasureAndCompareVoltage(IUserInteractionService messageService, double voltage, int delay, IFastMeter fastMeter)
+    static private async Task MeasureAndCompareVoltage(IUserInteractionService messageService, double voltage, int delay, IMultimeter fastMeter)
     {
       double firstNorm = Math.Round(voltage - ((0.01 * voltage) + 0.1), 3);
       double lastNorm = Math.Round(voltage + ((0.01 * voltage) + 0.1), 3);
@@ -84,7 +84,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
     /// <returns>Результат измерения.</returns>
-    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, double voltage, double rangeFrom, double rangeTo, int delay, IFastMeter meter)
+    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, double voltage, double rangeFrom, double rangeTo, int delay, IMultimeter meter)
     {
       await Task.Delay(delay);
       double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage, rangeFrom, rangeTo, messageService);

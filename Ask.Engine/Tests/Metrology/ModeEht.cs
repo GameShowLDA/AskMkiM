@@ -87,7 +87,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         await fastMeter.ResistanceManager.SetResistanceModeAsync(messageService);
       }
@@ -152,7 +152,7 @@ namespace Ask.Engine.Tests.Metrology
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService);
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService);
 
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
@@ -178,7 +178,7 @@ namespace Ask.Engine.Tests.Metrology
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService);
 
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
@@ -194,7 +194,7 @@ namespace Ask.Engine.Tests.Metrology
         var relayModule = GetRelayModules(metrologicalModeRole).Last();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
 
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
         return result;
       }

@@ -61,7 +61,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     #endregion
 
     /// <inheritdoc />
-    public Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IFastMeter meter = null) => SelfTestProcessManager.StartSelfCheck(cancellationToken, userMessageService, selectedType, device, meter);
+    public Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null) => SelfTestProcessManager.StartSelfCheck(cancellationToken, userMessageService, selectedType, device, meter);
 
     /// <inheritdoc />
     public async Task<bool> ControlRelayAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, int relayNumber, int busContact, int action, IUserInteractionService? userMessageService = null) => await SelfTestProcessManager.ControlRelayAsync(cancellationToken, _deviceBusCommutation, testType, relayNumber, busContact, action);

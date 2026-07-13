@@ -41,7 +41,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       if (meter == null)
         return model;
 
-      var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE);
+      var commandInfo = EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.IE);
 
       var limits = GetCapacityLimits(commandInfo);
 
@@ -67,7 +67,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// <summary>
     /// Получает быстрый измеритель из конфигурации устройства.
     /// </summary>
-    private static IFastMeter GetFastMeter(IeCommandModel model, int numberLine, string commandNumber, string mnemonic)
+    private static IMultimeter GetFastMeter(IeCommandModel model, int numberLine, string commandNumber, string mnemonic)
     {
       var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
 

@@ -1,11 +1,11 @@
 <Window x:Class="MainWindowProgram.Windows.ApkwToApkConversionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Components="clr-namespace:UI.Components;assembly=UI"
+        xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Конвертация APKW в APK"
+        Title="РљРѕРЅРІРµСЂС‚Р°С†РёСЏ APKW РІ APK"
         Width="820"
         MinWidth="820"
         SizeToContent="Height"
@@ -48,12 +48,15 @@
                                    Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Title}"
                                    Style="{StaticResource ConversionDialogTitleTextStyle}" />
 
-                        <Components:WindowButtons Grid.Column="1"
-                                                  Margin="0,0,2,0"
-                                                  Style="{StaticResource ConversionDialogWindowButtonStyle}"
-                                                  ChoiceElement="Exit"
-                                                  ToolTip="Закрыть окно"
-                                                  PreviewMouseDown="CloseButton_PreviewMouseDown" />
+                        <Button Grid.Column="1"
+                                Margin="0,0,2,0"
+                                Style="{StaticResource ConversionDialogWindowButtonStyle}"
+                                ToolTip="Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ"
+                                PreviewMouseDown="CloseButton_PreviewMouseDown">
+                            <askUiIcons:WindowCloseIcon Size="14"
+                                IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                        </Button>
                     </Grid>
                 </Border>
 
@@ -68,14 +71,14 @@
 
                     <TextBlock Grid.Row="0"
                                Margin="0,0,0,18"
-                               Text="Выберите новый архив APKW и папку, куда нужно сохранить legacy-комплект APK + OPK для старой программы."
+                               Text="Р’С‹Р±РµСЂРёС‚Рµ РЅРѕРІС‹Р№ Р°СЂС…РёРІ APKW Рё РїР°РїРєСѓ, РєСѓРґР° РЅСѓР¶РЅРѕ СЃРѕС…СЂР°РЅРёС‚СЊ legacy-РєРѕРјРїР»РµРєС‚ APK + OPK РґР»СЏ СЃС‚Р°СЂРѕР№ РїСЂРѕРіСЂР°РјРјС‹."
                                Style="{StaticResource ConversionDialogDescriptionTextStyle}" />
 
                     <Border Grid.Row="1"
                             Style="{StaticResource ConversionDialogSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Margin="0,0,0,12"
-                                       Text="Исходный архив APKW"
+                                       Text="РСЃС…РѕРґРЅС‹Р№ Р°СЂС…РёРІ APKW"
                                        Style="{StaticResource ConversionDialogSectionTitleStyle}" />
 
                             <Grid>
@@ -92,7 +95,7 @@
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"
-                                        Content="Выбрать файл"
+                                        Content="Р’С‹Р±СЂР°С‚СЊ С„Р°Р№Р»"
                                         Style="{StaticResource ConversionDialogBrowseButtonStyle}"
                                         Click="SelectInputFileButton_Click" />
                             </Grid>
@@ -103,7 +106,7 @@
                             Style="{StaticResource ConversionDialogSectionCardStyle}">
                         <StackPanel>
                             <TextBlock Margin="0,0,0,12"
-                                       Text="Папка для сохранения APK и OPK"
+                                       Text="РџР°РїРєР° РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ APK Рё OPK"
                                        Style="{StaticResource ConversionDialogSectionTitleStyle}" />
 
                             <Grid>
@@ -120,7 +123,7 @@
 
                                 <Button Grid.Column="1"
                                         Margin="12,0,0,0"
-                                        Content="Выбрать папку"
+                                        Content="Р’С‹Р±СЂР°С‚СЊ РїР°РїРєСѓ"
                                         Style="{StaticResource ConversionDialogBrowseButtonStyle}"
                                         Click="SelectOutputDirectoryButton_Click" />
                             </Grid>
@@ -130,7 +133,7 @@
                     <Border Grid.Row="3"
                             Style="{StaticResource ConversionDialogHintBorderStyle}">
                         <TextBlock x:Name="StateTextBlock"
-                                   Text="Выберите APKW-архив и папку для сохранения."
+                                   Text="Р’С‹Р±РµСЂРёС‚Рµ APKW-Р°СЂС…РёРІ Рё РїР°РїРєСѓ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ."
                                    Style="{StaticResource ConversionDialogHintTextStyle}" />
                     </Border>
 
@@ -143,13 +146,13 @@
 
                         <Button Grid.Column="1"
                                 MinWidth="132"
-                                Content="Отмена"
+                                Content="РћС‚РјРµРЅР°"
                                 Style="{StaticResource ConversionDialogSecondaryButtonStyle}"
                                 IsCancel="True" />
                         <Button x:Name="ConvertButton"
                                 Grid.Column="2"
                                 Margin="12,0,0,0"
-                                Content="Конвертировать"
+                                Content="РљРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ"
                                 Style="{StaticResource ConversionDialogPrimaryButtonStyle}"
                                 IsDefault="True"
                                 Click="ConvertButton_Click" />

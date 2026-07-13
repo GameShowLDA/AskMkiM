@@ -63,6 +63,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     private IHeadUnit _headUnit;
     private readonly Action<AdminRightsChanged> _adminRightsChangedHandler;
     private bool _adminRightsSubscribed;
+    private bool _isEditingEnabled = true;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DeviceManagerControl"/> class.
@@ -72,7 +73,6 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
       InitializeComponent();
 
       FastMeterControl.IsSingleDeviceOnly = true;
-      PrecisionMeterControl.IsSingleDeviceOnly = true;
       BreakdownTesterControl.IsSingleDeviceOnly = true;
       SwitchingDeviceControl.IsSingleDeviceOnly = true;
       UninterruptiblePowerSupplyControl.IsSingleDeviceOnly = true;
@@ -136,6 +136,17 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
 
       Loaded += DeviceManagerControl_Loaded;
       Unloaded += DeviceManagerControl_Unloaded;
+    }
+
+    public void SetEditingEnabled(bool isEnabled)
+    {
+      _isEditingEnabled = isEnabled;
+      BreakdownTesterControl.IsEditingEnabled = isEnabled;
+      SwitchingDeviceControl.IsEditingEnabled = isEnabled;
+      FastMeterControl.IsEditingEnabled = isEnabled;
+      PowerSourceModuleControl.IsEditingEnabled = isEnabled;
+      RelaySwitchModuleControl.IsEditingEnabled = isEnabled;
+      UninterruptiblePowerSupplyControl.IsEditingEnabled = isEnabled;
     }
 
     /// <summary>

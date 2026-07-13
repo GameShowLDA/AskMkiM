@@ -71,7 +71,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
       yield return string.Empty;
     }
 
-    protected static IEnumerable<string> FormatSchemeWithRmCheck(
+    protected static IEnumerable<string> FormatSchemeWithRmCheckDisconnectedPoints(
       IHasScheme model,
       string title,
       string rmNotSetMessage = "\t\tМодель РМ не задана!")
@@ -84,7 +84,26 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
         yield break;
       }
 
-      foreach (var line in SchemeFormatter.FormatSchemePoints(model))
+      foreach (var line in SchemeFormatter.FormatDisconnectedPoints(model.Scheme))
+      {
+        yield return line;
+      }
+    }
+
+    protected static IEnumerable<string> FormatSchemeWithRmCheckConnectedPoints(
+      IHasScheme model,
+      string title,
+      string rmNotSetMessage = "\t\tМодель РМ не задана!")
+    {
+      yield return title;
+
+      if (!HasRmModel())
+      {
+        yield return rmNotSetMessage;
+        yield break;
+      }
+
+      foreach (var line in SchemeFormatter.FormatSchemeConnectedPoints(model))
       {
         yield return line;
       }

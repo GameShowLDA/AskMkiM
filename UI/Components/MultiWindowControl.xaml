@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              xmlns:local="clr-namespace:UI.Components"
              xmlns:SearchControls="clr-namespace:UI.Components.SearchControls"
              xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
@@ -95,27 +96,29 @@
                        VerticalAlignment="Center"
                        Margin="10,0,0,0"/>
 
-                    <local:WindowButtons 
+                    <Button x:Name="minimizeButton"
                         Style="{StaticResource WindowsButtonStyle}"
-                        x:Name="minimizeButton"
-                        ChoiceElement="Minimize"  
                         Grid.Column="1"
                         Width="30"
                         Height="30"
                         HorizontalAlignment="Right"
-                        PreviewMouseDown="minimizeButton_PreviewMouseDown"
-                        />
+                        PreviewMouseDown="minimizeButton_PreviewMouseDown">
+                        <askUiIcons:WindowMinimizeIcon Size="14"
+                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
 
-                    <local:WindowButtons 
+                    <Button x:Name="exitButton"
                         Style="{StaticResource WindowsButtonStyle}"
-                        x:Name="exitButton"
-                        ChoiceElement="Exit"  
                         Grid.Column="2"
                         Width="30"
                         Height="30"
                         HorizontalAlignment="Right"
-                        PreviewMouseDown="exitButton_PreviewMouseDown"
-                        />
+                        PreviewMouseDown="exitButton_PreviewMouseDown">
+                        <askUiIcons:WindowCloseIcon Size="14"
+                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
 
                 </Grid>
                 

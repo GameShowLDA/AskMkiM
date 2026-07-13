@@ -9,6 +9,8 @@
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
         <Style x:Key="TopMenuLikeIconButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
@@ -139,6 +141,7 @@
                             Grid.Column="1"
                             Margin="5,0"
                             Style="{StaticResource AddButtonStyle}"
+                            Visibility="{Binding IsEditingEnabled, RelativeSource={RelativeSource AncestorType=local:DeviceListControl}, Converter={StaticResource BoolToVisibilityConverter}}"
                             PreviewMouseDown="PlusPreviewMouseDown"
                             ToolTip="Добавить устройство">
                         <askUiIcons:PlusCircleIcon Size="16"
@@ -167,6 +170,7 @@
                                         Style="{StaticResource EditButtonStyle}"
                                         Click="EditDeviceButton_Click"
                                         CommandParameter="{Binding}"
+                                        Visibility="{Binding IsEditingEnabled, RelativeSource={RelativeSource AncestorType=local:DeviceListControl}, Converter={StaticResource BoolToVisibilityConverter}}"
                                         ToolTip="Редактировать устройство"
                                         Margin="0,0,6,0">
                                     <askUiIcons:EditIcon Size="16"
@@ -179,6 +183,7 @@
                                         Style="{StaticResource RemoveButtonStyle}"
                                         Click="RemoveDeviceButton_Click"
                                         CommandParameter="{Binding}"
+                                        Visibility="{Binding IsEditingEnabled, RelativeSource={RelativeSource AncestorType=local:DeviceListControl}, Converter={StaticResource BoolToVisibilityConverter}}"
                                         ToolTip="Удалить устройство">
                                     <askUiIcons:TrashDeleteIcon Size="16"
                                                                  ToolTip="Удалить устройство"

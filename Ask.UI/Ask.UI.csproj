@@ -47,6 +47,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Resource Include="Resources\Assets\Image\Authorization\*.*" />
 	  <Resource Include="Resources\Assets\SyntaxHighlighting\Dark\*.xshd" />
 	  <Resource Include="Resources\Assets\SyntaxHighlighting\Light\*.xshd" />
 	</ItemGroup>
@@ -55,6 +56,12 @@
 	  <Page Update="Resources\Localization\Menu\Menu.File.xaml">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Page>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Update="Resources\Assets\Image\Authorization\login_background.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
 	</ItemGroup>
 
 </Project>

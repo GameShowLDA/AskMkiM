@@ -10,7 +10,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
   /// </summary>
   public class OkCommandModel : BaseCommandModel
   {
-    public override string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.OK).DisplayName;
+    /// <inheritdoc />
+    public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.OK).DisplayName;
 
     /// <summary>
     /// Обозначение объекта контроля (обязательно, до 39 символов).
@@ -70,7 +71,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     /// <summary>
     /// Примечания.
     /// </summary>
-    public string? Comments { get; set; }
+    public List<string>? Comments { get; set; } = new();
 
     public ProtocolModel ProtocolModel { get; set; } = new();
   }

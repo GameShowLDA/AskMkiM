@@ -1,5 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
@@ -58,30 +59,52 @@ namespace MainWindowProgram
     /// <param name="e"></param>
     protected override async void OnStartup(StartupEventArgs e)
     {
+      ShutdownMode = ShutdownMode.OnExplicitShutdown;
       RegisterGlobalExceptionHandlers();
       CommandLineArgs = e.Args;
       FileAssociationRegistrar.RegisterCurrentUserAssociations();
       ApplicationClockService.Start();
 
-      SplashScreenManager.ShowSplash();
-      Console.SetOut(new ConsoleRedirector());
+      base.OnStartup(e);
 
-      await Task.Run(async () =>
+      Console.SetOut(new ConsoleRedirector());
+      var startupInitializationTask = Task.Run(async () =>
       {
         await PreStartupInitializer.Initialize();
-        await InitializeTheme();
       });
 
-      base.OnStartup(e);
+      var loginWindowManager = new RoleLoginWindowManager();
 
       try
       {
+        loginWindowManager.Show();
+
+        var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
+        if (authenticatedRole == null)
+        {
+          RoleAuthorizationConfig.Clear();
+          await loginWindowManager.WaitForCloseAsync();
+          Application.Current.Shutdown();
+          return;
+        }
+
+        RoleApplicationConfigurator.Apply(authenticatedRole);
+
+        await loginWindowManager.UpdateLoadingStatusAsync("Завершение фоновой инициализации...");
+        await startupInitializationTask;
+
+        await loginWindowManager.UpdateLoadingStatusAsync("Применение настроек интерфейса...");
+        await InitializeTheme();
+
         var mainWindow = new MainWindow
         {
           Visibility = Visibility.Hidden
         };
         Application.Current.MainWindow = mainWindow;
+        mainWindow.Show();
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
 
+        await loginWindowManager.UpdateLoadingStatusAsync("Инициализация главного окна...");
         await mainWindow.InitializeAsync();
         ApplicationActivator.FlushPendingFileRequests();
 
@@ -89,6 +112,8 @@ namespace MainWindowProgram
 
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
         mainWindow.Visibility = Visibility.Visible;
+        await loginWindowManager.CloseAsync();
+        mainWindow.Show();
 
         mainWindow.Topmost = true;
 
@@ -108,6 +133,7 @@ namespace MainWindowProgram
       }
       catch (Exception ex)
       {
+        await loginWindowManager.CloseAsync();
 
         LogError("FATAL OnStartup exception");
         LogError(ex.ToString());

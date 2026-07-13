@@ -60,11 +60,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base
         return GetUsbConnection(defaultSettingControl);
       }
 
-      if (instance is DeviceWithASKMKI)
-      {
-        return string.Empty;
-      }
-
       MessageBoxCustom.Show("Устройство не принадлежит к известным типам (DeviceWithIP, DeviceWithCOM или DeviceWithUSB).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       return null;
     }

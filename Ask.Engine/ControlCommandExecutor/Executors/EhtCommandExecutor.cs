@@ -83,7 +83,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
     }

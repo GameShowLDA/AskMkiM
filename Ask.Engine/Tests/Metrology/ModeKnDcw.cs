@@ -64,14 +64,31 @@ namespace Ask.Engine.Tests.Metrology
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, userInteractionService), userInteractionService, true);
     }
 
+    /// <summary>
+    /// Возвращает адаптер текстового интерфейса пользователя.
+    /// </summary>
+    /// <returns>Экземпляр <see cref="ITextAdapter"/>.</returns>
     public ITextAdapter GetControl()
     {
       return _userInteractionService;
     }
 
+    /// <summary>
+    /// Реализует измерение постоянного напряжения в режиме КН.
+    /// </summary>
     private class KnMeasurement : BaseMeasurement
     {
+      /// <summary>
+      /// Сервис получения значения эталонного напряжения.
+      /// </summary>
       private IReferenceVoltageRequestService _reference;
+
+      /// <summary>
+      /// Инициализирует обработчик измерений режима КН.
+      /// </summary>
+      /// <param name="referenceVoltageRequestService">
+      /// Сервис получения значения эталонного напряжения.
+      /// </param>
       public KnMeasurement(IReferenceVoltageRequestService referenceVoltageRequestService) : base()
       {
         _reference = referenceVoltageRequestService;
@@ -81,7 +98,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         await fastMeter.DcVoltageManager.SetDCVoltageModeAsync(messageService);
       }
@@ -90,7 +107,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0)
       {
         protocolUI.GetCancellationToken().ThrowIfCancellationRequested();
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(fastMeter, protocolUI, param);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_DCW, resultReferenceMeterMeasured);
@@ -110,6 +127,7 @@ namespace Ask.Engine.Tests.Metrology
         return true;
       }
 
+      /// <inheritdoc />
       public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
         await PrintResult(messageService, MeasurementTypeCommand.KN_DCW);
@@ -117,13 +135,35 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
+      /// <summary>
+      /// Выполняет измерение напряжения проверяемым мультиметром.
+      /// </summary>
+      /// <param name="fastMeter">Проверяемый мультиметр.</param>
+      /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+      /// <param name="param">Ожидаемое значение напряжения.</param>
+      /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+      /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+      /// <returns>Измеренное значение напряжения.</returns>
+      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
         var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
         return result;
       }
 
-      private async Task<double> MeasuredReferenceMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param)
+      /// <summary>
+      /// Получает значение напряжения с эталонного средства измерения.
+      /// </summary>
+      /// <param name="fastMeter">
+      /// Проверяемый мультиметр. Параметр зарезервирован для совместимости.
+      /// </param>
+      /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+      /// <param name="param">
+      /// Номинальное значение напряжения. Параметр зарезервирован для совместимости.
+      /// </param>
+      /// <returns>
+      /// Значение эталонного напряжения либо <c>-1</c>, если получить его не удалось.
+      /// </returns>
+      private async Task<double> MeasuredReferenceMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param)
       {
         var result = await _reference.RequestReferenceVoltageAsync(userMessageService.GetControl());
         return result == null ? -1 : result.Value;

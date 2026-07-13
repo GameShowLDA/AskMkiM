@@ -77,7 +77,7 @@ namespace Ask.UI.Features.Archive.ViewModels
     /// <param name="hasClipboardEntry">
     /// Признак наличия файла в буфере обмена архивов.
     /// </param>
-    public void Update(ArchiveTreeNode? node, bool hasClipboardEntry)
+    public void Update(ArchiveTreeNode? node, bool hasClipboardEntry, bool canEditArchives)
     {
       var isRoot = node?.Kind == ArchiveTreeNodeKind.Root;
       var isArchive = node?.Kind == ArchiveTreeNodeKind.Archive;
@@ -85,20 +85,20 @@ namespace Ask.UI.Features.Archive.ViewModels
       var isReviewFile = node?.Kind == ArchiveTreeNodeKind.ReviewFile;
       var isReviewArchive = node?.Kind == ArchiveTreeNodeKind.ReviewArchive;
 
-      CreateArchiveVisibility = ToVisibility(isRoot);
+      CreateArchiveVisibility = ToVisibility(isRoot && canEditArchives);
       UploadArchiveVisibility = ToVisibility(isRoot);
       DownloadArchivesVisibility = ToVisibility(isRoot);
       OpenArchiveVisibility = ToVisibility(isArchive || isReviewArchive);
       SaveArchiveVisibility = ToVisibility(isArchive);
       PrintArchiveCatalogVisibility = ToVisibility(isArchive);
-      DeleteArchiveVisibility = ToVisibility(isArchive || isReviewArchive);
-      AddFileToArchiveVisibility = ToVisibility(isArchive);
+      DeleteArchiveVisibility = ToVisibility((isArchive || isReviewArchive) && canEditArchives);
+      AddFileToArchiveVisibility = ToVisibility(isArchive && canEditArchives);
       OpenArchiveFileVisibility = ToVisibility(isFile || isReviewFile || isReviewArchive);
       OpenInTextEditorVisibility = ToVisibility(isReviewFile);
       CopyArchiveFileVisibility = ToVisibility(isFile);
-      CutArchiveFileVisibility = ToVisibility(isFile);
-      PasteArchiveFileVisibility = ToVisibility((isFile || isArchive) && hasClipboardEntry);
-      DeleteArchiveFileVisibility = ToVisibility(isFile || isReviewFile);
+      CutArchiveFileVisibility = ToVisibility(isFile && canEditArchives);
+      PasteArchiveFileVisibility = ToVisibility((isFile || isArchive) && hasClipboardEntry && canEditArchives);
+      DeleteArchiveFileVisibility = ToVisibility((isFile || isReviewFile) && canEditArchives);
 
       HasAvailableItems = isRoot || isArchive || isFile || isReviewArchive || isReviewFile;
       RaisePropertyChanged(nameof(HasAvailableItems));

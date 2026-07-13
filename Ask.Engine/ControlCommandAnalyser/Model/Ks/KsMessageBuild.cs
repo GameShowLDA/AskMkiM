@@ -7,6 +7,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Model.Ks
 {
   public class KsMessageBuild : IDislpayInfo
   {
+    /// <inheritdoc />
     public string BuildErrorChainStringAsync(ChainModel chain)
     {
       var chainStr = string.Empty;

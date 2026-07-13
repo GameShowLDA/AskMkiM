@@ -11,7 +11,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabili
     /// </summary>
     /// <param name="messageService"></param>
     /// <returns></returns>
-    Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice device = null, IPowerSourceModule powerDevice = null, IFastMeter meter = null);
+    Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice device = null, IPowerSourceModule powerDevice = null, IMultimeter meter = null);
 
     /// <summary>
     /// Возвращает тип перечисления, используемый как тип проверки.
