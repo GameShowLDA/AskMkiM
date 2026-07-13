@@ -55,7 +55,10 @@ namespace Ask.Engine.Tests.SelfControl
             var dbcChassinumbers = relay.NumberChassis;
             var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(dbcChassinumbers)).FirstOrDefault();
             await relay.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, dbc);
-            await dbc.ConnectableManager.ResetAsync();
+            if(dbc != null)
+            {
+              await dbc.ConnectableManager.ResetAsync();
+            }
             break;
 
           case DeviceType.SwitchingDevice when device is ISwitchingDevice switcher:
