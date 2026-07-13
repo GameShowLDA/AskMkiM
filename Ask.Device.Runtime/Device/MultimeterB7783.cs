@@ -34,7 +34,12 @@ namespace Ask.Device.Runtime.Device
       DeviceProtocol = new UsbProtocol(this, new UsbCommandHandler());
       ResistanceCommands = new ResistanceMeasurementProfile()
       {
-        Timeout = 2500
+        Measure = "READ?",
+        SetRange = "CONF:RES {0},{1}",
+        SetAutoRange = "CONF:RES AUTO",
+        GetRangeError = "SYSTEM:ERROR?",
+        SupportedRanges = new[] { 100d, 1_000d, 10_000d, 100_000d, 1_000_000d, 10_000_000d, 100_000_000d },
+        Timeout = 2500,
       };
 
       ACVCommands = new ACVMeasurementProfile()

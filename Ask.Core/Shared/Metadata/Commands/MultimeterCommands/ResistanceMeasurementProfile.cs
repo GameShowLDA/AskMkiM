@@ -45,6 +45,29 @@ namespace Ask.Core.Shared.Metadata.Commands.MultimeterCommands
     public string Measure { get; init; } = "MEAS:RES?";
 
     /// <summary>
+    /// Команда установки ручного диапазона измерения сопротивления.
+    /// Плейсхолдер {0} заменяется диапазоном, {1} - рекомендуемым разрешением.
+    /// </summary>
+    public string SetRange { get; init; } = "RES:RANG {0}";
+
+    /// <summary>
+    /// Команда включения автоматического выбора диапазона измерения сопротивления.
+    /// </summary>
+    public string SetAutoRange { get; init; } = "RES:RANG:AUTO ON";
+
+    /// <summary>
+    /// Команда чтения последней ошибки прибора после установки диапазона.
+    /// Если не задана, проверка ошибки не выполняется.
+    /// </summary>
+    public string? GetRangeError { get; init; }
+
+    /// <summary>
+    /// Поддерживаемые диапазоны измерения сопротивления.
+    /// Если список пуст, используется переданное пользователем значение.
+    /// </summary>
+    public double[] SupportedRanges { get; init; } = Array.Empty<double>();
+
+    /// <summary>
     /// Время ожидания ответа устройства, в миллисекундах.
     /// </summary>
     public int Timeout { get; init; } = 1000;

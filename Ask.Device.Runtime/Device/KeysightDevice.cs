@@ -121,7 +121,10 @@ namespace Ask.Device.Runtime.Device
       SelfTestManager = new SelfTestManager();
       DeviceProtocol = new TcpProtocol(this, ConnectedProfile.Port);
 
-      ResistanceCommands = new ResistanceMeasurementProfile();
+      ResistanceCommands = new ResistanceMeasurementProfile()
+      {
+        SupportedRanges = new[] { 100d, 1_000d, 10_000d, 100_000d, 1_000_000d, 10_000_000d, 100_000_000d, 1_000_000_000d },
+      };
       ACVCommands = new ACVMeasurementProfile()
       {
         SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 750d },
