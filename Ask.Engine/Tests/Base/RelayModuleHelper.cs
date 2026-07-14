@@ -231,11 +231,11 @@ namespace Ask.Engine.Tests.Base
     /// </param>
     /// <param name="lower">Нижняя граница допустимого диапазона.</param>
     /// <param name="upper">Верхняя граница допустимого диапазона.</param>
-    /// <returns>Измеренное значение сопротивления (Ом).</returns>
+    /// <returns>Признак попадания в допуск и измеренное значение сопротивления (Ом).</returns>
     /// <exception cref="DeviceException">
     /// Генерируется при ошибке выполнения измерения.
     /// </exception>
-    public static async Task<double> MeasureResistanceAsync(
+    public static async Task<(bool Success, double Result)> MeasureResistanceAsync(
       IMultimeter meter,
       IUserInteractionService ui,
       CancellationToken token,
@@ -247,8 +247,7 @@ namespace Ask.Engine.Tests.Base
       var answer = await meter.ContinuityManager.CheckContinuityAsync(param);
       token.ThrowIfCancellationRequested();
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
-      var (_, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, param, answer, point);
-      return result;
+      return await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, param, answer, point);
     }
 
     /// <summary>

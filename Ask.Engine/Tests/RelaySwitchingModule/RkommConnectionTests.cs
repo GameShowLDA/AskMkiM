@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -144,22 +145,82 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           new ShowMessageModel("Инициализация завершена, тест начат!"),
           IsBlockStart: true);
 
-      double result = 0;
-
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
         cancellationToken.ThrowIfCancellationRequested();
-        await _module.PointManager.ConnectRelayAsync(BusPoint.AB, i, _userInteractionService);
 
-        result = await RelayModuleHelper.MeasureResistanceAsync(
+        await MeasurePointResistanceWithUserActionAsync(i, data.Param, cancellationToken);
+
+        cancellationToken.ThrowIfCancellationRequested();
+      }
+    }
+
+    /// <summary>
+    /// Выполняет измерение точки.
+    /// </summary>
+    private async Task MeasurePointResistanceWithUserActionAsync(
+      int pointNumber,
+      double expectedResistance,
+      CancellationToken cancellationToken)
+    {
+      while (true)
+      {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        bool success = await MeasurePointResistanceAsync(pointNumber, expectedResistance, cancellationToken);
+        if (success)
+        {
+          return;
+        }
+
+        var action = await _userInteractionService.WaitUserActionAsync();
+        _userInteractionService.ButtonService?.ShowOnlyStopAndFinishButtons();
+
+        switch (action)
+        {
+          case UserAction.None:
+          case UserAction.Continue:
+            return;
+
+          case UserAction.Retry:
+            continue;
+
+          case UserAction.Abort:
+            throw new OperationCanceledException(cancellationToken);
+
+          default:
+            return;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Подключает точку, измеряет сопротивление и возвращает признак успешного попадания в допуск.
+    /// </summary>
+    private async Task<bool> MeasurePointResistanceAsync(
+      int pointNumber,
+      double expectedResistance,
+      CancellationToken cancellationToken)
+    {
+      cancellationToken.ThrowIfCancellationRequested();
+
+      await _module.PointManager.ConnectRelayAsync(BusPoint.AB, pointNumber, _userInteractionService);
+
+      try
+      {
+        var (success, _) = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
             _userInteractionService,
             cancellationToken,
-            i,
+            pointNumber,
             _module,
-            data.Param);
+            expectedResistance);
 
-        await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, i, _userInteractionService);
+        return success;
+      }
+      finally
+      {
+        await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, pointNumber, _userInteractionService);
       }
     }
 
