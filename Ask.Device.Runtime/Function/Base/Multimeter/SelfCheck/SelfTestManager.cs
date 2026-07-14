@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Media;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
@@ -12,6 +13,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
   public class SelfTestManager : ISelfTestCheckerMultimeter
   {
     private static readonly double IdealVoltage = 0;
+
+    private static readonly Color? HeaderColor = new ShowMessageModel(
+        type: ShowMessageModel.MessageType.CommandBlock)
+        .GetColorMessage();
 
     private static double VoltageTolerance(double voltage = 0) => (0.1 * voltage) + 0.02;
     private static double ResistanceTolerance(double resistance = 0, double fallibility = 1) => (fallibility / 100) * resistance; //(0.01 * resistance) + 0.1;
@@ -77,11 +82,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       try
       {
-        cancellationToken.ThrowIfCancellationRequested();
-        await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
-
         await device.RelayManager.EnableRelay(userMessageService);
         relayEnabled = true;
+
+        await userMessageService.ShowMessageAsync(
+          new ShowMessageModel(
+            header: $"Тест измерения постоянного напряжения:",
+            headerColor: HeaderColor,
+            type: ShowMessageModel.MessageType.Info));
+
+        cancellationToken.ThrowIfCancellationRequested();
+        await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
 
         await VoltageMeasurement(cancellationToken, 0.1, meter.DcVoltageManager.SetDCVoltageRangeAsync, meter.DcVoltageManager.MeasureDCVoltageAsync, userMessageService);
         await VoltageMeasurement(cancellationToken, 1, meter.DcVoltageManager.SetDCVoltageRangeAsync, meter.DcVoltageManager.MeasureDCVoltageAsync, userMessageService);
@@ -91,6 +102,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         cancellationToken.ThrowIfCancellationRequested();
         await meter.DcVoltageManager.SetDCVoltageRangeAsync(0, userMessageService);
+
+        await userMessageService.ShowMessageAsync(
+           new ShowMessageModel(
+             header: $"Тест измерения переменного напряжения:",
+             headerColor: HeaderColor,
+             type: ShowMessageModel.MessageType.Info));
 
         cancellationToken.ThrowIfCancellationRequested();
         await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
@@ -125,7 +142,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
       bool resultStatus = SelfTestHelper.InRange(IdealVoltage, result, VoltageTolerance());
-      await SelfTestHelper.IsCorrectRangeAsync(resultStatus, result, "напряжения", "В", 0, 2, userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(resultStatus, result, $"диапазона {range}", " В", 0, 2, userMessageService);
       cancellationToken.ThrowIfCancellationRequested();
     }
 
@@ -141,6 +158,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
         await device.RelayManager.ConnectRCRelay(userMessageService);
         rcRelayConnected = true;
+
+        await userMessageService.ShowMessageAsync(
+           new ShowMessageModel(
+             header: $"Тест измерения сопротивления:",
+             headerColor: HeaderColor,
+             type: ShowMessageModel.MessageType.Info));
 
         cancellationToken.ThrowIfCancellationRequested();
         await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
@@ -180,7 +203,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         cancellationToken.ThrowIfCancellationRequested();
         bool result_status = SelfTestHelper.InRange(idealResult, result, range);
-        await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "сопротивления", "Ом", idealResult, fallibility, userMessageService);
+        await SelfTestHelper.IsCorrectRangeAsync(result_status, result, $"{idealResult.ToString("N0")}", " Ом", -1, fallibility, userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
       }
@@ -205,6 +228,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
         await device.RelayManager.ConnectRCRelay(userMessageService);
         rcRelayConnected = true;
+
+        await userMessageService.ShowMessageAsync(
+           new ShowMessageModel(
+             header: $"Тест измерения ёмкости:",
+             headerColor: HeaderColor,
+             type: ShowMessageModel.MessageType.Info));
 
         await CapacitanceMeasurement(cancellationToken, 1, 3.3, device, meter, userMessageService: userMessageService);
         await CapacitanceMeasurement(cancellationToken, 2, 10, device, meter, userMessageService: userMessageService);
@@ -249,7 +278,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
            new ShowMessageModel(
              header: $"Тест активного сопротивления (>50 Ом)",
              message: $"{meaning} [{status}]",
-             type: resultType));
+             type: resultType)
+           {
+             IndentLevel = 1
+           });
 
         cancellationToken.ThrowIfCancellationRequested();
         if (!activeResistanceCorrect)
@@ -279,7 +311,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         cancellationToken.ThrowIfCancellationRequested();
         bool result_status = SelfTestHelper.InRange(idealResult, result, range);
-        await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "емкости", "нФ", idealResult, 5, userMessageService);
+        await SelfTestHelper.IsCorrectRangeAsync(result_status, result, $"{idealResult.ToString("N0")}", " нФ", -1, 5, userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
       }

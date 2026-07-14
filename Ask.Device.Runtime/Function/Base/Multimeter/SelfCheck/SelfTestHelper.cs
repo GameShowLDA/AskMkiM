@@ -27,24 +27,40 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       }
       else 
       {
-        formattedResult = MeasurementValueFormatter.Round(result).ToString();
+        formattedResult = MeasurementValueFormatter.Round(result).ToString("N0");
+      }
+
+      string fallibility;
+      if(idealResult == -1)
+      {
+        fallibility = $"(± {percentageError}%)";
+      }
+      else 
+      {
+        fallibility = $"({idealResult} ± {percentageError}%)";
       }
 
       if (status)
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
-            header: $"Тест {param}, {unit} ({idealResult} ± {percentageError}%)",
+            header: $"Тест {param}{unit} {fallibility}",
             message: $"{formattedResult} [НОРМА]",
-            type: ShowMessageModel.MessageType.Success));
+            type: ShowMessageModel.MessageType.Success)
+          {
+            IndentLevel = 1
+          });
       }
       else
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
-            header: $"Тест {param}, {unit} ({idealResult} ± {percentageError}%)",
+            header: $"Тест {param}{unit} {fallibility}",
             message: $"{formattedResult} [БРАК]",
-            type: ShowMessageModel.MessageType.Error));
+            type: ShowMessageModel.MessageType.Error)
+          {
+            IndentLevel = 1
+          });
       }
     }
 
