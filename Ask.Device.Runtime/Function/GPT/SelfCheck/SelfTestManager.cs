@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -169,8 +170,11 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await Task.Delay(1000);
 
           var result = await meter.AcVoltageManager.MeasureACVoltageAsync(item, lowerBound, upperBound);
-          result *= 10;
-          result += item / 100 * meter.AcwPpuDividerCoefficientPercent;
+          if (!ExecutionConfig.GetIsIdleModeEnabled())
+          {
+            result *= 10;
+            result += item / 100 * meter.AcwPpuDividerCoefficientPercent;
+          }
 
           await breakdownTester.AcwManger.Measure.StopMeasure();
 
@@ -229,8 +233,11 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await Task.Delay(1000);
 
           var result = await meter.DcVoltageManager.MeasureDCVoltageAsync(item, lowerBound, upperBound);
-          result *= 10;
-          result += item / 100 * meter.DcwPpuDividerCoefficientPercent;
+          if (!ExecutionConfig.GetIsIdleModeEnabled())
+          {
+            result *= 10;
+            result += item / 100 * meter.DcwPpuDividerCoefficientPercent;
+          }
           await breakdownTester.DcwManger.Measure.StopMeasure();
 
           var err = result - item;

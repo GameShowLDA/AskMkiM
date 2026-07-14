@@ -2,11 +2,11 @@ using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.Core.Shared.Metadata.Static;
 using Message;
 using System.Globalization;
 using System.IO;
@@ -454,60 +454,9 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Сохраняет протокол в файл с автоматически сгенерированным именем в фоновом режиме асинхронно.
     /// </summary>
-    public async Task SaveProtocolAsync(string name, string extention)
+    public async Task SaveProtocolAsync(string name)
     {
-      string filename = BuildDerivedFileName(name, extention);
-      string datePath = $"{DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture)}";
-      string fullPath = Path.Combine($"..\\{FileLocations.DataSaveDirectory}", $"{datePath}", filename);
-      if (!Directory.Exists(Path.GetDirectoryName(fullPath)))
-      {
-        Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-      }
-
-      var lines = protocolTextBox.GetMessagesSnapshot()
-        .Select(FormatProtocolLineForSave)
-        .Where(static line => !string.IsNullOrWhiteSpace(line));
-
-      await File.WriteAllLinesAsync(fullPath, lines);
-      _lastSavedProtocolPath = Path.GetFullPath(fullPath);
-    }
-
-    private static string BuildDerivedFileName(string? sourceName, string extension)
-    {
-      string baseName = Path.GetFileNameWithoutExtension(sourceName);
-      if (string.IsNullOrWhiteSpace(baseName))
-      {
-        baseName = "protocol";
-      }
-
-      return $"{baseName}{extension}";
-    }
-
-    private static string FormatProtocolLineForSave(ShowMessageModel message)
-    {
-      string header = message.Header?.TrimEnd() ?? string.Empty;
-      string body = message.Message?.TrimEnd() ?? string.Empty;
-
-      bool hasHeader = !string.IsNullOrWhiteSpace(header);
-      bool hasBody = !string.IsNullOrWhiteSpace(body);
-
-      if (!hasHeader && !hasBody)
-      {
-        return string.Empty;
-      }
-
-      if (!hasHeader)
-      {
-        return body;
-      }
-
-      if (!hasBody)
-      {
-        return header;
-      }
-
-      string separator = header.EndsWith(' ') || body.StartsWith(' ') ? string.Empty : " ";
-      return $"{header}{separator}{body}";
+      _lastSavedProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(name, protocolTextBox.GetMessagesSnapshot());
     }
 
     #endregion

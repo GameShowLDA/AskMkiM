@@ -3,10 +3,10 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -489,7 +489,7 @@ namespace Ask.UI.Controls.ProtocolNew
           return;
         }
 
-        var historyDirectory = Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
+        var historyDirectory = ExecutionProtocolHistoryService.GetHistoryDirectory();
         Directory.CreateDirectory(historyDirectory);
 
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
@@ -510,17 +510,7 @@ namespace Ask.UI.Controls.ProtocolNew
         return Path.GetFullPath(_lastSavedProtocolPath);
       }
 
-      var historyDirectory = Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
-      if (!Directory.Exists(historyDirectory))
-      {
-        return null;
-      }
-
-      return Directory
-        .EnumerateFiles(historyDirectory, "*.lstw", SearchOption.AllDirectories)
-        .Concat(Directory.EnumerateFiles(historyDirectory, "*.lst", SearchOption.AllDirectories))
-        .OrderByDescending(File.GetLastWriteTimeUtc)
-        .FirstOrDefault();
+      return ExecutionProtocolHistoryService.ResolveLatestProtocolPath();
     }
   }
 }
