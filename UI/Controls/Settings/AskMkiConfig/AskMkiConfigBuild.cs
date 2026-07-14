@@ -1,4 +1,6 @@
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Device.Runtime.Device;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,7 +60,42 @@ public partial class AskMkiConfigControl
   /// </summary>
   private IReadOnlyList<AskMkiSettingOption> OptionsFromResource(string key)
   {
+    if (string.Equals(key, "AskMki.Options.RuntimeMultimeters", StringComparison.Ordinal))
+    {
+      return RuntimeMultimeterOptions();
+    }
+
     return ((IEnumerable)FindResource(key)).Cast<AskMkiSettingOption>().ToArray();
+  }
+
+  /// <summary>
+  /// Возвращает список runtime-мультиметров, доступных в общей системе устройств.
+  /// </summary>
+  private static IReadOnlyList<AskMkiSettingOption> RuntimeMultimeterOptions()
+  {
+    return ReflectionHelper.GetAllImplementations<IMultimeter>()
+      .Select(CreateMultimeterOption)
+      .Where(option => option != null)
+      .Cast<AskMkiSettingOption>()
+      .OrderBy(option => option.Label, StringComparer.CurrentCultureIgnoreCase)
+      .ToArray();
+  }
+
+  /// <summary>
+  /// Создает вариант выбора мультиметра по runtime-классу устройства.
+  /// </summary>
+  private static AskMkiSettingOption? CreateMultimeterOption(Type type)
+  {
+    if (Activator.CreateInstance(type) is not IMultimeter meter)
+    {
+      return null;
+    }
+
+    return new AskMkiSettingOption
+    {
+      Value = type.FullName ?? type.Name,
+      Label = meter.Name
+    };
   }
 
   /// <summary>
@@ -186,6 +223,18 @@ public partial class AskMkiConfigControl
 
     var value = GetValueByPath(CurrentProfile(), definition.Path);
 
+    if (definition.EditorKind == AskMkiSettingEditorKind.Text
+        && definition.Path == "HardwareAux.UsbAddrVm")
+    {
+      return CreateUsbDeviceItem(definition, value);
+    }
+
+    if (definition.EditorKind == AskMkiSettingEditorKind.Text
+        && definition.Path == "HardwareAux.VoltmeterIpAddress")
+    {
+      return CreateIpAddressItem(definition, value);
+    }
+
     return definition.EditorKind switch
     {
       AskMkiSettingEditorKind.Text => new AskMkiSettingItem
@@ -249,16 +298,73 @@ public partial class AskMkiConfigControl
         }
 
         var targetType = GetValueTypeByPath(profile, definition.Path);
-        SetValueByPath(profile, definition.Path, ConvertTextToType(editorItem.SelectedOption.Value.ToString(CultureInfo.InvariantCulture), targetType));
+        SetValueByPath(profile, definition.Path, ConvertTextToType(editorItem.SelectedOption.Value, targetType));
+
+        if (definition.Path is "HardwareAux.VoltmeterDeviceClass" or "HardwareAux.VoltmeterConnectionType")
+        {
+          profile.HardwareConfig.DvV7 = 7;
+        }
       }
     };
 
     item.SelectedOption = item.Options.FirstOrDefault(option =>
       string.Equals(
-        option.Value.ToString(CultureInfo.InvariantCulture),
+        option.Value,
         Convert.ToString(value, CultureInfo.InvariantCulture),
         StringComparison.OrdinalIgnoreCase));
 
+    item.SelectedOption ??= item.Options.FirstOrDefault();
+
+    return item;
+  }
+
+  /// <summary>
+  /// Создает карточку USB-устройства для подключения цифрового вольтметра.
+  /// </summary>
+  private AskMkiSettingItem CreateUsbDeviceItem(AskMkiFieldDefinition definition, object? value)
+  {
+    var text = Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
+    var item = new AskMkiSettingItem
+    {
+      Label = definition.Label,
+      Description = definition.Description,
+      Path = definition.Path,
+      EditorKind = AskMkiSettingEditorKind.UsbDevice,
+      TextValue = text,
+      UsbStatus = string.IsNullOrWhiteSpace(text) ? "USB не найден" : $"USB устройство: {text}",
+      UsbVid = "N/A",
+      UsbPid = "N/A",
+      ApplyToProfile = (profile, editorItem) =>
+      {
+        var targetType = GetValueTypeByPath(profile, definition.Path);
+        SetValueByPath(profile, definition.Path, ConvertTextToType(editorItem.TextValue, targetType));
+      }
+    };
+
+    FillUsbInfoFromAddress(item, text);
+    return item;
+  }
+
+  /// <summary>
+  /// Создает карточку IP-адреса для подключения цифрового вольтметра.
+  /// </summary>
+  private AskMkiSettingItem CreateIpAddressItem(AskMkiFieldDefinition definition, object? value)
+  {
+    var text = Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
+    var item = new AskMkiSettingItem
+    {
+      Label = definition.Label,
+      Description = definition.Description,
+      Path = definition.Path,
+      EditorKind = AskMkiSettingEditorKind.IpAddress,
+      ApplyToProfile = (profile, editorItem) =>
+      {
+        var targetType = GetValueTypeByPath(profile, definition.Path);
+        SetValueByPath(profile, definition.Path, ConvertTextToType(editorItem.TextValue, targetType));
+      }
+    };
+
+    item.SetIpTextValue(string.IsNullOrWhiteSpace(text) ? "192.168.1." : text);
     return item;
   }
 }

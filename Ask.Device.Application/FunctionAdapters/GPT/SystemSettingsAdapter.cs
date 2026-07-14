@@ -1,9 +1,9 @@
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.Device;
-using Ask.Device.Runtime.Function.GPT;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.AskMkiM.Function.GPT;
+using Ask.Device.Runtime.Base.Helpers;
+using Ask.Device.Runtime.Device.Breakdowntester;
 
 namespace Ask.Device.Application.FunctionAdapters.GPT
 {

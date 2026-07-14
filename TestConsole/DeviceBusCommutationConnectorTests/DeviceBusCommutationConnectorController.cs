@@ -1,9 +1,9 @@
+using System.Diagnostics;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Device;
-using Ask.Device.Runtime.Function.DeviceBusCommutation;
-using System.Diagnostics;
+using Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation;
+using Ask.Device.Runtime.Device.SwitchingDevice;
 
 namespace TestConsole.DeviceBusCommutationConnectorTests
 {

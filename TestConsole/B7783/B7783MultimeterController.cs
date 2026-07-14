@@ -1,5 +1,5 @@
-using Ask.Device.Runtime.Device;
 using System.Diagnostics;
+using Ask.Device.Runtime.Device.Multimeters;
 
 namespace TestConsole.B7783
 {

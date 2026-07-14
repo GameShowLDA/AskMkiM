@@ -4,7 +4,8 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm;
+using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
 {
@@ -14,12 +15,12 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
   internal class ConnectableManagerAdapter : IConnectable
   {
     private readonly IUninterruptiblePowerSupply _device;
-    private readonly Ask.Device.Runtime.Function.MikUps1101rRm.ConnectableManager _manager;
+    private readonly ConnectableManager _manager;
 
     public ConnectableManagerAdapter(IUninterruptiblePowerSupply device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _manager = new Ask.Device.Runtime.Function.MikUps1101rRm.ConnectableManager(device);
+      _manager = new ConnectableManager(device);
     }
 
     public event Action IsReset

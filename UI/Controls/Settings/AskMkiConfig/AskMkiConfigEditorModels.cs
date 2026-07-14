@@ -11,7 +11,9 @@ public enum AskMkiSettingEditorKind
   Text,
   Toggle,
   Choice,
-  Info
+  Info,
+  UsbDevice,
+  IpAddress
 }
 
 public sealed class AskMkiSettingOption
@@ -22,11 +24,11 @@ public sealed class AskMkiSettingOption
 
   public AskMkiSettingOption(byte value, string label)
   {
-    Value = value;
+    Value = value.ToString(System.Globalization.CultureInfo.InvariantCulture);
     Label = label;
   }
 
-  public byte Value { get; set; }
+  public string Value { get; set; } = string.Empty;
 
   public string Label { get; set; } = string.Empty;
 }
@@ -195,6 +197,17 @@ public sealed class AskMkiSettingItem : INotifyPropertyChanged
 {
   private string? _textValue;
   private bool _toggleValue;
+  private bool _isVisible = true;
+  private string _usbStatus = string.Empty;
+  private string _usbPort = string.Empty;
+  private string _usbId = string.Empty;
+  private string _usbVid = "N/A";
+  private string _usbPid = "N/A";
+  private string _ip1 = string.Empty;
+  private string _ip2 = string.Empty;
+  private string _ip3 = string.Empty;
+  private string _ip4 = string.Empty;
+  private bool _isSyncingIp;
   private AskMkiSettingOption? _selectedOption;
 
   public string Label { get; set; } = string.Empty;
@@ -204,6 +217,21 @@ public sealed class AskMkiSettingItem : INotifyPropertyChanged
   public string Path { get; set; } = string.Empty;
 
   public AskMkiSettingEditorKind EditorKind { get; set; }
+
+  public bool IsVisible
+  {
+    get => _isVisible;
+    set
+    {
+      if (_isVisible == value)
+      {
+        return;
+      }
+
+      _isVisible = value;
+      OnPropertyChanged();
+    }
+  }
 
   public string? TextValue
   {
@@ -217,6 +245,89 @@ public sealed class AskMkiSettingItem : INotifyPropertyChanged
 
       _textValue = value;
       OnPropertyChanged();
+
+      if (!_isSyncingIp && EditorKind == AskMkiSettingEditorKind.IpAddress)
+      {
+        UpdateIpPartsFromText();
+      }
+    }
+  }
+
+  public string UsbStatus
+  {
+    get => _usbStatus;
+    set => SetField(ref _usbStatus, value);
+  }
+
+  public string UsbPort
+  {
+    get => _usbPort;
+    set => SetField(ref _usbPort, value);
+  }
+
+  public string UsbId
+  {
+    get => _usbId;
+    set => SetField(ref _usbId, value);
+  }
+
+  public string UsbVid
+  {
+    get => _usbVid;
+    set => SetField(ref _usbVid, value);
+  }
+
+  public string UsbPid
+  {
+    get => _usbPid;
+    set => SetField(ref _usbPid, value);
+  }
+
+  public string Ip1
+  {
+    get => _ip1;
+    set
+    {
+      if (SetField(ref _ip1, value))
+      {
+        UpdateIpTextValue();
+      }
+    }
+  }
+
+  public string Ip2
+  {
+    get => _ip2;
+    set
+    {
+      if (SetField(ref _ip2, value))
+      {
+        UpdateIpTextValue();
+      }
+    }
+  }
+
+  public string Ip3
+  {
+    get => _ip3;
+    set
+    {
+      if (SetField(ref _ip3, value))
+      {
+        UpdateIpTextValue();
+      }
+    }
+  }
+
+  public string Ip4
+  {
+    get => _ip4;
+    set
+    {
+      if (SetField(ref _ip4, value))
+      {
+        UpdateIpTextValue();
+      }
     }
   }
 
@@ -255,6 +366,67 @@ public sealed class AskMkiSettingItem : INotifyPropertyChanged
   public Action<LegacyMkiHardwareProfile, AskMkiSettingItem> ApplyToProfile { get; set; } = (_, _) => { };
 
   public event PropertyChangedEventHandler? PropertyChanged;
+
+  public void SetIpTextValue(string? value)
+  {
+    _textValue = value ?? string.Empty;
+
+    var parts = (_textValue ?? string.Empty).Split('.');
+    _ip1 = parts.ElementAtOrDefault(0) ?? string.Empty;
+    _ip2 = parts.ElementAtOrDefault(1) ?? string.Empty;
+    _ip3 = parts.ElementAtOrDefault(2) ?? string.Empty;
+    _ip4 = parts.ElementAtOrDefault(3) ?? string.Empty;
+
+    OnPropertyChanged(nameof(TextValue));
+    OnPropertyChanged(nameof(Ip1));
+    OnPropertyChanged(nameof(Ip2));
+    OnPropertyChanged(nameof(Ip3));
+    OnPropertyChanged(nameof(Ip4));
+  }
+
+  private bool SetField(ref string field, string? value, [CallerMemberName] string? propertyName = null)
+  {
+    value ??= string.Empty;
+    if (field == value)
+    {
+      return false;
+    }
+
+    field = value;
+    OnPropertyChanged(propertyName);
+    return true;
+  }
+
+  private void UpdateIpTextValue()
+  {
+    if (_isSyncingIp)
+    {
+      return;
+    }
+
+    _isSyncingIp = true;
+    _textValue = $"{Ip1}.{Ip2}.{Ip3}.{Ip4}";
+    OnPropertyChanged(nameof(TextValue));
+    _isSyncingIp = false;
+  }
+
+  private void UpdateIpPartsFromText()
+  {
+    _isSyncingIp = true;
+
+    var parts = (_textValue ?? string.Empty).Split('.');
+    _ip1 = parts.ElementAtOrDefault(0) ?? string.Empty;
+    _ip2 = parts.ElementAtOrDefault(1) ?? string.Empty;
+    _ip3 = parts.ElementAtOrDefault(2) ?? string.Empty;
+    _ip4 = parts.ElementAtOrDefault(3) ?? string.Empty;
+
+    OnPropertyChanged(nameof(Ip1));
+    OnPropertyChanged(nameof(Ip2));
+    OnPropertyChanged(nameof(Ip3));
+    OnPropertyChanged(nameof(Ip4));
+
+    _isSyncingIp = false;
+  }
 
   private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
   {

@@ -63,6 +63,10 @@ public sealed class LegacyMkiHardwareConfigSection
 
 public sealed class LegacyMkiHardwareAuxSection
 {
+  public string VoltmeterDeviceClass { get; set; } = string.Empty;
+  public string VoltmeterConnectionType { get; set; } = "USB";
+  public string VoltmeterIpAddress { get; set; } = string.Empty;
+
   public byte Res1 { get; set; }
   public byte IsTstUpki { get; set; }
   public ushort U220 { get; set; }

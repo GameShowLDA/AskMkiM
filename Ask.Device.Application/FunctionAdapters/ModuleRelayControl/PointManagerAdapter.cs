@@ -6,8 +6,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Function.Helpers;
-using Ask.Device.Runtime.Function.ModuleRelayControl;
+using Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl;
+using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {

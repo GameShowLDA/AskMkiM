@@ -1,17 +1,15 @@
+using System.Reflection;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.DataBase.Engine.Factory;
 using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static;
-using Ask.Device.Runtime.Device;
-using System.Reflection;
+using Ask.Device.Runtime.Device.Chassi;
 
 namespace TestConsole;
 

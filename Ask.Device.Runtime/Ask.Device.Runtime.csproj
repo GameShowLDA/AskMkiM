@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="AskMki\Function\SelfCheck - Копировать\**" />
+    <EmbeddedResource Remove="AskMki\Function\SelfCheck - Копировать\**" />
+    <None Remove="AskMki\Function\SelfCheck - Копировать\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NationalInstruments.Visa" Version="25.5.0.13" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
@@ -18,7 +24,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.DataBase.Provider\Ask.DataBase.Provider.csproj" />
     <ProjectReference Include="..\Ask.Device.Communication\Ask.Device.Communication.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AskMki\Function\SelfCheck\PPU\" />
+    <Folder Include="AskMki\Function\SelfCheck\ACP\" />
+    <Folder Include="AskMki\Function\SelfCheck\DeviceCommutation\" />
+    <Folder Include="AskMki\Function\SelfCheck\Commutator\" />
+    <Folder Include="AskMki\Function\SelfCheck\Timer\" />
+    <Folder Include="AskMki\Function\SelfCheck\PINTs\" />
+    <Folder Include="AskMki\Function\SelfCheck\PKI\" />
+    <Folder Include="AskMki\Function\SelfCheck\Multimeter\" />
   </ItemGroup>
 
 </Project>

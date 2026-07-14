@@ -1,9 +1,9 @@
-﻿using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
+﻿using System.Text.Json;
+using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.Base.DeviceResponses;
-using Ask.Device.Runtime.Device;
-using System.Text.Json;
+using Ask.Device.Runtime.AskMkiM.Base.DeviceResponses;
+using Ask.Device.Runtime.Device.PowerSourceModule;
 
 namespace TestConsole.MINT
 {

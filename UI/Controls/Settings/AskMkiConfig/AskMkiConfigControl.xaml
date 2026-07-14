@@ -175,6 +175,11 @@
             <local:AskMkiSettingOption Value="12" Label="COMx4/Канал 4"/>
         </x:Array>
 
+        <x:Array x:Key="AskMki.Options.VoltmeterConnection" Type="{x:Type local:AskMkiSettingOption}">
+            <local:AskMkiSettingOption Value="USB" Label="USB"/>
+            <local:AskMkiSettingOption Value="IP" Label="IP"/>
+        </x:Array>
+
         <x:Array x:Key="AskMki.Groups" Type="{x:Type local:AskMkiGroupDefinition}">
             <local:AskMkiGroupDefinition Code="A" Title="Параметры СК, БК" Description="Наличие коммутаторов СК/ТКИ и диапазоны БК, используемых в стойке." Summary="Стойки, ТКИ и диапазоны БК.">
                 <local:AskMkiGroupDefinition.Children>
@@ -385,6 +390,10 @@
         </x:Array>
 
         <x:Array x:Key="AskMki.Fields.F.Main" Type="{x:Type local:AskMkiFieldDefinition}">
+            <local:AskMkiFieldDefinition Label="Модель цифрового вольтметра" EditorKind="Choice" Path="HardwareAux.VoltmeterDeviceClass" OptionsKey="AskMki.Options.RuntimeMultimeters"/>
+            <local:AskMkiFieldDefinition Label="Тип подключения вольтметра" EditorKind="Choice" Path="HardwareAux.VoltmeterConnectionType" OptionsKey="AskMki.Options.VoltmeterConnection"/>
+            <local:AskMkiFieldDefinition Label="USB устройство" EditorKind="Text" Path="HardwareAux.UsbAddrVm"/>
+            <local:AskMkiFieldDefinition Label="IP Address" EditorKind="Text" Path="HardwareAux.VoltmeterIpAddress"/>
             <local:AskMkiFieldDefinition Label="U вольтметра для теста АЦП, В" EditorKind="Text" Path="HardwareAux.Uv7R"/>
             <local:AskMkiFieldDefinition Label="R короткозамкнутого входа вольтметра, Ом" EditorKind="Text" Path="HardwareAux.RwirV7"/>
         </x:Array>
@@ -787,15 +796,19 @@
                     <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
                 </DataTrigger>
 
-                <DataTrigger Binding="{Binding EditorKind}" Value="Info">
-                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0"/>
-                    <Setter TargetName="ItemBorder" Property="Padding" Value="0,14,0,6"/>
-                    <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
-                    <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
-                    <Setter TargetName="LabelText" Property="FontSize" Value="18"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
-        </DataTemplate>
+                        <DataTrigger Binding="{Binding EditorKind}" Value="Info">
+                            <Setter TargetName="ItemBorder" Property="BorderThickness" Value="0"/>
+                            <Setter TargetName="ItemBorder" Property="Padding" Value="0,14,0,6"/>
+                            <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
+                            <Setter TargetName="LabelText" Property="FontSize" Value="18"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                            <Setter TargetName="ItemBorder" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
 
         <DataTemplate x:Key="AskMkiSwitchRangeRowEditorTemplate"
                       DataType="{x:Type local:AskMkiSwitchRangeRow}">
@@ -1192,6 +1205,10 @@
                                                 <Setter TargetName="EditorHost" Property="Visibility" Value="Collapsed"/>
                                                 <Setter TargetName="InfoStack" Property="Grid.ColumnSpan" Value="3"/>
                                                 <Setter TargetName="LabelText" Property="FontSize" Value="18"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                                                <Setter TargetName="ItemBorder" Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
                                         </DataTemplate.Triggers>
                                     </DataTemplate>

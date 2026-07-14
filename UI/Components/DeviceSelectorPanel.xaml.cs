@@ -182,14 +182,45 @@ namespace UI.Components
     }
 
     /// <summary>
-    /// Возвращает выбранное устройство как IFastMeter, если возможно.
+    /// Возвращает мультиметр, привязанный к стойке выбранного устройства.
     /// </summary>
-    /// <returns>Объект типа IFastMeter или null, если выбранное устройство не реализует IFastMeter.</returns>
-    public IMultimeter GetFastMeterSafe()
+    /// <returns>Мультиметр стойки или <see langword="null"/>, если он не настроен.</returns>
+    public IMultimeter? GetFastMeterSafe()
     {
-      IMultimeter? result = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      object? selected = null;
 
-      return result;
+      void TryGetSelected()
+      {
+        selected = RelayData.SelectedItem;
+      }
+
+      if (Dispatcher.CheckAccess())
+      {
+        TryGetSelected();
+      }
+      else
+      {
+        Dispatcher.Invoke(TryGetSelected);
+      }
+
+      if (selected is IMultimeter selectedMeter)
+      {
+        return selectedMeter;
+      }
+
+      int? chassisNumber = selected switch
+      {
+        LegacyAskSelfControlTarget target => target.NumberChassis,
+        IRelaySwitchModule relay => relay.NumberChassis,
+        ISwitchingDevice switching => switching.NumberChassis,
+        IPowerSourceModule power => power.NumberChassis,
+        IBreakdownTester breakdown => breakdown.NumberChassis,
+        _ => null
+      };
+
+      return chassisNumber.HasValue
+        ? FastMeters.GetDevicesByNumberChassisAsync(chassisNumber.Value).GetAwaiter().GetResult().FirstOrDefault()
+        : null;
     }
 
     #endregion
@@ -252,6 +283,8 @@ namespace UI.Components
       var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
       var breakdowns = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
       var fastmeter = FastMeters.GetAllAsync().GetAwaiter().GetResult();
+      var legacyChassis = chassisManagers.Where(IsLegacyAskChassis).ToList();
+      var legacyChassisNumbers = legacyChassis.Select(x => x.Number).ToHashSet();
 
       var sources = new List<IEnumerable<dynamic>>
       {
@@ -259,15 +292,15 @@ namespace UI.Components
         switchingDevices,
         relaySwitchModules,
         breakdowns,
-        fastmeter
+        fastmeter.Where(x => !legacyChassisNumbers.Contains(x.NumberChassis))
       };
 
       var combined = new List<object>();
       var displayNames = new List<string>();
 
-      foreach (var legacyChassis in chassisManagers.Where(IsLegacyAskChassis))
+      foreach (var legacyAskChassis in legacyChassis)
       {
-        foreach (var target in LegacyAskSelfControlTarget.CreateForChassis(legacyChassis))
+        foreach (var target in LegacyAskSelfControlTarget.CreateForChassis(legacyAskChassis))
         {
           combined.Add(target);
           displayNames.Add($"{target.ChassisName} {target.NumberChassis}: {LegacyAskSelfControlModuleMetadata.GetDisplayName(target.Module)}");

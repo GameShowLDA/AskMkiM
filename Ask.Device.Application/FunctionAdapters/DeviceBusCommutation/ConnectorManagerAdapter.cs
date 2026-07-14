@@ -6,8 +6,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Function.DeviceBusCommutation;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation;
+using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 {
@@ -34,7 +34,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     public ConnectorManagerAdapter(ISwitchingDevice deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation ?? throw new ArgumentNullException(nameof(deviceBusCommutation));
-      _connectorManager = new ConnectorManager((Runtime.Device.DeviceBusCommutation)deviceBusCommutation);
+      _connectorManager = new ConnectorManager((Runtime.Device.SwitchingDevice.DeviceBusCommutation)deviceBusCommutation);
     }
 
     /// <inheritdoc />

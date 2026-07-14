@@ -1,10 +1,10 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Communication.Com.Configuration;
-using Ask.Device.Runtime.Base.Device;
-using Message;
 using System.IO.Ports;
 using System.Net;
 using System.Windows;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Device.Communication.Com.Configuration;
+using Ask.Device.Runtime.Base.DeviceProtocol;
+using Message;
 using UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig;
 
 namespace UI.Controls.Settings.DeviceConfig.Base

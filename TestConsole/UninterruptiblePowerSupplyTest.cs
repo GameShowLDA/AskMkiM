@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Device.UninterruptiblePowerSupply;
 
 namespace TestConsole
 {

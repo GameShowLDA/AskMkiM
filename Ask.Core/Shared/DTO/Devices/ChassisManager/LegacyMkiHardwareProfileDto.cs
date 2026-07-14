@@ -64,6 +64,9 @@ public sealed class LegacyMkiHardwareProfileDto
   public byte CalcPgr { get; set; }
   public byte[] HardwareConfigReserved { get; set; } = [];
 
+  public string VoltmeterDeviceClass { get; set; } = string.Empty;
+  public string VoltmeterConnectionType { get; set; } = "USB";
+  public string VoltmeterIpAddress { get; set; } = string.Empty;
   public byte Res1 { get; set; }
   public byte IsTstUpki { get; set; }
   public ushort U220 { get; set; }
@@ -192,6 +195,9 @@ public sealed class LegacyMkiHardwareProfileDto
       UmaxPiEkFull = hardware.UmaxPiEkFull,
       CalcPgr = hardware.CalcPgr,
       HardwareConfigReserved = Copy(profile.HardwareConfigReserved),
+      VoltmeterDeviceClass = aux.VoltmeterDeviceClass,
+      VoltmeterConnectionType = aux.VoltmeterConnectionType,
+      VoltmeterIpAddress = aux.VoltmeterIpAddress,
       Res1 = aux.Res1,
       IsTstUpki = aux.IsTstUpki,
       U220 = aux.U220,
@@ -315,6 +321,9 @@ public sealed class LegacyMkiHardwareProfileDto
       },
       HardwareAux = new LegacyMkiHardwareAuxSection
       {
+        VoltmeterDeviceClass = VoltmeterDeviceClass,
+        VoltmeterConnectionType = VoltmeterConnectionType,
+        VoltmeterIpAddress = VoltmeterIpAddress,
         Res1 = Res1,
         IsTstUpki = IsTstUpki,
         U220 = U220,

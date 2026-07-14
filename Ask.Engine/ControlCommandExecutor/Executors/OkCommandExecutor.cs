@@ -3,7 +3,7 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Device.Communication.Ethernet.Udp;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 

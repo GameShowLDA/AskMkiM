@@ -2,8 +2,8 @@ using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.Function.Helpers;
-using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource;
+using Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource;
+using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
 {

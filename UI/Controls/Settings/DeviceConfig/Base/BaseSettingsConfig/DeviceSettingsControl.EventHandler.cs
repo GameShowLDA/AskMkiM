@@ -1,15 +1,13 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Device.Communication.Com;
-using Ask.Device.Communication.Ethernet;
-using Ask.Device.Communication.Usb;
-using Ask.Device.Runtime.Base.Device;
-using Message;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Device.Runtime.Base.DeviceProtocol;
+using Ask.Device.Runtime.Device.Chassi;
+using Message;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
@@ -64,10 +62,12 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       try
       {
         Type baseClass = GetBaseDeviceType(selectedType);
+        bool isAskChassis = selectedType == typeof(ManagerASKMKI);
 
-        ConnectionTypeIPItem.Visibility = baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
-        ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
-        ConnectionTypeUSBItem.Visibility = baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeContainer.Visibility = isAskChassis ? Visibility.Collapsed : Visibility.Visible;
+        ConnectionTypeIPItem.Visibility = !isAskChassis && baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeCOMItem.Visibility = !isAskChassis && baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeUSBItem.Visibility = !isAskChassis && baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;

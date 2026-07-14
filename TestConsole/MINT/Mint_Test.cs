@@ -4,7 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.AskMkiM.Base.Commands;
 
 namespace TestConsole.MINT
 {

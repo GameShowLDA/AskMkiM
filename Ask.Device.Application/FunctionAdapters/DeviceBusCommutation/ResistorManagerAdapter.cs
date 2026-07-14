@@ -3,8 +3,8 @@ using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.Function.DeviceBusCommutation;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation;
+using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 {
@@ -13,14 +13,14 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
   /// </summary>
   internal class ResistorManagerAdapter : IResistorDeviceBusCommutation
   {
-    private readonly Runtime.Device.DeviceBusCommutation _deviceBusCommutation;
+    private readonly Runtime.Device.SwitchingDevice.DeviceBusCommutation _deviceBusCommutation;
     private readonly ResistorManager _resistorManager;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ResistorManagerAdapter"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public ResistorManagerAdapter(Runtime.Device.DeviceBusCommutation deviceBusCommutation)
+    public ResistorManagerAdapter(Runtime.Device.SwitchingDevice.DeviceBusCommutation deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation ?? throw new ArgumentNullException(nameof(deviceBusCommutation));
       _resistorManager = new ResistorManager(deviceBusCommutation);

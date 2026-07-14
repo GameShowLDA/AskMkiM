@@ -1,5 +1,8 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.DataBase.Provider.Services.Devices;
 using System;
 using System.Linq;
@@ -25,6 +28,65 @@ public partial class AskMkiConfigControl
 
     var service = new LegacyMkiHardwareProfileDtoService();
     await service.SaveProfileAsync(numberChassis.Value, _selectedProfileKind, profile);
+    await SyncFastMeterAsync(numberChassis.Value, profile);
+  }
+
+  /// <summary>
+  /// Сохраняет цифровой вольтметр АСК как обычный быстрый измеритель стойки.
+  /// </summary>
+  private static async Task SyncFastMeterAsync(int numberChassis, LegacyMkiHardwareProfile profile)
+  {
+    if (string.IsNullOrWhiteSpace(profile.HardwareAux.VoltmeterDeviceClass))
+    {
+      return;
+    }
+
+    var existing = (await FastMeters.GetDevicesByNumberChassisAsync(numberChassis))
+      .FirstOrDefault();
+
+    var dto = new FastMeterDto
+    {
+      Id = existing?.Id ?? 0,
+      NumberChassis = numberChassis,
+      Number = existing?.Number > 0 ? existing.Number : 1,
+      Name = existing?.Name ?? "Цифровой вольтметр АСК",
+      Description = existing?.Description ?? "Цифровой вольтметр стойки АСК.",
+      DeviceType = DeviceType.FastMeter,
+      DeviceClass = profile.HardwareAux.VoltmeterDeviceClass,
+      ConnectionDetails = ResolveVoltmeterConnection(profile),
+      TypeMode = MultimeterTypeMode.None,
+      MaxContinuityResistance = existing?.MaxContinuityResistance > 0 ? existing.MaxContinuityResistance : 100000,
+      AcwPpuDividerCoefficientPercent = existing?.AcwPpuDividerCoefficientPercent > 0 ? existing.AcwPpuDividerCoefficientPercent : 100d,
+      DcwPpuDividerCoefficientPercent = existing?.DcwPpuDividerCoefficientPercent > 0 ? existing.DcwPpuDividerCoefficientPercent : 100d
+    };
+
+    var meter = FastMeters.Build(dto);
+
+    if (existing == null)
+    {
+      await FastMeters.CreateAsync(meter);
+      return;
+    }
+
+    await FastMeters.UpdateAsync(meter);
+  }
+
+  /// <summary>
+  /// Возвращает строку подключения цифрового вольтметра из профиля АСК.
+  /// </summary>
+  private static string ResolveVoltmeterConnection(LegacyMkiHardwareProfile profile)
+  {
+    if (string.Equals(profile.HardwareAux.VoltmeterConnectionType, "IP", StringComparison.OrdinalIgnoreCase))
+    {
+      return profile.HardwareAux.VoltmeterIpAddress?.Trim() ?? string.Empty;
+    }
+
+    if (!string.IsNullOrWhiteSpace(profile.HardwareAux.UsbAddrVm))
+    {
+      return profile.HardwareAux.UsbAddrVm.Trim();
+    }
+
+    return string.Empty;
   }
 
   /// <summary>

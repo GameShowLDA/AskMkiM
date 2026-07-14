@@ -34,6 +34,21 @@
             <Setter Property="Height" Value="40"/>
         </Style>
 
+        <Style x:Key="AskMkiDrawerLabelStyle"
+               TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="14,0,8,0"/>
+        </Style>
+
+        <Style x:Key="AskMkiDrawerReadOnlyTextBoxStyle"
+               TargetType="TextBox"
+               BasedOn="{StaticResource AskMkiDrawerInputTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+
         <Style x:Key="AskMkiDrawerSectionCardStyle"
                TargetType="Border"
                BasedOn="{StaticResource DeviceInputSectionCardStyle}"/>
@@ -44,8 +59,18 @@
 
         <DataTemplate x:Key="AskMkiDrawerSettingItemTemplate"
                       DataType="{x:Type local:AskMkiSettingItem}">
-            <Border x:Name="SectionRoot"
-                    Style="{StaticResource AskMkiDrawerSectionCardStyle}">
+            <Border x:Name="SectionRoot">
+                <Border.Style>
+                    <Style TargetType="Border"
+                           BasedOn="{StaticResource AskMkiDrawerSectionCardStyle}">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -97,6 +122,158 @@
                                    TextWrapping="Wrap"
                                    Margin="16,12"
                                    Visibility="Collapsed"/>
+
+                        <StackPanel x:Name="UsbEditorHost"
+                                    Visibility="Collapsed"
+                                    Margin="0,0,0,8">
+                            <Border Style="{StaticResource AskMkiDrawerInputBorderStyle}">
+                                <TextBox Text="{Binding UsbStatus}"
+                                         Style="{StaticResource AskMkiDrawerReadOnlyTextBoxStyle}"/>
+                            </Border>
+
+                            <Grid Margin="0,2,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           Text="Порт:"
+                                           Style="{StaticResource AskMkiDrawerLabelStyle}"/>
+                                <Border Grid.Row="0"
+                                        Grid.Column="1"
+                                        Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                        Margin="0,6,14,6">
+                                    <TextBox Text="{Binding UsbPort}"
+                                             Style="{StaticResource AskMkiDrawerReadOnlyTextBoxStyle}"/>
+                                </Border>
+
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Text="ID:"
+                                           Style="{StaticResource AskMkiDrawerLabelStyle}"/>
+                                <Border Grid.Row="1"
+                                        Grid.Column="1"
+                                        Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                        Margin="0,6,14,6"
+                                        Height="56">
+                                    <TextBox Text="{Binding UsbId}"
+                                             TextWrapping="Wrap"
+                                             Style="{StaticResource AskMkiDrawerReadOnlyTextBoxStyle}"/>
+                                </Border>
+
+                                <Grid Grid.Row="2"
+                                      Grid.ColumnSpan="2"
+                                      Margin="14,6,14,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="VID:"
+                                               Style="{StaticResource AskMkiDrawerLabelStyle}"
+                                               Margin="0,0,8,0"/>
+                                    <Border Grid.Column="1"
+                                            Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                            Margin="0"
+                                            Height="32">
+                                        <TextBox Text="{Binding UsbVid}"
+                                                 Style="{StaticResource AskMkiDrawerReadOnlyTextBoxStyle}"
+                                                 FontSize="16"/>
+                                    </Border>
+
+                                    <TextBlock Grid.Column="3"
+                                               Text="PID:"
+                                               Style="{StaticResource AskMkiDrawerLabelStyle}"
+                                               Margin="0,0,8,0"/>
+                                    <Border Grid.Column="4"
+                                            Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                            Margin="0"
+                                            Height="32">
+                                        <TextBox Text="{Binding UsbPid}"
+                                                 Style="{StaticResource AskMkiDrawerReadOnlyTextBoxStyle}"
+                                                 FontSize="16"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+
+                        <Grid x:Name="IpEditorHost"
+                              Visibility="Collapsed"
+                              Margin="14,8,14,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                    Margin="0"
+                                    Height="40">
+                                <TextBox Text="{Binding Ip1, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource AskMkiDrawerInputTextBoxStyle}"
+                                         HorizontalContentAlignment="Center"
+                                         MaxLength="3"/>
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="."
+                                       Foreground="{DynamicResource ForegrounfBrushes}"
+                                       FontSize="22"
+                                       Margin="2,0"/>
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                    Margin="0"
+                                    Height="40">
+                                <TextBox Text="{Binding Ip2, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource AskMkiDrawerInputTextBoxStyle}"
+                                         HorizontalContentAlignment="Center"
+                                         MaxLength="3"/>
+                            </Border>
+                            <TextBlock Grid.Column="3"
+                                       Text="."
+                                       Foreground="{DynamicResource ForegrounfBrushes}"
+                                       FontSize="22"
+                                       Margin="2,0"/>
+                            <Border Grid.Column="4"
+                                    Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                    Margin="0"
+                                    Height="40">
+                                <TextBox Text="{Binding Ip3, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource AskMkiDrawerInputTextBoxStyle}"
+                                         HorizontalContentAlignment="Center"
+                                         MaxLength="3"/>
+                            </Border>
+                            <TextBlock Grid.Column="5"
+                                       Text="."
+                                       Foreground="{DynamicResource ForegrounfBrushes}"
+                                       FontSize="22"
+                                       Margin="2,0"/>
+                            <Border Grid.Column="6"
+                                    Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                    Margin="0"
+                                    Height="40">
+                                <TextBox Text="{Binding Ip4, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource AskMkiDrawerInputTextBoxStyle}"
+                                         HorizontalContentAlignment="Center"
+                                         MaxLength="3"/>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Border>
@@ -113,6 +290,12 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding EditorKind}" Value="Info">
                     <Setter TargetName="InfoEditorHost" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding EditorKind}" Value="UsbDevice">
+                    <Setter TargetName="UsbEditorHost" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding EditorKind}" Value="IpAddress">
+                    <Setter TargetName="IpEditorHost" Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>

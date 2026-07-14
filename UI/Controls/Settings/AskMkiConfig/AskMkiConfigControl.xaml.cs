@@ -235,8 +235,74 @@ public partial class AskMkiConfigControl : UserControl
         or nameof(AskMkiSettingItem.ToggleValue)
         or nameof(AskMkiSettingItem.SelectedOption))
     {
+      if (sender is AskMkiSettingItem item)
+      {
+        HandleEditorItemChanged(item, e.PropertyName);
+      }
+
       SetUnsavedChanges(true);
     }
+  }
+
+  /// <summary>
+  /// Обрабатывает зависимые поля редактора конфигурации.
+  /// </summary>
+  private void HandleEditorItemChanged(AskMkiSettingItem item, string? propertyName)
+  {
+    if (propertyName != nameof(AskMkiSettingItem.SelectedOption))
+    {
+      return;
+    }
+
+    if (item.Path is "HardwareAux.VoltmeterDeviceClass" or "HardwareAux.VoltmeterConnectionType")
+    {
+      UpdateVoltmeterEditorState(autoResolveUsb: true);
+    }
+  }
+
+  /// <summary>
+  /// Обновляет видимость полей подключения цифрового вольтметра АСК.
+  /// </summary>
+  private void UpdateVoltmeterEditorState(bool autoResolveUsb)
+  {
+    var connectionItem = FindEditorItemByPath("HardwareAux.VoltmeterConnectionType");
+    var usbItem = FindEditorItemByPath("HardwareAux.UsbAddrVm");
+    var ipItem = FindEditorItemByPath("HardwareAux.VoltmeterIpAddress");
+
+    var connectionType = connectionItem?.SelectedOption?.Value ?? "USB";
+    var isUsb = string.Equals(connectionType, "USB", StringComparison.OrdinalIgnoreCase);
+    var isIp = string.Equals(connectionType, "IP", StringComparison.OrdinalIgnoreCase);
+
+    if (usbItem != null)
+    {
+      usbItem.IsVisible = isUsb;
+    }
+
+    if (ipItem != null)
+    {
+      ipItem.IsVisible = isIp;
+    }
+
+    if (autoResolveUsb && isUsb)
+    {
+      ResolveVoltmeterUsbAddress();
+    }
+  }
+
+  /// <summary>
+  /// Автоматически подставляет USB-адрес выбранного цифрового вольтметра, если устройство найдено.
+  /// </summary>
+  private void ResolveVoltmeterUsbAddress()
+  {
+    var meterItem = FindEditorItemByPath("HardwareAux.VoltmeterDeviceClass");
+    var usbItem = FindEditorItemByPath("HardwareAux.UsbAddrVm");
+
+    if (meterItem?.SelectedOption == null || usbItem == null)
+    {
+      return;
+    }
+
+    ApplyUsbInfo(usbItem, TryResolveUsbInfo(meterItem.SelectedOption.Value));
   }
 
   /// <summary>
@@ -355,6 +421,7 @@ public partial class AskMkiConfigControl : UserControl
       _currentProfile = profile;
       _editorGroups = BuildEditorGroups(profile);
       SubscribeEditorChanges(_editorGroups);
+      UpdateVoltmeterEditorState(autoResolveUsb: true);
       ProfileGroupsItemsControl.ItemsSource = _editorGroups;
       SelectProfileGroup(_editorGroups.FirstOrDefault());
       SetUnsavedChanges(false);

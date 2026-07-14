@@ -1,5 +1,9 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Device.Breakdowntester;
+using Ask.Device.Runtime.Device.PowerSourceModule;
+using Ask.Device.Runtime.Device.RelaySwitchModule;
+using Ask.Device.Runtime.Device.SwitchingDevice;
+using Ask.Device.Runtime.Device.UninterruptiblePowerSupply;
 using DbcCapacitorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.CapacitorManagerAdapter;
 using DbcConnectorManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.ConnectorManagerAdapter;
 using DbcRelayManagerAdapter = Ask.Device.Application.FunctionAdapters.DeviceBusCommutation.RelayManagerAdapter;

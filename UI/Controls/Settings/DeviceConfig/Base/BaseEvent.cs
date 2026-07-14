@@ -1,13 +1,11 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Communication.Com;
-using Ask.Device.Communication.Ethernet;
-using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Device;
-using Message;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Device.Runtime.Base.DeviceProtocol;
+using Ask.Device.Runtime.Device;
+using Message;
 
 namespace UI.Controls.Settings.DeviceConfig.Base
 {

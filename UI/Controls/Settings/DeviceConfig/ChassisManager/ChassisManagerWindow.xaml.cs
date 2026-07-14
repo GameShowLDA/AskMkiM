@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Runtime.Device.Chassi;
 using System.Threading.Tasks;
 using System.Windows;
 using UI.Controls.Settings.DeviceConfig.Base;
@@ -72,7 +73,9 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
           var processor = new DeviceSettingsProcessorBase();
           var baseDevice = deviceSettingsWindow.CreateSelectedDeviceInstance();
 
-          ChassisManagerDto deviceDto = processor.ProcessDevice<ChassisManagerDto>(
+          ChassisManagerDto deviceDto = baseDevice is ManagerASKMKI askChassis
+            ? CreateAskChassisDto(askChassis)
+            : processor.ProcessDevice<ChassisManagerDto>(
               selectedDevice: baseDevice as IDevice,
               control: deviceSettingsWindow,
               additionalDataProcessor: this);
@@ -115,6 +118,19 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
       }
 
       Close();
+    }
+
+    /// <summary>
+    /// Создает DTO стойки АСК без параметров подключения.
+    /// </summary>
+    /// <param name="device">Runtime-модель стойки АСК.</param>
+    /// <returns>DTO стойки АСК для сохранения в базе данных.</returns>
+    private ChassisManagerDto CreateAskChassisDto(ManagerASKMKI device)
+    {
+      var dto = device.Convert();
+      dto.Number = deviceSettingsWindow.NumberDevice;
+      dto.ConnectionDetails = string.Empty;
+      return dto;
     }
   }
 }

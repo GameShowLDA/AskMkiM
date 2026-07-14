@@ -1,8 +1,8 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Device.Runtime.Device;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Device.Runtime.Device.Multimeters;
 
 namespace TestConsole.Keysight
 {

@@ -1,7 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Device.RelaySwitchModule;
 using System.Diagnostics;
 
 namespace TestConsole.ModuleRelayControlTests
