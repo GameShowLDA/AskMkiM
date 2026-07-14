@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -16,7 +18,14 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
     /// </summary>
     public void InitializeSettings(IExecutionController executionController)
     {
-      executionController.SetSettings(StartDelegate: ExecuteMeasurementProcess, true);
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Test
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -83,7 +92,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           }
 
           await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {CurrentDischargeNumber}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
-          return type == ShowMessageModel.MessageType.Success ? true : false;
+          return type == ShowMessageModel.MessageType.Success;
         }, messageService);
       }
 

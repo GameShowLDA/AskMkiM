@@ -1,15 +1,16 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
-using Newtonsoft.Json.Linq;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.Metrology
@@ -41,10 +42,14 @@ namespace Ask.Engine.Tests.Metrology
     public void InitializeSettings(IExecutionController executionController, IUserInteractionService userInteractionService)
     {
       _userInteractionService = userInteractionService;
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Metrology,
+      };
 
-      executionController.SetSettings(
-        StartDelegate: ExecuteMeasurementProcess,
-        true);
+      executionController.SetSettings(settings);
     }
 
     /// <summary>

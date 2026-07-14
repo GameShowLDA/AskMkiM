@@ -4,8 +4,10 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Message;
@@ -121,21 +123,16 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Запуск самоконтроля/режима.
     /// </summary>
-    /// <param name="startDelegate">Делегат для выполнения задачи.</param>
-    /// <param name="stop">Делегат для завершения задачи.</param>
-    /// <param name="name">Имя запускаемого процесса.</param>
-    /// <param name="isRepeatEnabled">Флаг, указывающий, повторять ли операцию.</param>
-    /// <param name="preActionDelegate">Необязательный делегат для выполнения предварительных действий.</param>
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
-    internal async Task StartAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled, PreActionDelegate preActionDelegate = null, bool checkPower = true)
+    internal async Task StartAsync(ActionSettings actionSettings)
     {
       isExit = false;
-      processName = name;
+      processName = actionSettings.Name;
       IsPaused = false;
 
       if (!TryAcquireRunSlot(out var activeProcessName))
       {
-        LogWarning($"Попытка запустить \"{name}\", пока выполняется \"{activeProcessName}\".");
+        LogWarning($"Попытка запустить \"{actionSettings.Name}\", пока выполняется \"{activeProcessName}\".");
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true);
         return;
       }
@@ -154,22 +151,22 @@ namespace Ask.UI.Controls.ProtocolNew
         StepMode = false;
 
         await ProtocolSelfCheck.ClearAllMessagesAsync();
-        if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && checkPower)
+        if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && actionSettings.CheckPower)
         {
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
-          await FinalizeAsync();
+          await FinalizeAsync(actionSettings);
           return;
         }
 
-        if (preActionDelegate != null)
+        if (actionSettings.PreActionDelegate != null)
         {
-          await preActionDelegate(ProtocolSelfCheck.GetCancellationToken());
+          await actionSettings.PreActionDelegate(ProtocolSelfCheck.GetCancellationToken());
         }
 
-        if (startDelegate == null)
+        if (actionSettings.StartDelegate == null)
         {
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", type: MessageType.Error));
-          await FinalizeAsync();
+          await FinalizeAsync(actionSettings);
           LogError("Системная ошибка выполнения, обратитесь к администратору");
           return;
         }
@@ -183,31 +180,31 @@ namespace Ask.UI.Controls.ProtocolNew
           StepMode = true;
         }
 
-        if (IsProcessRunning(name))
+        if (IsProcessRunning(actionSettings.Name))
         {
           return;
         }
 
-        PrepareForStartAsync(name);
+        PrepareForStartAsync(actionSettings.Name);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
           await ResetSystemAsync();
         }
 
-        await ExecuteTaskAsync(startDelegate, stop, name, isRepeatEnabled);
+        await ExecuteTaskAsync(actionSettings.StartDelegate, actionSettings.StopDelegate, actionSettings.Name, actionSettings.IsRepeatEnabled);
       }
       catch (Exception ex)
       {
-        LogException($"Ошибка при запуске \"{name}\"", ex);
+        LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error), skipPause: true);
         try
         {
-          await FinalizeAsync(stop);
+          await FinalizeAsync(actionSettings);
         }
         catch (Exception finalizeEx)
         {
-          LogException($"Ошибка при аварийном завершении \"{name}\"", finalizeEx);
+          LogException($"Ошибка при аварийном завершении \"{actionSettings.Name}\"", finalizeEx);
           ReleaseRunSlot();
           SystemStateManager.SetIsLocked(false);
         }
@@ -219,10 +216,10 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="stopDelegate">Делегат для завершения задачи.</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
-    internal async Task StopAsync(StopDelegate stopDelegate, TaskCompletionSource<UserAction> _userActionTcs)
+    internal async Task StopAsync(ActionSettings actionSettings, TaskCompletionSource<UserAction> _userActionTcs)
     {
       _userActionTcs?.TrySetResult(UserAction.Abort);
-      await FinalizeAsync(stopDelegate);
+      await FinalizeAsync(actionSettings);
     }
 
     /// <summary>
@@ -231,7 +228,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="stopDelegate">Делегат для завершения задачи (по умолчанию null).</param>
     /// <param name="name">Имя завершаемого процесса (по умолчанию null).</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    internal async Task FinalizeAsync(StopDelegate stopDelegate = null, string name = null)
+    internal async Task FinalizeAsync(ActionSettings actionSettings)
     {
       if (isExit)
       {
@@ -239,15 +236,15 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       isExit = true;
-      LogInformation($"Завершение \"{processName}\"");
+      LogInformation($"Завершение \"{actionSettings.Name}\"");
 
-      await CancelProcessTaskAsync(stopDelegate, processName);
+      await CancelProcessTaskAsync(actionSettings.StopDelegate, actionSettings.Name);
       ResetState();
       await ResetSystemAsync();
 
-      await HandleProtocolActionsAsync(processName);
+      await HandleProtocolActionsAsync(actionSettings.Name);
       ProtocolSelfCheck.ShowOnlyStartButton();
-      await DisplayCompletionMessage();
+      await DisplayCompletionMessage(actionSettings.CheckType);
 
       StartProcessing?.Invoke(false);
 
@@ -343,14 +340,14 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="returnDelegate">Делегат, выполняющий операцию измерения. Если null, выполняется завершение.</param>
     /// <param name="stop">Делегат для остановки операции.</param>
     /// <returns>Задача, представляющая асинхронную операцию цикла измерения.</returns>
-    internal async Task LoopMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
+    internal async Task LoopMeasureEvent(ActionSettings actionSettings)
     {
       ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
       while (!CancellationTokenSource?.IsCancellationRequested ?? true)
       {
         try
         {
-          await ReturnMeasureEvent(returnDelegate, stop);
+          await ReturnMeasureEvent(actionSettings);
         }
         catch (Exception)
         {
@@ -365,32 +362,32 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="returnDelegate">Делегат измерения.</param>
     /// <param name="stop">Делегат остановки.</param>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task ReturnMeasureEvent(ReturnDelegate returnDelegate, StopDelegate stop)
+    private async Task ReturnMeasureEvent(ActionSettings actionSettings)
     {
       try
       {
         var token = CancellationTokenSource?.Token ?? new CancellationToken();
 
-        if (returnDelegate != null)
+        if (actionSettings.ReturnDelegate != null)
         {
-          await returnDelegate(token);
+          await actionSettings.ReturnDelegate(token);
         }
         else
         {
-          await FinalizeAsync(stop);
+          await FinalizeAsync(actionSettings);
         }
       }
       catch (ObjectDisposedException ex)
       {
         LogException("Token уже утилизирован", ex);
         MessageBoxCustom.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
-        await FinalizeAsync(stop);
+        await FinalizeAsync(actionSettings);
       }
       catch (Exception ex)
       {
         LogException("Системная ошибка", ex);
         MessageBoxCustom.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
-        await FinalizeAsync(stop);
+        await FinalizeAsync(actionSettings);
       }
     }
 
@@ -574,7 +571,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Отображает сообщение о завершении.
     /// </summary>
-    private async Task DisplayCompletionMessage()
+    private async Task DisplayCompletionMessage(CheckType checkType)
     {
       ShowMessageModel showMessage = new ShowMessageModel()
       {
@@ -583,6 +580,10 @@ namespace Ask.UI.Controls.ProtocolNew
       };
 
       ProtocolSelfCheck.LastMessage = true;
+      if (checkType != CheckType.ControlProgram)
+      {
+        return;
+      }
       await ProtocolSelfCheck.ShowMessageAsync(showMessage, ignoreOutputValidation: true);
     }
 
@@ -639,7 +640,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
           if (shouldFinalize)
           {
-            await ProtocolSelfCheck.FinalizeAsync(stop);
+            await ProtocolSelfCheck.FinalizeAsync();
           }
         }
       }

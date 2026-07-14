@@ -5,6 +5,7 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ErrorList;
@@ -329,7 +330,15 @@ namespace UI.Controls.Runner
       }
 
       ProtocolUI.Header = BuildDerivedFileName(OpkFilePath, FileName, ".lst", "protocol.lst");
-      ProtocolUI.SetSettings(StartDelegate: StartTest, false);
+
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = StartTest,
+        IsRepeatEnabled = false,
+        CheckType = CheckType.ControlProgram,
+      };
+
+      ProtocolUI.SetSettings(settings);
       this.FileName = ProtocolUI.Header;
 
       await ProtocolUI.StartAsync();

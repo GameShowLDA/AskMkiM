@@ -1,8 +1,10 @@
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
@@ -39,13 +41,18 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       _controller = executionController;
       _userInteractionService = userInteractionService;
 
-      _controller.SetSettings(
-        StartDelegate: ExecuteTestProcess,
-        true,
-        StopDelegate: async (CancellationToken token) =>
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteTestProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Test,
+        StopDelegate = async (CancellationToken token) =>
         {
           await Stop(token, userInteractionService);
-        });
+        }
+      };
+
+      _controller.SetSettings(settings);
     }
 
     /// <summary>

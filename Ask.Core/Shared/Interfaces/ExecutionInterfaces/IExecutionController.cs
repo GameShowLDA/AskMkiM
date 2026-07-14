@@ -1,4 +1,4 @@
-﻿using static Ask.Core.Shared.Metadata.Static.DelegateManager;
+﻿using Ask.Core.Shared.DTO.Executor;
 
 namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces
 {
@@ -13,13 +13,7 @@ namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces
     /// <param name="StopDelegate">Делегат остановки (необязательно).</param>
     /// <param name="ReturnDelegate">Делегат возврата к предыдущему состоянию (необязательно).</param>
     /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
-    void SetSettings(
-      StartDelegate StartDelegate,
-      bool isRepeatEnabled,
-      StopDelegate StopDelegate = null,
-      ReturnDelegate ReturnDelegate = null,
-      PreActionDelegate preActionDelegate = null,
-      bool checkPower = true);
+    void SetSettings(ActionSettings actionSettings);
 
     /// <summary>
     /// Прерывает выполнение текущего процесса.
@@ -36,8 +30,7 @@ namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces
     /// <summary>
     /// Выполняет завершающие действия после завершения процесса.
     /// </summary>
-    /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    Task FinalizeAsync(StopDelegate stopDelegate = null);
+    Task FinalizeAsync();
   }
 }
