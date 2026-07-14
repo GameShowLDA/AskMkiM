@@ -11,6 +11,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Message;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using WindowsInput;
@@ -192,7 +193,7 @@ namespace Ask.UI.Controls.ProtocolNew
           await ResetSystemAsync();
         }
 
-        await ExecuteTaskAsync(actionSettings.StartDelegate, actionSettings.StopDelegate, actionSettings.Name, actionSettings.IsRepeatEnabled);
+        await ExecuteTaskAsync(actionSettings);
       }
       catch (Exception ex)
       {
@@ -244,7 +245,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       await HandleProtocolActionsAsync(actionSettings.Name);
       ProtocolSelfCheck.ShowOnlyStartButton();
-      await DisplayCompletionMessage(actionSettings.CheckType);
+      await DisplayCompletionMessage(actionSettings);
 
       StartProcessing?.Invoke(false);
 
@@ -571,7 +572,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Отображает сообщение о завершении.
     /// </summary>
-    private async Task DisplayCompletionMessage(CheckType checkType)
+    private async Task DisplayCompletionMessage(ActionSettings actionSettings)
     {
       ShowMessageModel showMessage = new ShowMessageModel()
       {
@@ -580,11 +581,14 @@ namespace Ask.UI.Controls.ProtocolNew
       };
 
       ProtocolSelfCheck.LastMessage = true;
-      if (checkType == CheckType.ControlProgram)
+      if (actionSettings.CheckType == CheckType.ControlProgram)
       {
         return;
       }
+
       await ProtocolSelfCheck.ShowMessageAsync(showMessage, ignoreOutputValidation: true);
+      var message = BuildProtocol(actionSettings);
+      await ShowProtocol(message);
     }
 
     /// <summary>
@@ -593,7 +597,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="startDelegate">Делегат для выполнения задачи.</param>
     /// <param name="name">Имя запускаемого процесса.</param>
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
-    private async Task ExecuteTaskAsync(StartDelegate startDelegate, StopDelegate stop, string name, bool isRepeatEnabled)
+    private async Task ExecuteTaskAsync(ActionSettings actionSettings)
     {
       // Освобождаем старый токен, если был
       CancellationTokenSource?.Dispose();
@@ -603,19 +607,20 @@ namespace Ask.UI.Controls.ProtocolNew
       CancellationTokenSource = new CancellationTokenSource();
       PauseCompletionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-      if (startDelegate != null)
+      if (actionSettings.StartDelegate != null)
       {
-        bool shouldFinalize = !isRepeatEnabled;
+        bool shouldFinalize = !actionSettings.IsRepeatEnabled;
 
         try
         {
           SystemStateManager._stopwatch.Restart();
+          actionSettings.StartTime = TimeOnly.FromDateTime(DateTime.Now);
 
-          ProcessTask = Task.Run(() => startDelegate(ProtocolSelfCheck, ProtocolSelfCheck, ProtocolSelfCheck.GetInputHighlightService(), CancellationTokenSource.Token));
+          ProcessTask = Task.Run(() => actionSettings.StartDelegate(ProtocolSelfCheck, ProtocolSelfCheck, ProtocolSelfCheck.GetInputHighlightService(), CancellationTokenSource.Token));
           SystemStateManager.SetIsLocked(true);
           await ProcessTask;
 
-          if (isRepeatEnabled)
+          if (actionSettings.IsRepeatEnabled)
           {
             ProtocolSelfCheck.ShowAdditionalFunctionButtons();
             shouldFinalize = false;
@@ -628,7 +633,7 @@ namespace Ask.UI.Controls.ProtocolNew
         }
         catch (Exception ex)
         {
-          LogException($"Ошибка при запуске \"{name}\"", ex);
+          LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
           await ProtocolSelfCheck.AppendEmptyLineAsync();
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка программы АСК-МКИ-М", headerColor: ShowMessageModel.ErrorMessage.TitleColor, message: ex.Message) { IndentLevel = 1 });
           shouldFinalize = true;
@@ -636,6 +641,8 @@ namespace Ask.UI.Controls.ProtocolNew
         finally
         {
           SystemStateManager.SetIsLocked(false);
+
+          actionSettings.ExecutionDuration = SystemStateManager._stopwatch.Elapsed;
           SystemStateManager._stopwatch.Stop();
 
           if (shouldFinalize)
@@ -814,5 +821,28 @@ namespace Ask.UI.Controls.ProtocolNew
       return actionExecutor;
     }
     #endregion
+
+    /// <summary>
+    /// Формирует протокол выполнения проверки.
+    /// </summary>
+    private StringBuilder BuildProtocol(ActionSettings actionSettings)
+    {
+      StringBuilder message = new StringBuilder();
+      message.AppendLine($"Проверка \"{actionSettings.Name}\" от {DateTime.Now.ToString("dd.MM.yyyy")} завершена.");
+      message.AppendLine($"\tНачало проверки: {actionSettings.StartTime.ToString("HH:mm:ss")}");
+
+      string durationFormatted = actionSettings.ExecutionDuration.ToString(@"hh\:mm\:ss\:fff");
+      message.AppendLine($"\tВремя выполнения: {durationFormatted}");
+
+      return message;
+    }
+
+    /// <summary>
+    /// Отображает протокол на экране.
+    /// </summary>
+    private async Task ShowProtocol(StringBuilder stringBuilder)
+    {
+      await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel(message: stringBuilder.ToString()));
+    }
   }
 }

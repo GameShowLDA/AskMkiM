@@ -47,5 +47,15 @@ namespace Ask.Core.Shared.DTO.Executor
     /// Имя запускаемого процесса.
     /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// Время начала выполнения.
+    /// </summary>
+    public TimeOnly StartTime { get; set; }
+
+    /// <summary>
+    /// Время, затраченное на выполнение теста.
+    /// </summary>
+    public TimeSpan ExecutionDuration { get; set; }
   }
 }
