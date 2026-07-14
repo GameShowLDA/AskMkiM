@@ -51,6 +51,8 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     private string processName = string.Empty;
 
+    private ActionSettings? _actionSettings;
+
     /// <summary>
     /// Объект синхронизации для операций паузы и возобновления выполнения.
     /// </summary>
@@ -140,6 +142,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
       try
       {
+        _actionSettings = actionSettings;
+        ClearErrors();
         ProtocolSelfCheck.HideProtocolManager();
 
         // Новый запуск не должен наследовать "залипшее" состояние
@@ -541,6 +545,29 @@ namespace Ask.UI.Controls.ProtocolNew
       }
     }
 
+    internal void AddError(string error)
+    {
+      if (string.IsNullOrWhiteSpace(error))
+      {
+        return;
+      }
+
+      lock (_runSync)
+      {
+        var executor = _activeExecutor ?? this;
+        executor._actionSettings?.ExecutionErrors.Add(error);
+      }
+    }
+
+    internal void ClearErrors()
+    {
+      lock (_runSync)
+      {
+        var executor = _activeExecutor ?? this;
+        executor._actionSettings?.ExecutionErrors.Clear();
+      }
+    }
+
     /// <summary>
     /// Освобождает глобальный слот выполнения.
     /// </summary>
@@ -587,6 +614,8 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       await ProtocolSelfCheck.ShowMessageAsync(showMessage, ignoreOutputValidation: true);
+      await ProtocolSelfCheck.AppendEmptyLineAsync();
+
       var message = BuildProtocol(actionSettings);
       await ShowProtocol(message);
     }
@@ -833,6 +862,21 @@ namespace Ask.UI.Controls.ProtocolNew
 
       string durationFormatted = actionSettings.ExecutionDuration.ToString(@"hh\:mm\:ss\:fff");
       message.AppendLine($"\tВремя выполнения: {durationFormatted}");
+      message.AppendLine();
+
+      if (actionSettings.ExecutionErrors.Count == 0)
+      {
+        message.AppendLine("\tЗаключение: ошибок не обнаружено");
+      }
+      else
+      {
+        message.AppendLine("Заключение:");
+
+        for (int i = 0; i < actionSettings.ExecutionErrors.Count; i++)
+        {
+          message.AppendLine($"\t{i + 1}. {actionSettings.ExecutionErrors[i]}[БРАК]");
+        }
+      }
 
       return message;
     }
@@ -842,7 +886,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     private async Task ShowProtocol(StringBuilder stringBuilder)
     {
-      await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel(message: stringBuilder.ToString()));
+      await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel(message: stringBuilder.ToString()) { IndentLevel = 0 });
     }
   }
 }

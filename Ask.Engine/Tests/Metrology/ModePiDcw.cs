@@ -43,6 +43,7 @@ namespace Ask.Engine.Tests.Metrology
 
       _userInteractionService = userInteractionService;
       testMeasurement = new PiMeasurement(referenceVoltageRequestService);
+      testMeasurement.SetExecutionController(executionController);
 
       ActionSettings settings = new ActionSettings()
       {
@@ -125,6 +126,11 @@ namespace Ask.Engine.Tests.Metrology
         var err = result - param;
 
         Measurements.Add(err);
+
+        if (result < LowerBound || result > UpperBound)
+        {
+          AddMetrologyError(messageService, metrologicalModeRole, result, LowerBound, UpperBound, "В");
+        }
 
         await messageService.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжения", message: MeasurementValueFormatter.FormatWithUnit(result, "В"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
         await messageService.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);

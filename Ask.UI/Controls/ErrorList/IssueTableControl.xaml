@@ -64,7 +64,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="{Binding LineColumnWidth, ElementName=root}"/>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="{Binding MeasureColumnWidth, ElementName=root}"/>
@@ -131,7 +131,7 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="0"/>
                                 <ColumnDefinition Width="{Binding LineColumnWidth, RelativeSource={RelativeSource AncestorType=local:IssueTableControl}}"/>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="{Binding MeasureColumnWidth, RelativeSource={RelativeSource AncestorType=local:IssueTableControl}}"/>

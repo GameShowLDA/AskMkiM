@@ -42,6 +42,7 @@ namespace Ask.Engine.Tests.Metrology
     public void InitializeSettings(IExecutionController executionController, IUserInteractionService userInteractionService)
     {
       _userInteractionService = userInteractionService;
+      testMeasurement.SetExecutionController(executionController);
 
       ActionSettings settings = new ActionSettings()
       {
@@ -120,6 +121,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var err = result - param;
         Measurements.Add(err);
+
+        if (result < LowerBound || result > UpperBound)
+        {
+          AddMetrologyError(protocolUI, metrologicalModeRole, result, LowerBound, UpperBound, "МОм");
+        }
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: MeasurementValueFormatter.FormatWithUnit(result, "МОм"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "МОм"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);

@@ -57,5 +57,10 @@ namespace Ask.Core.Shared.DTO.Executor
     /// Время, затраченное на выполнение теста.
     /// </summary>
     public TimeSpan ExecutionDuration { get; set; }
+
+    /// <summary>
+    /// Ошибки, сформированные во время выполнения действия.
+    /// </summary>
+    public List<string> ExecutionErrors { get; } = new();
   }
 }

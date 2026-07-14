@@ -16,6 +16,16 @@ namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces
     void SetSettings(ActionSettings actionSettings);
 
     /// <summary>
+    /// Добавляет ошибку в текущий протокол выполнения.
+    /// </summary>
+    void AddError(string error);
+
+    /// <summary>
+    /// Очищает ошибки текущего протокола выполнения.
+    /// </summary>
+    void ClearErrors();
+
+    /// <summary>
     /// Прерывает выполнение текущего процесса.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>

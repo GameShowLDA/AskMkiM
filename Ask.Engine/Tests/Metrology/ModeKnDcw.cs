@@ -41,6 +41,7 @@ namespace Ask.Engine.Tests.Metrology
     {
       _userInteractionService = userInteractionService;
       testMeasurement = new KnMeasurement(referenceVoltageRequestService);
+      testMeasurement.SetExecutionController(executionController);
 
       ActionSettings settings = new ActionSettings()
       {
@@ -125,6 +126,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var err = resultFastMeterMeasured - resultReferenceMeterMeasured;
         Measurements.Add(err);
+
+        if (!result)
+        {
+          AddMetrologyError(protocolUI, metrologicalModeRole, resultFastMeterMeasured, LowerBound, UpperBound, "В");
+        }
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"Значение эталоного напряжения ", null, MeasurementValueFormatter.FormatWithUnit(resultReferenceMeterMeasured, "В")) { IndentLevel = 1 });
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжение", message: MeasurementValueFormatter.FormatWithUnit(resultFastMeterMeasured, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
