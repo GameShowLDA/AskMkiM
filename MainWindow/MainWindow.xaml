@@ -279,7 +279,7 @@
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}" Visibility="Collapsed">
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}">
 
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KS}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" utilities:HelpProvider.HelpKey="UtilityModeKC"/>
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_IE}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" utilities:HelpProvider.HelpKey="UtilityModeIE"/>
@@ -301,7 +301,7 @@
 
                         </MenuItem>
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests}, Path=Value}"  Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}" Visibility="Collapsed">
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests}, Path=Value}"  Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
 
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI}, Path=Value}"  Style="{StaticResource SideMenuItemStyle}" Name="AskmCiTestsMenuItem">
 
