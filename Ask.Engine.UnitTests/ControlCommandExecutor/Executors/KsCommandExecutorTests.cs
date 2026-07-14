@@ -449,6 +449,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
         It.IsAny<bool>(),
         It.IsAny<bool>(),
         It.IsAny<bool>(),
+        It.IsAny<bool>(),
         It.IsAny<string>(),
         It.IsAny<string>(),
         It.IsAny<int>()))

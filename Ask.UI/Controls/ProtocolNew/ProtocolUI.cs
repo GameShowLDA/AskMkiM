@@ -226,7 +226,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     /// <param name="showMessageModel">Модель сообщения.</param>
     /// <returns>Возвращает режим по шагам.</returns>
-    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false,
+    public async Task ShowMessageAsync(ShowMessageModel showMessageModel, bool IsBlockStart = false, bool SkipStepModeCheck = false, bool skipPause = false, bool ignoreOutputValidation = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)
@@ -255,7 +255,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       if (string.IsNullOrEmpty(showMessageModel.Message) &&
           showMessageModel.Status != MessageType.Command &&
-          !ProtocolConfig.GetHeaderInfo())
+          (!ProtocolConfig.GetHeaderInfo() || !ignoreOutputValidation))
       {
         return;
       }

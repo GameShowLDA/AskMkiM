@@ -747,6 +747,7 @@ namespace Ask.UI.Components.ProtocolListBox
       bool IsBlockStart = false,
       bool SkipStepModeCheck = false,
       bool skipPause = false,
+      bool ignoreOutputValidation = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)

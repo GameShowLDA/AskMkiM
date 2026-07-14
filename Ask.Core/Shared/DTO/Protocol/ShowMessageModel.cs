@@ -139,7 +139,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// </summary>
     public int IndentLevel { get; set; }
 
-    private MessageType? status;
+    private MessageType? status = MessageType.Info;
     public MessageType? Status
     {
       get
