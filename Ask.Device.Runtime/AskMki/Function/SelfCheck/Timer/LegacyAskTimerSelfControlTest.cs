@@ -41,17 +41,17 @@ public sealed class LegacyAskTimerSelfControlTest : LegacyAskModuleTestBase
     int[] beforeMs = [50, 100, 150, 200, 250, 500];
     int[] impulseMs = [20, 50, 100, 200, 500, 1000];
 
-    await context.Protocol.BeginSubTestAsync(title, 1, "Проверка времени до пуска и длительности импульса");
+    await context.Reporter.BeginSubTestAsync(title, 1, "Проверка времени до пуска и длительности импульса");
     for (int i = 0; i < impulseMs.Length; i++)
     {
       await controller.SetTimerStopAsync((ushort)impulseMs[i], context.CancellationToken);
       await controller.StartTimerAsync((ushort)beforeMs[i], context.CancellationToken);
       await controller.ReadTimerReadyAsync(1, context.CancellationToken);
       await controller.ReadTimerWordAsync(0, context.CancellationToken);
-      await context.Protocol.TestStepAsync($"Тест {i + 1}: до={beforeMs[i]}мс tи={impulseMs[i]}мс  tдо={beforeMs[i]}мс+-10мс  Tизм={impulseMs[i]}мс+-10мс");
+      await context.Reporter.TestStepAsync($"Тест {i + 1}: до={beforeMs[i]}мс tи={impulseMs[i]}мс  tдо={beforeMs[i]}мс+-10мс  Tизм={impulseMs[i]}мс+-10мс");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 1, "Проверка времени до пуска и длительности импульса");
+    await context.Reporter.EndSubTestAsync(title, 1, "Проверка времени до пуска и длительности импульса");
 
     stopwatch.Stop();
     SetSummary(startedAt, stopwatch.Elapsed, isIdleMode);

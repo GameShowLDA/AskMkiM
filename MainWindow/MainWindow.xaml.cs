@@ -185,10 +185,8 @@ namespace MainWindowProgram
       var legacyVisibility = useLegacyAsk ? Visibility.Visible : Visibility.Collapsed;
       var askmVisibility = useLegacyAsk ? Visibility.Collapsed : Visibility.Visible;
 
-      LegacyAskMetrologyMenuItem.Visibility = legacyVisibility;
-      LegacyAskAdditionalTestsMenuItem.Visibility = legacyVisibility;
-      LegacyAskRelayTrainingMenuItem.Visibility = legacyVisibility;
-      LegacyAskSwitchingTimeMenuItem.Visibility = legacyVisibility;
+      Metrology.Visibility = Visibility.Collapsed;
+      TestControl.Visibility = Visibility.Collapsed;
 
       ModeKSMenuItem.Visibility = askmVisibility;
       ModeIEMenuItem.Visibility = askmVisibility;

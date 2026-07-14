@@ -73,7 +73,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
   protected override Task AfterTestEndedAsync(LegacyAskSelfControlContext context, string testName, bool hasErrors)
   {
     return _summaryReady
-      ? context.Protocol.WriteSummaryAsync(testName, _summaryIsIdleMode, _summaryStartedAt, _summaryElapsed, hasErrors)
+      ? context.Reporter.WriteSummaryAsync(testName, _summaryIsIdleMode, _summaryStartedAt, _summaryElapsed, hasErrors)
       : Task.CompletedTask;
   }
 
@@ -95,17 +95,17 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       new VoltageRange("1кВ", 1000.0, "10В")
     };
 
-    await context.Protocol.BeginSubTestAsync(title, 1, testName);
+    await context.Reporter.BeginSubTestAsync(title, 1, testName);
 
     foreach (var range in ranges)
     {
       await ConfigureVoltageAsync(context, range.NominalValue, "измерение 0В");
       await ConnectVoltmeterToBusAsync(controller, LegacyAskBus.A1, LegacyAskBus.A1, isVoltageMode: true, context.CancellationToken);
       var measured = await MeasureVoltageAsync(context, range.ExpectedValue, range.NominalValue, "измерение 0В");
-      await context.Protocol.TestStepAsync($"ДиапU={range.DisplayName} U д.быть=0В+-{range.AbsoluteErrorText}  Uизм={FormatVoltage(measured)}");
+      await context.Reporter.TestStepAsync($"ДиапU={range.DisplayName} U д.быть=0В+-{range.AbsoluteErrorText}  Uизм={FormatVoltage(measured)}");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 1, testName);
+    await context.Reporter.EndSubTestAsync(title, 1, testName);
   }
 
   /// <summary>
@@ -126,7 +126,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       new PintVoltageCase(LegacyAskBus.A1, LegacyAskBus.B2, 30.0, 100.0, false, "30В+-1.5В")
     };
 
-    await context.Protocol.BeginSubTestAsync(title, 2, testName);
+    await context.Reporter.BeginSubTestAsync(title, 2, testName);
 
     foreach (var testCase in cases)
     {
@@ -139,17 +139,17 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       if (testCase.MustBeOverload)
       {
         await CheckVoltageOverloadAsync(context, testCase.ExpectedVoltage, testCase.Range, "проверка перегрузки ПИНТ4");
-        await context.Protocol.TestStepAsync(
+        await context.Reporter.TestStepAsync(
           $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-)={FormatVoltageShort(testCase.ExpectedVoltage)} Диап={FormatVoltageShort(testCase.Range)} Д.быть перегр.  Uизм>{FormatVoltageShort(testCase.Range)}");
         continue;
       }
 
       var measuredVoltage = await MeasureVoltageAsync(context, testCase.ExpectedVoltage, testCase.Range, "измерение напряжения ПИНТ4");
-      await context.Protocol.TestStepAsync(
+      await context.Reporter.TestStepAsync(
         $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-) д.быть={testCase.ExpectedText}  Диап={FormatVoltageShort(testCase.Range)}  Uизм={FormatVoltage(measuredVoltage)}");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 2, testName);
+    await context.Reporter.EndSubTestAsync(title, 2, testName);
   }
 
   /// <summary>
@@ -169,7 +169,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       new ResistanceCase("100кОм", 100000.0, 5000.0, false)
     };
 
-    await context.Protocol.BeginSubTestAsync(title, 3, testName);
+    await context.Reporter.BeginSubTestAsync(title, 3, testName);
 
     try
     {
@@ -183,12 +183,12 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
         if (testCase.MustBeOverload)
         {
           await CheckResistanceOverloadAsync(context, ShortCircuitResistanceOhm, testCase.Range, "проверка перегрузки сопротивления КЗШ");
-          await context.Protocol.TestStepAsync($"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом Д.быть перегр.  Rизм>{testCase.DisplayRange}");
+          await context.Reporter.TestStepAsync($"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом Д.быть перегр.  Rизм>{testCase.DisplayRange}");
           continue;
         }
 
         var measuredResistance = await MeasureResistanceAsync(context, ShortCircuitResistanceOhm, testCase.Range, "измерение сопротивления КЗШ");
-        await context.Protocol.TestStepAsync(
+        await context.Reporter.TestStepAsync(
           $"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом+-{FormatResistanceTolerance(testCase.AbsoluteErrorOhm)}  Rизм={FormatResistance(measuredResistance)}");
       }
     }
@@ -198,7 +198,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     }
 
     await ConnectVoltmeterToBusAsync(controller, 0, 0, isVoltageMode: true, context.CancellationToken);
-    await context.Protocol.EndSubTestAsync(title, 3, testName);
+    await context.Reporter.EndSubTestAsync(title, 3, testName);
   }
 
   /// <summary>

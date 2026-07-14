@@ -42,18 +42,18 @@ public sealed class LegacyAskDeviceSwitchingSelfControlTest : LegacyAskModuleTes
 
     foreach (int pint in LegacyAskSelfTestFormat.GetPresentPints(context.Profile))
     {
-      await context.Protocol.BeginSubTestAsync(title, number, $"Проверка коммутации ПИНТ{pint}");
+      await context.Reporter.BeginSubTestAsync(title, number, $"Проверка коммутации ПИНТ{pint}");
       foreach (var bus in LegacyAskSelfTestFormat.DeviceSwitchBuses())
       {
         await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, 5.0, 0.01, bus.Positive, bus.Negative);
         await controller.WriteBusCommandAsync((ushort)(bus.Positive | (bus.Negative << 8)), context.CancellationToken);
         await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, LegacyAskAcpMode.Voltage10V, bus.Positive, bus.Negative);
-        await context.Protocol.TestStepAsync($"{number}. Uпинт{pint}(+{bus.PositiveName} -{bus.NegativeName}) д.быть=5В+-500мВ  Uацп=5.0000В  Uв7=5.0000В");
+        await context.Reporter.TestStepAsync($"{number}. Uпинт{pint}(+{bus.PositiveName} -{bus.NegativeName}) д.быть=5В+-500мВ  Uацп=5.0000В  Uв7=5.0000В");
       }
 
       await controller.WriteBusCommandAsync(0, context.CancellationToken);
       await LegacyAskSelfTestFormat.ResetPintAsync(context, controller, pint);
-      await context.Protocol.EndSubTestAsync(title, number, $"Проверка коммутации ПИНТ{pint}");
+      await context.Reporter.EndSubTestAsync(title, number, $"Проверка коммутации ПИНТ{pint}");
       number++;
     }
 

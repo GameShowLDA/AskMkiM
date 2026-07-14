@@ -57,7 +57,7 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
   private static async Task RunPintVoltageAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title, int pint)
   {
     int number = pint == 3 ? 1 : 3;
-    await context.Protocol.BeginSubTestAsync(title, number, $"Проверка Uпинт{pint}");
+    await context.Reporter.BeginSubTestAsync(title, number, $"Проверка Uпинт{pint}");
     double step = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltStep.ElementAtOrDefault(pint - 3), 0.1);
     double max = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(pint - 3), pint == 3 ? 36.0 : 39.9);
 
@@ -71,11 +71,11 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
         LegacyAskAcpMode.Voltage1V;
       await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, value, current, LegacyAskBus.A1, LegacyAskBus.B1);
       await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
-      await context.Protocol.TestStepAsync($"{index} Uпинт{pint}(+A1 -B1) д.быть={LegacyAskSelfTestFormat.Voltage(value)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(value)}");
+      await context.Reporter.TestStepAsync($"{index} Uпинт{pint}(+A1 -B1) д.быть={LegacyAskSelfTestFormat.Voltage(value)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(value)}");
       index++;
     }
 
-    await context.Protocol.EndSubTestAsync(title, number, $"Проверка Uпинт{pint}");
+    await context.Reporter.EndSubTestAsync(title, number, $"Проверка Uпинт{pint}");
   }
 
   /// <summary>
@@ -84,7 +84,7 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
   private static async Task RunPintCurrentAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title, int pint)
   {
     int number = pint == 3 ? 2 : 4;
-    await context.Protocol.BeginSubTestAsync(title, number, $"Проверка Iпинт{pint}");
+    await context.Reporter.BeginSubTestAsync(title, number, $"Проверка Iпинт{pint}");
     double step = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), pint == 3 ? 0.1 : 0.001);
     double max = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperMax.ElementAtOrDefault(pint - 3), pint == 3 ? 4.0 : 0.999);
 
@@ -95,10 +95,10 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
       double voltage = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(pint - 3), pint == 3 ? 36.0 : 39.9) / 10.0;
       await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, voltage, value, LegacyAskBus.B1, LegacyAskBus.B1);
       await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, LegacyAskAcpMode.Resistance100Ohm, LegacyAskBus.B1, LegacyAskBus.B1);
-      await context.Protocol.TestStepAsync($"{index} Iпинт{pint} д.быть={LegacyAskSelfTestFormat.Current(value)}+-{LegacyAskSelfTestFormat.Current(tolerance)}  Iизм={LegacyAskSelfTestFormat.Current(value)}");
+      await context.Reporter.TestStepAsync($"{index} Iпинт{pint} д.быть={LegacyAskSelfTestFormat.Current(value)}+-{LegacyAskSelfTestFormat.Current(tolerance)}  Iизм={LegacyAskSelfTestFormat.Current(value)}");
       index++;
     }
 
-    await context.Protocol.EndSubTestAsync(title, number, $"Проверка Iпинт{pint}");
+    await context.Reporter.EndSubTestAsync(title, number, $"Проверка Iпинт{pint}");
   }
 }

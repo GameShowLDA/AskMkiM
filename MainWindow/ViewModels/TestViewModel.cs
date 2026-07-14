@@ -52,16 +52,5 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void RelayContactResistExecutor() => _testService.AddRelayContactResistExecutorControlAsync();
 
-    /// <summary>Открывает дополнительные тесты старой АСК.</summary>
-    [RelayCommand]
-    private void LegacyAskAdditionalTests() => _testService.AddLegacyAskAdditionalTestsControl();
-
-    /// <summary>Открывает тренировку реле старой АСК.</summary>
-    [RelayCommand]
-    private void LegacyAskRelayTraining() => _testService.AddLegacyAskRelayTrainingControl();
-
-    /// <summary>Открывает измерение времени срабатывания старой АСК.</summary>
-    [RelayCommand]
-    private void LegacyAskSwitchingTime() => _testService.AddLegacyAskSwitchingTimeControl();
   }
 }

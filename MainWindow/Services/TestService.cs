@@ -1,6 +1,4 @@
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.Engine.Tests.LegacyAsk;
-using UI.Controls.ExecutorControls.LegacyAsk;
 using UI.Controls.ExecutorControls.TestsControls;
 using UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI;
 using UI.Controls.ExecutorControls.TestsControls.MethodExecutor.PI;
@@ -77,31 +75,5 @@ namespace MainWindowProgram.Services
     public void AddRelayContactResistExecutorControlAsync() =>
       _multiWindow.WorkspaceService.AddControl("Сопротивление коммутатора", new RkommConnectionControl(), TypeWindow.DeviceControl);
 
-    /// <summary>
-    /// Добавляет элемент управления для дополнительных тестов старой АСК.
-    /// </summary>
-    public void AddLegacyAskAdditionalTestsControl() =>
-      _multiWindow.WorkspaceService.AddControl(
-        "Дополнительные тесты АСК",
-        new LegacyAskTestControl(LegacyAskTestKind.AdditionalService),
-        TypeWindow.DeviceControl);
-
-    /// <summary>
-    /// Добавляет элемент управления для тренировки реле старой АСК.
-    /// </summary>
-    public void AddLegacyAskRelayTrainingControl() =>
-      _multiWindow.WorkspaceService.AddControl(
-        "Тренировка реле АСК",
-        new LegacyAskTestControl(LegacyAskTestKind.RelayTraining),
-        TypeWindow.DeviceControl);
-
-    /// <summary>
-    /// Добавляет элемент управления для измерения времени срабатывания старой АСК.
-    /// </summary>
-    public void AddLegacyAskSwitchingTimeControl() =>
-      _multiWindow.WorkspaceService.AddControl(
-        "Время срабатывания АСК",
-        new LegacyAskTestControl(LegacyAskTestKind.SwitchingTime),
-        TypeWindow.DeviceControl);
   }
 }

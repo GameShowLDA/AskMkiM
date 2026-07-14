@@ -54,7 +54,7 @@ public sealed class LegacyAskPpuSelfControlTest : LegacyAskModuleTestBase
   /// </summary>
   private static async Task RunPpuOneSecondAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
   {
-    await context.Protocol.BeginSubTestAsync(title, 1, "Испытание 1с");
+    await context.Reporter.BeginSubTestAsync(title, 1, "Испытание 1с");
     foreach (int voltage in LegacyAskSelfTestFormat.PpuOneSecondVoltages(LegacyAskSelfTestFormat.GetPpuMaximumVoltage(context.Profile)))
     {
       double tolerance = voltage * 0.05;
@@ -62,10 +62,10 @@ public sealed class LegacyAskPpuSelfControlTest : LegacyAskModuleTestBase
       await LegacyAskPpuPkiExchange.StartPpuAsync(context, controller, LegacyAskPpuMode.OneSecond | LegacyAskPpuMode.MeasureVoltage);
       await LegacyAskPpuPkiExchange.ReadPpuStatusAsync(context, controller);
       await LegacyAskPpuPkiExchange.ResetPpuAsync(context, controller);
-      await context.Protocol.TestStepAsync($"U д.быть={LegacyAskSelfTestFormat.Voltage(voltage)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}  Ош=0.0%");
+      await context.Reporter.TestStepAsync($"U д.быть={LegacyAskSelfTestFormat.Voltage(voltage)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}  Ош=0.0%");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 1, "Испытание 1с");
+    await context.Reporter.EndSubTestAsync(title, 1, "Испытание 1с");
   }
 
   /// <summary>
@@ -73,17 +73,17 @@ public sealed class LegacyAskPpuSelfControlTest : LegacyAskModuleTestBase
   /// </summary>
   private static async Task RunPpuLongAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
   {
-    await context.Protocol.BeginSubTestAsync(title, 2, "Испытание 60с");
+    await context.Reporter.BeginSubTestAsync(title, 2, "Испытание 60с");
     int voltage = Math.Clamp(LegacyAskSelfTestFormat.GetPpuMaximumVoltage(context.Profile), 100, 999);
     await LegacyAskPpuPkiExchange.SetPpuModeAsync(context, controller, voltage, LegacyAskPpuMode.OneMinute | LegacyAskPpuMode.MeasureVoltage);
     await LegacyAskPpuPkiExchange.StartPpuAsync(context, controller, LegacyAskPpuMode.OneMinute | LegacyAskPpuMode.MeasureVoltage);
     await LegacyAskPpuPkiExchange.ReadPpuStatusAsync(context, controller);
-    await context.Protocol.TestStepAsync($"U заданное={LegacyAskSelfTestFormat.Voltage(voltage)}");
-    await context.Protocol.TestStepAsync($"0.0с-7.5с V д.быть<={Math.Max(1, voltage / 3)}В/с  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}");
-    await context.Protocol.TestStepAsync($"7.5с-21.0с U д.быть={LegacyAskSelfTestFormat.Voltage(voltage)}+-{LegacyAskSelfTestFormat.Voltage(voltage * 0.25)}  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}");
-    await context.Protocol.TestStepAsync($"21.0с-63.0с U д.быть={LegacyAskSelfTestFormat.Voltage(voltage)}+-{LegacyAskSelfTestFormat.Voltage(voltage * 0.05)}  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}");
-    await context.Protocol.TestStepAsync($"67.5с-75.0с V спада д.быть<={Math.Max(1, voltage / 3)}В/с  Uизм=0.0000В");
+    await context.Reporter.TestStepAsync($"U заданное={LegacyAskSelfTestFormat.Voltage(voltage)}");
+    await context.Reporter.TestStepAsync($"0.0с-7.5с V д.быть<={Math.Max(1, voltage / 3)}В/с  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}");
+    await context.Reporter.TestStepAsync($"7.5с-21.0с U д.быть={LegacyAskSelfTestFormat.Voltage(voltage)}+-{LegacyAskSelfTestFormat.Voltage(voltage * 0.25)}  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}");
+    await context.Reporter.TestStepAsync($"21.0с-63.0с U д.быть={LegacyAskSelfTestFormat.Voltage(voltage)}+-{LegacyAskSelfTestFormat.Voltage(voltage * 0.05)}  Uизм={LegacyAskSelfTestFormat.Voltage(voltage)}");
+    await context.Reporter.TestStepAsync($"67.5с-75.0с V спада д.быть<={Math.Max(1, voltage / 3)}В/с  Uизм=0.0000В");
     await LegacyAskPpuPkiExchange.ResetPpuAsync(context, controller);
-    await context.Protocol.EndSubTestAsync(title, 2, "Испытание 60с");
+    await context.Reporter.EndSubTestAsync(title, 2, "Испытание 60с");
   }
 }

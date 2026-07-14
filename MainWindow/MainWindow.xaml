@@ -279,26 +279,7 @@
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}">
-
-                            <MenuItem Header="Погрешности измерения" Style="{DynamicResource SideMenuItemStyle}" Name="LegacyAskMetrologyMenuItem" Visibility="Collapsed">
-                                <MenuItem Header="Измерение R электронная 4-х точка" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="E4TPGR"/>
-                                <MenuItem Header="Измерение R релейная 4-х точка" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="R4TPGR"/>
-                                <MenuItem Header="Измерение R 2-х проводная схема" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="R2TPGR"/>
-                                <MenuItem Header="Измерение R в режиме омметра" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="RV7PGR"/>
-                                <MenuItem Header="Измерение R с помощью ПКИ" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="PKIPGR"/>
-                                <MenuItem Header="Измерение Uпост вольтметром" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="UV7PGR"/>
-                                <MenuItem Header="Измерение I ПИНТов" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="IV7PGR"/>
-                                <MenuItem Header="Измерение Uпост с помощью АЦП" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="UACPPGR"/>
-                                <MenuItem Header="Измерение R с помощью АЦП" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="RACPPGR"/>
-                                <MenuItem Header="Измерение Uппу" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="UPPUPGR"/>
-                                <MenuItem Header="Измерение U переменного" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="VV7PGR"/>
-                                <MenuItem Header="Измерение интервалов времени" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="TIMEPGR"/>
-                                <MenuItem Header="Порог срабатывания компаратора" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="EPREZ"/>
-                                <MenuItem Header="Измерение Iут с помощью ПКИ" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="KUPGR"/>
-                                <MenuItem Header="Измерение емкости" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="IEPGR"/>
-                                <MenuItem Header="Измерение Uпки" Style="{DynamicResource StyleMenuItem}" Command="{Binding Metrology.LegacyAskMeasurementAccuracyTestCommand}" CommandParameter="UPKIPGR"/>
-                            </MenuItem>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}" Visibility="Collapsed">
 
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_KS}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeKSMenuItem" Command="{Binding Metrology.KCCommand}" utilities:HelpProvider.HelpKey="UtilityModeKC"/>
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_IE}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="ModeIEMenuItem" Command="{Binding Metrology.IECommand}" utilities:HelpProvider.HelpKey="UtilityModeIE"/>
@@ -320,13 +301,7 @@
 
                         </MenuItem>
 
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests}, Path=Value}"  Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}">
-
-                            <MenuItem Header="Дополнительные тесты" Style="{DynamicResource StyleMenuItem}" Name="LegacyAskAdditionalTestsMenuItem" Command="{Binding Test.LegacyAskAdditionalTestsCommand}" Visibility="Collapsed"/>
-
-                            <MenuItem Header="Тренировка реле" Style="{DynamicResource StyleMenuItem}" Name="LegacyAskRelayTrainingMenuItem" Command="{Binding Test.LegacyAskRelayTrainingCommand}" Visibility="Collapsed"/>
-
-                            <MenuItem Header="Время срабатывания" Style="{DynamicResource StyleMenuItem}" Name="LegacyAskSwitchingTimeMenuItem" Command="{Binding Test.LegacyAskSwitchingTimeCommand}" Visibility="Collapsed"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests}, Path=Value}"  Name="TestControl" Tag="menuHeader_4" Style="{StaticResource SideMenuItemStyle}" Visibility="Collapsed">
 
                             <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Tests_CI}, Path=Value}"  Style="{StaticResource SideMenuItemStyle}" Name="AskmCiTestsMenuItem">
 

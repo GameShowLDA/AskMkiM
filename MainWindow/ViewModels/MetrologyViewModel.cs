@@ -56,20 +56,5 @@ namespace MainWindowProgram.ViewModels
     /// <summary>Открыть режим ЭТ.</summary>
     [RelayCommand]
     private void EHT() => _service.OpenMetrologyMode(MetrologyType.EHT);
-
-    /// <summary>
-    /// Открыть тест погрешности измерения старого тестера АСК по коду MKI.
-    /// </summary>
-    /// <param name="testCode">Код теста старой программы MKI.</param>
-    [RelayCommand]
-    private void LegacyAskMeasurementAccuracyTest(string? testCode)
-    {
-      if (string.IsNullOrWhiteSpace(testCode))
-      {
-        return;
-      }
-
-      _service.OpenLegacyAskMeasurementAccuracyTest(testCode);
-    }
   }
 }

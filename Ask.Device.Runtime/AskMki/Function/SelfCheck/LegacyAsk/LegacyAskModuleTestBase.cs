@@ -31,7 +31,7 @@ public abstract class LegacyAskModuleTestBase
     string testName = GetTestName(context);
     bool hasErrors = false;
 
-    await context.Protocol.BeginTestAsync(testName);
+    await context.Reporter.BeginTestAsync(testName);
 
     try
     {
@@ -39,9 +39,9 @@ public abstract class LegacyAskModuleTestBase
 
       if (!LegacyAskSelfControlAvailability.IsAvailable(context.Profile, Module))
       {
-        await context.Protocol.ErrorAsync(LegacyAskSelfControlModuleMetadata.GetUnavailableReason(Module));
-        await context.Protocol.EndTestAsync(testName);
-        await context.Protocol.CompleteCommandAsync(hasErrors: true);
+        await context.Reporter.ErrorAsync(LegacyAskSelfControlModuleMetadata.GetUnavailableReason(Module));
+        await context.Reporter.EndTestAsync(testName);
+        await context.Reporter.CompleteCommandAsync(hasErrors: true);
         return;
       }
 
@@ -50,22 +50,22 @@ public abstract class LegacyAskModuleTestBase
     catch (OperationCanceledException)
     {
       hasErrors = true;
-      await context.Protocol.ErrorAsync("Тест прерван пользователем");
+      await context.Reporter.ErrorAsync("Тест прерван пользователем");
     }
     catch (LegacyMkiHardwareProfileValidationException ex)
     {
       hasErrors = true;
-      await context.Protocol.ErrorAsync("Ошибка конфигурации аппаратуры АСК: " + ex.Message);
+      await context.Reporter.ErrorAsync("Ошибка конфигурации аппаратуры АСК: " + ex.Message);
     }
     catch (Exception ex) when (ex is LegacyAskProtocolException or TimeoutException or IOException or InvalidOperationException or UnauthorizedAccessException)
     {
       hasErrors = true;
-      await context.Protocol.ErrorAsync($"Ошибка обмена с контроллером АСК: {ex.Message}");
+      await context.Reporter.ErrorAsync($"Ошибка обмена с контроллером АСК: {ex.Message}");
     }
 
-    await context.Protocol.EndTestAsync(testName);
+    await context.Reporter.EndTestAsync(testName);
     await AfterTestEndedAsync(context, testName, hasErrors);
-    await context.Protocol.CompleteCommandAsync(hasErrors);
+    await context.Reporter.CompleteCommandAsync(hasErrors);
   }
 
   /// <summary>
@@ -96,7 +96,7 @@ public abstract class LegacyAskModuleTestBase
   protected virtual Task AfterTestEndedAsync(LegacyAskSelfControlContext context, string testName, bool hasErrors)
   {
     return _summaryReady
-      ? context.Protocol.WriteSummaryAsync(testName, _summaryIsIdleMode, _summaryStartedAt, _summaryElapsed, hasErrors)
+      ? context.Reporter.WriteSummaryAsync(testName, _summaryIsIdleMode, _summaryStartedAt, _summaryElapsed, hasErrors)
       : Task.CompletedTask;
   }
 

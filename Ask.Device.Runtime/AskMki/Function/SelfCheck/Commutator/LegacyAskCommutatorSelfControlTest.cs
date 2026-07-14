@@ -54,17 +54,17 @@ public sealed class LegacyAskCommutatorSelfControlTest : LegacyAskModuleTestBase
   /// </summary>
   private static async Task RunCommutatorNoShortsAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
   {
-    await context.Protocol.BeginSubTestAsync(title, 1, "Проверка отсутствия лишних замыканий");
+    await context.Reporter.BeginSubTestAsync(title, 1, "Проверка отсутствия лишних замыканий");
     foreach (var range in LegacyAskSelfTestFormat.GetSwitchRanges(context.Profile))
     {
       foreach (ushort address in LegacyAskSelfTestFormat.GetProbeAddresses(range))
       {
         await controller.CheckNoElectronicConnectionAsync(address, context.CancellationToken);
       }
-      await context.Protocol.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: лишние соединения не обнаружены");
+      await context.Reporter.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: лишние соединения не обнаружены");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 1, "Проверка отсутствия лишних замыканий");
+    await context.Reporter.EndSubTestAsync(title, 1, "Проверка отсутствия лишних замыканий");
   }
 
   /// <summary>
@@ -72,7 +72,7 @@ public sealed class LegacyAskCommutatorSelfControlTest : LegacyAskModuleTestBase
   /// </summary>
   private static async Task RunCommutatorNoBreaksAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
   {
-    await context.Protocol.BeginSubTestAsync(title, 2, "Проверка отсутствия обрывов");
+    await context.Reporter.BeginSubTestAsync(title, 2, "Проверка отсутствия обрывов");
     foreach (var range in LegacyAskSelfTestFormat.GetSwitchRanges(context.Profile))
     {
       foreach (ushort address in LegacyAskSelfTestFormat.GetProbeAddresses(range))
@@ -80,10 +80,10 @@ public sealed class LegacyAskCommutatorSelfControlTest : LegacyAskModuleTestBase
         await controller.CheckElectronicConnectionAsync(address, context.CancellationToken);
         await controller.CheckElectronicDisconnectionAsync(address, context.CancellationToken);
       }
-      await context.Protocol.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: цепи подключаются нормально");
+      await context.Reporter.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: цепи подключаются нормально");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 2, "Проверка отсутствия обрывов");
+    await context.Reporter.EndSubTestAsync(title, 2, "Проверка отсутствия обрывов");
   }
 
   /// <summary>
@@ -91,15 +91,15 @@ public sealed class LegacyAskCommutatorSelfControlTest : LegacyAskModuleTestBase
   /// </summary>
   private static async Task RunCommutatorContactResistanceAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
   {
-    await context.Protocol.BeginSubTestAsync(title, 3, "Сопротивление контактов реле");
+    await context.Reporter.BeginSubTestAsync(title, 3, "Сопротивление контактов реле");
     foreach (var range in LegacyAskSelfTestFormat.GetSwitchRanges(context.Profile))
     {
       await controller.WriteCommandRegisterAsync((ushort)(LegacyAskCommandBits.RelayA | LegacyAskCommandBits.RelayB | LegacyAskCommandBits.GroupRelay), context.CancellationToken);
       await controller.ReadAdcAsync(context.CancellationToken);
-      await context.Protocol.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: Rконт={LegacyAskSelfTestFormat.Resistance(context.Profile.HardwareConfig.RbusBb)} [НОРМА]");
+      await context.Reporter.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: Rконт={LegacyAskSelfTestFormat.Resistance(context.Profile.HardwareConfig.RbusBb)} [НОРМА]");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 3, "Сопротивление контактов реле");
+    await context.Reporter.EndSubTestAsync(title, 3, "Сопротивление контактов реле");
   }
 
   /// <summary>
@@ -107,14 +107,14 @@ public sealed class LegacyAskCommutatorSelfControlTest : LegacyAskModuleTestBase
   /// </summary>
   private static async Task RunCommutatorInsulationAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
   {
-    await context.Protocol.BeginSubTestAsync(title, 4, "Сопротивление изоляции коммутатора");
+    await context.Reporter.BeginSubTestAsync(title, 4, "Сопротивление изоляции коммутатора");
     foreach (var range in LegacyAskSelfTestFormat.GetSwitchRanges(context.Profile))
     {
       await controller.WriteCommandRegisterAsync((ushort)(LegacyAskCommandBits.ElectronicProbe | LegacyAskCommandBits.ElectronicTop | LegacyAskCommandBits.ElectronicBottom), context.CancellationToken);
       await controller.ReadAdcAsync(context.CancellationToken);
-      await context.Protocol.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: Rиз>{context.Profile.HardwareConfig.GomCmt:0.###} ГОм [НОРМА]");
+      await context.Reporter.TestStepAsync($"{range.Name} БК {range.FirstBk}-{range.LastBk}: Rиз>{context.Profile.HardwareConfig.GomCmt:0.###} ГОм [НОРМА]");
     }
 
-    await context.Protocol.EndSubTestAsync(title, 4, "Сопротивление изоляции коммутатора");
+    await context.Reporter.EndSubTestAsync(title, 4, "Сопротивление изоляции коммутатора");
   }
 }

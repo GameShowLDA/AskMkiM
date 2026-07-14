@@ -22,7 +22,7 @@ public sealed class LegacyAskSelfControlContext
     Target = target;
     Profile = profile;
     MessageService = messageService;
-    Protocol = new LegacyAskProtocolWriter(messageService);
+    Reporter = new LegacyAskSelfControlReporter(messageService);
     CancellationToken = cancellationToken;
     Multimeter = multimeter;
   }
@@ -43,9 +43,9 @@ public sealed class LegacyAskSelfControlContext
   public IUserInteractionService MessageService { get; }
 
   /// <summary>
-  /// Возвращает writer протокола в стиле старой MKI.
+  /// Возвращает writer стандартного протокола АСКМ.
   /// </summary>
-  public LegacyAskProtocolWriter Protocol { get; }
+  public LegacyAskSelfControlReporter Reporter { get; }
 
   /// <summary>
   /// Возвращает токен отмены выполнения.
