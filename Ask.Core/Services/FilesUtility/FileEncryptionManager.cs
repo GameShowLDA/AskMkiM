@@ -75,10 +75,10 @@ namespace Ask.Core.Services.FilesUtility
     }
 
     /// <summary>
-    /// Reads a file encrypted by FileEncryptionManager without changing the file on disk.
+    /// Считывает файл, зашифрованный с помощью FileEncryptionManager, не изменяя его на диске.
     /// </summary>
-    /// <param name="filePath">Path to the encrypted file.</param>
-    /// <returns>Decrypted source bytes.</returns>
+    /// <param name="filePath">Путь к зашифрованному файлу.</param>
+    /// <returns>Расшифрованные данные файла в виде массива байт.</returns>
     static public byte[] ReadEncryptedFileBytes(string filePath)
     {
       string fullPath = ValidateFilePath(filePath);
@@ -88,11 +88,11 @@ namespace Ask.Core.Services.FilesUtility
     }
 
     /// <summary>
-    /// Reads a file encrypted by FileEncryptionManager as text without changing the file on disk.
+    /// Считывает файл, зашифрованный с помощью FileEncryptionManager, в виде текста, не изменяя его на диске.
     /// </summary>
-    /// <param name="filePath">Path to the encrypted file.</param>
-    /// <param name="encoding">Text encoding for decrypted bytes.</param>
-    /// <returns>Decrypted file text.</returns>
+    /// <param name="filePath">Путь к зашифрованному файлу.</param>
+    /// <param name="encoding">Кодировка текста для расшифрованных данных.</param>
+    /// <returns>Текст расшифрованного файла.</returns>
     static public string ReadEncryptedFileText(string filePath, Encoding encoding)
     {
       return encoding.GetString(ReadEncryptedFileBytes(filePath));
@@ -223,6 +223,15 @@ namespace Ask.Core.Services.FilesUtility
       return fullPath;
     }
 
+    /// <summary>
+    /// Считывает зашифрованные данные из файла и возвращает шифртекст.
+    /// </summary>
+    /// <param name="fullPath">Полный путь к зашифрованному файлу.</param>
+    /// <returns>Шифртекст, извлечённый из файла.</returns>
+    /// <exception cref="InvalidDataException">
+    /// Выбрасывается, если файл имеет неподдерживаемый формат
+    /// или не содержит зашифрованных данных.
+    /// </exception>
     static private string ReadEncryptedFileCipherText(string fullPath)
     {
       string encryptedFileContent = File.ReadAllText(fullPath, Encoding.UTF8);
@@ -245,6 +254,18 @@ namespace Ask.Core.Services.FilesUtility
       return cipherText;
     }
 
+    /// <summary>
+    /// Проверяет, совпадает ли заданная последовательность байтов
+    /// с префиксом, начиная с указанного смещения.
+    /// </summary>
+    /// <param name="source">Исходный массив байтов.</param>
+    /// <param name="sourceLength">Количество значимых байтов в исходном массиве.</param>
+    /// <param name="prefix">Последовательность байтов, используемая в качестве префикса.</param>
+    /// <param name="offset">Смещение, с которого начинается сравнение.</param>
+    /// <returns>
+    /// <see langword="true"/>, если последовательность байтов совпадает с префиксом;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     static private bool MatchesPrefixAtOffset(byte[] source, int sourceLength, byte[] prefix, int offset)
     {
       if (offset < 0 || sourceLength - offset < prefix.Length)

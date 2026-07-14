@@ -7,7 +7,7 @@ using System.Text;
 namespace Ask.Core.Services.Protocols;
 
 /// <summary>
-/// Saves execution protocols to the common History directory.
+/// Предоставляет методы для сохранения протоколов выполнения в общий каталог истории.
 /// </summary>
 public static class ExecutionProtocolHistoryService
 {
@@ -15,8 +15,14 @@ public static class ExecutionProtocolHistoryService
   private static readonly UTF8Encoding Utf8NoBom = new(false);
 
   /// <summary>
-  /// Saves protocol messages to History\yyyy-MM-dd using the Name_HH-mm-ss.lst pattern.
+  /// Сохраняет протокол выполнения в общий каталог истории,
+  /// шифрует сохранённый файл и возвращает путь к нему.
   /// </summary>
+  /// <param name="protocolName">Имя протокола.</param>
+  /// <param name="messages">Коллекция сообщений, формирующих содержимое протокола.</param>
+  /// <returns>
+  /// Полный путь к сохранённому и зашифрованному файлу протокола.
+  /// </returns>
   public static async Task<string> SaveAsync(string? protocolName, IEnumerable<ShowMessageModel> messages)
   {
     string historyDirectory = GetHistoryDirectory();
@@ -34,16 +40,19 @@ public static class ExecutionProtocolHistoryService
   }
 
   /// <summary>
-  /// Returns the absolute History directory path.
+  /// Возвращает абсолютный путь к каталогу хранения протоколов выполнения.
   /// </summary>
-  public static string GetHistoryDirectory()
-  {
-    return Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
-  }
+  /// <returns>Абсолютный путь к каталогу <c>History</c>.</returns>
+  public static string GetHistoryDirectory() => Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
 
   /// <summary>
-  /// Returns the latest saved protocol path from History.
+  /// Возвращает путь к последнему сохранённому протоколу
+  /// из каталога истории.
   /// </summary>
+  /// <returns>
+  /// Полный путь к последнему сохранённому протоколу
+  /// либо <see langword="null"/>, если протоколы отсутствуют.
+  /// </returns>
   public static string? ResolveLatestProtocolPath()
   {
     string historyDirectory = GetHistoryDirectory();
@@ -60,6 +69,12 @@ public static class ExecutionProtocolHistoryService
       .FirstOrDefault();
   }
 
+  /// <summary>
+  /// Формирует уникальный путь к файлу протокола в указанном каталоге.
+  /// </summary>
+  /// <param name="dateDirectory">Каталог, в котором будет сохранён протокол.</param>
+  /// <param name="protocolName">Имя протокола, используемое при формировании имени файла.</param>
+  /// <returns>Полный путь к файлу, не совпадающий с уже существующими файлами.</returns>
   private static string BuildUniqueFilePath(string dateDirectory, string? protocolName)
   {
     string baseName = SanitizeFileName(Path.GetFileNameWithoutExtension(protocolName));
@@ -83,6 +98,16 @@ public static class ExecutionProtocolHistoryService
     return filePath;
   }
 
+  /// <summary>
+  /// Преобразует строку в корректное имя файла,
+  /// заменяя недопустимые символы символом подчёркивания.
+  /// </summary>
+  /// <param name="value">Исходное имя файла.</param>
+  /// <returns>
+  /// Строка, пригодная для использования в качестве имени файла.
+  /// Если исходное значение отсутствует или содержит только пробельные символы,
+  /// возвращается пустая строка.
+  /// </returns>
   private static string SanitizeFileName(string? value)
   {
     if (string.IsNullOrWhiteSpace(value))
@@ -101,6 +126,14 @@ public static class ExecutionProtocolHistoryService
     return builder.ToString();
   }
 
+  /// <summary>
+  /// Формирует строковое представление сообщения протокола.
+  /// </summary>
+  /// <param name="message">Сообщение, подлежащее записи в протокол.</param>
+  /// <returns>
+  /// Строка протокола, содержащая заголовок и сообщение,
+  /// либо пустая строка, если оба значения отсутствуют.
+  /// </returns>
   private static string FormatProtocolLine(ShowMessageModel message)
   {
     string header = message.Header?.TrimEnd() ?? string.Empty;

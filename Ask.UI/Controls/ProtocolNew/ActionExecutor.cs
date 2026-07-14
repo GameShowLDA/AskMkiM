@@ -24,19 +24,44 @@ namespace Ask.UI.Controls.ProtocolNew
   /// </summary>
   public class ActionExecutor
   {
+    /// <summary>
+    /// Выполняет последовательное исполнение управляющих команд
+    /// с поддержкой запуска, паузы и пошагового режима.
+    /// </summary>
     public ActionExecutor()
     {
       EventAggregator.Subscribe<ExecutionEvents.StepByStepModeChanged>(e => StepMode = e.IsEnabled);
     }
 
+    /// <summary>
+    /// Возникает при изменении состояния выполнения процесса.
+    /// </summary>
     static public event Action<bool> StartProcessing;
 
+    /// <summary>
+    /// Признак необходимости завершения выполнения процесса.
+    /// </summary>
     private bool isExit = false;
 
+    /// <summary>
+    /// Имя текущего выполняемого процесса.
+    /// </summary>
     private string processName = string.Empty;
 
+    /// <summary>
+    /// Объект синхронизации для операций паузы и возобновления выполнения.
+    /// </summary>
     private readonly object _pauseSync = new();
+
+    /// <summary>
+    /// Глобальный объект синхронизации, предотвращающий одновременный запуск
+    /// нескольких экземпляров исполнителя.
+    /// </summary>
     private static readonly object _runSync = new();
+
+    /// <summary>
+    /// Ссылка на текущий активный экземпляр исполнителя.
+    /// </summary>
     private static ActionExecutor? _activeExecutor;
 
     #region Проверка токена.
