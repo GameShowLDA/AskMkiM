@@ -244,7 +244,7 @@ namespace Ask.Engine.Tests.Base
       double param = 0,
       double lower = 0)
     {
-      var answer = await meter.ContinuityManager.CheckContinuityAsync(param);
+      var answer = await meter.ContinuityManager.CheckContinuityAsync(rangeFrom: 0, rangeTo: param);
       token.ThrowIfCancellationRequested();
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
       return await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, param, answer, point);
