@@ -65,6 +65,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       try
       {
+        ResetSettingsForDeviceModelChange();
+
         Type baseClass = GetBaseDeviceType(selectedType);
 
         ConnectionTypeIPItem.Visibility = baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
@@ -73,9 +75,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;
-        IPAddressContainer.Visibility = Visibility.Collapsed;
-        COMContainer.Visibility = Visibility.Collapsed;
-        USBContainer.Visibility = Visibility.Collapsed;
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
         {
           BusTypeContainer.Visibility = Visibility.Visible;
@@ -93,15 +92,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           ShowFastMeterAdditionalSettings(sender as IMultimeter);
         }
-        else
-        {
-          AdditionalSettingsContainer.Content = null;
-        }
-
         if (baseClass == typeof(DeviceWithCOM))
         {
           object deviceModel = Activator.CreateInstance(selectedType);
           ApplyCOMSettingsFromModel(deviceModel);
+        }
+
+        if (baseClass == typeof(DeviceWithUSB))
+        {
+          ResolveUsbDevice();
         }
       }
       catch (InvalidOperationException ex)
@@ -110,10 +109,39 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
+    private void ResetSettingsForDeviceModelChange()
+    {
+      AdditionalSettingsContainer.Content = null;
+      _acwPpuDividerCoefficientPercentTextBox = null;
+      _dcwPpuDividerCoefficientPercentTextBox = null;
+
+      ConnectionTypeSelectionBox.SelectedIndex = 0;
+      IPAddressContainer.Visibility = Visibility.Collapsed;
+      COMContainer.Visibility = Visibility.Collapsed;
+      USBContainer.Visibility = Visibility.Collapsed;
+
+      IpPart1.Text = string.Empty;
+      IpPart2.Text = string.Empty;
+      IpPart3.Text = string.Empty;
+      IpPart4.Text = string.Empty;
+
+      COMPortSelectionBox.ItemsSource = null;
+      COMPortSelectionBox.SelectedIndex = -1;
+      VIDData.Text = "N/A";
+      PIDData.Text = "N/A";
+
+      ResistanceTextBox.Text = string.Empty;
+      CapacitanceTextBox.Text = string.Empty;
+
+      _usbConnectionDetails = string.Empty;
+      USBStatusData.Text = "Ожидание поиска...";
+      ClearUsbFields();
+    }
+
     private void ShowFastMeterAdditionalSettings(IMultimeter multimeter)
     {
-      _acwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_acwPpuDividerCoefficientPercentTextBox);
-      _dcwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_dcwPpuDividerCoefficientPercentTextBox);
+      _acwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
+      _dcwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
 
       var container = new Border
       {
@@ -185,19 +213,16 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       return title;
     }
 
-    private TextBox PreparePpuDividerTextBox(TextBox? textBox)
+    private TextBox CreatePpuDividerTextBox()
     {
-      textBox ??= new TextBox();
-      textBox.Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle");
-      textBox.PreviewTextInput -= ResistanceDevice_PreviewTextInput;
-      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
-      textBox.TextChanged -= ResistanceDevice_TextChanged;
-      textBox.TextChanged += ResistanceDevice_TextChanged;
-
-      if (string.IsNullOrWhiteSpace(textBox.Text))
+      var textBox = new TextBox
       {
-        textBox.Text = "100";
-      }
+        Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle"),
+        Text = "100"
+      };
+
+      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
+      textBox.TextChanged += ResistanceDevice_TextChanged;
 
       return textBox;
     }
