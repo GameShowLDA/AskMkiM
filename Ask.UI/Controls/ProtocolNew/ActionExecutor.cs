@@ -580,7 +580,7 @@ namespace Ask.UI.Controls.ProtocolNew
       };
 
       ProtocolSelfCheck.LastMessage = true;
-      if (checkType != CheckType.ControlProgram)
+      if (checkType == CheckType.ControlProgram)
       {
         return;
       }
