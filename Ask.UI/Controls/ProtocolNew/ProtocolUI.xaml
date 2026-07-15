@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ask.UI.Controls.ProtocolNew"
-                          xmlns:TextEditor="clr-namespace:Ask.UI.Components.ProtocolListBox"
+             xmlns:TextEditor="clr-namespace:Ask.UI.Components.ProtocolListBox"
+             xmlns:TextEditorControl="clr-namespace:Ask.UI.Controls.TextEditorControl"
              xmlns:Icons="clr-namespace:Ask.UI.Shared.Components.Icons"
              xmlns:ErrorList="clr-namespace:Ask.UI.Controls.ErrorList"
              mc:Ignorable="d" 
@@ -341,28 +342,51 @@
                 </Border>
 
                 <Grid Grid.Column="1" Margin="5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="ExecutionProtocolColumn" Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition x:Name="InspectionProtocolColumn" Width="0"/>
+                    </Grid.ColumnDefinitions>
 
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />
+                        <TextEditor:ProtocolListBoxUI x:Name="protocolTextBox" />
 
-                    <GridSplitter  
-                        x:Name="SeparatorError"
-                        Grid.Row="1" 
-                        Height="5"
+                        <GridSplitter
+                            x:Name="SeparatorError"
+                            Grid.Row="1"
+                            Height="5"
+                            Background="{StaticResource VioletColorSolidColorBrush}"
+                            HorizontalAlignment="Stretch"
+                            ResizeDirection="Rows"/>
+
+                        <ErrorList:ErrorListControl Grid.Row="2"
+                                  x:Name="ErrorListBoxVertical"
+                                  StringsNumberVisible="Collapsed"
+                                  MeasureResultVisible="Collapsed"/>
+                    </Grid>
+
+                    <GridSplitter
+                        x:Name="InspectionProtocolSplitter"
+                        Grid.Column="1"
+                        Width="5"
+                        Margin="5,0"
                         Background="{StaticResource VioletColorSolidColorBrush}"
-                        HorizontalAlignment="Stretch"
-                        ResizeDirection="Rows"/>
+                        ResizeDirection="Columns"
+                        Visibility="Collapsed"/>
 
-                    <ErrorList:ErrorListControl Grid.Row="2"
-                              x:Name="ErrorListBoxVertical"
-                              StringsNumberVisible="Collapsed"
-                              MeasureResultVisible="Collapsed"
-                              />
+                    <Border x:Name="InspectionProtocolPanel"
+                            Grid.Column="2"
+                            Visibility="Collapsed"
+                            Background="{DynamicResource TestsProtocolBackgroundBrush}">
+                        <TextEditorControl:TextEditorUI x:Name="inspectionProtocolTextBox"
+                                                        IsReadOnly="True"/>
+                    </Border>
                 </Grid>
 
             </Grid>

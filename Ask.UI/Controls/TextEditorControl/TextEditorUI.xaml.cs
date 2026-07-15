@@ -633,9 +633,8 @@ namespace Ask.UI.Controls.TextEditorControl
     {
       InitializeComponent();
 
-      FileType = fileType;
+      SetFileType(fileType);
       TextEditorModel = textEditorModel;
-      textEditor.IsReadOnly = IsReadOnlyFileType(fileType);
       _defaultFontSize = textEditor.FontSize;
       EnsureLineNumbersForeground();
 
@@ -690,6 +689,21 @@ namespace Ask.UI.Controls.TextEditorControl
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+    }
+
+    /// <summary>
+    /// Настраивает редактор для указанного типа файла.
+    /// Используется для редакторов, создаваемых из XAML без параметров конструктора.
+    /// </summary>
+    public void SetFileType(FileType fileType)
+    {
+      FileType = fileType;
+      textEditor.IsReadOnly = IsReadOnlyFileType(fileType);
+
+      if (IsLoaded)
+      {
+        ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+      }
     }
 
     /// <summary>
@@ -814,7 +828,7 @@ namespace Ask.UI.Controls.TextEditorControl
     }
 
     private static bool IsReadOnlyFileType(FileType fileType)
-      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol;
+      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol or FileType.InspectionProtocol;
 
     #endregion
   }

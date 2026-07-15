@@ -472,6 +472,44 @@ namespace Ask.UI.Controls.ProtocolNew
       _lastSavedProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(name, protocolTextBox.GetMessagesSnapshot());
     }
 
+    /// <summary>
+    /// Очищает и скрывает итоговый протокол перед новым запуском.
+    /// </summary>
+    public void ClearInspectionProtocol()
+    {
+      inspectionProtocolTextBox.Text = string.Empty;
+      InspectionProtocolPanel.Visibility = Visibility.Collapsed;
+      InspectionProtocolSplitter.Visibility = Visibility.Collapsed;
+      InspectionProtocolColumn.Width = new GridLength(0);
+    }
+
+    /// <summary>
+    /// Показывает итоговый протокол справа от протокола выполнения.
+    /// </summary>
+    public void ShowInspectionProtocol(string protocolText)
+    {
+      inspectionProtocolTextBox.Text = protocolText ?? string.Empty;
+      InspectionProtocolColumn.Width = new GridLength(1, GridUnitType.Star);
+      InspectionProtocolSplitter.Visibility = Visibility.Visible;
+      InspectionProtocolPanel.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
+    /// Сохраняет итоговый протокол в History в формате RTLST.
+    /// </summary>
+    public async Task SaveInspectionProtocolAsync(string name)
+    {
+      if (string.IsNullOrWhiteSpace(inspectionProtocolTextBox.Text))
+      {
+        return;
+      }
+
+      await ExecutionProtocolHistoryService.SaveInspectionAsync(
+        name,
+        inspectionProtocolTextBox.Text,
+        _lastSavedProtocolPath);
+    }
+
     #endregion
 
     /// <summary>

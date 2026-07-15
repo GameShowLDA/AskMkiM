@@ -6,6 +6,7 @@ using Ask.Core.Services.FilesUtility;
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Collections.ObjectModel;
@@ -154,6 +155,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
+      inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
+      ClearInspectionProtocol();
       this.DataContext = this;
 
       loopButton.Visibility = Visibility.Collapsed;

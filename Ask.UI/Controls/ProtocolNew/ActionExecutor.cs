@@ -145,6 +145,7 @@ namespace Ask.UI.Controls.ProtocolNew
         _actionSettings = actionSettings;
         ClearErrors();
         ProtocolSelfCheck.HideProtocolManager();
+        ProtocolSelfCheck.ClearInspectionProtocol();
 
         // Новый запуск не должен наследовать "залипшее" состояние
         // брейкпоинта/пошагового режима от предыдущего выполнения.
@@ -254,6 +255,7 @@ namespace Ask.UI.Controls.ProtocolNew
       StartProcessing?.Invoke(false);
 
       await ProtocolSelfCheck.SaveProtocolAsync(ProtocolSelfCheck.Header);
+      await ProtocolSelfCheck.SaveInspectionProtocolAsync(ProtocolSelfCheck.Header);
       ProtocolSelfCheck.ShowProtocolManager();
     }
 
@@ -884,9 +886,10 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Отображает протокол на экране.
     /// </summary>
-    private async Task ShowProtocol(StringBuilder stringBuilder)
+    private Task ShowProtocol(StringBuilder stringBuilder)
     {
-      await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel(message: stringBuilder.ToString()) { IndentLevel = 0 });
+      ProtocolSelfCheck.ShowInspectionProtocol(stringBuilder.ToString());
+      return Task.CompletedTask;
     }
   }
 }
