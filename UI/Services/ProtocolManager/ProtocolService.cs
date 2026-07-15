@@ -59,7 +59,7 @@ namespace UI.Services.ProtocolManager
     /// <summary>
     /// Формирует текст протокола с ошибками или без них.
     /// </summary>
-    private string BuildProtocolText(ProtocolModel protocol)
+    public static string BuildProtocolText(ProtocolModel protocol)
     {
       return protocol.Errors.Count > 0
           ? ProtocolModel.GetProtocolWithErrorsText(protocol)
