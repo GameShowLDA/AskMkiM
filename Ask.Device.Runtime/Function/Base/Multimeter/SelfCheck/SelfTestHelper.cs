@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -7,78 +7,68 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
   public static class SelfTestHelper
   {
+    private const double RelativeErrorMarker = -1;
+    private const string SuccessStatus = "НОРМА";
+    private const string ErrorStatus = "БРАК";
 
     /// <summary>
     /// Метод для вывода сообщения пользователю о результатах измерения.
     /// </summary>
-    /// <param name="status">Статус измерения (<see langword="true"/> - в норме, <see langword="false"/> - брак)</param>
-    /// <param name="result">Полученный результат</param>
-    /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
-    /// <param name="unit">Единица измерения результата</param>
-    /// <param name="idealResult">Идеальный результат</param>
-    /// <param name="percentageError">Процент погрешности от идеального результата</param>
-    /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    public static async Task IsCorrectRangeAsync(bool status, double result, string param, string unit, double idealResult, int percentageError, IUserInteractionService? userMessageService = null)
+    /// <param name="status">Статус измерения (<see langword="true"/> - в норме, <see langword="false"/> - брак).</param>
+    /// <param name="result">Полученный результат.</param>
+    /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.).</param>
+    /// <param name="unit">Единица измерения результата.</param>
+    /// <param name="idealResult">Идеальный результат.</param>
+    /// <param name="percentageError">Процент погрешности от идеального результата.</param>
+    /// <param name="userMessageService">Пользовательский интерфейс для вывода.</param>
+    public static Task IsCorrectRangeAsync(bool status, double result, string param, string unit, double idealResult, int percentageError, IUserInteractionService? userMessageService = null)
     {
-      string formattedResult;
-      if (MeasurementValueFormatter.IsOverloadValue(result))
-      {
-        formattedResult = "Overload";
-      }
-      else 
-      {
-        formattedResult = MeasurementValueFormatter.Round(result).ToString("N0");
-      }
+      ArgumentNullException.ThrowIfNull(userMessageService);
 
-      string fallibility;
-      if(idealResult == -1)
-      {
-        fallibility = $"(± {percentageError}%)";
-      }
-      else 
-      {
-        fallibility = $"({idealResult} ± {percentageError}%)";
-      }
+      var resultType = status
+        ? ShowMessageModel.MessageType.Success
+        : ShowMessageModel.MessageType.Error;
 
-      if (status)
-      {
-        await userMessageService.ShowMessageAsync(
-          new ShowMessageModel(
-            header: $"Тест {param}{unit} {fallibility}",
-            message: $"{formattedResult} [НОРМА]",
-            type: ShowMessageModel.MessageType.Success)
-          {
-            IndentLevel = 1
-          });
-      }
-      else
-      {
-        await userMessageService.ShowMessageAsync(
-          new ShowMessageModel(
-            header: $"Тест {param}{unit} {fallibility}",
-            message: $"{formattedResult} [БРАК]",
-            type: ShowMessageModel.MessageType.Error)
-          {
-            IndentLevel = 1
-          });
-      }
+      return userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"Тест {param}{unit} {FormatFallibility(idealResult, percentageError)}",
+          message: $"{FormatResult(result)} [{FormatStatus(status)}]",
+          type: resultType)
+        {
+          IndentLevel = 1,
+        });
     }
 
     /// <summary>
     /// Метод для выявления правильности результата с учетом погрешности.
     /// </summary>
-    /// <param name="idealResult">Идеальный результат</param>
-    /// <param name="result">Получившийся результат</param>
-    /// <param name="range">Допустимый диапазон отклонений</param>
-    /// <returns><see langword="true"/> - результат находится в допустимом диапазоне</returns>
+    /// <param name="idealResult">Идеальный результат.</param>
+    /// <param name="result">Получившийся результат.</param>
+    /// <param name="range">Допустимый диапазон отклонений.</param>
+    /// <returns><see langword="true"/> - результат находится в допустимом диапазоне.</returns>
     /// <remarks>
-    /// Определение правилости результата работает по формуле:
-    /// <paramref name="result"/> +- <paramref name="range"/> ~ <paramref name="idealResult"/>
+    /// Определение правильности результата работает по формуле:
+    /// <paramref name="result"/> +- <paramref name="range"/> ~ <paramref name="idealResult"/>.
     /// </remarks>
     public static bool InRange(double idealResult, double result, double range = 0)
     {
-      if (result - range <= idealResult && result + range >= idealResult) return true;
-      return false;
+      return Math.Abs(result - idealResult) <= Math.Abs(range);
     }
+
+    private static string FormatResult(double result)
+    {
+      return MeasurementValueFormatter.IsOverloadValue(result)
+        ? "Overload"
+        : MeasurementValueFormatter.Round(result).ToString("N0");
+    }
+
+    private static string FormatFallibility(double idealResult, int percentageError)
+    {
+      return idealResult == RelativeErrorMarker
+        ? $"(± {percentageError}%)"
+        : $"({idealResult} ± {percentageError}%)";
+    }
+
+    private static string FormatStatus(bool status) => status ? SuccessStatus : ErrorStatus;
   }
 }
