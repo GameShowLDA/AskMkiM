@@ -3,7 +3,6 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
-using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
@@ -163,6 +162,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
+      _protocolStorage = new ProtocolStorageService();
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
       inspectionProtocolTextBox.WordWrap = true;
       ClearInspectionProtocol();
@@ -462,7 +462,7 @@ namespace Ask.UI.Controls.ProtocolNew
           return;
         }
 
-        var historyDirectory = ExecutionProtocolHistoryService.GetHistoryDirectory();
+        var historyDirectory = _protocolStorage.GetHistoryDirectory();
         Directory.CreateDirectory(historyDirectory);
 
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
@@ -478,12 +478,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private string? ResolveLatestProtocolPath()
     {
-      if (!string.IsNullOrWhiteSpace(_lastSavedProtocolPath) && File.Exists(_lastSavedProtocolPath))
-      {
-        return Path.GetFullPath(_lastSavedProtocolPath);
-      }
-
-      return ExecutionProtocolHistoryService.ResolveLatestProtocolPath();
+      return _protocolStorage.ResolveLatestExecutionProtocolPath();
     }
   }
 }

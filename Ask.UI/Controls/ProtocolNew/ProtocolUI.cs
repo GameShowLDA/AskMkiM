@@ -1,7 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -60,9 +59,10 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public ErrorManager Errors;
 
-    private string? _lastSavedProtocolPath;
-
-    private string _inspectionProtocolText = string.Empty;
+    /// <summary>
+    /// Хранилище состояния и файлов текущей пары протоколов.
+    /// </summary>
+    private ProtocolStorageService _protocolStorage = null!;
 
     /// <summary>
     /// Внешний владелец представления итогового протокола.
@@ -346,7 +346,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public async Task SaveProtocolAsync(string name)
     {
-      _lastSavedProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(name, protocolTextBox.GetMessagesSnapshot());
+      await _protocolStorage.SaveExecutionProtocolAsync(name, protocolTextBox.GetMessagesSnapshot());
     }
 
     /// <summary>
@@ -354,7 +354,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ClearInspectionProtocol()
     {
-      _inspectionProtocolText = string.Empty;
+      _protocolStorage.ClearInspectionProtocol();
       inspectionProtocolTextBox.Text = string.Empty;
       InspectionProtocolPanel.Visibility = Visibility.Collapsed;
       InspectionProtocolSplitter.Visibility = Visibility.Collapsed;
@@ -367,15 +367,15 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
-      _inspectionProtocolText = protocolText ?? string.Empty;
+      _protocolStorage.SetInspectionProtocol(protocolText);
 
       if (InspectionProtocolHost != null)
       {
-        InspectionProtocolHost.ShowInspectionProtocol(_inspectionProtocolText);
+        InspectionProtocolHost.ShowInspectionProtocol(_protocolStorage.InspectionProtocolText);
         return;
       }
 
-      inspectionProtocolTextBox.Text = _inspectionProtocolText;
+      inspectionProtocolTextBox.Text = _protocolStorage.InspectionProtocolText;
       InspectionProtocolColumn.Width = new GridLength(1, GridUnitType.Star);
       InspectionProtocolSplitter.Visibility = Visibility.Visible;
       InspectionProtocolPanel.Visibility = Visibility.Visible;
@@ -386,15 +386,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public async Task SaveInspectionProtocolAsync(string name)
     {
-      if (string.IsNullOrWhiteSpace(_inspectionProtocolText))
-      {
-        return;
-      }
-
-      await ExecutionProtocolHistoryService.SaveInspectionAsync(
-        name,
-        _inspectionProtocolText,
-        _lastSavedProtocolPath);
+      await _protocolStorage.SaveInspectionProtocolAsync(name);
     }
 
     #endregion
