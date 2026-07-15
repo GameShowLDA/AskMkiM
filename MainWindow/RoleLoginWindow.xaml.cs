@@ -29,14 +29,36 @@ namespace MainWindowProgram
     [DllImport("user32.dll")]
     private static extern bool BringWindowToTop(IntPtr hWnd);
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProcDelegate lpfn, IntPtr hmod, uint dwThreadId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern IntPtr GetModuleHandle(string? lpModuleName);
+
     private const int SW_SHOW = 5;
+    private const int WH_KEYBOARD_LL = 13;
+    private const int WM_KEYDOWN = 0x0100;
+    private const int WM_SYSKEYDOWN = 0x0104;
+    private const int VK_R = 0x52;
+    private const int VK_MENU = 0x12;
 
     private readonly RoleCredentialFileService _roleCredentialService = new();
     private readonly IReadOnlySet<RoleType> _rolesWithSavedSessions;
     private readonly TaskCompletionSource<RoleCredentialModel?> _authenticationCompletionSource =
       new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly DispatcherTimer _keyboardLayoutTimer;
+    private readonly LowLevelKeyboardProcDelegate _keyboardHookProc;
 
+    private IntPtr _keyboardHookHandle;
     private bool _isStartupLoading;
     private bool _allowClose;
     private bool _isPasswordVisible;
@@ -52,6 +74,7 @@ namespace MainWindowProgram
     {
       InitializeComponent();
       _rolesWithSavedSessions = rolesWithSavedSessions ?? new HashSet<RoleType>();
+      _keyboardHookProc = LowLevelKeyboardProc;
 
       _keyboardLayoutTimer = new DispatcherTimer
       {
@@ -101,6 +124,7 @@ namespace MainWindowProgram
 
     private void RoleLoginWindow_SourceInitialized(object? sender, EventArgs e)
     {
+      InstallKeyboardHook();
       BringToFront();
     }
 
@@ -131,6 +155,7 @@ namespace MainWindowProgram
 
       _keyboardLayoutTimer.Stop();
       InputLanguageManager.Current.InputLanguageChanged -= Current_InputLanguageChanged;
+      UninstallKeyboardHook();
       _authenticationCompletionSource.TrySetResult(null);
     }
 
@@ -139,7 +164,7 @@ namespace MainWindowProgram
       var pressedKey = e.SystemKey == Key.None ? e.Key : e.SystemKey;
       if (pressedKey == Key.R && Keyboard.Modifiers == ModifierKeys.Alt && !_isStartupLoading)
       {
-        SelectRootLogin();
+        HandleRootLoginHotkey();
         e.Handled = true;
         return;
       }
@@ -152,6 +177,66 @@ namespace MainWindowProgram
       int direction = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? -1 : 1;
       MoveRoleSelection(direction);
       e.Handled = true;
+    }
+
+    private void InstallKeyboardHook()
+    {
+      if (_keyboardHookHandle != IntPtr.Zero)
+      {
+        return;
+      }
+
+      _keyboardHookHandle = SetWindowsHookEx(
+        WH_KEYBOARD_LL,
+        _keyboardHookProc,
+        GetModuleHandle(null),
+        0);
+    }
+
+    private void UninstallKeyboardHook()
+    {
+      if (_keyboardHookHandle == IntPtr.Zero)
+      {
+        return;
+      }
+
+      UnhookWindowsHookEx(_keyboardHookHandle);
+      _keyboardHookHandle = IntPtr.Zero;
+    }
+
+    private IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam)
+    {
+      if (nCode >= 0 && IsRootLoginHotkey(wParam, lParam))
+      {
+        Dispatcher.BeginInvoke(HandleRootLoginHotkey);
+        return new IntPtr(1);
+      }
+
+      return CallNextHookEx(_keyboardHookHandle, nCode, wParam, lParam);
+    }
+
+    private bool IsRootLoginHotkey(IntPtr wParam, IntPtr lParam)
+    {
+      if (_isStartupLoading ||
+          wParam != new IntPtr(WM_KEYDOWN) && wParam != new IntPtr(WM_SYSKEYDOWN))
+      {
+        return false;
+      }
+
+      var hookData = Marshal.PtrToStructure<Kbdllhookstruct>(lParam);
+      bool altPressed = (GetAsyncKeyState(VK_MENU) & unchecked((short)0x8000)) != 0;
+
+      return hookData.VkCode == VK_R && altPressed;
+    }
+
+    private void HandleRootLoginHotkey()
+    {
+      if (_isStartupLoading)
+      {
+        return;
+      }
+
+      SelectRootLogin();
     }
 
     private async Task LoadRolesAsync()
@@ -630,6 +715,18 @@ namespace MainWindowProgram
           ? $"{credential.DisplayName} (выполнен вход)"
           : credential.DisplayName;
       }
+    }
+
+    private delegate IntPtr LowLevelKeyboardProcDelegate(int nCode, IntPtr wParam, IntPtr lParam);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Kbdllhookstruct
+    {
+      public int VkCode;
+      public int ScanCode;
+      public int Flags;
+      public int Time;
+      public IntPtr ExtraInfo;
     }
   }
 }
