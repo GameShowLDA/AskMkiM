@@ -7,7 +7,6 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Message;
 using System.Globalization;
@@ -90,17 +89,6 @@ namespace Ask.UI.Controls.ProtocolNew
       {
         _settings = actionSettings;
         _settings.Name = header.Text;
-
-        if (actionSettings.CheckType == CheckType.Metrology)
-        {
-          ErrorListBoxVerticalVisibility = Visibility.Collapsed;
-          SeparatorError.Visibility = Visibility.Collapsed;
-        }
-        else
-        {
-          ErrorListBoxVerticalVisibility = Visibility.Visible;
-          SeparatorError.Visibility = Visibility.Visible;
-        }
 
         if (actionSettings.ReturnDelegate != null)
         {

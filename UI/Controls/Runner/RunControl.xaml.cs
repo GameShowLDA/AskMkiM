@@ -22,6 +22,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.TextEditorControl;
 using UI.Services;
+using UI.Services.ProtocolManager;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -104,6 +105,7 @@ namespace UI.Controls.Runner
 
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
       EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(e => devicesStatus.LoadDevices(e.Devices));
+      EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
 
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
@@ -340,13 +342,35 @@ namespace UI.Controls.Runner
         StartDelegate = StartTest,
         IsRepeatEnabled = false,
         CheckType = CheckType.ControlProgram,
-        AccumulateErrorMessages = true,
       };
 
       ProtocolUI.SetSettings(settings);
       this.FileName = ProtocolUI.Header;
 
       await ProtocolUI.StartAsync();
+    }
+
+    private void OnViewProtocol(FileInteractionEvents.ViewProtocol e)
+    {
+      if (!IsProtocolForCurrentRun(e.Protocol.ProgramPath))
+      {
+        return;
+      }
+
+      ProtocolUI.ShowInspectionProtocol(ProtocolService.BuildProtocolText(e.Protocol));
+    }
+
+    private bool IsProtocolForCurrentRun(string protocolProgramPath)
+    {
+      if (string.IsNullOrWhiteSpace(protocolProgramPath) || string.IsNullOrWhiteSpace(OpkFilePath))
+      {
+        return false;
+      }
+
+      return string.Equals(
+        Path.GetFullPath(protocolProgramPath),
+        Path.GetFullPath(OpkFilePath),
+        StringComparison.OrdinalIgnoreCase);
     }
 
     /// <inheritdoc />
