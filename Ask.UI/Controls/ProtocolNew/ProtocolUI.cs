@@ -8,7 +8,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
-using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
 using System.Runtime.CompilerServices;
@@ -21,7 +20,7 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext
   {
     #region Поля.
 
@@ -29,6 +28,11 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Сервис подготовки и вывода одной записи протокола.
     /// </summary>
     private ProtocolEntryOutputService _entryOutputService = null!;
+
+    /// <summary>
+    /// Контроллер паузы и пошагового выполнения после отображения записи.
+    /// </summary>
+    private ProtocolPostOutputController _postOutputController = null!;
 
     /// <summary>
     /// Возвращает текущий статус пошагового режима.
@@ -236,61 +240,11 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       LastMessage = false;
-
-      if (ActionExecutor.IsPaused)
-      {
-        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
-      }
-
-      if (!skipPause)
-      {
-        await CheckPause(showMessageModel.Status);
-      }
-
-      if (StepControlManager.StepMode && !SkipStepModeCheck)
-      {
-        if (ShouldWaitStepKey(showMessageModel, IsBlockStart))
-        {
-          ShowButtonsOnPause(repeatVisible: false);
-          await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
-
-          bool showStepButtons = StepControlManager.IsStepInto && !StepControlManager.StepOverUntilNextControlCommand;
-          ShowOnlyStopAndFinishButtons(showStepButtons);
-        }
-      }
-
-      await Task.Delay(1);
-    }
-
-    private static bool ShouldWaitStepKey(ShowMessageModel showMessageModel, bool isBlockStart)
-    {
-      if (StepControlManager.IsStepInto)
-      {
-        return true;
-      }
-
-      if (!StepControlManager.StepOverUntilNextControlCommand)
-      {
-        return false;
-      }
-
-      if (!IsControlProgramCommandStart(showMessageModel, isBlockStart))
-      {
-        return false;
-      }
-
-      StepControlManager.CompleteStepOverUntilNextControlCommand();
-      return true;
-    }
-
-    private static bool IsControlProgramCommandStart(ShowMessageModel showMessageModel, bool isBlockStart)
-    {
-      if (!isBlockStart || showMessageModel.Status != MessageType.Command)
-      {
-        return false;
-      }
-
-      return showMessageModel.IsControlProgramCommandHeader;
+      await _postOutputController.ProcessAsync(
+        showMessageModel,
+        IsBlockStart,
+        SkipStepModeCheck,
+        skipPause);
     }
 
     /// <summary>
@@ -342,18 +296,6 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Если статус сообщения — ошибка и включена остановка при ошибке, выполнение ставится на паузу.
-    /// </summary>
-    /// <param name="Status">Тип сообщения (ошибка, информация, успех).</param>
-    private async Task CheckPause(ShowMessageModel.MessageType? Status)
-    {
-      if (Status == MessageType.Error && await ExecutionConfig.GetIsStopOnErrorEnabled())
-      {
-        await PauseAsync();
-      }
-    }
-
-    /// <summary>
     /// Полностью очищает протокол и сбрасывает последнее сообщение.
     /// </summary>
     /// <returns>Возвращает признак успешного завершения операции.</returns>
@@ -377,6 +319,20 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     Task IProtocolEntrySink.RemoveLastLinesAsync() => protocolTextBox.RemoveLastLinesAsync();
+
+    /// <inheritdoc />
+    bool IProtocolPostOutputContext.IsPaused => ActionExecutor.IsPaused;
+
+    /// <inheritdoc />
+    Task IProtocolPostOutputContext.WaitWhilePausedAsync(CancellationToken cancellationToken) =>
+      ActionExecutor.WaitWhilePausedAsync(cancellationToken, this);
+
+    /// <inheritdoc />
+    void IProtocolPostOutputContext.ShowPauseButtons() => ShowButtonsOnPause(repeatVisible: false);
+
+    /// <inheritdoc />
+    void IProtocolPostOutputContext.ShowRunningButtons(bool showStepButtons) =>
+      ShowOnlyStopAndFinishButtons(showStepButtons);
 
     /// <summary>
     /// Асинхронно удаляет блок, содержащий указанную строку, из RichTextBox.

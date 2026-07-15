@@ -174,6 +174,7 @@ namespace Ask.UI.Controls.ProtocolNew
       SetupButtons();
       _hotkeyController = new ProtocolHotkeyController(this);
       _entryOutputService = new ProtocolEntryOutputService(this);
+      _postOutputController = new ProtocolPostOutputController(this);
 
       this.Loaded += (s, e) =>
       {
