@@ -11,6 +11,7 @@ using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
+using Ask.UI.Features.ProtocolNew.Protocol;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -172,6 +173,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       SetupButtons();
       _hotkeyController = new ProtocolHotkeyController(this);
+      _entryOutputService = new ProtocolEntryOutputService(this);
 
       this.Loaded += (s, e) =>
       {

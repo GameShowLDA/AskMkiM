@@ -1,6 +1,5 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
@@ -10,28 +9,26 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
+using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
-using System.Globalization;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink
   {
     #region Поля.
 
     /// <summary>
-    /// Последнее отображенное сообщение в протоколе.
+    /// Сервис подготовки и вывода одной записи протокола.
     /// </summary>
-    private ShowMessageModel LastModelMeassage;
+    private ProtocolEntryOutputService _entryOutputService = null!;
 
     /// <summary>
     /// Возвращает текущий статус пошагового режима.
@@ -223,48 +220,21 @@ namespace Ask.UI.Controls.ProtocolNew
       [CallerLineNumber] int callerLine = 0)
     {
       await CheckBlockStart(IsBlockStart);
+      var wasDisplayed = await _entryOutputService.WriteAsync(
+        showMessageModel,
+        LastMessage,
+        ignoreOutputValidation,
+        _settings?.AccumulateErrorMessages == true,
+        AddError,
+        callerName,
+        callerFile,
+        callerLine);
 
-      if (ProtocolConfig.GetTimeStart() && showMessageModel.Status != MessageType.Info && showMessageModel.Status != MessageType.Command)
+      if (!wasDisplayed)
       {
-        showMessageModel.Time = SystemStateManager._stopwatch.Elapsed.ToString(@"mm\:ss\.fff", CultureInfo.InvariantCulture);
+        return;
       }
 
-      if (AdminConfig.GetDebugRights())
-      {
-        if (string.IsNullOrEmpty(showMessageModel.Debug))
-        {
-          showMessageModel.Debug = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
-        }
-        else
-        {
-          showMessageModel.Debug += $"|| {Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
-        }
-      }
-
-      await ShouldShowDetailedProtocol(showMessageModel);
-
-      if (_settings?.AccumulateErrorMessages == true && showMessageModel.Status == MessageType.Error)
-      {
-        var error = showMessageModel.ExecutionErrorMessage ?? showMessageModel.ToString();
-        if (!string.IsNullOrWhiteSpace(error))
-        {
-          AddError(error);
-        }
-      }
-
-      await CheckStatus(showMessageModel);
-
-      if (!ignoreOutputValidation)
-      {
-        if (string.IsNullOrEmpty(showMessageModel.Message) &&
-            showMessageModel.Status != MessageType.Command &&
-            (!ProtocolConfig.GetHeaderInfo() || !ignoreOutputValidation))
-        {
-          return;
-        }
-      }
-
-      await protocolTextBox.AppendLineAsync(showMessageModel, LastMessage);
       LastMessage = false;
 
       if (ActionExecutor.IsPaused)
@@ -372,30 +342,6 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
-    /// </summary>
-    /// <param name="showMessageModel">Модель отображаемого сообщения, передаётся по ссылке.</param>
-    private async Task CheckStatus(ShowMessageModel showMessageModel)
-    {
-      if (showMessageModel.Status != MessageType.Info)
-      {
-        if (string.IsNullOrEmpty(showMessageModel.Message))
-        {
-          showMessageModel.Message += showMessageModel.GetQualityPrefix();
-        }
-        else
-        {
-          var prefix = showMessageModel.GetQualityPrefix();
-          if (!showMessageModel.Message.Contains(prefix))
-            showMessageModel.Message += " " + prefix;
-        }
-        showMessageModel.MessageColor = showMessageModel.GetColorMessage();
-      }
-
-      await CheckSyntaxHighlighting(showMessageModel);
-    }
-
-    /// <summary>
     /// Если статус сообщения — ошибка и включена остановка при ошибке, выполнение ставится на паузу.
     /// </summary>
     /// <param name="Status">Тип сообщения (ошибка, информация, успех).</param>
@@ -408,43 +354,13 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Проверяет, нужно ли отображать детализированный протокол.
-    /// Если не нужно, удаляет последнее сообщение, если оно допускает удаление и не содержит ошибки выполнения.
-    /// </summary>
-    /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
-    private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
-    {
-      if (!ProtocolConfig.GetShowDetailedProtocol())
-      {
-        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
-        {
-          await protocolTextBox.RemoveLastLinesAsync();
-        }
-
-        LastModelMeassage = showMessageModel;
-      }
-    }
-
-    private async Task CheckSyntaxHighlighting(ShowMessageModel showMessageModel)
-    {
-      if (!UserInterfaceConfig.GetSyntaxHighlighting())
-      {
-        showMessageModel.HeaderColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
-        showMessageModel.MessageColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
-        showMessageModel.TimeColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
-        showMessageModel.HeaderBackgroundColor = null;
-        return;
-      }
-    }
-
-    /// <summary>
     /// Полностью очищает протокол и сбрасывает последнее сообщение.
     /// </summary>
     /// <returns>Возвращает признак успешного завершения операции.</returns>
     public async Task<bool> ClearAllMessagesAsync()
     {
       await protocolTextBox.ClearAsync();
-      LastModelMeassage = null;
+      _entryOutputService.Reset();
 
       if (ActionExecutor.IsPaused)
       {
@@ -454,6 +370,13 @@ namespace Ask.UI.Controls.ProtocolNew
       Errors?.ErrorClear();
       return ActionExecutor.StepMode;
     }
+
+    /// <inheritdoc />
+    Task IProtocolEntrySink.AppendLineAsync(ShowMessageModel message, bool isLastMessage) =>
+      protocolTextBox.AppendLineAsync(message, isLastMessage);
+
+    /// <inheritdoc />
+    Task IProtocolEntrySink.RemoveLastLinesAsync() => protocolTextBox.RemoveLastLinesAsync();
 
     /// <summary>
     /// Асинхронно удаляет блок, содержащий указанную строку, из RichTextBox.
