@@ -1,9 +1,9 @@
-namespace Ask.UI.Features.ProtocolNew.Services;
+namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 
 /// <summary>
 /// Определяет операцию возврата аппаратуры и глобального состояния приложения в исходное состояние.
 /// </summary>
-internal interface IExecutionSystemResetService
+public interface IExecutionSystemResetService
 {
   /// <summary>
   /// Асинхронно сбрасывает устройства и связанное состояние выполнения.

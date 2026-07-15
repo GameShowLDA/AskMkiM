@@ -5,7 +5,7 @@ namespace Ask.UI.Controls.ProtocolNew
   /// с контрактом области из подсистемы <c>Features.ProtocolNew</c>.
   /// </summary>
   public interface IInspectionProtocolHost :
-    global::Ask.UI.Features.ProtocolNew.Protocol.IInspectionProtocolHost
+    global::Ask.Core.Shared.Interfaces.UiInterfaces.IInspectionProtocolHost
   {
   }
 }

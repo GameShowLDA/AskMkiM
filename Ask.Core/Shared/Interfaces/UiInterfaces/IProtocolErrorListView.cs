@@ -1,11 +1,11 @@
 using Ask.Core.Services.Errors.Models;
 
-namespace Ask.UI.Features.ProtocolNew.Errors
+namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
   /// <summary>
   /// Предоставляет менеджеру ошибок минимальные операции визуального списка.
   /// </summary>
-  internal interface IProtocolErrorListView
+  public interface IProtocolErrorListView
   {
     /// <summary>
     /// Добавляет ошибку в визуальный список.

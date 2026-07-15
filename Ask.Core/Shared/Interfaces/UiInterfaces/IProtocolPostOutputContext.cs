@@ -1,9 +1,9 @@
-namespace Ask.UI.Features.ProtocolNew.Protocol
+namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
   /// <summary>
   /// Предоставляет операции исполнителя и кнопок, необходимые после вывода записи протокола.
   /// </summary>
-  internal interface IProtocolPostOutputContext
+  public interface IProtocolPostOutputContext
   {
     /// <summary>Возвращает признак установленной паузы выполнения.</summary>
     bool IsPaused { get; }

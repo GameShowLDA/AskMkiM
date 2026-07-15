@@ -5,6 +5,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;

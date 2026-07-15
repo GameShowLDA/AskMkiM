@@ -1,11 +1,11 @@
 using System.Windows;
 
-namespace Ask.UI.Features.ProtocolNew.Controls;
+namespace Ask.Core.Shared.Interfaces.UiInterfaces;
 
 /// <summary>
 /// Предоставляет контроллеру кнопок минимальный доступ к видимости элементов <c>ProtocolUI</c>.
 /// </summary>
-internal interface IProtocolButtonView
+public interface IProtocolButtonView
 {
   /// <summary>
   /// Видимость кнопки запуска.

@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.ProtocolInterfaces;
 using System.Text;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol;

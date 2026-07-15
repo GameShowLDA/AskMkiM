@@ -1,9 +1,9 @@
-namespace Ask.UI.Features.ProtocolNew.Protocol
+namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
   /// <summary>
   /// Предоставляет контроллеру доступ к встроенной области итогового протокола.
   /// </summary>
-  internal interface IInspectionProtocolAreaView
+  public interface IInspectionProtocolAreaView
   {
     /// <summary>Получает или задаёт текст встроенного редактора итогового протокола.</summary>
     string ProtocolText { get; set; }

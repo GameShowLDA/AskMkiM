@@ -1,10 +1,10 @@
-namespace Ask.UI.Features.ProtocolNew.Execution;
+namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 
 /// <summary>
 /// Управляет эксклюзивным доступом к общему контуру выполнения и не допускает
 /// одновременный запуск нескольких исполнительных процессов.
 /// </summary>
-internal interface IExecutionRunGuard
+public interface IExecutionRunGuard
 {
   /// <summary>
   /// Пытается закрепить общий контур выполнения за указанным владельцем.

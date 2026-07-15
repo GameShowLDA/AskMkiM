@@ -1,5 +1,6 @@
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.UI.Shared.Formatting;
 using System.Windows;
 

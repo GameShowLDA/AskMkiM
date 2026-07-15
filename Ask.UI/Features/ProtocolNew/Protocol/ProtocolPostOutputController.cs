@@ -1,6 +1,7 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 

@@ -1,12 +1,12 @@
 using System.Windows.Input;
 
-namespace Ask.UI.Features.ProtocolNew.Hotkeys
+namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
   /// <summary>
   /// Предоставляет контроллеру горячих клавиш состояние исполнительного интерфейса
   /// и операции, которые разрешено вызвать с клавиатуры.
   /// </summary>
-  internal interface IProtocolHotkeyContext
+  public interface IProtocolHotkeyContext
   {
     /// <summary>Возвращает признак доступности запуска.</summary>
     bool CanStart { get; }

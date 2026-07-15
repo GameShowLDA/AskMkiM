@@ -1,5 +1,6 @@
 using Ask.Core.Services.Errors.Models;
 using Ask.UI.Controls.ErrorList;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.UI.Features.ProtocolNew.Errors;
 
 namespace Ask.UI.Controls.ProtocolNew

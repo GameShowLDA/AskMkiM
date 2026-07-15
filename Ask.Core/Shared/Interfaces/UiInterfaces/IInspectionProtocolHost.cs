@@ -1,4 +1,4 @@
-namespace Ask.UI.Features.ProtocolNew.Protocol
+namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
   /// <summary>
   /// Размещает итоговый протокол во внешней области интерфейса владельца.

@@ -1,11 +1,11 @@
 using Ask.Core.Shared.DTO.Executor;
 
-namespace Ask.UI.Features.ProtocolNew.Protocol;
+namespace Ask.Core.Shared.Interfaces.ProtocolInterfaces;
 
 /// <summary>
 /// Формирует текст итогового протокола по результатам завершённого действия.
 /// </summary>
-internal interface IInspectionProtocolBuilder
+public interface IInspectionProtocolBuilder
 {
   /// <summary>
   /// Строит итоговый текст для указанных настроек и накопленных ошибок.

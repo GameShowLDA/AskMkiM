@@ -1,3 +1,5 @@
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+
 namespace Ask.UI.Features.ProtocolNew.Protocol
 {
   /// <summary>

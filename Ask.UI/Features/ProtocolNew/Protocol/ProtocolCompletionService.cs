@@ -3,6 +3,7 @@ using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Interfaces.ProtocolInterfaces;
 using Ask.UI.Controls.ProtocolNew;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol;

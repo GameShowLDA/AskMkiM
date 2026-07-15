@@ -1,11 +1,11 @@
 using Ask.Core.Shared.DTO.Protocol;
 
-namespace Ask.UI.Features.ProtocolNew.Protocol
+namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
   /// <summary>
   /// Предоставляет операции редактора, необходимые для вывода одной записи протокола.
   /// </summary>
-  internal interface IProtocolEntrySink
+  public interface IProtocolEntrySink
   {
     /// <summary>
     /// Добавляет подготовленную запись в редактор протокола.

@@ -1,9 +1,9 @@
-namespace Ask.UI.Features.ProtocolNew.Execution;
+namespace Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 
 /// <summary>
 /// Определяет операции управления приостановкой, продолжением и отменой ожидания выполнения.
 /// </summary>
-internal interface IExecutionPauseController
+public interface IExecutionPauseController
 {
   /// <summary>
   /// Возвращает признак активной паузы.
