@@ -289,12 +289,61 @@ namespace Ask.UI.Components.ProtocolListBox
           return;
         }
 
-        _historyMessages.RemoveRange(_historyMessages.Count - linesToRemove, linesToRemove);
-        RestoreVisibleItems();
+        int removeStartIndex = _historyMessages.Count - linesToRemove;
+        var removedMessages = _historyMessages.GetRange(removeStartIndex, linesToRemove);
+        _historyMessages.RemoveRange(removeStartIndex, linesToRemove);
+
+        for (int i = removedMessages.Count - 1; i >= 0; i--)
+        {
+          RemoveLastVisibleMessage(removedMessages[i]);
+        }
         removed = linesToRemove;
       });
 
       return Task.FromResult(removed);
+    }
+
+    private void RemoveLastVisibleMessage(ShowMessageModel removedMessage)
+    {
+      if (_pendingGroup != null && ReferenceEquals(_pendingGroup.HeaderItem.Message, removedMessage))
+      {
+        RemoveVisibleTailItem(_pendingGroup.HeaderItem);
+        _pendingGroup = null;
+        return;
+      }
+
+      if (_currentGroup != null && _currentGroup.BodyItems.Count > 0)
+      {
+        var lastBodyItem = _currentGroup.BodyItems[^1];
+        if (ReferenceEquals(lastBodyItem.Message, removedMessage))
+        {
+          if (RemoveVisibleTailItem(lastBodyItem))
+          {
+            _currentGroup.VisibleBodyCount--;
+          }
+
+          _currentGroup.RemoveLastBodyItem(removedMessage);
+          return;
+        }
+      }
+
+      var lastDisplayItem = DisplayItems.LastOrDefault();
+      if (lastDisplayItem != null && ReferenceEquals(lastDisplayItem.Message, removedMessage))
+      {
+        RemoveVisibleTailItem(lastDisplayItem);
+      }
+    }
+
+    private bool RemoveVisibleTailItem(ProtocolDisplayItem item)
+    {
+      if (DisplayItems.Count == 0 || !ReferenceEquals(DisplayItems[^1], item))
+      {
+        return false;
+      }
+
+      DisplayItems.RemoveAt(DisplayItems.Count - 1);
+      _visibleRowCount--;
+      return true;
     }
 
     public async Task ClearAsync()
@@ -747,6 +796,7 @@ namespace Ask.UI.Components.ProtocolListBox
       bool IsBlockStart = false,
       bool SkipStepModeCheck = false,
       bool skipPause = false,
+      bool ignoreOutputValidation = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)

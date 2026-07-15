@@ -44,6 +44,7 @@ namespace Ask.Core.Shared.Metadata.Enums.FileEnums
         ".opkw" => FileType.OPKW,
         ".lst" => FileType.Protocol,
         ".lstw" => FileType.Protocol,
+        ".rtlst" => FileType.InspectionProtocol,
         _ => FileType.None,
       };
     }
@@ -60,6 +61,7 @@ namespace Ask.Core.Shared.Metadata.Enums.FileEnums
         FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
         FileType.PK or FileType.PKW => "MKI_PK.xshd",
         FileType.Protocol => "MKI_PROTOCOL.xshd",
+        FileType.InspectionProtocol => "MKI_RESULT_PROTOCOL.xshd",
         _ => null,
       };
     }
@@ -70,7 +72,7 @@ namespace Ask.Core.Shared.Metadata.Enums.FileEnums
     /// <param name="fileType">Тип файла.</param>
     /// <returns><see langword="true"/>, если для типа ожидается UTF-8.</returns>
     public static bool UsesUtf8Encoding(FileType fileType)
-      => fileType is FileType.PKW or FileType.OPKW or FileType.Protocol;
+      => fileType is FileType.PKW or FileType.OPKW or FileType.Protocol or FileType.InspectionProtocol;
 
     /// <summary>
     /// Возвращает признак того, что для типа поддерживается folding OPK/OPKW-структур.
