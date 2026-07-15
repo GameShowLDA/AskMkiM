@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Errors;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
 using System.Runtime.CompilerServices;
@@ -19,7 +20,7 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView, IProtocolErrorListView
   {
     #region Поля.
 
@@ -92,7 +93,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
     public void SetSettings(ActionSettings actionSettings)
     {
-      Errors = new ErrorManager(ErrorListBoxVertical);
+      Errors = new ErrorManager(this);
       try
       {
         _settings = actionSettings;
@@ -455,6 +456,12 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       Errors.AddError(errorItem);
     }
+
+    /// <inheritdoc />
+    void IProtocolErrorListView.AddError(ErrorItem errorItem) => ErrorListBoxVertical.AddError(errorItem);
+
+    /// <inheritdoc />
+    void IProtocolErrorListView.ClearErrors() => ErrorListBoxVertical.ClearAll();
 
     public IInputFieldAccessor? GetInputFieldAccessor()
     {
