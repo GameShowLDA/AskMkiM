@@ -4,6 +4,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using Ask.UI.Features.ProtocolNew.Controls;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using System.Windows;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;

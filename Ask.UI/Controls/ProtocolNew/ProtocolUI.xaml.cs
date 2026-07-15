@@ -10,6 +10,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -24,7 +25,7 @@ namespace Ask.UI.Controls.ProtocolNew
   /// Класс управления пользовательским интерфейсом протокола выполнения.
   /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
-  public partial class ProtocolUI : UserControl, ITextAdapter
+  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext
   {
     static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     private bool loaded = false;
@@ -120,6 +121,11 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private Window _attachedWindow;
 
+    /// <summary>
+    /// Контроллер маршрутизации горячих клавиш в команды исполнительного интерфейса.
+    /// </summary>
+    private ProtocolHotkeyController _hotkeyController = null!;
+
     private Action<ExecutionEvents.ControlButtonPressed> _controlButtonHandler;
     private Action<ExecutionEvents.StepByStepModeChanged> _stepByStepModeChangedHandler;
     private bool _eventSubscriptionsAttached;
@@ -165,6 +171,7 @@ namespace Ask.UI.Controls.ProtocolNew
       RepeatButtonElement.Visibility = Visibility.Collapsed;
 
       SetupButtons();
+      _hotkeyController = new ProtocolHotkeyController(this);
 
       this.Loaded += (s, e) =>
       {
@@ -214,92 +221,51 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
     {
-      var key = e.Key == Key.System ? e.SystemKey : e.Key;
-      var modifiers = Keyboard.Modifiers;
-      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
-      {
-        return;
-      }
-
-      if (Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox)
-        return;
-
-      switch (key)
-      {
-        case Key.Enter:
-          if (modifiers == ModifierKeys.None && StartButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnStartPressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-
-        case Key.F5:
-          if (modifiers == ModifierKeys.None)
-          {
-            KeyboardManager.OnRunOrPausePressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-
-        case Key.F10:
-          if (modifiers == ModifierKeys.None)
-          {
-            HandleStepModeStart(isStepInto: false);
-            e.Handled = true;
-          }
-          break;
-
-        case Key.F11:
-          if (modifiers == ModifierKeys.None)
-          {
-            HandleStepModeStart(isStepInto: true);
-            e.Handled = true;
-          }
-          break;
-
-        case Key.P:
-          if (modifiers == ModifierKeys.None && ContinueButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnContinuePressed?.Invoke();
-          }
-          else if (modifiers == ModifierKeys.None && PauseButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnPausePressed?.Invoke();
-          }
-          if (modifiers == ModifierKeys.None)
-          {
-            e.Handled = true;
-          }
-          break;
-
-        case Key.Escape:
-          if (modifiers == ModifierKeys.None &&
-              (StopButtonElement.Visibility == Visibility.Visible
-              || ContinueButtonElement.Visibility == Visibility.Visible
-              || PauseButtonElement.Visibility == Visibility.Visible))
-          {
-            KeyboardManager.OnExitPressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-
-        case Key.R:
-          if (modifiers == ModifierKeys.None && RepeatButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnRepeatPressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-        default:
-          var focus = Keyboard.FocusedElement;
-          if (key == Key.LeftAlt || key == Key.RightAlt)
-          {
-            AnotherKeyPressed?.Invoke(sender, e);
-          }
-          break;
-      }
+      _hotkeyController.HandleKeyDown(sender, e);
     }
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanStart => StartButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanPause => PauseButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanContinue => ContinueButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanExit =>
+      StopButtonElement.Visibility == Visibility.Visible
+      || ContinueButtonElement.Visibility == Visibility.Visible
+      || PauseButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Start() => KeyboardManager.OnStartPressed?.Invoke();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.RunOrPause() => KeyboardManager.OnRunOrPausePressed?.Invoke();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Step(bool isStepInto) => HandleStepModeStart(isStepInto);
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Pause() => KeyboardManager.OnPausePressed?.Invoke();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Continue() => KeyboardManager.OnContinuePressed?.Invoke();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Exit() => KeyboardManager.OnExitPressed?.Invoke();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Repeat() => KeyboardManager.OnRepeatPressed?.Invoke();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
+      AnotherKeyPressed?.Invoke(sender, e);
 
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {

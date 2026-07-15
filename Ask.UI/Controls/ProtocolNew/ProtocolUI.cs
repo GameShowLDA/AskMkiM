@@ -9,6 +9,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Message;
 using System.Globalization;
 using System.IO;

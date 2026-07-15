@@ -10,6 +10,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Ask.UI.Features.ProtocolNew.Services;
 using Message;
