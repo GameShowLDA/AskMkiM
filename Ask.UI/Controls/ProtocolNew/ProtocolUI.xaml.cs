@@ -9,6 +9,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.UI.Features.ProtocolNew.Execution;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Features.ProtocolNew.Execution;
 using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace Ask.UI.Components.InputField
