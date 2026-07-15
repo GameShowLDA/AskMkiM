@@ -33,6 +33,7 @@ namespace Ask.Engine.Tests.SelfControl
         IsRepeatEnabled = false,
         CheckType = CheckType.SelfTest,
         CheckPower = false,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);

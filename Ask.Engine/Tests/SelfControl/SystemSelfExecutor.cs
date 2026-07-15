@@ -21,6 +21,7 @@ namespace Ask.Engine.Tests.SelfControl
         IsRepeatEnabled = true,
         CheckType = CheckType.SelfTest,
         CheckPower = false,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);

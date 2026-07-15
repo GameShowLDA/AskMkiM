@@ -44,6 +44,11 @@ namespace Ask.Core.Shared.DTO.Executor
     public CheckType CheckType { get; init; } = CheckType.None;
 
     /// <summary>
+    /// Автоматически добавлять сообщения об ошибках выполнения в итоговое заключение.
+    /// </summary>
+    public bool AccumulateErrorMessages { get; init; }
+
+    /// <summary>
     /// Имя запускаемого процесса.
     /// </summary>
     public string Name { get; set; }

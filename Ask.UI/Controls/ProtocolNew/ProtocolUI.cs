@@ -244,6 +244,16 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       await ShouldShowDetailedProtocol(showMessageModel);
+
+      if (_settings?.AccumulateErrorMessages == true && showMessageModel.Status == MessageType.Error)
+      {
+        var error = showMessageModel.ExecutionErrorMessage ?? showMessageModel.ToString();
+        if (!string.IsNullOrWhiteSpace(error))
+        {
+          AddError(error);
+        }
+      }
+
       await CheckStatus(showMessageModel);
 
       if (!ignoreOutputValidation)
