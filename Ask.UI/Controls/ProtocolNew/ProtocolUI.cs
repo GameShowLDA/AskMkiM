@@ -15,7 +15,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -76,7 +75,10 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public IInspectionProtocolHost? InspectionProtocolHost { get; set; }
 
-    private ActionSettings _settings;
+    /// <summary>
+    /// Владелец настроек текущего режима выполнения.
+    /// </summary>
+    private readonly ExecutionModeSettings _modeSettings = new();
 
     #endregion
 
@@ -94,21 +96,7 @@ namespace Ask.UI.Controls.ProtocolNew
     public void SetSettings(ActionSettings actionSettings)
     {
       Errors = new ErrorManager(this);
-      try
-      {
-        _settings = actionSettings;
-        _settings.Name = header.Text;
-
-        if (actionSettings.ReturnDelegate != null)
-        {
-          _settings.IsRepeatEnabled = true;
-        }
-      }
-      catch (Exception ex)
-      {
-        LogException("Ошибка загрузки элемента", ex);
-        throw;
-      }
+      _modeSettings.Configure(actionSettings, header.Text);
     }
 
     public void AddError(string error)
@@ -119,7 +107,7 @@ namespace Ask.UI.Controls.ProtocolNew
     public void ClearErrors()
     {
       ActionExecutor.ClearErrors();
-      _settings?.ExecutionErrors.Clear();
+      _modeSettings.ClearExecutionErrors();
     }
 
     /// <summary>
@@ -149,26 +137,26 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Прерывает выполнение текущего процесса.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
-    public async Task AbortExecution() => await ActionExecutor.StopAsync(_settings, _userActionTcs);
+    public async Task AbortExecution() => await ActionExecutor.StopAsync(_modeSettings.Current, _userActionTcs);
 
     /// <summary>
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync() => await ActionExecutor.StartAsync(_settings);
+    public async Task StartAsync() => await ActionExecutor.StartAsync(_modeSettings.Current);
 
     /// <summary>
     /// Завершение текущей выполняемой задачи.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    private async Task StopAsync() => await ActionExecutor.StopAsync(_settings, _userActionTcs);
+    private async Task StopAsync() => await ActionExecutor.StopAsync(_modeSettings.Current, _userActionTcs);
 
     /// <summary>
     /// Выполняет завершающие действия после завершения процесса.
     /// </summary>
     /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    public async Task FinalizeAsync() => await ActionExecutor.FinalizeAsync(_settings);
+    public async Task FinalizeAsync() => await ActionExecutor.FinalizeAsync(_modeSettings.Current);
 
     #endregion
 
@@ -192,7 +180,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
     /// </summary>
-    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_settings);
+    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_modeSettings.Current);
 
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
@@ -234,7 +222,7 @@ namespace Ask.UI.Controls.ProtocolNew
         showMessageModel,
         LastMessage,
         ignoreOutputValidation,
-        _settings?.AccumulateErrorMessages == true,
+        _modeSettings.AccumulateErrorMessages,
         AddError,
         callerName,
         callerFile,
