@@ -170,6 +170,21 @@ namespace Ask.UI.Controls.TextEditorControl
     }
 
     /// <summary>
+    /// Включает визуальный перенос длинных строк по ширине редактора.
+    /// </summary>
+    public bool WordWrap
+    {
+      get => textEditor.WordWrap;
+      set
+      {
+        textEditor.WordWrap = value;
+        ScrollViewer.SetHorizontalScrollBarVisibility(
+          textEditor,
+          value ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto);
+      }
+    }
+
+    /// <summary>
     /// Получает экземпляр сервиса маркеров для подсветки текста в редакторе.
     /// </summary>
     /// <value>

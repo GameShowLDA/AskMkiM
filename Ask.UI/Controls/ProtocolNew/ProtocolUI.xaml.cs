@@ -156,6 +156,7 @@ namespace Ask.UI.Controls.ProtocolNew
       loaded = true;
       InitializeComponent();
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
+      inspectionProtocolTextBox.WordWrap = true;
       ClearInspectionProtocol();
       this.DataContext = this;
 

@@ -16,6 +16,7 @@ namespace Ask.UI.Controls.ProtocolNew
       ExecutionProtocolEditor.Text = executionProtocolText ?? string.Empty;
 
       ResultProtocolEditor.SetFileType(FileType.InspectionProtocol);
+      ResultProtocolEditor.WordWrap = true;
       ResultProtocolEditor.Text = resultProtocolText ?? string.Empty;
     }
   }

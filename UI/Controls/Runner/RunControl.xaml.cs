@@ -10,6 +10,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
+using ResultProtocolEditor = Ask.UI.Controls.TextEditorControl.TextEditorUI;
 using Ask.UI.Features.Archive.Services;
 using Ask.UI.Shared.Formatting;
 using System.IO;
@@ -30,7 +31,7 @@ namespace UI.Controls.Runner
   /// <summary>
   /// Логика взаимодействия для RunControl.xaml
   /// </summary>
-  public partial class RunControl : UserControl, IRunView
+  public partial class RunControl : UserControl, IRunView, IInspectionProtocolHost
   {
     /// <summary>
     /// Флаг, указывающий, находится ли интерфейс в заблокированном состоянии.
@@ -57,6 +58,8 @@ namespace UI.Controls.Runner
     private TextEditorContainer _leftEditor;
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
+    private DockItem? _inspectionProtocolDockItem;
+    private ResultProtocolEditor? _inspectionProtocolEditor;
 
     public List<BaseCommandModel> TranslationModels
     {
@@ -92,6 +95,7 @@ namespace UI.Controls.Runner
     {
       InitializeComponent();
       ProtocolUI = new ProtocolUI(true);
+      ProtocolUI.InspectionProtocolHost = this;
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
@@ -336,12 +340,67 @@ namespace UI.Controls.Runner
         StartDelegate = StartTest,
         IsRepeatEnabled = false,
         CheckType = CheckType.ControlProgram,
+        AccumulateErrorMessages = true,
       };
 
       ProtocolUI.SetSettings(settings);
       this.FileName = ProtocolUI.Header;
 
       await ProtocolUI.StartAsync();
+    }
+
+    /// <inheritdoc />
+    public void ShowInspectionProtocol(string protocolText)
+    {
+      Dispatcher.Invoke(() =>
+      {
+        ClearInspectionProtocolCore();
+
+        var dockManager = ChildTextEditorContainer.DockManager;
+        _inspectionProtocolEditor = new ResultProtocolEditor
+        {
+          IsReadOnly = true,
+        };
+        _inspectionProtocolEditor.SetFileType(FileType.InspectionProtocol);
+        _inspectionProtocolEditor.WordWrap = true;
+        _inspectionProtocolEditor.Text = protocolText ?? string.Empty;
+
+        _inspectionProtocolDockItem = new DockItem
+        {
+          Title = "Итоговый протокол",
+          TabText = "Итоговый протокол",
+          Content = _inspectionProtocolEditor,
+        };
+
+        DocumentTab.SetHideCloseButton(_inspectionProtocolDockItem, true);
+        _inspectionProtocolDockItem.Show(dockManager, DockPosition.Document);
+      });
+    }
+
+    /// <inheritdoc />
+    public void ClearInspectionProtocol()
+    {
+      Dispatcher.Invoke(ClearInspectionProtocolCore);
+    }
+
+    private void ClearInspectionProtocolCore()
+    {
+      if (_inspectionProtocolEditor != null)
+      {
+        _inspectionProtocolEditor.Text = string.Empty;
+      }
+
+      if (_inspectionProtocolDockItem != null)
+      {
+        var dockManager = ChildTextEditorContainer.DockManager;
+        if (dockManager.DockItems.Contains(_inspectionProtocolDockItem))
+        {
+          _inspectionProtocolDockItem.Close();
+        }
+      }
+
+      _inspectionProtocolDockItem = null;
+      _inspectionProtocolEditor = null;
     }
 
     private async Task StartTest(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)

@@ -60,6 +60,14 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private string? _lastSavedProtocolPath;
 
+    private string _inspectionProtocolText = string.Empty;
+
+    /// <summary>
+    /// Внешний владелец представления итогового протокола.
+    /// Если не задан, используется встроенная панель <see cref="ProtocolUI"/>.
+    /// </summary>
+    public IInspectionProtocolHost? InspectionProtocolHost { get; set; }
+
     private ActionSettings _settings;
 
     #endregion
@@ -477,10 +485,12 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ClearInspectionProtocol()
     {
+      _inspectionProtocolText = string.Empty;
       inspectionProtocolTextBox.Text = string.Empty;
       InspectionProtocolPanel.Visibility = Visibility.Collapsed;
       InspectionProtocolSplitter.Visibility = Visibility.Collapsed;
       InspectionProtocolColumn.Width = new GridLength(0);
+      InspectionProtocolHost?.ClearInspectionProtocol();
     }
 
     /// <summary>
@@ -488,7 +498,15 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
-      inspectionProtocolTextBox.Text = protocolText ?? string.Empty;
+      _inspectionProtocolText = protocolText ?? string.Empty;
+
+      if (InspectionProtocolHost != null)
+      {
+        InspectionProtocolHost.ShowInspectionProtocol(_inspectionProtocolText);
+        return;
+      }
+
+      inspectionProtocolTextBox.Text = _inspectionProtocolText;
       InspectionProtocolColumn.Width = new GridLength(1, GridUnitType.Star);
       InspectionProtocolSplitter.Visibility = Visibility.Visible;
       InspectionProtocolPanel.Visibility = Visibility.Visible;
@@ -499,14 +517,14 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public async Task SaveInspectionProtocolAsync(string name)
     {
-      if (string.IsNullOrWhiteSpace(inspectionProtocolTextBox.Text))
+      if (string.IsNullOrWhiteSpace(_inspectionProtocolText))
       {
         return;
       }
 
       await ExecutionProtocolHistoryService.SaveInspectionAsync(
         name,
-        inspectionProtocolTextBox.Text,
+        _inspectionProtocolText,
         _lastSavedProtocolPath);
     }
 

@@ -610,7 +610,7 @@ namespace Ask.UI.Controls.ProtocolNew
       };
 
       ProtocolSelfCheck.LastMessage = true;
-      if (actionSettings.CheckType == CheckType.ControlProgram || actionSettings.CheckType == CheckType.Metrology)
+      if (actionSettings.CheckType == CheckType.Metrology)
       {
         return;
       }
