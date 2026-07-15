@@ -569,7 +569,7 @@ namespace Ask.UI.Components.InputField
       switch (e.Key)
       {
         case Key.F5:
-          ExecutionControlEventAdapter.Raise(ExecutionControlButton.Run);
+          KeyboardManager.OnRunOrPausePressed?.Invoke();
           e.Handled = true;
           break;
 
