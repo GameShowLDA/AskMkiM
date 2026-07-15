@@ -19,7 +19,7 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView
   {
     #region Поля.
 
@@ -63,6 +63,11 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Хранилище состояния и файлов текущей пары протоколов.
     /// </summary>
     private ProtocolStorageService _protocolStorage = null!;
+
+    /// <summary>
+    /// Контроллер встроенной и внешней областей итогового протокола.
+    /// </summary>
+    private InspectionProtocolAreaController _inspectionProtocolAreaController = null!;
 
     /// <summary>
     /// Внешний владелец представления итогового протокола.
@@ -354,12 +359,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ClearInspectionProtocol()
     {
-      _protocolStorage.ClearInspectionProtocol();
-      inspectionProtocolTextBox.Text = string.Empty;
-      InspectionProtocolPanel.Visibility = Visibility.Collapsed;
-      InspectionProtocolSplitter.Visibility = Visibility.Collapsed;
-      InspectionProtocolColumn.Width = new GridLength(0);
-      InspectionProtocolHost?.ClearInspectionProtocol();
+      _inspectionProtocolAreaController.Clear(InspectionProtocolHost);
     }
 
     /// <summary>
@@ -367,18 +367,25 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
-      _protocolStorage.SetInspectionProtocol(protocolText);
+      _inspectionProtocolAreaController.Show(protocolText, InspectionProtocolHost);
+    }
 
-      if (InspectionProtocolHost != null)
-      {
-        InspectionProtocolHost.ShowInspectionProtocol(_protocolStorage.InspectionProtocolText);
-        return;
-      }
+    /// <inheritdoc />
+    string IInspectionProtocolAreaView.ProtocolText
+    {
+      get => inspectionProtocolTextBox.Text;
+      set => inspectionProtocolTextBox.Text = value;
+    }
 
-      inspectionProtocolTextBox.Text = _protocolStorage.InspectionProtocolText;
-      InspectionProtocolColumn.Width = new GridLength(1, GridUnitType.Star);
-      InspectionProtocolSplitter.Visibility = Visibility.Visible;
-      InspectionProtocolPanel.Visibility = Visibility.Visible;
+    /// <inheritdoc />
+    void IInspectionProtocolAreaView.SetAreaVisible(bool isVisible)
+    {
+      var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+      InspectionProtocolColumn.Width = isVisible
+        ? new GridLength(1, GridUnitType.Star)
+        : new GridLength(0);
+      InspectionProtocolSplitter.Visibility = visibility;
+      InspectionProtocolPanel.Visibility = visibility;
     }
 
     /// <summary>

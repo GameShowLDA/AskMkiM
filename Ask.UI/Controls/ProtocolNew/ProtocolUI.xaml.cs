@@ -163,6 +163,7 @@ namespace Ask.UI.Controls.ProtocolNew
       loaded = true;
       InitializeComponent();
       _protocolStorage = new ProtocolStorageService();
+      _inspectionProtocolAreaController = new InspectionProtocolAreaController(_protocolStorage, this);
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
       inspectionProtocolTextBox.WordWrap = true;
       ClearInspectionProtocol();
