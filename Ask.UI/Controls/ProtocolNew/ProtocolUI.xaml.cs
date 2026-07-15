@@ -1,8 +1,8 @@
 using Ask.Core.Services.App;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -11,7 +11,6 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -47,7 +46,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public string Header
     {
-      get => (string)GetValue(HeaderProperty); 
+      get => (string)GetValue(HeaderProperty);
       set => SetValue(HeaderProperty, value);
     }
 
