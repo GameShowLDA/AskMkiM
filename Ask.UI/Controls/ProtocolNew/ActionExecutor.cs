@@ -610,12 +610,18 @@ namespace Ask.UI.Controls.ProtocolNew
       };
 
       ProtocolSelfCheck.LastMessage = true;
-      if (actionSettings.CheckType == CheckType.ControlProgram || actionSettings.CheckType == CheckType.Metrology)
+      if (actionSettings.CheckType == CheckType.ControlProgram)
       {
         return;
       }
 
       await ProtocolSelfCheck.ShowMessageAsync(showMessage, ignoreOutputValidation: true);
+
+      if (actionSettings.CheckType == CheckType.Metrology)
+      {
+        return;
+      }
+
       await ProtocolSelfCheck.AppendEmptyLineAsync();
 
       var message = BuildProtocol(actionSettings);

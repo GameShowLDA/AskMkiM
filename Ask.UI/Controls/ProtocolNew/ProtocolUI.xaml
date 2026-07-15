@@ -307,7 +307,7 @@
                                         Margin="0,10,5,0" 
                                         Style="{StaticResource ShadowButtonStyle}" 
                                         PreviewMouseDown="stepOverButton_PreviewMouseDown" />
-                                
+
                                         <Button x:Name="StepInto" 
                                         Content="{Binding Source={StaticResource LS_Protocol_Btn_StepInto}, Path=Value}" 
                                         FontSize="18" 
@@ -359,6 +359,7 @@
 
                         <GridSplitter
                             x:Name="SeparatorError"
+                                  Visibility="Collapsed"
                             Grid.Row="1"
                             Height="5"
                             Background="{StaticResource VioletColorSolidColorBrush}"
@@ -367,6 +368,7 @@
 
                         <ErrorList:ErrorListControl Grid.Row="2"
                                   x:Name="ErrorListBoxVertical"
+                                  Visibility="Collapsed"
                                   StringsNumberVisible="Collapsed"
                                   MeasureResultVisible="Collapsed"/>
                     </Grid>

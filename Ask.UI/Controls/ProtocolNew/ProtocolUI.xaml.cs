@@ -236,7 +236,7 @@ namespace Ask.UI.Controls.ProtocolNew
         case Key.F5:
           if (modifiers == ModifierKeys.None)
           {
-            HandleRunOrPause();
+            KeyboardManager.OnRunOrPausePressed?.Invoke();
             e.Handled = true;
           }
           break;
