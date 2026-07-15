@@ -343,9 +343,9 @@
 
                 <Grid Grid.Column="1" Margin="5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition x:Name="ExecutionProtocolColumn" Width="*"/>
+                        <ColumnDefinition x:Name="ExecutionProtocolColumn" Width="*" MinWidth="100"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition x:Name="InspectionProtocolColumn" Width="0"/>
+                        <ColumnDefinition x:Name="InspectionProtocolColumn" Width="0" MinWidth="0"/>
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
@@ -377,7 +377,10 @@
                         Width="5"
                         Margin="5,0"
                         Background="{StaticResource VioletColorSolidColorBrush}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
                         ResizeDirection="Columns"
+                        ResizeBehavior="PreviousAndNext"
                         Visibility="Collapsed"/>
 
                     <Border x:Name="InspectionProtocolPanel"

@@ -15,6 +15,7 @@ using MainWindowProgram.Windows;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
@@ -24,6 +25,7 @@ using UI.Controls.FileCompare;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
 using Ask.UI.Features.Archive.Services;
+using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Services
 {
@@ -195,6 +197,12 @@ namespace MainWindowProgram.Services
 
     private void OpenFileWithLegacyConversion(string filePath)
     {
+      if (string.Equals(Path.GetExtension(filePath), ".rtlst", StringComparison.OrdinalIgnoreCase))
+      {
+        OpenLinkedResultProtocol(filePath);
+        return;
+      }
+
       if (string.Equals(Path.GetExtension(filePath), ".opk", StringComparison.OrdinalIgnoreCase))
       {
         var convertedPath = ConvertOpkToOpkwForOpen(filePath);
@@ -208,6 +216,48 @@ namespace MainWindowProgram.Services
       }
 
       _multiWindow.EditorDocumentService.OpenFile(filePath);
+    }
+
+    private void OpenLinkedResultProtocol(string resultProtocolPath)
+    {
+      try
+      {
+        string fullResultPath = Path.GetFullPath(resultProtocolPath);
+        string executionProtocolPath = Path.ChangeExtension(fullResultPath, ".lst");
+
+        string resultProtocolText = ReadSavedProtocolText(fullResultPath);
+        string executionProtocolText = File.Exists(executionProtocolPath)
+          ? ReadSavedProtocolText(executionProtocolPath)
+          : $"Связанный протокол выполнения не найден:\n{executionProtocolPath}";
+
+        var viewer = new SavedProtocolPairUI(executionProtocolText, resultProtocolText);
+        _multiWindow.WorkspaceService.AddControl(
+          Path.GetFileName(fullResultPath),
+          viewer,
+          TypeWindow.Files,
+          fullResultPath);
+      }
+      catch (Exception ex)
+      {
+        LogException($"Ошибка открытия связанного итогового протокола {resultProtocolPath}", ex);
+        Message.MessageBoxCustom.Show(
+          $"Не удалось открыть итоговый протокол: {ex.Message}",
+          "Открытие протокола",
+          MessageBoxButton.OK,
+          MessageBoxImage.Error);
+      }
+    }
+
+    private static string ReadSavedProtocolText(string filePath)
+    {
+      var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+      string text = FileEncryptionManager.IsFileEncrypted(filePath)
+        ? FileEncryptionManager.ReadEncryptedFileText(filePath, encoding)
+        : File.ReadAllText(filePath, encoding);
+
+      return text
+        .Replace("\r\n", "\n")
+        .Replace('\r', '\n');
     }
 
     private string? ConvertOpkToOpkwForOpen(string inputFilePath)
