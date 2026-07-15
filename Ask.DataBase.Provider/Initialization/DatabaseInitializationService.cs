@@ -324,7 +324,7 @@ public static class DatabaseInitializationService
     TraceWarning(
       report,
       progress,
-      "[DB] Р’ СЃС‚Р°СЂРѕР№ С…РµРјРµ Execution РґРѕР±Р°РІР»РµРЅР° РєРѕР»РѕРЅРєР° LegacyCompatibilityMode.");
+      "[DB] В старой схеме Execution добавлена колонка LegacyCompatibilityMode.");
   }
 
   private static async Task EnsureSettingsProtocolPrintColumnsAsync(

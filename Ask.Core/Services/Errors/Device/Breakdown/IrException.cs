@@ -13,7 +13,7 @@
     /// <param name="chassis">Номер шасси.</param>
     /// <param name="number">Номер устройства.</param>
     public static DeviceException ConnectionFailed(string name, int chassis, int number) =>
-        new($"Нет подключения к {name}({chassis}.{number})");
+        new($"Нет связи с {name}({chassis}.{number})");
 
     /// <summary>
     /// Создаёт исключение при ошибке установки режима IR.

@@ -860,7 +860,10 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// <param name="userMessageService">Сервис отображения сообщений пользователю (опционально).</param>
       public async Task ApplyVoltageAsync(IUserInteractionService userMessageService = null)
       {
-        await _dcwMode.Measure.ApplyVoltageAsync(userMessageService);
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          await _dcwMode.Measure.ApplyVoltageAsync(userMessageService);
+        }
       }
 
       /// <summary>

@@ -949,7 +949,10 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// <returns>Задача, представляющая завершение операции подачи напряжения.</returns>
       public async Task ApplyVoltageAsync(IUserInteractionService userMessageService = null)
       {
-        await _acwMode.Measure.ApplyVoltageAsync(userMessageService);
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          await _acwMode.Measure.ApplyVoltageAsync(userMessageService);
+        }
       }
     }
 
