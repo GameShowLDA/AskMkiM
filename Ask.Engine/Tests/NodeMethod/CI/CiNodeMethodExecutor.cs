@@ -22,7 +22,6 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
       };
 

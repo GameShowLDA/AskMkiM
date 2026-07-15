@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Application.Execution;
-using Ask.Device.Application.Function.Helpers;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT;
 using Ask.Device.Runtime.Function.Helpers;
@@ -810,19 +809,8 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Измеренное значение тока утечки в миллиамперах (мА).  
       /// В случае ошибки возвращается <c>-1</c>.
       /// </returns>
-      public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
-        if (rangeTo == -1)
-        {
-          rangeTo = double.MaxValue;
-        }
-
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.DielectricWithstandDC);
-        if (random != -1)
-        {
-          return (random, "мА");
-        }
-
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение тока DCW",
