@@ -26,6 +26,7 @@ public partial class AskMkiConfigControl : UserControl
   private const double DrawerWidth = 650d;
   private readonly int? _numberChassis;
   private bool _isLoadingEditor;
+  private bool _isUpdatingVoltmeterEditorState;
   private bool _hasUnsavedChanges;
   private LegacyMkiHardwareConfigFile? _loadedConfigFile;
   private ObservableCollection<AskMkiSettingGroup> _editorGroups = new ObservableCollection<AskMkiSettingGroup>();
@@ -249,6 +250,11 @@ public partial class AskMkiConfigControl : UserControl
   /// </summary>
   private void HandleEditorItemChanged(AskMkiSettingItem item, string? propertyName)
   {
+    if (_isUpdatingVoltmeterEditorState)
+    {
+      return;
+    }
+
     if (propertyName != nameof(AskMkiSettingItem.SelectedOption))
     {
       return;
@@ -256,37 +262,99 @@ public partial class AskMkiConfigControl : UserControl
 
     if (item.Path is "HardwareAux.VoltmeterDeviceClass" or "HardwareAux.VoltmeterConnectionType")
     {
-      UpdateVoltmeterEditorState(autoResolveUsb: true);
+      UpdateVoltmeterEditorState(
+        autoResolveUsb: item.Path == "HardwareAux.VoltmeterConnectionType",
+        resetConnectionSelection: item.Path == "HardwareAux.VoltmeterDeviceClass");
     }
   }
 
   /// <summary>
   /// Обновляет видимость полей подключения цифрового вольтметра АСК.
   /// </summary>
-  private void UpdateVoltmeterEditorState(bool autoResolveUsb)
+  private void UpdateVoltmeterEditorState(bool autoResolveUsb, bool resetConnectionSelection = false)
   {
-    var connectionItem = FindEditorItemByPath("HardwareAux.VoltmeterConnectionType");
-    var usbItem = FindEditorItemByPath("HardwareAux.UsbAddrVm");
-    var ipItem = FindEditorItemByPath("HardwareAux.VoltmeterIpAddress");
-
-    var connectionType = connectionItem?.SelectedOption?.Value ?? "USB";
-    var isUsb = string.Equals(connectionType, "USB", StringComparison.OrdinalIgnoreCase);
-    var isIp = string.Equals(connectionType, "IP", StringComparison.OrdinalIgnoreCase);
-
-    if (usbItem != null)
+    if (_isUpdatingVoltmeterEditorState)
     {
-      usbItem.IsVisible = isUsb;
+      return;
     }
 
-    if (ipItem != null)
+    _isUpdatingVoltmeterEditorState = true;
+    try
     {
-      ipItem.IsVisible = isIp;
+      var meterItem = FindEditorItemByPath("HardwareAux.VoltmeterDeviceClass");
+      var connectionItem = FindEditorItemByPath("HardwareAux.VoltmeterConnectionType");
+      var usbItem = FindEditorItemByPath("HardwareAux.UsbAddrVm");
+      var ipItem = FindEditorItemByPath("HardwareAux.VoltmeterIpAddress");
+
+      var selectedDeviceClass = meterItem?.SelectedOption?.Value;
+      var supportsUsb = IsUsbVoltmeter(selectedDeviceClass);
+      var supportsIp = IsIpVoltmeter(selectedDeviceClass);
+
+      if (connectionItem != null && supportsIp && !supportsUsb)
+      {
+        SetVoltmeterConnectionOptions(connectionItem, "IP", resetConnectionSelection);
+      }
+
+      if (connectionItem != null && supportsUsb && !supportsIp)
+      {
+        SetVoltmeterConnectionOptions(connectionItem, "USB", resetConnectionSelection);
+      }
+
+      if (connectionItem != null && supportsUsb && supportsIp)
+      {
+        SetVoltmeterConnectionOptions(connectionItem, null, resetConnectionSelection);
+      }
+
+      var connectionType = connectionItem?.SelectedOption?.Value ?? string.Empty;
+      var isUsb = string.Equals(connectionType, "USB", StringComparison.OrdinalIgnoreCase) && supportsUsb;
+      var isIp = string.Equals(connectionType, "IP", StringComparison.OrdinalIgnoreCase) && supportsIp;
+
+      if (usbItem != null)
+      {
+        usbItem.IsVisible = isUsb && supportsUsb;
+      }
+
+      if (ipItem != null)
+      {
+        ipItem.IsVisible = isIp;
+      }
+
+      if (autoResolveUsb && isUsb && supportsUsb)
+      {
+        ResolveVoltmeterUsbAddress();
+      }
+    }
+    finally
+    {
+      _isUpdatingVoltmeterEditorState = false;
+    }
+  }
+
+  private void SetVoltmeterConnectionOptions(AskMkiSettingItem connectionItem, string? onlyValue, bool resetSelection)
+  {
+    string? selectedValue = resetSelection ? string.Empty : connectionItem.SelectedOption?.Value;
+    var placeholder = new AskMkiSettingOption
+    {
+      Value = string.Empty,
+      Label = "Выбор типа подключения:"
+    };
+
+    var options = OptionsFromResource("AskMki.Options.VoltmeterConnection")
+      .Where(option => onlyValue == null || string.Equals(option.Value, onlyValue, StringComparison.OrdinalIgnoreCase))
+      .GroupBy(option => option.Value, StringComparer.OrdinalIgnoreCase)
+      .Select(group => group.First())
+      .ToArray();
+
+    connectionItem.Options.Clear();
+    connectionItem.Options.Add(placeholder);
+    foreach (var option in options)
+    {
+      connectionItem.Options.Add(option);
     }
 
-    if (autoResolveUsb && isUsb)
-    {
-      ResolveVoltmeterUsbAddress();
-    }
+    connectionItem.SelectedOption = connectionItem.Options.FirstOrDefault(option =>
+      string.Equals(option.Value, selectedValue, StringComparison.OrdinalIgnoreCase))
+      ?? connectionItem.Options.FirstOrDefault();
   }
 
   /// <summary>

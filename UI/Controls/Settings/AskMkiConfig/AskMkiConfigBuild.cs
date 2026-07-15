@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.LegacyMki;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Device.Runtime.Device;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -65,7 +64,19 @@ public partial class AskMkiConfigControl
       return RuntimeMultimeterOptions();
     }
 
-    return ((IEnumerable)FindResource(key)).Cast<AskMkiSettingOption>().ToArray();
+    return ((IEnumerable)FindResource(key))
+      .Cast<AskMkiSettingOption>()
+      .Select(CloneOption)
+      .ToArray();
+  }
+
+  private static AskMkiSettingOption CloneOption(AskMkiSettingOption option)
+  {
+    return new AskMkiSettingOption
+    {
+      Value = option.Value,
+      Label = option.Label
+    };
   }
 
   /// <summary>
@@ -73,7 +84,7 @@ public partial class AskMkiConfigControl
   /// </summary>
   private static IReadOnlyList<AskMkiSettingOption> RuntimeMultimeterOptions()
   {
-    return ReflectionHelper.GetAllImplementations<IMultimeter>()
+    return RuntimeMultimeterTypes
       .Select(CreateMultimeterOption)
       .Where(option => option != null)
       .Cast<AskMkiSettingOption>()
@@ -292,13 +303,19 @@ public partial class AskMkiConfigControl
       Options = new ObservableCollection<AskMkiSettingOption>(options),
       ApplyToProfile = (profile, editorItem) =>
       {
-        if (editorItem.SelectedOption == null)
+        var selectedOption = editorItem.SelectedOption;
+        if (definition.Path == "HardwareAux.VoltmeterConnectionType" && string.IsNullOrWhiteSpace(selectedOption?.Value))
+        {
+          selectedOption = editorItem.Options.FirstOrDefault(option => !string.IsNullOrWhiteSpace(option.Value));
+        }
+
+        if (selectedOption == null)
         {
           throw new InvalidOperationException(UiFormat("AskMki.Error.OptionNotSelected", editorItem.Label));
         }
 
         var targetType = GetValueTypeByPath(profile, definition.Path);
-        SetValueByPath(profile, definition.Path, ConvertTextToType(editorItem.SelectedOption.Value, targetType));
+        SetValueByPath(profile, definition.Path, ConvertTextToType(selectedOption.Value, targetType));
 
         if (definition.Path is "HardwareAux.VoltmeterDeviceClass" or "HardwareAux.VoltmeterConnectionType")
         {

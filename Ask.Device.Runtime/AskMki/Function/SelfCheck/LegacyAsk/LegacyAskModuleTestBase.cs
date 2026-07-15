@@ -45,7 +45,7 @@ public abstract class LegacyAskModuleTestBase
         return;
       }
 
-      hasErrors = !await ExecuteHardwareAsync(context);
+      hasErrors = !await ExecuteHardwareAsync(context) || context.Reporter.HasFailedMeasurements;
     }
     catch (OperationCanceledException)
     {

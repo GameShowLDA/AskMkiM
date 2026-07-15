@@ -76,17 +76,22 @@ public partial class AskMkiConfigControl
   /// </summary>
   private static string ResolveVoltmeterConnection(LegacyMkiHardwareProfile profile)
   {
+    if (IsIpVoltmeter(profile.HardwareAux.VoltmeterDeviceClass) && !IsUsbVoltmeter(profile.HardwareAux.VoltmeterDeviceClass))
+    {
+      return profile.HardwareAux.VoltmeterIpAddress?.Trim() ?? string.Empty;
+    }
+
+    if (IsUsbVoltmeter(profile.HardwareAux.VoltmeterDeviceClass) && !IsIpVoltmeter(profile.HardwareAux.VoltmeterDeviceClass))
+    {
+      return profile.HardwareAux.UsbAddrVm?.Trim() ?? string.Empty;
+    }
+
     if (string.Equals(profile.HardwareAux.VoltmeterConnectionType, "IP", StringComparison.OrdinalIgnoreCase))
     {
       return profile.HardwareAux.VoltmeterIpAddress?.Trim() ?? string.Empty;
     }
 
-    if (!string.IsNullOrWhiteSpace(profile.HardwareAux.UsbAddrVm))
-    {
-      return profile.HardwareAux.UsbAddrVm.Trim();
-    }
-
-    return string.Empty;
+    return profile.HardwareAux.UsbAddrVm?.Trim() ?? string.Empty;
   }
 
   /// <summary>

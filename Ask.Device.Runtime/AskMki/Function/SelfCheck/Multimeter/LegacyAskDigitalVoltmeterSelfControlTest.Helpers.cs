@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,7 +15,7 @@ namespace Ask.Engine.Tests.SelfControl;
 
 public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest
 {
-  private static async Task CheckResistanceOverloadAsync(
+  private static async Task<(bool Passed, string MeasuredText)> CheckResistanceOverloadAsync(
     LegacyAskSelfControlContext context,
     double expected,
     double range,
@@ -23,22 +24,27 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest
     if (context.Multimeter == null)
     {
       LogInformation($"[Тест цифрового вольтметра] {operation}: холостой режим, перегрузка эмулирована.", isDeviceLog: true);
-      return;
+      return (true, $">{FormatResistance(range)}");
     }
 
     try
     {
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        LogInformation($"[Тест цифрового вольтметра] {operation}: холостой режим, перегрузка эмулирована.", isDeviceLog: true);
+        return (true, $">{FormatResistance(range)}");
+      }
+
       LogInformation($"[Тест цифрового вольтметра] {operation}: R, диапазон={range}, ожидается перегрузка от {expected}.", isDeviceLog: true);
       double measured = await ReadMultimeterValueAsync(context, MultimeterMeasureCommand);
       LogInformation($"[Тест цифрового вольтметра] {operation}: ответ прибора={measured}.", isDeviceLog: true);
-      if (measured <= range)
-      {
-        throw new InvalidOperationException($"Мультиметр не вернул перегрузку: измерено {measured}, диапазон {range}.");
-      }
+      bool passed = measured > range;
+      return (passed, passed ? $">{FormatResistance(range)}" : $"={FormatResistance(measured)}");
     }
     catch (Exception ex) when (IsExpectedOverloadException(ex))
     {
       LogInformation($"[Тест цифрового вольтметра] {operation}: прибор вернул ожидаемую перегрузку: {ex.Message}", isDeviceLog: true);
+      return (true, $">{FormatResistance(range)}");
     }
   }
 

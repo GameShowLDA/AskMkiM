@@ -13,7 +13,7 @@ public sealed class MultiAgilent34401A : MultiUsbSCPIMeterBase
     ConfigureUsbMeter(
       "Agilent 34401A",
       "USB-SCPI мультиметр Agilent 34401A.",
-      "34401A");
+      "VID_0000&PID_0000");
 
     ConfigureAgilentUsbCommands(supportsCapacitance: false);
   }

@@ -136,6 +136,7 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
                                 <Grid.ColumnDefinitions>
@@ -157,9 +158,23 @@
 
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="0"
-                                           Text="ID:"
+                                           Text="USB-адрес:"
                                            Style="{StaticResource AskMkiDrawerLabelStyle}"/>
                                 <Border Grid.Row="1"
+                                        Grid.Column="1"
+                                        Style="{StaticResource AskMkiDrawerInputBorderStyle}"
+                                        Margin="0,6,14,6"
+                                        Height="56">
+                                    <TextBox Text="{Binding TextValue, UpdateSourceTrigger=PropertyChanged}"
+                                             TextWrapping="Wrap"
+                                             Style="{StaticResource AskMkiDrawerInputTextBoxStyle}"/>
+                                </Border>
+
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="0"
+                                           Text="ID:"
+                                           Style="{StaticResource AskMkiDrawerLabelStyle}"/>
+                                <Border Grid.Row="2"
                                         Grid.Column="1"
                                         Style="{StaticResource AskMkiDrawerInputBorderStyle}"
                                         Margin="0,6,14,6"
@@ -169,7 +184,7 @@
                                              Style="{StaticResource AskMkiDrawerReadOnlyTextBoxStyle}"/>
                                 </Border>
 
-                                <Grid Grid.Row="2"
+                                <Grid Grid.Row="3"
                                       Grid.ColumnSpan="2"
                                       Margin="14,6,14,0">
                                     <Grid.ColumnDefinitions>

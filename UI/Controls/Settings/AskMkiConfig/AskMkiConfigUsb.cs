@@ -1,11 +1,11 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Device.Runtime.Device;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
+using System.Text;
 using System.Text.RegularExpressions;
+using Ivi.Visa;
+using NationalInstruments.Visa;
 
 namespace UI.Controls.Settings.AskMkiConfig;
 
@@ -15,6 +15,7 @@ namespace UI.Controls.Settings.AskMkiConfig;
 public partial class AskMkiConfigControl
 {
   private static readonly Regex UsbVidPidRegex = new(@"VID_([0-9A-F]{4})&PID_([0-9A-F]{4})", RegexOptions.IgnoreCase);
+  private static readonly Regex VisaVidPidRegex = new(@"USB\d*::0x([0-9A-F]{4})::0x([0-9A-F]{4})::", RegexOptions.IgnoreCase);
   private static readonly Regex UsbPortRegex = new(@"&0&(\d+)$", RegexOptions.IgnoreCase);
 
   /// <summary>
@@ -33,6 +34,12 @@ public partial class AskMkiConfigControl
     var patterns = ResolveUsbSearchPatterns(deviceClass);
     if (patterns.Count == 0)
     {
+      var visaInfo = TryResolveVisaUsbInfo(deviceClass);
+      if (visaInfo != null)
+      {
+        return visaInfo;
+      }
+
       return UsbDeviceInfo.NotFound("USB не найден");
     }
 
@@ -46,9 +53,21 @@ public partial class AskMkiConfigControl
           return BuildUsbInfo(match);
         }
       }
+
+      var fallbackVisaInfo = TryResolveVisaUsbInfo(deviceClass);
+      if (fallbackVisaInfo != null)
+      {
+        return fallbackVisaInfo;
+      }
     }
     catch
     {
+      var visaInfo = TryResolveVisaUsbInfo(deviceClass);
+      if (visaInfo != null)
+      {
+        return visaInfo;
+      }
+
       return UsbDeviceInfo.NotFound($"USB не найден: {patterns[0]}");
     }
 
@@ -84,10 +103,9 @@ public partial class AskMkiConfigControl
   private static List<string> ResolveUsbSearchPatterns(string deviceClass)
   {
     var patterns = new List<string>();
-    var type = ReflectionHelper.GetAllImplementations<IMultimeter>()
-      .FirstOrDefault(item => string.Equals(item.FullName, deviceClass, StringComparison.Ordinal));
-
-    if (type == null || Activator.CreateInstance(type) is not IDevice device)
+    var type = ResolveVoltmeterType(deviceClass);
+    var device = CreateVoltmeterDevice(deviceClass);
+    if (type == null || !IsUsbVoltmeter(deviceClass) || device == null)
     {
       return patterns;
     }
@@ -233,6 +251,133 @@ public partial class AskMkiConfigControl
   {
     var match = UsbPortRegex.Match(source);
     return match.Success ? match.Groups[1].Value : string.Empty;
+  }
+
+  private static UsbDeviceInfo? TryResolveVisaUsbInfo(string deviceClass)
+  {
+    var identityPatterns = ResolveVisaIdentityPatterns(deviceClass);
+    if (identityPatterns.Count == 0)
+    {
+      return null;
+    }
+
+    try
+    {
+      using var resourceManager = new ResourceManager();
+      var resources = resourceManager.Find("USB?*INSTR").ToArray();
+      foreach (var resource in resources)
+      {
+        var identity = TryReadVisaIdentity(resourceManager, resource);
+        if (identity == null)
+        {
+          continue;
+        }
+
+        if (!IsVisaIdentityMatch(identity, identityPatterns))
+        {
+          continue;
+        }
+
+        return BuildVisaUsbInfo(resource, identity);
+      }
+    }
+    catch (Exception ex) when (ex is VisaException or NativeVisaException or InvalidOperationException)
+    {
+      return null;
+    }
+
+    return null;
+  }
+
+  private static List<string> ResolveVisaIdentityPatterns(string deviceClass)
+  {
+    var patterns = new List<string>();
+    var device = CreateVoltmeterDevice(deviceClass);
+    if (device == null)
+    {
+      return patterns;
+    }
+
+    AddVisaIdentityPatterns(patterns, device.Name);
+    AddVisaIdentityPatterns(patterns, device.Description);
+    AddVisaIdentityPatterns(patterns, deviceClass);
+    return patterns;
+  }
+
+  private static void AddVisaIdentityPatterns(List<string> patterns, string? source)
+  {
+    if (string.IsNullOrWhiteSpace(source))
+    {
+      return;
+    }
+
+    foreach (Match match in Regex.Matches(source, @"[\p{L}\d][\p{L}\d\-/\.]*"))
+    {
+      var pattern = NormalizeVisaIdentity(match.Value);
+      if (pattern.Length < 3 || !pattern.Any(char.IsDigit))
+      {
+        continue;
+      }
+
+      if (!patterns.Contains(pattern, StringComparer.OrdinalIgnoreCase))
+      {
+        patterns.Add(pattern);
+      }
+    }
+  }
+
+  private static bool IsVisaIdentityMatch(string identity, List<string> patterns)
+  {
+    var normalizedIdentity = NormalizeVisaIdentity(identity);
+    return patterns.Any(pattern => normalizedIdentity.Contains(pattern, StringComparison.OrdinalIgnoreCase));
+  }
+
+  private static string NormalizeVisaIdentity(string value)
+  {
+    return new string(value.Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant).ToArray());
+  }
+
+  private static string? TryReadVisaIdentity(ResourceManager resourceManager, string resource)
+  {
+    try
+    {
+      using var session = resourceManager.Open(resource);
+      if (session is not MessageBasedSession messageSession)
+      {
+        return null;
+      }
+
+      messageSession.TimeoutMilliseconds = 2000;
+      messageSession.SendEndEnabled = true;
+      messageSession.TerminationCharacter = (byte)'\n';
+      messageSession.TerminationCharacterEnabled = true;
+      messageSession.RawIO.Write("*IDN?\n");
+
+      byte[] buffer = new byte[4096];
+      messageSession.RawIO.Read(buffer, 0, buffer.Length, out long readCount, out _);
+      return readCount <= 0
+        ? null
+        : Encoding.ASCII.GetString(buffer, 0, (int)readCount).Trim('\0', '\r', '\n', ' ');
+    }
+    catch (Exception ex) when (ex is VisaException or NativeVisaException or IOTimeoutException or InvalidOperationException)
+    {
+      return null;
+    }
+  }
+
+  private static UsbDeviceInfo BuildVisaUsbInfo(string resource, string identity)
+  {
+    var match = VisaVidPidRegex.Match(resource);
+    var vid = match.Success ? match.Groups[1].Value.ToUpperInvariant() : "N/A";
+    var pid = match.Success ? match.Groups[2].Value.ToUpperInvariant() : "N/A";
+
+    return new UsbDeviceInfo(
+      resource,
+      $"USB VISA устройство найдено: {identity}",
+      string.Empty,
+      identity,
+      vid,
+      pid);
   }
 
   /// <summary>

@@ -487,7 +487,17 @@ namespace Ask.Device.Runtime.AskMkiM.Function.Base
         ? "USB?*INSTR"
         : profile.VisaResourcePattern;
 
-      var resources = resourceManager.Find(resourcePattern).ToList();
+      List<string> resources;
+      try
+      {
+        resources = resourceManager.Find(resourcePattern).ToList();
+      }
+      catch (Exception ex) when (ex is VisaException or NativeVisaException)
+      {
+        throw new InvalidOperationException(
+          $"USBTMC VISA resources are not available by pattern \"{resourcePattern}\". Device pattern: \"{pattern}\". {ex.Message}",
+          ex);
+      }
 
       string? matched = resources.FirstOrDefault(resource => IsResourceMatch(resource, pattern));
       if (!string.IsNullOrWhiteSpace(matched))

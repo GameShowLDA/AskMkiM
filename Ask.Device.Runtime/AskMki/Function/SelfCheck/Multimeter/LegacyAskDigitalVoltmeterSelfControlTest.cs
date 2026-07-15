@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -15,7 +16,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
 {
   private const double ShortCircuitResistanceOhm = 240.0;
   private const ushort ShortCircuitRelayBit = 0x0040;
-  private const int MultimeterResponseDelayMs = 100;
+  private const int MultimeterResponseDelayMs = 0;
   private const int MultimeterCommandTimeoutMs = 5000;
   private const int MultimeterMeasurementTimeoutMs = 15000;
   private const string MultimeterMeasureCommand = "READ?";
@@ -138,9 +139,10 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
 
       if (testCase.MustBeOverload)
       {
-        await CheckVoltageOverloadAsync(context, testCase.ExpectedVoltage, testCase.Range, "проверка перегрузки ПИНТ4");
+        var overload = await CheckVoltageOverloadAsync(context, testCase.ExpectedVoltage, testCase.Range, "проверка перегрузки ПИНТ4");
         await context.Reporter.TestStepAsync(
-          $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-)={FormatVoltageShort(testCase.ExpectedVoltage)} Диап={FormatVoltageShort(testCase.Range)} Д.быть перегр.  Uизм>{FormatVoltageShort(testCase.Range)}");
+          $"Uпинт4({FormatBus(testCase.PositiveBus)}+ {FormatBus(testCase.NegativeBus)}-)={FormatVoltageShort(testCase.ExpectedVoltage)} Диап={FormatVoltageShort(testCase.Range)} Д.быть перегр.  Uизм{overload.MeasuredText}",
+          overload.Passed);
         continue;
       }
 
@@ -182,8 +184,10 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
 
         if (testCase.MustBeOverload)
         {
-          await CheckResistanceOverloadAsync(context, ShortCircuitResistanceOhm, testCase.Range, "проверка перегрузки сопротивления КЗШ");
-          await context.Reporter.TestStepAsync($"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом Д.быть перегр.  Rизм>{testCase.DisplayRange}");
+          var overload = await CheckResistanceOverloadAsync(context, ShortCircuitResistanceOhm, testCase.Range, "проверка перегрузки сопротивления КЗШ");
+          await context.Reporter.TestStepAsync(
+            $"Диап={testCase.DisplayRange} R д.быть={ShortCircuitResistanceOhm:0} Ом Д.быть перегр.  Rизм{overload.MeasuredText}",
+            overload.Passed);
           continue;
         }
 
@@ -242,6 +246,15 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       return expected;
     }
 
+    if (ExecutionConfig.GetIsIdleModeEnabled())
+    {
+      return await context.Multimeter.DcVoltageManager.MeasureDCVoltageAsync(
+        param: expected,
+        rangeFrom: expected,
+        rangeTo: expected,
+        userMessageService: context.MessageService);
+    }
+
     LogInformation($"[Тест цифрового вольтметра] {operation}: DC READ?, диапазон={range}, ожидается={expected}.", isDeviceLog: true);
     double measured = await ReadMultimeterValueAsync(context, GetMeasureCommand(context.Multimeter.DCVCommands.Measure));
     LogInformation($"[Тест цифрового вольтметра] {operation}: измерено={measured}.", isDeviceLog: true);
@@ -268,7 +281,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
   /// <summary>
   /// Проверяет ожидаемую перегрузку по напряжению без срыва всего теста на штатном ответе прибора.
   /// </summary>
-  private static async Task CheckVoltageOverloadAsync(
+  private static async Task<(bool Passed, string MeasuredText)> CheckVoltageOverloadAsync(
     LegacyAskSelfControlContext context,
     double expected,
     double range,
@@ -277,21 +290,26 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     if (context.Multimeter == null)
     {
       LogInformation($"[Тест цифрового вольтметра] {operation}: холостой режим, перегрузка эмулирована.", isDeviceLog: true);
-      return;
+      return (true, $">{FormatVoltageShort(range)}");
     }
 
     try
     {
-      LogInformation($"[Тест цифрового вольтметра] {operation}: DC, диапазон={range}, ожидается перегрузка от {expected}.", isDeviceLog: true);
-    double measured = await ReadMultimeterValueAsync(context, GetMeasureCommand(context.Multimeter.DCVCommands.Measure));
-      if (measured <= range)
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        throw new InvalidOperationException($"Мультиметр не вернул перегрузку: измерено {measured}, диапазон {range}.");
+        LogInformation($"[Тест цифрового вольтметра] {operation}: холостой режим, перегрузка эмулирована.", isDeviceLog: true);
+        return (true, $">{FormatVoltageShort(range)}");
       }
+
+      LogInformation($"[Тест цифрового вольтметра] {operation}: DC, диапазон={range}, ожидается перегрузка от {expected}.", isDeviceLog: true);
+      double measured = await ReadMultimeterValueAsync(context, GetMeasureCommand(context.Multimeter.DCVCommands.Measure));
+      bool passed = measured > range;
+      return (passed, passed ? $">{FormatVoltageShort(range)}" : $"={FormatVoltage(measured)}");
     }
     catch (Exception ex) when (IsExpectedOverloadException(ex))
     {
       LogInformation($"[Тест цифрового вольтметра] {operation}: прибор вернул ожидаемую перегрузку: {ex.Message}", isDeviceLog: true);
+      return (true, $">{FormatVoltageShort(range)}");
     }
   }
 
@@ -308,6 +326,15 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     {
       LogInformation($"[Тест цифрового вольтметра] {operation}: мультиметр не выбран, используется эмуляция {expected}.", isDeviceLog: true);
       return expected;
+    }
+
+    if (ExecutionConfig.GetIsIdleModeEnabled())
+    {
+      return await context.Multimeter.ResistanceManager.MeasureResistanceAsync(
+        param: expected,
+        rangeFrom: expected,
+        rangeTo: expected,
+        userMessageService: context.MessageService);
     }
 
     LogInformation($"[Тест цифрового вольтметра] {operation}: R READ?, диапазон={range}, ожидается={expected}.", isDeviceLog: true);

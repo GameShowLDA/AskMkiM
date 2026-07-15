@@ -13,7 +13,7 @@ public sealed class MultiDmm4050 : MultiUsbSCPIMeterBase
     ConfigureUsbMeter(
       "Tektronix DMM4050",
       "USB-SCPI мультиметр Tektronix DMM4050.",
-      "DMM4050");
+      "VID_0000&PID_0000");
 
     ConfigureAgilentUsbCommands(supportsCapacitance: true);
   }
