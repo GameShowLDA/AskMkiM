@@ -685,14 +685,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       ShouldShowResumeMessage = false;
       _runGuard.Release(this);
 
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        ProtocolSelfCheck.PauseButtonVisibility = Visibility.Collapsed;
-        ProtocolSelfCheck.StepOverButtonVisibility = Visibility.Collapsed;
-        ProtocolSelfCheck.StepIntoButtonVisibility = Visibility.Collapsed;
-        ProtocolSelfCheck.NextButtonVisibility = Visibility.Collapsed;
-        ProtocolSelfCheck.ExitButtonVisibility = Visibility.Collapsed;
-      });
+      ProtocolSelfCheck.HideExecutionButtonsAfterReset();
     }
 
     #endregion
