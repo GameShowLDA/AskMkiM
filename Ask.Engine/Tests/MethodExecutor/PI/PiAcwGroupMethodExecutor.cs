@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -16,7 +18,15 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
     /// </summary>
     public void InitializeSettings(IExecutionController executionController)
     {
-      executionController.SetSettings(StartDelegate: ExecuteMeasurementProcess, true, null);
+      ActionSettings settings = new ActionSettings
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        StopDelegate = null,
+        CheckType = CheckType.Test,
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -83,7 +93,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
             type = ShowMessageModel.MessageType.Error;
           }
 
-          return type == ShowMessageModel.MessageType.Success ? true : false;
+          return type == ShowMessageModel.MessageType.Success;
 
         }, messageService);
       }

@@ -4,11 +4,13 @@ using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Usb;
 using Ask.Device.Runtime.Base.Device;
+using Ask.UI.Infrastructure.Localization;
 using Message;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
@@ -63,6 +65,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       try
       {
+        ResetSettingsForDeviceModelChange();
+
         Type baseClass = GetBaseDeviceType(selectedType);
 
         ConnectionTypeIPItem.Visibility = baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
@@ -71,9 +75,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;
-        IPAddressContainer.Visibility = Visibility.Collapsed;
-        COMContainer.Visibility = Visibility.Collapsed;
-        USBContainer.Visibility = Visibility.Collapsed;
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
         {
           BusTypeContainer.Visibility = Visibility.Visible;
@@ -91,15 +92,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           ShowFastMeterAdditionalSettings(sender as IMultimeter);
         }
-        else
-        {
-          AdditionalSettingsContainer.Content = null;
-        }
-
         if (baseClass == typeof(DeviceWithCOM))
         {
           object deviceModel = Activator.CreateInstance(selectedType);
           ApplyCOMSettingsFromModel(deviceModel);
+        }
+
+        if (baseClass == typeof(DeviceWithUSB))
+        {
+          ResolveUsbDevice();
         }
       }
       catch (InvalidOperationException ex)
@@ -108,10 +109,39 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
+    private void ResetSettingsForDeviceModelChange()
+    {
+      AdditionalSettingsContainer.Content = null;
+      _acwPpuDividerCoefficientPercentTextBox = null;
+      _dcwPpuDividerCoefficientPercentTextBox = null;
+
+      ConnectionTypeSelectionBox.SelectedIndex = 0;
+      IPAddressContainer.Visibility = Visibility.Collapsed;
+      COMContainer.Visibility = Visibility.Collapsed;
+      USBContainer.Visibility = Visibility.Collapsed;
+
+      IpPart1.Text = string.Empty;
+      IpPart2.Text = string.Empty;
+      IpPart3.Text = string.Empty;
+      IpPart4.Text = string.Empty;
+
+      COMPortSelectionBox.ItemsSource = null;
+      COMPortSelectionBox.SelectedIndex = -1;
+      VIDData.Text = "N/A";
+      PIDData.Text = "N/A";
+
+      ResistanceTextBox.Text = string.Empty;
+      CapacitanceTextBox.Text = string.Empty;
+
+      _usbConnectionDetails = string.Empty;
+      USBStatusData.Text = "Ожидание поиска...";
+      ClearUsbFields();
+    }
+
     private void ShowFastMeterAdditionalSettings(IMultimeter multimeter)
     {
-      _acwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_acwPpuDividerCoefficientPercentTextBox);
-      _dcwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_dcwPpuDividerCoefficientPercentTextBox);
+      _acwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
+      _dcwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
 
       var container = new Border
       {
@@ -129,19 +159,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
       };
 
-      titleBar.Child = new TextBlock
-      {
-        Text = "Коэффициент делителя ППУ, %",
-        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
-        FontSize = 20,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
-      };
-
-      if (titleBar.Child is TextBlock acwTitle)
-      {
-        acwTitle.Text = "Коэффициент делителя ППУ ACW, %";
-      }
+      titleBar.Child = CreateLocalizedAdditionalSettingsTitle("settings.device.multimeter.additionalDividerCoefficient.acw");
 
       var inputBorder = new Border
       {
@@ -156,14 +174,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
       };
 
-      dcwTitleBar.Child = new TextBlock
-      {
-        Text = "Коэффициент делителя ППУ DCW, %",
-        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
-        FontSize = 20,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
-      };
+      dcwTitleBar.Child = CreateLocalizedAdditionalSettingsTitle("settings.device.multimeter.additionalDividerCoefficient.dcw");
 
       var dcwInputBorder = new Border
       {
@@ -182,19 +193,36 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       AdditionalSettingsContainer.Content = container;
     }
 
-    private TextBox PreparePpuDividerTextBox(TextBox? textBox)
+    private TextBlock CreateLocalizedAdditionalSettingsTitle(string localizationKey)
     {
-      textBox ??= new TextBox();
-      textBox.Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle");
-      textBox.PreviewTextInput -= ResistanceDevice_PreviewTextInput;
-      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
-      textBox.TextChanged -= ResistanceDevice_TextChanged;
-      textBox.TextChanged += ResistanceDevice_TextChanged;
-
-      if (string.IsNullOrWhiteSpace(textBox.Text))
+      var title = new TextBlock
       {
-        textBox.Text = "100";
-      }
+        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
+        FontSize = 20,
+        FontWeight = FontWeights.Bold,
+        Margin = new Thickness(7, 0, 7, 0)
+      };
+
+      title.SetBinding(
+        TextBlock.TextProperty,
+        new Binding(nameof(LocalizedString.Value))
+        {
+          Source = new LocalizedString(localizationKey)
+        });
+
+      return title;
+    }
+
+    private TextBox CreatePpuDividerTextBox()
+    {
+      var textBox = new TextBox
+      {
+        Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle"),
+        Text = "100"
+      };
+
+      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
+      textBox.TextChanged += ResistanceDevice_TextChanged;
 
       return textBox;
     }

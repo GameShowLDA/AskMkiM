@@ -47,9 +47,9 @@ namespace UI.Services.ProtocolManager
       if (string.IsNullOrEmpty(protocolText))
         return;
 
-      if (showInSoftware)
-        OpenProtocolInEditor(protocol, protocolText);
-      else
+      // Итоговый протокол выполнения отображает RunControl в своей панели документов.
+      // Старый редактор «Протоколы» больше не открываем параллельно с ним.
+      if (!showInSoftware)
         ExportProtocolAsPdf(protocol.ProgramName, protocolText);
       PrintUtility.PrintProtocol(protocol, protocolText);
     }
@@ -59,7 +59,7 @@ namespace UI.Services.ProtocolManager
     /// <summary>
     /// Формирует текст протокола с ошибками или без них.
     /// </summary>
-    private string BuildProtocolText(ProtocolModel protocol)
+    public static string BuildProtocolText(ProtocolModel protocol)
     {
       return protocol.Errors.Count > 0
           ? ProtocolModel.GetProtocolWithErrorsText(protocol)

@@ -26,6 +26,11 @@ namespace Ask.UI.Controls.ProtocolNew
     public static Action? OnStartPressedByStepMode;
 
     /// <summary>
+    /// Единый обработчик F5 с учётом текущего состояния: запуск, пауза или продолжение.
+    /// </summary>
+    public static Action? OnRunOrPausePressed;
+
+    /// <summary>
     /// Делегат, вызываемый при нажатии клавиши P (остановка или продолжение).
     /// </summary>
     public static Action? OnPausePressed;

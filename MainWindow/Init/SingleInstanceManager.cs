@@ -37,7 +37,10 @@ namespace MainWindowProgram.Init
           client.Connect(500);
 
           using var writer = new StreamWriter(client);
-          writer.WriteLine("ACTIVATE");
+          if (filesToOpen.Count == 0)
+          {
+            writer.WriteLine("ACTIVATE");
+          }
 
           foreach (var filePath in filesToOpen)
           {
