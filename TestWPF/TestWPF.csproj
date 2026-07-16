@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Ask.UI\Ask.UI.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
   </ItemGroup>
 

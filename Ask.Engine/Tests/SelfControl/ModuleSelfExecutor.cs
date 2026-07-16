@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -7,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
 
 namespace Ask.Engine.Tests.SelfControl
@@ -25,7 +27,16 @@ namespace Ask.Engine.Tests.SelfControl
     /// </summary>
     public void InitializeSettings(IExecutionController executionController)
     {
-      executionController.SetSettings(StartDelegate: ExecuteMeasurementProcess, true, checkPower: false);
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = false,
+        CheckType = CheckType.SelfTest,
+        CheckPower = false,
+        AccumulateErrorMessages = true,
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -55,7 +66,7 @@ namespace Ask.Engine.Tests.SelfControl
             var dbcChassinumbers = relay.NumberChassis;
             var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(dbcChassinumbers)).FirstOrDefault();
             await relay.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, dbc);
-            if(dbc != null)
+            if (dbc != null)
             {
               await dbc.ConnectableManager.ResetAsync();
             }

@@ -36,7 +36,12 @@
     /// <summary>
     /// Файл протокола выполнения программы контроля.
     /// </summary>
-    Protocol
+    Protocol,
+
+    /// <summary>
+    /// Итоговый протокол выполнения проверки.
+    /// </summary>
+    InspectionProtocol
   }
 
 }

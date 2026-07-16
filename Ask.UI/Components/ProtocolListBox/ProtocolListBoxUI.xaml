@@ -42,8 +42,14 @@
                     </Run.Foreground>
                 </Run>
 
-                <Run Text="{Binding Message.Message, Converter={StaticResource MessageToColonConverter}}"
-                     Foreground="{Binding Message.HeaderColor, Converter={StaticResource ColorToBrushConverter}}"/>
+                <Run Foreground="{Binding Message.HeaderColor, Converter={StaticResource ColorToBrushConverter}}">
+                    <Run.Text>
+                        <MultiBinding Converter="{StaticResource MessageToColonConverter}">
+                            <Binding Path="Message.Header"/>
+                            <Binding Path="Message.Message"/>
+                        </MultiBinding>
+                    </Run.Text>
+                </Run>
 
                 <Run Text="{Binding Message.Message}"
                      Foreground="{Binding Message.MessageColor, Converter={StaticResource ColorToBrushConverter}}"/>

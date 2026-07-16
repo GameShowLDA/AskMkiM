@@ -1,6 +1,8 @@
-﻿using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
 
 namespace Ask.Engine.Tests.SelfControl
@@ -13,10 +15,16 @@ namespace Ask.Engine.Tests.SelfControl
     /// </summary>
     public void InitializeSettings(IExecutionController executionController)
     {
-      executionController.SetSettings(
-        StartDelegate: ExecuteMeasurementProcess,
-        true,
-        checkPower: false);
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.SelfTest,
+        CheckPower = false,
+        AccumulateErrorMessages = true,
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>

@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -24,7 +26,14 @@ namespace MainWindowProgram.Test.Protocol
     /// </summary>
     public void InitializeSettings()
     {
-      Test.SetSettings(ExecuteMeasurementProcess, true);
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Test,
+      };
+
+      Test.SetSettings(settings);
     }
 
     /// <summary>

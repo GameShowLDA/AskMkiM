@@ -83,7 +83,7 @@ namespace Ask.Core.Services.UI
           break;
 
         var action = await messageService.WaitUserActionAsync(loop, deviceTask);
-        ApplyButtonMode(messageService, onlyExit: true);
+        ApplyButtonMode(messageService, onlyExit: false);
 
         if (action == UserAction.None)
           return result;
@@ -143,7 +143,7 @@ namespace Ask.Core.Services.UI
           break;
 
         var action = await messageService.WaitUserActionAsync(loop, deviceTask);
-        ApplyButtonMode(messageService, onlyExit: true);
+        ApplyButtonMode(messageService, onlyExit: false);
 
         if (action == UserAction.None)
           return result;
@@ -205,7 +205,9 @@ namespace Ask.Core.Services.UI
         }
 
         var action = await messageService.WaitUserActionAsync(loop, deviceTask);
-        ApplyButtonMode(messageService, onlyExit: true);
+        // После выбора оператора выполнение продолжается (в том числе при повторной попытке),
+        // поэтому кнопка «Пауза» должна оставаться доступной до фактического завершения.
+        ApplyButtonMode(messageService, onlyExit: false);
 
         if (action == UserAction.None)
         {

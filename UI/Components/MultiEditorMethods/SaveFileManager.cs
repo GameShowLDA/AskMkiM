@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Static;
+using Ask.Core.Services.FilesUtility;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Message;
@@ -432,6 +433,7 @@ namespace UI.Components.MultiEditorMethods
         {
           Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
           File.WriteAllText(filePath, fileData, Encoding.UTF8);
+          EncryptProtocolFileIfNeeded(filePath);
         }
         else
         {
@@ -494,6 +496,16 @@ namespace UI.Components.MultiEditorMethods
 
         LastSaveNotificationByFile[fullPath] = now;
         return true;
+      }
+    }
+
+    private static void EncryptProtocolFileIfNeeded(string filePath)
+    {
+      var extension = Path.GetExtension(filePath);
+      if (extension.Equals(".lst", StringComparison.OrdinalIgnoreCase) ||
+          extension.Equals(".lstw", StringComparison.OrdinalIgnoreCase))
+      {
+        FileEncryptionManager.EncryptFile(filePath);
       }
     }
 

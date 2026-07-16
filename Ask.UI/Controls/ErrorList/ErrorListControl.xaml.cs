@@ -178,6 +178,7 @@ namespace Ask.UI.Controls.ErrorList
       _allIssues.Add(error);
       _errorTotal++;
 
+      UpdateMeasureResultColumnVisibility(error);
       RefreshPageIfNewItemIsVisibleOnCurrentPage(error);
       ApplyInitialButtonState();
     }
@@ -190,6 +191,7 @@ namespace Ask.UI.Controls.ErrorList
       _allIssues.Add(warning);
       _warningTotal++;
 
+      UpdateMeasureResultColumnVisibility(warning);
       RefreshPageIfNewItemIsVisibleOnCurrentPage(warning);
       ApplyInitialButtonState();
     }
@@ -206,6 +208,7 @@ namespace Ask.UI.Controls.ErrorList
       _allIssues.AddRange(errorList);
       _errorTotal += errorList.Count;
 
+      UpdateMeasureResultColumnVisibility(errorList);
       RefreshCurrentPage();
       ApplyInitialButtonState();
     }
@@ -222,6 +225,7 @@ namespace Ask.UI.Controls.ErrorList
       _allIssues.AddRange(warningList);
       _warningTotal += warningList.Count;
 
+      UpdateMeasureResultColumnVisibility(warningList);
       RefreshCurrentPage();
       ApplyInitialButtonState();
     }
@@ -237,6 +241,7 @@ namespace Ask.UI.Controls.ErrorList
       _allIssues.Clear();
       _allIssues.AddRange(issueList);
 
+      UpdateMeasureResultColumnVisibility(issueList);
       RecalculateTotals();
       _currentPageIndex = 0;
       RefreshCurrentPage();
@@ -251,6 +256,7 @@ namespace Ask.UI.Controls.ErrorList
       _errorTotal = 0;
       _warningTotal = 0;
       _currentPageIndex = 0;
+      MeasureResultVisible = Visibility.Collapsed;
 
       UpdateButtons();
       UpdateIssueTableHeight();
@@ -258,6 +264,22 @@ namespace Ask.UI.Controls.ErrorList
 
       UpdateTabsVisibilityAndSelection();
       UpdateDesiredHeight();
+    }
+
+    private void UpdateMeasureResultColumnVisibility(IDisplayIssue issue)
+    {
+      if (!string.IsNullOrWhiteSpace(issue?.MeasureResult))
+      {
+        MeasureResultVisible = Visibility.Visible;
+      }
+    }
+
+    private void UpdateMeasureResultColumnVisibility(IEnumerable<IDisplayIssue> issues)
+    {
+      if (issues?.Any(issue => !string.IsNullOrWhiteSpace(issue?.MeasureResult)) == true)
+      {
+        MeasureResultVisible = Visibility.Visible;
+      }
     }
 
     /// <summary>
