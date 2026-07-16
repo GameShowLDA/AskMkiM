@@ -97,6 +97,7 @@ namespace UI.Controls.TextEditorControl
     private IReadOnlyList<TextSyntaxDiagnostic> _syntaxDiagnostics =
       Array.Empty<TextSyntaxDiagnostic>();
 
+    private ToolTip? _syntaxDiagnosticToolTip;
 
     private int _syntaxAnalysisVersion;
 
@@ -737,20 +738,38 @@ namespace UI.Controls.TextEditorControl
         return;
       }
 
-      ShowSyntaxDiagnosticToolTip(
-        FormatSyntaxDiagnosticToolTip(diagnostic),
-        mousePoint);
+      ShowSyntaxDiagnosticToolTip(diagnostic, mousePoint);
     }
 
-    private void ShowSyntaxDiagnosticToolTip(string content, Point mousePoint)
+    private void ShowSyntaxDiagnosticToolTip(TextSyntaxDiagnostic diagnostic, Point mousePoint)
     {
-      syntaxDiagnosticPopupText.Text = content;
+      var toolTip = GetSyntaxDiagnosticToolTip();
+      var content = FormatSyntaxDiagnosticToolTip(diagnostic);
 
-      Canvas.SetLeft(syntaxDiagnosticPopup, mousePoint.X + 20);
-      Canvas.SetTop(syntaxDiagnosticPopup, mousePoint.Y + 28);
+      Canvas.SetLeft(syntaxDiagnosticToolTipTarget, mousePoint.X);
+      Canvas.SetTop(syntaxDiagnosticToolTipTarget, mousePoint.Y);
 
-      if (syntaxDiagnosticPopup.Visibility != Visibility.Visible)
-        syntaxDiagnosticPopup.Visibility = Visibility.Visible;
+      if (!Equals(toolTip.Content, content))
+        toolTip.Content = content;
+
+      if (!toolTip.IsOpen)
+        toolTip.IsOpen = true;
+    }
+
+    private ToolTip GetSyntaxDiagnosticToolTip()
+    {
+      if (_syntaxDiagnosticToolTip != null)
+        return _syntaxDiagnosticToolTip;
+
+      _syntaxDiagnosticToolTip = new ToolTip
+      {
+        PlacementTarget = syntaxDiagnosticToolTipTarget,
+        StaysOpen = true
+      };
+
+      syntaxDiagnosticToolTipTarget.ToolTip = _syntaxDiagnosticToolTip;
+
+      return _syntaxDiagnosticToolTip;
     }
 
     private TextSyntaxDiagnostic? FindSyntaxDiagnostic(int offset)
@@ -780,8 +799,8 @@ namespace UI.Controls.TextEditorControl
 
     private void CloseSyntaxDiagnosticToolTip()
     {
-      if (syntaxDiagnosticPopup.Visibility == Visibility.Visible)
-        syntaxDiagnosticPopup.Visibility = Visibility.Collapsed;
+      if (_syntaxDiagnosticToolTip?.IsOpen == true)
+        _syntaxDiagnosticToolTip.IsOpen = false;
     }
 
     private static EditorSyntaxAnalyzer CreateSyntaxAnalyzer()

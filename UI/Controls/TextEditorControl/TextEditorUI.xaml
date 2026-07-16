@@ -27,24 +27,12 @@
             </avalonEdit:TextEditor.Resources>
         </avalonEdit:TextEditor>
 
-        <Canvas x:Name="syntaxDiagnosticOverlay"
-                IsHitTestVisible="False"
+        <Canvas IsHitTestVisible="False"
                 Panel.ZIndex="100">
-
-            <Border x:Name="syntaxDiagnosticPopup"
-                    Visibility="Collapsed"
-                    Background="#252A33"
-                    BorderBrush="Red"
-                    BorderThickness="1"
-                    CornerRadius="4"
-                    Padding="8"
-                    MaxWidth="420">
-
-                <TextBlock x:Name="syntaxDiagnosticPopupText"
-                           Foreground="#E6ECF5"
-                           FontSize="13"
-                           TextWrapping="Wrap" />
-            </Border>
+            <Border x:Name="syntaxDiagnosticToolTipTarget"
+                    Width="1"
+                    Height="1"
+                    Opacity="0" />
         </Canvas>
     </Grid>
 </UserControl>
