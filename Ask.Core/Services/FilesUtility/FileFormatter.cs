@@ -70,6 +70,12 @@ namespace Ask.Core.Services.FilesUtility
 
         if (trimmedLine.StartsWith("{", StringComparison.Ordinal))
         {
+          if (trimmedLine.Length > 1 && trimmedLine.EndsWith("}", StringComparison.Ordinal))
+          {
+            formattedLines.Add(originalIndent + trimmedLine);
+            continue;
+          }
+
           blockCommentIndent = originalIndent;
           blockCommentCloseToken = "}";
           formattedLines.Add(blockCommentIndent + "{");
@@ -106,6 +112,12 @@ namespace Ask.Core.Services.FilesUtility
 
         if (trimmedLine.StartsWith("/*", StringComparison.Ordinal))
         {
+          if (trimmedLine.Length > 2 && trimmedLine.EndsWith("*/", StringComparison.Ordinal))
+          {
+            formattedLines.Add(originalIndent + trimmedLine);
+            continue;
+          }
+
           blockCommentIndent = originalIndent;
           blockCommentCloseToken = "*/";
           formattedLines.Add(blockCommentIndent + "/*");

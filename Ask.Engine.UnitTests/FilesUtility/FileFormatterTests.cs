@@ -47,4 +47,17 @@ public class FileFormatterTests
 
     Assert.Equal(expected, actual);
   }
+
+  [Theory(DisplayName = "Однострочный блочный комментарий не раскрывается")]
+  [InlineData("{ ERR: К1/81-85 и К1/71-75 разобщены }")]
+  [InlineData("/* ERR: К1/81-85 и К1/71-75 разобщены */")]
+  public void NormalizeProgramWhitespace_SingleLineBlockComment_RemainsSingleLine(string comment)
+  {
+    string source = "160 ЭТ Ом<40 *К1/11-15*" + Environment.NewLine + "    " + comment;
+    string expected = "160 ЭТ Ом<40 *К1/11-15*" + Environment.NewLine + "    " + comment;
+
+    string actual = FileFormatter.NormalizeProgramWhitespace(source);
+
+    Assert.Equal(expected, actual);
+  }
 }
