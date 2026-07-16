@@ -1,4 +1,5 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
@@ -92,6 +93,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           ShowFastMeterAdditionalSettings(sender as IMultimeter);
         }
+        else if (typeof(IBreakdownTester).IsAssignableFrom(selectedType))
+        {
+          ShowBreakdownTesterAdditionalSettings();
+        }
         if (baseClass == typeof(DeviceWithCOM))
         {
           object deviceModel = Activator.CreateInstance(selectedType);
@@ -114,6 +119,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       AdditionalSettingsContainer.Content = null;
       _acwPpuDividerCoefficientPercentTextBox = null;
       _dcwPpuDividerCoefficientPercentTextBox = null;
+      _systemInsulationResistanceGOhmTextBox = null;
 
       ConnectionTypeSelectionBox.SelectedIndex = 0;
       IPAddressContainer.Visibility = Visibility.Collapsed;
@@ -193,6 +199,48 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       AdditionalSettingsContainer.Content = container;
     }
 
+    private void ShowBreakdownTesterAdditionalSettings()
+    {
+      _systemInsulationResistanceGOhmTextBox = new TextBox
+      {
+        Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle"),
+        Text = "60",
+        MaxLength = 2
+      };
+      _systemInsulationResistanceGOhmTextBox.PreviewTextInput += IntegerDevice_PreviewTextInput;
+
+      var container = new Border
+      {
+        Style = (Style)FindResource("DeviceInputSectionCardStyle")
+      };
+      var grid = new Grid();
+      grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+      grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+      var titleBar = new Border
+      {
+        Style = (Style)FindResource("DeviceInputSectionTitleBarStyle"),
+        Height = double.NaN,
+        MinHeight = 42,
+        Child = CreateLocalizedAdditionalSettingsTitle("settings.device.breakdownTester.systemInsulationResistance")
+      };
+      var inputBorder = new Border
+      {
+        Style = (Style)FindResource("DeviceSettingsUnifiedInputBorderStyle"),
+        Child = _systemInsulationResistanceGOhmTextBox
+      };
+      Grid.SetRow(inputBorder, 1);
+      grid.Children.Add(titleBar);
+      grid.Children.Add(inputBorder);
+      container.Child = grid;
+      AdditionalSettingsContainer.Content = container;
+    }
+
+    private static void IntegerDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+      e.Handled = !e.Text.All(char.IsDigit);
+    }
+
     private TextBlock CreateLocalizedAdditionalSettingsTitle(string localizationKey)
     {
       var title = new TextBlock
@@ -200,7 +248,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
         FontSize = 20,
         FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
+        Margin = new Thickness(7, 0, 7, 0),
+        TextWrapping = TextWrapping.Wrap,
+        VerticalAlignment = VerticalAlignment.Center
       };
 
       title.SetBinding(

@@ -13,6 +13,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
   {
     private TextBox? _acwPpuDividerCoefficientPercentTextBox;
     private TextBox? _dcwPpuDividerCoefficientPercentTextBox;
+    private TextBox? _systemInsulationResistanceGOhmTextBox;
 
     /// <summary>
     /// Экземпляр головного устройства.
@@ -200,6 +201,24 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public double GetDcwPpuDividerCoefficientPercent()
     {
       return GetPpuDividerCoefficientPercent(_dcwPpuDividerCoefficientPercentTextBox);
+    }
+
+    public void SetSystemInsulationResistanceGOhm(int value)
+    {
+      _systemInsulationResistanceGOhmTextBox ??= new TextBox();
+      _systemInsulationResistanceGOhmTextBox.Text = (value is >= 1 and <= 60 ? value : 60)
+        .ToString(CultureInfo.InvariantCulture);
+    }
+
+    public int GetSystemInsulationResistanceGOhm()
+    {
+      return int.TryParse(
+        _systemInsulationResistanceGOhmTextBox?.Text,
+        NumberStyles.Integer,
+        CultureInfo.InvariantCulture,
+        out int value)
+          ? value
+          : -1;
     }
 
     private static void SetPpuDividerCoefficientText(TextBox textBox, double value)

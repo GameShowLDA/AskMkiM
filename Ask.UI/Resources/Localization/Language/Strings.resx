@@ -642,4 +642,7 @@
   <data name="settings.device.multimeter.additionalDividerCoefficient.dcw" xml:space="preserve">
     <value>Доп. коэф. делителя DCW, %</value>
   </data>
+  <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
+    <value>Сопротивление изоляции системы, ГОм</value>
+  </data>
 </root>

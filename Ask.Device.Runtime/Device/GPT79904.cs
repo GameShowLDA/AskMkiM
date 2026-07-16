@@ -27,6 +27,7 @@ namespace Ask.Device.Runtime.Device
       DcwMaxVoltage = 1000;
       IrMaxVoltage = 1000;
       IrMinVoltage = 50;
+      SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
 
       AcwManger = new Function.GPT.AcwMode(this);
@@ -73,6 +74,9 @@ namespace Ask.Device.Runtime.Device
     public int IrMinVoltage { get; set; }
 
     /// <inheritdoc />
+    public int SystemInsulationResistanceGOhm { get; set; }
+
+    /// <inheritdoc />
     public ISelfTestCheckerBreakdownTester SelfTestManager { get; set; }
 
     /// <summary>
@@ -117,7 +121,8 @@ namespace Ask.Device.Runtime.Device
         AcwMaxVoltage = AcwMaxVoltage,
         DcwMaxVoltage = DcwMaxVoltage,
         SiMaxVoltage = IrMaxVoltage,
-        IRMinVoltage = IrMinVoltage
+        IRMinVoltage = IrMinVoltage,
+        SystemInsulationResistanceGOhm = SystemInsulationResistanceGOhm
       };
     }
   }

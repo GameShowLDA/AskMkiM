@@ -4,8 +4,8 @@ using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
 using Ask.Device.Runtime.Function.Helpers;
-using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.GPT.Managment
 {
@@ -65,7 +65,14 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         waitFullTime,
         userMessageService);
 
-      return (MeasurementAdapterHelper.Round(measurement.value), measurement.unit);
+      var result = measurement;
+      if (_gptModel.Mode == Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
+      {
+        result.Item1 = result.Item1 * (_gptModel.SystemInsulationResistanceGOhm * 1000) / (result.Item1 + (_gptModel.SystemInsulationResistanceGOhm * 1000));
+      }
+
+      result = (MeasurementAdapterHelper.Round(measurement.value), measurement.unit);
+      return result;
     }
 
     /// <inheritdoc />
