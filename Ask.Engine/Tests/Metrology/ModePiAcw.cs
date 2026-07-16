@@ -1,12 +1,13 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Device.Communication.Ethernet.Udp;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
@@ -41,14 +42,20 @@ namespace Ask.Engine.Tests.Metrology
     {
       _userInteractionService = userInteractionService;
       testMeasurement = new PiMeasurement(referenceVoltageRequestService);
+      testMeasurement.SetExecutionController(executionController);
 
-      executionController.SetSettings(
-        StartDelegate: ExecuteMeasurementProcess,
-        true,
-        StopDelegate: async (CancellationToken token) =>
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Metrology,
+        StopDelegate = async (CancellationToken token) =>
         {
-          await testMeasurement.FinalizeMeasurement(metrologicalModeRole, userInteractionService);
-        });
+          await testMeasurement.FinalizeMeasurement(metrologicalModeRole, _userInteractionService);
+        }
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -114,12 +121,17 @@ namespace Ask.Engine.Tests.Metrology
         await meterDevice.AcwManger.Measure.MeasureAsync(param, LowerBound, UpperBound);
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
-        var answer = (result >= LowerBound && result <= UpperBound) ? false : true;
+        var answer = result < LowerBound || result > UpperBound;
         var err = result - param;
         Measurements.Add(err);
 
-        await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжения", message: MeasurementValueFormatter.FormatWithUnit(result, "�"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        await userMessageService.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "�"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        if (result < LowerBound || result > UpperBound)
+        {
+          AddMetrologyError(userMessageService, metrologicalModeRole, result, LowerBound, UpperBound, "В");
+        }
+
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжения", message: MeasurementValueFormatter.FormatWithUnit(result, "В"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+        await userMessageService.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
 
         return true;
       }

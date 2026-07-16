@@ -17,6 +17,7 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     /// пошаговом режиме.
     /// </param>
     /// <param name="skipPause">Пропустить ли автоматическую паузу перед отображением.</param>
+    /// <param name="ignoreOutputValidation"> Флаг, указывающий, следует ли игнорировать проверку возможности вывода. </param>
     /// <param name="callerName">Имя вызывающего метода (устанавливается автоматически).</param>
     /// <param name="callerFile">Файл вызова метода (автоматически).</param>
     /// <param name="callerLine">Строка вызова метода (автоматически).</param>
@@ -26,6 +27,7 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
       bool IsBlockStart = false,
       bool SkipStepModeCheck = false,
       bool skipPause = false,
+      bool ignoreOutputValidation = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0);

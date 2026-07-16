@@ -1,6 +1,9 @@
 using TestConsole.GPT;
 using TestConsole.MINT;
 using TestConsole.B7783;
+using TestConsole.ModuleRelayControlTests;
+using TestConsole.DeviceBusCommutationConnectorTests;
+using TestConsole.UnusedCode;
 
 namespace TestConsole
 {
@@ -8,6 +11,14 @@ namespace TestConsole
   {
     private static async Task Main(string[] args)
     {
+      if (args.Any(static arg =>
+            string.Equals(arg, "encoding-scanner", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(arg, "encoding", StringComparison.OrdinalIgnoreCase)))
+      {
+        EncodingScanner.Run();
+        return;
+      }
+
       while (true)
       {
         Console.WriteLine("\nВыберите действие:");
@@ -30,9 +41,13 @@ namespace TestConsole
         Console.WriteLine("17. Скан пустых строк");
         Console.WriteLine("18. Encoding scanner");
         Console.WriteLine("19. B7-78/3 multimeter");
+        Console.WriteLine("20. ModuleRelayControl");
+        Console.WriteLine("21. DeviceBusCommutation ConnectorManager");
+        Console.WriteLine("22. Unused code Roslyn analyzer");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 19)
+        string? input = Console.ReadLine()?.Trim().Trim('\uFEFF');
+        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 22)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -49,7 +64,7 @@ namespace TestConsole
             break;
 
           case 3:
-            TestKeysight.RunAsync();
+            await TestKeysight.RunAsync();
             break;
 
           case 4:
@@ -114,6 +129,18 @@ namespace TestConsole
 
           case 19:
             await B7783MultimeterTest.RunAsync();
+            break;
+
+          case 20:
+            await ModuleRelayControlTest.RunAsync();
+            break;
+
+          case 21:
+            await DeviceBusCommutationConnectorTest.RunAsync();
+            break;
+
+          case 22:
+            await UnusedCodeAnalyzer.RunAsync();
             break;
 
           case 0:

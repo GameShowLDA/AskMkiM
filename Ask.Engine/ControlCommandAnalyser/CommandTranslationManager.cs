@@ -307,7 +307,7 @@ namespace Ask.Engine.ControlCommandAnalyser
           {
             commandNumber++;
           }
-          var mnemonic = EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.VSH).DisplayName;
+          var mnemonic = EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.VSH).DisplayName;
           var vshModel = new VshCommandModel
           {
             CommandNumber = commandNumber.ToString(),

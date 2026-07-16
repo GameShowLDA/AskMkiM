@@ -260,7 +260,7 @@ public static class DeviceConfigurationService
 
   private static PowerSourceModuleDto ToDto(IPowerSourceModule item) => item.Convert();
 
-  private static FastMeterDto ToDto(IFastMeter item) => item.Convert();
+  private static FastMeterDto ToDto(IMultimeter item) => item.Convert();
 
   private static BreakdownTesterDto ToDto(IBreakdownTester item) => item.Convert();
 }

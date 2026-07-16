@@ -247,6 +247,8 @@ namespace Ask.UI.Controls.ProtocolNew
     }
     private void RegisterHotkeys()
     {
+      KeyboardManager.OnRunOrPausePressed = HandleRunOrPause;
+
       KeyboardManager.OnStartPressed = () =>
         Application.Current.Dispatcher.Invoke(() =>
         {

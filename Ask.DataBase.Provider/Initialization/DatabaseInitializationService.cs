@@ -69,6 +69,7 @@ public static class DatabaseInitializationService
 
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, report, progress, cancellationToken);
@@ -323,7 +324,25 @@ public static class DatabaseInitializationService
     TraceWarning(
       report,
       progress,
-      "[DB] Р’ СЃС‚Р°СЂРѕР№ С…РµРјРµ Execution РґРѕР±Р°РІР»РµРЅР° РєРѕР»РѕРЅРєР° LegacyCompatibilityMode.");
+      "[DB] В старой схеме Execution добавлена колонка LegacyCompatibilityMode.");
+  }
+
+  private static async Task EnsureSettingsProtocolPrintColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "SettingsProtocol", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontFamily", "TEXT NOT NULL DEFAULT 'Consolas'", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontSize", "REAL NOT NULL DEFAULT 10.0", report, progress, cancellationToken);
   }
 
   private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(

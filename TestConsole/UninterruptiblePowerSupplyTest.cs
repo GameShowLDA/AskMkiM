@@ -232,7 +232,7 @@ namespace TestConsole
       Console.WriteLine($"Номер: {device.Number}");
       Console.WriteLine($"ConnectionDetails: {device.ConnectionDetails}");
       Console.WriteLine($"LastResolvedDevicePath: {device.LastResolvedDevicePath}");
-      Console.WriteLine($"ConnectionStatus: {device.ConnectableManager.GetConnectionStatus()}");
+      Console.WriteLine($"ConnectionStatus: {device.ConnectionInfo.GetConnectionStatus()}");
       Console.WriteLine();
     }
   }

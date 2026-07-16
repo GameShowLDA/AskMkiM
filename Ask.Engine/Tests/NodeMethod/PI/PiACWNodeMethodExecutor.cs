@@ -1,9 +1,10 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Communication.Ethernet.Udp;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -19,13 +20,18 @@ namespace Ask.Engine.Tests.NodeMethod.PI
     /// </summary>
     public void InitializeSettings(IExecutionController executionController, IUserInteractionService userInteractionService)
     {
-      executionController.SetSettings(
-        StartDelegate: ExecuteMeasurementProcess,
-        true,
-        StopDelegate: async (CancellationToken token) =>
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Test,
+        StopDelegate = async (CancellationToken token) =>
         {
           await testMeasurement.FinalizeAsync(userInteractionService);
-        });
+        }
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -97,7 +103,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
                 type = ShowMessageModel.MessageType.Error;
               }
 
-              return type == ShowMessageModel.MessageType.Success ? true : false;
+              return type == ShowMessageModel.MessageType.Success;
 
             }, protocolUI);
           }

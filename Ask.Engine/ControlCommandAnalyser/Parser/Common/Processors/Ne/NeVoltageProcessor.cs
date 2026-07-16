@@ -39,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ne
           ? CommonParameterParser.ParseToDouble(higherRaw)
           : null;
 
-      var commandInfo = EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE);
+      var commandInfo = EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.NE);
 
       if (lower.HasValue || higher.HasValue)
       {

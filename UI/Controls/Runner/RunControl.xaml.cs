@@ -5,10 +5,12 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
+using ResultProtocolEditor = Ask.UI.Controls.TextEditorControl.TextEditorUI;
 using Ask.UI.Features.Archive.Services;
 using Ask.UI.Shared.Formatting;
 using System.IO;
@@ -20,6 +22,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.TextEditorControl;
 using UI.Services;
+using UI.Services.ProtocolManager;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
@@ -29,7 +32,7 @@ namespace UI.Controls.Runner
   /// <summary>
   /// Логика взаимодействия для RunControl.xaml
   /// </summary>
-  public partial class RunControl : UserControl, IRunView
+  public partial class RunControl : UserControl, IRunView, IInspectionProtocolHost
   {
     /// <summary>
     /// Флаг, указывающий, находится ли интерфейс в заблокированном состоянии.
@@ -56,6 +59,8 @@ namespace UI.Controls.Runner
     private TextEditorContainer _leftEditor;
     private readonly ArchiveSaveService _archiveSaveService = new ArchiveSaveService();
     private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
+    private DockItem? _inspectionProtocolDockItem;
+    private ResultProtocolEditor? _inspectionProtocolEditor;
 
     public List<BaseCommandModel> TranslationModels
     {
@@ -91,6 +96,7 @@ namespace UI.Controls.Runner
     {
       InitializeComponent();
       ProtocolUI = new ProtocolUI(true);
+      ProtocolUI.InspectionProtocolHost = this;
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
@@ -99,6 +105,7 @@ namespace UI.Controls.Runner
 
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
       EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(e => devicesStatus.LoadDevices(e.Devices));
+      EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
 
       Loaded += RunControl_Loaded;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
@@ -246,7 +253,7 @@ namespace UI.Controls.Runner
       rightEditor.BackButton.Visibility = CanReturnToSourceFile() && !isLocked
         ? Visibility.Visible
         : Visibility.Collapsed;
-      var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.FileName);
+      var fileName = GetDisplayFileName(textEditorUI.TextEditorModel.FilePath, textEditorUI.TextEditorModel.OriginalFileName);
       var filePath = textEditorUI.TextEditorModel.FilePath;
       rightEditor.TranslationFileName.Text = fileName;
       rightEditor.SetSaveToDiskVisible(translationModels.Count > 0 && ErrorCount == 0);
@@ -329,10 +336,95 @@ namespace UI.Controls.Runner
       }
 
       ProtocolUI.Header = BuildDerivedFileName(OpkFilePath, FileName, ".lst", "protocol.lst");
-      ProtocolUI.SetSettings(StartDelegate: StartTest, false);
+
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = StartTest,
+        IsRepeatEnabled = false,
+        CheckType = CheckType.ControlProgram,
+      };
+
+      ProtocolUI.SetSettings(settings);
       this.FileName = ProtocolUI.Header;
 
       await ProtocolUI.StartAsync();
+    }
+
+    private void OnViewProtocol(FileInteractionEvents.ViewProtocol e)
+    {
+      if (!IsProtocolForCurrentRun(e.Protocol.ProgramPath))
+      {
+        return;
+      }
+
+      ProtocolUI.ShowInspectionProtocol(ProtocolService.BuildProtocolText(e.Protocol));
+    }
+
+    private bool IsProtocolForCurrentRun(string protocolProgramPath)
+    {
+      if (string.IsNullOrWhiteSpace(protocolProgramPath) || string.IsNullOrWhiteSpace(OpkFilePath))
+      {
+        return false;
+      }
+
+      return string.Equals(
+        Path.GetFullPath(protocolProgramPath),
+        Path.GetFullPath(OpkFilePath),
+        StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <inheritdoc />
+    public void ShowInspectionProtocol(string protocolText)
+    {
+      Dispatcher.Invoke(() =>
+      {
+        ClearInspectionProtocolCore();
+
+        var dockManager = ChildTextEditorContainer.DockManager;
+        _inspectionProtocolEditor = new ResultProtocolEditor
+        {
+          IsReadOnly = true,
+        };
+        _inspectionProtocolEditor.SetFileType(FileType.InspectionProtocol);
+        _inspectionProtocolEditor.WordWrap = true;
+        _inspectionProtocolEditor.Text = protocolText ?? string.Empty;
+
+        _inspectionProtocolDockItem = new DockItem
+        {
+          Title = "Итоговый протокол",
+          TabText = "Итоговый протокол",
+          Content = _inspectionProtocolEditor,
+        };
+
+        DocumentTab.SetHideCloseButton(_inspectionProtocolDockItem, true);
+        _inspectionProtocolDockItem.Show(dockManager, DockPosition.Document);
+      });
+    }
+
+    /// <inheritdoc />
+    public void ClearInspectionProtocol()
+    {
+      Dispatcher.Invoke(ClearInspectionProtocolCore);
+    }
+
+    private void ClearInspectionProtocolCore()
+    {
+      if (_inspectionProtocolEditor != null)
+      {
+        _inspectionProtocolEditor.Text = string.Empty;
+      }
+
+      if (_inspectionProtocolDockItem != null)
+      {
+        var dockManager = ChildTextEditorContainer.DockManager;
+        if (dockManager.DockItems.Contains(_inspectionProtocolDockItem))
+        {
+          _inspectionProtocolDockItem.Close();
+        }
+      }
+
+      _inspectionProtocolDockItem = null;
+      _inspectionProtocolEditor = null;
     }
 
     private async Task StartTest(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
@@ -450,14 +542,14 @@ namespace UI.Controls.Runner
     private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
     {
       var rightEditor = sender as TranslatorEditor;
-      var translatedText = rightEditor?.GetTextEditor()?.Text;
+      var translatedText = rightEditor?.GetTextEditor()?.TextEditorModel.SourceLines;
       var sourceFilePath = rightEditor?.GetTextEditor()?.TextEditorModel?.FilePath;
       if (string.IsNullOrWhiteSpace(sourceFilePath))
       {
         sourceFilePath = OpkFilePath;
       }
 
-      _translatedFileSaveService.SaveToDisk(this, translatedText ?? string.Empty, sourceFilePath);
+      _translatedFileSaveService.SaveToDisk(this, translatedText ?? new List<string>(), sourceFilePath);
     }
 
     private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
@@ -555,10 +647,19 @@ namespace UI.Controls.Runner
       {
         return fileName;
       }
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(filePath);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1)
+      {
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
+      }
+      return string.IsNullOrWhiteSpace(uniqueNameWithoutExtention)
+         ? string.Empty
+        : uniqueNameWithoutExtention + Path.GetExtension(filePath);
 
-      return string.IsNullOrWhiteSpace(filePath)
+      /*return string.IsNullOrWhiteSpace(filePath)
         ? string.Empty
-        : Path.GetFileName(filePath);
+        : Path.GetFileName(filePath);*/
     }
 
     private static string BuildDerivedFileName(string? sourceFilePath, string? sourceFileName, string extension, string fallbackFileName)

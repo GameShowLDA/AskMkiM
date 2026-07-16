@@ -1,11 +1,14 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
+using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Base.Multimeter.Measurements;
+using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
+using Ask.Device.Runtime.Function.Connected;
 using System.Net;
-using System.Net.Sockets;
 
 namespace Ask.Device.Runtime.Device
 {
@@ -13,33 +16,8 @@ namespace Ask.Device.Runtime.Device
   /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
   /// Работает через сетевое подключение (TCP/IP).
   /// </summary>
-  public class KeysightDevice : DeviceWithIP, IFastMeter
+  public class KeysightDevice : DeviceWithTcpIp, IMultimeter
   {
-    /// <summary>
-    /// IP-адрес устройства.
-    /// </summary>
-    public IPAddress IP { get; set; }
-
-    /// <summary>
-    /// Флаг состояния подключения устройства.
-    /// </summary>
-    public bool IsConnected { get; set; }
-
-    /// <summary>
-    /// Порт, используемый для связи с устройством (по умолчанию 5025).
-    /// </summary>
-    public int Port => 5025;
-
-    /// <summary>
-    /// TCP-клиент для установления соединения с устройством.
-    /// </summary>
-    internal TcpClient Client { get; set; }
-
-    /// <summary>
-    /// Сетевой поток для передачи команд и получения данных.
-    /// </summary>
-    internal NetworkStream Stream { get; set; }
-
     /// <inheritdoc />
     public int NumberChassis { get; set; }
 
@@ -60,6 +38,8 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public IResistanceMeasurement ResistanceManager { get; set; }
+
+    /// <inheritdoc />
     public ITextMessage TextMessage { get; set; }
 
     /// <inheritdoc />
@@ -73,7 +53,42 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public MultimeterTypeMode TypeMode { get; set; }
+
+    /// <summary>
+    /// Менеджер выполнения самотестирования мультиметра.
+    /// </summary>
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения электрического сопротивления.
+    /// </summary>
+    public ResistanceMeasurementProfile ResistanceCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения переменного напряжения.
+    /// </summary>
+    public ACVMeasurementProfile ACVCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения постоянного напряжения.
+    /// </summary>
+    public DCVMeasurementProfile DCVCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд измерения ёмкости.
+    /// </summary>
+    public CapacitanceMeasurementProfile CapacitanceCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд режима прозвонки.
+    /// </summary>
+    public ContinuityMeasurementProfile ContinuityCommands { get; set; }
+
+    /// <summary>
+    /// Профиль команд проверки диодов.
+    /// </summary>
+    public DiodeMeasurementProfile DiodeCommands { get; set; }
+
 
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
@@ -81,34 +96,60 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     /// <param name="ip">IP-адрес устройства.</param>
     public KeysightDevice(IPAddress ip)
-        : this() => IP = ip;
+        : this() => IPAddress = ip;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="KeysightDevice"/>.
     /// </summary>
     public KeysightDevice()
     {
-      Name = "Мультиметр 34465A";
+      Name = "Keysight 34465A";
       Description = "Реализовать описание в Ask.Device.Runtime.Device.KeysightDevice";
       DeviceClass = GetType().FullName;
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.FastMeter;
-      IsConnected = false;
+      DeviceType = DeviceType.FastMeter;
+      ConnectionInfo.IsConnected = false;
+      ConnectedProfile.Port = 5025;
 
-      CapacitanceManager = new Function.Keysight3466new.CapacitanceMeasurement(this);
-      ConnectableManager = new Function.Keysight3466new.KeysightConnection(this);
-      ContinuityManager = new Function.Keysight3466new.ContinuityMeasurement(this);
-      ResistanceManager = new Function.Keysight3466new.ResistanceMeasurement(this);
-      AcVoltageManager = new Function.Keysight3466new.AcVoltageMeasurement(this);
-      DcVoltageManager = new Function.Keysight3466new.DcVoltageMeasurement(this);
+      CapacitanceManager = new CapacitanceMeasurementBase(this);
+      ConnectableManager = new Transport(this);
+      ContinuityManager = new ContinuityMeasurementBase(this);
+      ResistanceManager = new ResistanceMeasurementBase(this);
+      AcVoltageManager = new ACVMeasurementBase(this);
+      DcVoltageManager = new DCVMeasurementBase(this);
       TextMessage = new Function.Keysight3466new.TextMessage(this);
-      DiodeManager = new Function.Keysight3466new.DiodeMeasurement(this);
-      SelfTestManager = new Function.Multimeter.SelfCheck.SelfTestManager();
-      DeviceProtocol = new TcpProtocol(this, Port);
+      DiodeManager = new DiodeMeasurementBase(this);
+      SelfTestManager = new SelfTestManager();
+      DeviceProtocol = new TcpProtocol(this, ConnectedProfile.Port);
+
+      ResistanceCommands = new ResistanceMeasurementProfile()
+      {
+        SupportedRanges = new[] { 100d, 1_000d, 10_000d, 100_000d, 1_000_000d, 10_000_000d, 100_000_000d, 1_000_000_000d },
+      };
+      ACVCommands = new ACVMeasurementProfile()
+      {
+        SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 750d },
+      };
+      DCVCommands = new DCVMeasurementProfile()
+      {
+        SupportedRanges = new[] { 0.1d, 1d, 10d, 100d, 1000d },
+      };
+      CapacitanceCommands = new CapacitanceMeasurementProfile()
+      {
+        SupportedRanges = new[] { 1d, 10d, 100d, 1_000d, 10_000d, 100_000d, 1_000_000d, 10_000_000d },
+      };
+      ContinuityCommands = new ContinuityMeasurementProfile();
+      DiodeCommands = new DiodeMeasurementProfile();
+
+
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;
       DcwPpuDividerCoefficientPercent = 100d;
     }
 
+    /// <summary>
+    /// Преобразует текущий экземпляр мультиметра в объект передачи данных.
+    /// </summary>
+    /// <returns>Объект <see cref="FastMeterDto"/> с параметрами мультиметра.</returns>
     public FastMeterDto Convert()
     {
       return new FastMeterDto

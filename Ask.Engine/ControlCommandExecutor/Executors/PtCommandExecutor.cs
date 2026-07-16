@@ -12,7 +12,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class PtCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.PT).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.PT).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {

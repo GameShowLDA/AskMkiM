@@ -1,8 +1,10 @@
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
-using Ask.Device.Communication.Ethernet;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Commands;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
@@ -10,7 +12,7 @@ namespace Ask.Device.Runtime.Device
   /// <summary>
   /// Устройство коммутации шин, обеспечивающее подключение различных измерителей системы.
   /// </summary>
-  public class DeviceBusCommutation : DeviceWithIP, ISwitchingDevice
+  public class DeviceBusCommutation : DeviceWithUdpIp, ISwitchingDevice
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DeviceBusCommutation"/>.
@@ -20,9 +22,10 @@ namespace Ask.Device.Runtime.Device
       Name = "Устройство УКШ";
       Description = "Реализовать описание в Ask.Device.Runtime.Device.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
-      DeviceType = Ask.Core.Shared.Metadata.Enums.DeviceEnums.DeviceType.SwitchingDevice;
+      DeviceType = DeviceType.SwitchingDevice;
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
 
-      ConnectableManager = new Function.DeviceBusCommutation.StateManager(this);
+      ConnectableManager = new Transport(this);
       ConnectorManager = new Function.DeviceBusCommutation.ConnectorManager(this);
       CapacitorManager = new Function.DeviceBusCommutation.CapacitorManager(this);
       RelayManager = new Function.DeviceBusCommutation.RelayManager(this);

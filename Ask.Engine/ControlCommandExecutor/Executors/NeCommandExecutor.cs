@@ -7,21 +7,15 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class NeCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
     private double firstValue = 0;
     private double secondValue = -1;
 
@@ -143,7 +137,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Возвращает значение проверки диода с учётом холостого режима и ожидаемой перегрузки.
     /// </summary>
     private async Task<double> GetDiodeMeasurementValueAsync(
-      IFastMeter meter,
+      IMultimeter meter,
       double value,
       ConnectedPointContext pointContext)
     {
@@ -163,7 +157,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       && !ExecutionConfig.GetIsErrorSimulationEnabled().Result
       && pointContext.IsOverloadExpected;
 
-    private async Task SettingMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.DiodeManager.SetDiodeModeAsync(userMessageService);
     }

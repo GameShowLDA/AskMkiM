@@ -59,7 +59,7 @@ namespace UI.Controls
 
           try
           {
-            var str = device.ConnectableManager.GetConnectionStatus();
+            var str = device.ConnectionInfo.GetConnectionStatus();
             DeviceStatus = str;
           }
           catch (Exception)

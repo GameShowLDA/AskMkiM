@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -39,14 +41,20 @@ namespace Ask.Engine.Tests.Metrology
     {
       _userInteractionService = userInteractionService;
       testMeasurement = new KnMeasurement(referenceVoltageRequestService);
+      testMeasurement.SetExecutionController(executionController);
 
-      executionController.SetSettings(
-        StartDelegate: ExecuteMeasurementProcess,
-        true,
-        StopDelegate: async (CancellationToken token) =>
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Metrology,
+        StopDelegate = async (CancellationToken token) =>
         {
           await testMeasurement.FinalizeMeasurement(metrologicalModeRole, _userInteractionService);
-        });
+        }
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -83,14 +91,14 @@ namespace Ask.Engine.Tests.Metrology
       {
         await base.ConfigureMeter(messageService, metrologicalModeRole, dataModel);
 
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
         await fastMeter.AcVoltageManager.SetACVoltageModeAsync(messageService);
       }
 
       /// <inheritdoc />
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0)
       {
-        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IFastMeter>().FirstOrDefault() : null;
+        var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(protocolUI, param);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_ACW, resultReferenceMeterMeasured);
@@ -102,6 +110,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var err = resultFastMeterMeasured - resultReferenceMeterMeasured;
         Measurements.Add(err);
+
+        if (!result)
+        {
+          AddMetrologyError(protocolUI, metrologicalModeRole, resultFastMeterMeasured, LowerBound, UpperBound, "В");
+        }
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"Значение эталоного напряжения ", null, MeasurementValueFormatter.FormatWithUnit(resultReferenceMeterMeasured, "В")) { IndentLevel = 1 });
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжение", message: MeasurementValueFormatter.FormatWithUnit(resultFastMeterMeasured, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
@@ -118,7 +131,7 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> MeasuredFastMeter(IFastMeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
+      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
         var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
         return result;

@@ -1,4 +1,4 @@
-using Ask.Core.Services.FilesUtility;
+using Ask.UI.Services.Notifications;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -697,7 +697,7 @@ namespace UI.Controls.TextEditorControl
       if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
       {
         e.Handled = true;
-        TextPrintHelper.PrintText(textEditor.Text, "Печать редактора");
+        _ = PrintOperationNotificationService.PrintTextAsync(textEditor.Text, "Печать редактора");
         return true;
       }
 

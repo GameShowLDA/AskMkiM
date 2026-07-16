@@ -10,6 +10,7 @@ using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.UserInterface
@@ -20,6 +21,7 @@ namespace UI.Controls.Settings.UserInterface
   public partial class UiSettingsControl : UserControl
   {
     private UserInterfaceDto _baseParameterModel { get; set; }
+    private SettingsProtocolDto _baseProtocolModel { get; set; }
     private bool _isInitialized;
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
@@ -60,7 +62,9 @@ namespace UI.Controls.Settings.UserInterface
       try
       {
         await UserInterfaceConfig.SaveProtocolModel(GetModel());
+        await ProtocolConfig.SaveProtocolModel(GetProtocolModel());
         _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
+        _baseProtocolModel = ProtocolConfig.GetProtocolModel();
 
         Error.Visibility = Visibility.Collapsed;
         Success.Visibility = Visibility.Collapsed;
@@ -75,7 +79,8 @@ namespace UI.Controls.Settings.UserInterface
 
     private void ValueChanged(object? sender, object? e)
     {
-      if (!ProtocolEquals(_baseParameterModel, GetModel()))
+      if (!UserInterfaceEquals(_baseParameterModel, GetModel())
+        || !PrintSettingsEquals(_baseProtocolModel, GetProtocolModel()))
       {
         Error.Visibility = Visibility.Visible;
         Success.Visibility = Visibility.Visible;
@@ -92,6 +97,7 @@ namespace UI.Controls.Settings.UserInterface
     private async void UiSettingsControl_Loaded(object sender, RoutedEventArgs e)
     {
       _baseParameterModel = await UserInterfaceConfig.GetParameterModel();
+      _baseProtocolModel = ProtocolConfig.GetProtocolModel();
       DefalultData();
       UpdateCommandAutoCollapseVisibility();
 
@@ -104,6 +110,8 @@ namespace UI.Controls.Settings.UserInterface
         ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
         CommandAutoCollapsing.CheckedChanged += SettingsCard_CheckedChanged;
+        PrintFontFamilyComboBox.SelectionChanged += (s, ev) => ValueChanged(s, ev);
+        PrintFontSizeComboBox.SelectionChanged += (s, ev) => ValueChanged(s, ev);
 
         Success.PreviewMouseDown += Success_PreviewMouseDown;
         Error.PreviewMouseDown += Error_PreviewMouseDown;
@@ -183,6 +191,33 @@ namespace UI.Controls.Settings.UserInterface
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
+      FillPrintFontControls();
+    }
+
+    private void FillPrintFontControls()
+    {
+      var fontFamilies = Fonts.SystemFontFamilies
+        .Select(font => font.Source)
+        .Distinct(StringComparer.CurrentCultureIgnoreCase)
+        .OrderBy(font => font)
+        .ToList();
+
+      if (!fontFamilies.Contains(_baseProtocolModel.PrintFontFamily))
+      {
+        fontFamilies.Insert(0, _baseProtocolModel.PrintFontFamily);
+      }
+
+      PrintFontFamilyComboBox.ItemsSource = fontFamilies;
+      PrintFontFamilyComboBox.SelectedItem = _baseProtocolModel.PrintFontFamily;
+
+      double[] sizes = new double[] { 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32 };
+      if (!sizes.Contains(_baseProtocolModel.PrintFontSize))
+      {
+        sizes = sizes.Append(_baseProtocolModel.PrintFontSize).OrderBy(size => size).ToArray();
+      }
+
+      PrintFontSizeComboBox.ItemsSource = sizes;
+      PrintFontSizeComboBox.SelectedItem = _baseProtocolModel.PrintFontSize;
     }
 
     private void ProtocolConfig_SaveProtocolEvent(SettingsProtocolDto _)
@@ -222,10 +257,21 @@ namespace UI.Controls.Settings.UserInterface
       };
     }
 
+    private SettingsProtocolDto GetProtocolModel()
+    {
+      var model = ProtocolConfig.GetProtocolModel();
+      model.PrintFontFamily = PrintFontFamilyComboBox.SelectedItem?.ToString() ?? _baseProtocolModel.PrintFontFamily;
+      model.PrintFontSize = PrintFontSizeComboBox.SelectedItem is double selectedSize
+        ? selectedSize
+        : _baseProtocolModel.PrintFontSize;
+
+      return model;
+    }
+
     /// <summary>
     /// Сравнивает две модели параметров.
     /// </summary>
-    private static bool ProtocolEquals(UserInterfaceDto a, UserInterfaceDto b) =>
+    private static bool UserInterfaceEquals(UserInterfaceDto a, UserInterfaceDto b) =>
       a.Language == b.Language &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
@@ -233,6 +279,10 @@ namespace UI.Controls.Settings.UserInterface
       a.UseTopMenuIcons == b.UseTopMenuIcons &&
       a.UseCommandAutoCollapse == b.UseCommandAutoCollapse &&
       b.Theme == a.Theme;
+
+    private static bool PrintSettingsEquals(SettingsProtocolDto a, SettingsProtocolDto b) =>
+      a.PrintFontFamily == b.PrintFontFamily &&
+      Math.Abs(a.PrintFontSize - b.PrintFontSize) < 0.01;
 
     /// <summary>
     /// Обработчик события смены темы. Вызывается, когда тема меняется глобально.

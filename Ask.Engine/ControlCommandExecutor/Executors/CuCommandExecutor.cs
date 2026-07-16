@@ -14,7 +14,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class CuCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.CU).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.CU).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
@@ -51,24 +51,23 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private static async Task<MessageBoxResult> AskQuestionWithSingleDialogAsync(IUserInteractionService userInteractionService, string message)
     {
-      while (true)
+      var result = MessageBoxCustom.Show(
+        $"{message}\r\n\r\nКоманда ЦУ: Yes-Да No-Нет Esc-Временный останов ПК",
+        "Запрос оператору",
+        MessageBoxButton.YesNoCancel,
+        MessageBoxImage.Question);
+
+      if (result != MessageBoxResult.Cancel)
       {
-        var result = MessageBoxCustom.Show(
-          $"{message}\r\n\r\nКоманда ЦУ: Yes-Да No-Нет Esc-Временный останов ПК",
-          "Запрос оператору",
-          MessageBoxButton.YesNoCancel,
-          MessageBoxImage.Question);
-
-        if (result != MessageBoxResult.Cancel)
-        {
-          return result;
-        }
-
-        if (!await WaitForTemporaryResumeAsync(userInteractionService))
-        {
-          throw new OperationCanceledException("Выполнение остановлено оператором на команде ЦУ.");
-        }
+        return result;
       }
+
+      if (!await WaitForTemporaryResumeAsync(userInteractionService))
+      {
+        throw new OperationCanceledException("Выполнение остановлено оператором на команде ЦУ.");
+      }
+
+      return MessageBoxResult.Cancel;
     }
 
     private static async Task<bool> WaitForTemporaryResumeAsync(IUserInteractionService userInteractionService)

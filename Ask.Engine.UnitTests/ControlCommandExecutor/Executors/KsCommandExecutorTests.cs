@@ -449,6 +449,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
         It.IsAny<bool>(),
         It.IsAny<bool>(),
         It.IsAny<bool>(),
+        It.IsAny<bool>(),
         It.IsAny<string>(),
         It.IsAny<string>(),
         It.IsAny<int>()))
@@ -599,7 +600,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       List<PointModel>? analyzedPoints,
       List<IRelaySwitchModule>? relayModules,
       ISwitchingDevice? switchingDevice,
-      IFastMeter? fastMeter)
+      IMultimeter? fastMeter)
     {
       SetProperty("AnalyzedPoints", analyzedPoints);
       SetProperty("ValidRelayModules", relayModules);
@@ -662,7 +663,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
         .Setup(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()))
         .ReturnsAsync(true);
 
-      var meterMock = new Mock<IFastMeter>();
+      var meterMock = new Mock<IMultimeter>();
       meterMock.SetupGet(x => x.ResistanceManager).Returns(ResistanceManagerMock.Object);
       meterMock.SetupGet(x => x.ContinuityManager).Returns(ContinuityManagerMock.Object);
 

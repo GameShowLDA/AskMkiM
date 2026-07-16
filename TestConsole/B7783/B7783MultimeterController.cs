@@ -3,33 +3,76 @@ using System.Diagnostics;
 
 namespace TestConsole.B7783
 {
+  /// <summary>
+  /// Предоставляет высокоуровневый API для управления мультиметром В7-783.
+  /// </summary>
   public sealed class B7783MultimeterController
   {
+    /// <summary>
+    /// Время ожидания операций по умолчанию, в миллисекундах.
+    /// </summary>
     private const int DefaultTimeoutMs = 5000;
+
+    /// <summary>
+    /// Время ожидания операций измерения, в миллисекундах.
+    /// </summary>
     private const int MeasurementTimeoutMs = 10000;
+
+    /// <summary>
+    /// Экземпляр мультиметра В7-783.
+    /// </summary>
     private readonly MultimeterB7783 _device;
+
+    /// <summary>
+    /// Делегат вывода диагностических сообщений.
+    /// </summary>
     private readonly Action<string> _log;
 
+    /// <summary>
+    /// Инициализирует контроллер мультиметра В7-783.
+    /// </summary>
+    /// <param name="device">
+    /// Экземпляр мультиметра. Если не указан, создаётся новый.
+    /// </param>
+    /// <param name="log">
+    /// Делегат журналирования. Если не указан, используется вывод в консоль.
+    /// </param>
     public B7783MultimeterController(MultimeterB7783? device = null, Action<string>? log = null)
     {
       _device = device ?? new MultimeterB7783();
       _log = log ?? Console.WriteLine;
     }
 
+    /// <summary>
+    /// Наименование мультиметра.
+    /// </summary>
     public string Name => _device.Name;
 
+    /// <summary>
+    /// Строка с параметрами подключения мультиметра.
+    /// </summary>
     public string ConnectionDetails
     {
       get => _device.ConnectionDetails;
       set => _device.ConnectionDetails = value;
     }
 
-    public bool IsConnected => _device.IsConnected;
-
+    /// <summary>
+    /// Путь к последнему успешно найденному USB-устройству.
+    /// </summary>
     public string LastResolvedDevicePath => _device.LastResolvedDevicePath;
 
-    public string ConnectionStatus => _device.ConnectableManager.GetConnectionStatus();
+    /// <summary>
+    /// Текущее состояние подключения мультиметра.
+    /// </summary>
+    public string ConnectionStatus => _device.ConnectionInfo.GetConnectionStatus();
 
+    /// <summary>
+    /// Выполняет инициализацию мультиметра.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> InitializeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       return await RunTimedAsync(
@@ -44,6 +87,12 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    /// <summary>
+    /// Выполняет подключение к мультиметру.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> ConnectAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       return await RunTimedAsync(
@@ -58,6 +107,14 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    /// <summary>
+    /// Выполняет отключение от мультиметра.
+    /// </summary>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>
+    /// <see langword="true"/>, если отключение выполнено успешно;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     public async Task<bool> DisconnectAsync(CancellationToken cancellationToken = default)
     {
       var stopwatch = Stopwatch.StartNew();
@@ -77,29 +134,60 @@ namespace TestConsole.B7783
       }
     }
 
+    /// <summary>
+    /// Возвращает идентификационную информацию о мультиметре.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public Task<B7783CommandResult> IdentifyAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       return QueryAsync("*IDN?", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
     }
 
+
+    /// <summary>
+    /// Выполняет сброс мультиметра к заводским настройкам.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public Task<B7783CommandResult> ResetAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       return QueryAsync("*RST", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
     }
 
+    /// <summary>
+    /// Очищает регистры состояния и ошибок мультиметра.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public Task<B7783CommandResult> ClearStatusAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       return QueryAsync("*CLS", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
     }
 
+    /// <summary>
+    /// Выполняет считывание текущего результата измерения.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public Task<B7783CommandResult> ReadAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       return QueryAsync("READ?", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
     }
 
+    /// <summary>
+    /// Переводит мультиметр в режим измерения сопротивления.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> SetResistanceModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -115,14 +203,188 @@ namespace TestConsole.B7783
         {
           bool result = await _device.ResistanceManager.SetResistanceModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Resistance mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Resistance mode was not confirmed.";
         },
         cancellationToken);
     }
 
+    /// <summary>
+    /// Переводит мультиметр в режим прозвонки.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
+    public async Task<B7783CommandResult> SetContinuityModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "SET CONTINUITY MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ContinuityManager.SetContinuityModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Continuity mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Переводит мультиметр в режим проверки диодов.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
+    public async Task<B7783CommandResult> SetDiodeModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "SET DIODE MODE",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.DiodeManager.SetDiodeModeAsync();
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Diode mode was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Выполняет проверку цепи в режиме прозвонки.
+    /// </summary>
+    /// <param name="expectedOutcome">
+    /// Ожидаемый результат проверки цепи.
+    /// </param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
+    public async Task<B7783CommandResult> CheckContinuityAsync(bool expectedOutcome, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"CHECK CONTINUITY (expected {expectedOutcome})",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ContinuityManager.CheckContinuityAsync(expectedOutcome);
+          token.ThrowIfCancellationRequested();
+          return result.ToString();
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Измеряет сопротивление в режиме прозвонки.
+    /// </summary>
+    /// <param name="param">
+    /// Ожидаемое значение сопротивления. Используется в режиме имитации.
+    /// </param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
+    public async Task<B7783CommandResult> MeasureContinuityResistanceAsync(
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      int timeoutMs = MeasurementTimeoutMs,
+      CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "MEASURE CONTINUITY RESISTANCE",
+        timeoutMs,
+        async token =>
+        {
+          double result = await _device.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+          token.ThrowIfCancellationRequested();
+          return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Выполняет измерение прямого напряжения на диоде.
+    /// </summary>
+    /// <param name="param">
+    /// Ожидаемое значение напряжения. Используется в режиме имитации.
+    /// </param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
+    public async Task<B7783CommandResult> MeasureDiodeAsync(
+    double param = 0,
+    double rangeFrom = -1,
+    double rangeTo = -1,
+    int timeoutMs = MeasurementTimeoutMs,
+    CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        "MEASURE DIODE",
+        timeoutMs,
+        async token =>
+        {
+          double result = await _device.DiodeManager.CheckDiodeAsync(param, rangeFrom, rangeTo);
+          token.ThrowIfCancellationRequested();
+          return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Переводит мультиметр в режим измерения постоянного напряжения.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> SetDcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -138,14 +400,66 @@ namespace TestConsole.B7783
         {
           bool result = await _device.DcVoltageManager.SetDCVoltageModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "DC voltage mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "DC voltage mode was not confirmed.";
         },
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetResistanceRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET RESISTANCE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.ResistanceManager.SetResistanceRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Resistance range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    public async Task<B7783CommandResult> SetDcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET DC VOLTAGE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.DcVoltageManager.SetDCVoltageRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "DC voltage range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Переводит мультиметр в режим измерения переменного напряжения.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> SetAcVoltageModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -161,14 +475,43 @@ namespace TestConsole.B7783
         {
           bool result = await _device.AcVoltageManager.SetACVoltageModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "AC voltage mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage mode was not confirmed.";
         },
         cancellationToken);
     }
 
+    public async Task<B7783CommandResult> SetAcVoltageRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
+    {
+      if (!_device.ConnectionInfo.IsConnected)
+      {
+        var connection = await ConnectAsync(timeoutMs, cancellationToken);
+        if (!connection.Success)
+        {
+          return connection;
+        }
+      }
+
+      return await RunTimedAsync(
+        $"SET AC VOLTAGE RANGE {FormatRange(range)}",
+        timeoutMs,
+        async token =>
+        {
+          bool result = await _device.AcVoltageManager.SetACVoltageRangeAsync(range);
+          token.ThrowIfCancellationRequested();
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "AC voltage range was not confirmed.";
+        },
+        cancellationToken);
+    }
+
+    /// <summary>
+    /// Переводит мультиметр в режим измерения ёмкости.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> SetCapacitanceModeAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -184,17 +527,14 @@ namespace TestConsole.B7783
         {
           bool result = await _device.CapacitanceManager.SetCapacitanceModeAsync();
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Capacitance mode was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance mode was not confirmed.";
         },
         cancellationToken);
     }
 
-    public async Task<B7783CommandResult> SetCapacitanceRangeAsync(
-      double rangeNanofarads,
-      int timeoutMs = DefaultTimeoutMs,
-      CancellationToken cancellationToken = default)
+    public async Task<B7783CommandResult> SetCapacitanceRangeAsync(double range, int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -204,22 +544,26 @@ namespace TestConsole.B7783
       }
 
       return await RunTimedAsync(
-        $"SET CAPACITANCE RANGE {rangeNanofarads:G17} nF",
+        $"SET CAPACITANCE RANGE {FormatRange(range)}",
         timeoutMs,
         async token =>
         {
-          if (_device.CapacitanceManager is not Ask.Device.Runtime.Function.B7783.CapacitanceMeasurement measurement)
-          {
-            throw new InvalidOperationException("B7-78/3 capacitance range control is not available.");
-          }
-
-          bool result = await measurement.SetCapacitanceRangeAsync(rangeNanofarads);
+          bool result = await _device.CapacitanceManager.SetCapacitanceRangeAsync(range);
           token.ThrowIfCancellationRequested();
-          return result ? _device.ConnectableManager.GetConnectionStatus() : "Capacitance range was not confirmed.";
+          return result ? _device.ConnectionInfo.GetConnectionStatus() : "Capacitance range was not confirmed.";
         },
         cancellationToken);
     }
 
+    /// <summary>
+    /// Выполняет измерение электрического сопротивления.
+    /// </summary>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Измеренное значение сопротивления.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если не удалось перевести мультиметр в режим измерения сопротивления.
+    /// </exception>
     public async Task<double> MeasureResistanceAsync(int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       var mode = await SetResistanceModeAsync(timeoutMs, cancellationToken);
@@ -231,6 +575,20 @@ namespace TestConsole.B7783
       return await _device.ResistanceManager.MeasureResistanceAsync();
     }
 
+    /// <summary>
+    /// Выполняет измерение постоянного напряжения.
+    /// </summary>
+    /// <param name="param">
+    /// Ожидаемое значение напряжения. Используется в режиме имитации.
+    /// </param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Измеренное значение постоянного напряжения.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если не удалось подключиться к мультиметру.
+    /// </exception>
     public async Task<double> MeasureDcVoltageAsync(
       double param = 0,
       double rangeFrom = -1,
@@ -238,7 +596,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -251,6 +609,20 @@ namespace TestConsole.B7783
       return await _device.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
     }
 
+    /// <summary>
+    /// Выполняет измерение постоянного напряжения.
+    /// </summary>
+    /// <param name="param">
+    /// Ожидаемое значение напряжения. Используется в режиме имитации.
+    /// </param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Измеренное значение переменного напряжения.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если не удалось подключиться к мультиметру.
+    /// </exception>
     public async Task<double> MeasureAcVoltageAsync(
       double param = 0,
       double rangeFrom = -1,
@@ -258,7 +630,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -271,6 +643,20 @@ namespace TestConsole.B7783
       return await _device.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
     }
 
+    /// <summary>
+    /// Выполняет измерение ёмкости.
+    /// </summary>
+    /// <param name="param">
+    /// Ожидаемое значение ёмкости. Используется в режиме имитации.
+    /// </param>
+    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
+    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Измеренное значение ёмкости.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если не удалось подключиться к мультиметру.
+    /// </exception>
     public async Task<double> MeasureCapacitanceAsync(
       double param = 0,
       double rangeFrom = -1,
@@ -278,7 +664,7 @@ namespace TestConsole.B7783
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -291,6 +677,22 @@ namespace TestConsole.B7783
       return await _device.CapacitanceManager.MeasureCapacitanceAsync(param, rangeFrom, rangeTo);
     }
 
+    /// <summary>
+    /// Отправляет произвольную SCPI-команду мультиметру и возвращает результат её выполнения.
+    /// </summary>
+    /// <param name="command">SCPI-команда.</param>
+    /// <param name="responseDelayMs">
+    /// Дополнительная задержка перед чтением ответа, в миллисекундах.
+    /// </param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="delayBeforeCallMs">
+    /// Задержка перед отправкой команды, в миллисекундах.
+    /// </param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения команды.</returns>
+    /// <exception cref="ArgumentException">
+    /// Выбрасывается, если команда не задана.
+    /// </exception>
     public async Task<B7783CommandResult> QueryAsync(
       string command,
       double responseDelayMs = 0,
@@ -303,7 +705,7 @@ namespace TestConsole.B7783
         throw new ArgumentException("Command is empty.", nameof(command));
       }
 
-      if (!_device.IsConnected)
+      if (!_device.ConnectionInfo.IsConnected)
       {
         var connection = await ConnectAsync(timeoutMs, cancellationToken);
         if (!connection.Success)
@@ -324,6 +726,20 @@ namespace TestConsole.B7783
         cancellationToken);
     }
 
+    private static string FormatRange(double range)
+    {
+      return range <= 0 ? "AUTO" : range.ToString("G", System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Выполняет операцию с контролем времени выполнения, журналированием
+    /// и обработкой ошибок.
+    /// </summary>
+    /// <param name="operation">Наименование выполняемой операции.</param>
+    /// <param name="timeoutMs">Максимальное время ожидания операции, в миллисекундах.</param>
+    /// <param name="action">Асинхронная операция для выполнения.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <returns>Результат выполнения операции.</returns>
     private async Task<B7783CommandResult> RunTimedAsync(
       string operation,
       int timeoutMs,
