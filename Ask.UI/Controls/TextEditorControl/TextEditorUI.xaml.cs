@@ -170,6 +170,21 @@ namespace Ask.UI.Controls.TextEditorControl
     }
 
     /// <summary>
+    /// Включает визуальный перенос длинных строк по ширине редактора.
+    /// </summary>
+    public bool WordWrap
+    {
+      get => textEditor.WordWrap;
+      set
+      {
+        textEditor.WordWrap = value;
+        ScrollViewer.SetHorizontalScrollBarVisibility(
+          textEditor,
+          value ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto);
+      }
+    }
+
+    /// <summary>
     /// Получает экземпляр сервиса маркеров для подсветки текста в редакторе.
     /// </summary>
     /// <value>
@@ -633,9 +648,8 @@ namespace Ask.UI.Controls.TextEditorControl
     {
       InitializeComponent();
 
-      FileType = fileType;
+      SetFileType(fileType);
       TextEditorModel = textEditorModel;
-      textEditor.IsReadOnly = IsReadOnlyFileType(fileType);
       _defaultFontSize = textEditor.FontSize;
       EnsureLineNumbersForeground();
 
@@ -690,6 +704,21 @@ namespace Ask.UI.Controls.TextEditorControl
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+    }
+
+    /// <summary>
+    /// Настраивает редактор для указанного типа файла.
+    /// Используется для редакторов, создаваемых из XAML без параметров конструктора.
+    /// </summary>
+    public void SetFileType(FileType fileType)
+    {
+      FileType = fileType;
+      textEditor.IsReadOnly = IsReadOnlyFileType(fileType);
+
+      if (IsLoaded)
+      {
+        ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+      }
     }
 
     /// <summary>
@@ -814,7 +843,7 @@ namespace Ask.UI.Controls.TextEditorControl
     }
 
     private static bool IsReadOnlyFileType(FileType fileType)
-      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol;
+      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol or FileType.InspectionProtocol;
 
     #endregion
   }

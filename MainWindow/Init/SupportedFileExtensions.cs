@@ -15,6 +15,7 @@ namespace MainWindowProgram.Init
       ".opkw",
       ".lst",
       ".lstw",
+      ".rtlst",
       ".acs",
       ".txt"
     };
@@ -27,6 +28,7 @@ namespace MainWindowProgram.Init
       ".opkw",
       ".lst",
       ".lstw",
+      ".rtlst",
       ".acs"
     };
 

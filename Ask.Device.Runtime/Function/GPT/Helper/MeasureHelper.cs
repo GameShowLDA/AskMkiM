@@ -1,12 +1,14 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.GPT.Command;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.GPT.Helper
 {
@@ -39,8 +41,9 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем param.", isDeviceLog: true);
-        return (param, "");
+        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.InsulationResistance);
+        LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
+        return (random, "");
       }
 
       try
