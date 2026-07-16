@@ -21,7 +21,8 @@ namespace Ask.Device.Communication.Com.Extensions
     public static async Task<IDisposable> UsePort(
       this SerialPort port,
       string? deviceName = null,
-      IUserInteractionService? userMessageService = null)
+      IUserInteractionService? userMessageService = null,
+      CancellationToken cancellationToken = default)
     {
       ArgumentNullException.ThrowIfNull(port);
 
@@ -31,12 +32,13 @@ namespace Ask.Device.Communication.Com.Extensions
         return new NoOpDisposable();
       }
 
-      const int maxAttempts = 100;
-      const int retryDelay = 1000;
+      int maxAttempts = userMessageService == null ? 3 : 100;
+      const int retryDelay = 250;
       int attempt = 0;
 
       while (true)
       {
+        cancellationToken.ThrowIfCancellationRequested();
         userMessageService?.GetCancellationToken().ThrowIfCancellationRequested();
 
         attempt++;
@@ -47,7 +49,7 @@ namespace Ask.Device.Communication.Com.Extensions
           port.Open();
           LogDebug($"{header} COM-порт {port.PortName} открыт (попытка {attempt}).", isDeviceLog: true);
 
-          await Task.Delay(100);
+          await Task.Delay(100, cancellationToken);
           return new NoOpDisposable();
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("The port is already open"))
@@ -71,7 +73,7 @@ namespace Ask.Device.Communication.Com.Extensions
             throw;
           }
 
-          await Task.Delay(retryDelay);
+          await Task.Delay(retryDelay, cancellationToken);
         }
         catch (IOException ex)
         {
@@ -87,7 +89,7 @@ namespace Ask.Device.Communication.Com.Extensions
             throw;
           }
 
-          await Task.Delay(retryDelay);
+          await Task.Delay(retryDelay, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -103,7 +105,7 @@ namespace Ask.Device.Communication.Com.Extensions
             throw;
           }
 
-          await Task.Delay(retryDelay);
+          await Task.Delay(retryDelay, cancellationToken);
         }
       }
     }
