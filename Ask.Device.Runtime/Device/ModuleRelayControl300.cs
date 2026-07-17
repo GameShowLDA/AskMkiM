@@ -20,7 +20,7 @@ namespace Ask.Device.Runtime.Device
     public ModuleRelayControl300()
     {
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
-      ConnectedProfile.Reset = new DeviceCommand(2, 0, 0, 0).ToString();
+      ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
       DeviceType = DeviceType.RelaySwitchModule;
       Name = "Модуль МКР-300";
       Description = "Добавить описание сюда";

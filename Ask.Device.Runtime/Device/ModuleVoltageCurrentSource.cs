@@ -29,7 +29,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.PowerSourceModule;
       
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
-      ConnectedProfile.Reset = new DeviceCommand(2, 0, 0, 0).ToString();
+      ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
       BusManager = new Function.ModuleVoltageCurrentSource.BusManager(this);
       CurrentManager = new Function.ModuleVoltageCurrentSource.CurrentManager(this);
       ConnectableManager = new Transport(this);

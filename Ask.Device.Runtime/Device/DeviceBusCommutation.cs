@@ -24,7 +24,7 @@ namespace Ask.Device.Runtime.Device
       DeviceClass = GetType().FullName;
       DeviceType = DeviceType.SwitchingDevice;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
-      ConnectedProfile.Reset = new DeviceCommand(2, 0, 0, 0).ToString();
+      ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
 
       ConnectableManager = new Transport(this);
       ConnectorManager = new Function.DeviceBusCommutation.ConnectorManager(this);
