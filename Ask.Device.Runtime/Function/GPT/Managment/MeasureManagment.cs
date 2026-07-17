@@ -66,12 +66,13 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         userMessageService);
 
       var result = measurement;
+
       if (_gptModel.Mode == Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
       {
         result.Item1 = result.Item1 * (_gptModel.SystemInsulationResistanceGOhm * 1000) / (result.Item1 + (_gptModel.SystemInsulationResistanceGOhm * 1000));
       }
 
-      result = (MeasurementAdapterHelper.Round(measurement.value), measurement.unit);
+      result = (MeasurementAdapterHelper.Round(result.value), result.unit);
       return result;
     }
 
