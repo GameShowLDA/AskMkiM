@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Device.Communication.Com.Configuration;
 using System.IO.Ports;
 using System.Management;
@@ -57,6 +58,16 @@ namespace Ask.UI.Components
     };
 
     /// <summary>
+    /// Возвращает выбранный режим управления потоком данных.
+    /// </summary>
+    public Handshake Handshake => GetSelectedText(FlowControlSelectionBox) switch
+    {
+      "Xon/Xoff" => Handshake.XOnXOff,
+      "Аппаратное" => Handshake.RequestToSend,
+      _ => Handshake.None,
+    };
+
+    /// <summary>
     /// Загружает список доступных COM-портов и выбирает первый из них.
     /// </summary>
     public void LoadAvailablePorts()
@@ -73,22 +84,55 @@ namespace Ask.UI.Components
     public void ApplyModelDefaults(object deviceModel)
     {
       ArgumentNullException.ThrowIfNull(deviceModel);
-      Type modelType = deviceModel.GetType();
-      SetValueFromProperty(modelType, deviceModel, "BaudRate", BaudRateSelectionBox);
-      SetValueFromProperty(modelType, deviceModel, "StopBits", StopBitsSelectionBox);
-      SetValueFromProperty(modelType, deviceModel, "DataBits", DataBitsSelectionBox);
-      SetValueFromProperty(modelType, deviceModel, "Parity", ParitySelectionBox);
-      SetValueFromProperty(modelType, deviceModel, "FlowControl", FlowControlSelectionBox);
+      if (deviceModel is not IComPortSettingsProvider provider)
+      {
+        throw new InvalidOperationException($"COM-устройство {deviceModel.GetType().Name} не задаёт настройки порта по умолчанию.");
+      }
+
+      Load(provider.DefaultComPortSettings);
+    }
+
+    /// <summary>
+    /// Загружает параметры последовательного порта,
+    /// оставляя выбор физического COM-порта пользователю.
+    /// </summary>
+    /// <param name="settings">Параметры последовательного порта.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Выбрасывается, если <paramref name="settings"/> равен <see langword="null"/>.
+    /// </exception>
+    public void Load(ComPortSettings settings)
+    {
+      ArgumentNullException.ThrowIfNull(settings);
+      SetValue(BaudRateSelectionBox, settings.BaudRate.ToString());
+      SetValue(DataBitsSelectionBox, settings.DataBits.ToString());
+      SetValue(StopBitsSelectionBox, ParseStopBits(settings.StopBits) switch
+      {
+        StopBits.OnePointFive => "1.5",
+        StopBits.Two => "2",
+        _ => "1",
+      });
+      SetValue(ParitySelectionBox, ParseParity(settings.Parity) switch
+      {
+        Parity.Even => "Чет",
+        Parity.Odd => "Нечет",
+        Parity.Mark => "Маркер",
+        Parity.Space => "Пробел",
+        _ => "Нет",
+      });
+      SetFlowControl(ParseHandshake(settings.Handshake));
     }
 
     /// <summary>
     /// Загружает сохранённые параметры последовательного порта в компонент.
     /// </summary>
     /// <param name="settings">Сохранённые параметры COM-порта.</param>
-    public void Load(SerialPortCustom settings)
+    public void Load(SerialPortCustom settings, bool loadAvailablePorts = true)
     {
       ArgumentNullException.ThrowIfNull(settings);
-      LoadAvailablePorts();
+      if (loadAvailablePorts)
+      {
+        LoadAvailablePorts();
+      }
 
       var ports = (COMPortSelectionBox.ItemsSource as IEnumerable<string>)?.ToList() ?? [];
       if (!ports.Contains(settings.PortName))
@@ -114,6 +158,17 @@ namespace Ask.UI.Components
         Parity.Space => "Пробел",
         _ => "Нет",
       });
+      SetFlowControl(settings.Handshake);
+    }
+
+    private void SetFlowControl(Handshake handshake)
+    {
+      SetValue(FlowControlSelectionBox, handshake switch
+      {
+        Handshake.XOnXOff => "Xon/Xoff",
+        Handshake.RequestToSend or Handshake.RequestToSendXOnXOff => "Аппаратное",
+        _ => "Нет",
+      });
     }
 
     /// <summary>
@@ -128,7 +183,10 @@ namespace Ask.UI.Components
         throw new ArgumentException("Укажите корректные параметры COM-порта.");
       }
 
-      return new SerialPortCustom(PortName, BaudRate, Parity, DataBits, StopBits);
+      return new SerialPortCustom(PortName, BaudRate, Parity, DataBits, StopBits)
+      {
+        Handshake = Handshake,
+      };
     }
 
     /// <summary>
@@ -186,18 +244,6 @@ namespace Ask.UI.Components
     }
 
     /// <summary>
-    /// Выбирает значение списка по текстовому представлению свойства модели.
-    /// </summary>
-    private static void SetValueFromProperty(Type modelType, object deviceModel, string propertyName, ComboBox comboBox)
-    {
-      object? value = modelType.GetProperty(propertyName)?.GetValue(deviceModel);
-      if (value != null)
-      {
-        SetValue(comboBox, value.ToString() ?? string.Empty);
-      }
-    }
-
-    /// <summary>
     /// Выбирает элемент списка с указанным текстом.
     /// </summary>
     private static void SetValue(ComboBox comboBox, string text)
@@ -226,5 +272,41 @@ namespace Ask.UI.Components
     /// </summary>
     private static int GetIntegerValue(ComboBox comboBox) =>
       int.TryParse(GetSelectedText(comboBox), out int value) ? value : -1;
+
+    /// <summary>
+    /// Преобразует строковое представление режима контроля чётности
+    /// в значение перечисления <see cref="Parity"/>.
+    /// </summary>
+    /// <param name="value">Строковое представление режима контроля чётности.</param>
+    /// <returns>
+    /// Соответствующее значение <see cref="Parity"/>.
+    /// Если преобразование невозможно, возвращается <see cref="Parity.None"/>.
+    /// </returns>
+    private static Parity ParseParity(string value) =>
+      Enum.TryParse(value, true, out Parity result) ? result : Parity.None;
+
+    /// <summary>
+    /// Преобразует строковое представление количества стоп-битов
+    /// в значение перечисления <see cref="StopBits"/>.
+    /// </summary>
+    /// <param name="value">Строковое представление количества стоп-битов.</param>
+    /// <returns>
+    /// Соответствующее значение <see cref="StopBits"/>.
+    /// Если преобразование невозможно, возвращается <see cref="StopBits.One"/>.
+    /// </returns>
+    private static StopBits ParseStopBits(string value) =>
+      Enum.TryParse(value, true, out StopBits result) ? result : StopBits.One;
+
+    /// <summary>
+    /// Преобразует строковое представление режима управления потоком данных
+    /// в значение перечисления <see cref="Handshake"/>.
+    /// </summary>
+    /// <param name="value">Строковое представление режима управления потоком данных.</param>
+    /// <returns>
+    /// Соответствующее значение <see cref="Handshake"/>.
+    /// Если преобразование невозможно, возвращается <see cref="Handshake.None"/>.
+    /// </returns>
+    private static Handshake ParseHandshake(string value) =>
+      Enum.TryParse(value, true, out Handshake result) ? result : Handshake.None;
   }
 }

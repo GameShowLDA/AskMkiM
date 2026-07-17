@@ -2,11 +2,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com.Configuration;
-using Ask.Device.Communication.Com.Interop;
 using Ask.Device.Communication.Com.Protocols;
 using Ask.Device.Runtime.Function.Base.Status;
 using System.IO.Ports;
-using System.Net;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Base.Device
@@ -14,7 +12,7 @@ namespace Ask.Device.Runtime.Base.Device
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого через COM-порт.
   /// </summary>
-  public abstract class DeviceWithCOM : IDevice
+  public abstract class DeviceWithCOM : IDevice, IComPortSettingsProvider
   {
     public DeviceWithCOM()
     {
@@ -81,6 +79,21 @@ namespace Ask.Device.Runtime.Base.Device
 
     #endregion
 
+    /// <inheritdoc />
+    public abstract Ask.Core.Shared.DTO.Devices.Base.ComPortSettings DefaultComPortSettings { get; }
+
+    /// <summary>
+    /// Применяет параметры последовательного порта по умолчанию,
+    /// если настройки подключения ещё не были сохранены.
+    /// </summary>
+    protected void ApplyDefaultComPortSettings()
+    {
+      if (string.IsNullOrWhiteSpace(ConnectionDetails))
+      {
+        ConnectionDetails = SerialPortCustom.SerializeSettings(DefaultComPortSettings);
+      }
+    }
+
     /// <summary>
     /// Получает или задаёт COM-порт, используемый для подключения устройства.
     /// </summary>
@@ -91,7 +104,12 @@ namespace Ask.Device.Runtime.Base.Device
       {
         if (_comPort != null)
         {
-          ComPortDeviceManager.DisableDevice(_comPort.PortName);
+          if (_comPort.IsOpen)
+          {
+            _comPort.Close();
+          }
+
+          _comPort.Dispose();
         }
 
         LogWarning($"[{Name}] COMPort меняется: {_comPort?.PortName ?? "null"} → {value?.PortName ?? "null"}", isDeviceLog: true);
