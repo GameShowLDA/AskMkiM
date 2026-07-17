@@ -5,13 +5,14 @@ using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.DataBase.Engine.Static.Settings;
+using Ask.DataBase.Provider.Initialization;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init
 {
   static internal class DatabaseInitializer
   {
-    static internal async Task InitializeAsync()
+    static internal async Task<DatabaseInitializationReport?> InitializeAsync()
     {
       try
       {
@@ -79,10 +80,13 @@ namespace MainWindowProgram.Init
         {
           await DeviceDisplaySettings.SaveAsync(model);
         };
+
+        return newDatabaseReport;
       }
       catch (Exception ex)
       {
         LogException(ex);
+        return null;
       }
     }
 
