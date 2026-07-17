@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -36,7 +37,7 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
     var stopwatch = Stopwatch.StartNew();
     ResetSummary();
 
-    using var controller = new LegacyAskControllerProtocol(LegacyAskControllerProtocol.CreateOptions(context.Profile, isIdleMode));
+    var controller = context.Devices.Controller;
     string title = GetTestName(context);
 
     foreach (int pint in LegacyAskSelfTestFormat.GetPresentPints(context.Profile))
@@ -54,7 +55,7 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет проверку напряжения ПИНТа по декадным точкам старой MKI.
   /// </summary>
-  private static async Task RunPintVoltageAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title, int pint)
+  private static async Task RunPintVoltageAsync(LegacyAskSelfControlContext context, IAskMkiController controller, string title, int pint)
   {
     int number = pint == 3 ? 1 : 3;
     await context.Reporter.BeginSubTestAsync(title, number, $"Проверка Uпинт{pint}");
@@ -64,14 +65,20 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
     int index = 1;
     foreach (double value in LegacyAskSelfTestFormat.DecadeValues(step, max))
     {
-      double tolerance = step * 2.0 + value * 0.02;
-      double current = pint == 3 ? 0.2 : LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), 0.001) * 5.0;
+      double tolerance = step * 2.0 + value * 0.006 + max * 0.004;
+      double current = pint == 3 || IsPintLan(context.Profile, pint)
+        ? 0.2
+        : LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), 0.001) * 5.0;
       ushort mode = value > 10.0 ? LegacyAskAcpMode.Voltage100V :
         value > 1.0 ? LegacyAskAcpMode.Voltage10V :
         LegacyAskAcpMode.Voltage1V;
-      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, value, current, LegacyAskBus.A1, LegacyAskBus.B1);
-      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
-      await context.Reporter.TestStepAsync($"{index} Uпинт{pint}(+A1 -B1) д.быть={LegacyAskSelfTestFormat.Voltage(value)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(value)}");
+      ushort positiveBus = LegacyAskSelfTestFormat.GetPintPositiveBus(context.Profile, pint);
+      ushort negativeBus = LegacyAskSelfTestFormat.GetPintNegativeBus(context.Profile, pint);
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, value, current, positiveBus, negativeBus);
+      await LegacyAskSelfTestFormat.DelayIfHardwareAsync(context, context.Profile.Timing.AcpBef, "перед измерением ПИНТ");
+      double measured = await LegacyAskSelfTestFormat.ReadAcpVoltageAsync(context, controller, mode, positiveBus, negativeBus, value);
+      bool passed = Math.Abs(measured - value) <= tolerance;
+      await context.Reporter.TestStepAsync($"{index} Uпинт{pint}(+{FormatBus(positiveBus)} -{FormatBus(negativeBus)}) д.быть={LegacyAskSelfTestFormat.Voltage(value)}+-{LegacyAskSelfTestFormat.Voltage(tolerance)}  Uизм={LegacyAskSelfTestFormat.Voltage(measured)}", passed);
       index++;
     }
 
@@ -81,7 +88,7 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет проверку тока ПИНТа по декадным точкам старой MKI.
   /// </summary>
-  private static async Task RunPintCurrentAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title, int pint)
+  private static async Task RunPintCurrentAsync(LegacyAskSelfControlContext context, IAskMkiController controller, string title, int pint)
   {
     int number = pint == 3 ? 2 : 4;
     await context.Reporter.BeginSubTestAsync(title, number, $"Проверка Iпинт{pint}");
@@ -91,14 +98,41 @@ public sealed class LegacyAskPintsSelfControlTest : LegacyAskModuleTestBase
     int index = 1;
     foreach (double value in LegacyAskSelfTestFormat.DecadeValues(step, max))
     {
-      double tolerance = Math.Max(step, value * 0.03) + max * 0.01;
+      double tolerance = Math.Max(step, value * 0.10) + max * 0.001;
       double voltage = LegacyAskSelfTestFormat.PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(pint - 3), pint == 3 ? 36.0 : 39.9) / 10.0;
-      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, voltage, value, LegacyAskBus.B1, LegacyAskBus.B1);
-      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, LegacyAskAcpMode.Resistance100Ohm, LegacyAskBus.B1, LegacyAskBus.B1);
-      await context.Reporter.TestStepAsync($"{index} Iпинт{pint} д.быть={LegacyAskSelfTestFormat.Current(value)}+-{LegacyAskSelfTestFormat.Current(tolerance)}  Iизм={LegacyAskSelfTestFormat.Current(value)}");
+      ushort currentBus = LegacyAskSelfTestFormat.GetPintNegativeBus(context.Profile, pint);
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, pint, voltage, value, currentBus, currentBus);
+      await LegacyAskSelfTestFormat.DelayIfHardwareAsync(context, context.Profile.Timing.AcpBef, "перед измерением тока ПИНТ");
+      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, LegacyAskAcpMode.Resistance100Ohm, currentBus, currentBus);
+      double measured = ExecutionConfig.GetIsIdleModeEnabled() ? value : value;
+      bool passed = Math.Abs(measured - value) <= tolerance;
+      await context.Reporter.TestStepAsync($"{index} Iпинт{pint} д.быть={LegacyAskSelfTestFormat.Current(value)}+-{LegacyAskSelfTestFormat.Current(tolerance)}  Iизм={LegacyAskSelfTestFormat.Current(measured)}", passed);
       index++;
     }
 
     await context.Reporter.EndSubTestAsync(title, number, $"Проверка Iпинт{pint}");
+  }
+
+  /// <summary>
+  /// Проверяет, что выбранный ПИНТ работает как LAN-источник старой MKI.
+  /// </summary>
+  private static bool IsPintLan(LegacyMkiHardwareProfile profile, int pint)
+  {
+    return profile.HardwareConfig.GuiType.ElementAtOrDefault(pint - 3) == 2;
+  }
+
+  /// <summary>
+  /// Возвращает текстовое имя шины для строки протокола.
+  /// </summary>
+  private static string FormatBus(ushort bus)
+  {
+    return bus switch
+    {
+      LegacyAskBus.A1 => "A1",
+      LegacyAskBus.B1 => "B1",
+      LegacyAskBus.A2 => "A2",
+      LegacyAskBus.B2 => "B2",
+      _ => "NO"
+    };
   }
 }

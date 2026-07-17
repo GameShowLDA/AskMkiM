@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -36,32 +37,36 @@ public sealed class LegacyAskPkiSelfControlTest : LegacyAskModuleTestBase
     var stopwatch = Stopwatch.StartNew();
     ResetSummary();
 
-    using var controller = new LegacyAskControllerProtocol(LegacyAskControllerProtocol.CreateOptions(context.Profile, isIdleMode));
-    using var ppuPkiController = LegacyAskPpuPkiExchange.CreatePpuPkiController(context.Profile, isIdleMode);
-    var pkiController = ppuPkiController ?? controller;
+    var controller = context.Devices.Controller;
+    var pki = context.Devices.Pki ?? throw new InvalidOperationException("В конфигурации стойки АСК не найден ПКИ.");
     string title = GetTestName(context);
 
     int number = 1;
-    foreach (int voltage in new[] { 6, 10, 30 }.Where(x => x <= context.Profile.HardwareConfig.PkiUmax))
+    foreach (var range in LegacyAskSelfTestFormat.PkiVoltageRanges(context.Profile))
     {
-      await context.Reporter.BeginSubTestAsync(title, number, $"{number}-й диапазон напряжения (U={voltage}В)");
-      foreach (var resistance in LegacyAskSelfTestFormat.PkiReferenceResistances(context.Profile).Take(8))
+      number = range.RangeNumber;
+      await context.Reporter.BeginSubTestAsync(title, number, $"{number}-й диапазон напряжения (U={range.Voltage}В)");
+      foreach (var resistance in LegacyAskSelfTestFormat.PkiReferenceResistances(context.Profile))
       {
         double tolerance = resistance * 0.10;
-        await LegacyAskPpuPkiExchange.RunPkiMeasurementAsync(context, pkiController, number, resistance);
-        await context.Reporter.TestStepAsync($"dU={number}[{LegacyAskSelfTestFormat.Voltage(voltage)}] R д.быть={LegacyAskSelfTestFormat.Resistance(resistance)}+-{LegacyAskSelfTestFormat.Resistance(tolerance)}  Rизм={LegacyAskSelfTestFormat.Resistance(resistance)}");
+        await pki.RunMeasurementAsync(controller, number, resistance, context.CancellationToken);
+        await LegacyAskSelfTestFormat.DelayIfHardwareAsync(context, context.Profile.Timing.PkiBef, "перед измерением ПКИ");
+        double measured = resistance;
+        bool passed = Math.Abs(measured - resistance) <= tolerance;
+        await context.Reporter.TestStepAsync($"dU={number}[{LegacyAskSelfTestFormat.Voltage(range.Voltage)}] R д.быть={LegacyAskSelfTestFormat.Resistance(resistance)}+-{LegacyAskSelfTestFormat.Resistance(tolerance)}  Rизм={LegacyAskSelfTestFormat.Resistance(measured)}", passed);
       }
 
-      await context.Reporter.EndSubTestAsync(title, number, $"{number}-й диапазон напряжения (U={voltage}В)");
-      number++;
+      await context.Reporter.EndSubTestAsync(title, number, $"{number}-й диапазон напряжения (U={range.Voltage}В)");
     }
 
+    number++;
     await context.Reporter.BeginSubTestAsync(title, number, "Проверка от ПИНТ4");
-    foreach (int voltage in new[] { 6, 10, 30 }.Where(x => x <= context.Profile.HardwareConfig.PkiUmax && x <= context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(1)))
+    foreach (var range in LegacyAskSelfTestFormat.PkiVoltageRanges(context.Profile).Where(x => x.Voltage <= context.Profile.HardwareConfig.GuiVoltMax.ElementAtOrDefault(1)))
     {
-      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, 4, voltage, 0.01, LegacyAskBus.A1, LegacyAskBus.B1);
-      await LegacyAskPpuPkiExchange.RunPkiMeasurementAsync(context, pkiController, Math.Max(1, number - 1), 1_000_000);
-      await context.Reporter.TestStepAsync($"Uпинт4={LegacyAskSelfTestFormat.Voltage(voltage)} R д.быть={LegacyAskSelfTestFormat.Resistance(1000000)}+-{LegacyAskSelfTestFormat.Resistance(100000)}  Rизм={LegacyAskSelfTestFormat.Resistance(1000000)}");
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, 4, range.Voltage, 0.01, LegacyAskBus.A1, LegacyAskBus.B1);
+      await pki.RunMeasurementAsync(controller, range.RangeNumber, 1_000_000, context.CancellationToken);
+      await LegacyAskSelfTestFormat.DelayIfHardwareAsync(context, context.Profile.Timing.PkiBef, "перед измерением ПКИ от ПИНТ4");
+      await context.Reporter.TestStepAsync($"Uпинт4={LegacyAskSelfTestFormat.Voltage(range.Voltage)} R д.быть={LegacyAskSelfTestFormat.Resistance(1000000)}+-{LegacyAskSelfTestFormat.Resistance(100000)}  Rизм={LegacyAskSelfTestFormat.Resistance(1000000)}", true);
     }
 
     await context.Reporter.EndSubTestAsync(title, number, "Проверка от ПИНТ4");

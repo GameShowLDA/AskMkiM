@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -50,8 +51,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     var stopwatch = Stopwatch.StartNew();
     _summaryReady = false;
 
-    var options = LegacyAskControllerProtocol.CreateOptions(context.Profile, isIdleMode);
-    using var controller = new LegacyAskControllerProtocol(options);
+    var controller = context.Devices.Controller;
 
     await EnsureMultimeterReadyAsync(context, title, isIdleMode);
 
@@ -83,7 +83,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
   /// </summary>
   private static async Task RunZeroVoltageTestAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     string title)
   {
     const string testName = "Измерение 0В (КЗ входа)";
@@ -101,7 +101,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     foreach (var range in ranges)
     {
       await ConfigureVoltageAsync(context, range.NominalValue, "измерение 0В");
-      await ConnectVoltmeterToBusAsync(controller, LegacyAskBus.A1, LegacyAskBus.A1, isVoltageMode: true, context.CancellationToken);
+      await ConnectVoltmeterToBusAsync(context, controller, LegacyAskBus.A1, LegacyAskBus.A1, isVoltageMode: true, context.CancellationToken);
       var measured = await MeasureVoltageAsync(context, range.ExpectedValue, range.NominalValue, "измерение 0В");
       await context.Reporter.TestStepAsync($"ДиапU={range.DisplayName} U д.быть=0В+-{range.AbsoluteErrorText}  Uизм={FormatVoltage(measured)}");
     }
@@ -114,7 +114,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
   /// </summary>
   private static async Task RunPint4VoltageTestAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     string title)
   {
     const string testName = "Измерение напряжения ПИНТ4";
@@ -133,7 +133,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     {
       await SetPint4VoltageAsync(context, controller, testCase.ExpectedVoltage, testCase.PositiveBus, testCase.NegativeBus);
       await ConfigureVoltageAsync(context, testCase.Range, "измерение напряжения ПИНТ4");
-      await ConnectVoltmeterToBusAsync(controller, testCase.PositiveBus, testCase.NegativeBus, isVoltageMode: true, context.CancellationToken);
+      await ConnectVoltmeterToBusAsync(context, controller, testCase.PositiveBus, testCase.NegativeBus, isVoltageMode: true, context.CancellationToken);
 
 
 
@@ -159,7 +159,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
   /// </summary>
   private static async Task RunShortCircuitResistanceTestAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     string title)
   {
     const string testName = "Измерение cопротивления КЗШ";
@@ -179,7 +179,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       {
         await SetShortCircuitRelayAsync(controller, true, context.CancellationToken);
         await ConfigureResistanceAsync(context, testCase.Range, "измерение сопротивления КЗШ");
-        await ConnectVoltmeterToBusAsync(controller, LegacyAskBus.A1, LegacyAskBus.B1, isVoltageMode: false, context.CancellationToken);
+        await ConnectVoltmeterToBusAsync(context, controller, LegacyAskBus.A1, LegacyAskBus.B1, isVoltageMode: false, context.CancellationToken);
 
 
         if (testCase.MustBeOverload)
@@ -201,7 +201,7 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
       await SetShortCircuitRelayAsync(controller, false, context.CancellationToken);
     }
 
-    await ConnectVoltmeterToBusAsync(controller, 0, 0, isVoltageMode: true, context.CancellationToken);
+    await ConnectVoltmeterToBusAsync(context, controller, 0, 0, isVoltageMode: true, context.CancellationToken);
     await context.Reporter.EndSubTestAsync(title, 3, testName);
   }
 

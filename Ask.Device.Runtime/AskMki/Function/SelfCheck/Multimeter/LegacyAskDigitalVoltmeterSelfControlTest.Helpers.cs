@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -186,7 +187,8 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest
   /// Подключает входы цифрового вольтметра к шинам через контроллер АСК.
   /// </summary>
   private static Task ConnectVoltmeterToBusAsync(
-    LegacyAskControllerProtocol controller,
+    LegacyAskSelfControlContext context,
+    IAskMkiController controller,
     ushort positiveBus,
     ushort negativeBus,
     bool isVoltageMode,
@@ -196,20 +198,20 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest
       ? (ushort)(negativeBus | LegacyAskBus.GroundSource)
       : negativeBus;
 
-    return ConnectVoltmeterToBusCoreAsync(controller, positiveBus, groundWord, cancellationToken);
+    return ConnectVoltmeterToBusCoreAsync(context, controller, positiveBus, groundWord, cancellationToken);
   }
 
   /// <summary>
   /// Записывает оба подрегистра подключения вольтметра так же, как старый <c>V7wrbusrg</c>.
   /// </summary>
   private static async Task ConnectVoltmeterToBusCoreAsync(
-    LegacyAskControllerProtocol controller,
+    LegacyAskSelfControlContext context,
+    IAskMkiController controller,
     ushort inputBus,
     ushort groundBus,
     CancellationToken cancellationToken)
   {
-    await controller.WriteSubRegisterAsync(LegacyAskRegister.V7Gate, 2, groundBus, cancellationToken);
-    await controller.WriteSubRegisterAsync(LegacyAskRegister.V7Gate, 1, inputBus, cancellationToken);
+    await context.Devices.Commutator.ConnectVoltmeterAsync(controller, inputBus, groundBus, cancellationToken);
   }
 
   /// <summary>
@@ -217,23 +219,26 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest
   /// </summary>
   private static async Task SetPint4VoltageAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     double voltage,
     ushort positiveBus,
     ushort negativeBus)
   {
-    ushort busWord = (ushort)(positiveBus | (negativeBus << 8));
-    ushort voltageCode = LegacyAskSelfTestFormat.ToPintVoltageWord(context.Profile, 4, voltage);
-
-    await controller.WriteBusCommandAsync(busWord, context.CancellationToken);
-    await controller.WriteRegisterAsync(LegacyAskRegister.Gui4, voltageCode, context.CancellationToken);
+    await LegacyAskSelfTestFormat.SetPintOutputAsync(
+      context,
+      controller,
+      4,
+      voltage,
+      0.01,
+      positiveBus,
+      negativeBus);
   }
 
   /// <summary>
   /// Включает или отключает реле КЗШ через регистр включения приборов.
   /// </summary>
   private static Task SetShortCircuitRelayAsync(
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     bool isEnabled,
     CancellationToken cancellationToken)
   {

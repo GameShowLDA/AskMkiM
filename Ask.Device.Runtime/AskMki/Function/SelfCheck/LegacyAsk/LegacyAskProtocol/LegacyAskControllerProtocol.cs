@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.LegacyMki;
 using System.Globalization;
+using System.IO;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -328,7 +329,13 @@ public sealed partial class LegacyAskControllerProtocol : IDisposable
 
     catch (TimeoutException ex)
     {
+      LogError($"АСК timeout: кадр не получил ответ за {_options.TimeoutMs} мс. {ex.Message}", isDeviceLog: true);
       throw new TimeoutException($"Контроллер АСК не вернул ответ за {_options.TimeoutMs} мс.", ex);
+    }
+    catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
+    {
+      LogError($"АСК ошибка обмена кадром: {ex}", isDeviceLog: true);
+      throw;
     }
   }
 
@@ -369,12 +376,16 @@ public sealed partial class LegacyAskControllerProtocol : IDisposable
       LogInformation($"АСК ответ: command=0x{command:X2}, status=0x{parsed.Status:X2}, data=0x{parsed.Data:X4}", isDeviceLog: true);
       return Task.FromResult(parsed);
     }
-    catch { return Task.FromResult(default(LegacyAskControllerResponse)); }
-    
-    //catch (TimeoutException ex)
-    //{
-    //  throw new TimeoutException($"Контроллер АСК не вернул ответ за {_options.TimeoutMs} мс на команду 0x{command:X2}.", ex);
-    //}
+    catch (TimeoutException ex)
+    {
+      LogError($"АСК timeout: command=0x{command:X2}, value=0x{value:X4}, word={expectWord}, timeout={_options.TimeoutMs} мс. {ex.Message}", isDeviceLog: true);
+      throw new TimeoutException($"Контроллер АСК не вернул ответ за {_options.TimeoutMs} мс на команду 0x{command:X2}.", ex);
+    }
+    catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException or LegacyAskProtocolException)
+    {
+      LogError($"АСК ошибка обмена: command=0x{command:X2}, value=0x{value:X4}, word={expectWord}, error={ex}", isDeviceLog: true);
+      throw;
+    }
   }
 
   /// <summary>

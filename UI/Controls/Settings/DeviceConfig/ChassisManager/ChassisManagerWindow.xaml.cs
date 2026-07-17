@@ -121,7 +121,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     }
 
     /// <summary>
-    /// Создает DTO стойки АСК без параметров подключения.
+    /// Создает DTO стойки АСК с параметрами подключения из формы.
     /// </summary>
     /// <param name="device">Runtime-модель стойки АСК.</param>
     /// <returns>DTO стойки АСК для сохранения в базе данных.</returns>
@@ -129,7 +129,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     {
       var dto = device.Convert();
       dto.Number = deviceSettingsWindow.NumberDevice;
-      dto.ConnectionDetails = string.Empty;
+      dto.ConnectionDetails = BaseHandler<IChassisManager>.GetConnectionDetails(deviceSettingsWindow, device);
       return dto;
     }
   }

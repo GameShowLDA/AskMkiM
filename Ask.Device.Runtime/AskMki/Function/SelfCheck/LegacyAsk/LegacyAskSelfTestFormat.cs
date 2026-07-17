@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -43,16 +44,14 @@ internal static class LegacyAskSelfTestFormat
   /// </summary>
   public static async Task SetPintOutputAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     int pint,
     double volts,
     double amps,
     ushort positiveBus,
     ushort negativeBus)
   {
-    await SetPintBusesAsync(context, controller, pint, positiveBus, negativeBus);
-    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Voltage, ToPintVoltageWord(context.Profile, pint, volts), context.CancellationToken);
-    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Current, ToPintCurrentWord(context.Profile, pint, amps), context.CancellationToken);
+    await context.Devices.GetRequiredPint(pint).SetOutputAsync(controller, volts, amps, positiveBus, negativeBus, context.CancellationToken);
   }
 
   /// <summary>
@@ -60,26 +59,20 @@ internal static class LegacyAskSelfTestFormat
   /// </summary>
   public static async Task SetPintBusesAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     int pint,
     ushort positiveBus,
     ushort negativeBus)
   {
-    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.PositiveBus, ToPintBusWord(positiveBus), context.CancellationToken);
-    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.NegativeBus, ToPintBusWord(negativeBus), context.CancellationToken);
+    await context.Devices.GetRequiredPint(pint).SetBusesAsync(controller, positiveBus, negativeBus, context.CancellationToken);
   }
 
   /// <summary>
   /// Сбрасывает ПИНТ в малый режим и отключает его от шин.
   /// </summary>
-  public static async Task ResetPintAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, int pint)
+  public static async Task ResetPintAsync(LegacyAskSelfControlContext context, IAskMkiController controller, int pint)
   {
-    double voltageStep = PositiveOrDefault(context.Profile.HardwareConfig.GuiVoltStep.ElementAtOrDefault(pint - 3), 0.1);
-    double currentStep = PositiveOrDefault(context.Profile.HardwareConfig.GuiAmperStep.ElementAtOrDefault(pint - 3), pint == 3 ? 0.1 : 0.001);
-
-    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Voltage, ToPintVoltageWord(context.Profile, pint, voltageStep * 2.0), context.CancellationToken);
-    await controller.WriteSubRegisterAsync(GetPintRegister(pint), LegacyAskPintSubRegister.Current, ToPintCurrentWord(context.Profile, pint, currentStep * 2.0), context.CancellationToken);
-    await SetPintBusesAsync(context, controller, pint, 0, 0);
+    await context.Devices.GetRequiredPint(pint).ResetAsync(controller, context.CancellationToken);
   }
 
   /// <summary>
@@ -87,13 +80,12 @@ internal static class LegacyAskSelfTestFormat
   /// </summary>
   public static async Task SetAcpModeAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     ushort mode,
     ushort positiveBus,
     ushort negativeBus)
   {
-    await controller.WriteRegisterAsync(LegacyAskRegister.AcpMode, mode, context.CancellationToken);
-    await controller.WriteRegisterAsync(LegacyAskRegister.AcpGate, ToAcpGateWord(positiveBus, negativeBus), context.CancellationToken);
+    await context.Devices.Acp.SetModeAsync(controller, mode, positiveBus, negativeBus, context.CancellationToken);
   }
 
   /// <summary>
@@ -101,13 +93,81 @@ internal static class LegacyAskSelfTestFormat
   /// </summary>
   public static async Task<ushort> ReadAcpAsync(
     LegacyAskSelfControlContext context,
-    LegacyAskControllerProtocol controller,
+    IAskMkiController controller,
     ushort mode,
     ushort positiveBus,
     ushort negativeBus)
   {
-    await SetAcpModeAsync(context, controller, mode, positiveBus, negativeBus);
-    return await controller.ReadAdcAsync(context.CancellationToken);
+    return await context.Devices.Acp.ReadAsync(controller, mode, positiveBus, negativeBus, context.CancellationToken);
+  }
+
+  /// <summary>
+  /// Читает напряжение АЦП и переводит сырое слово контроллера в вольты.
+  /// </summary>
+  public static async Task<double> ReadAcpVoltageAsync(
+    LegacyAskSelfControlContext context,
+    IAskMkiController controller,
+    ushort mode,
+    ushort positiveBus,
+    ushort negativeBus,
+    double expected)
+  {
+    ushort raw = await ReadAcpAsync(context, controller, mode, positiveBus, negativeBus);
+    if (ExecutionConfig.GetIsIdleModeEnabled())
+    {
+      LogInformation($"АСК idle: эмуляция АЦП U={expected:0.####}.", isDeviceLog: true);
+      return expected;
+    }
+
+    if ((raw & 0x4000) != 0)
+    {
+      return double.PositiveInfinity;
+    }
+
+    double range = GetAcpVoltageRange(mode);
+    double value = (raw & 0x03FF) * range * 1.1 / 1000.0;
+    return (raw & 0x2000) != 0 ? value : -value;
+  }
+
+  /// <summary>
+  /// Читает сопротивление АЦП и переводит сырое слово контроллера в омы.
+  /// </summary>
+  public static async Task<double> ReadAcpResistanceAsync(
+    LegacyAskSelfControlContext context,
+    IAskMkiController controller,
+    ushort mode,
+    ushort positiveBus,
+    ushort negativeBus,
+    double expected)
+  {
+    ushort raw = await ReadAcpAsync(context, controller, mode, positiveBus, negativeBus);
+    if (ExecutionConfig.GetIsIdleModeEnabled())
+    {
+      LogInformation($"АСК idle: эмуляция АЦП R={expected:0.####}.", isDeviceLog: true);
+      return expected;
+    }
+
+    if ((raw & 0x5000) != 0)
+    {
+      return double.PositiveInfinity;
+    }
+
+    double range = GetAcpResistanceRange(mode);
+    return (raw & 0x03FF) * range * 1.1 / 1000.0;
+  }
+
+  /// <summary>
+  /// Выполняет аппаратную задержку только в боевом режиме.
+  /// </summary>
+  public static async Task DelayIfHardwareAsync(LegacyAskSelfControlContext context, int milliseconds, string reason)
+  {
+    if (milliseconds <= 0 || ExecutionConfig.GetIsIdleModeEnabled())
+    {
+      return;
+    }
+
+    LogInformation($"АСК задержка {reason}: {milliseconds} мс.", isDeviceLog: true);
+    await Task.Delay(milliseconds, context.CancellationToken);
   }
 
   /// <summary>
@@ -181,6 +241,21 @@ internal static class LegacyAskSelfTestFormat
   public static int GetPpuMaximumVoltage(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile)
   {
     return profile.HardwareConfig.TyPpu == 0 ? 0 : 625;
+  }
+
+  /// <summary>
+  /// Возвращает максимальное напряжение короткого теста ППУ с учетом напряжения сети.
+  /// </summary>
+  public static int GetPpuConfiguredMaximumVoltage(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile)
+  {
+    int maximum = GetPpuMaximumVoltage(profile);
+    if (maximum <= 0)
+    {
+      return 0;
+    }
+
+    int mains = profile.HardwareAux.U220 == 0 ? 220 : profile.HardwareAux.U220;
+    return (int)Math.Round(maximum * (mains - 5.0) / 220.0);
   }
 
   /// <summary>
@@ -353,5 +428,63 @@ internal static class LegacyAskSelfTestFormat
     yield return 119.8e6;
     yield return 273.8e6;
     yield return 908.58e6;
+  }
+
+  /// <summary>
+  /// Возвращает диапазоны напряжения ПКИ из таблицы legacy-конфигурации.
+  /// </summary>
+  public static IEnumerable<(int RangeNumber, double Voltage)> PkiVoltageRanges(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile)
+  {
+    for (int index = 0; index < profile.HardwareAux.PkiAVolt.Length; index++)
+    {
+      double voltage = profile.HardwareAux.PkiAVolt[index];
+      if (voltage > 0 && voltage <= profile.HardwareConfig.PkiUmax)
+      {
+        yield return (index + 1, voltage);
+      }
+    }
+  }
+
+  /// <summary>
+  /// Возвращает плюсовую шину ПИНТа по правилам старой MKI.
+  /// </summary>
+  public static ushort GetPintPositiveBus(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile, int pint)
+  {
+    return pint == 3 ? LegacyAskBus.A2 : LegacyAskBus.A1;
+  }
+
+  /// <summary>
+  /// Возвращает минусовую шину ПИНТа по правилам старой MKI.
+  /// </summary>
+  public static ushort GetPintNegativeBus(Core.Services.Config.LegacyMki.LegacyMkiHardwareProfile profile, int pint)
+  {
+    return pint == 3 ? LegacyAskBus.B2 : LegacyAskBus.B1;
+  }
+
+  /// <summary>
+  /// Возвращает диапазон напряжения АЦП для выбранного режима.
+  /// </summary>
+  private static double GetAcpVoltageRange(ushort mode)
+  {
+    return mode switch
+    {
+      LegacyAskAcpMode.Voltage1V => 1.0,
+      LegacyAskAcpMode.Voltage10V => 10.0,
+      _ => 100.0
+    };
+  }
+
+  /// <summary>
+  /// Возвращает диапазон сопротивления АЦП для выбранного режима.
+  /// </summary>
+  private static double GetAcpResistanceRange(ushort mode)
+  {
+    return mode switch
+    {
+      LegacyAskAcpMode.Resistance100Ohm => 100.0,
+      LegacyAskAcpMode.Resistance1KOhm => 1000.0,
+      LegacyAskAcpMode.Resistance10KOhm => 10000.0,
+      _ => 100000.0
+    };
   }
 }

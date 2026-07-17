@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Device.Chassi;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -31,6 +33,23 @@ namespace Ask.Engine.Tests.SelfControl
       }
 
       var meter = (await SelfCheckDeviceRuntime.GetFastMetersByNumberChassisAsync(managerShassi.Number, cancellationToken)).FirstOrDefault();
+      if (managerShassi is ManagerASKMKI)
+      {
+        var legacySelfTestManager = new SelfTestManager();
+
+        LogInformation($"Системный самоконтроль АСК: старт, стойка={managerShassi.Number}, мультиметр={(meter == null ? "не найден" : $"{meter.Name}({meter.NumberChassis}.{meter.Number})")}.", isDeviceLog: true);
+        foreach (var module in Enum.GetValues<LegacyAskSelfControlModule>())
+        {
+          cancellationToken.ThrowIfCancellationRequested();
+          var target = new LegacyAskSelfControlTarget(managerShassi.Number, managerShassi.Name ?? "Тестер АСК", module);
+          LogInformation($"Системный самоконтроль АСК: запуск модуля {module}.", isDeviceLog: true);
+          await legacySelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), module, _messageService, target, meter);
+        }
+
+        LogInformation($"Системный самоконтроль АСК: завершен, стойка={managerShassi.Number}.", isDeviceLog: true);
+        return;
+      }
+
       if (meter == null)
       {
         return;

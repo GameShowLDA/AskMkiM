@@ -66,12 +66,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ResetSettingsForDeviceModelChange();
 
         Type baseClass = GetBaseDeviceType(selectedType);
-        bool isAskChassis = selectedType == typeof(ManagerASKMKI);
-
-        ConnectionTypeContainer.Visibility = isAskChassis ? Visibility.Collapsed : Visibility.Visible;
-        ConnectionTypeIPItem.Visibility = !isAskChassis && baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
-        ConnectionTypeCOMItem.Visibility = !isAskChassis && baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
-        ConnectionTypeUSBItem.Visibility = !isAskChassis && baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeContainer.Visibility = Visibility.Visible;
+        ConnectionTypeIPItem.Visibility = baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeCOMItem.Visibility = baseClass == typeof(DeviceWithCOM) ? Visibility.Visible : Visibility.Collapsed;
+        ConnectionTypeUSBItem.Visibility = baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;

@@ -18,14 +18,14 @@ public static class LegacyAskSelfControlAvailability
 
     return module switch
     {
-      LegacyAskSelfControlModule.DigitalVoltmeter => hardware.DvV7 <= 8,
+      LegacyAskSelfControlModule.DigitalVoltmeter => hardware.DvV7 != 0 && hardware.DvV7 <= 8,
       LegacyAskSelfControlModule.Adc => hardware.DvAcp != 0,
       LegacyAskSelfControlModule.DeviceSwitching => IsAnyPintEnabled(hardware),
       LegacyAskSelfControlModule.Pints => IsAnyPintEnabled(hardware),
       LegacyAskSelfControlModule.Commutator => HasCommutatorRange(hardware),
       LegacyAskSelfControlModule.Ppu => hardware.TyPpu != 0,
       LegacyAskSelfControlModule.Pki => hardware.IsPki != 0,
-      LegacyAskSelfControlModule.Timer => IsPint4Enabled(hardware) && hardware.DivGatBk == 0,
+      LegacyAskSelfControlModule.Timer => hardware.AcpTmr != 0 && IsPint4Enabled(hardware) && hardware.DivGatBk == 0,
       _ => false
     };
   }

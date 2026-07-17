@@ -56,13 +56,40 @@ namespace Ask.Device.Runtime.Base.Multimeter.Measurements.Common
 
       await device.DeviceProtocol.QueryAsync(profile.SetMode);
       var answer = await device.DeviceProtocol.QueryAsync(profile.GetMode, timeout: profile.Timeout);
-      if (answer.Contains(profile.CheckMode))
+      if (IsModeAnswerMatched(answer, profile.CheckMode))
       {
         device.TypeMode = profile.TypeMode;
         return true;
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Проверяет ответ прибора о текущем режиме с учетом особенностей Agilent-совместимых USB-мультиметров.
+    /// </summary>
+    static private bool IsModeAnswerMatched(string answer, string expectedMode)
+    {
+      var normalizedAnswer = NormalizeModeAnswer(answer);
+      var normalizedExpected = NormalizeModeAnswer(expectedMode);
+
+      if (normalizedAnswer.Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase))
+      {
+        return true;
+      }
+
+      return normalizedAnswer.Length > 1
+        && normalizedAnswer[1..].Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Убирает служебные символы из ответа FUNC?, как это делалось в старой MKI для Rigol/Agilent USB.
+    /// </summary>
+    static private string NormalizeModeAnswer(string value)
+    {
+      return new string((value ?? string.Empty)
+        .Where(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '\r' && ch != '\n')
+        .ToArray());
     }
 
   }

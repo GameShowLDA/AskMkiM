@@ -17,6 +17,7 @@ public sealed class LegacyAskSelfControlContext
     LegacyMkiHardwareProfile profile,
     IUserInteractionService messageService,
     CancellationToken cancellationToken,
+    LegacyAskDeviceComposition devices,
     IMultimeter? multimeter = null)
   {
     Target = target;
@@ -24,6 +25,7 @@ public sealed class LegacyAskSelfControlContext
     MessageService = messageService;
     Reporter = new LegacyAskSelfControlReporter(messageService);
     CancellationToken = cancellationToken;
+    Devices = devices;
     Multimeter = multimeter;
   }
 
@@ -51,6 +53,11 @@ public sealed class LegacyAskSelfControlContext
   /// Возвращает токен отмены выполнения.
   /// </summary>
   public CancellationToken CancellationToken { get; }
+
+  /// <summary>
+  /// Возвращает runtime-устройства стойки АСК, используемые текущим самоконтролем.
+  /// </summary>
+  public LegacyAskDeviceComposition Devices { get; }
 
   /// <summary>
   /// Возвращает выбранный цифровой мультиметр для аппаратных измерений.

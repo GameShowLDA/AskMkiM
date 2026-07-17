@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -36,7 +37,7 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
     var stopwatch = Stopwatch.StartNew();
     ResetSummary();
 
-    using var controller = new LegacyAskControllerProtocol(LegacyAskControllerProtocol.CreateOptions(context.Profile, isIdleMode));
+    var controller = context.Devices.Controller;
     string title = GetTestName(context);
 
     await RunAdcZeroVoltageAsync(context, controller, title);
@@ -52,7 +53,7 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет проверку нуля АЦП при коротком замыкании входа.
   /// </summary>
-  private static async Task RunAdcZeroVoltageAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
+  private static async Task RunAdcZeroVoltageAsync(LegacyAskSelfControlContext context, IAskMkiController controller, string title)
   {
     await context.Reporter.BeginSubTestAsync(title, 1, "Измерение 0В (КЗ входа)");
     foreach (var range in new[]
@@ -65,8 +66,9 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
       ushort mode = range.RangeText.Contains("100") ? LegacyAskAcpMode.Voltage100V :
         range.RangeText.Contains("10") ? LegacyAskAcpMode.Voltage10V :
         LegacyAskAcpMode.Voltage1V;
-      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.B1, LegacyAskBus.B1);
-      await context.Reporter.TestStepAsync($"ДиапU={range.RangeText} U д.быть={range.ExpectedText}  Uизм={LegacyAskSelfTestFormat.Voltage(range.Value)}");
+      double measured = await LegacyAskSelfTestFormat.ReadAcpVoltageAsync(context, controller, mode, LegacyAskBus.B1, LegacyAskBus.B1, range.Value);
+      bool passed = Math.Abs(measured - range.Value) <= range.Tolerance;
+      await context.Reporter.TestStepAsync($"ДиапU={range.RangeText} U д.быть={range.ExpectedText}  Uизм={LegacyAskSelfTestFormat.Voltage(measured)}", passed);
     }
 
     await context.Reporter.EndSubTestAsync(title, 1, "Измерение 0В (КЗ входа)");
@@ -75,7 +77,7 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет проверку наличия напряжений источников тока АЦП.
   /// </summary>
-  private static async Task RunAdcCurrentSourcesAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
+  private static async Task RunAdcCurrentSourcesAsync(LegacyAskSelfControlContext context, IAskMkiController controller, string title)
   {
     await context.Reporter.BeginSubTestAsync(title, 2, "Наличие U источников тока АЦП");
     foreach (var testCase in new[]
@@ -85,8 +87,9 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
     })
     {
       ushort mode = testCase.RangeText.Contains("4") ? LegacyAskAcpMode.CurrentSource4V : LegacyAskAcpMode.CurrentSource11V;
-      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
-      await context.Reporter.TestStepAsync($"Диап={testCase.RangeText} U д.быть={testCase.ExpectedText}  Uизм={LegacyAskSelfTestFormat.Voltage(testCase.Value)}");
+      double measured = await LegacyAskSelfTestFormat.ReadAcpVoltageAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1, testCase.Value);
+      bool passed = Math.Abs(measured - testCase.Value) <= testCase.Tolerance;
+      await context.Reporter.TestStepAsync($"Диап={testCase.RangeText} U д.быть={testCase.ExpectedText}  Uизм={LegacyAskSelfTestFormat.Voltage(measured)}", passed);
     }
 
     await context.Reporter.EndSubTestAsync(title, 2, "Наличие U источников тока АЦП");
@@ -95,7 +98,7 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет проверку измерения напряжения ПИНТ4 через АЦП.
   /// </summary>
-  private static async Task RunAdcPint4VoltageAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
+  private static async Task RunAdcPint4VoltageAsync(LegacyAskSelfControlContext context, IAskMkiController controller, string title)
   {
     await context.Reporter.BeginSubTestAsync(title, 3, "Измерение напряжения ПИНТ4");
     foreach (var testCase in new[]
@@ -109,11 +112,17 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
       ushort mode = testCase.RangeText.Contains("100") ? LegacyAskAcpMode.Voltage100V :
         testCase.RangeText.Contains("10") ? LegacyAskAcpMode.Voltage10V :
         LegacyAskAcpMode.Voltage1V;
-      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, 4, testCase.Value, 0.01, LegacyAskBus.A1, LegacyAskBus.B1);
-      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
-      string measured = testCase.MustBeOverload ? $">{testCase.RangeText}" : LegacyAskSelfTestFormat.Voltage(testCase.Value);
+      ushort positiveBus = testCase.Value >= 2.0 ? LegacyAskBus.A2 : LegacyAskBus.A1;
+      ushort negativeBus = testCase.Value >= 2.0 ? LegacyAskBus.B2 : LegacyAskBus.B1;
+      await LegacyAskSelfTestFormat.SetPintOutputAsync(context, controller, 4, testCase.Value, 0.01, positiveBus, negativeBus);
+      await LegacyAskSelfTestFormat.DelayIfHardwareAsync(context, context.Profile.Timing.AcpBef, "перед измерением АЦП");
+      double measuredValue = await LegacyAskSelfTestFormat.ReadAcpVoltageAsync(context, controller, mode, positiveBus, negativeBus, testCase.MustBeOverload ? double.PositiveInfinity : testCase.Value);
+      bool passed = testCase.MustBeOverload
+        ? double.IsPositiveInfinity(measuredValue) || measuredValue > LegacyAskSelfTestFormat.PositiveOrDefault(testCase.Value, 1.0)
+        : Math.Abs(measuredValue - testCase.Value) <= testCase.Tolerance;
+      string measured = double.IsPositiveInfinity(measuredValue) ? $">{testCase.RangeText}" : LegacyAskSelfTestFormat.Voltage(measuredValue);
       string expectation = testCase.MustBeOverload ? "Д.быть перегр." : $"д.быть={testCase.ExpectedText}";
-      await context.Reporter.TestStepAsync($"Uпинт4(A1+ B1-) {expectation}  Диап={testCase.RangeText}  Uизм={measured}");
+      await context.Reporter.TestStepAsync($"Uпинт4({FormatBus(positiveBus)}+ {FormatBus(negativeBus)}-) {expectation}  Диап={testCase.RangeText}  Uизм={measured}", passed);
     }
 
     await LegacyAskSelfTestFormat.ResetPintAsync(context, controller, 4);
@@ -123,7 +132,7 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
   /// <summary>
   /// Выполняет проверку измерения сопротивления КЗШ через АЦП.
   /// </summary>
-  private static async Task RunAdcShortCircuitResistanceAsync(LegacyAskSelfControlContext context, LegacyAskControllerProtocol controller, string title)
+  private static async Task RunAdcShortCircuitResistanceAsync(LegacyAskSelfControlContext context, IAskMkiController controller, string title)
   {
     await context.Reporter.BeginSubTestAsync(title, 4, "Измерение сопротивления КЗШ");
     foreach (var testCase in new[]
@@ -138,18 +147,32 @@ public sealed class LegacyAskAdcSelfControlTest : LegacyAskModuleTestBase
         testCase.ToleranceOhm >= 500 ? LegacyAskAcpMode.Resistance10KOhm :
         testCase.ToleranceOhm >= 50 ? LegacyAskAcpMode.Resistance1KOhm :
         LegacyAskAcpMode.Resistance100Ohm;
-      await LegacyAskSelfTestFormat.ReadAcpAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1);
-      string measured = testCase.MustBeOverload ? $">{testCase.RangeText}" : LegacyAskSelfTestFormat.Resistance(testCase.ValueOhm);
+      double measuredValue = await LegacyAskSelfTestFormat.ReadAcpResistanceAsync(context, controller, mode, LegacyAskBus.A1, LegacyAskBus.B1, testCase.MustBeOverload ? double.PositiveInfinity : testCase.ValueOhm);
+      bool passed = testCase.MustBeOverload
+        ? double.IsPositiveInfinity(measuredValue) || measuredValue > testCase.ValueOhm
+        : Math.Abs(measuredValue - testCase.ValueOhm) <= testCase.ToleranceOhm;
+      string measured = double.IsPositiveInfinity(measuredValue) ? $">{testCase.RangeText}" : LegacyAskSelfTestFormat.Resistance(measuredValue);
       string expected = testCase.MustBeOverload
         ? $"{LegacyAskSelfTestFormat.Resistance(testCase.ValueOhm)} Д.быть перегр."
         : $"{LegacyAskSelfTestFormat.Resistance(testCase.ValueOhm)}+-{LegacyAskSelfTestFormat.Resistance(testCase.ToleranceOhm)}";
-      await context.Reporter.TestStepAsync($"Диап={testCase.RangeText} R д.быть={expected}  Rизм={measured}");
+      await context.Reporter.TestStepAsync($"Диап={testCase.RangeText} R д.быть={expected}  Rизм={measured}", passed);
     }
 
     await context.Reporter.EndSubTestAsync(title, 4, "Измерение сопротивления КЗШ");
   }
 
   /// <summary>
-  /// Выполняет чтение АЦП для боевого режима или получает эмулированный код в холостом режиме.
+  /// Возвращает текстовое имя шины для строки протокола.
   /// </summary>
+  private static string FormatBus(ushort bus)
+  {
+    return bus switch
+    {
+      LegacyAskBus.A1 => "A1",
+      LegacyAskBus.B1 => "B1",
+      LegacyAskBus.A2 => "A2",
+      LegacyAskBus.B2 => "B2",
+      _ => "NO"
+    };
+  }
 }

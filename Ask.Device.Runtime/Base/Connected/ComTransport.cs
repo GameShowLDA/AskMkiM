@@ -211,8 +211,38 @@ namespace Ask.Device.Runtime.Base.Connected
     /// <returns><c>true</c>, если ответ соответствует профилю подключения.</returns>
     private bool IsExpectedInitializeAnswer(string answer)
     {
-      return !string.IsNullOrWhiteSpace(answer)
-        && answer.Contains(_device.ConnectedProfile.CheckMode);
+      if (string.IsNullOrWhiteSpace(answer))
+      {
+        return false;
+      }
+
+      string checkMode = _device.ConnectedProfile.CheckMode;
+      if (string.IsNullOrWhiteSpace(checkMode))
+      {
+        return true;
+      }
+
+      string normalizedAnswer = NormalizeInitializeAnswer(answer);
+      string normalizedCheckMode = NormalizeInitializeAnswer(checkMode);
+      return normalizedAnswer.Contains(normalizedCheckMode, StringComparison.OrdinalIgnoreCase)
+        || normalizedAnswer.Length > 1
+        && normalizedAnswer[1..].Contains(normalizedCheckMode, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Нормализует ответ устройства для устойчивой проверки идентификации.
+    /// </summary>
+    /// <param name="answer">Исходный ответ устройства.</param>
+    /// <returns>Ответ без кавычек, пробелов и переводов строк.</returns>
+    private static string NormalizeInitializeAnswer(string answer)
+    {
+      return answer
+        .Replace("\r", string.Empty)
+        .Replace("\n", string.Empty)
+        .Replace("\"", string.Empty)
+        .Replace("'", string.Empty)
+        .Replace(" ", string.Empty)
+        .Trim();
     }
 
     /// <summary>

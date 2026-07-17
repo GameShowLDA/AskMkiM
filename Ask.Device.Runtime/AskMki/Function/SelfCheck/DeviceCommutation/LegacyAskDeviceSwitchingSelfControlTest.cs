@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.Diagnostics;
 using System.Globalization;
@@ -36,7 +37,7 @@ public sealed class LegacyAskDeviceSwitchingSelfControlTest : LegacyAskModuleTes
     var stopwatch = Stopwatch.StartNew();
     ResetSummary();
 
-    using var controller = new LegacyAskControllerProtocol(LegacyAskControllerProtocol.CreateOptions(context.Profile, isIdleMode));
+    var controller = context.Devices.Controller;
     string title = GetTestName(context);
     int number = 1;
 
