@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.DataBase;
+using Ask.Core.Services.Validation.Devices;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -17,6 +18,7 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   /// </summary>
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
+    private readonly IRelaySwitchModuleConfigurationValidator _configurationValidator;
     public Action? CloseActionOverride { get; set; }
     private RelaySwitchModuleDto? _editingDto;
 
@@ -34,7 +36,13 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControlWindow"/>.
     /// </summary>
     public ModuleRelayControlWindow()
+      : this(new RelaySwitchModuleConfigurationValidator())
     {
+    }
+
+    public ModuleRelayControlWindow(IRelaySwitchModuleConfigurationValidator configurationValidator)
+    {
+      _configurationValidator = configurationValidator ?? throw new ArgumentNullException(nameof(configurationValidator));
       InitializeComponent();
     }
 
@@ -87,7 +95,15 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
 
         if (deviceEntity != null)
         {
-          deviceEntity.PointCount = (baseDevice as IRelaySwitchModule).PointCount;
+          int pointCount = deviceSettingsWindow.RelayPointCount;
+          if (!_configurationValidator.TryValidatePointCount(pointCount, out string validationError))
+          {
+            Message.MessageBoxCustom.Show(validationError, "Ошибка настройки", image: MessageBoxImage.Error);
+            return;
+          }
+
+          deviceEntity.PointCount = pointCount;
+          deviceEntity.Name = $"Модуль МКР-{pointCount}";
           deviceEntity.BusType = (SwitchingBusNew)deviceSettingsWindow.BusTypeSelectionBox.SelectedItem;
           deviceEntity.SwitchResistance = deviceSettingsWindow.GetResistance();
           deviceEntity.SwitchCapacitance = deviceSettingsWindow.GetCapacitance();

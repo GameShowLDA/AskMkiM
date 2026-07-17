@@ -14,7 +14,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
   /// <summary>
   /// Управляет точками (реле) модуля коммутации реле (МКР).
   /// </summary>
-  public class PointManager : IPointManager
+  public class PointManager : IPointManager, IPointCountReconfigurable
   {
     private readonly PointConnectionStateStore connectionState;
 
@@ -39,6 +39,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     private void ConnectableManager_IsReset()
     {
       connectionState.Reset(_moduleRelayControl.PointCount);
+    }
+
+    /// <inheritdoc />
+    public void ReconfigurePointCount(int pointCount)
+    {
+      connectionState.Reset(pointCount);
     }
 
     /// <inheritdoc />

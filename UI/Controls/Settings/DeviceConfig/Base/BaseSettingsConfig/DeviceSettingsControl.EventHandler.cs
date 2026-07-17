@@ -21,6 +21,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
   public partial class DeviceSettingsControl
   {
     private bool _internalChange;
+    private bool _synchronizingDeviceNumberAndIp;
 
     /// <summary>
     /// Обрабатывает изменение выбранной модели шасси.
@@ -80,12 +81,16 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           BusTypeContainer.Visibility = Visibility.Visible;
           ResistanceContainer.Visibility = Visibility.Visible;
           CapacitanceContainer.Visibility = Visibility.Visible;
+          var relayModule = (IRelaySwitchModule)Activator.CreateInstance(selectedType)!;
+          RelayPointCountContainer.Visibility = Visibility.Visible;
+          SetRelayPointCount(relayModule.PointCount);
         }
         else
         {
           BusTypeContainer.Visibility = Visibility.Collapsed;
           ResistanceContainer.Visibility = Visibility.Collapsed;
           CapacitanceContainer.Visibility = Visibility.Collapsed;
+          RelayPointCountContainer.Visibility = Visibility.Collapsed;
         }
 
         if (typeof(IMultimeter).IsAssignableFrom(selectedType))
@@ -129,6 +134,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       ResistanceTextBox.Text = string.Empty;
       CapacitanceTextBox.Text = string.Empty;
+      RelayPointCountTextBox.Text = string.Empty;
 
       _usbConnectionDetails = string.Empty;
       USBStatusData.Text = "Ожидание поиска...";
@@ -281,7 +287,34 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="e">Аргументы события изменения текста.</param>
     private void NumberDevice_TextChanged(object sender, TextChangedEventArgs e)
     {
-      return;
+      SynchronizeDeviceNumberAndIp(DeviceNumberTextBox, IpPart4);
+    }
+
+    private void IpPart4_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      SynchronizeDeviceNumberAndIp(IpPart4, DeviceNumberTextBox);
+    }
+
+    private void SynchronizeDeviceNumberAndIp(TextBox source, TextBox target)
+    {
+      if (_synchronizingDeviceNumberAndIp ||
+          GetBaseDeviceType() != typeof(DeviceWithIP) ||
+          IsSelectedChassisManager() ||
+          string.Equals(source.Text, target.Text, StringComparison.Ordinal))
+      {
+        return;
+      }
+
+      _synchronizingDeviceNumberAndIp = true;
+      try
+      {
+        target.Text = source.Text;
+        target.CaretIndex = target.Text.Length;
+      }
+      finally
+      {
+        _synchronizingDeviceNumberAndIp = false;
+      }
     }
 
     /// <summary>

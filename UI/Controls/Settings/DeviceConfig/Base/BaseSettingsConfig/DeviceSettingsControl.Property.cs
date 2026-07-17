@@ -103,6 +103,14 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// </summary>
     public int NumberDevice => int.TryParse(DeviceNumberTextBox.Text, out int number) ? number : -1;
 
+    public int RelayPointCount =>
+      int.TryParse(RelayPointCountTextBox.Text, out int pointCount) ? pointCount : -1;
+
+    public void SetRelayPointCount(int pointCount)
+    {
+      RelayPointCountTextBox.Text = pointCount.ToString(CultureInfo.InvariantCulture);
+    }
+
     public double GetResistance()
     {
       if (ResistanceTextBox == null)

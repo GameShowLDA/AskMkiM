@@ -7,6 +7,7 @@ using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
+using Ask.Core.Services.App;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -169,7 +170,7 @@ namespace UI.Controls.Settings.DeviceConfig
         return;
       }
 
-      ModuleRelayControlWindow fastMeterWindow = new ModuleRelayControlWindow();
+      ModuleRelayControlWindow fastMeterWindow = ServiceLocator.GetRequired<ModuleRelayControlWindow>();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
@@ -261,7 +262,7 @@ namespace UI.Controls.Settings.DeviceConfig
         return;
       }
 
-      ModuleRelayControlWindow window = new ModuleRelayControlWindow();
+      ModuleRelayControlWindow window = ServiceLocator.GetRequired<ModuleRelayControlWindow>();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
