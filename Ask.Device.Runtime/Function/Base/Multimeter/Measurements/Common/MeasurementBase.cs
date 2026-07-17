@@ -87,7 +87,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, responseDelay: 1500, timeout: profile.Timeout);
+      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, timeout: profile.Timeout);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       response = response.Trim().Replace("+", "");

@@ -8,8 +8,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
   public static class SelfTestHelper
   {
     private const double RelativeErrorMarker = -1;
-    private const string SuccessStatus = "НОРМА";
-    private const string ErrorStatus = "БРАК";
 
     /// <summary>
     /// Метод для вывода сообщения пользователю о результатах измерения.
@@ -32,7 +30,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
           header: $"Тест {param}{unit} {FormatFallibility(idealResult, percentageError)}",
-          message: $"{FormatResult(result)} [{FormatStatus(status)}]",
+          message: $"{FormatResult(result)}",
           type: resultType)
         {
           IndentLevel = 1,
@@ -68,7 +66,5 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         ? $"(± {percentageError}%)"
         : $"({idealResult} ± {percentageError}%)";
     }
-
-    private static string FormatStatus(bool status) => status ? SuccessStatus : ErrorStatus;
   }
 }

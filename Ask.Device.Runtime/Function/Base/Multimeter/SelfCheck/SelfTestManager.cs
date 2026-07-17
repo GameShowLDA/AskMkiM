@@ -383,6 +383,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
 
         var tolerance = CapacityTolerance(check.IdealResult);
+        await meter.CapacitanceManager.SetCapacitanceRangeAsync(check.IdealResult, userMessageService);
+
         var result = await MeasureAverageCapacitanceAsync(cancellationToken, meter, check.IdealResult, tolerance, userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -426,7 +428,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         attempts++;
 
         var result = await meter.CapacitanceManager.MeasureCapacitanceAsync(
-          idealResult,
+          0,
           idealResult - tolerance,
           idealResult + tolerance,
           userMessageService: userMessageService);

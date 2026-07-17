@@ -128,6 +128,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       var rangeText = range <= 0
         ? "Авто"
         : $"{effectiveRange.ToString("G", CultureInfo.InvariantCulture)} {profile.Unit.GetUnit()}";
+      var rangeKey = BuildRangeKey(device, profile.TypeMode);
+
+      if (SelectedRanges.TryGetValue(rangeKey, out var selectedRange)
+        && selectedRange.Equals(effectiveRange))
+      {
+        return true;
+      }
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -160,7 +167,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException($"Ошибка установки диапазона \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}).");
       }
 
-      SelectedRanges[BuildRangeKey(device, profile.TypeMode)] = effectiveRange;
+      SelectedRanges[rangeKey] = effectiveRange;
       return true;
     }
 
