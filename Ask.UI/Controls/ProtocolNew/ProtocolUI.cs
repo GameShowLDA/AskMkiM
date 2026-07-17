@@ -1,35 +1,37 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Errors;
+using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
-using System.Globalization;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView, IProtocolErrorListView
   {
     #region Поля.
 
     /// <summary>
-    /// Последнее отображенное сообщение в протоколе.
+    /// Сервис подготовки и вывода одной записи протокола.
     /// </summary>
-    private ShowMessageModel LastModelMeassage;
+    private ProtocolEntryOutputService _entryOutputService = null!;
+
+    /// <summary>
+    /// Контроллер паузы и пошагового выполнения после отображения записи.
+    /// </summary>
+    private ProtocolPostOutputController _postOutputController = null!;
 
     /// <summary>
     /// Возвращает текущий статус пошагового режима.
@@ -57,9 +59,15 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public ErrorManager Errors;
 
-    private string? _lastSavedProtocolPath;
+    /// <summary>
+    /// Хранилище состояния и файлов текущей пары протоколов.
+    /// </summary>
+    private ProtocolStorageService _protocolStorage = null!;
 
-    private string _inspectionProtocolText = string.Empty;
+    /// <summary>
+    /// Контроллер встроенной и внешней областей итогового протокола.
+    /// </summary>
+    private InspectionProtocolAreaController _inspectionProtocolAreaController = null!;
 
     /// <summary>
     /// Внешний владелец представления итогового протокола.
@@ -67,7 +75,10 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public IInspectionProtocolHost? InspectionProtocolHost { get; set; }
 
-    private ActionSettings _settings;
+    /// <summary>
+    /// Владелец настроек текущего режима выполнения.
+    /// </summary>
+    private readonly ExecutionModeSettings _modeSettings = new();
 
     #endregion
 
@@ -84,22 +95,8 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="preActionDelegate">Делегат предварительных действий перед запуском (необязательно).</param>
     public void SetSettings(ActionSettings actionSettings)
     {
-      Errors = new ErrorManager(ErrorListBoxVertical);
-      try
-      {
-        _settings = actionSettings;
-        _settings.Name = header.Text;
-
-        if (actionSettings.ReturnDelegate != null)
-        {
-          _settings.IsRepeatEnabled = true;
-        }
-      }
-      catch (Exception ex)
-      {
-        LogException("Ошибка загрузки элемента", ex);
-        throw;
-      }
+      Errors = new ErrorManager(this);
+      _modeSettings.Configure(actionSettings, header.Text);
     }
 
     public void AddError(string error)
@@ -110,7 +107,7 @@ namespace Ask.UI.Controls.ProtocolNew
     public void ClearErrors()
     {
       ActionExecutor.ClearErrors();
-      _settings?.ExecutionErrors.Clear();
+      _modeSettings.ClearExecutionErrors();
     }
 
     /// <summary>
@@ -140,26 +137,26 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Прерывает выполнение текущего процесса.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию прерывания выполнения.</returns>
-    public async Task AbortExecution() => await ActionExecutor.StopAsync(_settings, _userActionTcs);
+    public async Task AbortExecution() => await ActionExecutor.StopAsync(_modeSettings.Current, _userActionTcs);
 
     /// <summary>
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync() => await ActionExecutor.StartAsync(_settings);
+    public async Task StartAsync() => await ActionExecutor.StartAsync(_modeSettings.Current);
 
     /// <summary>
     /// Завершение текущей выполняемой задачи.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    private async Task StopAsync() => await ActionExecutor.StopAsync(_settings, _userActionTcs);
+    private async Task StopAsync() => await ActionExecutor.StopAsync(_modeSettings.Current, _userActionTcs);
 
     /// <summary>
     /// Выполняет завершающие действия после завершения процесса.
     /// </summary>
     /// <param name="stopDelegate">Делегат завершения процесса (необязательно).</param>
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
-    public async Task FinalizeAsync() => await ActionExecutor.FinalizeAsync(_settings);
+    public async Task FinalizeAsync() => await ActionExecutor.FinalizeAsync(_modeSettings.Current);
 
     #endregion
 
@@ -183,7 +180,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <summary>
     /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
     /// </summary>
-    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_settings);
+    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_modeSettings.Current);
 
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
@@ -221,104 +218,27 @@ namespace Ask.UI.Controls.ProtocolNew
       [CallerLineNumber] int callerLine = 0)
     {
       await CheckBlockStart(IsBlockStart);
+      var wasDisplayed = await _entryOutputService.WriteAsync(
+        showMessageModel,
+        LastMessage,
+        ignoreOutputValidation,
+        _modeSettings.AccumulateErrorMessages,
+        AddError,
+        callerName,
+        callerFile,
+        callerLine);
 
-      if (ProtocolConfig.GetTimeStart() && showMessageModel.Status != MessageType.Info && showMessageModel.Status != MessageType.Command)
+      if (!wasDisplayed)
       {
-        showMessageModel.Time = SystemStateManager._stopwatch.Elapsed.ToString(@"mm\:ss\.fff", CultureInfo.InvariantCulture);
+        return;
       }
 
-      if (AdminConfig.GetDebugRights())
-      {
-        if (string.IsNullOrEmpty(showMessageModel.Debug))
-        {
-          showMessageModel.Debug = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
-        }
-        else
-        {
-          showMessageModel.Debug += $"|| {Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
-        }
-      }
-
-      await ShouldShowDetailedProtocol(showMessageModel);
-
-      if (_settings?.AccumulateErrorMessages == true && showMessageModel.Status == MessageType.Error)
-      {
-        var error = showMessageModel.ExecutionErrorMessage ?? showMessageModel.ToString();
-        if (!string.IsNullOrWhiteSpace(error))
-        {
-          AddError(error);
-        }
-      }
-
-      await CheckStatus(showMessageModel);
-
-      if (!ignoreOutputValidation)
-      {
-        if (string.IsNullOrEmpty(showMessageModel.Message) &&
-            showMessageModel.Status != MessageType.Command &&
-            (!ProtocolConfig.GetHeaderInfo() || !ignoreOutputValidation))
-        {
-          return;
-        }
-      }
-
-      await protocolTextBox.AppendLineAsync(showMessageModel, LastMessage);
       LastMessage = false;
-
-      if (ActionExecutor.IsPaused)
-      {
-        await ActionExecutor.WaitWhilePausedAsync(GetCancellationToken(), this);
-      }
-
-      if (!skipPause)
-      {
-        await CheckPause(showMessageModel.Status);
-      }
-
-      if (StepControlManager.StepMode && !SkipStepModeCheck)
-      {
-        if (ShouldWaitStepKey(showMessageModel, IsBlockStart))
-        {
-          ShowButtonsOnPause(repeatVisible: false);
-          await KeyboardManager.WaitForNextStepKeyAsync(GetCancellationToken());
-
-          bool showStepButtons = StepControlManager.IsStepInto && !StepControlManager.StepOverUntilNextControlCommand;
-          ShowOnlyStopAndFinishButtons(showStepButtons);
-        }
-      }
-
-      await Task.Delay(1);
-    }
-
-    private static bool ShouldWaitStepKey(ShowMessageModel showMessageModel, bool isBlockStart)
-    {
-      if (StepControlManager.IsStepInto)
-      {
-        return true;
-      }
-
-      if (!StepControlManager.StepOverUntilNextControlCommand)
-      {
-        return false;
-      }
-
-      if (!IsControlProgramCommandStart(showMessageModel, isBlockStart))
-      {
-        return false;
-      }
-
-      StepControlManager.CompleteStepOverUntilNextControlCommand();
-      return true;
-    }
-
-    private static bool IsControlProgramCommandStart(ShowMessageModel showMessageModel, bool isBlockStart)
-    {
-      if (!isBlockStart || showMessageModel.Status != MessageType.Command)
-      {
-        return false;
-      }
-
-      return showMessageModel.IsControlProgramCommandHeader;
+      await _postOutputController.ProcessAsync(
+        showMessageModel,
+        IsBlockStart,
+        SkipStepModeCheck,
+        skipPause);
     }
 
     /// <summary>
@@ -370,79 +290,13 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Проверяет статус сообщения и добавляет текстовую приставку и цвет, если статус не является информационным.
-    /// </summary>
-    /// <param name="showMessageModel">Модель отображаемого сообщения, передаётся по ссылке.</param>
-    private async Task CheckStatus(ShowMessageModel showMessageModel)
-    {
-      if (showMessageModel.Status != MessageType.Info)
-      {
-        if (string.IsNullOrEmpty(showMessageModel.Message))
-        {
-          showMessageModel.Message += showMessageModel.GetQualityPrefix();
-        }
-        else
-        {
-          var prefix = showMessageModel.GetQualityPrefix();
-          if (!showMessageModel.Message.Contains(prefix))
-            showMessageModel.Message += " " + prefix;
-        }
-        showMessageModel.MessageColor = showMessageModel.GetColorMessage();
-      }
-
-      await CheckSyntaxHighlighting(showMessageModel);
-    }
-
-    /// <summary>
-    /// Если статус сообщения — ошибка и включена остановка при ошибке, выполнение ставится на паузу.
-    /// </summary>
-    /// <param name="Status">Тип сообщения (ошибка, информация, успех).</param>
-    private async Task CheckPause(ShowMessageModel.MessageType? Status)
-    {
-      if (Status == MessageType.Error && await ExecutionConfig.GetIsStopOnErrorEnabled())
-      {
-        await PauseAsync();
-      }
-    }
-
-    /// <summary>
-    /// Проверяет, нужно ли отображать детализированный протокол.
-    /// Если не нужно, удаляет последнее сообщение, если оно допускает удаление и не содержит ошибки выполнения.
-    /// </summary>
-    /// <param name="showMessageModel">Модель текущего сообщения, которое потенциально будет сохранено как последнее.</param>
-    private async Task ShouldShowDetailedProtocol(ShowMessageModel showMessageModel)
-    {
-      if (!ProtocolConfig.GetShowDetailedProtocol())
-      {
-        if (LastModelMeassage != null && LastModelMeassage.CanBeDeleted && !LastModelMeassage.ExecutionError)
-        {
-          await protocolTextBox.RemoveLastLinesAsync();
-        }
-
-        LastModelMeassage = showMessageModel;
-      }
-    }
-
-    private async Task CheckSyntaxHighlighting(ShowMessageModel showMessageModel)
-    {
-      if (!UserInterfaceConfig.GetSyntaxHighlighting())
-      {
-        showMessageModel.HeaderColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
-        showMessageModel.MessageColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
-        showMessageModel.TimeColor = (Color)Application.Current.Resources["tests.protocol.message.header.foreground"];
-        showMessageModel.HeaderBackgroundColor = null;
-        return;
-      }
-    }
-
-    /// <summary>
     /// Полностью очищает протокол и сбрасывает последнее сообщение.
     /// </summary>
     /// <returns>Возвращает признак успешного завершения операции.</returns>
     public async Task<bool> ClearAllMessagesAsync()
     {
       await protocolTextBox.ClearAsync();
-      LastModelMeassage = null;
+      _entryOutputService.Reset();
 
       if (ActionExecutor.IsPaused)
       {
@@ -452,6 +306,27 @@ namespace Ask.UI.Controls.ProtocolNew
       Errors?.ErrorClear();
       return ActionExecutor.StepMode;
     }
+
+    /// <inheritdoc />
+    Task IProtocolEntrySink.AppendLineAsync(ShowMessageModel message, bool isLastMessage) =>
+      protocolTextBox.AppendLineAsync(message, isLastMessage);
+
+    /// <inheritdoc />
+    Task IProtocolEntrySink.RemoveLastLinesAsync() => protocolTextBox.RemoveLastLinesAsync();
+
+    /// <inheritdoc />
+    bool IProtocolPostOutputContext.IsPaused => ActionExecutor.IsPaused;
+
+    /// <inheritdoc />
+    Task IProtocolPostOutputContext.WaitWhilePausedAsync(CancellationToken cancellationToken) =>
+      ActionExecutor.WaitWhilePausedAsync(cancellationToken, this);
+
+    /// <inheritdoc />
+    void IProtocolPostOutputContext.ShowPauseButtons() => ShowButtonsOnPause(repeatVisible: false);
+
+    /// <inheritdoc />
+    void IProtocolPostOutputContext.ShowRunningButtons(bool showStepButtons) =>
+      ShowOnlyStopAndFinishButtons(showStepButtons);
 
     /// <summary>
     /// Асинхронно удаляет блок, содержащий указанную строку, из RichTextBox.
@@ -465,7 +340,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public async Task SaveProtocolAsync(string name)
     {
-      _lastSavedProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(name, protocolTextBox.GetMessagesSnapshot());
+      await _protocolStorage.SaveExecutionProtocolAsync(name, protocolTextBox.GetMessagesSnapshot());
     }
 
     /// <summary>
@@ -473,12 +348,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ClearInspectionProtocol()
     {
-      _inspectionProtocolText = string.Empty;
-      inspectionProtocolTextBox.Text = string.Empty;
-      InspectionProtocolPanel.Visibility = Visibility.Collapsed;
-      InspectionProtocolSplitter.Visibility = Visibility.Collapsed;
-      InspectionProtocolColumn.Width = new GridLength(0);
-      InspectionProtocolHost?.ClearInspectionProtocol();
+      _inspectionProtocolAreaController.Clear(InspectionProtocolHost);
     }
 
     /// <summary>
@@ -486,18 +356,25 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
-      _inspectionProtocolText = protocolText ?? string.Empty;
+      _inspectionProtocolAreaController.Show(protocolText, InspectionProtocolHost);
+    }
 
-      if (InspectionProtocolHost != null)
-      {
-        InspectionProtocolHost.ShowInspectionProtocol(_inspectionProtocolText);
-        return;
-      }
+    /// <inheritdoc />
+    string IInspectionProtocolAreaView.ProtocolText
+    {
+      get => inspectionProtocolTextBox.Text;
+      set => inspectionProtocolTextBox.Text = value;
+    }
 
-      inspectionProtocolTextBox.Text = _inspectionProtocolText;
-      InspectionProtocolColumn.Width = new GridLength(1, GridUnitType.Star);
-      InspectionProtocolSplitter.Visibility = Visibility.Visible;
-      InspectionProtocolPanel.Visibility = Visibility.Visible;
+    /// <inheritdoc />
+    void IInspectionProtocolAreaView.SetAreaVisible(bool isVisible)
+    {
+      var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+      InspectionProtocolColumn.Width = isVisible
+        ? new GridLength(1, GridUnitType.Star)
+        : new GridLength(0);
+      InspectionProtocolSplitter.Visibility = visibility;
+      InspectionProtocolPanel.Visibility = visibility;
     }
 
     /// <summary>
@@ -505,15 +382,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public async Task SaveInspectionProtocolAsync(string name)
     {
-      if (string.IsNullOrWhiteSpace(_inspectionProtocolText))
-      {
-        return;
-      }
-
-      await ExecutionProtocolHistoryService.SaveInspectionAsync(
-        name,
-        _inspectionProtocolText,
-        _lastSavedProtocolPath);
+      await _protocolStorage.SaveInspectionProtocolAsync(name);
     }
 
     #endregion
@@ -575,6 +444,12 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       Errors.AddError(errorItem);
     }
+
+    /// <inheritdoc />
+    void IProtocolErrorListView.AddError(ErrorItem errorItem) => ErrorListBoxVertical.AddError(errorItem);
+
+    /// <inheritdoc />
+    void IProtocolErrorListView.ClearErrors() => ErrorListBoxVertical.ClearAll();
 
     public IInputFieldAccessor? GetInputFieldAccessor()
     {

@@ -18,10 +18,11 @@ namespace TestConsole.GPT
         Console.WriteLine("3. Проверка скорости изменений параметров");
         Console.WriteLine("4. Тест завершения измерения");
         Console.WriteLine("5. Управление землей ACW/DCW");
+        Console.WriteLine("6. Автопоиск и управление GPT79904 по COM");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 5)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 6)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -47,6 +48,10 @@ namespace TestConsole.GPT
 
           case 5:
             await ConfigureGroundModeAsync();
+            break;
+
+          case 6:
+            await GPTAutoDiscoveryTest.RunAsync();
             break;
 
           case 0:
