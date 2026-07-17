@@ -1,4 +1,5 @@
 using Ask.UI.Services.Notifications;
+using Ask.Core.Services.FilesUtility;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -445,7 +446,7 @@ namespace UI.Controls.TextEditorControl
         return;
 
       string sourceText = textEditor.Text ?? string.Empty;
-      string formattedText = NormalizeProgramWhitespace(sourceText);
+      string formattedText = FileFormatter.NormalizeProgramWhitespace(sourceText);
 
       if (string.Equals(sourceText, formattedText, StringComparison.Ordinal))
         return;

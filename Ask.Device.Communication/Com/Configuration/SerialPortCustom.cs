@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using System.IO.Ports;
 using System.Text;
 using System.Text.Json;
@@ -15,7 +16,7 @@ namespace Ask.Device.Communication.Com.Configuration
     /// <returns>JSON-строка с настройками порта.</returns>
     public override string ToString()
     {
-      var dto = new SerialPortSettingsDto
+      var dto = new ComPortSettings
       {
         PortName = PortName,
         BaudRate = BaudRate,
@@ -27,6 +28,21 @@ namespace Ask.Device.Communication.Com.Configuration
       };
 
       return JsonSerializer.Serialize(dto, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    /// <summary>
+    /// Сериализует параметры последовательного порта в JSON
+    /// без необходимости указывать конкретное имя порта.
+    /// </summary>
+    /// <param name="settings">Параметры последовательного порта.</param>
+    /// <returns>Строка JSON с сериализованными параметрами.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Выбрасывается, если <paramref name="settings"/> равен <see langword="null"/>.
+    /// </exception>
+    public static string SerializeSettings(ComPortSettings settings)
+    {
+      ArgumentNullException.ThrowIfNull(settings);
+      return JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
     }
 
     /// <summary>
@@ -43,7 +59,7 @@ namespace Ask.Device.Communication.Com.Configuration
 
       try
       {
-        var data = JsonSerializer.Deserialize<SerialPortSettingsDto>(str);
+        var data = JsonSerializer.Deserialize<ComPortSettings>(str);
         return data == null
           ? null
           : new SerialPortCustom(
@@ -65,6 +81,32 @@ namespace Ask.Device.Communication.Com.Configuration
       {
         return null;
       }
+    }
+
+    /// <summary>
+    /// Создаёт экземпляр последовательного порта на основе заданных параметров.
+    /// </summary>
+    /// <param name="settings">Параметры последовательного порта.</param>
+    /// <returns>Настроенный экземпляр <see cref="SerialPortCustom"/>.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Выбрасывается, если <paramref name="settings"/> равен <see langword="null"/>.
+    /// </exception>
+    public static SerialPortCustom FromSettings(ComPortSettings settings)
+    {
+      ArgumentNullException.ThrowIfNull(settings);
+
+      return new SerialPortCustom(
+        settings.PortName,
+        settings.BaudRate,
+        System.Enum.TryParse(settings.Parity, true, out Parity parity) ? parity : Parity.None,
+        settings.DataBits,
+        System.Enum.TryParse(settings.StopBits, true, out StopBits stopBits) ? stopBits : StopBits.One)
+      {
+        Handshake = System.Enum.TryParse(settings.Handshake, true, out Handshake handshake) ? handshake : Handshake.None,
+        Encoding = string.IsNullOrWhiteSpace(settings.EncodingName)
+          ? Encoding.ASCII
+          : Encoding.GetEncoding(settings.EncodingName),
+      };
     }
 
     /// <summary>

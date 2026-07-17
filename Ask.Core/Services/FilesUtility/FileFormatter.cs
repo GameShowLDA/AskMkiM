@@ -70,6 +70,12 @@ namespace Ask.Core.Services.FilesUtility
 
         if (trimmedLine.StartsWith("{", StringComparison.Ordinal))
         {
+          if (trimmedLine.Length > 1 && trimmedLine.EndsWith("}", StringComparison.Ordinal))
+          {
+            formattedLines.Add(originalIndent + trimmedLine);
+            continue;
+          }
+
           blockCommentIndent = originalIndent;
           blockCommentCloseToken = "}";
           formattedLines.Add(blockCommentIndent + "{");
@@ -106,6 +112,12 @@ namespace Ask.Core.Services.FilesUtility
 
         if (trimmedLine.StartsWith("/*", StringComparison.Ordinal))
         {
+          if (trimmedLine.Length > 2 && trimmedLine.EndsWith("*/", StringComparison.Ordinal))
+          {
+            formattedLines.Add(originalIndent + trimmedLine);
+            continue;
+          }
+
           blockCommentIndent = originalIndent;
           blockCommentCloseToken = "*/";
           formattedLines.Add(blockCommentIndent + "/*");
@@ -161,12 +173,40 @@ namespace Ask.Core.Services.FilesUtility
     private static string NormalizeCommandHeader(string line)
     {
       string trimmedLine = line.TrimStart(' ', '\t');
-      var match = Regex.Match(trimmedLine, @"^(\d+)\s+(\S+)(.*)$");
+      var match = Regex.Match(trimmedLine, @"^(\d+)[ \t]+(\S+)(.*)$");
       if (!match.Success)
         return trimmedLine;
 
       string tail = match.Groups[3].Value;
-      return $"{match.Groups[1].Value} {match.Groups[2].Value}{tail}";
+      int commentIndex = FindInlineCommentStart(tail);
+      string parameters = commentIndex >= 0 ? tail[..commentIndex] : tail;
+      string comment = commentIndex >= 0 ? tail[commentIndex..] : string.Empty;
+
+      int alignmentStart = parameters.Length;
+      while (alignmentStart > 0 && parameters[alignmentStart - 1] is ' ' or '\t')
+      {
+        alignmentStart--;
+      }
+
+      string commentAlignment = commentIndex >= 0 ? parameters[alignmentStart..] : string.Empty;
+      string normalizedParameters = Regex.Replace(parameters[..alignmentStart], @"[ \t]+", " ");
+
+      return $"{match.Groups[1].Value} {match.Groups[2].Value}{normalizedParameters}{commentAlignment}{comment}";
+    }
+
+    private static int FindInlineCommentStart(string text)
+    {
+      int result = -1;
+      foreach (string token in new[] { "//", "/*", "{" })
+      {
+        int index = text.IndexOf(token, StringComparison.Ordinal);
+        if (index >= 0 && (result < 0 || index < result))
+        {
+          result = index;
+        }
+      }
+
+      return result;
     }
 
     private static bool IsEndCommandLine(string line)

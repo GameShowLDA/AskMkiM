@@ -61,7 +61,7 @@ namespace Ask.Device.Communication.Com.Protocols
     {
       using (await OperationLock.LockAsync(cancellationToken))
       {
-        using (await _serialPort.UsePort(_device.Name))
+        using (await _serialPort.UsePort(_device.Name, cancellationToken: cancellationToken))
         {
           try
           {
@@ -79,6 +79,12 @@ namespace Ask.Device.Communication.Com.Protocols
           }
           catch (Exception ex)
           {
+            if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
+            {
+              throw;
+            }
+
+            RecoverPortAfterFailure(ex);
             LogException(ex, $"[{_device.Name}] Ошибка при работе с COM-портом", isDeviceLog: true);
             return string.Empty;
           }
@@ -124,6 +130,7 @@ namespace Ask.Device.Communication.Com.Protocols
       _serialPort.DiscardInBuffer();
       _serialPort.DiscardOutBuffer();
       _serialPort.Write(command + "\n");
+      LogDebug($"[{_device.Name}] COM TX {_serialPort.PortName}: {FormatForLog(command + "\n")}", isDeviceLog: true);
     }
 
     /// <summary>
@@ -173,6 +180,34 @@ namespace Ask.Device.Communication.Com.Protocols
       }
 
       return response;
+    }
+    private void RecoverPortAfterFailure(Exception exception)
+    {
+      if (exception is not IOException
+          && exception is not InvalidOperationException
+          && exception is not UnauthorizedAccessException)
+      {
+        return;
+      }
+
+      try
+      {
+        if (_serialPort.IsOpen)
+        {
+          _serialPort.Close();
+        }
+
+        LogWarning($"[{_device.Name}] COM-port {_serialPort.PortName} closed after communication failure; the next request will reopen it.", isDeviceLog: true);
+      }
+      catch (Exception closeException)
+      {
+        LogWarning($"[{_device.Name}] Failed to close COM-port {_serialPort.PortName} during recovery: {closeException.Message}", isDeviceLog: true);
+      }
+    }
+
+    private static string FormatForLog(string value)
+    {
+      return value.Replace("\r", "\\r").Replace("\n", "\\n");
     }
   }
 }

@@ -1,4 +1,4 @@
-using Message;
+using Ask.UI.Services.Notifications;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -38,7 +38,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при загрузке конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        ShowErrorNotification("Не удалось загрузить настройки GPT", ex);
       }
     }
 
@@ -141,7 +141,9 @@ namespace UI.Controls.GPT.Mode
         double contrast = double.Parse(contrastValue);
         OnValueChanged("LCD_CONTRAST", contrast);
 
-        await GPTPunchControl.ModelGPT.SystemManger.SetLcdContrastAsync(contrast);
+        await ExecuteSettingChangeAsync(
+          () => GPTPunchControl.ModelGPT.SystemManger.SetLcdContrastAsync(contrast),
+          "Не удалось изменить контраст дисплея");
       }
     }
 
@@ -157,7 +159,9 @@ namespace UI.Controls.GPT.Mode
         double brightness = double.Parse(brightnessValue);
         OnValueChanged("LCD_BRIGHTNESS", brightness);
 
-        await GPTPunchControl.ModelGPT.SystemManger.SetLcdBrightnessAsync(brightness);
+        await ExecuteSettingChangeAsync(
+          () => GPTPunchControl.ModelGPT.SystemManger.SetLcdBrightnessAsync(brightness),
+          "Не удалось изменить яркость дисплея");
       }
     }
 
@@ -173,7 +177,9 @@ namespace UI.Controls.GPT.Mode
         double value = soundState == "ON" ? 1 : 0;
         OnValueChanged("BUZZER_PSOUND", value);
 
-        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimarySound(value == 1 ? true : false);
+        await ExecuteSettingChangeAsync(
+          () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimarySound(value == 1),
+          "Не удалось изменить звук успешного теста");
       }
     }
 
@@ -189,7 +195,9 @@ namespace UI.Controls.GPT.Mode
         double value = soundState == "ON" ? 1 : 0;
         OnValueChanged("BUZZER_FSOUND", value);
 
-        await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackSound(value == 1 ? true : false);
+        await ExecuteSettingChangeAsync(
+          () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackSound(value == 1),
+          "Не удалось изменить звук ошибочного теста");
       }
     }
 
@@ -201,7 +209,9 @@ namespace UI.Controls.GPT.Mode
     {
       double duration = SuccessSoundSlider.Value;
       OnValueChanged("BUZZER_PTIME", duration);
-      await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimaryTime(duration);
+      await ExecuteSettingChangeAsync(
+        () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimaryTime(duration),
+        "Не удалось изменить длительность звука успешного теста");
     }
 
     /// <summary>
@@ -212,7 +222,28 @@ namespace UI.Controls.GPT.Mode
     {
       double duration = ErrorSoundSlider.Value;
       OnValueChanged("BUZZER_FTIME", duration);
-      await GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackTime(duration);
+      await ExecuteSettingChangeAsync(
+        () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackTime(duration),
+        "Не удалось изменить длительность звука ошибочного теста");
+    }
+
+    private static async Task ExecuteSettingChangeAsync(Func<Task> operation, string errorMessage)
+    {
+      try
+      {
+        await operation();
+      }
+      catch (Exception ex)
+      {
+        ShowErrorNotification(errorMessage, ex);
+      }
+    }
+
+    private static void ShowErrorNotification(string message, Exception exception)
+    {
+      OperationNotificationService.ShowError(
+        "Настройки GPT",
+        $"{message}: {exception.Message}");
     }
 
     /// <summary>
