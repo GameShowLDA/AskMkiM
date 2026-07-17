@@ -26,13 +26,14 @@ using UI.Services.ProtocolManager;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 using static Ask.LogLib.LoggerUtility;
+using InspectionProtocolHost = Ask.UI.Controls.ProtocolNew.IInspectionProtocolHost;
 
 namespace UI.Controls.Runner
 {
   /// <summary>
   /// Логика взаимодействия для RunControl.xaml
   /// </summary>
-  public partial class RunControl : UserControl, IRunView, IInspectionProtocolHost
+  public partial class RunControl : UserControl, IRunView, InspectionProtocolHost
   {
     /// <summary>
     /// Флаг, указывающий, находится ли интерфейс в заблокированном состоянии.
