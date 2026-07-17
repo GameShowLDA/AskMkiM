@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;

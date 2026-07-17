@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Device.Communication.Com.Configuration;
@@ -156,7 +157,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       IpPart1.Text = "192";
       IpPart2.Text = "168";
       IpPart3.Text = _headUnit == null ? DeviceNumberTextBox.Text : _headUnit.Number.ToString();
-      IpPart4.Text = DeviceNumberTextBox.Text;
+      IpPart4.Text = IsSelectedChassisManager() ? "0" : DeviceNumberTextBox.Text;
+    }
+
+    private bool IsSelectedChassisManager()
+    {
+      return DeviceModelMap != null &&
+        DeviceModelSelectionBox.SelectedItem is string selectedModel &&
+        DeviceModelMap.TryGetValue(selectedModel, out Type selectedType) &&
+        typeof(IChassisManager).IsAssignableFrom(selectedType);
     }
 
     /// <summary>

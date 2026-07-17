@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Engine.Base.GroupMethod;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
@@ -239,11 +240,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var point in points.PointModels)
-            {
-              var module = EquipmentService.GetModuleByPoint(point);
-              await module.PointManager.ConnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService);
-            }
+            await RelayPointBatchCommutator.ConnectPointsAsync(points.PointModels, BusPoint.A, messageService);
           }
           else
           {
@@ -264,11 +261,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var point in points.PointModels)
-            {
-              var module = EquipmentService.GetModuleByPoint(point);
-              await module.PointManager.ConnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService);
-            }
+            await RelayPointBatchCommutator.ConnectPointsAsync(points.PointModels, BusPoint.B, messageService);
           }
           else
           {
@@ -289,11 +282,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var point in points.PointModels)
-            {
-              var module = EquipmentService.GetModuleByPoint(point);
-              await module.PointManager.DisconnectRelayAsync(bus: BusPoint.B, point.PointNumber, messageService);
-            }
+            await RelayPointBatchCommutator.DisconnectPointsAsync(points.PointModels, BusPoint.B, messageService);
           }
           else
           {
@@ -314,11 +303,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var point in points.PointModels)
-            {
-              var module = EquipmentService.GetModuleByPoint(point);
-              await module.PointManager.DisconnectRelayAsync(bus: BusPoint.A, point.PointNumber, messageService);
-            }
+            await RelayPointBatchCommutator.DisconnectPointsAsync(points.PointModels, BusPoint.A, messageService);
           }
           else
           {
@@ -395,13 +380,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var chain in groupChains.ChainModels)
-            {
-              foreach (var item in chain.PointModels)
-              {
-                await PointManager.ConnectPointToBusBAsync(item, messageService, revers);
-              }
-            }
+            await RelayPointBatchCommutator.ConnectPointsAsync(GetPoints(groupChains), BusPoint.B, messageService);
           }
           else
           {
@@ -421,13 +400,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var chain in groupChains.ChainModels)
-            {
-              foreach (var item in chain.PointModels)
-              {
-                await PointManager.ConnectPointToBusAAsync(item, messageService, revers);
-              }
-            }
+            await RelayPointBatchCommutator.ConnectPointsAsync(GetPoints(groupChains), BusPoint.A, messageService);
           }
           else
           {
@@ -448,13 +421,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var chain in groupChains.ChainModels)
-            {
-              foreach (var item in chain.PointModels)
-              {
-                await RelayModule.PointManager.DisconnectPointFromBusAAsync(item, messageService, revers);
-              }
-            }
+            await RelayPointBatchCommutator.DisconnectPointsAsync(GetPoints(groupChains), BusPoint.A, messageService);
           }
           else
           {
@@ -475,18 +442,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           if (!revers)
           {
-            foreach (var chain in groupChains.ChainModels)
-            {
-              foreach (var item in chain.PointModels)
-              {
-                await RelayModule.PointManager.DisconnectPointFromBusBAsync(item, messageService, revers);
-              }
-            }
+            await RelayPointBatchCommutator.DisconnectPointsAsync(GetPoints(groupChains), BusPoint.B, messageService);
           }
           else
           {
             await DisconnectAlPointlFromBusAAsync(groupChains, messageService, false);
           }
+        }
+
+        private static IEnumerable<PointModel> GetPoints(GroupModel groupChains)
+        {
+          return groupChains.ChainModels.SelectMany(chain => chain.PointModels);
         }
       }
 

@@ -212,7 +212,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
       }
 
-      result = (chain, answers.Average());
+      // Для одиночной бракованной точки связанная цепь КЗ может не найтись.
+      // В этом случае список измерений пуст, а сама точка ниже всё равно будет
+      // отфильтрована как цепь из одного элемента.
+      result = (chain, answers.Count > 0 ? answers.Average() : 0d);
       return result;
     }
 

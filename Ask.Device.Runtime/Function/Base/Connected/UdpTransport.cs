@@ -75,7 +75,7 @@ namespace Ask.Device.Runtime.Function.Connected
         return true;
       }
 
-      string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Initialize, timeout: _device.ConnectedProfile.Timeout);
+      string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Reset, timeout: _device.ConnectedProfile.Timeout);
       var resetResult = _device.ResetValidationDelegate(result, _device);
       IsReset?.Invoke();
 
