@@ -24,6 +24,7 @@ namespace Ask.Device.Runtime.Device
       PowerManager = new PowerManager(this);
       DeviceType = DeviceType.ChassisManager;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
+      ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
 
       Name = "Тестер АСКМ";
       Description = "Добавить описание сюда";
