@@ -93,6 +93,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void VisibilityElements()
     {
       DeviceNumberContainer.Visibility = Visibility.Visible;
+      RelayPointCountContainer.Visibility = Visibility.Collapsed;
       BusTypeContainer.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
       CapacitanceContainer.Visibility = Visibility.Collapsed;
@@ -217,6 +218,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       if (device is RelaySwitchModuleDto relayDevice)
       {
+        SetRelayPointCount(relayDevice.PointCount);
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
