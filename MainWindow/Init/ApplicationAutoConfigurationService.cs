@@ -107,6 +107,15 @@ internal sealed class ApplicationAutoConfigurationService
 
     await UserInterfaceConfig.SaveProtocolModel(defaultInterfaceSettings);
 
+    var defaultDeviceDisplaySettings = DeviceDisplayConfig.GetDeviceDisplayModel();
+    defaultDeviceDisplaySettings.ShowMachineAddresses = true;
+    defaultDeviceDisplaySettings.ShowConnectionInfo = true;
+    defaultDeviceDisplaySettings.ShowDeviceExecutionParameters = true;
+    defaultDeviceDisplaySettings.ShowMeasurementResults = true;
+    defaultDeviceDisplaySettings.ShowIntermediateMeasurementResults = true;
+
+    await DeviceDisplayConfig.SaveSettingsAsync(defaultDeviceDisplaySettings);
+
     var defaultProtocolSettings = ProtocolConfig.GetProtocolModel();
     defaultProtocolSettings.PrintFontFamily = "Consolas";
     defaultProtocolSettings.PrintFontSize = 16;
