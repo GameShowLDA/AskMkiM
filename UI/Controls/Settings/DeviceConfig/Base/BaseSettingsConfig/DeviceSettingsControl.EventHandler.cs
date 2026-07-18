@@ -21,6 +21,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
   public partial class DeviceSettingsControl
   {
     private bool _internalChange;
+
+    /// <summary>
+    /// Признак синхронизации номера устройства и последнего октета IP-адреса.
+    /// </summary>
     private bool _synchronizingDeviceNumberAndIp;
 
     /// <summary>
@@ -290,11 +294,21 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       SynchronizeDeviceNumberAndIp(DeviceNumberTextBox, IpPart4);
     }
 
+    /// <summary>
+    /// Обрабатывает изменение последнего октета IP-адреса.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события изменения текста.</param>
     private void IpPart4_TextChanged(object sender, TextChangedEventArgs e)
     {
       SynchronizeDeviceNumberAndIp(IpPart4, DeviceNumberTextBox);
     }
 
+    /// <summary>
+    /// Синхронизирует номер устройства и последний октет IP-адреса.
+    /// </summary>
+    /// <param name="source">Поле с исходным значением.</param>
+    /// <param name="target">Поле для синхронизируемого значения.</param>
     private void SynchronizeDeviceNumberAndIp(TextBox source, TextBox target)
     {
       if (_synchronizingDeviceNumberAndIp ||

@@ -18,6 +18,9 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
   /// </summary>
   public partial class ModuleRelayControlWindow : Window, IDataProcessor
   {
+    /// <summary>
+    /// Средство проверки параметров конфигурации модуля коммутации реле.
+    /// </summary>
     private readonly IRelaySwitchModuleConfigurationValidator _configurationValidator;
     public Action? CloseActionOverride { get; set; }
     private RelaySwitchModuleDto? _editingDto;
@@ -40,6 +43,14 @@ namespace UI.Controls.Settings.DeviceConfig.ModuleRelayControl
     {
     }
 
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ModuleRelayControlWindow"/>
+    /// с указанным средством проверки конфигурации.
+    /// </summary>
+    /// <param name="configurationValidator">Средство проверки параметров конфигурации.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Выбрасывается, если <paramref name="configurationValidator"/> равен <see langword="null"/>.
+    /// </exception>
     public ModuleRelayControlWindow(IRelaySwitchModuleConfigurationValidator configurationValidator)
     {
       _configurationValidator = configurationValidator ?? throw new ArgumentNullException(nameof(configurationValidator));

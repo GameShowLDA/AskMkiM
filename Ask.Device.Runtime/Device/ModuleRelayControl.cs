@@ -60,6 +60,9 @@ namespace Ask.Device.Runtime.Device
       }
     }
 
+    /// <summary>
+    /// Количество точек модуля коммутации реле.
+    /// </summary>
     private int _pointCount;
 
     /// <inheritdoc />

@@ -1,9 +1,13 @@
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 
 /// <summary>
-/// Allows a point manager to rebuild its state for a changed channel count.
+/// Предоставляет изменение количества точек модуля коммутации реле.
 /// </summary>
 public interface IPointCountReconfigurable
 {
+  /// <summary>
+  /// Изменяет количество точек модуля коммутации реле.
+  /// </summary>
+  /// <param name="pointCount">Количество точек.</param>
   void ReconfigurePointCount(int pointCount);
 }
