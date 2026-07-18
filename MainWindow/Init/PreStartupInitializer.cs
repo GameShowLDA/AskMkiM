@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Atributes;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Extensions;
+using Ask.DataBase.Provider.Initialization;
 using Ask.LogLib;
 using Ask.Support;
 using Ask.UI.Features.Archive.Application;
@@ -64,12 +65,13 @@ namespace MainWindowProgram.Init
     /// Выполняет проверку единственного экземпляра приложения и инициализацию базы данных.
     /// Этот метод должен вызываться один раз — до загрузки основного окна.
     /// </remarks>
-    static internal async Task Initialize()
+    static internal async Task<DatabaseInitializationReport?> Initialize()
     {
       // SingleInstanceManager.EnsureSingleInstance();
-      await DatabaseInitializer.InitializeAsync();
+      var databaseReport = await DatabaseInitializer.InitializeAsync();
       InitializeAppHost();
       InitializeHelpServer();
+      return databaseReport;
     }
 
     /// <summary>
@@ -83,6 +85,7 @@ namespace MainWindowProgram.Init
             services.AddSingleton<Dispatcher>(_ => Application.Current.Dispatcher);
 
             services.AddSingleton<MetrologyControlFactory>();
+            services.AddSingleton<ApplicationAutoConfigurationService>();
             services.AddSingleton<IRelaySwitchModuleConfigurationValidator, RelaySwitchModuleConfigurationValidator>();
             services.AddTransient<ModuleRelayControlWindow>();
 
