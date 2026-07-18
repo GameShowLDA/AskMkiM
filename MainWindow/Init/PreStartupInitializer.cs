@@ -1,6 +1,7 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Metrology;
+using Ask.Core.Services.Validation.Devices;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
@@ -18,6 +19,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using UI.Controls.Settings.DeviceConfig.ModuleRelayControl;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init
@@ -84,6 +86,8 @@ namespace MainWindowProgram.Init
 
             services.AddSingleton<MetrologyControlFactory>();
             services.AddSingleton<ApplicationAutoConfigurationService>();
+            services.AddSingleton<IRelaySwitchModuleConfigurationValidator, RelaySwitchModuleConfigurationValidator>();
+            services.AddTransient<ModuleRelayControlWindow>();
 
             services.AddCrashDiagnostics(
               options =>
