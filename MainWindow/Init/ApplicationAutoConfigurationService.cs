@@ -1,3 +1,8 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
+using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
+
 namespace MainWindowProgram.Init;
 
 /// <summary>
@@ -40,11 +45,21 @@ internal sealed class ApplicationAutoConfigurationService
   /// </summary>
   /// <param name="cancellationToken">Токен отмены операции.</param>
   /// <returns>Асинхронная задача применения настроек выполнения.</returns>
-  private static Task ApplyDefaultExecutionSettingsAsync(
+  private static async Task ApplyDefaultExecutionSettingsAsync(
     CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    return Task.CompletedTask;
+
+    var defaultSettings = new SettingsExecutionDto
+    {
+      IdleModeExecution = false,
+      IsErrorSimulationMode = false,
+      StepByStepMode = false,
+      StopOnError = false,
+      LegacyCompatibilityMode = false
+    };
+
+    await ExecutionConfig.SaveExecutionModel(defaultSettings);
   }
 
   /// <summary>
@@ -52,11 +67,25 @@ internal sealed class ApplicationAutoConfigurationService
   /// </summary>
   /// <param name="cancellationToken">Токен отмены операции.</param>
   /// <returns>Асинхронная задача применения настроек протокола.</returns>
-  private static Task ApplyDefaultProtocolSettingsAsync(
+  private static async Task ApplyDefaultProtocolSettingsAsync(
     CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    return Task.CompletedTask;
+
+    // Берём уже загруженную модель, чтобы не затереть шаблоны протоколов пустыми строками.
+    var defaultSettings = ProtocolConfig.GetProtocolModel();
+    defaultSettings.ShowDeviceInfo = true;
+    defaultSettings.ShowHeaderInfo = true;
+    defaultSettings.AutoSaveProtocol = true;
+    defaultSettings.AutoPrintProtocol = true;
+    defaultSettings.DisplayOperationTime = true;
+    defaultSettings.ShowDetailedProtocol = true;
+    defaultSettings.ShowProtocolInSoftware = true;
+    defaultSettings.GenerateProtocol = true;
+    defaultSettings.ShowCommandHeadersInProtocol = true;
+    defaultSettings.ShowTestStepMessagesInProtocol = true;
+
+    await ProtocolConfig.SaveProtocolModel(defaultSettings);
   }
 
   /// <summary>
@@ -64,10 +93,24 @@ internal sealed class ApplicationAutoConfigurationService
   /// </summary>
   /// <param name="cancellationToken">Токен отмены операции.</param>
   /// <returns>Асинхронная задача применения настроек интерфейса пользователя.</returns>
-  private static Task ApplyDefaultInterfaceSettingsAsync(
+  private static async Task ApplyDefaultInterfaceSettingsAsync(
     CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    return Task.CompletedTask;
+
+    var defaultInterfaceSettings = await UserInterfaceConfig.GetParameterModel();
+    defaultInterfaceSettings.Language = "ru";
+    defaultInterfaceSettings.Theme = ThemeMode.DarkCustom;
+    defaultInterfaceSettings.UseSyntaxHighlighting = true;
+    defaultInterfaceSettings.UseCommandBodyBackgroundHighlighting = true;
+    defaultInterfaceSettings.UseChainPointBodyBackgroundHighlighting = true;
+
+    await UserInterfaceConfig.SaveProtocolModel(defaultInterfaceSettings);
+
+    var defaultProtocolSettings = ProtocolConfig.GetProtocolModel();
+    defaultProtocolSettings.PrintFontFamily = "Consolas";
+    defaultProtocolSettings.PrintFontSize = 16;
+
+    await ProtocolConfig.SaveProtocolModel(defaultProtocolSettings);
   }
 }

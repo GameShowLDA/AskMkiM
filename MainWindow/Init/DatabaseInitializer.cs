@@ -39,9 +39,25 @@ namespace MainWindowProgram.Init
 
         if (protocol != null)
         {
+          bool protocolDefaultsAdded = false;
+          if (string.IsNullOrWhiteSpace(protocol.CleanTextProtocol))
+          {
+            protocol.CleanTextProtocol = ProtocolConfig.GetBaseTextProtocol();
+            protocolDefaultsAdded = true;
+          }
+
+          if (string.IsNullOrWhiteSpace(protocol.CleanTextErrorsProtocol))
+          {
+            protocol.CleanTextErrorsProtocol = ProtocolConfig.GetBaseTextErrorsProtocol();
+            protocolDefaultsAdded = true;
+          }
+
           ProtocolConfig.SetProtocolModel(protocol);
-          ProtocolModel.SetTemplate(protocol.CleanTextProtocol);
-          ProtocolModel.SetErrorsTemplate(protocol.CleanTextErrorsProtocol);
+
+          if (protocolDefaultsAdded)
+          {
+            await ProtocolSettings.SaveAsync(protocol);
+          }
         }
 
         if (execution != null)

@@ -40,10 +40,11 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Icons:SuccessIconControlV2 
-                        Grid.Column="1"
-                        x:Name="Success" 
-                        Width="30"
+                     <Icons:SuccessIconControlV2 
+                         Grid.Column="1"
+                         x:Name="Success" 
+                         Visibility="Collapsed"
+                         Width="30"
                         Margin="10,0,0,0"
                         Height="30" 
                         CheckThickness="4"
@@ -51,10 +52,11 @@
                         CircleBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
                         />
 
-                    <Icons:ErrorIconControlV2 
-                      x:Name="Error"
-                        Grid.Column="2"
-                      Width="30"
+                     <Icons:ErrorIconControlV2 
+                       x:Name="Error"
+                         Grid.Column="2"
+                       Visibility="Collapsed"
+                       Width="30"
                       Height="30" 
                       Margin="10,0,0,0"
                       CrossThickness="4"
@@ -129,14 +131,6 @@
                         VerticalAlignment="Top"/>
 
                     <SharedComponents:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_AutoSave_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_AutoSave_Description}, Path=Value}"
-                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
-                        Margin="10,10"
-                        x:Name="AutoSave"
-                        VerticalAlignment="Top"/>
-
-                    <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_Protocol_AutoPrint_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Protocol_AutoPrint_Description}, Path=Value}"
                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
@@ -151,15 +145,6 @@
                         x:Name="ProtocolFromPO"
                         Margin="10,10"
                         VerticalAlignment="Top"/>
-
-                    <SharedComponents:SettingsCard
-                        Title="{Binding Source={StaticResource Settings_Protocol_Generate_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Protocol_Generate_Description}, Path=Value}"
-                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
-                        Margin="10,10"
-                        VerticalAlignment="Top"
-                        x:Name="ProtocolGeneration"/>
-
 
                 </WrapPanel>
 
