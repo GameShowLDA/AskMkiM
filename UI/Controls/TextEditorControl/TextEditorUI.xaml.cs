@@ -92,7 +92,7 @@ namespace UI.Controls.TextEditorControl
       (Color)ColorConverter.ConvertFromString("#FF0000");
 
     private readonly Color _syntaxWarningUnderline =
-      (Color)ColorConverter.ConvertFromString("#0000FF");
+      (Color)ColorConverter.ConvertFromString("#005FFF");
 
     private IReadOnlyList<TextSyntaxDiagnostic> _syntaxDiagnostics =
       Array.Empty<TextSyntaxDiagnostic>();
