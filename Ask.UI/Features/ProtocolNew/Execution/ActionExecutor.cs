@@ -1,24 +1,19 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Ask.UI.Features.ProtocolNew.Services;
-using Message;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Input;
 using WindowsInput;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
@@ -409,63 +404,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     }
 
     /// <summary>
-    /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
-    /// </summary>
-    /// <param name="returnDelegate">Делегат, выполняющий операцию измерения. Если null, выполняется завершение.</param>
-    /// <param name="stop">Делегат для остановки операции.</param>
-    /// <returns>Задача, представляющая асинхронную операцию цикла измерения.</returns>
-    internal async Task LoopMeasureEvent(ActionSettings actionSettings)
-    {
-      ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
-      while (!CancellationTokenSource?.IsCancellationRequested ?? true)
-      {
-        try
-        {
-          await ReturnMeasureEvent(actionSettings);
-        }
-        catch (Exception)
-        {
-          break;
-        }
-      }
-    }
-
-    /// <summary>
-    /// Выполняет операцию измерения один раз.
-    /// </summary>
-    /// <param name="returnDelegate">Делегат измерения.</param>
-    /// <param name="stop">Делегат остановки.</param>
-    /// <returns>Задача, представляющая измерение.</returns>
-    private async Task ReturnMeasureEvent(ActionSettings actionSettings)
-    {
-      try
-      {
-        var token = CancellationTokenSource?.Token ?? new CancellationToken();
-
-        if (actionSettings.ReturnDelegate != null)
-        {
-          await actionSettings.ReturnDelegate(token);
-        }
-        else
-        {
-          await FinalizeAsync(actionSettings);
-        }
-      }
-      catch (ObjectDisposedException ex)
-      {
-        LogException("Token уже утилизирован", ex);
-        MessageBoxCustom.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
-        await FinalizeAsync(actionSettings);
-      }
-      catch (Exception ex)
-      {
-        LogException("Системная ошибка", ex);
-        MessageBoxCustom.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
-        await FinalizeAsync(actionSettings);
-      }
-    }
-
-    /// <summary>
     /// Выполняет повтор действия, зарегистрированного в <see cref="IUserInteractionService"/>, при нажатии на кнопку "Повторить".
     /// Если повторное действие не задано, ничего не происходит.
     /// </summary>
@@ -764,8 +702,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       if (actionSettings.StartDelegate != null)
       {
-        bool shouldFinalize = !actionSettings.IsRepeatEnabled;
-
         try
         {
           SystemStateManager._stopwatch.Restart();
@@ -778,24 +714,16 @@ namespace Ask.UI.Features.ProtocolNew.Execution
             _session.Cancellation.Token));
           SystemStateManager.SetIsLocked(true);
           await ProcessTask;
-
-          if (actionSettings.IsRepeatEnabled)
-          {
-            ProtocolSelfCheck.ShowAdditionalFunctionButtons();
-            shouldFinalize = false;
-          }
         }
         catch (OperationCanceledException)
         {
           // Отмена ожидаема при остановке выполнения.
-          shouldFinalize = true;
         }
         catch (Exception ex)
         {
           LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
           await ProtocolSelfCheck.AppendEmptyLineAsync();
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка программы АСК-МКИ-М", headerColor: ShowMessageModel.ErrorMessage.TitleColor, message: ex.Message) { IndentLevel = 1 });
-          shouldFinalize = true;
         }
         finally
         {
@@ -803,11 +731,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
           actionSettings.ExecutionDuration = SystemStateManager._stopwatch.Elapsed;
           SystemStateManager._stopwatch.Stop();
-
-          if (shouldFinalize)
-          {
-            await ProtocolSelfCheck.FinalizeAsync();
-          }
+          await ProtocolSelfCheck.FinalizeAsync();
         }
       }
     }
@@ -883,10 +807,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       ProtocolSelfCheck.HideExecutionButtonsAfterReset();
     }
-
-    #endregion
-
-    #region Повтор действий.
 
     #endregion
 

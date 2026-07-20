@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
-using Ask.UI.Features.ProtocolNew.Errors;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
 using System.Diagnostics;
@@ -16,7 +15,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -126,7 +124,6 @@ namespace Ask.UI.Controls.ProtocolNew
       NextButtonPreviewMouseDown += (sender, e) => Resume();
       ExitButtonPreviewMouseDown += async (sender, e) => await StopAsync();
 
-      LoopMeasureResistanceButtonPreviewMouseDown += (sender, e) => LoopMeasureEvent();
       ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
     }
     #endregion
@@ -185,12 +182,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     #endregion
 
-    #region Повтор и зацикливание.
-
-    /// <summary>
-    /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
-    /// </summary>
-    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_modeSettings.Current);
+    #region Повтор.
 
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.

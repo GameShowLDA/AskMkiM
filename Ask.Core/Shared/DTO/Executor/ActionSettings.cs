@@ -29,11 +29,6 @@ namespace Ask.Core.Shared.DTO.Executor
     public PreActionDelegate? PreActionDelegate { get; init; }
 
     /// <summary>
-    /// Разрешить повторное выполнение.
-    /// </summary>
-    public bool IsRepeatEnabled { get; set; }
-
-    /// <summary>
     /// Выполнять проверку питания.
     /// </summary>
     public bool CheckPower { get; init; } = true;

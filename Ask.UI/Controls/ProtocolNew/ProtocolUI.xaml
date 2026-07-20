@@ -292,12 +292,6 @@
                                     Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
-                                    <Button x:Name="loopButton" 
-                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
-                                    Margin="0,10,0,0" 
-                                    Style="{DynamicResource ShadowButtonStyle}" 
-                                    />
-
                                     <Button x:Name="PauseButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" 
                                     Margin="0,10,0,0"

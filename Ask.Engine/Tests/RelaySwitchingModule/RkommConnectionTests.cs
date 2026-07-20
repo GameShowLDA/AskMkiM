@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -66,7 +67,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteTestProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
         StopDelegate = Stop
       };
@@ -151,20 +151,23 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           new ShowMessageModel("Инициализация завершена, тест начат!"),
           IsBlockStart: true);
 
-      double result = 0;
-
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
         cancellationToken.ThrowIfCancellationRequested();
         await _module.PointManager.ConnectRelayAsync(BusPoint.AB, i, _userInteractionService);
 
-        result = await RelayModuleHelper.MeasureResistanceAsync(
-            _fastMeter,
-            _userInteractionService,
-            cancellationToken,
-            i,
-            _module,
-            data.Param);
+        await UserActionHelper.RunWithUserRepeatAsync(async () =>
+        {
+          var (success, _) = await RelayModuleHelper.MeasureResistanceAsync(
+              _fastMeter,
+              _userInteractionService,
+              cancellationToken,
+              i,
+              _module,
+              data.Param);
+
+          return success;
+        }, _userInteractionService);
 
         await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, i, _userInteractionService);
       }
