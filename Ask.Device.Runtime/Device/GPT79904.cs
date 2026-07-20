@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -29,6 +30,8 @@ namespace Ask.Device.Runtime.Device
       IrMinVoltage = 50;
       ConnectedProfile.CheckMode = "GPT";
 
+      ApplyDefaultComPortSettings();
+
       AcwManger = new Function.GPT.AcwMode(this);
       DcwManger = new Function.GPT.DcwMode(this);
       IrManger = new Function.GPT.IrMode(this);
@@ -44,6 +47,17 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public new string Description { get => "Реализовать описание в Ask.Device.Runtime.Device.GPT79904"; }
+
+    /// <inheritdoc />
+    public override ComPortSettings DefaultComPortSettings { get; } = new()
+    {
+      BaudRate = 115200,
+      Parity = nameof(Parity.None),
+      DataBits = 8,
+      StopBits = nameof(StopBits.One),
+      Handshake = nameof(Handshake.None),
+      EncodingName = "us-ascii",
+    };
 
     /// <inheritdoc />
     public int NumberChassis { get; set; }

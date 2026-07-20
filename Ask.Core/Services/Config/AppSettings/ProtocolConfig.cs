@@ -36,7 +36,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Устанавливает автосохранение протокола.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static void SetSaveProtocol(bool enable) => ProtocolModel.AutoSaveProtocol = enable;
+    public static void SetSaveProtocol(bool enable) => ProtocolModel.AutoSaveProtocol = true;
 
     /// <summary>
     /// Устанавливает автоматическую печать протокола.
@@ -59,11 +59,20 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Устанавливает отображение времени выполнения операций.
     /// </summary>
     /// <param name="enable">true для отображения, false для скрытия.</param>
-    public static void SetGenerateProtocol(bool enable) => ProtocolModel.GenerateProtocol = enable;
+    public static void SetGenerateProtocol(bool enable) => ProtocolModel.GenerateProtocol = true;
     public static void SetCleanTextProtocol(string text) => ProtocolModel.CleanTextProtocol = text;
     public static void SetCleanTextErrorProtocol(string text) => ProtocolModel.CleanTextErrorsProtocol = text;
     public static void SetErrorTextProtocol(string text) => ProtocolModel.ErrorTextProtocol = text;
-    public static void SetProtocolModel(SettingsProtocolDto protocolModel) => ProtocolModel = protocolModel;
+    public static void SetProtocolModel(SettingsProtocolDto protocolModel)
+    {
+      ArgumentNullException.ThrowIfNull(protocolModel);
+
+      ProtocolModel = protocolModel;
+      ProtocolModel.AutoSaveProtocol = true;
+      ProtocolModel.GenerateProtocol = true;
+      Ask.Core.Shared.DTO.Protocol.ProtocolModel.SetTemplate(protocolModel.CleanTextProtocol);
+      Ask.Core.Shared.DTO.Protocol.ProtocolModel.SetErrorsTemplate(protocolModel.CleanTextErrorsProtocol);
+    }
 
     public static void SetCommandHeadersInProtocol(bool enable) => ProtocolModel.ShowCommandHeadersInProtocol = enable;
     public static void SetTestStepMessagesInProtocol(bool enable) => ProtocolModel.ShowTestStepMessagesInProtocol = enable;
@@ -96,7 +105,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает статус автосохранения протокола.
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
-    public static bool GetSaveProtocol() => ProtocolModel.AutoSaveProtocol;
+    public static bool GetSaveProtocol() => true;
 
     /// <summary>
     /// Возвращает статус авто печати протокола.
@@ -110,7 +119,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>true, если отображается; false, если скрывается.</returns>
     public static bool GetTimeStart() => ProtocolModel.DisplayOperationTime;
     public static bool GetShowProtocolInSoftware() => ProtocolModel.ShowProtocolInSoftware;
-    public static bool GetGenerateProtocol() => ProtocolModel.GenerateProtocol;
+    public static bool GetGenerateProtocol() => true;
     public static bool GetCommandHeadersInProtocol() => ProtocolModel.ShowCommandHeadersInProtocol;
     public static bool GetTestStepMessagesInProtocol() => ProtocolModel.ShowTestStepMessagesInProtocol;
     public static string GetCleanTextProtocol() => ProtocolModel.CleanTextProtocol;
@@ -147,13 +156,16 @@ namespace Ask.Core.Services.Config.AppSettings
 
     public static async Task SaveProtocolModel(SettingsProtocolDto protocolModel)
     {
+      protocolModel.AutoSaveProtocol = true;
+      protocolModel.GenerateProtocol = true;
       bool testStepMessagesChanged = ProtocolModel.ShowTestStepMessagesInProtocol != protocolModel.ShowTestStepMessagesInProtocol;
 
       ProtocolModel.Id = protocolModel.Id;
       ProtocolModel.ShowDeviceInfo = protocolModel.ShowDeviceInfo;
       ProtocolModel.ShowHeaderInfo = protocolModel.ShowHeaderInfo;
       ProtocolModel.ShowDetailedProtocol = protocolModel.ShowDetailedProtocol;
-      ProtocolModel.AutoSaveProtocol = protocolModel.AutoSaveProtocol;
+      ProtocolModel.AutoSaveProtocol = true;
+      ProtocolModel.GenerateProtocol = true;
       ProtocolModel.AutoPrintProtocol = protocolModel.AutoPrintProtocol;
       ProtocolModel.DisplayOperationTime = protocolModel.DisplayOperationTime;
       ProtocolModel.ShowProtocolInSoftware = protocolModel.ShowProtocolInSoftware;
