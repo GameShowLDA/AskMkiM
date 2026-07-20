@@ -78,6 +78,10 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           _context.Step(isStepInto: true);
           e.Handled = true;
           break;
+        case Key.F4 when _context.CanJumpToCommand:
+          _context.JumpToCommand();
+          e.Handled = true;
+          break;
         case Key.P when _context.CanContinue:
           _context.Continue();
           e.Handled = true;

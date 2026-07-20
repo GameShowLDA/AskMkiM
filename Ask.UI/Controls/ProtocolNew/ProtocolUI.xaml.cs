@@ -12,6 +12,7 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -26,7 +27,7 @@ namespace Ask.UI.Controls.ProtocolNew
   /// Класс управления пользовательским интерфейсом протокола выполнения.
   /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
-  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext
+  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext, IExecutionCommandJumpGate
   {
     static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     private bool loaded = false;
@@ -248,6 +249,10 @@ namespace Ask.UI.Controls.ProtocolNew
     bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanJumpToCommand =>
+      ContinueButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
     void IProtocolHotkeyContext.Start() => StartFromHotkey();
 
     /// <inheritdoc />
@@ -267,6 +272,16 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.Repeat() => RepeatFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.JumpToCommand() => RequestCommandJump();
+
+    /// <inheritdoc />
+    bool IExecutionCommandJumpGate.IsExecutionPaused => ActionExecutor.IsPaused;
+
+    /// <inheritdoc />
+    void IExecutionCommandJumpGate.InterruptPauseForCommandJump() =>
+      ActionExecutor.InterruptPauseForCommandJump();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
@@ -306,6 +321,26 @@ namespace Ask.UI.Controls.ProtocolNew
       header.Visibility = vis;
       ContentPanel.Visibility = vis;
       BigButtonsPanel.Visibility = vis;
+    }
+
+    private void CommandJumpButtonTop_Click(object sender, RoutedEventArgs e) => RequestCommandJump();
+
+    private async void RequestCommandJump()
+    {
+      if (StepControlManager.IsBreakpointStepModeActive && StepControlManager.BreakpointCommandInfo != null)
+      {
+        ExecutionEventAdapter.RaiseBreakpointF4Pressed(StepControlManager.BreakpointCommandInfo);
+        return;
+      }
+
+      try
+      {
+        await CommandExecutionManager.RequestPausedCommandJumpAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка перехода к выбранной команде", exception);
+      }
     }
 
     private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)

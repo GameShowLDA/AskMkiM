@@ -32,8 +32,6 @@ namespace Ask.UI.Components.ProtocolListBox
     private const double ZoomStep = 1.0;
     private const double DefaultFontSize = 20.0;
     private const double MouseWheelScrollStep = 48.0;
-    private const int MaxVisibleProtocolRows = 3000;
-
     private readonly List<ShowMessageModel> _historyMessages = new();
     private ScrollViewer? _protocolScrollViewer;
     private ProtocolCommandGroup? _currentGroup;
@@ -41,8 +39,6 @@ namespace Ask.UI.Components.ProtocolListBox
     private bool _scrollToEndRequested;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
-    private int _visibleRowCount;
-
     /// <summary>
     /// Признак запланированного замера задержки отрисовки.
     /// </summary>
@@ -363,7 +359,6 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       DisplayItems.RemoveAt(DisplayItems.Count - 1);
-      _visibleRowCount--;
       return true;
     }
 
@@ -375,8 +370,6 @@ namespace Ask.UI.Components.ProtocolListBox
         DisplayItems.Clear();
         _currentGroup = null;
         _pendingGroup = null;
-        _visibleRowCount = 0;
-
         LogInformation("Протокол полностью очищен.");
       });
     }
@@ -421,6 +414,7 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         var uiWorkStarted = Stopwatch.GetTimestamp();
         dispatcherQueueMs = Stopwatch.GetElapsedTime(queuedAt, uiWorkStarted).TotalMilliseconds;
+        var shouldScrollToEnd = IsScrolledToEnd();
 
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
@@ -430,8 +424,10 @@ namespace Ask.UI.Components.ProtocolListBox
           FinalizeLatestCommandGroup();
         }
 
-        TrimVisibleItemsIfNeeded();
-        RequestScrollToEnd();
+        if (shouldScrollToEnd)
+        {
+          RequestScrollToEnd();
+        }
         RequestRenderTimingProbe(messageId);
 
         uiWorkMs = Stopwatch.GetElapsedTime(uiWorkStarted).TotalMilliseconds;
@@ -501,14 +497,12 @@ namespace Ask.UI.Components.ProtocolListBox
         {
           DisplayItems.Add(lineItem);
           _currentGroup.VisibleBodyCount++;
-          _visibleRowCount++;
         }
 
         return;
       }
 
       DisplayItems.Add(lineItem);
-      _visibleRowCount++;
     }
 
     private void StartCommandGroup(ShowMessageModel model)
@@ -526,7 +520,6 @@ namespace Ask.UI.Components.ProtocolListBox
       _pendingGroup = group;
 
       DisplayItems.Add(group.HeaderItem);
-      _visibleRowCount++;
     }
 
     private void EnsureCurrentGroupStarted()
@@ -583,7 +576,6 @@ namespace Ask.UI.Components.ProtocolListBox
           DisplayItems.RemoveAt(startIndex);
         }
 
-        _visibleRowCount -= group.VisibleBodyCount;
         group.VisibleBodyCount = 0;
       }
 
@@ -616,8 +608,6 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       group.VisibleBodyCount = group.BodyItems.Count;
-      _visibleRowCount += group.VisibleBodyCount;
-      TrimVisibleItemsIfNeeded();
     }
 
     private void ProtocolCommandHeaderToggleButton_Click(object sender, RoutedEventArgs e)
@@ -644,11 +634,7 @@ namespace Ask.UI.Components.ProtocolListBox
       DisplayItems.Clear();
       _currentGroup = null;
       _pendingGroup = null;
-      _visibleRowCount = 0;
-
-      int historyStart = Math.Max(0, _historyMessages.Count - MaxVisibleProtocolRows);
-
-      for (int i = historyStart; i < _historyMessages.Count; i++)
+      for (int i = 0; i < _historyMessages.Count; i++)
       {
         AppendVisibleMessage(_historyMessages[i]);
       }
@@ -791,50 +777,24 @@ namespace Ask.UI.Components.ProtocolListBox
       }, DispatcherPriority.Loaded);
     }
 
-    private void TrimVisibleItemsIfNeeded()
+    /// <summary>
+    /// Проверяет, находится ли область просмотра у последней строки протокола.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если включена автоматическая прокрутка к новым строкам.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private bool IsScrolledToEnd()
     {
-      while (_visibleRowCount > MaxVisibleProtocolRows && DisplayItems.Count > 0)
+      _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
+      if (_protocolScrollViewer == null)
       {
-        RemoveFirstVisibleChunk();
-      }
-    }
-
-    private void RemoveFirstVisibleChunk()
-    {
-      if (DisplayItems.Count == 0)
-      {
-        return;
+        return true;
       }
 
-      var firstItem = DisplayItems[0];
-
-      if (firstItem.IsCommandHeader && firstItem.Group != null)
-      {
-        var group = firstItem.Group;
-        int rowsToRemove = 1 + group.VisibleBodyCount;
-
-        for (int i = 0; i < rowsToRemove; i++)
-        {
-          DisplayItems.RemoveAt(0);
-        }
-
-        if (ReferenceEquals(_currentGroup, group))
-        {
-          _currentGroup = null;
-        }
-
-        if (ReferenceEquals(_pendingGroup, group))
-        {
-          _pendingGroup = null;
-        }
-
-        _visibleRowCount -= rowsToRemove;
-        group.VisibleBodyCount = 0;
-        return;
-      }
-
-      DisplayItems.RemoveAt(0);
-      _visibleRowCount--;
+      const double tolerance = 2.0;
+      return _protocolScrollViewer.VerticalOffset >=
+        _protocolScrollViewer.ScrollableHeight - tolerance;
     }
 
     public Task AppendEmptyLineAsync(int indentLevel = 0)
