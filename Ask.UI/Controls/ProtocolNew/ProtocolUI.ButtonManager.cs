@@ -41,11 +41,6 @@ namespace Ask.UI.Controls.ProtocolNew
     public event PreviewMouseDownEventHandler ReturnMeasureResistanceButtonPreviewMouseDown;
 
     /// <summary>
-    /// Событие возникает при нажатии на кнопку "Зациклить".
-    /// </summary>
-    public event PreviewMouseDownEventHandler LoopMeasureResistanceButtonPreviewMouseDown;
-
-    /// <summary>
     /// Событие возникает при нажатии на кнопку "Остановить".
     /// </summary>
     public event PreviewMouseDownEventHandler PauseButtonPreviewMouseDown;
@@ -90,15 +85,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       get { return Application.Current.Dispatcher.Invoke(() => RepeatButtonElement.Visibility); }
       set { Application.Current.Dispatcher.Invoke(() => RepeatButtonElement.Visibility = value); }
-    }
-
-    /// <summary>
-    /// Получает или устанавливает видимость кнопки "Зациклить".
-    /// </summary>
-    public Visibility LoopMeasureResistanceButtonVisibility
-    {
-      get { return Application.Current.Dispatcher.Invoke(() => loopButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => loopButton.Visibility = value); }
     }
 
     /// <summary>
@@ -206,13 +192,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       get => RepeatButtonElement.Visibility;
       set => RepeatButtonElement.Visibility = value;
-    }
-
-    /// <inheritdoc />
-    Visibility IProtocolButtonView.LoopVisibility
-    {
-      get => loopButton.Visibility;
-      set => loopButton.Visibility = value;
     }
 
     /// <inheritdoc />
@@ -397,15 +376,6 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Обработчик события PreviewMouseDown для кнопки LoopMeasureResistanceButton.
-    /// </summary>
-    private void LoopMeasureResistanceButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      LogInformation($"Сработан обработчик события для кнопки \"Зациклить\"");
-      LoopMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
-    }
-
-    /// <summary>
     /// Обработчик события PreviewMouseDown для кнопки TopLayer.
     /// </summary>
     private void TopLayer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -469,7 +439,6 @@ namespace Ask.UI.Controls.ProtocolNew
       StepIntoButtonElement.PreviewMouseDown += BottomLayer_PreviewMouseDown;
 
       RepeatButtonElement.PreviewMouseDown += ReturnMeasureResistanceButton_PreviewMouseDown;
-      loopButton.PreviewMouseDown += LoopMeasureResistanceButton_PreviewMouseDown;
     }
 
     /// <summary>

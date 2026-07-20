@@ -8,11 +8,10 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
-using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
-using Ask.Engine.ControlCommandExecutor.Execution;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -171,7 +170,6 @@ namespace Ask.UI.Controls.ProtocolNew
       ClearInspectionProtocol();
       this.DataContext = this;
 
-      loopButton.Visibility = Visibility.Collapsed;
       RepeatButtonElement.Visibility = Visibility.Collapsed;
 
       SetupButtons();

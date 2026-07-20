@@ -23,7 +23,6 @@ namespace Ask.Engine.Tests.NodeMethod.PI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
         StopDelegate = async (CancellationToken token) =>
         {

@@ -21,7 +21,6 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test
       };
 
