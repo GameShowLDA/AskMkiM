@@ -17,6 +17,16 @@ public interface IExecutionPauseController
   bool RequestPause();
 
   /// <summary>
+  /// Асинхронно ожидает запроса паузы.
+  /// </summary>
+  /// <param name="cancellationToken">Токен отмены ожидания.</param>
+  /// <returns>Задача, представляющая ожидание запроса паузы.</returns>
+  /// <exception cref="OperationCanceledException">
+  /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
+  /// </exception>
+  Task WaitForPauseRequestAsync(CancellationToken cancellationToken);
+
+  /// <summary>
   /// Асинхронно ожидает продолжения или отмены выполнения.
   /// </summary>
   /// <param name="cancellationToken">Токен отмены ожидания.</param>

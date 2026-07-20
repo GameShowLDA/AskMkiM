@@ -143,7 +143,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       IsTopMenuVisible = isTopMenuVisible;
       Items = new ObservableCollection<object>();
-      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+      ActionExecutor = ActionExecutor.CreateInstance(this);
       _controlButtonHandler = OnControlButtonPressed;
       _stepByStepModeChangedHandler = e => EventAggregator_StepByStepModeChanged(e.IsEnabled);
       InitializeInternal();
@@ -248,25 +248,25 @@ namespace Ask.UI.Controls.ProtocolNew
     bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Start() => KeyboardManager.OnStartPressed?.Invoke();
+    void IProtocolHotkeyContext.Start() => StartFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.RunOrPause() => KeyboardManager.OnRunOrPausePressed?.Invoke();
+    void IProtocolHotkeyContext.RunOrPause() => HandleRunOrPause();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.Step(bool isStepInto) => HandleStepModeStart(isStepInto);
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Pause() => KeyboardManager.OnPausePressed?.Invoke();
+    void IProtocolHotkeyContext.Pause() => PauseFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Continue() => KeyboardManager.OnContinuePressed?.Invoke();
+    void IProtocolHotkeyContext.Continue() => ContinueFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Exit() => KeyboardManager.OnExitPressed?.Invoke();
+    void IProtocolHotkeyContext.Exit() => ExitFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Repeat() => KeyboardManager.OnRepeatPressed?.Invoke();
+    void IProtocolHotkeyContext.Repeat() => RepeatFromHotkey();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
@@ -350,7 +350,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnStartPressed?.Invoke();
+        StartFromHotkey();
         return;
       }
 
@@ -359,11 +359,11 @@ namespace Ask.UI.Controls.ProtocolNew
       // если видна "Пауза" — ставим на паузу (в т.ч. во время F10-run).
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnContinuePressed?.Invoke();
+        ContinueFromHotkey();
       }
       else if (PauseButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnPausePressed?.Invoke();
+        PauseFromHotkey();
       }
     }
 

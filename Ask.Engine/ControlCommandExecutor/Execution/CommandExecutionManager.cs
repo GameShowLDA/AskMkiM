@@ -117,6 +117,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       while (index < _commands.Count)
       {
+        await _console.WaitIfPausedAsync();
+
         var command = _commands[index];
         try
         {
@@ -155,6 +157,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           if (hasExecutor)
           {
             await executor.ExecuteAsync(context, _protocolModel);
+            await _console.WaitIfPausedAsync();
           }
           else
           {
