@@ -513,6 +513,8 @@ namespace MainWindowProgram.Services
 
       await BuildAsync();
 
+      var actualContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+
       if (container == null && editor != null)
       {
         container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
@@ -521,6 +523,11 @@ namespace MainWindowProgram.Services
       if (container == null && runContainer != null)
       {
         container = runContainer;
+      }
+
+      if (!container.Equals(actualContainer))
+      {
+        container = actualContainer;
       }
 
       var dockManager = container.GetDockControl();
