@@ -178,6 +178,7 @@
         <x:Array x:Key="AskMki.Options.VoltmeterConnection" Type="{x:Type local:AskMkiSettingOption}">
             <local:AskMkiSettingOption Value="USB" Label="USB"/>
             <local:AskMkiSettingOption Value="IP" Label="IP"/>
+            <local:AskMkiSettingOption Value="COM" Label="COM"/>
         </x:Array>
 
         <x:Array x:Key="AskMki.Groups" Type="{x:Type local:AskMkiGroupDefinition}">

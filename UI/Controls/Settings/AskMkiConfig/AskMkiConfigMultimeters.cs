@@ -14,6 +14,8 @@ public partial class AskMkiConfigControl
     typeof(KeysightDevice),
     typeof(MultiAgilent34401A),
     typeof(MultiAgilent34450A),
+    typeof(MultiAgilentRigol),
+    typeof(MultiAgilentCom),
     typeof(MultiDmm4040),
     typeof(MultiDmm4050)
   ];
@@ -28,6 +30,12 @@ public partial class AskMkiConfigControl
   {
     var type = ResolveVoltmeterType(deviceClass);
     return type != null && typeof(DeviceWithIP).IsAssignableFrom(type);
+  }
+
+  private static bool IsComVoltmeter(string? deviceClass)
+  {
+    var type = ResolveVoltmeterType(deviceClass);
+    return type != null && typeof(DeviceWithCOM).IsAssignableFrom(type);
   }
 
   private static Type? ResolveVoltmeterType(string? deviceClass)

@@ -15,19 +15,36 @@ public sealed class ASKMKI_PKI : AskMkiDeviceBase, IAskMkiPki
   {
     if (controller.UseNetworkProtocol)
     {
-      int dU = Math.Clamp(voltageRange, 1, 7);
-      int nlev = Math.Clamp((int)Math.Round(resistanceOhm / 1_000_000.0), 1, LegacyAskPpuNetBits.LevelMask);
-      ushort modeWord = (ushort)((LegacyAskPpuNetBits.DevicePkiSi << 8) | (dU << 4) | 1);
-      ushort levelWord = (ushort)(LegacyAskPpuNetBits.LevelPkiSi | (nlev ^ LegacyAskPpuNetBits.LevelMask));
+      await ExecuteOnPpuPkiAddressAsync(controller, async () =>
+      {
+        int dU = Math.Clamp(voltageRange, 1, 7);
+        int nlev = Math.Clamp((int)Math.Round(resistanceOhm / 1_000_000.0), 1, LegacyAskPpuNetBits.LevelMask);
+        ushort modeWord = (ushort)((LegacyAskPpuNetBits.DevicePkiSi << 8) | (dU << 4) | 1);
+        ushort levelWord = (ushort)(LegacyAskPpuNetBits.LevelPkiSi | (nlev ^ LegacyAskPpuNetBits.LevelMask));
 
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetMode, modeWord, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetLevel, levelWord, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetCommand, LegacyAskPpuNetBits.CommandPkiStart, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetMode, modeWord, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetLevel, levelWord, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetCommand, LegacyAskPpuNetBits.CommandPkiStart, cancellationToken).ConfigureAwait(false);
+      }).ConfigureAwait(false);
       return;
     }
 
     ushort commandWord = (ushort)(LegacyAskCommandBits.ElectronicProbe | LegacyAskCommandBits.ElectronicTop | LegacyAskCommandBits.ElectronicBottom);
     await controller.WriteCommandRegisterAsync(commandWord, cancellationToken).ConfigureAwait(false);
     await controller.ReadAdcAsync(cancellationToken).ConfigureAwait(false);
+  }
+
+  private static async Task ExecuteOnPpuPkiAddressAsync(IAskMkiController controller, Func<Task> action)
+  {
+    byte previousAddress = controller.NetworkAddress;
+    controller.NetworkAddress = LegacyAskDeviceAddress.PpuPki;
+    try
+    {
+      await action().ConfigureAwait(false);
+    }
+    finally
+    {
+      controller.NetworkAddress = previousAddress;
+    }
   }
 }

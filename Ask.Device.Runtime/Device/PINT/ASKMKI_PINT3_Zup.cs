@@ -5,8 +5,8 @@ namespace Ask.Device.Runtime.Device.PINT;
 
 public sealed class ASKMKI_PINT3_Zup : AskMkiPintBase
 {
-  public ASKMKI_PINT3_Zup()
-    : base("АСК: ПИНТ3 ZUP", "ПИНТ3 ZUP старого тестера АСК", DeviceType.PowerSourceModule, pintNumber: 3, voltageStep: 0.1, currentStep: 0.1, useBcdCode: false)
+  public ASKMKI_PINT3_Zup(double voltageStep = 0.1, double currentStep = 0.1)
+    : base("АСК: ПИНТ3 ZUP", "ПИНТ3 ZUP старого тестера АСК", DeviceType.PowerSourceModule, pintNumber: 3, voltageStep: voltageStep, currentStep: currentStep, useBcdCode: false)
   {
   }
 }

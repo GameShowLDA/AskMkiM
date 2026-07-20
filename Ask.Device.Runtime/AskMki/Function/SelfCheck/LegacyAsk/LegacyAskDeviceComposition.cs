@@ -89,21 +89,35 @@ public sealed class LegacyAskDeviceComposition
     }
 
     IAskMkiPint device = pint == 3
-      ? CreatePint3(type)
-      : CreatePint4(type);
+      ? CreatePint3(profile, type)
+      : CreatePint4(profile, type);
 
     pints[pint] = Attach(device, numberChassis);
     LogInformation($"АСК composition: ПИНТ{pint}, type={type}, device={device.GetType().Name}", isDeviceLog: true);
   }
 
-  private static IAskMkiPint CreatePint3(byte type)
+  private static IAskMkiPint CreatePint3(LegacyMkiHardwareProfile profile, byte type)
   {
-    return type == 1 ? new ASKMKI_PINT3_B5108() : new ASKMKI_PINT3_Zup();
+    double voltageStep = GetConfiguredStep(profile.HardwareConfig.GuiVoltStep, 0, 0.1);
+    double currentStep = GetConfiguredStep(profile.HardwareConfig.GuiAmperStep, 0, 0.1);
+    return type == 1
+      ? new ASKMKI_PINT3_B5108(voltageStep, currentStep)
+      : new ASKMKI_PINT3_Zup(voltageStep, currentStep);
   }
 
-  private static IAskMkiPint CreatePint4(byte type)
+  private static IAskMkiPint CreatePint4(LegacyMkiHardwareProfile profile, byte type)
   {
-    return type == 1 ? new ASKMKI_PINT4_PUI() : new ASKMKI_PINT4_RS485();
+    double voltageStep = GetConfiguredStep(profile.HardwareConfig.GuiVoltStep, 1, 0.1);
+    double currentStep = GetConfiguredStep(profile.HardwareConfig.GuiAmperStep, 1, 0.001);
+    return type == 1
+      ? new ASKMKI_PINT4_PUI(voltageStep, currentStep)
+      : new ASKMKI_PINT4_RS485(voltageStep, currentStep);
+  }
+
+  private static double GetConfiguredStep(double[] values, int index, double fallback)
+  {
+    double value = values.ElementAtOrDefault(index);
+    return value > 0 ? value : fallback;
   }
 
   private static T Attach<T>(T device, int numberChassis)

@@ -18,21 +18,24 @@ public sealed class ASKMKI_PPU : AskMkiDeviceBase, IAskMkiPpu
 
     if (controller.UseNetworkProtocol)
     {
-      ushort modeWord = (ushort)(LegacyAskPpuNetBits.DevicePpu << 8);
-      if ((mode & LegacyAskPpuMode.OneMinute) != 0)
+      await ExecuteOnPpuPkiAddressAsync(controller, async () =>
       {
-        modeWord |= LegacyAskPpuNetBits.ModeOneMinute;
-      }
+        ushort modeWord = (ushort)(LegacyAskPpuNetBits.DevicePpu << 8);
+        if ((mode & LegacyAskPpuMode.OneMinute) != 0)
+        {
+          modeWord |= LegacyAskPpuNetBits.ModeOneMinute;
+        }
 
-      ushort levelWord = LegacyAskPpuNetBits.LevelPpu;
-      if ((mode & LegacyAskPpuMode.OneSecond) != 0)
-      {
-        levelWord |= LegacyAskPpuNetBits.LevelOneSecond;
-      }
+        ushort levelWord = LegacyAskPpuNetBits.LevelPpu;
+        if ((mode & LegacyAskPpuMode.OneSecond) != 0)
+        {
+          levelWord |= LegacyAskPpuNetBits.LevelOneSecond;
+        }
 
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetVoltage, voltageCode, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetMode, modeWord, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetLevel, levelWord, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetVoltage, voltageCode, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetMode, modeWord, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetLevel, levelWord, cancellationToken).ConfigureAwait(false);
+      }).ConfigureAwait(false);
       return;
     }
 
@@ -47,14 +50,14 @@ public sealed class ASKMKI_PPU : AskMkiDeviceBase, IAskMkiPpu
   public Task StartAsync(IAskMkiController controller, ushort mode, CancellationToken cancellationToken = default)
   {
     return controller.UseNetworkProtocol
-      ? controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetCommand, LegacyAskPpuNetBits.CommandPpuStart, cancellationToken)
+      ? ExecuteOnPpuPkiAddressAsync(controller, () => controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetCommand, LegacyAskPpuNetBits.CommandPpuStart, cancellationToken))
       : controller.WriteRegisterAsync(LegacyAskRegisters.PpuMkiCommand, (ushort)(ToMkiPpuMode(mode) | LegacyAskPpuMkiBits.Led | LegacyAskPpuMkiBits.Start), cancellationToken);
   }
 
   public Task<ushort> ReadStatusAsync(IAskMkiController controller, CancellationToken cancellationToken = default)
   {
     return controller.UseNetworkProtocol
-      ? controller.ReadRegisterAsync(LegacyAskRegisters.PpuNetCommand, cancellationToken)
+      ? ExecuteOnPpuPkiAddressAsync(controller, () => controller.ReadRegisterAsync(LegacyAskRegisters.PpuNetCommand, cancellationToken))
       : controller.ReadRegisterAsync(LegacyAskRegisters.PpuMkiCommand, cancellationToken);
   }
 
@@ -62,10 +65,13 @@ public sealed class ASKMKI_PPU : AskMkiDeviceBase, IAskMkiPpu
   {
     if (controller.UseNetworkProtocol)
     {
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetCommand, LegacyAskPpuNetBits.CommandPpuReset, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetVoltage, 0, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetMode, 0, cancellationToken).ConfigureAwait(false);
-      await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetLevel, 0, cancellationToken).ConfigureAwait(false);
+      await ExecuteOnPpuPkiAddressAsync(controller, async () =>
+      {
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetCommand, LegacyAskPpuNetBits.CommandPpuReset, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetVoltage, 0, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetMode, 0, cancellationToken).ConfigureAwait(false);
+        await controller.WriteRegisterAsync(LegacyAskRegisters.PpuNetLevel, 0, cancellationToken).ConfigureAwait(false);
+      }).ConfigureAwait(false);
       return;
     }
 
@@ -91,5 +97,33 @@ public sealed class ASKMKI_PPU : AskMkiDeviceBase, IAskMkiPpu
     }
 
     return result;
+  }
+
+  private static async Task ExecuteOnPpuPkiAddressAsync(IAskMkiController controller, Func<Task> action)
+  {
+    byte previousAddress = controller.NetworkAddress;
+    controller.NetworkAddress = LegacyAskDeviceAddress.PpuPki;
+    try
+    {
+      await action().ConfigureAwait(false);
+    }
+    finally
+    {
+      controller.NetworkAddress = previousAddress;
+    }
+  }
+
+  private static async Task<T> ExecuteOnPpuPkiAddressAsync<T>(IAskMkiController controller, Func<Task<T>> action)
+  {
+    byte previousAddress = controller.NetworkAddress;
+    controller.NetworkAddress = LegacyAskDeviceAddress.PpuPki;
+    try
+    {
+      return await action().ConfigureAwait(false);
+    }
+    finally
+    {
+      controller.NetworkAddress = previousAddress;
+    }
   }
 }

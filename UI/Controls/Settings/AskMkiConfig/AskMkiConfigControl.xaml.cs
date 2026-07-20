@@ -289,18 +289,24 @@ public partial class AskMkiConfigControl : UserControl
       var selectedDeviceClass = meterItem?.SelectedOption?.Value;
       var supportsUsb = IsUsbVoltmeter(selectedDeviceClass);
       var supportsIp = IsIpVoltmeter(selectedDeviceClass);
+      var supportsCom = IsComVoltmeter(selectedDeviceClass);
 
-      if (connectionItem != null && supportsIp && !supportsUsb)
+      if (connectionItem != null && supportsCom && !supportsUsb && !supportsIp)
+      {
+        SetVoltmeterConnectionOptions(connectionItem, "COM", resetConnectionSelection);
+      }
+
+      if (connectionItem != null && supportsIp && !supportsUsb && !supportsCom)
       {
         SetVoltmeterConnectionOptions(connectionItem, "IP", resetConnectionSelection);
       }
 
-      if (connectionItem != null && supportsUsb && !supportsIp)
+      if (connectionItem != null && supportsUsb && !supportsIp && !supportsCom)
       {
         SetVoltmeterConnectionOptions(connectionItem, "USB", resetConnectionSelection);
       }
 
-      if (connectionItem != null && supportsUsb && supportsIp)
+      if (connectionItem != null && (supportsUsb ? 1 : 0) + (supportsIp ? 1 : 0) + (supportsCom ? 1 : 0) > 1)
       {
         SetVoltmeterConnectionOptions(connectionItem, null, resetConnectionSelection);
       }

@@ -4,7 +4,9 @@ using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.DataBase.Provider.Services.Devices;
+using Ask.Device.Communication.Com.Configuration;
 using System;
+using System.IO.Ports;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -76,6 +78,13 @@ public partial class AskMkiConfigControl
   /// </summary>
   private static string ResolveVoltmeterConnection(LegacyMkiHardwareProfile profile)
   {
+    if (IsComVoltmeter(profile.HardwareAux.VoltmeterDeviceClass)
+        && !IsUsbVoltmeter(profile.HardwareAux.VoltmeterDeviceClass)
+        && !IsIpVoltmeter(profile.HardwareAux.VoltmeterDeviceClass))
+    {
+      return CreateVoltmeterComConnection(profile);
+    }
+
     if (IsIpVoltmeter(profile.HardwareAux.VoltmeterDeviceClass) && !IsUsbVoltmeter(profile.HardwareAux.VoltmeterDeviceClass))
     {
       return profile.HardwareAux.VoltmeterIpAddress?.Trim() ?? string.Empty;
@@ -91,7 +100,78 @@ public partial class AskMkiConfigControl
       return profile.HardwareAux.VoltmeterIpAddress?.Trim() ?? string.Empty;
     }
 
+    if (string.Equals(profile.HardwareAux.VoltmeterConnectionType, "COM", StringComparison.OrdinalIgnoreCase))
+    {
+      return CreateVoltmeterComConnection(profile);
+    }
+
     return profile.HardwareAux.UsbAddrVm?.Trim() ?? string.Empty;
+  }
+
+  private static string CreateVoltmeterComConnection(LegacyMkiHardwareProfile profile)
+  {
+    var port = profile.HardwareAux.PortVm;
+    byte comNumber = port.Com1;
+    bool isComx4Channel = comNumber > 8;
+
+    if (comNumber == 0)
+    {
+      return string.Empty;
+    }
+
+    if (isComx4Channel)
+    {
+      comNumber = profile.HardwareConfig.Comx4Com1;
+      if (comNumber is 0 or > 8)
+      {
+        return string.Empty;
+      }
+    }
+
+    int channel = isComx4Channel ? port.Com1 - 9 : 3;
+    var timeout = port.MsTmo == 0 ? 1000 : port.MsTmo;
+    var serialPort = new SerialPortCustom(
+      $"COM{comNumber}",
+      GetBaudRate(port.Baud),
+      GetParity(port.Parity),
+      port.Len == 0 ? 8 : port.Len,
+      GetStopBits(port.QStopBit))
+    {
+      Handshake = Handshake.None,
+      ReadTimeout = timeout,
+      WriteTimeout = timeout,
+      RtsEnable = (channel & 0x01) != 0,
+      DtrEnable = (channel & 0x02) != 0
+    };
+
+    return serialPort.ToString();
+  }
+
+  private static int GetBaudRate(byte baudCode)
+  {
+    int[] baudRates = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200];
+    return baudCode < baudRates.Length ? baudRates[baudCode] : 9600;
+  }
+
+  private static Parity GetParity(byte parityCode)
+  {
+    return parityCode switch
+    {
+      1 => Parity.Odd,
+      2 => Parity.Even,
+      3 => Parity.Space,
+      4 => Parity.Mark,
+      _ => Parity.None
+    };
+  }
+
+  private static StopBits GetStopBits(byte stopBits)
+  {
+    return stopBits switch
+    {
+      2 => StopBits.Two,
+      _ => StopBits.One
+    };
   }
 
   /// <summary>
