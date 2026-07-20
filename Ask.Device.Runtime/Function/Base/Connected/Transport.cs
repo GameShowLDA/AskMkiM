@@ -4,9 +4,10 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Connected;
 using Ask.Device.Runtime.Function.Helpers;
 
-namespace Ask.Device.Runtime.Function.Connected
+namespace Ask.Device.Runtime.Function.Base.Connected
 {
   /// <summary>
   /// Универсальный транспорт для подключения и обмена данными с устройством.
@@ -99,9 +100,16 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        return await _connectionTransport.ResetAsync(userMessageService);
+        var result = await _connectionTransport.ResetAsync(userMessageService);
+
+        if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Сброс {_device.Name}", result ? "Устройство сброшено" : "Ошибка сброса", result, 1, userMessageService);
+        }
+
+        return result;
       }, userMessageService);
-     
+
       return connect;
     }
 
