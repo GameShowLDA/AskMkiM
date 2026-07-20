@@ -31,4 +31,9 @@ public class BreakdownTesterDto : AttachableDeviceDto
   /// Минимальное напряжение для измерения сопротивления изоляции.
   /// </summary>
   public int IRMinVoltage { get; set; }
+
+  /// <summary>
+  /// Сопротивление изоляции системы, ГОм.
+  /// </summary>
+  public int SystemInsulationResistanceGOhm { get; set; } = 60;
 }
