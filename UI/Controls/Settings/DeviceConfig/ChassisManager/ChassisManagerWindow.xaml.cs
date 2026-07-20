@@ -60,10 +60,15 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     /// <summary>
     /// Устанавливает настройки для теста АСКМ.
     /// </summary>
-    public void SetSettings()
+    public void SetSettings(ChassisManagerDto? existingDevice = null)
     {
       deviceSettingsWindow.NameDevice = "Тест АСКМ";
+      if (existingDevice != null)
+      {
+        deviceSettingsWindow.SetHeadUnit(ChassisManagers.Build(existingDevice));
+      }
       deviceSettingsWindow.LoadDeviceModels<IChassisManager>();
+      deviceSettingsWindow.LoadFromDevice(existingDevice);
 
       deviceSettingsWindow.SaveEvent += async (s, a) =>
       {
@@ -81,10 +86,20 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
           {
             deviceDto.BusType = (baseDevice as IChassisManager).BusType;
             var chassi = ChassisManagers.Build(deviceDto);
-            var createdDevice = await ChassisManagers.CreateAsync(chassi);
-            deviceDto.Id = createdDevice.Id;
+            if (existingDevice == null)
+            {
+              var createdDevice = await ChassisManagers.CreateAsync(chassi);
+              deviceDto.Id = createdDevice.Id;
+              ShowCreated(deviceDto);
+            }
+            else
+            {
+              deviceDto.Id = existingDevice.Id;
+              await ChassisManagers.UpdateAsync(chassi);
+              ShowUpdated(deviceDto);
+            }
+
             RequestCloseWindow();
-            ShowCreated(deviceDto);
             RequestSave?.Invoke(s, deviceDto);
           }
         }

@@ -1,17 +1,20 @@
 using Ask.Core.Services.App;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
+using Ask.UI.Features.ProtocolNew.Protocol;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,7 +26,7 @@ namespace Ask.UI.Controls.ProtocolNew
   /// Класс управления пользовательским интерфейсом протокола выполнения.
   /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
-  public partial class ProtocolUI : UserControl, ITextAdapter
+  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext
   {
     static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     private bool loaded = false;
@@ -47,7 +50,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public string Header
     {
-      get => (string)GetValue(HeaderProperty); 
+      get => (string)GetValue(HeaderProperty);
       set => SetValue(HeaderProperty, value);
     }
 
@@ -119,6 +122,11 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private Window _attachedWindow;
 
+    /// <summary>
+    /// Контроллер маршрутизации горячих клавиш в команды исполнительного интерфейса.
+    /// </summary>
+    private ProtocolHotkeyController _hotkeyController = null!;
+
     private Action<ExecutionEvents.ControlButtonPressed> _controlButtonHandler;
     private Action<ExecutionEvents.StepByStepModeChanged> _stepByStepModeChangedHandler;
     private bool _eventSubscriptionsAttached;
@@ -135,7 +143,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       IsTopMenuVisible = isTopMenuVisible;
       Items = new ObservableCollection<object>();
-      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+      ActionExecutor = ActionExecutor.CreateInstance(this);
       _controlButtonHandler = OnControlButtonPressed;
       _stepByStepModeChangedHandler = e => EventAggregator_StepByStepModeChanged(e.IsEnabled);
       InitializeInternal();
@@ -155,12 +163,20 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
+      _protocolStorage = new ProtocolStorageService();
+      _inspectionProtocolAreaController = new InspectionProtocolAreaController(_protocolStorage, this);
+      inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
+      inspectionProtocolTextBox.WordWrap = true;
+      ClearInspectionProtocol();
       this.DataContext = this;
 
       loopButton.Visibility = Visibility.Collapsed;
       RepeatButtonElement.Visibility = Visibility.Collapsed;
 
       SetupButtons();
+      _hotkeyController = new ProtocolHotkeyController(this);
+      _entryOutputService = new ProtocolEntryOutputService(this);
+      _postOutputController = new ProtocolPostOutputController(this);
 
       this.Loaded += (s, e) =>
       {
@@ -210,92 +226,51 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
     {
-      var key = e.Key == Key.System ? e.SystemKey : e.Key;
-      var modifiers = Keyboard.Modifiers;
-      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
-      {
-        return;
-      }
-
-      if (Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox)
-        return;
-
-      switch (key)
-      {
-        case Key.Enter:
-          if (modifiers == ModifierKeys.None && StartButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnStartPressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-
-        case Key.F5:
-          if (modifiers == ModifierKeys.None)
-          {
-            HandleRunOrPause();
-            e.Handled = true;
-          }
-          break;
-
-        case Key.F10:
-          if (modifiers == ModifierKeys.None)
-          {
-            HandleStepModeStart(isStepInto: false);
-            e.Handled = true;
-          }
-          break;
-
-        case Key.F11:
-          if (modifiers == ModifierKeys.None)
-          {
-            HandleStepModeStart(isStepInto: true);
-            e.Handled = true;
-          }
-          break;
-
-        case Key.P:
-          if (modifiers == ModifierKeys.None && ContinueButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnContinuePressed?.Invoke();
-          }
-          else if (modifiers == ModifierKeys.None && PauseButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnPausePressed?.Invoke();
-          }
-          if (modifiers == ModifierKeys.None)
-          {
-            e.Handled = true;
-          }
-          break;
-
-        case Key.Escape:
-          if (modifiers == ModifierKeys.None &&
-              (StopButtonElement.Visibility == Visibility.Visible
-              || ContinueButtonElement.Visibility == Visibility.Visible
-              || PauseButtonElement.Visibility == Visibility.Visible))
-          {
-            KeyboardManager.OnExitPressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-
-        case Key.R:
-          if (modifiers == ModifierKeys.None && RepeatButtonElement.Visibility == Visibility.Visible)
-          {
-            KeyboardManager.OnRepeatPressed?.Invoke();
-            e.Handled = true;
-          }
-          break;
-        default:
-          var focus = Keyboard.FocusedElement;
-          if (key == Key.LeftAlt || key == Key.RightAlt)
-          {
-            AnotherKeyPressed?.Invoke(sender, e);
-          }
-          break;
-      }
+      _hotkeyController.HandleKeyDown(sender, e);
     }
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanStart => StartButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanPause => PauseButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanContinue => ContinueButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanExit =>
+      StopButtonElement.Visibility == Visibility.Visible
+      || ContinueButtonElement.Visibility == Visibility.Visible
+      || PauseButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Start() => StartFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.RunOrPause() => HandleRunOrPause();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Step(bool isStepInto) => HandleStepModeStart(isStepInto);
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Pause() => PauseFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Continue() => ContinueFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Exit() => ExitFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.Repeat() => RepeatFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
+      AnotherKeyPressed?.Invoke(sender, e);
 
     private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -375,7 +350,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnStartPressed?.Invoke();
+        StartFromHotkey();
         return;
       }
 
@@ -384,11 +359,11 @@ namespace Ask.UI.Controls.ProtocolNew
       // если видна "Пауза" — ставим на паузу (в т.ч. во время F10-run).
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnContinuePressed?.Invoke();
+        ContinueFromHotkey();
       }
       else if (PauseButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnPausePressed?.Invoke();
+        PauseFromHotkey();
       }
     }
 
@@ -489,7 +464,7 @@ namespace Ask.UI.Controls.ProtocolNew
           return;
         }
 
-        var historyDirectory = Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
+        var historyDirectory = _protocolStorage.GetHistoryDirectory();
         Directory.CreateDirectory(historyDirectory);
 
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
@@ -505,22 +480,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private string? ResolveLatestProtocolPath()
     {
-      if (!string.IsNullOrWhiteSpace(_lastSavedProtocolPath) && File.Exists(_lastSavedProtocolPath))
-      {
-        return Path.GetFullPath(_lastSavedProtocolPath);
-      }
-
-      var historyDirectory = Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory));
-      if (!Directory.Exists(historyDirectory))
-      {
-        return null;
-      }
-
-      return Directory
-        .EnumerateFiles(historyDirectory, "*.lstw", SearchOption.AllDirectories)
-        .Concat(Directory.EnumerateFiles(historyDirectory, "*.lst", SearchOption.AllDirectories))
-        .OrderByDescending(File.GetLastWriteTimeUtc)
-        .FirstOrDefault();
+      return _protocolStorage.ResolveLatestExecutionProtocolPath();
     }
   }
 }

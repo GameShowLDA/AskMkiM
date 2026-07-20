@@ -1,13 +1,11 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -17,7 +15,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class KsCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
     private double firstValue = 0;
     private double secondValue = -1;
 
@@ -47,7 +45,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console, command.AlgorithmKey.Contains("Б"));
 
       if (command.LowerLimitResistance.HasValue)
@@ -117,7 +115,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -125,7 +123,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
-        { 
+        {
           answer -= errorResistance;
         }
 
@@ -147,7 +145,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -171,7 +169,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService, bool fast = false)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService, bool fast = false)
     {
       if (!fast)
       {

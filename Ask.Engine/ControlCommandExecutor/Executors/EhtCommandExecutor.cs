@@ -40,7 +40,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitResistance.HasValue)
@@ -83,7 +83,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.ContinuityManager.SetContinuityModeAsync(userMessageService);
     }

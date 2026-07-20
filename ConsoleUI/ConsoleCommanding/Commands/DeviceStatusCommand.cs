@@ -164,15 +164,15 @@ namespace ConsoleUI.ConsoleCommanding.Commands
 
     private static void WriteConnectionStatus(CommandContext context, IDevice device)
     {
-      if (device.ConnectableManager == null)
+      if (device.ConnectionInfo == null)
       {
-        context.Console.WriteLine("  Статус подключения: нет менеджера подключения");
+        context.Console.WriteLine("  Статус подключения: нет информации о подключении");
         return;
       }
 
       try
       {
-        var status = device.ConnectableManager.GetConnectionStatus();
+        var status = device.ConnectionInfo.GetConnectionStatus();
         WriteMultiline(context, "  Статус подключения", status);
       }
       catch (Exception ex)
@@ -208,7 +208,7 @@ namespace ConsoleUI.ConsoleCommanding.Commands
           context.Console.WriteLine($"  Пределы: PI(ACW)={breakdownTester.AcwMaxVoltage} В, PI(DCW)={breakdownTester.DcwMaxVoltage} В, IrMax={breakdownTester.IrMaxVoltage} В, IrMin={breakdownTester.IrMinVoltage} В");
           break;
 
-        case IFastMeter fastMeter:
+        case IMultimeter fastMeter:
           context.Console.WriteLine($"  Режим измерителя: {fastMeter.TypeMode}");
           context.Console.WriteLine($"  Порог прозвонки: {fastMeter.MaxContinuityResistance} Ом");
           break;

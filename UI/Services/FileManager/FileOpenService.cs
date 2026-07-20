@@ -1,4 +1,5 @@
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
@@ -114,7 +115,14 @@ namespace UI.Services.FileManager
     private void OpenNewFile(string path, string fileName, string fileContent, Encoding encoding, FileType fileType, TextEditorContainer container)
     {
       var uniqueName = _fileManager.FileService.Name.EnsureUniqueFileName(path, fileName);
-      var textEditorModel = new TextEditorModel(path, uniqueName, encoding);
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(uniqueName);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1)
+      {
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
+      }
+      var originalName = uniqueNameWithoutExtention + Path.GetExtension(uniqueName);
+      var textEditorModel = new TextEditorModel(path, uniqueName, originalName, encoding);
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, fileContent, fileType);
       textEditor.ConfigureBreakpoints(interactive: false, visible: false);
       textEditor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
@@ -185,12 +193,25 @@ namespace UI.Services.FileManager
         encoding = Encoding.GetEncoding(866);
       }
 
-      var content = File.ReadAllText(path, encoding)
+      var content = ReadTextFile(path, encoding, extention)
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
 
       return (content, encoding);
     }
+
+    private static string ReadTextFile(string path, Encoding encoding, string extension)
+    {
+      if (IsProtocolFileExtension(extension) && FileEncryptionManager.IsFileEncrypted(path))
+      {
+        return FileEncryptionManager.ReadEncryptedFileText(path, encoding);
+      }
+
+      return File.ReadAllText(path, encoding);
+    }
+
+    private static bool IsProtocolFileExtension(string extension)
+      => extension is ".lst" or ".lstw";
 
     /// <summary>
     /// Определяет тип файла по его расширению.

@@ -19,4 +19,6 @@
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Description" Key="settings.userinterface.topMenuIcons.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandAutoCollapse_Title" Key="settings.userinterface.commandAutoCollapse.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandAutoCollapse_Description" Key="settings.userinterface.commandAutoCollapse.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_PrintFont_Title" Key="settings.userinterface.printFont.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_PrintFont_Description" Key="settings.userinterface.printFont.description" />
 </ResourceDictionary>

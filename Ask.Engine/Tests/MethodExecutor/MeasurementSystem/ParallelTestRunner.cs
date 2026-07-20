@@ -3,6 +3,8 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Engine.Base.GroupMethod;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
@@ -122,17 +124,38 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         .First().buses;
 
       var (module, points, _) = group;
+      var orderedAssignments = points
+        .Select((point, index) => new PointBusAssignment(point, busAssignments[index]))
+        .OrderBy(assignment => assignment.Point.PointNumber)
+        .ToList();
 
-      for (int i = 0; i < points.Count; i++)
+      var currentPoints = new List<PointModel>();
+      BusPoint? currentBus = null;
+      int? lastPointNumber = null;
+
+      foreach (var assignment in orderedAssignments)
       {
         cancellationToken.ThrowIfCancellationRequested();
-        var point = points[i];
-        var bus = busAssignments[i];
 
-        await module.PointManager.ConnectRelayAsync(bus, point.PointNumber, _protocolUI);
+        if (currentBus != null &&
+            (currentBus != assignment.Bus || lastPointNumber + 1 != assignment.Point.PointNumber))
+        {
+          await RelayPointBatchCommutator.ConnectPointsAsync(module, currentPoints, currentBus.Value, _protocolUI);
+          currentPoints.Clear();
+        }
+
+        currentBus = assignment.Bus;
+        lastPointNumber = assignment.Point.PointNumber;
+        currentPoints.Add(assignment.Point);
       }
 
-      await Task.Delay(500);
+      if (currentBus != null && currentPoints.Count > 0)
+      {
+        cancellationToken.ThrowIfCancellationRequested();
+        await RelayPointBatchCommutator.ConnectPointsAsync(module, currentPoints, currentBus.Value, _protocolUI);
+      }
+
+      await _protocolUI.DelayWithPauseAsync(TimeSpan.FromMilliseconds(500));
     }
 
     /// <summary>
@@ -163,5 +186,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
       chars[_bitLength - 1 - Step] = '1';
       return new string(chars);
     }
+
+    private readonly record struct PointBusAssignment(PointModel Point, BusPoint Bus);
   }
 }

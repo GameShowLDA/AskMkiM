@@ -9,9 +9,11 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
@@ -45,6 +47,12 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     internal List<double> Measurements { get; set; } = new();
     internal double LowerBound = -1;
     internal double UpperBound = -1;
+    private IExecutionController _executionController;
+
+    public void SetExecutionController(IExecutionController executionController)
+    {
+      _executionController = executionController;
+    }
 
     /// <summary>
     /// Формирует список уникальных устройств, необходимых для выполнения алгоритма,
@@ -215,6 +223,87 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="protocolUI">Пользовательский элемент для вывода в протокол.</param>
     public abstract Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService protocolUI, double intrinsicValue = 0);
 
+    protected void AddMetrologyError(
+      IUserInteractionService messageService,
+      MeasurementTypeCommand command,
+      double measuredValue,
+      double lowerBound,
+      double upperBound,
+      string unit)
+    {
+      AddMetrologyError(
+        messageService,
+        command,
+        MeasurementValueFormatter.Format(measuredValue),
+        lowerBound,
+        upperBound,
+        unit);
+    }
+
+    protected void AddMetrologyError(
+      IUserInteractionService messageService,
+      MeasurementTypeCommand command,
+      string measuredValue,
+      double lowerBound,
+      double upperBound,
+      string unit)
+    {
+      var info = command.GetCommandDisplayInfo();
+      var symbol = ResolveQuantitySymbol(unit, info?.Symbol);
+      var firstPoint = FormatPoint(Points.points1);
+      var secondPoint = FormatPoint(Points.pointModel2);
+      var lower = MeasurementValueFormatter.Format(lowerBound);
+      var upper = MeasurementValueFormatter.Format(upperBound);
+
+      var executionController = _executionController ?? messageService as IExecutionController;
+      if (executionController != null)
+      {
+        executionController.AddError($"{firstPoint}, {secondPoint} {symbol}изм. = {measuredValue} {unit} ({lower} - {upper} {unit})");
+      }
+    }
+
+    private static string FormatPoint(PointModel point)
+    {
+      return point == null ? "не задана" : point.ToString();
+    }
+
+    private static QuantitySymbol ResolveQuantitySymbol(string unit, QuantitySymbol? fallback)
+    {
+      foreach (var unitValue in GetUnitValues())
+      {
+        var display = unitValue.GetUnitDisplay();
+        if (string.Equals(display?.Display, unit, StringComparison.OrdinalIgnoreCase))
+        {
+          return display.Symbol;
+        }
+      }
+
+      return fallback ?? QuantitySymbol.R;
+    }
+
+    private static IEnumerable<Enum> GetUnitValues()
+    {
+      foreach (ResistanceUnit unit in Enum.GetValues(typeof(ResistanceUnit)))
+      {
+        yield return unit;
+      }
+
+      foreach (VoltageUnit unit in Enum.GetValues(typeof(VoltageUnit)))
+      {
+        yield return unit;
+      }
+
+      foreach (CurrentUnit unit in Enum.GetValues(typeof(CurrentUnit)))
+      {
+        yield return unit;
+      }
+
+      foreach (CapacitanceUnit unit in Enum.GetValues(typeof(CapacitanceUnit)))
+      {
+        yield return unit;
+      }
+    }
+
     protected static double ApplyPpuDividerCoefficient(double measuredVoltage, double coefficientPercent)
     {
       if (coefficientPercent <= 0)
@@ -320,7 +409,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         max = 0;
       }
 
-      var info = command.GetDisplayInfo();
+      var info = command.GetCommandDisplayInfo();
       string displayName = info?.DisplayName ?? command.ToString();
       string unit = info?.Unit ?? "";
 

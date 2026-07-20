@@ -3,14 +3,21 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.UI.Features.ProtocolNew.Controls;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using System.Windows;
 using System.Windows.Input;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
-  public partial class ProtocolUI : IButtonService
+  public partial class ProtocolUI : IButtonService, IProtocolButtonView
   {
+    /// <summary>
+    /// Контроллер, централизованно применяющий состояния панели кнопок.
+    /// </summary>
+    private ProtocolButtonController _buttonController = null!;
+
     private TaskCompletionSource<bool>? _adminButtonTcs;
     private bool _startRequestedInStepMode;
 
@@ -166,6 +173,62 @@ namespace Ask.UI.Controls.ProtocolNew
       }
     }
 
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.StartVisibility
+    {
+      get => StartButtonElement.Visibility;
+      set => StartButtonElement.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.PauseVisibility
+    {
+      get => PauseButtonElement.Visibility;
+      set => PauseButtonElement.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.ContinueVisibility
+    {
+      get => ContinueButtonElement.Visibility;
+      set => ContinueButtonElement.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.ExitVisibility
+    {
+      get => StopButtonElement.Visibility;
+      set => StopButtonElement.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.RepeatVisibility
+    {
+      get => RepeatButtonElement.Visibility;
+      set => RepeatButtonElement.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.LoopVisibility
+    {
+      get => loopButton.Visibility;
+      set => loopButton.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.StepOverVisibility
+    {
+      get => StepOverButtonElement.Visibility;
+      set => StepOverButtonElement.Visibility = value;
+    }
+
+    /// <inheritdoc />
+    Visibility IProtocolButtonView.StepIntoVisibility
+    {
+      get => StepIntoButtonElement.Visibility;
+      set => StepIntoButtonElement.Visibility = value;
+    }
+
     #endregion
 
     #region События кнопок.
@@ -196,11 +259,6 @@ namespace Ask.UI.Controls.ProtocolNew
     private void StopButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
-
-      // Фиксируем запрос паузы сразу в executor, чтобы избежать гонки
-      // между быстрым "Пауза -> Продолжить" и запуском async-обработчика.
-      ActionExecutor.RequestPause();
-      ShowButtonsOnPause();
 
       PauseButtonPreviewMouseDown?.Invoke(this, e);
     }
@@ -241,19 +299,14 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Завершить\"");
 
-      SetNonVisibleAllButton();
-      StartButtonElement.Visibility = Visibility.Visible;
+      ShowOnlyStartButton();
       ExitButtonPreviewMouseDown?.Invoke(this, e);
     }
     private void RegisterHotkeys()
     {
-      KeyboardManager.OnStartPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          _startRequestedInStepMode = false;
-          ExecutionConfig.SetStepByStepMode(false);
-          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
-        });
+      KeyboardManager.OnRunOrPausePressed = HandleRunOrPause;
+
+      KeyboardManager.OnStartPressed = StartFromHotkey;
 
       KeyboardManager.OnStartPressedByStepMode = () =>
         Application.Current.Dispatcher.Invoke(() =>
@@ -263,36 +316,66 @@ namespace Ask.UI.Controls.ProtocolNew
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
 
-      KeyboardManager.OnExitPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
-          {
-            return;
-          }
-
-          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
-        });
-
-      KeyboardManager.OnPausePressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
-      };
-
-      KeyboardManager.OnContinuePressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
-      };
-
-      KeyboardManager.OnRepeatPressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
-      };
+      KeyboardManager.OnExitPressed = ExitFromHotkey;
+      KeyboardManager.OnPausePressed = PauseFromHotkey;
+      KeyboardManager.OnContinuePressed = ContinueFromHotkey;
+      KeyboardManager.OnRepeatPressed = RepeatFromHotkey;
     }
 
+    /// <summary>
+    /// Запускает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void StartFromHotkey()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        _startRequestedInStepMode = false;
+        ExecutionConfig.SetStepByStepMode(false);
+        StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+      });
+    }
+
+    /// <summary>
+    /// Приостанавливает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void PauseFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Продолжает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void ContinueFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Завершает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void ExitFromHotkey()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
+        {
+          return;
+        }
+
+        ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
+      });
+    }
+
+    /// <summary>
+    /// Повторяет выполнение по команде горячей клавиши.
+    /// </summary>
+    private void RepeatFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Создаёт аргументы события нажатия левой кнопки мыши.
+    /// </summary>
+    /// <returns>Аргументы события нажатия левой кнопки мыши.</returns>
     private MouseButtonEventArgs CreateMouseArgs()
     {
       return new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
@@ -364,6 +447,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     private void SetupButtons()
     {
+      _buttonController = new ProtocolButtonController(this);
       SetupEventHandlers();
       ShowOnlyStartButton();
       HideProtocolManager();
@@ -393,19 +477,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void SetNonVisibleAllButton()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        StartButtonElement.Visibility = Visibility.Collapsed;
-        PauseButtonElement.Visibility = Visibility.Collapsed;
-        ContinueButtonElement.Visibility = Visibility.Collapsed;
-        StopButtonElement.Visibility = Visibility.Collapsed;
-
-        RepeatButtonElement.Visibility = Visibility.Collapsed;
-        loopButton.Visibility = Visibility.Collapsed;
-
-        StepOverButtonElement.Visibility = Visibility.Collapsed;
-        StepIntoButtonElement.Visibility = Visibility.Collapsed;
-      });
+      _buttonController.Apply(ProtocolButtonState.Hidden);
     }
 
     /// <summary>
@@ -413,11 +485,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowOnlyStartButton()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        SetNonVisibleAllButton();
-        StartButtonElement.Visibility = Visibility.Visible;
-      });
+      _buttonController.Apply(ProtocolButtonState.Ready);
     }
 
     /// <summary>
@@ -426,10 +494,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="stepMode">Режим по шагам.</param>
     public void ShowOnlyStopAndFinishButtons()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        ShowExecutionButtonsOnRunning(ActionExecutor.StepMode);
-      });
+      _buttonController.Apply(ProtocolButtonState.Running, ActionExecutor.StepMode);
     }
 
     /// <summary>
@@ -438,10 +503,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <param name="stepMode">Режим по шагам.</param>
     public void ShowOnlyStopAndFinishButtons(bool stepMode)
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        ShowExecutionButtonsOnRunning(stepMode);
-      });
+      _buttonController.Apply(ProtocolButtonState.Running, stepMode);
     }
 
     /// <summary>
@@ -449,11 +511,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void SetNotVisibleStepButton()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        StepIntoButtonElement.Visibility = Visibility.Collapsed;
-        StepOverButtonElement.Visibility = Visibility.Collapsed;
-      });
+      _buttonController.HideStepButtons();
     }
 
     /// <summary>
@@ -461,10 +519,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowButtonsOnPause(bool repeatVisible = false)
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        ShowExecutionButtonsOnPause(ActionExecutor.StepMode, repeatVisible);
-      });
+      _buttonController.Apply(ProtocolButtonState.Paused, ActionExecutor.StepMode, repeatVisible);
     }
 
     /// <summary>
@@ -472,90 +527,32 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowAdditionalFunctionButtons()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        SetNonVisibleAllButton();
-        LoopMeasureResistanceButtonVisibility = Visibility.Visible;
-        ReturnMeasureResistanceButtonVisibility = Visibility.Visible;
-        ExitButtonVisibility = Visibility.Visible;
-      });
+      _buttonController.Apply(ProtocolButtonState.AdditionalActions);
     }
 
     public void ShowOnlyExitButton()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        SetNonVisibleAllButton();
-        ExitButtonVisibility = Visibility.Visible;
-
-        if (ActionExecutor.StepMode)
-        {
-          StepOverButtonVisibility = Visibility.Visible;
-          StepIntoButtonVisibility = Visibility.Visible;
-        }
-      });
-
+      _buttonController.Apply(ProtocolButtonState.ExitOnly, ActionExecutor.StepMode);
     }
 
     public void ShowButtonsOnPause()
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        ShowExecutionButtonsOnPause(ActionExecutor.StepMode, repeatVisible: false);
-      });
+      _buttonController.Apply(ProtocolButtonState.Paused, ActionExecutor.StepMode);
     }
 
     public void UpdateStepButtonsForCurrentState(bool stepModeEnabled)
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        // Для пошагового режима из точки останова всегда нужен сценарий
-        // "Продолжить / Завершить", а не "Пауза / Завершить".
-        if (StepControlManager.IsBreakpointStepModeActive)
-        {
-          ShowExecutionButtonsOnPause(stepModeEnabled, repeatVisible: false);
-          return;
-        }
-
-        if (ContinueButtonElement.Visibility == Visibility.Visible)
-        {
-          ShowExecutionButtonsOnPause(stepModeEnabled, RepeatButtonElement.Visibility == Visibility.Visible);
-          return;
-        }
-
-        if (PauseButtonElement.Visibility == Visibility.Visible)
-        {
-          ShowExecutionButtonsOnRunning(stepModeEnabled);
-          return;
-        }
-
-        StepIntoButtonElement.Visibility = Visibility.Collapsed;
-        StepOverButtonElement.Visibility = Visibility.Collapsed;
-      });
+      _buttonController.UpdateStepMode(
+        stepModeEnabled,
+        StepControlManager.IsBreakpointStepModeActive);
     }
 
-    private void ShowExecutionButtonsOnRunning(bool stepMode)
+    /// <summary>
+    /// Скрывает элементы управления активным выполнением при сбросе состояния исполнителя.
+    /// </summary>
+    internal void HideExecutionButtonsAfterReset()
     {
-      SetNonVisibleAllButton();
-      PauseButtonElement.Visibility = Visibility.Visible;
-      StopButtonElement.Visibility = Visibility.Visible;
-      StepOverButtonElement.Visibility = stepMode ? Visibility.Visible : Visibility.Collapsed;
-      StepIntoButtonElement.Visibility = stepMode ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void ShowExecutionButtonsOnPause(bool stepMode, bool repeatVisible)
-    {
-      SetNonVisibleAllButton();
-      ContinueButtonElement.Visibility = Visibility.Visible;
-      StopButtonElement.Visibility = Visibility.Visible;
-      if (repeatVisible)
-      {
-        RepeatButtonElement.Visibility = Visibility.Visible;
-      }
-
-      // На паузе кнопки шага доступны всегда, чтобы можно было перейти в step-mode.
-      StepOverButtonElement.Visibility = Visibility.Visible;
-      StepIntoButtonElement.Visibility = Visibility.Visible;
+      _buttonController.HideExecutionControls();
     }
 
     private void EnterStepModeFromPause(bool isStepInto, MouseButtonEventArgs e)

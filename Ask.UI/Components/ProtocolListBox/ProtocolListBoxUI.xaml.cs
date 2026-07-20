@@ -1,12 +1,13 @@
-using Ask.Core.Services.FilesUtility;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Services.Notifications;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -41,6 +42,26 @@ namespace Ask.UI.Components.ProtocolListBox
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
     private int _visibleRowCount;
+
+    /// <summary>
+    /// Признак запланированного замера задержки отрисовки.
+    /// </summary>
+    private bool _renderProbePending;
+
+    /// <summary>
+    /// Количество записей, ожидающих ближайшего цикла отрисовки.
+    /// </summary>
+    private int _pendingRenderEntries;
+
+    /// <summary>
+    /// Метка времени добавления последней записи протокола.
+    /// </summary>
+    private long _lastAppendTimestamp;
+
+    /// <summary>
+    /// Идентификатор последней записи протокола, ожидающей отрисовки.
+    /// </summary>
+    private int _lastRenderedMessageId;
 
     public static readonly DependencyProperty ProtocolFontSizeProperty =
       DependencyProperty.Register(
@@ -144,7 +165,7 @@ namespace Ask.UI.Components.ProtocolListBox
         DispatcherPriority.Loaded);
     }
 
-    private void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
+    private async void ProtocolListBoxUI_PreviewKeyDown(object sender, KeyEventArgs e)
     {
       if (HandleZoomShortcuts(e))
       {
@@ -155,19 +176,8 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         e.Handled = true;
 
-        try
-        {
-          var text = GetText();
-          TextPrintHelper.PrintText(text, "Печать протокола");
-        }
-        catch (Exception ex)
-        {
-          MessageBox.Show(
-            $"Ошибка при печати: {ex.Message}",
-            "Ошибка печати",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-        }
+        var text = GetText();
+        await PrintOperationNotificationService.PrintTextAsync(text, "Печать протокола");
       }
     }
 
@@ -300,12 +310,61 @@ namespace Ask.UI.Components.ProtocolListBox
           return;
         }
 
-        _historyMessages.RemoveRange(_historyMessages.Count - linesToRemove, linesToRemove);
-        RestoreVisibleItems();
+        int removeStartIndex = _historyMessages.Count - linesToRemove;
+        var removedMessages = _historyMessages.GetRange(removeStartIndex, linesToRemove);
+        _historyMessages.RemoveRange(removeStartIndex, linesToRemove);
+
+        for (int i = removedMessages.Count - 1; i >= 0; i--)
+        {
+          RemoveLastVisibleMessage(removedMessages[i]);
+        }
         removed = linesToRemove;
       });
 
       return Task.FromResult(removed);
+    }
+
+    private void RemoveLastVisibleMessage(ShowMessageModel removedMessage)
+    {
+      if (_pendingGroup != null && ReferenceEquals(_pendingGroup.HeaderItem.Message, removedMessage))
+      {
+        RemoveVisibleTailItem(_pendingGroup.HeaderItem);
+        _pendingGroup = null;
+        return;
+      }
+
+      if (_currentGroup != null && _currentGroup.BodyItems.Count > 0)
+      {
+        var lastBodyItem = _currentGroup.BodyItems[^1];
+        if (ReferenceEquals(lastBodyItem.Message, removedMessage))
+        {
+          if (RemoveVisibleTailItem(lastBodyItem))
+          {
+            _currentGroup.VisibleBodyCount--;
+          }
+
+          _currentGroup.RemoveLastBodyItem(removedMessage);
+          return;
+        }
+      }
+
+      var lastDisplayItem = DisplayItems.LastOrDefault();
+      if (lastDisplayItem != null && ReferenceEquals(lastDisplayItem.Message, removedMessage))
+      {
+        RemoveVisibleTailItem(lastDisplayItem);
+      }
+    }
+
+    private bool RemoveVisibleTailItem(ProtocolDisplayItem item)
+    {
+      if (DisplayItems.Count == 0 || !ReferenceEquals(DisplayItems[^1], item))
+      {
+        return false;
+      }
+
+      DisplayItems.RemoveAt(DisplayItems.Count - 1);
+      _visibleRowCount--;
+      return true;
     }
 
     public async Task ClearAsync()
@@ -353,8 +412,16 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
+      var queuedAt = Stopwatch.GetTimestamp();
+      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
+      var dispatcherQueueMs = 0d;
+      var uiWorkMs = 0d;
+
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
+        var uiWorkStarted = Stopwatch.GetTimestamp();
+        dispatcherQueueMs = Stopwatch.GetElapsedTime(queuedAt, uiWorkStarted).TotalMilliseconds;
+
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
 
@@ -365,7 +432,48 @@ namespace Ask.UI.Components.ProtocolListBox
 
         TrimVisibleItemsIfNeeded();
         RequestScrollToEnd();
-      });
+        RequestRenderTimingProbe(messageId);
+
+        uiWorkMs = Stopwatch.GetElapsedTime(uiWorkStarted).TotalMilliseconds;
+      }, DispatcherPriority.Background);
+
+      LogDebug(
+        $"[ProtocolOutputTiming] UI append completed: message={messageId}, " +
+        $"dispatcherQueueMs={dispatcherQueueMs:F1}, uiWorkMs={uiWorkMs:F1}, " +
+        $"totalMs={Stopwatch.GetElapsedTime(queuedAt).TotalMilliseconds:F1}, " +
+        $"thread={Environment.CurrentManagedThreadId}");
+    }
+
+    /// <summary>
+    /// Регистрирует задержку до ближайшего цикла отрисовки протокола.
+    /// </summary>
+    /// <param name="messageId">Идентификатор записи протокола.</param>
+    private void RequestRenderTimingProbe(int messageId)
+    {
+      _pendingRenderEntries++;
+      _lastAppendTimestamp = Stopwatch.GetTimestamp();
+      _lastRenderedMessageId = messageId;
+
+      if (_renderProbePending)
+      {
+        return;
+      }
+
+      _renderProbePending = true;
+      Dispatcher.BeginInvoke(() =>
+      {
+        var entries = _pendingRenderEntries;
+        var lastMessageId = _lastRenderedMessageId;
+        var renderLatencyMs = Stopwatch.GetElapsedTime(_lastAppendTimestamp).TotalMilliseconds;
+
+        _pendingRenderEntries = 0;
+        _renderProbePending = false;
+
+        LogDebug(
+          $"[ProtocolOutputTiming] UI render turn reached: message={lastMessageId}, " +
+          $"batchedEntries={entries}, renderLatencyMs={renderLatencyMs:F1}, " +
+          $"thread={Environment.CurrentManagedThreadId}");
+      }, DispatcherPriority.Render);
     }
 
     private void AppendVisibleMessage(ShowMessageModel model)
@@ -758,6 +866,7 @@ namespace Ask.UI.Components.ProtocolListBox
       bool IsBlockStart = false,
       bool SkipStepModeCheck = false,
       bool skipPause = false,
+      bool ignoreOutputValidation = false,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)

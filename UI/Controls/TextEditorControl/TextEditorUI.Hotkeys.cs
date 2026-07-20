@@ -1,3 +1,4 @@
+using Ask.UI.Services.Notifications;
 using Ask.Core.Services.FilesUtility;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -445,7 +446,7 @@ namespace UI.Controls.TextEditorControl
         return;
 
       string sourceText = textEditor.Text ?? string.Empty;
-      string formattedText = NormalizeProgramWhitespace(sourceText);
+      string formattedText = FileFormatter.NormalizeProgramWhitespace(sourceText);
 
       if (string.Equals(sourceText, formattedText, StringComparison.Ordinal))
         return;
@@ -697,7 +698,7 @@ namespace UI.Controls.TextEditorControl
       if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
       {
         e.Handled = true;
-        TextPrintHelper.PrintText(textEditor.Text, "Печать редактора");
+        _ = PrintOperationNotificationService.PrintTextAsync(textEditor.Text, "Печать редактора");
         return true;
       }
 

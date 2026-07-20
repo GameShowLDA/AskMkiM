@@ -1,0 +1,29 @@
+<UserControl x:Class="Ask.UI.Controls.ProtocolNew.SavedProtocolPairUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:TextEditorControl="clr-namespace:Ask.UI.Controls.TextEditorControl">
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="100"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="100"/>
+        </Grid.ColumnDefinitions>
+
+        <TextEditorControl:TextEditorUI x:Name="ExecutionProtocolEditor"
+                                        Grid.Column="0"
+                                        IsReadOnly="True"/>
+
+        <GridSplitter Grid.Column="1"
+                      Width="5"
+                      Margin="5,0"
+                      Background="{StaticResource VioletColorSolidColorBrush}"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"/>
+
+        <TextEditorControl:TextEditorUI x:Name="ResultProtocolEditor"
+                                        Grid.Column="2"
+                                        IsReadOnly="True"/>
+    </Grid>
+</UserControl>

@@ -84,7 +84,7 @@ namespace UI.Controls
         : Visibility.Collapsed;
       if (isVisible)
       {
-        SaveToDiskButton.ToolTip = "��������� �� ����";
+        SaveToDiskButton.ToolTip = "Сохранить на диск";
       }
     }
 

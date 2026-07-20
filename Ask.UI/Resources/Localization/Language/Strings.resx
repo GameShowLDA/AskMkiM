@@ -594,6 +594,12 @@
   <data name="settings.userinterface.commandAutoCollapse.description" xml:space="preserve">
     <value>Автоматически сворачивает завершённые блоки команд в протоколе выполнения. Если отключено, блоки остаются раскрытыми.</value>
   </data>
+  <data name="settings.userinterface.printFont.title" xml:space="preserve">
+    <value>Шрифт печати</value>
+  </data>
+  <data name="settings.userinterface.printFont.description" xml:space="preserve">
+    <value>Единый вид печатных форм и PDF-документов.</value>
+  </data>
   <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
     <value>Заголовки команд</value>
   </data>
@@ -629,5 +635,11 @@
   </data>
   <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
     <value>Включает привязку модулей АСК-МКИ-М к разъёмам переходной панели по таблице соответствия старой системы АСК-МКИ. Используется для сохранения совместимости рабочих мест и существующих схем подключения.</value>
+  </data>
+  <data name="settings.device.multimeter.additionalDividerCoefficient.acw" xml:space="preserve">
+    <value>Доп. коэф. делителя ACW, %</value>
+  </data>
+  <data name="settings.device.multimeter.additionalDividerCoefficient.dcw" xml:space="preserve">
+    <value>Доп. коэф. делителя DCW, %</value>
   </data>
 </root>

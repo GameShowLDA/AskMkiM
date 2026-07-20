@@ -13,7 +13,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class RmCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayOrganizationalInfo(OrganizationalComands.RM).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.RM).DisplayName;
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (unique.Contains(MeasurementDevice.Multimeter))
       {
-        var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+        var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
         await meter.ConnectableManager.InitializeAsync(context.Console);
         devices.Add(meter);
       }

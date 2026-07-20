@@ -1,9 +1,9 @@
-﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using UI.Controls.ExecutorControls.TestsControls;
-using UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI;
-using UI.Controls.ExecutorControls.TestsControls.MethodExecutor.PI;
-using UI.Controls.ExecutorControls.TestsControls.NodeMethod.CI;
-using UI.Controls.ExecutorControls.TestsControls.NodeMethod.PI;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Controls.ExecutorControls.TestsControls;
+using Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI;
+using Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.PI;
+using Ask.UI.Controls.ExecutorControls.TestsControls.NodeMethod.CI;
+using Ask.UI.Controls.ExecutorControls.TestsControls.NodeMethod.PI;
 using static UI.Components.Invoke.OpenFileButton;
 
 namespace MainWindowProgram.Services

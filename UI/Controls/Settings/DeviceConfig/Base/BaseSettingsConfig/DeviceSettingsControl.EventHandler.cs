@@ -4,11 +4,13 @@ using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Usb;
 using Ask.Device.Runtime.Base.Device;
+using Ask.UI.Infrastructure.Localization;
 using Message;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
@@ -19,6 +21,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
   public partial class DeviceSettingsControl
   {
     private bool _internalChange;
+
+    /// <summary>
+    /// Признак синхронизации номера устройства и последнего октета IP-адреса.
+    /// </summary>
+    private bool _synchronizingDeviceNumberAndIp;
 
     /// <summary>
     /// Обрабатывает изменение выбранной модели шасси.
@@ -63,6 +70,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       try
       {
+        ResetSettingsForDeviceModelChange();
+
         Type baseClass = GetBaseDeviceType(selectedType);
 
         ConnectionTypeIPItem.Visibility = baseClass == typeof(DeviceWithIP) ? Visibility.Visible : Visibility.Collapsed;
@@ -70,42 +79,37 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ConnectionTypeUSBItem.Visibility = baseClass == typeof(DeviceWithUSB) ? Visibility.Visible : Visibility.Collapsed;
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
-        ConnectionTypeContainer.Visibility = baseClass == typeof(DeviceWithASKMKI) ? Visibility.Collapsed : Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;
-        IPAddressContainer.Visibility = Visibility.Collapsed;
-        COMContainer.Visibility = Visibility.Collapsed;
-        USBContainer.Visibility = Visibility.Collapsed;
-        if (baseClass != typeof(DeviceWithASKMKI))
-        {
-          ConnectionTypeSelectionBox.SelectedIndex = 0;
-        }
-
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
         {
           BusTypeContainer.Visibility = Visibility.Visible;
           ResistanceContainer.Visibility = Visibility.Visible;
           CapacitanceContainer.Visibility = Visibility.Visible;
+          var relayModule = (IRelaySwitchModule)Activator.CreateInstance(selectedType)!;
+          RelayPointCountContainer.Visibility = Visibility.Visible;
+          SetRelayPointCount(relayModule.PointCount);
         }
         else
         {
           BusTypeContainer.Visibility = Visibility.Collapsed;
           ResistanceContainer.Visibility = Visibility.Collapsed;
           CapacitanceContainer.Visibility = Visibility.Collapsed;
+          RelayPointCountContainer.Visibility = Visibility.Collapsed;
         }
 
-        if (typeof(IFastMeter).IsAssignableFrom(selectedType))
+        if (typeof(IMultimeter).IsAssignableFrom(selectedType))
         {
-          ShowFastMeterAdditionalSettings();
+          ShowFastMeterAdditionalSettings(sender as IMultimeter);
         }
-        else
-        {
-          AdditionalSettingsContainer.Content = null;
-        }
-
         if (baseClass == typeof(DeviceWithCOM))
         {
           object deviceModel = Activator.CreateInstance(selectedType);
-          ApplyCOMSettingsFromModel(deviceModel);
+          COMContainer.ApplyModelDefaults(deviceModel);
+        }
+
+        if (baseClass == typeof(DeviceWithUSB))
+        {
+          ResolveUsbDevice();
         }
       }
       catch (InvalidOperationException ex)
@@ -114,10 +118,37 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
     }
 
-    private void ShowFastMeterAdditionalSettings()
+    private void ResetSettingsForDeviceModelChange()
     {
-      _acwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_acwPpuDividerCoefficientPercentTextBox);
-      _dcwPpuDividerCoefficientPercentTextBox = PreparePpuDividerTextBox(_dcwPpuDividerCoefficientPercentTextBox);
+      AdditionalSettingsContainer.Content = null;
+      _acwPpuDividerCoefficientPercentTextBox = null;
+      _dcwPpuDividerCoefficientPercentTextBox = null;
+
+      ConnectionTypeSelectionBox.SelectedIndex = 0;
+      IPAddressContainer.Visibility = Visibility.Collapsed;
+      COMContainer.Visibility = Visibility.Collapsed;
+      USBContainer.Visibility = Visibility.Collapsed;
+
+      IpPart1.Text = string.Empty;
+      IpPart2.Text = string.Empty;
+      IpPart3.Text = string.Empty;
+      IpPart4.Text = string.Empty;
+
+      COMContainer.Reset();
+
+      ResistanceTextBox.Text = string.Empty;
+      CapacitanceTextBox.Text = string.Empty;
+      RelayPointCountTextBox.Text = string.Empty;
+
+      _usbConnectionDetails = string.Empty;
+      USBStatusData.Text = "Ожидание поиска...";
+      ClearUsbFields();
+    }
+
+    private void ShowFastMeterAdditionalSettings(IMultimeter multimeter)
+    {
+      _acwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
+      _dcwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
 
       var container = new Border
       {
@@ -135,19 +166,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
       };
 
-      titleBar.Child = new TextBlock
-      {
-        Text = "Коэффициент делителя ППУ, %",
-        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
-        FontSize = 20,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
-      };
-
-      if (titleBar.Child is TextBlock acwTitle)
-      {
-        acwTitle.Text = "Коэффициент делителя ППУ ACW, %";
-      }
+      titleBar.Child = CreateLocalizedAdditionalSettingsTitle("settings.device.multimeter.additionalDividerCoefficient.acw");
 
       var inputBorder = new Border
       {
@@ -162,14 +181,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         Style = (Style)FindResource("DeviceInputSectionTitleBarStyle")
       };
 
-      dcwTitleBar.Child = new TextBlock
-      {
-        Text = "Коэффициент делителя ППУ DCW, %",
-        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
-        FontSize = 20,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(7, 0, 7, 0)
-      };
+      dcwTitleBar.Child = CreateLocalizedAdditionalSettingsTitle("settings.device.multimeter.additionalDividerCoefficient.dcw");
 
       var dcwInputBorder = new Border
       {
@@ -188,19 +200,36 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       AdditionalSettingsContainer.Content = container;
     }
 
-    private TextBox PreparePpuDividerTextBox(TextBox? textBox)
+    private TextBlock CreateLocalizedAdditionalSettingsTitle(string localizationKey)
     {
-      textBox ??= new TextBox();
-      textBox.Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle");
-      textBox.PreviewTextInput -= ResistanceDevice_PreviewTextInput;
-      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
-      textBox.TextChanged -= ResistanceDevice_TextChanged;
-      textBox.TextChanged += ResistanceDevice_TextChanged;
-
-      if (string.IsNullOrWhiteSpace(textBox.Text))
+      var title = new TextBlock
       {
-        textBox.Text = "100";
-      }
+        Foreground = (System.Windows.Media.Brush)FindResource("ForegrounfBrushes"),
+        FontSize = 20,
+        FontWeight = FontWeights.Bold,
+        Margin = new Thickness(7, 0, 7, 0)
+      };
+
+      title.SetBinding(
+        TextBlock.TextProperty,
+        new Binding(nameof(LocalizedString.Value))
+        {
+          Source = new LocalizedString(localizationKey)
+        });
+
+      return title;
+    }
+
+    private TextBox CreatePpuDividerTextBox()
+    {
+      var textBox = new TextBox
+      {
+        Style = (Style)FindResource("DeviceSettingsUnifiedTextBoxStyle"),
+        Text = "100"
+      };
+
+      textBox.PreviewTextInput += ResistanceDevice_PreviewTextInput;
+      textBox.TextChanged += ResistanceDevice_TextChanged;
 
       return textBox;
     }
@@ -236,7 +265,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         else if (selectedType.Contains("com"))
         {
           COMContainer.Visibility = Visibility.Visible;
-          PopulateCOMPorts();
+          COMContainer.LoadAvailablePorts();
         }
         else if (selectedType.Contains("usb"))
         {
@@ -262,7 +291,44 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="e">Аргументы события изменения текста.</param>
     private void NumberDevice_TextChanged(object sender, TextChangedEventArgs e)
     {
-      return;
+      SynchronizeDeviceNumberAndIp(DeviceNumberTextBox, IpPart4);
+    }
+
+    /// <summary>
+    /// Обрабатывает изменение последнего октета IP-адреса.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события изменения текста.</param>
+    private void IpPart4_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      SynchronizeDeviceNumberAndIp(IpPart4, DeviceNumberTextBox);
+    }
+
+    /// <summary>
+    /// Синхронизирует номер устройства и последний октет IP-адреса.
+    /// </summary>
+    /// <param name="source">Поле с исходным значением.</param>
+    /// <param name="target">Поле для синхронизируемого значения.</param>
+    private void SynchronizeDeviceNumberAndIp(TextBox source, TextBox target)
+    {
+      if (_synchronizingDeviceNumberAndIp ||
+          GetBaseDeviceType() != typeof(DeviceWithIP) ||
+          IsSelectedChassisManager() ||
+          string.Equals(source.Text, target.Text, StringComparison.Ordinal))
+      {
+        return;
+      }
+
+      _synchronizingDeviceNumberAndIp = true;
+      try
+      {
+        target.Text = source.Text;
+        target.CaretIndex = target.Text.Length;
+      }
+      finally
+      {
+        _synchronizingDeviceNumberAndIp = false;
+      }
     }
 
     /// <summary>
@@ -357,17 +423,5 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       RequestClose?.Invoke(this, e);
     }
 
-    /// <summary>
-    /// Обрабатывает изменение выбранного COM-порта.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события выбора.</param>
-    private void COMPortSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-      if (COMPortSelectionBox.SelectedItem is string selectedPort)
-      {
-        GetVidPidForPort(selectedPort);
-      }
-    }
   }
 }

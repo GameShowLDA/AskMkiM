@@ -605,7 +605,7 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
-      runControl.FileName = BuildDerivedFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.FileName, ".lst", "protocol.lst");
+      runControl.FileName = BuildDerivedFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.OriginalFileName, ".lst", "protocol.lst");
       runControl.SetLeftEditor(editor);
 
       if (runContainer == null)
@@ -638,7 +638,7 @@ namespace MainWindowProgram.Services
 
     private static string BuildDerivedFileName(string? sourceFilePath, string? sourceFileName, string extension, string fallbackFileName)
     {
-      string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
+      /*string baseName = Path.GetFileNameWithoutExtension(sourceFilePath);
       if (string.IsNullOrWhiteSpace(baseName))
       {
         baseName = Path.GetFileNameWithoutExtension(sourceFileName);
@@ -646,7 +646,16 @@ namespace MainWindowProgram.Services
 
       return string.IsNullOrWhiteSpace(baseName)
         ? fallbackFileName
-        : $"{baseName}{extension}";
+        : $"{baseName}{extension}";*/
+      var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(sourceFilePath);
+      var index = uniqueNameWithoutExtention.LastIndexOf('_');
+      if (index != -1)
+      {
+        uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
+      }
+      return string.IsNullOrWhiteSpace(uniqueNameWithoutExtention)
+        ? fallbackFileName
+        : $"{uniqueNameWithoutExtention}{extension}";
     }
 
     /// <summary>
@@ -662,7 +671,7 @@ namespace MainWindowProgram.Services
 
       if (_multiWindow.RemoveActiveTextEditor(true))
       {
-        EditorEventAdapter.RaiseTextEditorContainerClosing(true, editor.TextEditorModel.FileName);
+        EditorEventAdapter.RaiseTextEditorContainerClosing(true, editor.TextEditorModel.OriginalFileName);
         await CreateNewTranslator(editor, text);
       }
     }
@@ -827,7 +836,7 @@ namespace MainWindowProgram.Services
                 86d);
 
             currentItem.SetRightEditor(translateEditor);
-            currentItem.SetRightEditorName(translateEditor.TextEditorModel?.FileName ?? string.Empty);
+            currentItem.SetRightEditorName(translateEditor.TextEditorModel?.OriginalFileName ?? string.Empty);
 
             await SetTranslationStageAsync(
                 progressWindow,
@@ -957,7 +966,10 @@ namespace MainWindowProgram.Services
               82d);
 
           translateEditor.Text = translationResult.FormattedText;
-
+          foreach (var model in models)
+          {
+            translateEditor.TextEditorModel.SourceLines.AddRange(model.SourceLines);
+          }
           // ЛЕВЫЙ редактор — исходные строки
           editor.ConfigureBreakpoints(interactive: true, visible: false);
           editor.RightBreakpoint = allowed

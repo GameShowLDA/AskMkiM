@@ -31,7 +31,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// <summary>
     /// Сохранённый экземпляр быстрого измерителя (FastMeter), получаемый по запросу.
     /// </summary>
-    private static IFastMeter? ValidFastMeter { get; set; }
+    private static IMultimeter? ValidFastMeter { get; set; }
 
     /// <summary>
     /// Сохранённый список точек подключения, переданных при вызове <see cref="AnalyzePoints"/>.
@@ -307,12 +307,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     }
 
     /// <summary>
-    /// Возвращает устройство пробойной установки (<see cref="IBreakdownTester"/>), связанное с одним из задействованных МКР.
-    /// Если устройство ещё не найдено — выполняется попытка поиска по номеру шасси.
+    /// Возвращает пробойную установку для используемого шасси.
     /// </summary>
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
-    /// <returns>Экземпляр <see cref="IBreakdownTester"/>.</returns>
-    /// <exception cref="Exception">Если устройство не найдено или <see cref="ValidRelayModules"/> ещё не проинициализировано.</exception>
+    /// <returns>
+    /// Задача, результат которой содержит экземпляр <see cref="IBreakdownTester"/>.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Выбрасывается, если модули релейной коммутации не инициализированы или пробойная установка не найдена.
+    /// </exception>
     public static async Task<IBreakdownTester> GetBreakdownTesterOrThrow(IUserInteractionService messageService = null)
     {
       if (ValidBreakdownTester != null)
@@ -328,7 +331,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
+        var tester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(number)).FirstOrDefault();
         if (tester != null)
         {
           ValidBreakdownTester = tester;
@@ -337,23 +340,26 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
       if (messageService != null)
       {
-        messageService.ShowMessageAsync(new ShowMessageModel("Пробойная установка",
+        await messageService.ShowMessageAsync(new ShowMessageModel("Пробойная установка",
           message: "Не найдено устройство пробойной установки (BreakdownTester) для используемых шасси.",
           type: ShowMessageModel.MessageType.Error)
-        { IndentLevel = 1 }, skipPause: true).Wait();
+        { IndentLevel = 1 }, skipPause: true);
       }
 
       throw new Exception("Ошибка конфигурации: не найдено устройство пробойной установки.");
     }
 
     /// <summary>
-    /// Возвращает устройство быстрого измерителя (<see cref="IFastMeter"/>), связанное с одним из задействованных МКР.
-    /// Если устройство ещё не найдено — выполняется попытка поиска по номеру шасси.
+    /// Возвращает быстрый измеритель для используемого шасси.
     /// </summary>
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
-    /// <returns>Экземпляр <see cref="IFastMeter"/>.</returns>
-    /// <exception cref="Exception">Если устройство не найдено или <see cref="ValidRelayModules"/> ещё не проинициализировано.</exception>
-    public static IFastMeter GetFastMeterOrThrow(IUserInteractionService messageService)
+    /// <returns>
+    /// Задача, результат которой содержит экземпляр <see cref="IMultimeter"/>.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Выбрасывается, если модули релейной коммутации не инициализированы или быстрый измеритель не найден.
+    /// </exception>
+    public static async Task<IMultimeter> GetFastMeterOrThrow(IUserInteractionService messageService)
     {
       if (ValidFastMeter != null)
         return ValidFastMeter;
@@ -368,7 +374,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var meter = FastMeters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
+        var meter = (await FastMeters.GetDevicesByNumberChassisAsync(number)).FirstOrDefault();
         if (meter != null)
         {
           ValidFastMeter = meter;
@@ -376,10 +382,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
       }
 
-      messageService.ShowMessageAsync(new ShowMessageModel("Быстрый измеритель",
+      await messageService.ShowMessageAsync(new ShowMessageModel("Быстрый измеритель",
         message: "Не найдено устройство быстрого измерителя (FastMeter) для используемых шасси.",
         type: ShowMessageModel.MessageType.Error)
-      { IndentLevel = 1 }, skipPause: true).Wait();
+      { IndentLevel = 1 }, skipPause: true);
 
       throw new Exception("Ошибка конфигурации: не найдено устройство быстрого измерителя.");
     }

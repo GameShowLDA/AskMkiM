@@ -20,7 +20,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 {
   internal class IeCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
-    public string Mnemonic => EnumExtensions.GetDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
+    public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.IE).DisplayName;
     private double firstValue = 0;
     private double secondValue = 1000;
     private double fixtureCapacitance = 0;
@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitCapacity.HasValue)
@@ -100,7 +100,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -124,7 +124,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
-    private async Task SettingFastMeter(IFastMeter meter, IUserInteractionService userMessageService)
+    private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {
       await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
     }

@@ -75,6 +75,30 @@ namespace Ask.Core.Services.FilesUtility
     }
 
     /// <summary>
+    /// Считывает файл, зашифрованный с помощью FileEncryptionManager, не изменяя его на диске.
+    /// </summary>
+    /// <param name="filePath">Путь к зашифрованному файлу.</param>
+    /// <returns>Расшифрованные данные файла в виде массива байт.</returns>
+    static public byte[] ReadEncryptedFileBytes(string filePath)
+    {
+      string fullPath = ValidateFilePath(filePath);
+      string cipherText = ReadEncryptedFileCipherText(fullPath);
+      string decryptedBase64 = Decrypt(cipherText);
+      return Convert.FromBase64String(decryptedBase64);
+    }
+
+    /// <summary>
+    /// Считывает файл, зашифрованный с помощью FileEncryptionManager, в виде текста, не изменяя его на диске.
+    /// </summary>
+    /// <param name="filePath">Путь к зашифрованному файлу.</param>
+    /// <param name="encoding">Кодировка текста для расшифрованных данных.</param>
+    /// <returns>Текст расшифрованного файла.</returns>
+    static public string ReadEncryptedFileText(string filePath, Encoding encoding)
+    {
+      return encoding.GetString(ReadEncryptedFileBytes(filePath));
+    }
+
+    /// <summary>
     /// Шифрует обычный текст с использованием AES и возвращает зашифрованный текст в формате base64.
     /// </summary>
     /// <param name="plainText">Обычный текст для шифрования.</param>
@@ -172,23 +196,7 @@ namespace Ask.Core.Services.FilesUtility
         return;
       }
 
-      string encryptedFileContent = File.ReadAllText(fullPath, Encoding.UTF8);
-      if (encryptedFileContent.Length > 0 && encryptedFileContent[0] == '\uFEFF')
-      {
-        encryptedFileContent = encryptedFileContent[1..];
-      }
-
-      if (!encryptedFileContent.StartsWith(EncryptedFilePrefix, StringComparison.Ordinal))
-      {
-        throw new InvalidDataException("Неподдерживаемый формат зашифрованного файла.");
-      }
-
-      string cipherText = encryptedFileContent[EncryptedFilePrefix.Length..].Trim();
-      if (string.IsNullOrWhiteSpace(cipherText))
-      {
-        throw new InvalidDataException("Зашифрованный файл не содержит данных.");
-      }
-
+      string cipherText = ReadEncryptedFileCipherText(fullPath);
       string decryptedBase64 = Decrypt(cipherText);
       byte[] decryptedBytes = Convert.FromBase64String(decryptedBase64);
       File.WriteAllBytes(fullPath, decryptedBytes);
@@ -215,6 +223,49 @@ namespace Ask.Core.Services.FilesUtility
       return fullPath;
     }
 
+    /// <summary>
+    /// Считывает зашифрованные данные из файла и возвращает шифртекст.
+    /// </summary>
+    /// <param name="fullPath">Полный путь к зашифрованному файлу.</param>
+    /// <returns>Шифртекст, извлечённый из файла.</returns>
+    /// <exception cref="InvalidDataException">
+    /// Выбрасывается, если файл имеет неподдерживаемый формат
+    /// или не содержит зашифрованных данных.
+    /// </exception>
+    static private string ReadEncryptedFileCipherText(string fullPath)
+    {
+      string encryptedFileContent = File.ReadAllText(fullPath, Encoding.UTF8);
+      if (encryptedFileContent.Length > 0 && encryptedFileContent[0] == '\uFEFF')
+      {
+        encryptedFileContent = encryptedFileContent[1..];
+      }
+
+      if (!encryptedFileContent.StartsWith(EncryptedFilePrefix, StringComparison.Ordinal))
+      {
+        throw new InvalidDataException("Неподдерживаемый формат зашифрованного файла.");
+      }
+
+      string cipherText = encryptedFileContent[EncryptedFilePrefix.Length..].Trim();
+      if (string.IsNullOrWhiteSpace(cipherText))
+      {
+        throw new InvalidDataException("Зашифрованный файл не содержит данных.");
+      }
+
+      return cipherText;
+    }
+
+    /// <summary>
+    /// Проверяет, совпадает ли заданная последовательность байтов
+    /// с префиксом, начиная с указанного смещения.
+    /// </summary>
+    /// <param name="source">Исходный массив байтов.</param>
+    /// <param name="sourceLength">Количество значимых байтов в исходном массиве.</param>
+    /// <param name="prefix">Последовательность байтов, используемая в качестве префикса.</param>
+    /// <param name="offset">Смещение, с которого начинается сравнение.</param>
+    /// <returns>
+    /// <see langword="true"/>, если последовательность байтов совпадает с префиксом;
+    /// иначе <see langword="false"/>.
+    /// </returns>
     static private bool MatchesPrefixAtOffset(byte[] source, int sourceLength, byte[] prefix, int offset)
     {
       if (offset < 0 || sourceLength - offset < prefix.Length)

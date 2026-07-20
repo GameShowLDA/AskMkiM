@@ -27,8 +27,9 @@ namespace UI.Components.MultiEditorMethods
 
       // Заголовок
       var paragraphContent = section.AddParagraph(content);
-      paragraphContent.Format.Font.Size = 12;
-      paragraphContent.Format.Font.Name = "Consolas";
+      var printSettings = Ask.Core.Services.FilesUtility.PrintSettingsService.GetSettings();
+      paragraphContent.Format.Font.Size = printSettings.FontSize;
+      paragraphContent.Format.Font.Name = printSettings.FontFamily;
 
       // Генерация PDF
       var renderer = new PdfDocumentRenderer(true)

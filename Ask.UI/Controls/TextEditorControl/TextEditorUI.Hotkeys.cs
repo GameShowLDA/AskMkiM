@@ -1,4 +1,5 @@
 using Ask.Core.Services.FilesUtility;
+using Ask.UI.Services.Notifications;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -21,7 +22,6 @@ namespace Ask.UI.Controls.TextEditorControl
   /// </summary>
   public partial class TextEditorUI
   {
-    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
     private const string LineCommentPrefix = "//";
     private bool _ctrlMPressed = false;
     private bool _ctrlKPressed = false;
@@ -295,14 +295,14 @@ namespace Ask.UI.Controls.TextEditorControl
 
     private static (int EditOffset, int Delta) CommentLine(ICSharpCode.AvalonEdit.Document.TextDocument document, ICSharpCode.AvalonEdit.Document.DocumentLine line, string lineText)
     {
-      int insertOffset = line.Offset + GetLeadingWhitespace(lineText).Length;
+      int insertOffset = line.Offset + FileFormatter.GetLeadingWhitespace(lineText).Length;
       document.Insert(insertOffset, LineCommentPrefix);
       return (insertOffset, LineCommentPrefix.Length);
     }
 
     private static (int EditOffset, int Delta) UncommentLine(ICSharpCode.AvalonEdit.Document.TextDocument document, ICSharpCode.AvalonEdit.Document.DocumentLine line, string lineText)
     {
-      int whitespaceLength = GetLeadingWhitespace(lineText).Length;
+      int whitespaceLength = FileFormatter.GetLeadingWhitespace(lineText).Length;
       if (!lineText.AsSpan(whitespaceLength).StartsWith(LineCommentPrefix, StringComparison.Ordinal))
         return (line.Offset, 0);
 
@@ -445,7 +445,7 @@ namespace Ask.UI.Controls.TextEditorControl
         return;
 
       string sourceText = textEditor.Text ?? string.Empty;
-      string formattedText = NormalizeProgramWhitespace(sourceText);
+      string formattedText = FileFormatter.NormalizeProgramWhitespace(sourceText);
 
       if (string.Equals(sourceText, formattedText, StringComparison.Ordinal))
         return;
@@ -467,190 +467,9 @@ namespace Ask.UI.Controls.TextEditorControl
       textEditor.CaretOffset = caretOffset;
     }
 
-    private static string NormalizeProgramWhitespace(string text)
-    {
-      if (string.IsNullOrEmpty(text))
-        return string.Empty;
+    
 
-      var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-      var formattedLines = new List<string>(lines.Length);
-      string? blockCommentIndent = null;
-      string? blockCommentCloseToken = null;
-      bool hasReachedFirstCommand = false;
-      bool hasReachedEndCommand = false;
-
-      for (int i = 0; i < lines.Length; i++)
-      {
-        string rawLine = lines[i];
-        string line = rawLine.TrimEnd(' ', '\t');
-        if (!hasReachedFirstCommand)
-        {
-          if (CommandHeaderRegex.IsMatch(line))
-          {
-            hasReachedFirstCommand = true;
-          }
-          else
-          {
-            formattedLines.Add(rawLine);
-            continue;
-          }
-        }
-        else if (hasReachedEndCommand)
-        {
-          formattedLines.Add(rawLine);
-          continue;
-        }
-
-        if (string.IsNullOrWhiteSpace(line))
-        {
-          formattedLines.Add(string.Empty);
-          continue;
-        }
-
-        string trimmedLine = line.TrimStart(' ', '\t');
-
-        if (blockCommentIndent != null)
-        {
-          if (trimmedLine.StartsWith(blockCommentCloseToken, StringComparison.Ordinal))
-          {
-            formattedLines.Add(blockCommentIndent + blockCommentCloseToken);
-            blockCommentIndent = null;
-            blockCommentCloseToken = null;
-          }
-          else
-          {
-            formattedLines.Add(blockCommentIndent + " " + trimmedLine);
-          }
-
-          continue;
-        }
-
-        string originalIndent = GetLeadingWhitespace(line);
-
-        if (trimmedLine.StartsWith("{", StringComparison.Ordinal))
-        {
-          blockCommentIndent = originalIndent;
-          blockCommentCloseToken = "}";
-          formattedLines.Add(blockCommentIndent + "{");
-
-          string commentBody = trimmedLine[1..].TrimStart(' ', '\t');
-          if (!string.IsNullOrEmpty(commentBody))
-          {
-            if (commentBody == "}")
-            {
-              formattedLines.Add(blockCommentIndent + "}");
-              blockCommentIndent = null;
-              blockCommentCloseToken = null;
-            }
-            else if (commentBody.EndsWith("}", StringComparison.Ordinal))
-            {
-              string inlineBody = commentBody[..^1].TrimEnd(' ', '\t');
-              if (!string.IsNullOrEmpty(inlineBody))
-              {
-                formattedLines.Add(blockCommentIndent + " " + inlineBody);
-              }
-
-              formattedLines.Add(blockCommentIndent + "}");
-              blockCommentIndent = null;
-              blockCommentCloseToken = null;
-            }
-            else
-            {
-              formattedLines.Add(blockCommentIndent + " " + commentBody);
-            }
-          }
-
-          continue;
-        }
-
-        if (trimmedLine.StartsWith("/*", StringComparison.Ordinal))
-        {
-          blockCommentIndent = originalIndent;
-          blockCommentCloseToken = "*/";
-          formattedLines.Add(blockCommentIndent + "/*");
-
-          string commentBody = trimmedLine[2..].TrimStart(' ', '\t');
-          if (!string.IsNullOrEmpty(commentBody))
-          {
-            if (commentBody == "*/")
-            {
-              formattedLines.Add(blockCommentIndent + "*/");
-              blockCommentIndent = null;
-              blockCommentCloseToken = null;
-            }
-            else if (commentBody.EndsWith("*/", StringComparison.Ordinal))
-            {
-              string inlineBody = commentBody[..^2].TrimEnd(' ', '\t');
-              if (!string.IsNullOrEmpty(inlineBody))
-              {
-                formattedLines.Add(blockCommentIndent + " " + inlineBody);
-              }
-
-              formattedLines.Add(blockCommentIndent + "*/");
-              blockCommentIndent = null;
-              blockCommentCloseToken = null;
-            }
-            else
-            {
-              formattedLines.Add(blockCommentIndent + " " + commentBody);
-            }
-          }
-
-          continue;
-        }
-
-        if (CommandHeaderRegex.IsMatch(line))
-        {
-          formattedLines.Add(NormalizeCommandHeader(line));
-        }
-        else
-        {
-          formattedLines.Add("\t" + trimmedLine);
-        }
-
-        if (IsEndCommandLine(line))
-        {
-          hasReachedEndCommand = true;
-        }
-      }
-
-      return string.Join(Environment.NewLine, formattedLines);
-    }
-
-    private static string NormalizeCommandHeader(string line)
-    {
-      string trimmedLine = line.TrimStart(' ', '\t');
-      var match = Regex.Match(trimmedLine, @"^(\d+)\s+(\S+)(.*)$");
-      if (!match.Success)
-        return trimmedLine;
-
-      string tail = match.Groups[3].Value;
-      return $"{match.Groups[1].Value} {match.Groups[2].Value}{tail}";
-    }
-
-    private static bool IsEndCommandLine(string line)
-    {
-      string trimmedLine = line.TrimStart(' ', '\t');
-      var match = Regex.Match(trimmedLine, @"^(\d+)\s+(\S+)(.*)$");
-      return match.Success && string.Equals(match.Groups[2].Value, "КЦ", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool SupportsProgramFormatting()
-    {
-      if (FileType is FileType.PK or FileType.PKW or FileType.OPK or FileType.OPKW)
-        return true;
-
-      string? fileName = TextEditorModel?.FileName ?? TextEditorModel?.FilePath;
-      if (string.IsNullOrWhiteSpace(fileName))
-        return false;
-
-      string extension = System.IO.Path.GetExtension(fileName);
-      return extension.Equals(".pk", StringComparison.OrdinalIgnoreCase)
-        || extension.Equals(".pkw", StringComparison.OrdinalIgnoreCase)
-        || extension.Equals(".opk", StringComparison.OrdinalIgnoreCase)
-        || extension.Equals(".opkw", StringComparison.OrdinalIgnoreCase)
-        || extension.Equals(".acs", StringComparison.OrdinalIgnoreCase);
-    }
+    
 
     /// <summary>
     /// Обрабатывает масштабирование редактора:
@@ -697,7 +516,7 @@ namespace Ask.UI.Controls.TextEditorControl
       if (e.Key == Key.P && Keyboard.Modifiers == ModifierKeys.Control)
       {
         e.Handled = true;
-        TextPrintHelper.PrintText(textEditor.Text, "Печать редактора");
+        _ = PrintOperationNotificationService.PrintTextAsync(textEditor.Text, "Печать редактора");
         return true;
       }
 
@@ -743,9 +562,9 @@ namespace Ask.UI.Controls.TextEditorControl
 
       var line = textEditor.Document.GetLineByNumber(lineNumber);
       string lineText = textEditor.Document.GetText(line.Offset, line.Length);
-      string indent = GetLeadingWhitespace(lineText);
+      string indent = FileFormatter.GetLeadingWhitespace(lineText);
 
-      if (indent.Length == 0 && CommandHeaderRegex.IsMatch(lineText))
+      if (indent.Length == 0 && FileFormatter.CommandHeaderRegex.IsMatch(lineText))
       {
         indent = "\t";
       }
@@ -757,15 +576,22 @@ namespace Ask.UI.Controls.TextEditorControl
       return true;
     }
 
-    private static string GetLeadingWhitespace(string text)
+    private bool SupportsProgramFormatting()
     {
-      int i = 0;
-      while (i < text.Length && char.IsWhiteSpace(text[i]))
-      {
-        i++;
-      }
+      if (FileType is FileType.PK or FileType.PKW or FileType.OPK or FileType.OPKW)
+        return true;
 
-      return i == 0 ? string.Empty : text[..i];
+      string? fileName = TextEditorModel?.FileName ?? TextEditorModel?.FilePath;
+      if (string.IsNullOrWhiteSpace(fileName))
+        return false;
+
+      string extension = System.IO.Path.GetExtension(fileName);
+      return extension.Equals(".pk", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".pkw", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".opk", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".opkw", StringComparison.OrdinalIgnoreCase)
+        || extension.Equals(".acs", StringComparison.OrdinalIgnoreCase);
     }
+
   }
 }

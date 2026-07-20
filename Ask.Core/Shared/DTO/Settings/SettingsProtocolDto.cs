@@ -80,4 +80,8 @@ public class SettingsProtocolDto
   /// Получает или задаёт значение, указывающее, отображаются ли шаги проверки в протоколе.
   /// </summary>
   public bool ShowTestStepMessagesInProtocol { get; set; }
+
+  public string PrintFontFamily { get; set; } = "Consolas";
+
+  public double PrintFontSize { get; set; } = 10;
 }

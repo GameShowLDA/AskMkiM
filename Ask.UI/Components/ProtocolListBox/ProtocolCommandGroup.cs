@@ -85,6 +85,40 @@ namespace Ask.UI.Components.ProtocolListBox
       UpdateHeaderBackground();
     }
 
+    public bool RemoveLastBodyItem(ShowMessageModel message)
+    {
+      if (BodyItems.Count == 0 || !ReferenceEquals(BodyItems[^1].Message, message))
+      {
+        return false;
+      }
+
+      BodyItems.RemoveAt(BodyItems.Count - 1);
+
+      if (BodyItems.Count == 0)
+      {
+        HeaderItem.HasChildItems = false;
+        HeaderItem.OuterMargin = new Thickness(0, 0, 0, 6);
+      }
+      else
+      {
+        var newLastItem = BodyItems[^1];
+        newLastItem.IsLastGroupItem = true;
+        newLastItem.OuterMargin = new Thickness(0, 0, 0, 6);
+      }
+
+      _executionState = HeaderItem.Message.CommandExecutionHasErrors switch
+      {
+        true => CommandExecutionVisualState.Error,
+        false => CommandExecutionVisualState.Success,
+        _ => BodyItems.Exists(item => item.Message.Status == ShowMessageModel.MessageType.Error)
+          ? CommandExecutionVisualState.Error
+          : CommandExecutionVisualState.Pending
+      };
+      UpdateHeaderBackground();
+
+      return true;
+    }
+
     public void SetExecutionResult(bool hasErrors)
     {
       HeaderItem.Message.CommandExecutionHasErrors = hasErrors;

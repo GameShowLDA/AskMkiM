@@ -73,7 +73,6 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
       InitializeComponent();
 
       FastMeterControl.IsSingleDeviceOnly = true;
-      PrecisionMeterControl.IsSingleDeviceOnly = true;
       BreakdownTesterControl.IsSingleDeviceOnly = true;
       SwitchingDeviceControl.IsSingleDeviceOnly = true;
       UninterruptiblePowerSupplyControl.IsSingleDeviceOnly = true;
@@ -145,7 +144,6 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
       BreakdownTesterControl.IsEditingEnabled = isEnabled;
       SwitchingDeviceControl.IsEditingEnabled = isEnabled;
       FastMeterControl.IsEditingEnabled = isEnabled;
-      PrecisionMeterControl.IsEditingEnabled = isEnabled;
       PowerSourceModuleControl.IsEditingEnabled = isEnabled;
       RelaySwitchModuleControl.IsEditingEnabled = isEnabled;
       UninterruptiblePowerSupplyControl.IsEditingEnabled = isEnabled;
