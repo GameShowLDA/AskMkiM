@@ -34,6 +34,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
 
       var devices = EquipmentService.GetAllDevices();
+
       foreach (var device in devices)
       {
         await device.ConnectableManager.ResetAsync(context.Console);
@@ -61,8 +62,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
       }
-        
-      var protocolProgramName = 
+
+      var protocolProgramName =
       protocolModel.ProgramName = string.IsNullOrWhiteSpace(opkPath)
           ? "Название программы контроля"
           : $"{uniqueNameWithoutExtention}{Path.GetExtension(opkPath)}";

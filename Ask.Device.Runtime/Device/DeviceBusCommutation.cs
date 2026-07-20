@@ -4,7 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
-using Ask.Device.Runtime.Function.Connected;
+using Ask.Device.Runtime.Function.Base.Connected;
 using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
