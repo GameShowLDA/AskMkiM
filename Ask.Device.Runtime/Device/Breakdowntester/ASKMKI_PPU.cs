@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
@@ -6,6 +7,8 @@ namespace Ask.Device.Runtime.Device.Breakdowntester;
 
 public sealed class ASKMKI_PPU : AskMkiDeviceBase, IAskMkiPpu
 {
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
+
   public ASKMKI_PPU()
     : base("АСК: ППУ", "ППУ старого тестера АСК", DeviceType.BreakdownTester)
   {

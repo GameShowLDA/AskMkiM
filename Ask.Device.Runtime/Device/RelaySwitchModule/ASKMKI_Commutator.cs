@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
@@ -6,6 +7,8 @@ namespace Ask.Device.Runtime.Device.RelaySwitchModule;
 
 public sealed class ASKMKI_Commutator : AskMkiDeviceBase, IAskMkiCommutator
 {
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
+
   public ASKMKI_Commutator()
     : base("АСК: коммутатор", "Коммутация шин и электронных точек старого тестера АСК", DeviceType.SwitchingDevice)
   {

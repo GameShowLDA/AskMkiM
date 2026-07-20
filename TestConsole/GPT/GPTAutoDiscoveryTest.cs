@@ -1,5 +1,6 @@
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Device.Breakdowntester;
 using Ask.DataBase.Engine.Static.Devices;
 using System.IO.Ports;
 

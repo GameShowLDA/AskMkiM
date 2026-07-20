@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.Base;
+
 namespace Ask.Device.Runtime.Device.Multimeters;
 
 /// <summary>
@@ -16,4 +18,6 @@ public sealed class MultiAgilentCom : MultiComSCPIMeterBase
 
     ConfigureAgilentComCommands(supportsCapacitance: true);
   }
+
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
 }

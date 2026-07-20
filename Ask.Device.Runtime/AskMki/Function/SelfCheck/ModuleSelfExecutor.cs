@@ -9,7 +9,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.DataBase.Engine.Static.Devices;
 
 
 namespace Ask.Engine.Tests.SelfControl

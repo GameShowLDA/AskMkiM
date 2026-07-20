@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
@@ -6,6 +7,8 @@ namespace Ask.Device.Runtime.Device.PKI;
 
 public sealed class ASKMKI_PKI : AskMkiDeviceBase, IAskMkiPki
 {
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
+
   public ASKMKI_PKI()
     : base("АСК: ПКИ", "ПКИ старого тестера АСК", DeviceType.PrecisionMeter)
   {

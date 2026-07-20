@@ -1,3 +1,4 @@
+using System.IO.Ports;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;

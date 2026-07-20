@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 
@@ -9,4 +10,6 @@ public sealed class ASKMKI_PINT4_RS485 : AskMkiPintBase
     : base("АСК: ПИНТ4 RS-485", "Сетевой ПИНТ4 старого тестера АСК", DeviceType.PowerSourceModule, pintNumber: 4, voltageStep: voltageStep, currentStep: currentStep, useBcdCode: false)
   {
   }
+
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
 }

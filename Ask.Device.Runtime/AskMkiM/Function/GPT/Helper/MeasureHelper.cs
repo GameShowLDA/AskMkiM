@@ -1,15 +1,12 @@
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
-using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
-using Ask.Device.Runtime.AskMkiM.Function.GPT.Command;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
-using Ask.Device.Runtime.Function.GPT.Command;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Base.Multimeter.Measurements.Common;
+using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper

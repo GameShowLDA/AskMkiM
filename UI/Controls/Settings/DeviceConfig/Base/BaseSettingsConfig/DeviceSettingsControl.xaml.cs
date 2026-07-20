@@ -1,14 +1,3 @@
-using System.IO.Ports;
-using Ask.Core.Shared.DTO.Devices.Base;
-using Ask.Core.Shared.DTO.Devices.FastMeter;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Device.Communication.Com.Configuration;
-using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Device;
 using System.Management;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -19,11 +8,13 @@ using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.Device;
+using System.IO.Ports;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 {

@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
@@ -6,6 +7,8 @@ namespace Ask.Device.Runtime.Device.ASKMKI_ACP;
 
 public sealed class ASKMKI_ACP : AskMkiDeviceBase, IAskMkiAcp
 {
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
+
   public ASKMKI_ACP()
     : base("АСК: АЦП", "АЦП старого тестера АСК", DeviceType.PrecisionMeter)
   {

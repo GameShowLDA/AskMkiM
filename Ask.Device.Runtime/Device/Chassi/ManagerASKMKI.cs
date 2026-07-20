@@ -10,6 +10,7 @@ using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
 using System.IO.Ports;
+using Ask.Core.Shared.DTO.Devices.Base;
 
 namespace Ask.Device.Runtime.Device.Chassi;
 
@@ -42,6 +43,8 @@ public sealed class ManagerASKMKI : DeviceWithCOM, IChassisManager, IAskMkiContr
   public byte NetworkAddress { get; set; }
 
   public LegacyMkiHardwareProfile? LegacyProfile { get; set; }
+
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
 
   public Task<ushort> ReadRegisterAsync(LegacyAskRegister register, CancellationToken cancellationToken = default)
   {

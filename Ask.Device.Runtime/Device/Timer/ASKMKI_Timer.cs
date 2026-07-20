@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 
@@ -5,6 +6,8 @@ namespace Ask.Device.Runtime.Device.TIMER;
 
 public sealed class ASKMKI_Timer : AskMkiDeviceBase, IAskMkiTimer
 {
+  public override ComPortSettings DefaultComPortSettings => throw new NotImplementedException();
+
   public ASKMKI_Timer()
     : base("АСК: таймер", "Таймер АЦП старого тестера АСК", DeviceType.Unknown)
   {
