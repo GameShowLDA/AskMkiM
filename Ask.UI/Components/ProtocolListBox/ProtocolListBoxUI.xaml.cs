@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Services.Notifications;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -41,6 +42,26 @@ namespace Ask.UI.Components.ProtocolListBox
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
     private int _visibleRowCount;
+
+    /// <summary>
+    /// Признак запланированного замера задержки отрисовки.
+    /// </summary>
+    private bool _renderProbePending;
+
+    /// <summary>
+    /// Количество записей, ожидающих ближайшего цикла отрисовки.
+    /// </summary>
+    private int _pendingRenderEntries;
+
+    /// <summary>
+    /// Метка времени добавления последней записи протокола.
+    /// </summary>
+    private long _lastAppendTimestamp;
+
+    /// <summary>
+    /// Идентификатор последней записи протокола, ожидающей отрисовки.
+    /// </summary>
+    private int _lastRenderedMessageId;
 
     public static readonly DependencyProperty ProtocolFontSizeProperty =
       DependencyProperty.Register(
@@ -391,8 +412,16 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
+      var queuedAt = Stopwatch.GetTimestamp();
+      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
+      var dispatcherQueueMs = 0d;
+      var uiWorkMs = 0d;
+
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
+        var uiWorkStarted = Stopwatch.GetTimestamp();
+        dispatcherQueueMs = Stopwatch.GetElapsedTime(queuedAt, uiWorkStarted).TotalMilliseconds;
+
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
 
@@ -403,7 +432,48 @@ namespace Ask.UI.Components.ProtocolListBox
 
         TrimVisibleItemsIfNeeded();
         RequestScrollToEnd();
-      });
+        RequestRenderTimingProbe(messageId);
+
+        uiWorkMs = Stopwatch.GetElapsedTime(uiWorkStarted).TotalMilliseconds;
+      }, DispatcherPriority.Background);
+
+      LogDebug(
+        $"[ProtocolOutputTiming] UI append completed: message={messageId}, " +
+        $"dispatcherQueueMs={dispatcherQueueMs:F1}, uiWorkMs={uiWorkMs:F1}, " +
+        $"totalMs={Stopwatch.GetElapsedTime(queuedAt).TotalMilliseconds:F1}, " +
+        $"thread={Environment.CurrentManagedThreadId}");
+    }
+
+    /// <summary>
+    /// Регистрирует задержку до ближайшего цикла отрисовки протокола.
+    /// </summary>
+    /// <param name="messageId">Идентификатор записи протокола.</param>
+    private void RequestRenderTimingProbe(int messageId)
+    {
+      _pendingRenderEntries++;
+      _lastAppendTimestamp = Stopwatch.GetTimestamp();
+      _lastRenderedMessageId = messageId;
+
+      if (_renderProbePending)
+      {
+        return;
+      }
+
+      _renderProbePending = true;
+      Dispatcher.BeginInvoke(() =>
+      {
+        var entries = _pendingRenderEntries;
+        var lastMessageId = _lastRenderedMessageId;
+        var renderLatencyMs = Stopwatch.GetElapsedTime(_lastAppendTimestamp).TotalMilliseconds;
+
+        _pendingRenderEntries = 0;
+        _renderProbePending = false;
+
+        LogDebug(
+          $"[ProtocolOutputTiming] UI render turn reached: message={lastMessageId}, " +
+          $"batchedEntries={entries}, renderLatencyMs={renderLatencyMs:F1}, " +
+          $"thread={Environment.CurrentManagedThreadId}");
+      }, DispatcherPriority.Render);
     }
 
     private void AppendVisibleMessage(ShowMessageModel model)

@@ -91,7 +91,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       await interactionService.ShowMessageAsync(new ShowMessageModel("Задержка перед отключением", message: $"{time}сек.") { IndentLevel = 2 });
       var delay = Convert.ToInt32(time * 1000);
-      await Task.Delay(delay);
+      await interactionService.DelayWithPauseAsync(TimeSpan.FromMilliseconds(delay));
     }
   }
 }

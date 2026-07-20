@@ -260,11 +260,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
 
-      // Фиксируем запрос паузы сразу в executor, чтобы избежать гонки
-      // между быстрым "Пауза -> Продолжить" и запуском async-обработчика.
-      ActionExecutor.RequestPause();
-      ShowButtonsOnPause();
-
       PauseButtonPreviewMouseDown?.Invoke(this, e);
     }
 
@@ -311,13 +306,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       KeyboardManager.OnRunOrPausePressed = HandleRunOrPause;
 
-      KeyboardManager.OnStartPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          _startRequestedInStepMode = false;
-          ExecutionConfig.SetStepByStepMode(false);
-          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
-        });
+      KeyboardManager.OnStartPressed = StartFromHotkey;
 
       KeyboardManager.OnStartPressedByStepMode = () =>
         Application.Current.Dispatcher.Invoke(() =>
@@ -327,36 +316,66 @@ namespace Ask.UI.Controls.ProtocolNew
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
 
-      KeyboardManager.OnExitPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
-          {
-            return;
-          }
-
-          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
-        });
-
-      KeyboardManager.OnPausePressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
-      };
-
-      KeyboardManager.OnContinuePressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
-      };
-
-      KeyboardManager.OnRepeatPressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
-      };
+      KeyboardManager.OnExitPressed = ExitFromHotkey;
+      KeyboardManager.OnPausePressed = PauseFromHotkey;
+      KeyboardManager.OnContinuePressed = ContinueFromHotkey;
+      KeyboardManager.OnRepeatPressed = RepeatFromHotkey;
     }
 
+    /// <summary>
+    /// Запускает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void StartFromHotkey()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        _startRequestedInStepMode = false;
+        ExecutionConfig.SetStepByStepMode(false);
+        StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+      });
+    }
+
+    /// <summary>
+    /// Приостанавливает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void PauseFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Продолжает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void ContinueFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Завершает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void ExitFromHotkey()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
+        {
+          return;
+        }
+
+        ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
+      });
+    }
+
+    /// <summary>
+    /// Повторяет выполнение по команде горячей клавиши.
+    /// </summary>
+    private void RepeatFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Создаёт аргументы события нажатия левой кнопки мыши.
+    /// </summary>
+    /// <returns>Аргументы события нажатия левой кнопки мыши.</returns>
     private MouseButtonEventArgs CreateMouseArgs()
     {
       return new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)

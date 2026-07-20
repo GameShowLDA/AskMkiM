@@ -45,7 +45,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingMeter(meter, context.Console);
 
       if (command.LowerLimitVoltage.HasValue)
@@ -109,7 +109,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       ConnectedPointContext pointContext,
       double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -141,7 +141,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       double value,
       ConnectedPointContext pointContext)
     {
-      if (ShouldReturnOverloadInIdleReverseMode(pointContext))
+      if (await ShouldReturnOverloadInIdleReverseModeAsync(pointContext))
       {
         return 9.9E+37;
       }
@@ -152,9 +152,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <summary>
     /// Определяет, нужно ли в холостом режиме вернуть перегрузку для обратного направления NE.
     /// </summary>
-    private static bool ShouldReturnOverloadInIdleReverseMode(ConnectedPointContext pointContext) =>
+    /// <param name="pointContext">Контекст проверки соединённых точек.</param>
+    /// <returns>
+    /// Задача, результат которой равен <see langword="true"/>, если требуется вернуть признак перегрузки.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private static async Task<bool> ShouldReturnOverloadInIdleReverseModeAsync(ConnectedPointContext pointContext) =>
       ExecutionConfig.GetIsIdleModeEnabled()
-      && !ExecutionConfig.GetIsErrorSimulationEnabled().Result
+      && !await ExecutionConfig.GetIsErrorSimulationEnabled()
       && pointContext.IsOverloadExpected;
 
     private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)

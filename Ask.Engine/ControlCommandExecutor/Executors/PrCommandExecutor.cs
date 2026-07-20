@@ -42,7 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
 
       double resistance = 0;
 
@@ -175,7 +175,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.ACW)
     {
-      var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var fastMeter = await EquipmentService.GetFastMeterOrThrow(messageService);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -209,7 +209,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.ACW)
     {
-      var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var fastMeter = await EquipmentService.GetFastMeterOrThrow(messageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         double answer = -1;
@@ -241,7 +241,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance)
     {
-      var fastMeter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var fastMeter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = -1;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>

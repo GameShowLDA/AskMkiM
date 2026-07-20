@@ -58,7 +58,6 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
         _context.ShowRunningButtons(showStepButtons);
       }
 
-      await Task.Delay(1);
     }
 
     /// <summary>Устанавливает паузу после ошибочной записи, если это разрешено настройками.</summary>
