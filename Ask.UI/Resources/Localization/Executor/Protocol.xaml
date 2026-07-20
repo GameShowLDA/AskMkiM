@@ -22,5 +22,6 @@
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_Repeat"     Key="protocol.tooltip.repeat" />
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_StepOver"   Key="protocol.tooltip.stepover" />
     <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_StepInto"   Key="protocol.tooltip.stepinto" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Protocol_Tooltip_CommandJump" Key="protocol.tooltip.commandjump" />
 
 </ResourceDictionary>

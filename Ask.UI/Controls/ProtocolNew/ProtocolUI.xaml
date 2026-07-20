@@ -166,6 +166,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Continue}, Path=Value}">
@@ -204,6 +205,14 @@
 
             <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
                 <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="CommandJumpButtonTop"
+                    Grid.Column="7"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_CommandJump}, Path=Value}"
+                    Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
+                <Icons:FastForwardIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
         </Grid>

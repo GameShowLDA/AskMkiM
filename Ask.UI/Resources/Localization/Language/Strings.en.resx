@@ -381,6 +381,9 @@
   <data name="protocol.tooltip.stepinto" xml:space="preserve">
     <value>Step Into (F11)</value>
   </data>
+  <data name="protocol.tooltip.commandjump" xml:space="preserve">
+    <value>Go to another command (F4)</value>
+  </data>
   <data name="translator.editor.tooltip.back" xml:space="preserve">
     <value>Return to the source file</value>
   </data>
