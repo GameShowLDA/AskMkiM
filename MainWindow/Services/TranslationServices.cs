@@ -476,7 +476,8 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
+      //TODO: тут не находит только что созданный текстовый редактор при первом запуске
+      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor); 
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
 
