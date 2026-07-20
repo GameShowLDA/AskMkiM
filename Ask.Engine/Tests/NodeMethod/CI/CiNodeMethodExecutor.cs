@@ -88,7 +88,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
-              var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, 1000, 60000, userMessageService: protocolUI);
+              var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, 1000, 60000);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value < dataModel.Param)
@@ -96,6 +96,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                 type = ShowMessageModel.MessageType.Error;
               }
 
+              await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения)", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
               return type == ShowMessageModel.MessageType.Success;
 
             }, protocolUI);

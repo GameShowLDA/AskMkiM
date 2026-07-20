@@ -6,8 +6,27 @@ using Ask.Core.Shared.Metadata.Static.Messages;
 
 namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 {
+  /// <summary>
+  /// Предоставляет методы для отображения результатов измерений.
+  /// </summary>
   internal class MessageManager
   {
+    /// <summary>
+    /// Отображает результат измерения и определяет, соответствует ли он заданным пределам.
+    /// </summary>
+    /// <param name="messageService">Сервис отображения сообщений.</param>
+    /// <param name="measurementTypeCommand">Тип выполняемого измерения.</param>
+    /// <param name="lowerLimit">Нижняя граница допустимого значения.</param>
+    /// <param name="upperLimit">Верхняя граница допустимого значения.</param>
+    /// <param name="value">Измеренное значение.</param>
+    /// <param name="chains">Обозначение измеряемых цепей.</param>
+    /// <param name="isOverloadExpected">
+    /// <see langword="true"/>, если ожидается проверка значения на перегрузку прибора;
+    /// в противном случае — <see langword="false"/>.
+    /// </param>
+    /// <returns>
+    /// Кортеж, содержащий результат проверки измерения и итоговое измеренное значение.
+    /// </returns>
     public static async Task<(bool, double)> ShowMeasurementResultAsync(
       IUserInteractionService messageService,
       MeasurementTypeCommand measurementTypeCommand,
@@ -50,6 +69,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// <summary>
     /// Определяет, соответствует ли измеренное значение перегрузке прибора.
     /// </summary>
+    /// <param name="value">Измеренное значение.</param>
+    /// <returns>
+    /// <see langword="true"/>, если значение соответствует перегрузке прибора.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
     private static bool IsOverloadValue(double value) => MeasurementValueFormatter.IsOverloadValue(value);
   }
 }
