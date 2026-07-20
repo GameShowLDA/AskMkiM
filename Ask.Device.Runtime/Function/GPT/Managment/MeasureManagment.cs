@@ -70,7 +70,6 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
 
       if (_gptModel.Mode == Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
       {
-        result.Item1 = result.Item1 * (_gptModel.SystemInsulationResistanceGOhm * 1000) / (result.Item1 + (_gptModel.SystemInsulationResistanceGOhm * 1000));
         result.Item1 = (measurement.value * resistanceMOm) / (resistanceMOm - measurement.value);
       }
 
