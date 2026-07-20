@@ -1,6 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Device.Communication.Com.Configuration;
 using System.Globalization;
-using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -88,43 +88,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public int IpPart4Value => int.TryParse(IpPart4.Text, out int ipValue) ? ipValue : -1;
 
     /// <summary>
-    /// Получает значение скорости передачи данных (BaudRate).
+    /// Получает выбранные пользователем параметры COM-порта.
     /// </summary>
-    public int BaudRateValue =>
-        BaudRateSelectionBox?.SelectedItem is ComboBoxItem selectedItem &&
-        int.TryParse(selectedItem.Content?.ToString(), out int baudRate) ? baudRate : -1;
-
-    /// <summary>
-    /// Получает значение количества бит данных.
-    /// </summary>
-    public int DataBitsValue =>
-        DataBitsSelectionBox?.SelectedItem is ComboBoxItem selectedItem &&
-        int.TryParse(selectedItem.Content?.ToString(), out int dataBits) ? dataBits : -1;
-
-    /// <summary>
-    /// Получает выбранное значение четности порта.
-    /// </summary>
-    public Parity ParityValue =>
-        BaseHandler<IDevice>.ValuePairs.TryGetValue(
-            (ParitySelectionBox.SelectedItem as ComboBoxItem)?.Content?.ToString(),
-            out Parity parity)
-            ? parity
-            : Parity.None;
-
-    /// <summary>
-    /// Получает выбранное количество стоп-бит.
-    /// </summary>
-    public StopBits StopBitsValue =>
-        BaseHandler<IDevice>.StopBitsPairs.TryGetValue(
-            (StopBitsSelectionBox.SelectedItem as ComboBoxItem)?.Content?.ToString(),
-            out StopBits stopBits)
-            ? stopBits
-            : StopBits.One;
-
-    /// <summary>
-    /// Получает название COM-порта.
-    /// </summary>
-    public string PortName => COMPortSelectionBox.Text;
+    /// <returns>Параметры последовательного порта.</returns>
+    public SerialPortCustom GetComSettings() => COMContainer.CreateSettings();
 
     /// <summary>
     /// Gets USB connection details selected or resolved by UI.
@@ -135,6 +102,21 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// Получает номер устройства.
     /// </summary>
     public int NumberDevice => int.TryParse(DeviceNumberTextBox.Text, out int number) ? number : -1;
+
+    /// <summary>
+    /// Количество точек модуля коммутации реле.
+    /// </summary>
+    public int RelayPointCount =>
+      int.TryParse(RelayPointCountTextBox.Text, out int pointCount) ? pointCount : -1;
+
+    /// <summary>
+    /// Задаёт количество точек модуля коммутации реле.
+    /// </summary>
+    /// <param name="pointCount">Количество точек.</param>
+    public void SetRelayPointCount(int pointCount)
+    {
+      RelayPointCountTextBox.Text = pointCount.ToString(CultureInfo.InvariantCulture);
+    }
 
     public double GetResistance()
     {

@@ -21,7 +21,7 @@ public class MeasurementErrorDefaultsTests
 
     Assert.NotNull(displayInfo);
     Assert.Equal(0.01, displayInfo.LowerLimit);
-    Assert.Equal(100, displayInfo.UpperLimit);
+    Assert.Equal(200, displayInfo.UpperLimit);
   }
 
   /// <summary>

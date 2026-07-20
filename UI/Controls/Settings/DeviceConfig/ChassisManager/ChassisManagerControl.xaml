@@ -5,9 +5,92 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.Settings.DeviceConfig.ChassisManager"
              xmlns:CustomControls="clr-namespace:UI.Components;assembly=UI"
+             xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="300" MinWidth="250">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <Style x:Key="ChassisIconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                                <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractivePressedSolidColorBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ChassisRemoveButtonStyle" TargetType="Button" BasedOn="{StaticResource ChassisIconButtonStyle}">
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonForegroundBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonHoverForegroundBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListDeleteButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListDeleteButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListDeleteButtonPressedForegroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ChassisEditButtonStyle" TargetType="Button" BasedOn="{StaticResource ChassisIconButtonStyle}">
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonForegroundBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonHoverBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonHoverBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonHoverForegroundBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DeviceListEditButtonPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource DeviceListEditButtonPressedBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DeviceListEditButtonPressedForegroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <DropShadowEffect x:Key="ShadowEffect" 
                   BlurRadius="20" 
                   ShadowDepth="0" 
@@ -73,12 +156,37 @@
                     <ItemsControl ItemsSource="{Binding SystemsChassis}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Margin="5" Padding="10" Style="{DynamicResource ButtonStyleV9}" Click="OnSystemSelected">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
-                                    </StackPanel>
-                                </Button>
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Padding="10" Style="{DynamicResource ButtonStyleV9}" Click="OnSystemSelected">
+                                        <StackPanel HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding Number, StringFormat='Номер: {0}'}" FontStyle="Italic"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="1" Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            Margin="0,0,6,0" Style="{StaticResource ChassisEditButtonStyle}"
+                                            Click="EditSystemButton_Click" CommandParameter="{Binding}"
+                                            Visibility="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=IsEditingEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            ToolTip="Редактировать тестер АСКМ">
+                                        <askUiIcons:EditIcon Size="16"
+                                                             IsWriting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                    </Button>
+                                    <Button Grid.Column="2" Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            Style="{StaticResource ChassisRemoveButtonStyle}"
+                                            Click="RemoveSystemButton_Click" CommandParameter="{Binding}"
+                                            Visibility="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=IsEditingEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            ToolTip="Удалить тестер АСКМ">
+                                        <askUiIcons:TrashDeleteIcon Size="16"
+                                                                    IsLidOpen="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

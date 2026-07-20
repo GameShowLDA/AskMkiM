@@ -8,6 +8,11 @@ namespace Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected
   public class IpConnectedProfile : ConnectedBaseProfile
   {
     /// <summary>
+    /// Команда сброса устройства.
+    /// </summary>
+    public string Reset { get; set; } = string.Empty;
+
+    /// <summary>
     /// Порт, используемый для связи с устройством.
     /// По умолчанию используется порт SCPI — 5025.
     /// </summary>

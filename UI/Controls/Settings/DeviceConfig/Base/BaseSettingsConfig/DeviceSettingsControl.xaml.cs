@@ -1,4 +1,14 @@
 using System.IO.Ports;
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.FastMeter;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Device.Communication.Com.Configuration;
+using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Device;
 using System.Management;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -93,6 +103,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void VisibilityElements()
     {
       DeviceNumberContainer.Visibility = Visibility.Visible;
+      RelayPointCountContainer.Visibility = Visibility.Collapsed;
       BusTypeContainer.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
       CapacitanceContainer.Visibility = Visibility.Collapsed;
@@ -156,7 +167,15 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       IpPart1.Text = "192";
       IpPart2.Text = "168";
       IpPart3.Text = _headUnit == null ? DeviceNumberTextBox.Text : _headUnit.Number.ToString();
-      IpPart4.Text = DeviceNumberTextBox.Text;
+      IpPart4.Text = IsSelectedChassisManager() ? "0" : DeviceNumberTextBox.Text;
+    }
+
+    private bool IsSelectedChassisManager()
+    {
+      return DeviceModelMap != null &&
+        DeviceModelSelectionBox.SelectedItem is string selectedModel &&
+        DeviceModelMap.TryGetValue(selectedModel, out Type selectedType) &&
+        typeof(IChassisManager).IsAssignableFrom(selectedType);
     }
 
     /// <summary>
@@ -180,92 +199,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       Type selectedType = DeviceModelMap[DeviceModelSelectionBox.SelectedItem.ToString()];
       return Activator.CreateInstance(selectedType);
-    }
-
-    /// <summary>
-    /// Loads COM ports into selector.
-    /// </summary>
-    private void PopulateCOMPorts()
-    {
-      string[] portNames = SerialPort.GetPortNames();
-      COMPortSelectionBox.ItemsSource = portNames;
-
-      if (portNames.Any())
-      {
-        COMPortSelectionBox.SelectedIndex = 0;
-      }
-    }
-
-    /// <summary>
-    /// Reads VID/PID for selected COM port.
-    /// </summary>
-    private void GetVidPidForPort(string comPort)
-    {
-      string query = $"SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%({comPort})%'";
-
-      using var searcher = new ManagementObjectSearcher(query);
-      foreach (ManagementObject device in searcher.Get())
-      {
-        string deviceId = device["DeviceID"] as string;
-        if (string.IsNullOrEmpty(deviceId))
-        {
-          continue;
-        }
-
-        Match match = VidPidRegex.Match(deviceId);
-        if (match.Success)
-        {
-          VIDData.Text = match.Groups[1].Value;
-          PIDData.Text = match.Groups[2].Value;
-          return;
-        }
-      }
-
-      VIDData.Text = "N/A";
-      PIDData.Text = "N/A";
-    }
-
-    /// <summary>
-    /// Applies COM defaults from runtime model.
-    /// </summary>
-    private void ApplyCOMSettingsFromModel(object deviceModel)
-    {
-      Type modelType = deviceModel.GetType();
-
-      SetComboBoxValueFromProperty(modelType, deviceModel, "BaudRate", BaudRateSelectionBox);
-      SetComboBoxValueFromProperty(modelType, deviceModel, "StopBits", StopBitsSelectionBox);
-      SetComboBoxValueFromProperty(modelType, deviceModel, "DataBits", DataBitsSelectionBox);
-      SetComboBoxValueFromProperty(modelType, deviceModel, "Parity", ParitySelectionBox);
-      SetComboBoxValueFromProperty(modelType, deviceModel, "FlowControl", FlowControlSelectionBox);
-    }
-
-    /// <summary>
-    /// Selects combo item by property value.
-    /// </summary>
-    private void SetComboBoxValueFromProperty(Type modelType, object deviceModel, string propertyName, ComboBox comboBox)
-    {
-      var property = modelType.GetProperty(propertyName);
-      if (property == null)
-      {
-        return;
-      }
-
-      var valueObj = property.GetValue(deviceModel);
-      if (valueObj == null)
-      {
-        return;
-      }
-
-      string value = valueObj.ToString();
-      foreach (var item in comboBox.Items)
-      {
-        string itemContent = item is ComboBoxItem cbItem ? cbItem.Content.ToString() : item.ToString();
-        if (string.Equals(itemContent, value, StringComparison.OrdinalIgnoreCase))
-        {
-          comboBox.SelectedItem = item;
-          return;
-        }
-      }
     }
 
     /// <summary>
@@ -295,6 +228,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       if (device is RelaySwitchModuleDto relayDevice)
       {
+        SetRelayPointCount(relayDevice.PointCount);
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
@@ -348,36 +282,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       }
 
       SelectConnectionType("COM");
-      PopulateCOMPorts();
-
-      if (COMPortSelectionBox.ItemsSource is IEnumerable<string> ports && !ports.Contains(serial.PortName))
-      {
-        var allPorts = ports.ToList();
-        allPorts.Add(serial.PortName);
-        COMPortSelectionBox.ItemsSource = allPorts;
-      }
-
-      COMPortSelectionBox.SelectedItem = serial.PortName;
-      SetComboBoxByText(BaudRateSelectionBox, serial.BaudRate.ToString());
-      SetComboBoxByText(DataBitsSelectionBox, serial.DataBits.ToString());
-      string stopBitsText = serial.StopBits switch
-      {
-        StopBits.One => "1",
-        StopBits.OnePointFive => "1.5",
-        StopBits.Two => "2",
-        _ => "1",
-      };
-      SetComboBoxByText(StopBitsSelectionBox, stopBitsText);
-
-      string parityText = serial.Parity switch
-      {
-        Parity.Even => "Чет",
-        Parity.Odd => "Нечет",
-        Parity.Mark => "Маркер",
-        Parity.Space => "Пробел",
-        _ => "Нет",
-      };
-      SetComboBoxByText(ParitySelectionBox, parityText);
+      COMContainer.Load(serial);
     }
 
     private bool SelectConnectionType(string content)
@@ -509,19 +414,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       USBDeviceIdData.Text = string.Empty;
       USBVIDData.Text = "N/A";
       USBPIDData.Text = "N/A";
-    }
-
-    private static void SetComboBoxByText(ComboBox comboBox, string text)
-    {
-      foreach (var item in comboBox.Items)
-      {
-        string itemContent = item is ComboBoxItem cbItem ? cbItem.Content?.ToString() ?? string.Empty : item?.ToString() ?? string.Empty;
-        if (string.Equals(itemContent, text, StringComparison.OrdinalIgnoreCase))
-        {
-          comboBox.SelectedItem = item;
-          return;
-        }
-      }
     }
 
     private UsbDeviceMatch? TryFindUsbDevice(IEnumerable<string> patterns, out string resolvedPattern)

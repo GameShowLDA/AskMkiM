@@ -33,7 +33,9 @@
 
             <GridSplitter  Grid.Row="1" 
               Height="5"
-              Background="{StaticResource RedColorSolidColorBrush}"
+              Background="Transparent"
+              BorderThickness="0,2,0,0"
+              BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch"
               ResizeDirection="Rows"
@@ -56,7 +58,10 @@
             </Grid>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Background="{StaticResource RedColorSolidColorBrush}" 
+        <GridSplitter Grid.Column="1"
+        Background="Transparent"
+        BorderThickness="2,0,0,0"
+        BorderBrush="{DynamicResource VioletColorSolidColorBrush}"
         HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
 
         <Grid Grid.Column="2">

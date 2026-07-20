@@ -12,6 +12,9 @@ using Ask.Device.Application.Function.Helpers;
 using Ask.Device.Runtime.AskMkiM.Function.GPT;
 using Ask.Device.Runtime.Base.Helpers;
 using Ask.Device.Runtime.Device.Breakdowntester;
+using Ask.Device.Runtime.Device;
+using Ask.Device.Runtime.Function.GPT;
+using Ask.Device.Runtime.Function.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.GPT
 {
@@ -695,19 +698,6 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// </returns>
       public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = 600000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
-        if (rangeTo == -1) rangeTo = 600000;
-
-        if (rangeTo == -1)
-        {
-          rangeTo = double.MaxValue;
-        }
-
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.InsulationResistance);
-        if (random != -1)
-        {
-          return (random, "МОм");
-        }
-
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение сопротивления изоляции",

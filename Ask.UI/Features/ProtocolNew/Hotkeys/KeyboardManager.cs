@@ -4,7 +4,7 @@ using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Ask.UI.Controls.ProtocolNew
+namespace Ask.UI.Features.ProtocolNew.Hotkeys
 {
   /// <summary>
   /// Менеджер для глобальной обработки клавиш, связанных с пошаговым режимом выполнения.
@@ -23,18 +23,34 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public static Action? OnStartPressed;
 
+    /// <summary>
+    /// Делегат, вызываемый при запуске выполнения клавишами пошагового режима F10 или F11.
+    /// </summary>
     public static Action? OnStartPressedByStepMode;
+
+    /// <summary>
+    /// Единый обработчик F5 с учётом текущего состояния: запуск, пауза или продолжение.
+    /// </summary>
+    public static Action? OnRunOrPausePressed;
 
     /// <summary>
     /// Делегат, вызываемый при нажатии клавиши P (остановка или продолжение).
     /// </summary>
     public static Action? OnPausePressed;
+
+    /// <summary>
+    /// Делегат, вызываемый для продолжения приостановленного выполнения.
+    /// </summary>
     public static Action? OnContinuePressed;
 
     /// <summary>
     /// Делегат, вызываемый при нажатии клавиши Escape (завершить).
     /// </summary>
     public static Action? OnExitPressed;
+
+    /// <summary>
+    /// Делегат, вызываемый для повтора текущей операции.
+    /// </summary>
     public static Action? OnRepeatPressed;
 
     /// <summary>

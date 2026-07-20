@@ -103,6 +103,13 @@ namespace Ask.Core.Shared.DTO.Protocol
     public bool ExecutionError { get; set; }
 
     /// <summary>
+    /// Текст ошибки для итогового заключения.
+    /// <see langword="null"/> — использовать текст сообщения;
+    /// пустая строка — не добавлять сообщение в заключение.
+    /// </summary>
+    public string? ExecutionErrorMessage { get; set; }
+
+    /// <summary>
     /// Получает или задает значение, указывающее, можно ли удалять сообщение.
     /// </summary>
     public bool CanBeDeleted { get; set; }
@@ -139,7 +146,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// </summary>
     public int IndentLevel { get; set; }
 
-    private MessageType? status;
+    private MessageType? status = MessageType.Info;
     public MessageType? Status
     {
       get

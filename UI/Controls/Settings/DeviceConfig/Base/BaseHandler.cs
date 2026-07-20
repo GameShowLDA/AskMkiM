@@ -91,24 +91,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
     /// <exception cref="ArgumentException">Выбрасывается, если данные невалидны.</exception>
     private static SerialPortCustom GetSerialPort(DeviceSettingsControl defaultSettingControl)
     {
-      string portName = defaultSettingControl.PortName;
-      int baudRate = defaultSettingControl.BaudRateValue;
-
-      if (baudRate == -1)
-      {
-        throw new ArgumentException("Системная ошибка преобразования значения.");
-      }
-
-      Parity parity = defaultSettingControl.ParityValue;
-      StopBits stopBits = defaultSettingControl.StopBitsValue;
-      int dataBits = defaultSettingControl.DataBitsValue;
-
-      if (dataBits == -1)
-      {
-        throw new ArgumentException("Системная ошибка преобразования значения.");
-      }
-
-      return new SerialPortCustom(portName, baudRate, parity, dataBits, stopBits);
+      return defaultSettingControl.GetComSettings();
     }
 
     /// <summary>

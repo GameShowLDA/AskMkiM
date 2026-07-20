@@ -3,24 +3,19 @@ using System.Windows.Data;
 
 namespace Ask.UI.Components.ProtocolListBox
 {
-  public class MessageToColonConverter : IValueConverter
+  public class MessageToColonConverter : IMultiValueConverter
   {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
-      var message = value as string;
-      if (string.IsNullOrEmpty(message))
-      {
-        return "";
-      }
+      var header = values.Length > 0 ? values[0] as string : string.Empty;
+      var message = values.Length > 1 ? values[1] as string : string.Empty;
 
-      var trimmedMessage = message.TrimStart();
-      return trimmedMessage.StartsWith("$TST", StringComparison.Ordinal) ||
-             trimmedMessage.StartsWith("$DOC", StringComparison.Ordinal)
-        ? ""
+      return string.IsNullOrWhiteSpace(header) || string.IsNullOrWhiteSpace(message)
+        ? string.Empty
         : ":";
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
       throw new NotImplementedException();
     }

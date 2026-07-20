@@ -5,7 +5,8 @@ using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace Ask.UI.Components.InputField
@@ -569,7 +570,7 @@ namespace Ask.UI.Components.InputField
       switch (e.Key)
       {
         case Key.F5:
-          ExecutionControlEventAdapter.Raise(ExecutionControlButton.Run);
+          KeyboardManager.OnRunOrPausePressed?.Invoke();
           e.Handled = true;
           break;
 

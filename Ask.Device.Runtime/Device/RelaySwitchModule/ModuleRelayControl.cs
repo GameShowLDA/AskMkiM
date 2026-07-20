@@ -1,3 +1,4 @@
+using Ask.Core.Services.Validation.Devices;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
@@ -21,8 +22,9 @@ namespace Ask.Device.Runtime.Device.RelaySwitchModule
     public ModuleRelayControl()
     {
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
+      ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
       DeviceType = DeviceType.RelaySwitchModule;
-      Name = "Модуль МКР-350";
+      Name = "Модуль МКР";
       Description = "Добавить описание сюда";
       PointCount = 350;
       DeviceClass = GetType().FullName;
@@ -41,7 +43,28 @@ namespace Ask.Device.Runtime.Device.RelaySwitchModule
     public int NumberChassis { get; set; }
 
     /// <inheritdoc />
-    public int PointCount { get; set; }
+    public int PointCount
+    {
+      get => _pointCount;
+      set
+      {
+        if (value is < RelaySwitchModuleConfigurationValidator.MinimumPointCount or > RelaySwitchModuleConfigurationValidator.MaximumPointCount)
+        {
+          throw new ArgumentOutOfRangeException(nameof(value), value, "Недопустимое количество точек модуля.");
+        }
+
+        _pointCount = value;
+        if (PointManager is IPointCountReconfigurable reconfigurable)
+        {
+          reconfigurable.ReconfigurePointCount(value);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Количество точек модуля коммутации реле.
+    /// </summary>
+    private int _pointCount;
 
     /// <inheritdoc />
     public IBusManager BusManager { get; set; }

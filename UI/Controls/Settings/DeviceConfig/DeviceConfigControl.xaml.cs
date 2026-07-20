@@ -7,6 +7,7 @@ using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
+using Ask.Core.Services.App;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -61,6 +62,8 @@ namespace UI.Controls.Settings.DeviceConfig
     {
       InitializeComponent();
       chassisManager.NewSystem += (s, a) => NewSystem();
+      chassisManager.EditSystemEvent += (s, a) => EditSystem(a);
+      chassisManager.DeleteSystemEvent += async (s, a) => await DeleteSystemAsync(a);
       chassisManager.SystemSelected += async (s, a) => await SelectedChassisAsync(a);
 
       MouseMove += (s, e) =>
@@ -169,7 +172,7 @@ namespace UI.Controls.Settings.DeviceConfig
         return;
       }
 
-      ModuleRelayControlWindow fastMeterWindow = new ModuleRelayControlWindow();
+      ModuleRelayControlWindow fastMeterWindow = ServiceLocator.GetRequired<ModuleRelayControlWindow>();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
@@ -261,7 +264,7 @@ namespace UI.Controls.Settings.DeviceConfig
         return;
       }
 
-      ModuleRelayControlWindow window = new ModuleRelayControlWindow();
+      ModuleRelayControlWindow window = ServiceLocator.GetRequired<ModuleRelayControlWindow>();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
@@ -448,6 +451,97 @@ namespace UI.Controls.Settings.DeviceConfig
     }
 
     /// <summary>
+    /// Открывает окно редактирования тестера АСКМ.
+    /// </summary>
+    /// <param name="device">Модель редактируемого тестера.</param>
+    private async void EditSystem(ChassisManagerDto device)
+    {
+      if (!_isEditingEnabled || device == null)
+      {
+        return;
+      }
+
+      ChassisManagerWindow window = new ChassisManagerWindow();
+      window.SetSettings(device);
+      window.RequestSave += ChassisManagerSettings_DeviceSaved;
+      await OpenWindowInDrawerAsync(window, "Редактирование системы", "F4 - закрыть", () => Setting_RequestClose(null, EventArgs.Empty));
+    }
+
+    /// <summary>
+    /// Удаляет тестер АСКМ и все устройства, привязанные к его номеру шасси.
+    /// </summary>
+    /// <param name="device">Модель удаляемого тестера.</param>
+    private async Task DeleteSystemAsync(ChassisManagerDto device)
+    {
+      if (!_isEditingEnabled || device == null)
+      {
+        return;
+      }
+
+      try
+      {
+        await DeleteDevicesForChassisAsync(device.Number);
+        await ChassisManagers.DeleteAsync(ChassisManagers.Build(device));
+        DeviceConfigNotifications.ShowDeleted(device);
+        await ReloadConfigurationAsync();
+      }
+      catch (Exception exception)
+      {
+        DeviceConfigNotifications.ShowDeleteError(device, exception);
+      }
+    }
+
+    /// <summary>
+    /// Удаляет все записи оборудования, связанные с указанным номером шасси.
+    /// </summary>
+    /// <param name="chassisNumber">Номер шасси.</param>
+    private async Task DeleteDevicesForChassisAsync(int chassisNumber)
+    {
+      var racks = (await Racks.GetAllAsync()).Where(rack => rack.NumberChassis == chassisNumber).ToList();
+      var breakdownTesters = await _breakdownTesterDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+      var fastMeters = await _fastMeterDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+      var powerSourceModules = await _powerSourceModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+      var relaySwitchModules = await _relaySwitchModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+      var switchingDevices = await _switchingDeviceDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+      var uninterruptiblePowerSupplies = await _uninterruptiblePowerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+
+      foreach (var device in breakdownTesters)
+      {
+        await BreakdownTesters.DeleteAsync(BreakdownTesters.Build(device));
+      }
+
+      foreach (var device in fastMeters)
+      {
+        await FastMeters.DeleteAsync(FastMeters.Build(device));
+      }
+
+      foreach (var device in powerSourceModules)
+      {
+        await PowerSourceModules.DeleteAsync(PowerSourceModules.Build(device));
+      }
+
+      foreach (var device in relaySwitchModules)
+      {
+        await RelaySwitchModules.DeleteAsync(RelaySwitchModules.Build(device));
+      }
+
+      foreach (var device in switchingDevices)
+      {
+        await SwitchingDevices.DeleteAsync(SwitchingDevices.Build(device));
+      }
+
+      foreach (var device in uninterruptiblePowerSupplies)
+      {
+        await UninterruptiblePowerSupplies.DeleteAsync(UninterruptiblePowerSupplies.Build(device));
+      }
+
+      foreach (var rack in racks)
+      {
+        await Racks.DeleteAsync(rack);
+      }
+    }
+
+    /// <summary>
     /// Обрабатывает сохранение конфигурации шасси.
     /// </summary>
     private async void ChassisManagerSettings_DeviceSaved(object sender, ChassisManagerDto device)
@@ -459,7 +553,7 @@ namespace UI.Controls.Settings.DeviceConfig
         return;
       }
 
-      chassisManager.AddSystem(device);
+      chassisManager.ReplaceSystem(device);
       await SelectedChassisAsync(ChassisManagers.Build(device));
     }
 

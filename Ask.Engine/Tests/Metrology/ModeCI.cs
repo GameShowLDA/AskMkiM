@@ -1,9 +1,11 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -41,14 +43,20 @@ namespace Ask.Engine.Tests.Metrology
     public void InitializeSettings(IExecutionController executionController, IUserInteractionService userInteractionService)
     {
       _userInteractionService = userInteractionService;
+      testMeasurement.SetExecutionController(executionController);
 
-      executionController.SetSettings(
-        StartDelegate: ExecuteMeasurementProcess,
-        true,
-        StopDelegate: async (CancellationToken token) =>
+      ActionSettings settings = new ActionSettings()
+      {
+        StartDelegate = ExecuteMeasurementProcess,
+        IsRepeatEnabled = true,
+        CheckType = CheckType.Metrology,
+        StopDelegate = async (CancellationToken token) =>
         {
           await testMeasurement.FinalizeMeasurement(metrologicalModeRole, userInteractionService);
-        });
+        }
+      };
+
+      executionController.SetSettings(settings);
     }
 
     /// <summary>
@@ -114,6 +122,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var err = result - param;
         Measurements.Add(err);
+
+        if (result < LowerBound || result > UpperBound)
+        {
+          AddMetrologyError(protocolUI, metrologicalModeRole, result, LowerBound, UpperBound, "МОм");
+        }
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: MeasurementValueFormatter.FormatWithUnit(result, "МОм"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "МОм"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
