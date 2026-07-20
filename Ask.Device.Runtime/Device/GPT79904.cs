@@ -5,7 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Function.Connected;
+using Ask.Device.Runtime.Function.Base.Connected;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
