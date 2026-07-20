@@ -6,6 +6,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Exceptions;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
@@ -72,7 +73,12 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Глобальный объект синхронизации, предотвращающий одновременный запуск
     /// нескольких экземпляров исполнителя.
     /// </summary>
-    private readonly IExecutionPauseController _pauseController;
+    private readonly ExecutionPauseController _pauseController;
+
+    /// <summary>
+    /// Признак запроса перехода к другой команде.
+    /// </summary>
+    private int _commandJumpRequested;
 
     /// <summary>
     /// Идентификатор последнего запроса паузы.
@@ -181,6 +187,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     {
       isExit = false;
       processName = actionSettings.Name;
+      Interlocked.Exchange(ref _commandJumpRequested, 0);
       _pauseController.Reset();
 
       if (!_runGuard.TryAcquire(actionSettings.Name, this, out var activeProcessName))
@@ -340,6 +347,20 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         $"[PauseTiming] Pause requested: executor={RuntimeHelpers.GetHashCode(this)}, " +
         $"requestId={requestId}, thread={Environment.CurrentManagedThreadId}, utc={DateTime.UtcNow:O}");
       return true;
+    }
+
+    /// <summary>
+    /// Прерывает ожидание паузы для перехода к другой команде.
+    /// </summary>
+    internal void InterruptPauseForCommandJump()
+    {
+      if (!IsPaused)
+      {
+        return;
+      }
+
+      Interlocked.Exchange(ref _commandJumpRequested, 1);
+      _pauseController.InterruptWait();
     }
 
     /// <summary>
@@ -503,6 +524,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           ShouldShowPauseMessage = true;
         }
+
+        if (IsPaused)
+        {
+          return;
+        }
       }
 
       if (protocolSelfCheck != null && ShouldShowResumeMessage)
@@ -534,6 +560,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       IMessageOutputService protocolSelfCheck,
       string checkpoint)
     {
+      ThrowIfCommandJumpRequested();
+
       if (IsPaused)
       {
         var requestId = Volatile.Read(ref _pauseRequestId);
@@ -551,6 +579,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
         await WaitWhilePausedAsync(cancellationToken, protocolSelfCheck).ConfigureAwait(false);
 
+        ThrowIfCommandJumpRequested();
+
         if (Interlocked.CompareExchange(ref _pauseReleasedLogged, 1, 0) == 0)
         {
           var releaseReason = cancellationToken.IsCancellationRequested
@@ -567,6 +597,20 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       }
 
       await WaitWhilePausedAsync(cancellationToken, protocolSelfCheck).ConfigureAwait(false);
+      ThrowIfCommandJumpRequested();
+    }
+
+    /// <summary>
+    /// Прерывает текущую команду, если запрошен переход к другой команде.
+    /// </summary>
+    private void ThrowIfCommandJumpRequested()
+    {
+      if (Interlocked.Exchange(ref _commandJumpRequested, 0) == 1)
+      {
+        ShouldShowPauseMessage = false;
+        ShouldShowResumeMessage = true;
+        throw new CommandJumpRequestedException();
+      }
     }
 
     /// <summary>

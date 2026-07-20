@@ -41,10 +41,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         return command;
       }
 
-      var selected = await OpenDrawerAndWaitSelectionAsync(command, commands, cancellationToken).ConfigureAwait(false);
+      var selected = await CommandJumpService.SelectAsync(command, commands, cancellationToken).ConfigureAwait(false);
+      if (selected == null)
+      {
+        return command;
+      }
 
-      // Drawer closed via F4 without selection: stay on current command and continue in normal flow.
-      return selected ?? command;
+      await CommandJumpService.PrepareAsync(selected, userInteractionService).ConfigureAwait(false);
+      StepControlManager.EnableStepMode(true);
+      return selected;
     }
 
     private static Task ShowBreakpointCommandHeaderAsync(BaseCommandModel command, IUserInteractionService userInteractionService)
@@ -122,45 +127,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         EventAggregator.Unsubscribe(onF4Pressed);
         EventAggregator.Unsubscribe(onControlPressed);
-      }
-    }
-
-    private static async Task<BaseCommandModel?> OpenDrawerAndWaitSelectionAsync(
-      BaseCommandModel breakpointCommand,
-      IReadOnlyList<BaseCommandModel> commands,
-      CancellationToken cancellationToken)
-    {
-      var requestId = Guid.NewGuid();
-      var tcs = new TaskCompletionSource<BaseCommandModel?>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-      Action<CommandDrawerResult>? onResult = null;
-      onResult = e =>
-      {
-        if (e.RequestId != requestId)
-        {
-          return;
-        }
-
-        tcs.TrySetResult(e.SelectedCommand);
-      };
-
-      EventAggregator.Subscribe(onResult);
-
-      try
-      {
-        CommandDrawerEventAdapter.RaiseOpenRequest(requestId, commands, breakpointCommand);
-        using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
-        {
-          return await tcs.Task.ConfigureAwait(false);
-        }
-      }
-      catch (TaskCanceledException)
-      {
-        return null;
-      }
-      finally
-      {
-        EventAggregator.Unsubscribe(onResult);
       }
     }
 

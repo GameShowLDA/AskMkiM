@@ -72,6 +72,18 @@ public sealed class ProtocolHotkeyControllerTests
     Assert.True(args.Handled);
   });
 
+  [Fact(DisplayName = "F4 при паузе открывает переход к другой команде")]
+  public Task F4_WhenCommandJumpIsAvailable_InvokesCommandJump() => RunOnStaAsync(() =>
+  {
+    var context = new RecordingHotkeyContext { CanJumpToCommand = true };
+    var args = CreateKeyEventArgs(Key.F4);
+
+    new ProtocolHotkeyController(context).HandleKeyDown(this, args);
+
+    Assert.Equal(1, context.CommandJumpCount);
+    Assert.True(args.Handled);
+  });
+
   private static KeyEventArgs CreateKeyEventArgs(Key key) =>
     new(InputManager.Current.PrimaryKeyboardDevice, new TestPresentationSource(), 0, key)
     {
@@ -114,6 +126,8 @@ public sealed class ProtocolHotkeyControllerTests
 
     public bool CanRepeat { get; init; }
 
+    public bool CanJumpToCommand { get; init; }
+
     public int RunOrPauseCount { get; private set; }
 
     public int PauseCount { get; private set; }
@@ -121,6 +135,8 @@ public sealed class ProtocolHotkeyControllerTests
     public int ContinueCount { get; private set; }
 
     public int ExitCount { get; private set; }
+
+    public int CommandJumpCount { get; private set; }
 
     public List<bool> StepModes { get; } = [];
 
@@ -141,6 +157,8 @@ public sealed class ProtocolHotkeyControllerTests
     public void Repeat()
     {
     }
+
+    public void JumpToCommand() => CommandJumpCount++;
 
     public void NotifyOtherKey(object sender, KeyEventArgs e)
     {

@@ -4,6 +4,26 @@ namespace Ask.UI.UnitTests.Features.ProtocolNew.Execution;
 
 public sealed class ExecutionPauseControllerTests
 {
+  [Fact(DisplayName = "Прерывание ожидания сохраняет состояние паузы")]
+  public async Task InterruptWait_WhenPaused_ReleasesWaitAndKeepsPause()
+  {
+    var controller = new ExecutionPauseController();
+    controller.RequestPause();
+    var firstWait = controller.WaitAsync(CancellationToken.None);
+
+    var interrupted = controller.InterruptWait();
+
+    await firstWait.WaitAsync(TimeSpan.FromSeconds(1));
+    Assert.True(interrupted);
+    Assert.True(controller.IsPaused);
+
+    var secondWait = controller.WaitAsync(CancellationToken.None);
+    Assert.False(secondWait.IsCompleted);
+
+    controller.Resume();
+    await secondWait.WaitAsync(TimeSpan.FromSeconds(1));
+  }
+
   [Fact(DisplayName = "Ожидание во время выполнения завершается сразу")]
   public async Task WaitAsync_WhenExecutionIsRunning_CompletesImmediately()
   {

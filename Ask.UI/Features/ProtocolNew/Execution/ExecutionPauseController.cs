@@ -106,6 +106,31 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
     resumeSource?.TrySetResult(true);
   }
 
+  /// <summary>
+  /// Прерывает текущее ожидание, сохраняя состояние паузы.
+  /// </summary>
+  /// <returns>
+  /// <see langword="true"/>, если ожидание было прервано.
+  /// В противном случае — <see langword="false"/>.
+  /// </returns>
+  public bool InterruptWait()
+  {
+    TaskCompletionSource<bool>? resumeSource;
+    lock (_syncRoot)
+    {
+      if (!_isPaused)
+      {
+        return false;
+      }
+
+      resumeSource = _resumeSource;
+      _resumeSource = CreateResumeSource();
+    }
+
+    resumeSource?.TrySetResult(true);
+    return true;
+  }
+
   /// <inheritdoc />
   public void Cancel()
   {

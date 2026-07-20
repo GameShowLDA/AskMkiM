@@ -211,6 +211,7 @@
                     Grid.Column="7"
                     Style="{StaticResource TopMenuButtonStyle}"
                     ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_CommandJump}, Path=Value}"
+                    Click="CommandJumpButtonTop_Click"
                     Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
                 <Icons:FastForwardIcon Size="17" IsHitTestVisible="False"/>
             </Button>
