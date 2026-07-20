@@ -17,6 +17,25 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     private bool _isEditingEnabled = true;
 
     /// <summary>
+    /// Признак доступности редактирования конфигурации.
+    /// </summary>
+    public bool IsEditingEnabled
+    {
+      get => (bool)GetValue(IsEditingEnabledProperty);
+      set => SetValue(IsEditingEnabledProperty, value);
+    }
+
+    /// <summary>
+    /// Свойство зависимости для признака доступности редактирования.
+    /// </summary>
+    public static readonly DependencyProperty IsEditingEnabledProperty =
+      DependencyProperty.Register(
+        nameof(IsEditingEnabled),
+        typeof(bool),
+        typeof(ChassisManagerControl),
+        new PropertyMetadata(true));
+
+    /// <summary>
     /// Коллекция доступных систем шасси.
     /// </summary>
     public ObservableCollection<ChassisManagerDto> SystemsChassis { get; set; } = new();
@@ -80,6 +99,16 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     public event EventHandler NewSystem;
 
     /// <summary>
+    /// Событие запроса редактирования тестера АСКМ.
+    /// </summary>
+    public event EventHandler<ChassisManagerDto> EditSystemEvent;
+
+    /// <summary>
+    /// Событие запроса удаления тестера АСКМ вместе с привязанным оборудованием.
+    /// </summary>
+    public event EventHandler<ChassisManagerDto> DeleteSystemEvent;
+
+    /// <summary>
     /// Событие, вызываемое при добавлении новой стойки.
     /// </summary>
     public event EventHandler NewRack;
@@ -91,6 +120,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     {
       InitializeComponent();
       DataContext = this;
+      IsEditingEnabled = true;
       UpdateAddButtonsVisibility();
     }
 
@@ -106,6 +136,33 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
       }
 
       SystemsChassis.Add(chassisManager);
+      UpdateAddButtonsVisibility();
+    }
+
+    /// <summary>
+    /// Обновляет тестер АСКМ в отображаемом списке.
+    /// </summary>
+    /// <param name="chassisManager">Обновлённая модель тестера.</param>
+    public void ReplaceSystem(ChassisManagerDto chassisManager)
+    {
+      if (chassisManager == null)
+      {
+        return;
+      }
+
+      int index = SystemsChassis
+        .Select((item, itemIndex) => new { item, itemIndex })
+        .FirstOrDefault(x => x.item.Id == chassisManager.Id)?.itemIndex ?? -1;
+
+      if (index >= 0)
+      {
+        SystemsChassis[index] = chassisManager;
+      }
+      else
+      {
+        SystemsChassis.Add(chassisManager);
+      }
+
       UpdateAddButtonsVisibility();
     }
 
@@ -162,6 +219,32 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     }
 
     /// <summary>
+    /// Обрабатывает запрос редактирования тестера АСКМ.
+    /// </summary>
+    private void EditSystemButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!_isEditingEnabled || sender is not Button button || button.CommandParameter is not ChassisManagerDto dto)
+      {
+        return;
+      }
+
+      EditSystemEvent?.Invoke(this, dto);
+    }
+
+    /// <summary>
+    /// Обрабатывает запрос удаления тестера АСКМ.
+    /// </summary>
+    private void RemoveSystemButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!_isEditingEnabled || sender is not Button button || button.CommandParameter is not ChassisManagerDto dto)
+      {
+        return;
+      }
+
+      DeleteSystemEvent?.Invoke(this, dto);
+    }
+
+    /// <summary>
     /// Обрабатывает выбор стойки.
     /// </summary>
     /// <param name="sender">Источник события.</param>
@@ -208,6 +291,7 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
     public void SetEditingEnabled(bool isEnabled)
     {
       _isEditingEnabled = isEnabled;
+      IsEditingEnabled = isEnabled;
       UpdateAddButtonsVisibility();
     }
 

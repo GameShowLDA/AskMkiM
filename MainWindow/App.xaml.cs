@@ -70,7 +70,7 @@ namespace MainWindowProgram
       Console.SetOut(new ConsoleRedirector());
       var startupInitializationTask = Task.Run(async () =>
       {
-        await PreStartupInitializer.Initialize();
+        return await PreStartupInitializer.Initialize();
       });
 
       var loginWindowManager = new RoleLoginWindowManager();
@@ -91,7 +91,7 @@ namespace MainWindowProgram
         RoleApplicationConfigurator.Apply(authenticatedRole);
 
         await loginWindowManager.UpdateLoadingStatusAsync("Завершение фоновой инициализации...");
-        await startupInitializationTask;
+        var databaseInitializationReport = await startupInitializationTask;
 
         await loginWindowManager.UpdateLoadingStatusAsync("Применение настроек интерфейса...");
         await InitializeTheme();
@@ -114,6 +114,25 @@ namespace MainWindowProgram
         mainWindow.Visibility = Visibility.Visible;
         await loginWindowManager.CloseAsync();
         mainWindow.Show();
+
+        if (databaseInitializationReport?.DatabaseAlreadyExisted == false)
+        {
+          var result = Message.MessageBoxCustom.Show(
+            "Настройки приложения не заданы. Заполнить их автоматически?\n\n" +
+            "Будут созданы стандартные настройки приложения и пример конфигурации оборудования.\n\n" +
+            "Важно: созданная конфигурация может не соответствовать вашему реальному оборудованию. " +
+            "Перед началом работы обязательно проверьте и исправьте её.",
+            "Настройки приложения не заданы",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+          if (result == MessageBoxResult.Yes)
+          {
+            var autoConfigurationService = PreStartupInitializer.AppHost.Services
+              .GetRequiredService<ApplicationAutoConfigurationService>();
+            await autoConfigurationService.ApplyDefaultConfigurationAsync();
+          }
+        }
 
         mainWindow.Topmost = true;
 
