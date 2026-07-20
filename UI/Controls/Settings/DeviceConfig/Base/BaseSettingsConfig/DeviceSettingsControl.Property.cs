@@ -104,6 +104,21 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// </summary>
     public int NumberDevice => int.TryParse(DeviceNumberTextBox.Text, out int number) ? number : -1;
 
+    /// <summary>
+    /// Количество точек модуля коммутации реле.
+    /// </summary>
+    public int RelayPointCount =>
+      int.TryParse(RelayPointCountTextBox.Text, out int pointCount) ? pointCount : -1;
+
+    /// <summary>
+    /// Задаёт количество точек модуля коммутации реле.
+    /// </summary>
+    /// <param name="pointCount">Количество точек.</param>
+    public void SetRelayPointCount(int pointCount)
+    {
+      RelayPointCountTextBox.Text = pointCount.ToString(CultureInfo.InvariantCulture);
+    }
+
     public double GetResistance()
     {
       if (ResistanceTextBox == null)

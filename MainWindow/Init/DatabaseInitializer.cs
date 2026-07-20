@@ -5,13 +5,14 @@ using Ask.DataBase.Engine.Initialization;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.DataBase.Engine.Static.Settings;
+using Ask.DataBase.Provider.Initialization;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Init
 {
   static internal class DatabaseInitializer
   {
-    static internal async Task InitializeAsync()
+    static internal async Task<DatabaseInitializationReport?> InitializeAsync()
     {
       try
       {
@@ -38,9 +39,25 @@ namespace MainWindowProgram.Init
 
         if (protocol != null)
         {
+          bool protocolDefaultsAdded = false;
+          if (string.IsNullOrWhiteSpace(protocol.CleanTextProtocol))
+          {
+            protocol.CleanTextProtocol = ProtocolConfig.GetBaseTextProtocol();
+            protocolDefaultsAdded = true;
+          }
+
+          if (string.IsNullOrWhiteSpace(protocol.CleanTextErrorsProtocol))
+          {
+            protocol.CleanTextErrorsProtocol = ProtocolConfig.GetBaseTextErrorsProtocol();
+            protocolDefaultsAdded = true;
+          }
+
           ProtocolConfig.SetProtocolModel(protocol);
-          ProtocolModel.SetTemplate(protocol.CleanTextProtocol);
-          ProtocolModel.SetErrorsTemplate(protocol.CleanTextErrorsProtocol);
+
+          if (protocolDefaultsAdded)
+          {
+            await ProtocolSettings.SaveAsync(protocol);
+          }
         }
 
         if (execution != null)
@@ -79,10 +96,13 @@ namespace MainWindowProgram.Init
         {
           await DeviceDisplaySettings.SaveAsync(model);
         };
+
+        return newDatabaseReport;
       }
       catch (Exception ex)
       {
         LogException(ex);
+        return null;
       }
     }
 

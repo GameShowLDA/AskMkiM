@@ -172,7 +172,13 @@ public static class DeviceConfigurationService
     ValidateLinkedDevices(model.BreakdownTesters.Select(device => device.NumberChassis), chassisNumbers, "пробойные установки");
   }
 
-  internal static async Task ApplyConfigurationFileAsync(
+  /// <summary>
+  /// Полностью заменяет конфигурацию оборудования в базе данных переданной моделью.
+  /// </summary>
+  /// <param name="model">Модель конфигурации оборудования для сохранения.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>Асинхронная задача сохранения конфигурации оборудования.</returns>
+  public static async Task ApplyConfigurationFileAsync(
     DeviceConfigurationFileModel model,
     CancellationToken cancellationToken = default)
   {
