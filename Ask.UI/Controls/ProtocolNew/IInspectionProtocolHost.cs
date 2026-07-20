@@ -1,18 +1,11 @@
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <summary>
-  /// Размещает итоговый протокол в интерфейсе владельца <see cref="ProtocolUI"/>.
+  /// Сохраняет совместимость существующих владельцев итогового протокола
+  /// с контрактом области из подсистемы <c>Features.ProtocolNew</c>.
   /// </summary>
-  public interface IInspectionProtocolHost
+  public interface IInspectionProtocolHost :
+    global::Ask.Core.Shared.Interfaces.UiInterfaces.IInspectionProtocolHost
   {
-    /// <summary>
-    /// Показывает сформированный итоговый протокол.
-    /// </summary>
-    void ShowInspectionProtocol(string protocolText);
-
-    /// <summary>
-    /// Удаляет представление итогового протокола и очищает его содержимое.
-    /// </summary>
-    void ClearInspectionProtocol();
   }
 }

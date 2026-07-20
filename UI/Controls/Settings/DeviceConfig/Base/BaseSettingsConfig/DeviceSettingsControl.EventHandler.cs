@@ -23,6 +23,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private bool _internalChange;
 
     /// <summary>
+    /// Признак синхронизации номера устройства и последнего октета IP-адреса.
+    /// </summary>
+    private bool _synchronizingDeviceNumberAndIp;
+
+    /// <summary>
     /// Обрабатывает изменение выбранной модели шасси.
     /// </summary>
     /// <param name="sender">Источник события.</param>
@@ -80,12 +85,16 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           BusTypeContainer.Visibility = Visibility.Visible;
           ResistanceContainer.Visibility = Visibility.Visible;
           CapacitanceContainer.Visibility = Visibility.Visible;
+          var relayModule = (IRelaySwitchModule)Activator.CreateInstance(selectedType)!;
+          RelayPointCountContainer.Visibility = Visibility.Visible;
+          SetRelayPointCount(relayModule.PointCount);
         }
         else
         {
           BusTypeContainer.Visibility = Visibility.Collapsed;
           ResistanceContainer.Visibility = Visibility.Collapsed;
           CapacitanceContainer.Visibility = Visibility.Collapsed;
+          RelayPointCountContainer.Visibility = Visibility.Collapsed;
         }
 
         if (typeof(IMultimeter).IsAssignableFrom(selectedType))
@@ -95,7 +104,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         if (baseClass == typeof(DeviceWithCOM))
         {
           object deviceModel = Activator.CreateInstance(selectedType);
-          ApplyCOMSettingsFromModel(deviceModel);
+          COMContainer.ApplyModelDefaults(deviceModel);
         }
 
         if (baseClass == typeof(DeviceWithUSB))
@@ -125,13 +134,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       IpPart3.Text = string.Empty;
       IpPart4.Text = string.Empty;
 
-      COMPortSelectionBox.ItemsSource = null;
-      COMPortSelectionBox.SelectedIndex = -1;
-      VIDData.Text = "N/A";
-      PIDData.Text = "N/A";
+      COMContainer.Reset();
 
       ResistanceTextBox.Text = string.Empty;
       CapacitanceTextBox.Text = string.Empty;
+      RelayPointCountTextBox.Text = string.Empty;
 
       _usbConnectionDetails = string.Empty;
       USBStatusData.Text = "Ожидание поиска...";
@@ -258,7 +265,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         else if (selectedType.Contains("com"))
         {
           COMContainer.Visibility = Visibility.Visible;
-          PopulateCOMPorts();
+          COMContainer.LoadAvailablePorts();
         }
         else if (selectedType.Contains("usb"))
         {
@@ -284,7 +291,44 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="e">Аргументы события изменения текста.</param>
     private void NumberDevice_TextChanged(object sender, TextChangedEventArgs e)
     {
-      return;
+      SynchronizeDeviceNumberAndIp(DeviceNumberTextBox, IpPart4);
+    }
+
+    /// <summary>
+    /// Обрабатывает изменение последнего октета IP-адреса.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы события изменения текста.</param>
+    private void IpPart4_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      SynchronizeDeviceNumberAndIp(IpPart4, DeviceNumberTextBox);
+    }
+
+    /// <summary>
+    /// Синхронизирует номер устройства и последний октет IP-адреса.
+    /// </summary>
+    /// <param name="source">Поле с исходным значением.</param>
+    /// <param name="target">Поле для синхронизируемого значения.</param>
+    private void SynchronizeDeviceNumberAndIp(TextBox source, TextBox target)
+    {
+      if (_synchronizingDeviceNumberAndIp ||
+          GetBaseDeviceType() != typeof(DeviceWithIP) ||
+          IsSelectedChassisManager() ||
+          string.Equals(source.Text, target.Text, StringComparison.Ordinal))
+      {
+        return;
+      }
+
+      _synchronizingDeviceNumberAndIp = true;
+      try
+      {
+        target.Text = source.Text;
+        target.CaretIndex = target.Text.Length;
+      }
+      finally
+      {
+        _synchronizingDeviceNumberAndIp = false;
+      }
     }
 
     /// <summary>
@@ -379,17 +423,5 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       RequestClose?.Invoke(this, e);
     }
 
-    /// <summary>
-    /// Обрабатывает изменение выбранного COM-порта.
-    /// </summary>
-    /// <param name="sender">Источник события.</param>
-    /// <param name="e">Аргументы события выбора.</param>
-    private void COMPortSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-      if (COMPortSelectionBox.SelectedItem is string selectedPort)
-      {
-        GetVidPidForPort(selectedPort);
-      }
-    }
   }
 }
