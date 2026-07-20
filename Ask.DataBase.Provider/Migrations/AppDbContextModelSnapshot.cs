@@ -878,10 +878,16 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("UseCommandBodyBackgroundHighlighting")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("UseErrorUnderlineHighlighting")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("UseSyntaxHighlighting")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseTopMenuIcons")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseWarningUnderlineHighlighting")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

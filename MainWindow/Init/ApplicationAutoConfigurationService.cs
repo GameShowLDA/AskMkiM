@@ -216,6 +216,8 @@ internal sealed class ApplicationAutoConfigurationService
     defaultInterfaceSettings.UseSyntaxHighlighting = true;
     defaultInterfaceSettings.UseCommandBodyBackgroundHighlighting = true;
     defaultInterfaceSettings.UseChainPointBodyBackgroundHighlighting = true;
+    defaultInterfaceSettings.UseWarningUnderlineHighlighting = false;
+    defaultInterfaceSettings.UseErrorUnderlineHighlighting = false;
 
     await UserInterfaceConfig.SaveProtocolModel(defaultInterfaceSettings);
 

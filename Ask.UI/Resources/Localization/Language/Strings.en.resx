@@ -435,6 +435,18 @@
   <data name="settings.userinterface.chainPointBodyBackground.description" xml:space="preserve">
     <value>Enables or disables background highlighting for chain and point check lines in the execution protocol.</value>
   </data>
+  <data name="settings.userinterface.warningUnderline.title" xml:space="preserve">
+    <value>Warning underline</value>
+  </data>
+  <data name="settings.userinterface.warningUnderline.description" xml:space="preserve">
+    <value>Enables or disables squiggly underlining for warnings in the protocol editor.</value>
+  </data>
+  <data name="settings.userinterface.errorUnderline.title" xml:space="preserve">
+    <value>Error underline</value>
+  </data>
+  <data name="settings.userinterface.errorUnderline.description" xml:space="preserve">
+    <value>Enables or disables squiggly underlining for errors in the protocol editor.</value>
+  </data>
   <data name="settings.userinterface.language.title" xml:space="preserve">
     <value>Language</value>
   </data>

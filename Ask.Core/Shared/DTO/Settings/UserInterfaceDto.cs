@@ -43,6 +43,16 @@ public class UserInterfaceDto
   public bool UseChainPointBodyBackgroundHighlighting { get; set; }
 
   /// <summary>
+  /// Включает подчеркивание предупреждений в редакторе протокола.
+  /// </summary>
+  public bool UseWarningUnderlineHighlighting { get; set; }
+
+  /// <summary>
+  /// Включает подчеркивание ошибок в редакторе протокола.
+  /// </summary>
+  public bool UseErrorUnderlineHighlighting { get; set; }
+
+  /// <summary>
   /// Заменяет текст верхнего меню на иконки.
   /// </summary>
   public bool UseTopMenuIcons { get; set; }

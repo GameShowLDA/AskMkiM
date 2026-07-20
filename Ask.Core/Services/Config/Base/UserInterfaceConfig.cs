@@ -39,6 +39,10 @@ namespace Ask.Core.Services.Config.Base
 
     public static void SetChainPointBodyBackgroundHighlighting(bool enable) => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting = enable;
 
+    public static void SetWarningUnderlineHighlighting(bool enable) => UserInterfaceModel.UseWarningUnderlineHighlighting = enable;
+
+    public static void SetErrorUnderlineHighlighting(bool enable) => UserInterfaceModel.UseErrorUnderlineHighlighting = enable;
+
     public static void SetTopMenuIcons(bool enable) => UserInterfaceModel.UseTopMenuIcons = enable;
 
     public static void SetCommandAutoCollapse(bool enable) => UserInterfaceModel.UseCommandAutoCollapse = enable;
@@ -50,6 +54,8 @@ namespace Ask.Core.Services.Config.Base
       SetSyntaxHighlighting(user.UseSyntaxHighlighting);
       SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
       SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
+      SetWarningUnderlineHighlighting(user.UseWarningUnderlineHighlighting);
+      SetErrorUnderlineHighlighting(user.UseErrorUnderlineHighlighting);
       SetTopMenuIcons(user.UseTopMenuIcons);
       SetCommandAutoCollapse(user.UseCommandAutoCollapse);
 
@@ -69,6 +75,8 @@ namespace Ask.Core.Services.Config.Base
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
     public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
     public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
+    public static bool GetWarningUnderlineHighlighting() => UserInterfaceModel.UseWarningUnderlineHighlighting;
+    public static bool GetErrorUnderlineHighlighting() => UserInterfaceModel.UseErrorUnderlineHighlighting;
     public static bool GetTopMenuIcons() => UserInterfaceModel.UseTopMenuIcons;
     public static bool GetCommandAutoCollapse() => UserInterfaceModel.UseCommandAutoCollapse;
 
@@ -81,6 +89,8 @@ namespace Ask.Core.Services.Config.Base
         UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting,
         UseCommandBodyBackgroundHighlighting = UserInterfaceModel.UseCommandBodyBackgroundHighlighting,
         UseChainPointBodyBackgroundHighlighting = UserInterfaceModel.UseChainPointBodyBackgroundHighlighting,
+        UseWarningUnderlineHighlighting = UserInterfaceModel.UseWarningUnderlineHighlighting,
+        UseErrorUnderlineHighlighting = UserInterfaceModel.UseErrorUnderlineHighlighting,
         UseTopMenuIcons = UserInterfaceModel.UseTopMenuIcons,
         UseCommandAutoCollapse = UserInterfaceModel.UseCommandAutoCollapse
       };
@@ -94,6 +104,8 @@ namespace Ask.Core.Services.Config.Base
       SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
       SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
       SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
+      SetWarningUnderlineHighlighting(parametrModel.UseWarningUnderlineHighlighting);
+      SetErrorUnderlineHighlighting(parametrModel.UseErrorUnderlineHighlighting);
       SetTopMenuIcons(parametrModel.UseTopMenuIcons);
       SetCommandAutoCollapse(parametrModel.UseCommandAutoCollapse);
 

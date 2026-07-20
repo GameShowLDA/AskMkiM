@@ -659,6 +659,14 @@ namespace UI.Controls.TextEditorControl
       if (textEditor.Document == null || _markerService == null)
         return;
 
+      if (!HasEnabledSyntaxDiagnosticUnderlines())
+      {
+        _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+        _syntaxDiagnostics = Array.Empty<TextSyntaxDiagnostic>();
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
       string textSnapshot = textEditor.Text ?? string.Empty;
       int analysisVersion = ++_syntaxAnalysisVersion;
 
@@ -682,24 +690,36 @@ namespace UI.Controls.TextEditorControl
       }
 
       _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
-      _syntaxDiagnostics = diagnostics;
+      _syntaxDiagnostics = diagnostics
+        .Where(IsSyntaxDiagnosticUnderlineEnabled)
+        .ToList();
 
       if (_syntaxDiagnostics.Count == 0)
         CloseSyntaxDiagnosticToolTip();
 
       foreach (var diagnostic in _syntaxDiagnostics)
       {
-        var color = diagnostic.Severity == TextSyntaxSeverity.Warning
-          ? _syntaxWarningUnderline
-          : _syntaxErrorUnderline;
-
         _markerService.AddSquigglyUnderlineMarker(
           diagnostic.StartOffset,
           Math.Max(1, diagnostic.Length),
-          color,
+          GetSyntaxDiagnosticUnderlineColor(diagnostic),
           SyntaxDiagnosticMarkerTag);
       }
     }
+
+    private static bool HasEnabledSyntaxDiagnosticUnderlines() =>
+      UserInterfaceConfig.GetWarningUnderlineHighlighting()
+      || UserInterfaceConfig.GetErrorUnderlineHighlighting();
+
+    private static bool IsSyntaxDiagnosticUnderlineEnabled(TextSyntaxDiagnostic diagnostic) =>
+      diagnostic.Severity == TextSyntaxSeverity.Warning
+        ? UserInterfaceConfig.GetWarningUnderlineHighlighting()
+        : UserInterfaceConfig.GetErrorUnderlineHighlighting();
+
+    private Color GetSyntaxDiagnosticUnderlineColor(TextSyntaxDiagnostic diagnostic) =>
+      diagnostic.Severity == TextSyntaxSeverity.Warning
+        ? _syntaxWarningUnderline
+        : _syntaxErrorUnderline;
 
     private void TextEditor_MouseMove(object sender, MouseEventArgs e)
     {
@@ -881,12 +901,18 @@ namespace UI.Controls.TextEditorControl
       });
 
       EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(
-        e => ApplySyntaxHighlighting(e.IsEnabled)
-      );
+        e =>
+        {
+          ApplySyntaxHighlighting(e.IsEnabled);
+          ScheduleSyntaxAnalysis();
+        });
 
       EventAggregator.Subscribe<ThemeEvent.Change>(
-        _ => ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting())
-      );
+        _ =>
+        {
+          ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+          ScheduleSyntaxAnalysis();
+        });
 
       if (textEditor.Document == null)
         textEditor.Document = new TextDocument();

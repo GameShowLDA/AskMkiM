@@ -15,6 +15,10 @@
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Description" Key="settings.userinterface.commandBodyBackground.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Title" Key="settings.userinterface.chainPointBodyBackground.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ChainPointBodyBackground_Description" Key="settings.userinterface.chainPointBodyBackground.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_WarningUnderline_Title" Key="settings.userinterface.warningUnderline.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_WarningUnderline_Description" Key="settings.userinterface.warningUnderline.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ErrorUnderline_Title" Key="settings.userinterface.errorUnderline.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_ErrorUnderline_Description" Key="settings.userinterface.errorUnderline.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Title" Key="settings.userinterface.topMenuIcons.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_TopMenuIcons_Description" Key="settings.userinterface.topMenuIcons.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandAutoCollapse_Title" Key="settings.userinterface.commandAutoCollapse.title" />

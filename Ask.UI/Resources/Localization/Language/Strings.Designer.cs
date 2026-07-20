@@ -1473,6 +1473,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает или отключает волнистое подчеркивание ошибок в редакторе протокола..
+        /// </summary>
+        internal static string settings_userinterface_errorUnderline_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.errorUnderline.description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Подчеркивание ошибок.
+        /// </summary>
+        internal static string settings_userinterface_errorUnderline_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.errorUnderline.title", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Выберите язык интерфейса, на котором будут отображаться надписи и сообщения..
         /// </summary>
         internal static string settings_userinterface_language_description {
@@ -1535,6 +1553,24 @@ namespace Ask.UI.Resources.Localization.Language {
             }
         }
         
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Включает или отключает волнистое подчеркивание предупреждений в редакторе протокола..
+        /// </summary>
+        internal static string settings_userinterface_warningUnderline_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.warningUnderline.description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Подчеркивание предупреждений.
+        /// </summary>
+        internal static string settings_userinterface_warningUnderline_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.warningUnderline.title", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Ищет локализованную строку, похожую на Заменяет текстовые пункты верхнего меню на иконки..
         /// </summary>
