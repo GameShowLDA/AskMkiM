@@ -383,7 +383,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
 
         var tolerance = CapacityTolerance(check.IdealResult);
-        await meter.CapacitanceManager.SetCapacitanceRangeAsync(check.IdealResult, userMessageService);
 
         var result = await MeasureAverageCapacitanceAsync(cancellationToken, meter, check.IdealResult, tolerance, userMessageService);
 
