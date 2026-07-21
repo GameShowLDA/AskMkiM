@@ -5,8 +5,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
+using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.CI
@@ -94,7 +95,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
 
           var dischargeIndex = CurrentDischargeNumber - 1;
           var bitString = GetBitString();
-          var formattedResult = MeasurementValueFormatter.FormatWithUnit(answer.value, "МОм");
+          var formattedResult = GroupMethodProtocolBuilder.FormatValue(answer.value, ResistanceUnit.MegaOhm);
           var resultMessage = new ShowMessageModel(
             $"Результат измерения разряда {dischargeIndex} ({bitString})",
             message: formattedResult,
@@ -102,7 +103,13 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           {
             IndentLevel = 2,
             ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
-              ? BuildExecutionErrorMessage(dischargeIndex, bitString, dataModel.Param, answer.value)
+              ? GroupMethodProtocolBuilder.BuildFailure(
+                dischargeIndex,
+                bitString,
+                dataModel.Param,
+                answer.value,
+                ResistanceUnit.MegaOhm,
+                MeasurementLimitKind.Minimum)
               : null,
           };
           await messageService.ShowMessageAsync(resultMessage, skipPause: true);
@@ -116,25 +123,6 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
       }
     }
 
-    /// <summary>
-    /// Формирует описание брака сопротивления изоляции для разряда.
-    /// </summary>
-    /// <param name="dischargeIndex">Индекс проверяемого разряда.</param>
-    /// <param name="bitString">Двоичная маска проверяемого разряда.</param>
-    /// <param name="minimumResistance">Минимальное допустимое сопротивление изоляции.</param>
-    /// <param name="result">Измеренное сопротивление изоляции.</param>
-    /// <returns>Описание результата проверки для итогового заключения.</returns>
-    internal static string BuildExecutionErrorMessage(
-      int dischargeIndex,
-      string bitString,
-      double minimumResistance,
-      double result)
-    {
-      var formattedMinimum = MeasurementValueFormatter.Format(minimumResistance);
-      var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "МОм");
-
-      return $"Разряд-{dischargeIndex}[{bitString}] ({formattedMinimum}<R МОм). Rизм = {formattedResult}";
-    }
   }
 }
 

@@ -2,6 +2,7 @@ using System.Globalization;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.NodeMethod;
+using Ask.Engine.Tests.Protocol;
 
 namespace Ask.Engine.UnitTests.Tests.NodeMethod;
 
