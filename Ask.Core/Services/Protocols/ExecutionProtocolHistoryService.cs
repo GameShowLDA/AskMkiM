@@ -28,7 +28,7 @@ public static class ExecutionProtocolHistoryService
   public static async Task<string> SaveAsync(string? protocolName, IEnumerable<ShowMessageModel> messages)
   {
     var lines = messages
-      .Select(FormatProtocolLine)
+      .Select(ExecutionProtocolLineFormatter.Format)
       .Where(static line => !string.IsNullOrWhiteSpace(line));
 
     return await SaveLinesAsync(protocolName, lines, ExecutionProtocolExtension);
@@ -157,38 +157,4 @@ public static class ExecutionProtocolHistoryService
     return builder.ToString();
   }
 
-  /// <summary>
-  /// Формирует строковое представление сообщения протокола.
-  /// </summary>
-  /// <param name="message">Сообщение, подлежащее записи в протокол.</param>
-  /// <returns>
-  /// Строка протокола, содержащая заголовок и сообщение,
-  /// либо пустая строка, если оба значения отсутствуют.
-  /// </returns>
-  private static string FormatProtocolLine(ShowMessageModel message)
-  {
-    string header = message.Header?.TrimEnd() ?? string.Empty;
-    string body = message.Message?.TrimEnd() ?? string.Empty;
-
-    bool hasHeader = !string.IsNullOrWhiteSpace(header);
-    bool hasBody = !string.IsNullOrWhiteSpace(body);
-
-    if (!hasHeader && !hasBody)
-    {
-      return string.Empty;
-    }
-
-    if (!hasHeader)
-    {
-      return body;
-    }
-
-    if (!hasBody)
-    {
-      return header;
-    }
-
-    string separator = header.EndsWith(' ') || body.StartsWith(' ') ? string.Empty : " ";
-    return $"{header}{separator}{body}";
-  }
 }

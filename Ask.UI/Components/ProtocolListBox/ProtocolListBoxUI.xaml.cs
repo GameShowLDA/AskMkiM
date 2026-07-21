@@ -838,13 +838,7 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       return string.Join(Environment.NewLine, _historyMessages
         .Where(message => ProtocolConfig.GetCommandHeadersInProtocol() || message.Status != ShowMessageModel.MessageType.Command)
-        .Select(m =>
-      {
-        string indent = new string(' ', m.IndentLevel * 2);
-        string header = string.IsNullOrWhiteSpace(m.Header) ? string.Empty : $"{m.Header}: ";
-        string timePart = string.IsNullOrWhiteSpace(m.Time) ? string.Empty : $" | {m.Time}";
-        return $"{indent}{header}{m.Message}{timePart}";
-      }));
+        .Select(Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format));
     }
 
     public int GetLastLineNumber()

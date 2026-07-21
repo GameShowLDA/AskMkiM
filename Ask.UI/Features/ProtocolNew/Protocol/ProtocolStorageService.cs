@@ -13,6 +13,9 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// <summary>Путь к последнему сохранённому протоколу выполнения.</summary>
     private string? _lastExecutionProtocolPath;
 
+    /// <summary>Путь к последнему сохранённому итоговому протоколу.</summary>
+    private string? _lastInspectionProtocolPath;
+
     /// <summary>Текст текущего итогового протокола.</summary>
     public string InspectionProtocolText { get; private set; } = string.Empty;
 
@@ -29,6 +32,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     public void ClearInspectionProtocol()
     {
       InspectionProtocolText = string.Empty;
+      _lastInspectionProtocolPath = null;
     }
 
     /// <summary>
@@ -54,7 +58,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
         return;
       }
 
-      await ExecutionProtocolHistoryService.SaveInspectionAsync(
+      _lastInspectionProtocolPath = await ExecutionProtocolHistoryService.SaveInspectionAsync(
         name,
         InspectionProtocolText,
         _lastExecutionProtocolPath);
@@ -74,6 +78,18 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       }
 
       return ExecutionProtocolHistoryService.ResolveLatestProtocolPath();
+    }
+
+    /// <summary>
+    /// Возвращает путь к последнему сохранённому итоговому протоколу текущего выполнения.
+    /// </summary>
+    /// <returns>Абсолютный путь к итоговому протоколу либо <see langword="null"/>.</returns>
+    public string? ResolveLatestInspectionProtocolPath()
+    {
+      return !string.IsNullOrWhiteSpace(_lastInspectionProtocolPath)
+             && File.Exists(_lastInspectionProtocolPath)
+        ? Path.GetFullPath(_lastInspectionProtocolPath)
+        : null;
     }
 
     /// <summary>Возвращает абсолютный путь к общему каталогу истории протоколов.</summary>

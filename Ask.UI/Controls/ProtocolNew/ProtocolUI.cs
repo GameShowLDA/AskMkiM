@@ -381,6 +381,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
+      UpdateInspectionProtocolTitle();
       _inspectionProtocolAreaController.Show(protocolText, InspectionProtocolHost);
     }
 
@@ -400,6 +401,7 @@ namespace Ask.UI.Controls.ProtocolNew
         : new GridLength(0);
       InspectionProtocolSplitter.Visibility = visibility;
       InspectionProtocolPanel.Visibility = visibility;
+      InspectionProtocolManager.Visibility = visibility;
     }
 
     /// <summary>
