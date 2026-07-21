@@ -54,6 +54,29 @@ public class NodeMethodProtocolBuilderTests
     });
   }
 
+  [Fact]
+  public void BuildRangeFailure_UsesResistanceRangeFromUnitMetadata()
+  {
+    RunWithRussianCulture(() =>
+    {
+      var point = new PointModel
+      {
+        DeviceNumber = 1,
+        ModuleNumber = 6,
+        PointNumber = 1,
+      };
+
+      var result = NodeMethodProtocolBuilder.BuildRangeFailure(
+        point,
+        0,
+        10,
+        12.35,
+        ResistanceUnit.Ohm);
+
+      Assert.Equal("Точка[1.6.1](0<R<10 Ом). Rизм = 12,35 Ом", result);
+    });
+  }
+
   private static void RunWithRussianCulture(Action action)
   {
     var previousCulture = CultureInfo.CurrentCulture;

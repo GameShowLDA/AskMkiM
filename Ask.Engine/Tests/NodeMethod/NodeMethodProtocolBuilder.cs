@@ -48,5 +48,31 @@ namespace Ask.Engine.Tests.NodeMethod
 
       return $"Точка[{point}]({condition}). {quantitySymbol}изм = {formattedResult}";
     }
+
+    /// <summary>
+    /// Формирует описание брака для точки с допустимым диапазоном.
+    /// </summary>
+    /// <param name="point">Проверяемая точка.</param>
+    /// <param name="lowerLimit">Нижняя граница допустимого диапазона.</param>
+    /// <param name="upperLimit">Верхняя граница допустимого диапазона.</param>
+    /// <param name="result">Измеренное значение.</param>
+    /// <param name="unit">Единица измерения.</param>
+    /// <returns>Описание результата проверки для итогового заключения.</returns>
+    internal static string BuildRangeFailure(
+      PointModel point,
+      double lowerLimit,
+      double upperLimit,
+      double result,
+      Enum unit)
+    {
+      var formattedLowerLimit = MeasurementValueFormatter.Format(lowerLimit);
+      var formattedUpperLimit = MeasurementValueFormatter.Format(upperLimit);
+      var formattedResult = FormatValue(result, unit);
+      var unitName = unit.GetUnit();
+      var quantitySymbol = unit.GetQuantitySymbol();
+
+      return $"Точка[{point}]({formattedLowerLimit}<{quantitySymbol}<{formattedUpperLimit} {unitName}). " +
+        $"{quantitySymbol}изм = {formattedResult}";
+    }
   }
 }
