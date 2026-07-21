@@ -21,7 +21,7 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Formatter
 
       var lines = TestFormatter.FormatAll(model).ToList();
 
-      Assert.Equal("\tРљРѕРјРјРµРЅС‚Р°СЂРёРё:", lines[0]);
+      Assert.Equal("\tКомментарии:", lines[0]);
       Assert.Equal("\t\t{  AAA", lines[1]);
       Assert.Equal("\t\t   BBB", lines[2]);
       Assert.Equal("\t\t     CCC", lines[3]);
