@@ -76,7 +76,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService);
         await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);
-        await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
+        await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
       }
 
       /// <inheritdoc />
