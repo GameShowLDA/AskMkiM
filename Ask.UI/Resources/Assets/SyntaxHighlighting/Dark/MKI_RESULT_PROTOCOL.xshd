@@ -12,6 +12,7 @@
 		<Rule color="ProtocolMain">(?&lt;=")[^"\r\n]+(?="\s+от\b)</Rule>
 		<Rule color="ProtocolMain">^\s*Заключение:</Rule>
 		<Rule color="OkParam">(?&lt;=Точка)\[\d+(?:\.\d+)*\]</Rule>
+		<Rule color="OkParam">(?&lt;=Разряд-\s)\d+</Rule>
 		<Rule color="MeasurementUnit">(?-i:(?&lt;![А-Яа-яA-Za-z])(?:мкФ|пФ|нФ|мА|А|ГОм|МОм|КОм|Ом|кВ|мВ|В)(?![А-Яа-яA-Za-z]))</Rule>
 		<Rule color="Error">\[БРАК\]</Rule>
 	</RuleSet>
