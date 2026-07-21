@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -113,7 +114,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await breakdownTester.IrManger.Voltage.SetVoltageAsync(item, userMessageService);
 
           (var lowerBound, var upperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
-          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(param, lowerBound, upperBound)).value;
+          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, lowerBound, upperBound)).value;
 
           var err = result - param;
           var status = result >= lowerBound && result <= upperBound

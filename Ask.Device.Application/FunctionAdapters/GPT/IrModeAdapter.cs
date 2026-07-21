@@ -692,12 +692,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Результат измерения сопротивления изоляции в МОм.  
       /// В случае ошибки возвращает значение <c>-1</c>.
       /// </returns>
-      public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = 600000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = 600000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение сопротивления изоляции",
-          () => _irMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
+          () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, rangeFrom, rangeTo));
 
         if (!execution.Success)
         {

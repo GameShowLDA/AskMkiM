@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
@@ -97,7 +98,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
-              var answer = await breakDown.AcwManger.Measure.MeasureAsync(dataModel.Param);
+              var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, dataModel.Param);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value >= dataModel.Param)
