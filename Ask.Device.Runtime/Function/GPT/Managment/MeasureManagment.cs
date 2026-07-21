@@ -68,10 +68,10 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         userMessageService);
 
       var result = measurement;
-      var resistanceMOm = _gptModel.SystemInsulationResistanceGOhm * 1000;
 
       if (_gptModel.Mode == Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
       {
+        var resistanceMOm = _gptModel.SystemInsulationResistanceGOhm * 1000;
         result.Item1 = measurement.value * resistanceMOm / (resistanceMOm - measurement.value);
       }
 
