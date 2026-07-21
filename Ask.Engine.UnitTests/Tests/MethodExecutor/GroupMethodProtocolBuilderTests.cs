@@ -31,4 +31,29 @@ public class GroupMethodProtocolBuilderTests
       CultureInfo.CurrentCulture = previousCulture;
     }
   }
+
+  [Fact]
+  public void BuildFailure_UsesMaximumCurrentFromUnitMetadata()
+  {
+    var previousCulture = CultureInfo.CurrentCulture;
+
+    try
+    {
+      CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
+
+      var result = GroupMethodProtocolBuilder.BuildFailure(
+        2,
+        "0000100",
+        10,
+        12.35,
+        CurrentUnit.MilliAmpere,
+        MeasurementLimitKind.Maximum);
+
+      Assert.Equal("Разряд-2[0000100] (I<10 мА). Iизм = 12,35 мА", result);
+    }
+    finally
+    {
+      CultureInfo.CurrentCulture = previousCulture;
+    }
+  }
 }
