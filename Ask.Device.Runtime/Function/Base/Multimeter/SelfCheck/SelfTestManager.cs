@@ -508,13 +508,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       var resultType = isCorrect
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
-      var status = isCorrect ? "НОРМА" : "БРАК";
       var meaning = MeasurementValueFormatter.IsOverloadValue(result) ? "Overload" : $"{result} Ом";
 
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
           header: $"Тест активного сопротивления (>{MinimumActiveResistance:N0} Ом)",
-          message: $"{meaning} [{status}]",
+          message: $"{meaning} ",
           type: resultType)
         {
           IndentLevel = 1,
