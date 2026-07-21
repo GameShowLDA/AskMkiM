@@ -6,7 +6,9 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.CI
@@ -23,6 +25,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       {
         StartDelegate = ExecuteMeasurementProcess,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -96,7 +99,23 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                 type = ShowMessageModel.MessageType.Error;
               }
 
-              await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения)", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
+              var formattedResult = NodeMethodProtocolBuilder.FormatValue(answer.value, ResistanceUnit.MegaOhm);
+              var resultMessage = new ShowMessageModel(
+                $"Результат измерения точки {connectResult.PointModel}",
+                message: formattedResult,
+                type: type)
+              {
+                IndentLevel = 2,
+                ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
+                  ? NodeMethodProtocolBuilder.BuildFailure(
+                    connectResult.PointModel,
+                    dataModel.Param,
+                    answer.value,
+                    ResistanceUnit.MegaOhm,
+                    MeasurementLimitKind.Minimum)
+                  : null,
+              };
+              await protocolUI.ShowMessageAsync(resultMessage, skipPause: true);
               return type == ShowMessageModel.MessageType.Success;
 
             }, protocolUI);

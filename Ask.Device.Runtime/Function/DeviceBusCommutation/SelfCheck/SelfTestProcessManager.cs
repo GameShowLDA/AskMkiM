@@ -142,7 +142,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
         if (!await PerformCircuitTestAsync(cancellationToken, messageService, selfTestChecker, meter, testType, circuitName, busContact))
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
           LogError($"Проверка {circuitName} завершилась с ошибкой!", isDeviceLog: true);
           allTestsPassed = false;
           continue;
@@ -174,12 +173,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     {
       await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
 
+      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка целостности цепи {circuitName}...") { IndentLevel = 1 });
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(() => SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(cancellationToken, messageService, selfTestChecker, testType, busContact, circuitName), messageService))
       {
         return false;
       }
-
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка целостности цепи {circuitName}...") { IndentLevel = 1 });
 
       bool continuityResult = false;
 
@@ -187,18 +185,16 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       {
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true, messageService);
+          continuityResult = await meter.ContinuityManager.CheckContinuityAsync(true);
+          await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", message: "Проверка подключение", type: continuityResult ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: !continuityResult);
+
           if (continuityResult)
           {
-            await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
             await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
-            return true;
           }
-          else
-          {
-            await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\"", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 }, skipPause: true);
-            return false;
-          }
+
+          return continuityResult;
+
         }, messageService);
       }
       else
@@ -212,7 +208,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\" отключен.", type: ShowMessageModel.MessageType.Success) { IndentLevel = 2 });
+      await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\" отключен.", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
       return continuityResult;
     }
 

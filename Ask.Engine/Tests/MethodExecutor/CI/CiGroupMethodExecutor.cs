@@ -5,7 +5,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
+using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.CI
@@ -21,7 +23,8 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        CheckType = CheckType.Test
+        CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -90,7 +93,26 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
             type = ShowMessageModel.MessageType.Error;
           }
 
-          await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {CurrentDischargeNumber}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
+          var dischargeIndex = CurrentDischargeNumber - 1;
+          var bitString = GetBitString();
+          var formattedResult = GroupMethodProtocolBuilder.FormatValue(answer.value, ResistanceUnit.MegaOhm);
+          var resultMessage = new ShowMessageModel(
+            $"Результат измерения разряда {dischargeIndex} ({bitString})",
+            message: formattedResult,
+            type: type)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
+              ? GroupMethodProtocolBuilder.BuildFailure(
+                dischargeIndex,
+                bitString,
+                dataModel.Param,
+                answer.value,
+                ResistanceUnit.MegaOhm,
+                MeasurementLimitKind.Minimum)
+              : null,
+          };
+          await messageService.ShowMessageAsync(resultMessage, skipPause: true);
           return type == ShowMessageModel.MessageType.Success;
         }, messageService);
       }
@@ -100,6 +122,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
         await base.FinalizeAsync(messageService);
       }
     }
+
   }
 }
 

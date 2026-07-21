@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -33,9 +34,22 @@ namespace Ask.Engine.Tests.SelfControl
         CheckType = CheckType.SelfTest,
         CheckPower = false,
         AccumulateErrorMessages = true,
+        NameProvider = GetExecutionName,
       };
 
       executionController.SetSettings(settings);
+    }
+
+    /// <summary>
+    /// Формирует имя самоконтроля для выбранного устройства.
+    /// </summary>
+    /// <returns>Имя самоконтроля или <see langword="null"/>, если устройство не выбрано.</returns>
+    private string? GetExecutionName()
+    {
+      var device = _deviceSelectorProvider.GetDeviceSelector().GetSelectedRelayDeviceByTypeSafe();
+      return device is IAttachableDevice attachableDevice
+        ? $"Самоконтроль модуля {attachableDevice.Name} {attachableDevice.NumberChassis}.{attachableDevice.Number}"
+        : null;
     }
 
     /// <summary>

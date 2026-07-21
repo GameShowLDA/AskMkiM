@@ -38,7 +38,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        bool isErrorSimulationEnabled = await ExecutionConfig.GetIsErrorSimulationEnabled();
+        return !isErrorSimulationEnabled || Random.Shared.Next(2) == 1;
       }
 
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(

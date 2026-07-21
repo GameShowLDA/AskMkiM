@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -8,7 +9,9 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
+using Ask.Engine.Tests.NodeMethod;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
@@ -68,6 +71,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       {
         StartDelegate = ExecuteTestProcess,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
         StopDelegate = Stop
       };
 
@@ -158,13 +162,41 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          var (success, _) = await RelayModuleHelper.MeasureResistanceAsync(
+          const double lowerLimit = 0;
+          var (success, result) = await RelayModuleHelper.MeasureResistanceAsync(
               _fastMeter,
-              _userInteractionService,
+              null!,
               cancellationToken,
               i,
               _module,
-              data.Param);
+              data.Param,
+              lowerLimit);
+
+          var point = new PointModel
+          {
+            DeviceNumber = _module.NumberChassis,
+            ModuleNumber = _module.Number,
+            PointNumber = i,
+          };
+          var type = success
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error;
+          var resultMessage = new ShowMessageModel(
+            $"Результат измерения точки {point}",
+            message: NodeMethodProtocolBuilder.FormatValue(result, ResistanceUnit.Ohm),
+            type: type)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = success
+              ? null
+              : NodeMethodProtocolBuilder.BuildRangeFailure(
+                point,
+                lowerLimit,
+                data.Param,
+                result,
+                ResistanceUnit.Ohm),
+          };
+          await _userInteractionService.ShowMessageAsync(resultMessage, skipPause: true);
 
           return success;
         }, _userInteractionService);

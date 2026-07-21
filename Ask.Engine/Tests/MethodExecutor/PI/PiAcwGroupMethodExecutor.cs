@@ -5,7 +5,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
+using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.PI
@@ -23,6 +25,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         StartDelegate = ExecuteMeasurementProcess,
         StopDelegate = null,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -85,12 +88,33 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
-          var answer = await breakDown.AcwManger.Measure.MeasureAsync(dataModel.Param, userMessageService: messageService);
+          var answer = await breakDown.AcwManger.Measure.MeasureAsync(dataModel.Param);
           var type = ShowMessageModel.MessageType.Success;
-          if (answer.value > dataModel.Param)
+          if (answer.value >= dataModel.Param)
           {
             type = ShowMessageModel.MessageType.Error;
           }
+
+          var dischargeIndex = CurrentDischargeNumber - 1;
+          var bitString = GetBitString();
+          var formattedResult = GroupMethodProtocolBuilder.FormatValue(answer.value, CurrentUnit.MilliAmpere);
+          var resultMessage = new ShowMessageModel(
+            $"Результат измерения разряда {dischargeIndex} ({bitString})",
+            message: formattedResult,
+            type: type)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
+              ? GroupMethodProtocolBuilder.BuildFailure(
+                dischargeIndex,
+                bitString,
+                dataModel.Param,
+                answer.value,
+                CurrentUnit.MilliAmpere,
+                MeasurementLimitKind.Maximum)
+              : null,
+          };
+          await messageService.ShowMessageAsync(resultMessage, skipPause: true);
 
           return type == ShowMessageModel.MessageType.Success;
 

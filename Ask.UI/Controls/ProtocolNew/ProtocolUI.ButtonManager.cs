@@ -543,7 +543,11 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public void ShowProtocolManager()
     {
-      Application.Current.Dispatcher.Invoke(() => ProtocolManager.Visibility = Visibility.Visible);
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        ProtocolManager.Visibility = Visibility.Visible;
+        UpdateProtocolManagerLayout();
+      });
     }
 
     public void HideProtocolManager()
