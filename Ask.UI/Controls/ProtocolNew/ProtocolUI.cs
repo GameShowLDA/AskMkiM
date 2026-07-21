@@ -142,7 +142,18 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync() => await ActionExecutor.StartAsync(_modeSettings.Current);
+    public async Task StartAsync()
+    {
+      var actionSettings = _modeSettings.Current;
+      var executionName = actionSettings.NameProvider?.Invoke();
+      if (!string.IsNullOrWhiteSpace(executionName))
+      {
+        Header = executionName;
+        actionSettings.Name = executionName;
+      }
+
+      await ActionExecutor.StartAsync(actionSettings);
+    }
 
     /// <summary>
     /// Завершение текущей выполняемой задачи.

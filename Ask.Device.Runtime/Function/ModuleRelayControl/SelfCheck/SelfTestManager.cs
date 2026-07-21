@@ -166,22 +166,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       {
         model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
 
-        var pointErrors = new List<string>();
-        if (!model.ConnectPoint)
-        {
-          pointErrors.Add("Подключение точки");
-        }
-
-        if (!model.DisconnectBusA)
-        {
-          pointErrors.Add("Отключение с шины A");
-        }
-
-        if (!model.DisconnectBusB)
-        {
-          pointErrors.Add("Отключение с шины B");
-        }
-
         showMessageModel = new ShowMessageModel()
         {
           Header = $"Точка {point}",
@@ -189,7 +173,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
           ExecutionError = !model.SelfControl,
           ExecutionErrorMessage = model.SelfControl
             ? null
-            : $"Точка[{point}] - {string.Join("; ", pointErrors)}",
+            : string.Empty,
           IndentLevel = 1,
         };
         showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
@@ -205,7 +189,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
             Header = $"Подключение точки",
             Status = model.ConnectPoint ? MessageType.Success : MessageType.Error,
             CanBeDeleted = model.ConnectPoint,
-            ExecutionErrorMessage = string.Empty,
+            ExecutionErrorMessage = model.ConnectPoint ? string.Empty : $"Точка[{point}] - Подключение точки",
             IndentLevel = 2,
           };
           await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
@@ -215,7 +199,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
             Header = $"\t\tОтключение с шины А",
             Status = model.DisconnectBusA ? MessageType.Success : MessageType.Error,
             CanBeDeleted = model.DisconnectBusA,
-            ExecutionErrorMessage = string.Empty,
+            ExecutionErrorMessage = model.DisconnectBusA ? string.Empty : $"Точка[{point}] - Отключение с шины A",
             IndentLevel = 2,
           };
           await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
@@ -225,7 +209,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
             Header = $"\t\tОтключение с шины B",
             Status = model.DisconnectBusB ? MessageType.Success : MessageType.Error,
             CanBeDeleted = model.DisconnectBusB,
-            ExecutionErrorMessage = string.Empty,
+            ExecutionErrorMessage = model.DisconnectBusB ? string.Empty : $"Точка[{point}] - Отключение с шины B",
             IndentLevel = 2,
 
           };

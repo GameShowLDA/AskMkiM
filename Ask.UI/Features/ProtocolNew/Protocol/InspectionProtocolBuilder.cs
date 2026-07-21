@@ -29,7 +29,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     message.AppendLine("Заключение:");
     for (var index = 0; index < settings.ExecutionErrors.Count; index++)
     {
-      message.AppendLine($"\t{index + 1}. {settings.ExecutionErrors[index]}[БРАК]");
+      message.AppendLine($"\t{index + 1}. {settings.ExecutionErrors[index]} [БРАК]");
     }
 
     return message.ToString();
