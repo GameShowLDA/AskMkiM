@@ -476,7 +476,6 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      //TODO: тут не находит только что созданный текстовый редактор при первом запуске
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor); 
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
@@ -485,22 +484,6 @@ namespace MainWindowProgram.Services
       {
         return;
       }
-
-      /*if (runContainer != null)
-      {
-        var runControl = runContainer.GetDockControl().DockItems[0].Content as RunControl;
-        if (runControl != null)
-        {
-          await runControl.Start(runControl.TranslationModels);
-          return;
-        }
-      }*/
-
-      /*if (runContainer != null && runContainer.GetDockControl().DockItems.Count > 0)
-      {
-        _multiWindow.RunService.CloseRunItem(runContainer.GetDockControl().DockItems[0].Content as RunControl, EditorType.Run);
-      }*/
-
 
       if (container == null && runContainer == null && editor == null)
       {
