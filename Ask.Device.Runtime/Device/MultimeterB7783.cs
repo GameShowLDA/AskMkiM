@@ -6,9 +6,9 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Usb.Protocols;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base;
+using Ask.Device.Runtime.Function.Base.Connected;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements;
 using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
-using Ask.Device.Runtime.Function.Connected;
 
 namespace Ask.Device.Runtime.Device
 {

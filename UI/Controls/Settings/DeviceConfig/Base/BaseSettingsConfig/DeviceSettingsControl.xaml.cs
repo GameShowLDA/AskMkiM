@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -229,6 +230,12 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         SetPpuDividerCoefficientPercent(
           fastMeterDevice.AcwPpuDividerCoefficientPercent,
           fastMeterDevice.DcwPpuDividerCoefficientPercent);
+      }
+
+
+      if (device is BreakdownTesterDto breakdownTesterDevice)
+      {
+        SetSystemInsulationResistanceGOhm(breakdownTesterDevice.SystemInsulationResistanceGOhm);
       }
 
       ApplyConnectionDetails(device.ConnectionDetails);

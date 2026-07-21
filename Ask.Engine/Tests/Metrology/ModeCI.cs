@@ -47,7 +47,6 @@ namespace Ask.Engine.Tests.Metrology
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Metrology,
         StopDelegate = async (CancellationToken token) =>
         {
@@ -112,7 +111,7 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
 
-        var result = (await meterDevice.IrManger.Measure.MeasureAsync(param, LowerBound, UpperBound, userMessageService: protocolUI)).value;
+        var result = (await meterDevice.IrManger.Measure.MeasureAsync(param, LowerBound, UpperBound)).value;
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {

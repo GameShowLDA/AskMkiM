@@ -11,7 +11,7 @@
     
     <Protocol:ProtocolUI x:Name="ProtocolUI" Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_CI}, Path=Value}">
         <Protocol:ProtocolUI.ContentView>
-            <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" UnitElectrical=",Ом"/>
+            <Custom:InputField Height="Auto" IsTimeVisible="True" IsVoltageVisible="True" UnitElectrical=",МОм"/>
         </Protocol:ProtocolUI.ContentView>
     </Protocol:ProtocolUI>
     

@@ -1,5 +1,5 @@
-using System.Windows;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using System.Windows;
 
 namespace Ask.UI.Features.ProtocolNew.Controls;
 
@@ -57,7 +57,6 @@ internal sealed class ProtocolButtonController
           break;
 
         case ProtocolButtonState.AdditionalActions:
-          _view.LoopVisibility = Visibility.Visible;
           _view.RepeatVisibility = Visibility.Visible;
           _view.ExitVisibility = Visibility.Visible;
           break;
@@ -139,7 +138,6 @@ internal sealed class ProtocolButtonController
     _view.ContinueVisibility = Visibility.Collapsed;
     _view.ExitVisibility = Visibility.Collapsed;
     _view.RepeatVisibility = Visibility.Collapsed;
-    _view.LoopVisibility = Visibility.Collapsed;
     SetStepButtons(visible: false);
   }
 
