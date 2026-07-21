@@ -7,9 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -242,7 +240,7 @@ namespace Ask.Engine.Tests.NodeMethod
     {
       try
       {
-        CollectDevicesAsync(point1, point2);
+        await CollectDevicesAsync(point1, point2);
       }
       catch (Exception ex)
       {

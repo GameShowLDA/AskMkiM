@@ -342,7 +342,7 @@ namespace Ask.Engine.Tests.Base
     {
       foreach (var device in devices)
       {
-        await device.ConnectableManager.ResetAsync();
+        await device.ConnectableManager.ResetAsync(messageService);
       }
     }
 
