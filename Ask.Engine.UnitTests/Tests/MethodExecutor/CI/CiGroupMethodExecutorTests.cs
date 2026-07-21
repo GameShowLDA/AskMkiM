@@ -16,7 +16,7 @@ public class CiGroupMethodExecutorTests
 
       var result = CiGroupMethodExecutor.BuildExecutionErrorMessage(0, "0000001", 10, 7.35);
 
-      Assert.Equal("Разряд- 0 (0000001) (10<R МОм). Rизм = 7,35 МОм", result);
+      Assert.Equal("Разряд-0[0000001] (10<R МОм). Rизм = 7,35 МОм", result);
     }
     finally
     {
