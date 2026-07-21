@@ -21,7 +21,6 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test
       };
 
@@ -84,7 +83,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
           await messageService.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
-          var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, dataModel.Param, 60000, userMessageService: messageService);
+          var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, dataModel.Param, 60000);
           var type = ShowMessageModel.MessageType.Success;
           if (answer.value < dataModel.Param)
           {

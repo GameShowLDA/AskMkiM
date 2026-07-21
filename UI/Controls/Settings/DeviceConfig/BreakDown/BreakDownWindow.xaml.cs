@@ -89,6 +89,16 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
           deviceDto.DcwMaxVoltage = (baseDevice as IBreakdownTester).DcwMaxVoltage;
           deviceDto.SiMaxVoltage = (baseDevice as IBreakdownTester).IrMaxVoltage;
           deviceDto.IRMinVoltage = (baseDevice as IBreakdownTester).IrMinVoltage;
+          deviceDto.SystemInsulationResistanceGOhm = deviceSettingsWindow.GetSystemInsulationResistanceGOhm();
+
+          if (deviceDto.SystemInsulationResistanceGOhm is < 1 or > 60)
+          {
+            Message.MessageBoxCustom.Show(
+              "Сопротивление изоляции системы должно быть от 1 до 60 ГОм.",
+              "Ошибка сохранения данных",
+              image: MessageBoxImage.Error);
+            return;
+          }
 
           try
           {

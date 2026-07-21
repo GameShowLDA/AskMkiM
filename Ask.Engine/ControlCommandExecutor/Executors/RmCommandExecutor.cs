@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (unique.Contains(MeasurementDevice.Multimeter))
       {
-        var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+        var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
         await meter.ConnectableManager.InitializeAsync(context.Console);
         devices.Add(meter);
       }

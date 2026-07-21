@@ -29,7 +29,6 @@ namespace MainWindowProgram.Test.Protocol
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
       };
 

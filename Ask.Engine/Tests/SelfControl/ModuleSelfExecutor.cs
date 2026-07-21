@@ -30,7 +30,6 @@ namespace Ask.Engine.Tests.SelfControl
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = false,
         CheckType = CheckType.SelfTest,
         CheckPower = false,
         AccumulateErrorMessages = true,

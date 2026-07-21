@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitCapacity.HasValue)
@@ -100,23 +100,16 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-
-        List<double> measuremend = new List<double>();
-
-        for (int i = 0; i < 5; i++)
-        {
-          answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, firstValue, secondValue, userMessageService: messageService) - fixtureCapacitance;
-          if (answer > 0)
-          {
-            measuremend.Add(answer);
-          }
-        }
-        answer = measuremend.Average();
+        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(
+          value,
+          firstValue,
+          secondValue,
+          userMessageService: messageService) - fixtureCapacitance;
 
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, secondValue, answer);
       }, messageService);

@@ -7,19 +7,19 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
-using Ask.UI.Features.ProtocolNew.Errors;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView, IProtocolErrorListView
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IExecutionPauseGate, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView, IProtocolErrorListView
   {
     #region Поля.
 
@@ -124,7 +124,6 @@ namespace Ask.UI.Controls.ProtocolNew
       NextButtonPreviewMouseDown += (sender, e) => Resume();
       ExitButtonPreviewMouseDown += async (sender, e) => await StopAsync();
 
-      LoopMeasureResistanceButtonPreviewMouseDown += (sender, e) => LoopMeasureEvent();
       ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
     }
     #endregion
@@ -173,14 +172,17 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this, _userActionTcs);
 
+    /// <inheritdoc />
+    Task IExecutionPauseGate.WaitIfPausedAsync(CancellationToken cancellationToken) =>
+      ActionExecutor.WaitAtExecutionCheckpointAsync(cancellationToken, this, "ExecutionPauseGate");
+
+    /// <inheritdoc />
+    Task IExecutionPauseGate.DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
+      ActionExecutor.DelayAsync(delay, cancellationToken);
+
     #endregion
 
-    #region Повтор и зацикливание.
-
-    /// <summary>
-    /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
-    /// </summary>
-    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_modeSettings.Current);
+    #region Повтор.
 
     /// <summary>
     /// Выполняет делегат измерения один раз. Если делегат null, выполняется завершение.
@@ -217,6 +219,9 @@ namespace Ask.UI.Controls.ProtocolNew
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)
     {
+      var outputStarted = Stopwatch.GetTimestamp();
+      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
+
       await CheckBlockStart(IsBlockStart);
       var wasDisplayed = await _entryOutputService.WriteAsync(
         showMessageModel,
@@ -233,12 +238,21 @@ namespace Ask.UI.Controls.ProtocolNew
         return;
       }
 
+      var displayedAt = Stopwatch.GetTimestamp();
       LastMessage = false;
       await _postOutputController.ProcessAsync(
         showMessageModel,
         IsBlockStart,
         SkipStepModeCheck,
         skipPause);
+
+      var completedAt = Stopwatch.GetTimestamp();
+      LogDebug(
+        $"[ProtocolOutputTiming] Output completed: message={messageId}, " +
+        $"dispatcherAndWriteMs={Stopwatch.GetElapsedTime(outputStarted, displayedAt).TotalMilliseconds:F1}, " +
+        $"postOutputMs={Stopwatch.GetElapsedTime(displayedAt, completedAt).TotalMilliseconds:F1}, " +
+        $"totalMs={Stopwatch.GetElapsedTime(outputStarted, completedAt).TotalMilliseconds:F1}, " +
+        $"thread={Environment.CurrentManagedThreadId}");
     }
 
     /// <summary>
@@ -319,7 +333,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     Task IProtocolPostOutputContext.WaitWhilePausedAsync(CancellationToken cancellationToken) =>
-      ActionExecutor.WaitWhilePausedAsync(cancellationToken, this);
+      ActionExecutor.WaitAtExecutionCheckpointAsync(cancellationToken, this, "ProtocolPostOutput");
 
     /// <inheritdoc />
     void IProtocolPostOutputContext.ShowPauseButtons() => ShowButtonsOnPause(repeatVisible: false);

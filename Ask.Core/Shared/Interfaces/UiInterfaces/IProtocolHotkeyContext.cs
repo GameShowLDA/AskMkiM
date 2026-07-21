@@ -23,6 +23,9 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     /// <summary>Возвращает признак доступности повтора.</summary>
     bool CanRepeat { get; }
 
+    /// <summary>Возвращает признак доступности перехода к другой команде.</summary>
+    bool CanJumpToCommand { get; }
+
     /// <summary>Запускает выполнение.</summary>
     void Start();
 
@@ -44,6 +47,9 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
 
     /// <summary>Повторяет текущую операцию.</summary>
     void Repeat();
+
+    /// <summary>Открывает выбор команды для перехода.</summary>
+    void JumpToCommand();
 
     /// <summary>Передаёт необработанную клавишу существующим подписчикам.</summary>
     /// <param name="sender">Источник события.</param>

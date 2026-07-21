@@ -384,6 +384,9 @@
   <data name="protocol.tooltip.stepinto" xml:space="preserve">
     <value>Шаг с заходом (F11)</value>
   </data>
+  <data name="protocol.tooltip.commandjump" xml:space="preserve">
+    <value>Перейти к другой команде (F4)</value>
+  </data>
   <data name="translator.editor.tooltip.back" xml:space="preserve">
     <value>Вернуться к исходному файлу</value>
   </data>
@@ -641,5 +644,8 @@
   </data>
   <data name="settings.device.multimeter.additionalDividerCoefficient.dcw" xml:space="preserve">
     <value>Доп. коэф. делителя DCW, %</value>
+  </data>
+  <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
+    <value>Сопротивление изоляции системы, ГОм</value>
   </data>
 </root>

@@ -8,7 +8,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
-using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
@@ -26,7 +26,7 @@ namespace Ask.UI.Controls.ProtocolNew
   /// Класс управления пользовательским интерфейсом протокола выполнения.
   /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
-  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext
+  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext, IExecutionCommandJumpGate
   {
     static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     private bool loaded = false;
@@ -143,7 +143,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       IsTopMenuVisible = isTopMenuVisible;
       Items = new ObservableCollection<object>();
-      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+      ActionExecutor = ActionExecutor.CreateInstance(this);
       _controlButtonHandler = OnControlButtonPressed;
       _stepByStepModeChangedHandler = e => EventAggregator_StepByStepModeChanged(e.IsEnabled);
       InitializeInternal();
@@ -170,7 +170,6 @@ namespace Ask.UI.Controls.ProtocolNew
       ClearInspectionProtocol();
       this.DataContext = this;
 
-      loopButton.Visibility = Visibility.Collapsed;
       RepeatButtonElement.Visibility = Visibility.Collapsed;
 
       SetupButtons();
@@ -248,25 +247,39 @@ namespace Ask.UI.Controls.ProtocolNew
     bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Start() => KeyboardManager.OnStartPressed?.Invoke();
+    bool IProtocolHotkeyContext.CanJumpToCommand =>
+      ContinueButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.RunOrPause() => KeyboardManager.OnRunOrPausePressed?.Invoke();
+    void IProtocolHotkeyContext.Start() => StartFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.RunOrPause() => HandleRunOrPause();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.Step(bool isStepInto) => HandleStepModeStart(isStepInto);
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Pause() => KeyboardManager.OnPausePressed?.Invoke();
+    void IProtocolHotkeyContext.Pause() => PauseFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Continue() => KeyboardManager.OnContinuePressed?.Invoke();
+    void IProtocolHotkeyContext.Continue() => ContinueFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Exit() => KeyboardManager.OnExitPressed?.Invoke();
+    void IProtocolHotkeyContext.Exit() => ExitFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Repeat() => KeyboardManager.OnRepeatPressed?.Invoke();
+    void IProtocolHotkeyContext.Repeat() => RepeatFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.JumpToCommand() => RequestCommandJump();
+
+    /// <inheritdoc />
+    bool IExecutionCommandJumpGate.IsExecutionPaused => ActionExecutor.IsPaused;
+
+    /// <inheritdoc />
+    void IExecutionCommandJumpGate.InterruptPauseForCommandJump() =>
+      ActionExecutor.InterruptPauseForCommandJump();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
@@ -306,6 +319,26 @@ namespace Ask.UI.Controls.ProtocolNew
       header.Visibility = vis;
       ContentPanel.Visibility = vis;
       BigButtonsPanel.Visibility = vis;
+    }
+
+    private void CommandJumpButtonTop_Click(object sender, RoutedEventArgs e) => RequestCommandJump();
+
+    private async void RequestCommandJump()
+    {
+      if (StepControlManager.IsBreakpointStepModeActive && StepControlManager.BreakpointCommandInfo != null)
+      {
+        ExecutionEventAdapter.RaiseBreakpointF4Pressed(StepControlManager.BreakpointCommandInfo);
+        return;
+      }
+
+      try
+      {
+        await CommandExecutionManager.RequestPausedCommandJumpAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка перехода к выбранной команде", exception);
+      }
     }
 
     private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)
@@ -350,7 +383,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnStartPressed?.Invoke();
+        StartFromHotkey();
         return;
       }
 
@@ -359,11 +392,11 @@ namespace Ask.UI.Controls.ProtocolNew
       // если видна "Пауза" — ставим на паузу (в т.ч. во время F10-run).
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnContinuePressed?.Invoke();
+        ContinueFromHotkey();
       }
       else if (PauseButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnPausePressed?.Invoke();
+        PauseFromHotkey();
       }
     }
 

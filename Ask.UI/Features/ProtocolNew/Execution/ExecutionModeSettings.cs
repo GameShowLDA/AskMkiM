@@ -34,11 +34,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       {
         _current = settings;
         _current.Name = modeName;
-
-        if (_current.ReturnDelegate != null)
-        {
-          _current.IsRepeatEnabled = true;
-        }
       }
       catch (Exception exception)
       {

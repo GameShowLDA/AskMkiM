@@ -166,6 +166,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Continue}, Path=Value}">
@@ -204,6 +205,15 @@
 
             <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
                 <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="CommandJumpButtonTop"
+                    Grid.Column="7"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_CommandJump}, Path=Value}"
+                    Click="CommandJumpButtonTop_Click"
+                    Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
+                <Icons:FastForwardIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
         </Grid>
@@ -278,12 +288,6 @@
 
                                     <Button x:Name="RepeatButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" 
-                                    Margin="0,10,0,0" 
-                                    Style="{DynamicResource ShadowButtonStyle}" 
-                                    />
-
-                                    <Button x:Name="loopButton" 
-                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
                                     Margin="0,10,0,0" 
                                     Style="{DynamicResource ShadowButtonStyle}" 
                                     />

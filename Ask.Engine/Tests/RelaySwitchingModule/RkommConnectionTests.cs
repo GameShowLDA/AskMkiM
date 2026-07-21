@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -7,7 +8,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -67,7 +67,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteTestProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
         StopDelegate = Stop
       };
@@ -170,35 +169,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       double expectedResistance,
       CancellationToken cancellationToken)
     {
-      while (true)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        bool success = await MeasurePointResistanceAsync(pointNumber, expectedResistance, cancellationToken);
-        if (success)
-        {
-          return;
-        }
-
-        var action = await _userInteractionService.WaitUserActionAsync();
-        _userInteractionService.ButtonService?.ShowOnlyStopAndFinishButtons();
-
-        switch (action)
-        {
-          case UserAction.None:
-          case UserAction.Continue:
-            return;
-
-          case UserAction.Retry:
-            continue;
-
-          case UserAction.Abort:
-            throw new OperationCanceledException(cancellationToken);
-
-          default:
-            return;
-        }
-      }
+      await UserActionHelper.RunWithUserRepeatAsync(
+        () => MeasurePointResistanceAsync(pointNumber, expectedResistance, cancellationToken),
+        _userInteractionService);
     }
 
     /// <summary>
