@@ -4,6 +4,8 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Exceptions;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -15,6 +17,36 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
   /// </summary>
   public class CommandExecutionManager
   {
+    /// <summary>
+    /// Объект синхронизации ссылки на активный исполнитель.
+    /// </summary>
+    private static readonly object ActiveManagerSync = new();
+
+    /// <summary>
+    /// Активный исполнитель программы контроля.
+    /// </summary>
+    private static CommandExecutionManager? _activeManager;
+
+    /// <summary>
+    /// Объект синхронизации текущей и выбранной команд.
+    /// </summary>
+    private readonly object _commandStateSync = new();
+
+    /// <summary>
+    /// Ограничитель одновременных запросов выбора команды.
+    /// </summary>
+    private readonly SemaphoreSlim _commandJumpSemaphore = new(1, 1);
+
+    /// <summary>
+    /// Текущая команда программы контроля.
+    /// </summary>
+    private BaseCommandModel? _currentCommand;
+
+    /// <summary>
+    /// Команда, выбранная для отложенного перехода.
+    /// </summary>
+    private BaseCommandModel? _pendingJumpCommand;
+
     /// <summary>
     /// Реестр исполнителей команд, обеспечивающий получение исполнителя по мнемонике команды.
     /// </summary>
@@ -89,6 +121,21 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     public IReadOnlyList<BaseCommandModel> GetCommandsSnapshot() => _commands.Snapshot();
 
+    /// <summary>
+    /// Открывает выбор команды для активного приостановленного исполнителя.
+    /// </summary>
+    /// <returns>Задача, представляющая обработку запроса перехода.</returns>
+    public static Task RequestPausedCommandJumpAsync()
+    {
+      CommandExecutionManager? manager;
+      lock (ActiveManagerSync)
+      {
+        manager = _activeManager;
+      }
+
+      return manager?.RequestCommandJumpAsync() ?? Task.CompletedTask;
+    }
+
     public CommandExecutionManager(
      IUserInteractionService console,
      ITextEditorAdapter textEditor,
@@ -111,6 +158,35 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// </summary>
     public async Task ExecuteAllAsync()
     {
+      lock (ActiveManagerSync)
+      {
+        _activeManager = this;
+      }
+
+      try
+      {
+        await ExecuteAllCoreAsync().ConfigureAwait(false);
+      }
+      finally
+      {
+        lock (_commandStateSync)
+        {
+          _currentCommand = null;
+          _pendingJumpCommand = null;
+        }
+
+        lock (ActiveManagerSync)
+        {
+          if (ReferenceEquals(_activeManager, this))
+          {
+            _activeManager = null;
+          }
+        }
+      }
+    }
+
+    private async Task ExecuteAllCoreAsync()
+    {
       int index = 0;
       CommandExecutionState.LastCuResult = null;
       CommandExecutionState.LastRejectFlag = false;
@@ -118,8 +194,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       while (index < _commands.Count)
       {
         var command = _commands[index];
+        SetCurrentCommand(command);
         try
         {
+          await _console.WaitIfPausedAsync();
+
           if (command.FormattedStartLineNumber >= 0)
           {
             _textEditor.SetActiveLine(command.FormattedStartLineNumber);
@@ -155,6 +234,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           if (hasExecutor)
           {
             await executor.ExecuteAsync(context, _protocolModel);
+            await _console.WaitIfPausedAsync();
           }
           else
           {
@@ -181,6 +261,30 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
             continue;
           }
         }
+        catch (CommandJumpRequestedException)
+        {
+          var targetCommand = TakePendingJumpCommand();
+          if (targetCommand == null)
+          {
+            throw;
+          }
+
+          await CommandJumpService.PrepareAsync(targetCommand, _console).ConfigureAwait(false);
+          var targetIndex = _commands.IndexOf(targetCommand);
+          if (targetIndex < 0)
+          {
+            throw new InvalidOperationException("Выбранная команда отсутствует в выполняемой программе контроля.");
+          }
+
+          index = targetIndex;
+          SetCurrentCommand(targetCommand);
+          if (targetCommand.FormattedStartLineNumber >= 0)
+          {
+            _textEditor.SetActiveLine(targetCommand.FormattedStartLineNumber);
+          }
+
+          continue;
+        }
         catch (Exception ex)
         {
           await _console.CompleteCommandAsync(true);
@@ -189,6 +293,68 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
 
         index++;
+      }
+    }
+
+    private async Task RequestCommandJumpAsync()
+    {
+      if (_console is not IExecutionCommandJumpGate { IsExecutionPaused: true } commandJumpGate)
+      {
+        return;
+      }
+
+      await _commandJumpSemaphore.WaitAsync().ConfigureAwait(false);
+      try
+      {
+        BaseCommandModel? currentCommand;
+        lock (_commandStateSync)
+        {
+          currentCommand = _currentCommand;
+        }
+
+        if (currentCommand == null || !commandJumpGate.IsExecutionPaused)
+        {
+          return;
+        }
+
+        var selectedCommand = await CommandJumpService.SelectAsync(
+          currentCommand,
+          _commands.Snapshot(),
+          _console.GetCancellationToken()).ConfigureAwait(false);
+
+        if (selectedCommand == null || !commandJumpGate.IsExecutionPaused)
+        {
+          return;
+        }
+
+        lock (_commandStateSync)
+        {
+          _pendingJumpCommand = selectedCommand;
+        }
+
+        commandJumpGate.InterruptPauseForCommandJump();
+      }
+      finally
+      {
+        _commandJumpSemaphore.Release();
+      }
+    }
+
+    private void SetCurrentCommand(BaseCommandModel command)
+    {
+      lock (_commandStateSync)
+      {
+        _currentCommand = command;
+      }
+    }
+
+    private BaseCommandModel? TakePendingJumpCommand()
+    {
+      lock (_commandStateSync)
+      {
+        var command = _pendingJumpCommand;
+        _pendingJumpCommand = null;
+        return command;
       }
     }
 

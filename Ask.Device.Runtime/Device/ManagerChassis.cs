@@ -5,7 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
-using Ask.Device.Runtime.Function.Connected;
+using Ask.Device.Runtime.Function.Base.Connected;
 using Ask.Device.Runtime.Function.ManagerChassis;
 
 namespace Ask.Device.Runtime.Device

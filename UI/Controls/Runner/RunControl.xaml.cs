@@ -341,7 +341,6 @@ namespace UI.Controls.Runner
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = StartTest,
-        IsRepeatEnabled = false,
         CheckType = CheckType.ControlProgram,
       };
 

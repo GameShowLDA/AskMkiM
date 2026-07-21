@@ -5,7 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Function.Connected;
+using Ask.Device.Runtime.Function.Base.Connected;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -28,6 +28,7 @@ namespace Ask.Device.Runtime.Device
       DcwMaxVoltage = 1000;
       IrMaxVoltage = 1000;
       IrMinVoltage = 50;
+      SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
 
       ApplyDefaultComPortSettings();
@@ -87,6 +88,9 @@ namespace Ask.Device.Runtime.Device
     public int IrMinVoltage { get; set; }
 
     /// <inheritdoc />
+    public int SystemInsulationResistanceGOhm { get; set; }
+
+    /// <inheritdoc />
     public ISelfTestCheckerBreakdownTester SelfTestManager { get; set; }
 
     /// <summary>
@@ -131,7 +135,8 @@ namespace Ask.Device.Runtime.Device
         AcwMaxVoltage = AcwMaxVoltage,
         DcwMaxVoltage = DcwMaxVoltage,
         SiMaxVoltage = IrMaxVoltage,
-        IRMinVoltage = IrMinVoltage
+        IRMinVoltage = IrMinVoltage,
+        SystemInsulationResistanceGOhm = SystemInsulationResistanceGOhm
       };
     }
   }

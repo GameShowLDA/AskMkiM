@@ -46,7 +46,6 @@ namespace Ask.Engine.Tests.Metrology
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Metrology,
       };
 
@@ -101,22 +100,11 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения ёмкости"));
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.IE, param);
 
-        double result = 0;
-        List<double> measuremend = new List<double>();
-
-        for (int i = 0; i < 6; i++)
-        {
-          result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(param, LowerBound, UpperBound, protocolUI);
-          if (result > 0)
-          {
-            measuremend.Add(result);
-          }
-          else
-          {
-            i--;
-          }
-        }
-        result = measuremend.Average();
+        double result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(
+          param,
+          LowerBound,
+          UpperBound,
+          userMessageService: protocolUI);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled() && result != 9.8999999999999969E+46)
         {

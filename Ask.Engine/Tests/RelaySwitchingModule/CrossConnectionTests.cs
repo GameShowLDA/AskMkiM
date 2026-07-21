@@ -1,3 +1,4 @@
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -44,7 +45,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteTestProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
         StopDelegate = async (CancellationToken token) =>
         {
@@ -295,64 +295,37 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         await RelayModuleHelper.BusConnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
         await RelayModuleHelper.BusConnectAsync(busB, tested_module, _userInteractionService, cancellationToken);
 
-        try
-        {
-          if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
-          {
-            cancellationToken.ThrowIfCancellationRequested();
-            await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание шин {busA} и {busB}", type: MessageType.Success) { IndentLevel = 2 });
-          }
-          else
-          {
-            cancellationToken.ThrowIfCancellationRequested();
-            await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ОБРЫВ ШИНЫ]", message: $"обрыв БК {tested_module.Number} от шин {busA} и {busB}", type: MessageType.Error) { IndentLevel = 2 });
-          }
-        }
-        catch
-        {
-          await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ОБРЫВ ШИНЫ]", message: $"обрыв БК {tested_module.Number} от шин {busA} и {busB}", type: MessageType.Error) { IndentLevel = 2 });
-        }
+        await VerifyBusStateAsync(
+          verificat_module,
+          cancellationToken,
+          expectedMeterAnswer: true,
+          "[НОРМА]",
+          $"замыкание шин {busA} и {busB}",
+          "[ОБРЫВ ШИНЫ]",
+          $"обрыв БК {tested_module.Number} от шин {busA} и {busB}");
 
         await RelayModuleHelper.BusDisconnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
 
-        try
-        {
-          if (!await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
-          {
-            cancellationToken.ThrowIfCancellationRequested();
-            await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание на шине {busA} отсутствует", type: MessageType.Success) { IndentLevel = 2 });
-          }
-          else
-          {
-            throw new Exception();
-          }
-        }
-        catch
-        {
-          await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", message: $"замыкание при отключении БК {tested_module.Number} от шины {busA}", type: MessageType.Error) { IndentLevel = 2 });
-        }
+        await VerifyBusStateAsync(
+          verificat_module,
+          cancellationToken,
+          expectedMeterAnswer: false,
+          "[НОРМА]",
+          $"замыкание на шине {busA} отсутствует",
+          "[ЗАМЫКАНИЕ ШИН]",
+          $"замыкание при отключении БК {tested_module.Number} от шины {busA}");
 
         await RelayModuleHelper.BusConnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
         await RelayModuleHelper.BusDisconnectAsync(busB, tested_module, _userInteractionService, cancellationToken);
 
-        try
-        {
-          if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
-          {
-            cancellationToken.ThrowIfCancellationRequested();
-            await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", message: $"замыкание при отключении БК {tested_module.Number} от шины {busB}", type: MessageType.Error) { IndentLevel = 2 });
-          }
-          else
-          {
-            cancellationToken.ThrowIfCancellationRequested();
-            await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[НОРМА]", message: $"замыкание на шине {busB} отсутствует", type: MessageType.Success) { IndentLevel = 2 });
-          }
-        }
-        catch
-        {
-          cancellationToken.ThrowIfCancellationRequested();
-          await _userInteractionService.ShowMessageAsync(new ShowMessageModel("[ЗАМЫКАНИЕ ШИН]", message: $"замыкание при отключении БК {tested_module.Number} от шины {busB}", type: MessageType.Error));
-        }
+        await VerifyBusStateAsync(
+          verificat_module,
+          cancellationToken,
+          expectedMeterAnswer: false,
+          "[НОРМА]",
+          $"замыкание на шине {busB} отсутствует",
+          "[ЗАМЫКАНИЕ ШИН]",
+          $"замыкание при отключении БК {tested_module.Number} от шины {busB}");
 
         await RelayModuleHelper.BusDisconnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
       }
@@ -363,6 +336,45 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         await verificat_module.ConnectableManager.ResetAsync();
       }
       return true;
+    }
+
+    private async Task VerifyBusStateAsync(
+      IRelaySwitchModule verificat_module,
+      CancellationToken cancellationToken,
+      bool expectedMeterAnswer,
+      string successHeader,
+      string successMessage,
+      string errorHeader,
+      string errorMessage)
+    {
+      await UserActionHelper.RunWithUserRepeatAsync(async () =>
+      {
+        bool success;
+        try
+        {
+          bool meterAnswer = await RelayModuleHelper.GetMeterAnswer(
+            verificat_module,
+            _userInteractionService,
+            cancellationToken);
+          success = meterAnswer == expectedMeterAnswer;
+        }
+        catch
+        {
+          cancellationToken.ThrowIfCancellationRequested();
+          success = false;
+        }
+
+        await _userInteractionService.ShowMessageAsync(
+          new ShowMessageModel(
+            success ? successHeader : errorHeader,
+            message: success ? successMessage : errorMessage,
+            type: success ? MessageType.Success : MessageType.Error)
+          {
+            IndentLevel = 2,
+          });
+
+        return success;
+      }, _userInteractionService);
     }
 
     #endregion
@@ -514,17 +526,18 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       int point,
       CancellationToken cancellationToken)
     {
-      var type = ShowMessageModel.MessageType.Success;
       cancellationToken.ThrowIfCancellationRequested();
 
       await tested_module.PointManager.ConnectRelayAsync(busA, point, _userInteractionService);
 
-      if (!await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
-      {
-        type = MessageType.Error;
-      }
-
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"Результат проверки точки {point}", type: type) { IndentLevel = 2 });
+      await VerifyBusStateAsync(
+        verificat_module,
+        cancellationToken,
+        expectedMeterAnswer: true,
+        $"Результат проверки точки {point}",
+        string.Empty,
+        $"Результат проверки точки {point}",
+        string.Empty);
     }
 
     /// <summary>
@@ -541,23 +554,18 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       int point,
       CancellationToken cancellationToken)
     {
-      var type = ShowMessageModel.MessageType.Success;
       cancellationToken.ThrowIfCancellationRequested();
 
       await verificat_module.PointManager.DisconnectRelayAsync(busB, point, _userInteractionService);
 
-      if (await RelayModuleHelper.GetMeterAnswer(verificat_module, _userInteractionService, cancellationToken))
-      {
-        type = MessageType.Error;
-      }
-
-      string message = string.Empty;
-      if (type == MessageType.Error)
-      {
-        message = $"Замыкание при отключении точки {point} от шины {busB}";
-      }
-
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Результат проверки", message: message, type: type) { IndentLevel = 2 });
+      await VerifyBusStateAsync(
+        verificat_module,
+        cancellationToken,
+        expectedMeterAnswer: false,
+        "Результат проверки",
+        string.Empty,
+        "Результат проверки",
+        $"Замыкание при отключении точки {point} от шины {busB}");
     }
 
     /// <summary>

@@ -33,11 +33,6 @@ public interface IProtocolButtonView
   Visibility RepeatVisibility { get; set; }
 
   /// <summary>
-  /// Видимость кнопки циклического выполнения.
-  /// </summary>
-  Visibility LoopVisibility { get; set; }
-
-  /// <summary>
   /// Видимость кнопки шага поверх.
   /// </summary>
   Visibility StepOverVisibility { get; set; }

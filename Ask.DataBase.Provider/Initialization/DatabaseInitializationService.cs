@@ -73,6 +73,7 @@ public static class DatabaseInitializationService
     await EnsureUserInterfaceUnderlineColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, report, progress, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
@@ -439,6 +440,30 @@ public static class DatabaseInitializationService
     await EnsureColumnAsync(connection, "BreakdownTesters", "PiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "BreakdownTesters", "SiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "BreakdownTesters", "IRMinVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+  }
+
+  private static async Task EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "BreakdownTesters", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureColumnAsync(
+      connection,
+      "BreakdownTesters",
+      "SystemInsulationResistanceGOhm",
+      "INTEGER NOT NULL DEFAULT 60",
+      report,
+      progress,
+      cancellationToken);
   }
 
   /// <summary>

@@ -31,14 +31,14 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// <param name="message">Уже отображённая запись протокола.</param>
     /// <param name="isBlockStart">Признак начала блока команды программы контроля.</param>
     /// <param name="skipStepModeCheck">Признак пропуска ожидания пошаговой команды.</param>
-    /// <param name="skipPause">Признак пропуска автоматической паузы при ошибке.</param>
+    /// <param name="skipPause">Признак пропуска ожидания паузы и автоматической паузы при ошибке.</param>
     public async Task ProcessAsync(
       ShowMessageModel message,
       bool isBlockStart,
       bool skipStepModeCheck,
       bool skipPause)
     {
-      if (_context.IsPaused)
+      if (_context.IsPaused && !skipPause)
       {
         await _context.WaitWhilePausedAsync(_context.GetCancellationToken());
       }
@@ -58,7 +58,6 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
         _context.ShowRunningButtons(showStepButtons);
       }
 
-      await Task.Delay(1);
     }
 
     /// <summary>Устанавливает паузу после ошибочной записи, если это разрешено настройками.</summary>

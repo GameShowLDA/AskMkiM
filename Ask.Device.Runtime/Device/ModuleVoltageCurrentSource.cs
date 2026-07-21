@@ -5,7 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
-using Ask.Device.Runtime.Function.Connected;
+using Ask.Device.Runtime.Function.Base.Connected;
 using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck;
 
 using System.ComponentModel.DataAnnotations.Schema;
@@ -27,7 +27,7 @@ namespace Ask.Device.Runtime.Device
       Description = "Предназначен для создания электрических параметров для проверки кабельных изделий, печатных плат, контроля функционирования релейно-коммутационных изделий и другой подобной аппаратуры, проведения испытаний изделий по программам контроля";
 
       DeviceType = DeviceType.PowerSourceModule;
-      
+
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
       ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
       BusManager = new Function.ModuleVoltageCurrentSource.BusManager(this);

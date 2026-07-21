@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.Base.GroupMethod;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
@@ -154,7 +155,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         await RelayPointBatchCommutator.ConnectPointsAsync(module, currentPoints, currentBus.Value, _protocolUI);
       }
 
-      await Task.Delay(500);
+      await _protocolUI.DelayWithPauseAsync(TimeSpan.FromMilliseconds(500));
     }
 
     /// <summary>

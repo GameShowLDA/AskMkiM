@@ -1,7 +1,9 @@
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Hotkeys
 {
@@ -32,8 +34,19 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     {
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
       var modifiers = Keyboard.Modifiers;
+      var drawerBlocksInput = DrawerHostService.Instance.ShouldBlockGlobalInput;
+      var textInputFocused = IsTextInputFocused();
 
-      if (DrawerHostService.Instance.ShouldBlockGlobalInput || IsTextInputFocused())
+      if (key == Key.F5)
+      {
+        LogInformation(
+          $"[PauseTiming] F5 KeyDown: context={RuntimeHelpers.GetHashCode(_context)}, " +
+          $"thread={Environment.CurrentManagedThreadId}, modifiers={modifiers}, " +
+          $"drawerBlocked={drawerBlocksInput}, textInputFocused={textInputFocused}, " +
+          $"canStart={_context.CanStart}, canPause={_context.CanPause}, canContinue={_context.CanContinue}");
+      }
+
+      if (drawerBlocksInput || textInputFocused)
       {
         return;
       }
@@ -51,6 +64,9 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           e.Handled = true;
           break;
         case Key.F5:
+          LogInformation(
+            $"[PauseTiming] F5 routed: context={RuntimeHelpers.GetHashCode(_context)}, " +
+            $"action={GetF5Action()}");
           _context.RunOrPause();
           e.Handled = true;
           break;
@@ -60,6 +76,10 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           break;
         case Key.F11:
           _context.Step(isStepInto: true);
+          e.Handled = true;
+          break;
+        case Key.F4 when _context.CanJumpToCommand:
+          _context.JumpToCommand();
           e.Handled = true;
           break;
         case Key.P when _context.CanContinue:
@@ -91,6 +111,30 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     private static bool IsTextInputFocused()
     {
       return Keyboard.FocusedElement is TextBox or PasswordBox or ComboBox;
+    }
+
+    /// <summary>
+    /// Определяет действие, назначенное клавише F5 для текущего состояния выполнения.
+    /// </summary>
+    /// <returns>Имя действия, назначенного клавише F5.</returns>
+    private string GetF5Action()
+    {
+      if (_context.CanStart)
+      {
+        return "Start";
+      }
+
+      if (_context.CanContinue)
+      {
+        return "Continue";
+      }
+
+      if (_context.CanPause)
+      {
+        return "Pause";
+      }
+
+      return "None";
     }
 
     /// <summary>Передаёт Alt существующему внешнему обработчику клавиатуры.</summary>

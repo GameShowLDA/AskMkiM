@@ -147,6 +147,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return null;
       }
 
+      await context.MessageService.WaitIfPausedAsync();
       await ShowChainCheckHeaderAsync(chainCopy, context);
 
       var neCommandModel = GetNeCommandModel(context);
@@ -257,6 +258,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
 
       LogDebug($"[ConnectedPointChecker] Chain checked. Fragments={result.Fragments.Count}. Display={BuildDisconnectionDisplayString(result.Fragments)}");
+
+      await context.MessageService.WaitIfPausedAsync();
 
       errors.AddRange(result.Errors);
       infos.AddRange(result.Infos);

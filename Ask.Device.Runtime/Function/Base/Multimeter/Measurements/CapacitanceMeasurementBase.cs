@@ -40,7 +40,19 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     }
 
     /// <inheritdoc />
-    public async Task<double> MeasureCapacitanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.CapacitanceCommands, param, rangeFrom, rangeTo, userMessageService);
+    public async Task<double> MeasureCapacitanceAsync(
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      IUserInteractionService? userMessageService = null,
+      int measurementCount = 5)
+        => await MeasurementBase.MeasureAsync(
+          _device,
+          _device.CapacitanceCommands,
+          param,
+          rangeFrom,
+          rangeTo,
+          userMessageService,
+          measurementCount);
   }
 }
