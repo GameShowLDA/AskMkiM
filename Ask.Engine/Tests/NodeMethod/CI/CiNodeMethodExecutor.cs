@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -6,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -23,6 +25,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       {
         StartDelegate = ExecuteMeasurementProcess,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -96,7 +99,18 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                 type = ShowMessageModel.MessageType.Error;
               }
 
-              await protocolUI.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения)", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
+              var formattedResult = MeasurementValueFormatter.FormatWithUnit(answer.value, "МОм");
+              var resultMessage = new ShowMessageModel(
+                $"Результат измерения точки {connectResult.PointModel}",
+                message: formattedResult,
+                type: type)
+              {
+                IndentLevel = 2,
+                ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
+                  ? BuildExecutionErrorMessage(connectResult.PointModel, dataModel, answer.value)
+                  : null,
+              };
+              await protocolUI.ShowMessageAsync(resultMessage, skipPause: true);
               return type == ShowMessageModel.MessageType.Success;
 
             }, protocolUI);
@@ -112,6 +126,22 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       {
         await base.FinalizeAsync(messageService);
       }
+    }
+
+    /// <summary>
+    /// Формирует описание брака сопротивления изоляции для точки.
+    /// </summary>
+    /// <param name="point">Проверяемая точка.</param>
+    /// <param name="dataModel">Параметры проверки.</param>
+    /// <param name="result">Измеренное сопротивление изоляции.</param>
+    /// <returns>Описание результата проверки для итогового заключения.</returns>
+    internal static string BuildExecutionErrorMessage(PointModel point, DataModel dataModel, double result)
+    {
+      var voltage = MeasurementValueFormatter.Format(dataModel.Voltage);
+      var minimumResistance = MeasurementValueFormatter.Format(dataModel.Param);
+      var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "МОм");
+
+      return $"Точка[{point}]({minimumResistance}<R МОм). Rизм = {formattedResult}";
     }
   }
 }

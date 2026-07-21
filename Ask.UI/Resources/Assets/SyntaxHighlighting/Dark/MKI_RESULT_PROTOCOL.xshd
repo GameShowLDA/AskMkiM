@@ -4,13 +4,15 @@
 	<Color name="ProtocolMain" foreground="#90EE90" fontWeight="bold"/>
 	<Color name="Error" foreground="#f1301b" />
 	<Color name="OkParam" foreground="#FFB300" />
+	<Color name="MeasurementUnit" foreground="#FFD700" fontWeight="bold" />
 
 	<RuleSet ignoreCase="true">
 		<Rule color="ProtocolMain">^\s*Начало\s+проверки:</Rule>
 		<Rule color="ProtocolMain">^\s*Время\s+выполнения:</Rule>
 		<Rule color="ProtocolMain">(?&lt;=")[^"\r\n]+(?="\s+от\b)</Rule>
 		<Rule color="ProtocolMain">^\s*Заключение:</Rule>
-		<Rule color="OkParam">(?&lt;=Точка)\[\d+\]</Rule>
+		<Rule color="OkParam">(?&lt;=Точка)\[\d+(?:\.\d+)*\]</Rule>
+		<Rule color="MeasurementUnit">(?-i:(?&lt;![А-Яа-яA-Za-z])(?:мкФ|пФ|нФ|мА|А|ГОм|МОм|КОм|Ом|кВ|мВ|В)(?![А-Яа-яA-Za-z]))</Rule>
 		<Rule color="Error">\[БРАК\]</Rule>
 	</RuleSet>
 </SyntaxDefinition>
