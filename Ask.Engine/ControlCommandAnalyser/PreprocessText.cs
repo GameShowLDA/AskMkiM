@@ -206,8 +206,10 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </summary>
     private static void CloseComment(CommentContext context, List<(int, string)> comments)
     {
-      comments.Add((context.StartLine,
-                    context.CurrentComment.ToString().TrimEnd()));
+      AddCommentLines(
+        comments,
+        context.StartLine,
+        context.CurrentComment.ToString().TrimEnd());
       context.CurrentComment.Clear();
       context.StartLine = -1;
     }
@@ -236,8 +238,20 @@ namespace Ask.Engine.ControlCommandAnalyser
     {
       if (context.InComment && context.CurrentComment.Length > 0)
       {
-        comments.Add((context.StartLine != -1 ? context.StartLine : totalLines - 1,
-                      context.CurrentComment.ToString().TrimEnd()));
+        AddCommentLines(
+          comments,
+          context.StartLine != -1 ? context.StartLine : totalLines - 1,
+          context.CurrentComment.ToString().TrimEnd());
+      }
+    }
+
+    private static void AddCommentLines(List<(int, string)> comments, int startLine, string text)
+    {
+      var lines = text.Split('\n');
+
+      for (int i = 0; i < lines.Length; i++)
+      {
+        comments.Add((startLine + i, lines[i]));
       }
     }
 
