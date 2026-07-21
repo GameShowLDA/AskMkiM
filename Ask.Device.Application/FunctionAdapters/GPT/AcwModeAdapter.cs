@@ -880,12 +880,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Генерируется при ошибке выполнения измерения.  
       /// Сообщение исключения содержит текст ошибки, полученный от устройства.
       /// </exception>
-      public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение тока ACW",
-          () => _acwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
+          () => _acwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, param, rangeFrom, rangeTo));
 
         if (!execution.Success)
         {

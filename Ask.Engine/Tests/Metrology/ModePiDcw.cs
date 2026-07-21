@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
@@ -118,7 +119,7 @@ namespace Ask.Engine.Tests.Metrology
         await messageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_DCW, param);
-        await meterDevice.DcwManger.Measure.MeasureAsync(param, LowerBound, UpperBound);
+        await meterDevice.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, param, LowerBound, UpperBound);
         var result = await MeasuredReferenceMeter(messageService, param);
 
         var answer = result < LowerBound || result > UpperBound;

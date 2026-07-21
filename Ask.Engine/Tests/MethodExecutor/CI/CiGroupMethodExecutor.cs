@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
@@ -86,7 +87,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
           await messageService.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
-          var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, dataModel.Param, 60000);
+          var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, dataModel.Param, dataModel.Param, 60000);
           var type = ShowMessageModel.MessageType.Success;
           if (answer.value < dataModel.Param)
           {

@@ -4,6 +4,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -200,13 +201,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         if (type == VoltageEnum.Type.ACW)
         {
-          var answer = await breadDown.AcwManger.Measure.MeasureAsync(value, 0, amperhMaxACW);
-          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, value, 0, amperhMaxACW);
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
+          return result;
         }
         else
         {
-          var answer = await breadDown.DcwManger.Measure.MeasureAsync(value, 0, amperhMaxDCW);
-          return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, value, 0, amperhMaxDCW);
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
+          return result;
         }
 
       }, messageService);
@@ -226,35 +229,21 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-
-        await messageService.ShowMessageAsync(new ShowMessageModel("Измерение прочности изоляции"));
-
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(10)).value;
-
-          var type = ShowMessageModel.MessageType.Success;
-          if (answer >= value)
-          {
-            type = ShowMessageModel.MessageType.Error;
-          }
-
-          return type == ShowMessageModel.MessageType.Success;
+          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, value, 0, amperhMaxACW)).value;
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer);
+          return result;
         }
         else
         {
-          answer = (await breadDown.DcwManger.Measure.MeasureAsync(value)).value;
-          var type = ShowMessageModel.MessageType.Success;
-          if (answer >= value)
-          {
-            type = ShowMessageModel.MessageType.Error;
-          }
-
-          return type == ShowMessageModel.MessageType.Success;
+          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, value, 0, amperhMaxDCW)).value;
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer);
+          return result;
         }
       }, messageService);
 
-      return (result, answer);
+      return result;
     }
 
     public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)

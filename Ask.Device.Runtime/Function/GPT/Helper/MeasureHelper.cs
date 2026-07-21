@@ -25,6 +25,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       double time,
       double timeRamp,
       int delayBeforeCall,
+      ElectricalTestFunction electricalTestFunction,
       double param = 0,
       double rangeFrom = -1,
       double rangeTo = -1,
@@ -41,7 +42,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.InsulationResistance);
+        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, electricalTestFunction);
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
         return (random, "");
       }
