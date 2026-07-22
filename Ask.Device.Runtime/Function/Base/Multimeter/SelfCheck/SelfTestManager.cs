@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -298,16 +299,45 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       {
         var tolerance = ResistanceTolerance(check.IdealResult, check.PercentageError);
 
-        cancellationToken.ThrowIfCancellationRequested();
-        var result = await meter.ResistanceManager.MeasureResistanceAsync(
+        double result = -1;
+        bool resultStatus = false;
+
+        double[] allResults = new double[3];
+        bool[] resultIsGood = { false, false, false };
+
+        for (int i = 0; i < 3; i++)
+        {
+          result = await meter.ResistanceManager.MeasureResistanceAsync(
           check.IdealResult,
           check.IdealResult - tolerance,
           check.IdealResult + tolerance,
           userMessageService,
           responseDelay: MeasurementResponseDelayMs);
 
+          if (SelfTestHelper.InRange(check.IdealResult, result, tolerance))
+          {
+            resultIsGood[i] = true;
+          }
+          allResults[i] = result;
+        }
+
+        result = 0;
+        int goodResultsCount = resultIsGood.Count(b => b == true);
+
+        if (goodResultsCount >= 2)
+        {
+          for (int i = 0; i < 3; i++)
+            if (resultIsGood[i]) result += allResults[i];
+          result /= goodResultsCount;
+          resultStatus = true;
+        }
+        else
+        {
+          result = allResults.Sum() / 3;
+          resultStatus = false;
+        }
+
         cancellationToken.ThrowIfCancellationRequested();
-        var resultStatus = SelfTestHelper.InRange(check.IdealResult, result, tolerance);
         await SelfTestHelper.IsCorrectRangeAsync(
           resultStatus,
           result,
