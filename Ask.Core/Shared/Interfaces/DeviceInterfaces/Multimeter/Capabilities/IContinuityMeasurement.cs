@@ -15,11 +15,13 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <summary>
     /// Проверяет наличие проводимости.
     /// </summary>
-    Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null);
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
+    Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null, double responseDelay = 0);
 
     /// <summary>
     /// Проверяет наличие проводимости.
     /// </summary>
-    Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null);
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
+    Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null, double responseDelay = 0);
   }
 }

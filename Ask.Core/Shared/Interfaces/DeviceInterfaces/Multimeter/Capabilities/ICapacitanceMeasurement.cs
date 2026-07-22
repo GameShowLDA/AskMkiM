@@ -29,6 +29,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="measurementCount">Количество положительных результатов для усреднения.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Среднее значение положительных результатов измерений.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Выбрасывается, если <paramref name="measurementCount"/> меньше единицы.
@@ -38,6 +39,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
       double rangeFrom = -1,
       double rangeTo = -1,
       IUserInteractionService? userMessageService = null,
-      int measurementCount = 5);
+      int measurementCount = 5,
+      double responseDelay = 0);
   }
 }

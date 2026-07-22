@@ -30,7 +30,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
           header: $"Тест {param}{unit} {FormatFallibility(idealResult, percentageError)}",
-          message: $"{FormatResult(result)} ",
+          message: $"{FormatResult(result)}{unit}",
           type: resultType)
         {
           IndentLevel = 1,

@@ -29,7 +29,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     public async Task<bool> SetContinuityModeAsync(IUserInteractionService? userMessageService = null) => await SetModeBase.SetModeAsync(_device, _device.ContinuityCommands, userMessageService);
 
     /// <inheritdoc />
-    public async Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
+    public async Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null, double responseDelay = 0)
     {
       if (_device.TypeMode != MultimeterTypeMode.Continuity)
       {
@@ -44,7 +44,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         _device,
         "Прозвонка",
-        () => CheckContinuityCoreAsync(expectedOutcome),
+        () => CheckContinuityCoreAsync(expectedOutcome, responseDelay: responseDelay),
         value => !value);
 
       if (!execution.Success)
@@ -69,8 +69,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     }
 
     /// <inheritdoc />
-    public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, param, rangeFrom, rangeTo, userMessageService);
+    public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null, double responseDelay = 0)
+        => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, param, rangeFrom, rangeTo, userMessageService, responseDelay: responseDelay);
 
     /// <summary>
     /// Проверяет проводимость между измерительными щупами.
@@ -79,14 +79,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     /// <c>true</c>, если обнаружено соединение (низкое сопротивление), иначе <c>false</c>.
     /// </returns>
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    private async Task<bool> CheckContinuityCoreAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
+    private async Task<bool> CheckContinuityCoreAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null, double responseDelay = 0)
     {
       if (!_device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _device.DeviceProtocol.QueryAsync(_device.ContinuityCommands.Measure, timeout: _device.ContinuityCommands.Timeout);
+      string response = await _device.DeviceProtocol.QueryAsync(_device.ContinuityCommands.Measure, responseDelay: responseDelay, timeout: _device.ContinuityCommands.Timeout);
       return response != "+9.90000000E+37" == expectedOutcome;
     }
   }

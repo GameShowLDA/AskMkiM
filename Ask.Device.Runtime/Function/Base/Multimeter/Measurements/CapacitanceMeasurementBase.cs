@@ -45,7 +45,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       double rangeFrom = -1,
       double rangeTo = -1,
       IUserInteractionService? userMessageService = null,
-      int measurementCount = 5)
+      int measurementCount = 5,
+      double responseDelay = 0)
         => await MeasurementBase.MeasureAsync(
           _device,
           _device.CapacitanceCommands,
@@ -53,6 +54,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
           rangeFrom,
           rangeTo,
           userMessageService,
-          measurementCount);
+          measurementCount,
+          responseDelay);
   }
 }

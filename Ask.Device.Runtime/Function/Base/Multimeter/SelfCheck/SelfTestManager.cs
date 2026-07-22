@@ -18,6 +18,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private const double MinimumActiveResistance = 50;
     private const int RequiredCapacitanceMeasurements = 6;
     private const int MaxCapacitanceMeasurementAttempts = RequiredCapacitanceMeasurements * 5;
+    private const int MeasurementResponseDelayMs = 1000;
     private const string VoltageUnit = " В";
     private const string ResistanceUnit = " Ом";
     private const string CapacitanceUnit = " нФ";
@@ -202,7 +203,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       string header,
       Func<IUserInteractionService?, Task<bool>> setVoltageMode,
       Func<double, IUserInteractionService?, Task<bool>> setVoltageRange,
-      Func<double, double, double, IUserInteractionService?, Task<double>> measureVoltage,
+      Func<double, double, double, IUserInteractionService?, double, Task<double>> measureVoltage,
       double[] ranges,
       IUserInteractionService userMessageService)
     {
@@ -237,14 +238,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       CancellationToken cancellationToken,
       double range,
       Func<double, IUserInteractionService?, Task<bool>> setVoltageRange,
-      Func<double, double, double, IUserInteractionService?, Task<double>> measureVoltage,
+      Func<double, double, double, IUserInteractionService?, double, Task<double>> measureVoltage,
       IUserInteractionService userMessageService)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await setVoltageRange(range, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      var result = await measureVoltage(IdealVoltage, VoltageRangeFrom, VoltageRangeTo, userMessageService);
+      var result = await measureVoltage(IdealVoltage, VoltageRangeFrom, VoltageRangeTo, userMessageService, MeasurementResponseDelayMs);
 
       cancellationToken.ThrowIfCancellationRequested();
       var resultStatus = SelfTestHelper.InRange(IdealVoltage, result, VoltageTolerance(IdealVoltage));
@@ -302,7 +303,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           check.IdealResult,
           check.IdealResult - tolerance,
           check.IdealResult + tolerance,
-          userMessageService);
+          userMessageService,
+          responseDelay: MeasurementResponseDelayMs);
 
         cancellationToken.ThrowIfCancellationRequested();
         var resultStatus = SelfTestHelper.InRange(check.IdealResult, result, tolerance);
@@ -340,7 +342,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         userMessageService,
         async () =>
         {
-          await ShowSectionHeaderAsync("Тест измерения ёмкости:", userMessageService);
+          await ShowSectionHeaderAsync($"Тест измерения ёмкости:", userMessageService);
 
           foreach (var check in CapacitanceChecks)
           {
@@ -369,7 +371,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
-        var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync();
+        var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(responseDelay: MeasurementResponseDelayMs);
         var activeResistanceCorrect = activeResistance > MinimumActiveResistance;
 
         await ShowActiveResistanceResultAsync(activeResistance, activeResistanceCorrect, userMessageService);
@@ -430,7 +432,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           0,
           idealResult - tolerance,
           idealResult + tolerance,
-          userMessageService: userMessageService);
+          userMessageService: userMessageService,
+          responseDelay: MeasurementResponseDelayMs);
 
         if (result <= 0)
         {
@@ -511,8 +514,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
-          header: $"Тест активного сопротивления (>{MinimumActiveResistance:N0} Ом)",
-          message: $"{meaning} ",
+          header: $"Тест активного сопротивления (>{MinimumActiveResistance:N0}{ResistanceUnit})",
+          message: $"{meaning}{ResistanceUnit}",
           type: resultType)
         {
           IndentLevel = 1,

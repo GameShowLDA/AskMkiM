@@ -16,7 +16,8 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// Измеряет постоянное напряжение.
     /// </summary>
     /// <param name="param">Ожидаемое значение.</param>
-    Task<double> MeasureDCVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null);
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
+    Task<double> MeasureDCVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null, double responseDelay = 0);
 
     /// <summary>
     /// Устанавливает диапазон измерения постоянного напряжения.

@@ -25,6 +25,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="measurementCount">Количество положительных результатов измерения ёмкости для усреднения.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Выбрасывается, если для измерения ёмкости <paramref name="measurementCount"/> меньше единицы.
@@ -36,7 +37,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double rangeFrom = -1,
       double rangeTo = -1,
       IUserInteractionService? userMessageService = null,
-      int measurementCount = 1)
+      int measurementCount = 1,
+      double responseDelay = 0)
     {
       if (profile.Unit is CapacitanceUnit)
       {
@@ -47,7 +49,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           rangeFrom,
           rangeTo,
           userMessageService,
-          measurementCount);
+          measurementCount,
+          responseDelay);
       }
 
       return await MeasureOtherAsync(
@@ -56,7 +59,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         param,
         rangeFrom,
         rangeTo,
-        userMessageService);
+        userMessageService,
+        responseDelay);
     }
 
     /// <summary>
@@ -68,6 +72,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
     static private async Task<double> MeasureOtherAsync(
       IMultimeter device,
@@ -75,7 +80,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double param = 0,
       double rangeFrom = -1,
       double rangeTo = -1,
-      IUserInteractionService? userMessageService = null)
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
     {
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
       var unit = profile.Unit.GetUnit();
@@ -101,7 +107,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
         header,
-        () => MeasureCoreAsync(device, profile, header, param, rangeFrom, rangeTo));
+        () => MeasureCoreAsync(
+          device,
+          profile,
+          header,
+          param,
+          rangeFrom,
+          rangeTo,
+          responseDelay: responseDelay));
 
       if (!execution.Success)
       {
@@ -138,6 +151,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="measurementCount">Количество положительных результатов для усреднения.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Выбрасывается, если <paramref name="measurementCount"/> меньше единицы.
@@ -149,7 +163,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double rangeFrom = -1,
       double rangeTo = -1,
       IUserInteractionService? userMessageService = null,
-      int measurementCount = 1)
+      int measurementCount = 1,
+      double responseDelay = 0)
     {
       if (measurementCount < 1)
       {
@@ -184,7 +199,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           device,
           header,
-          () => MeasureCoreAsync(device, profile, header, param, rangeFrom, rangeTo),
+          () => MeasureCoreAsync(
+            device,
+            profile,
+            header,
+            param,
+            rangeFrom,
+            rangeTo,
+            responseDelay: responseDelay),
           maxAttempts: 1);
 
         if (!execution.Success)
@@ -277,8 +299,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
-    static private async Task<double> MeasureCoreAsync(IMultimeter device, IMeasurementProfile profile, string header, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    static private async Task<double> MeasureCoreAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      string header,
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
     {
       var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, profile.ElectricalTest);
       if (random != -1)
@@ -291,7 +322,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, timeout: profile.Timeout);
+      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, responseDelay: responseDelay, timeout: profile.Timeout);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       response = response.Trim().Replace("+", "");
