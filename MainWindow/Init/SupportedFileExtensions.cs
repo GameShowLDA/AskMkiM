@@ -1,4 +1,5 @@
 using System.IO;
+using Ask.Core.Shared.Metadata.Static;
 
 namespace MainWindowProgram.Init
 {
@@ -13,9 +14,12 @@ namespace MainWindowProgram.Init
       ".pkw",
       ".opk",
       ".opkw",
-      ".lst",
-      ".lstw",
-      ".rtlst",
+      ProtocolFileExtensions.Trace,
+      ProtocolFileExtensions.Result,
+      ProtocolFileExtensions.Report,
+      ProtocolFileExtensions.LegacyTrace,
+      ProtocolFileExtensions.LegacyUtf8Trace,
+      ProtocolFileExtensions.LegacyResult,
       ".acs",
       ".txt"
     };
@@ -26,9 +30,12 @@ namespace MainWindowProgram.Init
       ".pkw",
       ".opk",
       ".opkw",
-      ".lst",
-      ".lstw",
-      ".rtlst",
+      ProtocolFileExtensions.Trace,
+      ProtocolFileExtensions.Result,
+      ProtocolFileExtensions.Report,
+      ProtocolFileExtensions.LegacyTrace,
+      ProtocolFileExtensions.LegacyUtf8Trace,
+      ProtocolFileExtensions.LegacyResult,
       ".acs"
     };
 

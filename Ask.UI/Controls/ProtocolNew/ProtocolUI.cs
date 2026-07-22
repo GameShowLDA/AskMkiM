@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Protocol;
@@ -405,11 +406,13 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <summary>
-    /// Сохраняет итоговый протокол в History в формате RTLST.
+    /// Сохраняет итоговый протокол в каталоге истории.
     /// </summary>
-    public async Task SaveInspectionProtocolAsync(string name)
+    /// <param name="name">Имя сохраняемого протокола.</param>
+    /// <param name="checkType">Тип завершённой проверки.</param>
+    public async Task SaveInspectionProtocolAsync(string name, CheckType checkType)
     {
-      await _protocolStorage.SaveInspectionProtocolAsync(name);
+      await _protocolStorage.SaveInspectionProtocolAsync(name, checkType);
     }
 
     #endregion

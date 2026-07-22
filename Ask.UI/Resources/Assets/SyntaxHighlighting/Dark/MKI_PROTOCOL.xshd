@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<SyntaxDefinition name="MKI" extensions=".lst;.lstw" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+<SyntaxDefinition name="MKI" extensions=".asktrace;.lst;.lstw" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
 	<Color name="PKData" foreground="#4CAF50"/>
 	<Color name="ProtocolMain" foreground="#90EE90" fontWeight="bold"/>
 	<Color name="PurposeAndResults" foreground="#90EE90" />
