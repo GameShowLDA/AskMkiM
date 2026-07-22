@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
+using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -475,23 +476,13 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
+      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor); 
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
 
       if (editor != null && !EnsureSupportedExecutionSource(editor))
       {
         return;
-      }
-
-      if (runContainer != null)
-      {
-        var runControl = runContainer.GetDockControl().DockItems[0].Content as RunControl;
-        if (runControl != null)
-        {
-          await runControl.Start(runControl.TranslationModels);
-          return;
-        }
       }
 
       if (container == null && runContainer == null && editor == null)
@@ -505,6 +496,8 @@ namespace MainWindowProgram.Services
 
       await BuildAsync();
 
+      var actualContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+
       if (container == null && editor != null)
       {
         container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
@@ -513,6 +506,11 @@ namespace MainWindowProgram.Services
       if (container == null && runContainer != null)
       {
         container = runContainer;
+      }
+
+      if (!container.Equals(actualContainer))
+      {
+        container = actualContainer;
       }
 
       var dockManager = container.GetDockControl();

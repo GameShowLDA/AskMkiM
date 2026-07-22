@@ -156,7 +156,7 @@ namespace UI.Services.FileManager
         textEditor.IsReadOnly = true;
 
       EditorEventAdapter.RaiseTextEditorActivated(textEditor);
-      _fileManager.DockItemService.ShowEditorDockItem(originalName, container, textEditor);
+      _fileManager.DockItemService.ShowEditorDockItem(uniqueName, container, textEditor).ConfigureAwait(true);
       _fileManager.ControlManagerService.ShowEditorContainer(container, EditorType.TextEditor);
     }
 
