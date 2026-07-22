@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
@@ -51,7 +52,9 @@ namespace UI.Services.ProtocolManager
       // Старый редактор «Протоколы» больше не открываем параллельно с ним.
       if (!showInSoftware)
         ExportProtocolAsPdf(protocol.ProgramName, protocolText);
-      PrintUtility.PrintProtocol(protocol, protocolText);
+
+      if (ProtocolConfig.GetPrintProtocol())
+        PrintUtility.PrintProtocol(protocol, protocolText);
     }
 
     #region 📄 Формирование текста протокола
@@ -132,8 +135,8 @@ namespace UI.Services.ProtocolManager
       }
 
       return string.IsNullOrWhiteSpace(baseName)
-        ? "protocol.lst"
-        : $"{baseName}.lst";
+        ? $"protocol{ProtocolFileExtensions.Report}"
+        : $"{baseName}{ProtocolFileExtensions.Report}";
     }
 
     /// <summary>
@@ -151,7 +154,10 @@ namespace UI.Services.ProtocolManager
     private TextEditorUI CreateReadOnlyProtocolEditor(string filePath, string protocolText)
     {
       var textEditorModel = new TextEditorModel(filePath, Path.GetFileName(filePath));
-      var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, protocolText, FileType.Protocol);
+      var textEditor = _fileManager.TextEditorService.CreateTextEditor(
+        textEditorModel,
+        protocolText,
+        FileType.InspectionProtocol);
       textEditor.IsReadOnly = true;
       EditorEventAdapter.RaiseTextEditorActivated(textEditor);
       return textEditor;

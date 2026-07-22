@@ -170,7 +170,7 @@ namespace UI.Services.FileManager
     }
 
     private static bool IsReadOnlyFileType(FileType fileType)
-      => fileType is FileType.Protocol or FileType.OPK or FileType.OPKW;
+      => fileType is FileType.Protocol or FileType.InspectionProtocol or FileType.OPK or FileType.OPKW;
 
     #endregion
 
@@ -184,7 +184,10 @@ namespace UI.Services.FileManager
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
       var extention = Path.GetExtension(path).ToLowerInvariant();
       Encoding encoding;
-      if (extention == ".pkw" || extention == ".opkw" || extention == ".txt" || extention == ".lstw" || extention == ".lst")
+      if (extention == ".pkw"
+          || extention == ".opkw"
+          || extention == ".txt"
+          || ProtocolFileExtensions.IsProtocol(extention))
       {
         encoding = Encoding.UTF8;
       }
@@ -211,7 +214,7 @@ namespace UI.Services.FileManager
     }
 
     private static bool IsProtocolFileExtension(string extension)
-      => extension is ".lst" or ".lstw";
+      => ProtocolFileExtensions.IsProtocol(extension);
 
     /// <summary>
     /// Определяет тип файла по его расширению.
@@ -228,8 +231,12 @@ namespace UI.Services.FileManager
         ".acs" => FileType.PK,
         ".opk" => FileType.OPK,
         ".opkw" => FileType.OPKW,
-        ".lst" => FileType.Protocol,
-        ".lstw" => FileType.Protocol,
+        ProtocolFileExtensions.Trace => FileType.Protocol,
+        ProtocolFileExtensions.Result => FileType.InspectionProtocol,
+        ProtocolFileExtensions.Report => FileType.InspectionProtocol,
+        ProtocolFileExtensions.LegacyTrace => FileType.Protocol,
+        ProtocolFileExtensions.LegacyUtf8Trace => FileType.Protocol,
+        ProtocolFileExtensions.LegacyResult => FileType.InspectionProtocol,
         _ => FileType.None
       };
     }

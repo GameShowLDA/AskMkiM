@@ -54,12 +54,12 @@ internal sealed class ExecutionFinalizer
     resetExecutorState();
     await _systemResetService.ResetAsync();
 
-    _protocolCompletionService.PrintIfRequired(protocol);
+    _protocolCompletionService.PrintIfRequired(settings, protocol);
     SystemStateManager.SetIsLocked(false);
 
     protocol.ShowOnlyStartButton();
     await _protocolCompletionService.DisplayCompletionAsync(settings, protocol);
     processingStateChanged?.Invoke(false);
-    await _protocolCompletionService.SaveAndExposeAsync(protocol);
+    await _protocolCompletionService.SaveAndExposeAsync(settings, protocol);
   }
 }

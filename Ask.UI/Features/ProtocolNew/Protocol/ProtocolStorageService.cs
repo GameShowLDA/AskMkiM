@@ -1,5 +1,6 @@
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using System.IO;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol
@@ -36,7 +37,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     }
 
     /// <summary>
-    /// Сохраняет снимок записей протокола выполнения в формате LST.
+    /// Сохраняет снимок записей протокола выполнения в формате ASKTRACE.
     /// </summary>
     /// <param name="name">Имя сохраняемого протокола.</param>
     /// <param name="messages">Снимок записей протокола выполнения.</param>
@@ -48,10 +49,11 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     }
 
     /// <summary>
-    /// Сохраняет текущий итоговый протокол в формате RTLST рядом с последним файлом LST.
+    /// Сохраняет текущий итоговый протокол рядом с последним файлом ASKTRACE.
     /// </summary>
     /// <param name="name">Имя сохраняемого протокола.</param>
-    public async Task SaveInspectionProtocolAsync(string name)
+    /// <param name="checkType">Тип завершённой проверки.</param>
+    public async Task SaveInspectionProtocolAsync(string name, CheckType checkType)
     {
       if (string.IsNullOrWhiteSpace(InspectionProtocolText))
       {
@@ -61,11 +63,12 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       _lastInspectionProtocolPath = await ExecutionProtocolHistoryService.SaveInspectionAsync(
         name,
         InspectionProtocolText,
+        checkType,
         _lastExecutionProtocolPath);
     }
 
     /// <summary>
-    /// Возвращает последний сохранённый в текущей сессии LST-файл,
+    /// Возвращает последний сохранённый в текущей сессии ASKTRACE-файл,
     /// а при его отсутствии — последний протокол из каталога History.
     /// </summary>
     /// <returns>Абсолютный путь к протоколу либо <see langword="null"/>.</returns>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<SyntaxDefinition name="MKI" extensions=".rtlst" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+<SyntaxDefinition name="MKI" extensions=".askresult;.askreport;.rtlst" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
 	<Color name="ProtocolMain" foreground="#006FCB" fontWeight="bold"/>
 	<Color name="Error" foreground="#C62828" fontWeight="bold" />
 	<Color name="OkParam" foreground="#006FCB" fontWeight="bold" />

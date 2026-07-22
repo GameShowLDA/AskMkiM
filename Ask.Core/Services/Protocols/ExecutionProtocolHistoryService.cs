@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Services.FilesUtility;
 using System.IO;
@@ -12,8 +13,6 @@ namespace Ask.Core.Services.Protocols;
 public static class ExecutionProtocolHistoryService
 {
   private const string DefaultProtocolName = "protocol";
-  private const string ExecutionProtocolExtension = ".lst";
-  private const string InspectionProtocolExtension = ".rtlst";
   private static readonly UTF8Encoding Utf8NoBom = new(false);
 
   /// <summary>
@@ -31,25 +30,35 @@ public static class ExecutionProtocolHistoryService
       .Select(ExecutionProtocolLineFormatter.Format)
       .Where(static line => !string.IsNullOrWhiteSpace(line));
 
-    return await SaveLinesAsync(protocolName, lines, ExecutionProtocolExtension);
+    return await SaveLinesAsync(protocolName, lines, ProtocolFileExtensions.Trace);
   }
 
   /// <summary>
   /// Сохраняет итоговый протокол рядом с протоколом выполнения.
   /// </summary>
+  /// <param name="protocolName">Имя протокола.</param>
+  /// <param name="protocolText">Текст итогового протокола.</param>
+  /// <param name="checkType">Тип завершённой проверки.</param>
+  /// <param name="executionProtocolPath">Путь к связанному протоколу выполнения.</param>
+  /// <returns>Полный путь к сохранённому и зашифрованному файлу итогового протокола.</returns>
   public static Task<string> SaveInspectionAsync(
     string? protocolName,
     string protocolText,
+    CheckType checkType,
     string? executionProtocolPath = null)
   {
     var lines = protocolText
       .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
+    string extension = checkType == CheckType.ControlProgram
+      ? ProtocolFileExtensions.Report
+      : ProtocolFileExtensions.Result;
+
     string? inspectionProtocolPath = string.IsNullOrWhiteSpace(executionProtocolPath)
       ? null
-      : Path.ChangeExtension(executionProtocolPath, InspectionProtocolExtension);
+      : Path.ChangeExtension(executionProtocolPath, extension);
 
-    return SaveLinesAsync(protocolName, lines, InspectionProtocolExtension, inspectionProtocolPath);
+    return SaveLinesAsync(protocolName, lines, extension, inspectionProtocolPath);
   }
 
   /// <summary>
@@ -76,8 +85,7 @@ public static class ExecutionProtocolHistoryService
 
     return Directory
       .EnumerateFiles(historyDirectory, "*.*", SearchOption.AllDirectories)
-      .Where(static file => string.Equals(Path.GetExtension(file), ".lst", StringComparison.OrdinalIgnoreCase)
-                            || string.Equals(Path.GetExtension(file), ".lstw", StringComparison.OrdinalIgnoreCase))
+      .Where(static file => ProtocolFileExtensions.IsTrace(Path.GetExtension(file)))
       .OrderByDescending(File.GetLastWriteTimeUtc)
       .FirstOrDefault();
   }
@@ -87,6 +95,7 @@ public static class ExecutionProtocolHistoryService
   /// </summary>
   /// <param name="dateDirectory">Каталог, в котором будет сохранён протокол.</param>
   /// <param name="protocolName">Имя протокола, используемое при формировании имени файла.</param>
+  /// <param name="extension">Расширение файла протокола.</param>
   /// <returns>Полный путь к файлу, не совпадающий с уже существующими файлами.</returns>
   private static string BuildUniqueFilePath(string dateDirectory, string? protocolName, string extension)
   {

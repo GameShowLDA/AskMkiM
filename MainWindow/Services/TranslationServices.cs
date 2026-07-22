@@ -595,7 +595,11 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
-      runControl.FileName = BuildDerivedFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.OriginalFileName, ".lst", "protocol.lst");
+      runControl.FileName = BuildDerivedFileName(
+        editor.TextEditorModel.FilePath,
+        editor.TextEditorModel.OriginalFileName,
+        ProtocolFileExtensions.Trace,
+        $"protocol{ProtocolFileExtensions.Trace}");
       runControl.SetLeftEditor(editor);
 
       if (runContainer == null)

@@ -30,10 +30,11 @@ internal sealed class ProtocolCompletionService
   /// <summary>
   /// Выполняет настроенную печать текущего потокового протокола.
   /// </summary>
+  /// <param name="settings">Настройки завершённого действия.</param>
   /// <param name="protocol">Компонент, содержащий записи выполнения.</param>
-  public void PrintIfRequired(ProtocolUI protocol)
+  public void PrintIfRequired(ActionSettings settings, ProtocolUI protocol)
   {
-    if (ProtocolConfig.GetPrintProtocol())
+    if (settings.CheckType != CheckType.ControlProgram && ProtocolConfig.GetPrintProtocol())
     {
       PrintUtility.PrintProtocol(protocol.GetShowMessageModels());
     }
@@ -71,11 +72,12 @@ internal sealed class ProtocolCompletionService
   /// <summary>
   /// Сохраняет оба представления протокола и показывает панель управления сохранёнными файлами.
   /// </summary>
+  /// <param name="settings">Настройки завершённого действия.</param>
   /// <param name="protocol">Компонент отображения и хранения протокола.</param>
-  public async Task SaveAndExposeAsync(ProtocolUI protocol)
+  public async Task SaveAndExposeAsync(ActionSettings settings, ProtocolUI protocol)
   {
     await protocol.SaveProtocolAsync(protocol.Header);
-    await protocol.SaveInspectionProtocolAsync(protocol.Header);
+    await protocol.SaveInspectionProtocolAsync(protocol.Header, settings.CheckType);
     protocol.ShowProtocolManager();
   }
 }

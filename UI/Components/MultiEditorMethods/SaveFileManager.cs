@@ -429,7 +429,9 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         var fileData = textEditor.Text;
-        if (filePath.ToLower().EndsWith(".pkw") || filePath.ToLower().EndsWith(".txt") || filePath.ToLower().EndsWith(".lst") || filePath.ToLower().EndsWith(".lstw"))
+        if (filePath.EndsWith(".pkw", StringComparison.OrdinalIgnoreCase)
+            || filePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
+            || ProtocolFileExtensions.IsProtocol(Path.GetExtension(filePath)))
         {
           Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
           File.WriteAllText(filePath, fileData, Encoding.UTF8);
@@ -502,8 +504,7 @@ namespace UI.Components.MultiEditorMethods
     private static void EncryptProtocolFileIfNeeded(string filePath)
     {
       var extension = Path.GetExtension(filePath);
-      if (extension.Equals(".lst", StringComparison.OrdinalIgnoreCase) ||
-          extension.Equals(".lstw", StringComparison.OrdinalIgnoreCase))
+      if (ProtocolFileExtensions.IsProtocol(extension))
       {
         FileEncryptionManager.EncryptFile(filePath);
       }
