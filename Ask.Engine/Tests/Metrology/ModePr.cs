@@ -107,7 +107,11 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления"), IsBlockStart: true);
         var (firstNorm, lastNorm, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PR, param);
 
-        var result = await fastMeter.ContinuityManager.CheckContinuityAsync(param, firstNorm, lastNorm);
+        var result = await fastMeter.ContinuityManager.CheckContinuityAsync(
+          param,
+          firstNorm,
+          lastNorm,
+          protocolUI);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {

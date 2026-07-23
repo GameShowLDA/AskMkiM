@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Breakdown;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -697,7 +698,8 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение сопротивления изоляции",
-          () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, rangeFrom, rangeTo));
+          () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, rangeFrom, rangeTo),
+          maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
         {
@@ -708,6 +710,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
             false,
             2,
             userMessageService);
+
+          if (userMessageService != null)
+          {
+            throw new DeviceException(
+              $"Ошибка при измерении сопротивления изоляции: {execution.ErrorMessage}");
+          }
 
           return (-1, string.Empty);
         }

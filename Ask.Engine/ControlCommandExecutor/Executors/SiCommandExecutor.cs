@@ -129,7 +129,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var measurement = Stopwatch.StartNew();
-        var answer = (await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, value, firstValue)).value;
+        var answer = (await breadDown.IrManger.Measure.MeasureAsync(
+          ElectricalTestFunction.InsulationResistance,
+          value,
+          firstValue,
+          userMessageService: messageService)).value;
         LogPerformance("node accumulation measurement device call", measurement);
 
         measurement.Restart();
@@ -155,7 +159,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
         var measurement = Stopwatch.StartNew();
-        answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, value, value, 60000);
+        answer = await breadDown.IrManger.Measure.MeasureAsync(
+          ElectricalTestFunction.InsulationResistance,
+          value,
+          value,
+          60000,
+          userMessageService: messageService);
         LogPerformance("node full measurement device call", measurement);
 
         measurement.Restart();

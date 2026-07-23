@@ -1,248 +1,267 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using System.Runtime.ExceptionServices;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Core.Services.UI
 {
   /// <summary>
-  /// Служебный класс для выполнения операций с поддержкой пользовательского выбора:
-  /// повторить, завершить или пропустить.
+  /// Выполняет операции с интерактивным выбором повтора, продолжения или завершения.
   /// </summary>
   public static class UserActionHelper
   {
     /// <summary>
-    /// Выполняет операцию с поддержкой повтора, завершения и пропуска.
-    /// Завершается после первого успешного выполнения, если <paramref name="loop"/> не включён.
+    /// Выполняет логическую операцию с поддержкой пользовательского повтора.
     /// </summary>
-    /// <param name="operation">Асинхронная операция, возвращающая true при успехе.</param>
-    /// <param name="messageService">Сервис пользовательских сообщений.</param>
-    /// <param name="loop">Если true — выполняет цикл хотя бы один раз независимо от результата.</param>
+    /// <param name="operation">Асинхронная операция.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
     public static async Task RunWithUserRepeatAsync(
-        Func<Task<bool>> operation,
-        IUserInteractionService messageService,
-        bool loop = false,
-        bool deviceTask = false)
+      Func<Task<bool>> operation,
+      IUserInteractionService? messageService,
+      bool loop = false,
+      bool deviceTask = false)
     {
-      await RunCoreAsync(operation, messageService, loop, deviceTask);
+      await RunCoreAsync(
+        operation,
+        static result => result,
+        messageService,
+        loop,
+        deviceTask,
+        exceptionFallback: null);
     }
 
     /// <summary>
-    /// Выполняет операцию с поддержкой пользовательского выбора и возвращает её результат.
+    /// Выполняет логическую операцию с поддержкой пользовательского повтора.
     /// </summary>
-    /// <param name="operation">Асинхронная операция, возвращающая true при успехе.</param>
-    /// <param name="messageService">Сервис пользовательских сообщений.</param>
-    /// <param name="loop">Если true — выполняет хотя бы один цикл независимо от результата.</param>
-    /// <returns>True, если операция была успешной.</returns>
-    public static async Task<bool> GetRunWithUserRepeatAsync(
-        Func<Task<bool>> operation,
-        IUserInteractionService messageService,
-        bool loop = false,
-        bool deviceTask = false)
+    /// <param name="operation">Асинхронная операция.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <returns>Результат последней подтверждённой попытки.</returns>
+    public static Task<bool> GetRunWithUserRepeatAsync(
+      Func<Task<bool>> operation,
+      IUserInteractionService? messageService,
+      bool loop = false,
+      bool deviceTask = false)
     {
-      var result = await RunCoreAsync(operation, messageService, loop, deviceTask);
-      return result.Success;
+      return RunCoreAsync(
+        operation,
+        static result => result,
+        messageService,
+        loop,
+        deviceTask,
+        exceptionFallback: null);
     }
 
     /// <summary>
-    /// Выполняет операцию, возвращающую результат подключения и строку ответа, с поддержкой пользовательского выбора.
+    /// Выполняет операцию подключения с поддержкой пользовательского повтора.
     /// </summary>
-    /// <param name="operation">Асинхронная операция, возвращающая результат подключения и строку ответа.</param>
-    /// <param name="messageService">Сервис пользовательских сообщений.</param>
-    /// <param name="loop">Если true — выполняет хотя бы один цикл независимо от результата.</param>
-    /// <returns>Кортеж (успех подключения, строка ответа).</returns>
-    public static async Task<(bool Connect, string Answer)> GetRunWithUserRepeatAsync(
-        Func<Task<(bool Connect, string Answer)>> operation,
-        IUserInteractionService messageService,
-        bool loop = false,
-        bool deviceTask = false)
+    /// <param name="operation">Асинхронная операция подключения.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <returns>Результат последней подтверждённой попытки подключения.</returns>
+    public static Task<(bool Connect, string Answer)> GetRunWithUserRepeatAsync(
+      Func<Task<(bool Connect, string Answer)>> operation,
+      IUserInteractionService? messageService,
+      bool loop = false,
+      bool deviceTask = false)
     {
-      bool error = loop;
-      bool next = !loop;
-      (bool Connect, string Answer) result;
+      return RunCoreAsync(
+        operation,
+        static result => result.Item1,
+        messageService,
+        loop,
+        deviceTask,
+        exception => (false, exception.Message));
+    }
 
-      do
+    /// <summary>
+    /// Выполняет измерительную операцию с поддержкой пользовательского повтора.
+    /// </summary>
+    /// <param name="operation">Асинхронная измерительная операция.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <returns>Результат последней подтверждённой попытки измерения.</returns>
+    public static Task<(bool Connect, double Answer)> GetRunWithUserRepeatAsync(
+      Func<Task<(bool Connect, double Answer)>> operation,
+      IUserInteractionService? messageService,
+      bool loop = false,
+      bool deviceTask = false)
+    {
+      return RunCoreAsync(
+        operation,
+        static result => result.Item1,
+        messageService,
+        loop,
+        deviceTask,
+        static _ => (false, -1));
+    }
+
+    /// <summary>
+    /// Выполняет типизированную операцию с поддержкой пользовательского повтора.
+    /// </summary>
+    /// <typeparam name="T">Тип результата операции.</typeparam>
+    /// <param name="operation">Асинхронная операция.</param>
+    /// <param name="isSuccessful">Проверка успешности результата.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <returns>Результат последней подтверждённой попытки.</returns>
+    public static Task<T> GetRunWithUserRepeatAsync<T>(
+      Func<Task<T>> operation,
+      Func<T, bool> isSuccessful,
+      IUserInteractionService? messageService,
+      bool loop = false,
+      bool deviceTask = false)
+    {
+      ArgumentNullException.ThrowIfNull(isSuccessful);
+
+      return RunCoreAsync(
+        operation,
+        isSuccessful,
+        messageService,
+        loop,
+        deviceTask,
+        exceptionFallback: null);
+    }
+
+    private static async Task<T> RunCoreAsync<T>(
+      Func<Task<T>> operation,
+      Func<T, bool> isSuccessful,
+      IUserInteractionService? messageService,
+      bool loop,
+      bool deviceTask,
+      Func<Exception, T>? exceptionFallback)
+    {
+      ArgumentNullException.ThrowIfNull(operation);
+      ArgumentNullException.ThrowIfNull(isSuccessful);
+
+      bool interactiveMode = loop;
+      int attempt = 0;
+
+      while (true)
       {
-        try
-        {
-          result = await operation();
-        }
-        catch (Exception ex)
-        {
-          result = (false, ex.Message);
-        }
+        attempt++;
+        int outputLineBeforeAttempt = messageService?.GetLastLineNumber() ?? -1;
+        T result = default!;
+        Exception? hardwareException = null;
+        bool operationSucceeded = false;
 
-        if (result.Connect && next)
-          return result;
-
-        if (!error)
-        {
-          error = true;
-          next = false;
-        }
-
-        if (messageService == null)
-          break;
-
-        var action = await messageService.WaitUserActionAsync(loop, deviceTask);
-        ApplyButtonMode(messageService, onlyExit: false);
-
-        if (action == UserAction.None)
-          return result;
-
-        if (action == UserAction.Retry)
-          continue;
-
-        next = true;
-        error = false;
-        ApplyButtonMode(messageService, onlyExit: false);
-        return result;
-
-      }
-      while (error);
-
-      return result;
-    }
-
-    /// <summary>
-    /// Выполняет операцию, возвращающую результат подключения и строку ответа, с поддержкой пользовательского выбора.
-    /// </summary>
-    /// <param name="operation">Асинхронная операция, возвращающая результат подключения и строку ответа.</param>
-    /// <param name="messageService">Сервис пользовательских сообщений.</param>
-    /// <param name="loop">Если true — выполняет хотя бы один цикл независимо от результата.</param>
-    /// <returns>Кортеж (успех подключения, строка ответа).</returns>
-    public static async Task<(bool Connect, double Answer)> GetRunWithUserRepeatAsync(
-        Func<Task<(bool Connect, double Answer)>> operation,
-        IUserInteractionService messageService,
-        bool loop = false,
-        bool deviceTask = false)
-    {
-      bool error = loop;
-      bool next = !loop;
-      (bool Connect, double Answer) result;
-
-      do
-      {
-        try
-        {
-          result = await operation();
-        }
-        catch (Exception ex)
-        {
-          result = (false, -1);
-        }
-
-        if (result.Connect && next)
-          return result;
-
-        if (!error)
-        {
-          error = true;
-          next = false;
-        }
-
-        if (messageService == null)
-          break;
-
-        var action = await messageService.WaitUserActionAsync(loop, deviceTask);
-        ApplyButtonMode(messageService, onlyExit: false);
-
-        if (action == UserAction.None)
-          return result;
-
-        if (action == UserAction.Retry)
-          continue;
-
-        next = true;
-        error = false;
-        ApplyButtonMode(messageService, onlyExit: false);
-        return result;
-
-      }
-      while (error);
-
-      return result;
-    }
-
-    /// <summary>
-    /// Внутренняя логика повтора операции, общая для методов с типом bool.
-    /// </summary>
-    /// <param name="operation">Операция, возвращающая true при успехе.</param>
-    /// <param name="messageService">Сервис пользовательских сообщений.</param>
-    /// <param name="loop">Принудительный запуск повторов независимо от результата.</param>
-    /// <returns>Кортеж (успешность операции, текстовое сообщение).</returns>
-    private static async Task<(bool Success, string Message)> RunCoreAsync(
-        Func<Task<bool>> operation,
-        IUserInteractionService messageService,
-        bool loop, bool deviceTask)
-    {
-      bool error = loop;
-      bool next = !loop;
-
-      do
-      {
         try
         {
           messageService?.GetCancellationToken().ThrowIfCancellationRequested();
+          result = await operation();
+          operationSucceeded = isSuccessful(result);
         }
-        catch
+        catch (OperationCanceledException)
         {
-
+          throw;
+        }
+        catch (Exception ex)
+        {
+          hardwareException = ex;
+          LogException($"Аппаратная операция завершилась ошибкой на попытке {attempt}.", ex, isDeviceLog: true);
         }
 
-        bool success = await operation();
-
-        if (success && next)
-          return (true, string.Empty);
-
-        if (!error)
+        if (EquipmentExecutionContext.IsMandatoryFinalization)
         {
-          error = true;
-          next = false;
+          return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
+        }
+
+        bool hardwareSucceeded = hardwareException == null && (!deviceTask || operationSucceeded);
+        bool attemptProducedOutput = messageService != null &&
+          messageService.GetLastLineNumber() != outputLineBeforeAttempt;
+        if (!interactiveMode && hardwareSucceeded && operationSucceeded)
+        {
+          return result;
         }
 
         if (messageService == null)
         {
-          break;
+          return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
 
-        var action = await messageService.WaitUserActionAsync(loop, deviceTask);
-        // После выбора оператора выполнение продолжается (в том числе при повторной попытке),
-        // поэтому кнопка «Пауза» должна оставаться доступной до фактического завершения.
-        ApplyButtonMode(messageService, onlyExit: false);
-
-        if (action == UserAction.None)
+        if (ExecutionConfig.GetIsIdleModeEnabled() &&
+            deviceTask &&
+            !attemptProducedOutput)
         {
-          ApplyButtonMode(messageService, onlyExit: false);
-          return (success, string.Empty);
+          await ShowAttemptResultAsync(
+            messageService,
+            hardwareSucceeded && operationSucceeded,
+            hardwareException);
         }
 
-        if (action == UserAction.Retry)
-          continue;
+        bool forceInteraction = interactiveMode;
+        interactiveMode = true;
+        UserAction action = await messageService.WaitUserActionAsync(
+          loop: loop || forceInteraction,
+          deviceTask: !hardwareSucceeded || deviceTask,
+          canContinue: hardwareSucceeded);
 
-        next = true;
-        error = false;
-        ApplyButtonMode(messageService, onlyExit: false);
-        return (success, string.Empty);
+        switch (action)
+        {
+          case UserAction.Retry:
+            LogInformation($"Оператор запросил повтор операции после попытки {attempt}.", isDeviceLog: true);
+            continue;
 
-      } while (error);
+          case UserAction.Continue when hardwareSucceeded:
+            messageService.ButtonService?.ShowOnlyStopAndFinishButtons();
+            return result;
 
-      ApplyButtonMode(messageService, onlyExit: false);
-      return (false, string.Empty);
+          case UserAction.Abort:
+            throw new OperationCanceledException(
+              "Выполнение завершено оператором.",
+              messageService.GetCancellationToken());
+
+          case UserAction.None:
+            return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
+
+          default:
+            continue;
+        }
+      }
     }
 
-    /// <summary>
-    /// Устанавливает режим отображения кнопок в пользовательском интерфейсе.
-    /// </summary>
-    /// <param name="messageService">Сервис пользовательских сообщений.</param>
-    /// <param name="onlyExit">Если true — отображается только кнопка "Завершить", иначе — "Пауза" и "Завершить".</param>
-    private static void ApplyButtonMode(IUserInteractionService messageService, bool onlyExit)
+    private static async Task ShowAttemptResultAsync(
+      IUserInteractionService messageService,
+      bool success,
+      Exception? exception)
     {
-      if (messageService?.ButtonService == null)
-        return;
+      await messageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: success ? "Повторная аппаратная операция" : "Аппаратная операция",
+          message: success
+            ? "Повторная попытка выполнена успешно."
+            : exception?.Message ?? "Оборудование не выполнило операцию.",
+          type: success
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error),
+        skipPause: true);
+    }
 
-      if (onlyExit)
-        messageService.ButtonService.ShowOnlyExitButton();
-      else
-        messageService.ButtonService.ShowOnlyStopAndFinishButtons();
+    private static T ResolveWithoutInteraction<T>(
+      T result,
+      Exception? exception,
+      Func<Exception, T>? exceptionFallback)
+    {
+      if (exception == null)
+      {
+        return result;
+      }
+
+      if (exceptionFallback != null)
+      {
+        return exceptionFallback(exception);
+      }
+
+      ExceptionDispatchInfo.Capture(exception).Throw();
+      return default!;
     }
   }
 }

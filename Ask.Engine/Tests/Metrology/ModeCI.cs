@@ -112,7 +112,12 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
 
-        var result = (await meterDevice.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, LowerBound, UpperBound)).value;
+        var result = (await meterDevice.IrManger.Measure.MeasureAsync(
+          ElectricalTestFunction.InsulationResistance,
+          param,
+          LowerBound,
+          UpperBound,
+          userMessageService: protocolUI)).value;
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {

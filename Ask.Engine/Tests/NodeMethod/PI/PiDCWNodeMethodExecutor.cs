@@ -100,7 +100,9 @@ namespace Ask.Engine.Tests.NodeMethod.PI
             {
               token.ThrowIfCancellationRequested();
 
-              var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC);
+              var answer = await breakDown.DcwManger.Measure.MeasureAsync(
+                ElectricalTestFunction.DielectricWithstandDC,
+                userMessageService: protocolUI);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value >= dataModel.Param)

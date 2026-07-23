@@ -89,7 +89,10 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
-          var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, dataModel.Param);
+          var answer = await breakDown.AcwManger.Measure.MeasureAsync(
+            ElectricalTestFunction.DielectricWithstandAC,
+            dataModel.Param,
+            userMessageService: messageService);
           var type = ShowMessageModel.MessageType.Success;
           if (answer.value >= dataModel.Param)
           {

@@ -781,8 +781,15 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       if (stopDelegate != null)
       {
-        var token = CancellationTokenSource?.Token ?? CancellationToken.None;
-        await stopDelegate(token);
+        try
+        {
+          var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+          await stopDelegate(token);
+        }
+        catch (Exception ex)
+        {
+          LogException($"Ошибка обязательного завершающего делегата \"{name}\".", ex);
+        }
       }
 
       if (_session != null)

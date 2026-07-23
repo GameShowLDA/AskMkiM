@@ -33,7 +33,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand cmd = new DeviceCommand(5, 1);
@@ -52,7 +52,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand cmd = new DeviceCommand(5, 2);
@@ -71,7 +71,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand cmd = new DeviceCommand(7);

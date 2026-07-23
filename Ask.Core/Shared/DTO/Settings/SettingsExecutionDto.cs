@@ -22,9 +22,14 @@ public class SettingsExecutionDto
   public bool IdleModeExecution { get; set; }
 
   /// <summary>
-  /// Включает режим симуляции ошибок.
+  /// Включает симуляцию отрицательных результатов измерений.
   /// </summary>
   public bool IsErrorSimulationMode { get; set; }
+
+  /// <summary>
+  /// Включает симуляцию аппаратных ошибок оборудования.
+  /// </summary>
+  public bool IsHardwareErrorSimulationMode { get; set; }
 
   /// <summary>
   /// Включает пошаговый режим выполнения.

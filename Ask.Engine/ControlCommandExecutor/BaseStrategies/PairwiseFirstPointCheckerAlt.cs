@@ -349,7 +349,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
     {
       var fastMeter = await EquipmentService.GetFastMeterOrThrow(userMessageService);
-      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(
+        param,
+        rangeFrom,
+        rangeTo,
+        userMessageService);
       return result;
     }
 

@@ -114,7 +114,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext);
+        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext, messageService);
 
         if (answer < 0)
         {
@@ -139,14 +139,19 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     private async Task<double> GetDiodeMeasurementValueAsync(
       IMultimeter meter,
       double value,
-      ConnectedPointContext pointContext)
+      ConnectedPointContext pointContext,
+      IUserInteractionService messageService)
     {
       if (await ShouldReturnOverloadInIdleReverseModeAsync(pointContext))
       {
         return 9.9E+37;
       }
 
-      return await meter.DiodeManager.CheckDiodeAsync(value, firstValue, secondValue);
+      return await meter.DiodeManager.CheckDiodeAsync(
+        value,
+        firstValue,
+        secondValue,
+        messageService);
     }
 
     /// <summary>

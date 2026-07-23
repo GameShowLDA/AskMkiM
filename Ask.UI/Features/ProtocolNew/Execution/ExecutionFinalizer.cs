@@ -1,9 +1,11 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Ask.UI.Features.ProtocolNew.Services;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Execution;
 
@@ -50,16 +52,46 @@ internal sealed class ExecutionFinalizer
     Action resetExecutorState,
     Action<bool>? processingStateChanged)
   {
-    await cancelProcessAsync();
-    resetExecutorState();
-    await _systemResetService.ResetAsync();
+    await RunMandatoryStepsAsync(
+      ("остановка выполняемой задачи", cancelProcessAsync),
+      ("сброс состояния исполнителя", AsAsync(resetExecutorState)),
+      ("сброс оборудования", _systemResetService.ResetAsync),
+      ("печать протокола", AsAsync(
+        () => _protocolCompletionService.PrintIfRequired(settings, protocol))),
+      ("снятие блокировки системы", AsAsync(() => SystemStateManager.SetIsLocked(false))),
+      ("восстановление кнопки запуска", AsAsync(protocol.ShowOnlyStartButton)),
+      ("отображение результата выполнения",
+        () => _protocolCompletionService.DisplayCompletionAsync(settings, protocol)),
+      ("уведомление о завершении выполнения",
+        AsAsync(() => processingStateChanged?.Invoke(false))),
+      ("сохранение протоколов",
+        () => _protocolCompletionService.SaveAndExposeAsync(settings, protocol)));
+  }
 
-    _protocolCompletionService.PrintIfRequired(settings, protocol);
-    SystemStateManager.SetIsLocked(false);
+  internal static async Task RunMandatoryStepsAsync(
+    params (string Name, Func<Task> Operation)[] steps)
+  {
+    using var finalizationScope = EquipmentExecutionContext.EnterMandatoryFinalization();
 
-    protocol.ShowOnlyStartButton();
-    await _protocolCompletionService.DisplayCompletionAsync(settings, protocol);
-    processingStateChanged?.Invoke(false);
-    await _protocolCompletionService.SaveAndExposeAsync(settings, protocol);
+    foreach (var step in steps)
+    {
+      try
+      {
+        await step.Operation();
+      }
+      catch (Exception ex)
+      {
+        LogException($"Ошибка обязательного завершающего действия: {step.Name}.", ex);
+      }
+    }
+  }
+
+  private static Func<Task> AsAsync(Action operation)
+  {
+    return () =>
+    {
+      operation();
+      return Task.CompletedTask;
+    };
   }
 }

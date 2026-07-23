@@ -88,7 +88,9 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         await messageService.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC);
+          var answer = await breakDown.DcwManger.Measure.MeasureAsync(
+            ElectricalTestFunction.DielectricWithstandDC,
+            userMessageService: messageService);
           var type = ShowMessageModel.MessageType.Success;
 
           if (answer.value >= dataModel.Param)

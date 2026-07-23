@@ -25,11 +25,6 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
     /// <inheritdoc />
     public async Task StopPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
       var success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         try
@@ -58,11 +53,6 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
     /// <inheritdoc />
     public async Task StartPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return;
-      }
-
       var success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         try
@@ -87,11 +77,6 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
     /// <inheritdoc />
     public async Task<bool> VerifyPowerAsync(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       bool result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         try
