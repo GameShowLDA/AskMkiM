@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -46,23 +47,35 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         _device,
         "Прозвонка",
         () => CheckContinuityCoreAsync(expectedOutcome),
-        value => !value);
+        maxAttempts: userMessageService == null ? 2 : 1);
 
       if (!execution.Success)
       {
-        string errorMessage = string.IsNullOrWhiteSpace(execution.ErrorMessage)
-          ? "Результат прозвонки не соответствует ожидаемому состоянию."
-          : execution.ErrorMessage;
+        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          _device,
+          "Ошибка при прозвонке",
+          execution.ErrorMessage,
+          false,
+          2,
+          userMessageService);
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка при прозвонке", errorMessage, false, 2, userMessageService);
+        if (userMessageService != null)
+        {
+          throw new DeviceException(
+            $"Ошибка при прозвонке для {_device.Name}({_device.NumberChassis}.{_device.Number}): " +
+            execution.ErrorMessage);
+        }
+
         return false;
       }
 
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
         _device,
-        "Результат прозвонки",
-        expectedOutcome ? "Цепь замкнута" : "Цепь разомкнута",
-        true,
+        execution.Value ? "Результат прозвонки" : "Ошибка при прозвонке",
+        execution.Value
+          ? expectedOutcome ? "Цепь замкнута" : "Цепь разомкнута"
+          : "Результат прозвонки не соответствует ожидаемому состоянию.",
+        execution.Value,
         2,
         userMessageService);
 

@@ -91,7 +91,12 @@ namespace Ask.Engine.Tests.NodeMethod.CI
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
-              var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, dataModel.Param, 1000, 60000);
+              var answer = await breakDown.IrManger.Measure.MeasureAsync(
+                ElectricalTestFunction.InsulationResistance,
+                dataModel.Param,
+                1000,
+                60000,
+                userMessageService: protocolUI);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value < dataModel.Param)

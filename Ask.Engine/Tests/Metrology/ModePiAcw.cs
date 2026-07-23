@@ -118,7 +118,12 @@ namespace Ask.Engine.Tests.Metrology
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
-        await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, param, LowerBound, UpperBound);
+        await meterDevice.AcwManger.Measure.MeasureAsync(
+          ElectricalTestFunction.DielectricWithstandAC,
+          param,
+          LowerBound,
+          UpperBound,
+          userMessageService: userMessageService);
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
         var answer = result < LowerBound || result > UpperBound;

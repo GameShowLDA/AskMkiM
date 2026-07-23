@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -101,7 +102,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
         header,
-        () => MeasureCoreAsync(device, profile, header, param, rangeFrom, rangeTo));
+        () => MeasureCoreAsync(device, profile, header, param, rangeFrom, rangeTo),
+        maxAttempts: userMessageService == null ? 2 : 1);
 
       if (!execution.Success)
       {
@@ -112,6 +114,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           false,
           2,
           userMessageService);
+
+        if (userMessageService != null)
+        {
+          throw new DeviceException(
+            $"Ошибка при \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}): " +
+            execution.ErrorMessage);
+        }
 
         return -1;
       }
@@ -200,6 +209,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
               false,
               2,
               userMessageService);
+          }
+
+          if (userMessageService != null)
+          {
+            throw new DeviceException(
+              $"Ошибка при \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}): " +
+              execution.ErrorMessage);
           }
 
           continue;

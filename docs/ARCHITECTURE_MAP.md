@@ -20,7 +20,7 @@
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Холостой режим | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
-| Ошибка подключения оборудования | `Ask.Core/Services/UI/UserActionHelper.cs` | целевой adapter в `Ask.Device.Application/FunctionAdapters/`, manager в `Ask.Device.Runtime/Function/`, transport/protocol |
+| Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
@@ -447,6 +447,10 @@ executor throws
 → ActionExecutor catches/finalizes
 ```
 
+Аварийный `КЦ` выполняется в `EquipmentExecutionContext` как обязательное
+завершение: ошибки оборудования в этой области протоколируются без нового
+интерактивного цикла.
+
 #### Strategies
 
 - `ConnectedPointChecker` — проверки соединённых цепей;
@@ -476,6 +480,12 @@ ProtocolUI.RequestCommandJump
 → CommandJumpRequestedException
 → CommandExecutionManager resumes at selected command
 ```
+
+`ExecutionFinalizer` последовательно отменяет текущую задачу, очищает состояние,
+сбрасывает оборудование, печатает при включённой настройке, восстанавливает UI,
+показывает результат и сохраняет протоколы. Все шаги выполняются внутри
+`EquipmentExecutionContext.EnterMandatoryFinalization`; ошибка отдельного шага
+логируется и не прерывает оставшиеся обязательные действия.
 
 #### Related configuration
 
@@ -745,13 +755,18 @@ executor/metrology
 → MeasurementBase.MeasureAsync
 → simulated check
 → SetModeBase / RangeBase
-→ AdapterMeasurementExecutor (up to 2 attempts)
+→ AdapterMeasurementExecutor
 → MeasurementBase.MeasureCoreAsync
 → TcpProtocol.QueryAsync(profile.Measure)
 → TcpClient/NetworkStream
 → numeric parsing/rounding
 → DeviceMessageBuilder
 ```
+
+При наличии `IUserInteractionService` низкоуровневая измерительная попытка
+выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
+`UserActionHelper`, который повторяет тот же measurement delegate. Без UI-сервиса
+сохраняется прежний внутренний fallback с двумя попытками.
 
 Representative GPT command:
 
@@ -773,8 +788,10 @@ executor
 `DeviceApplicationComposer.Compose` replaces raw managers for GPT, MINT, МКР,
 commutation device and UPS with `Ask.Device.Application.FunctionAdapters`.
 Adapters add user retry (`UserActionHelper`), device messages, typed exception
-factories and measurement retry. Keysight measurement retry currently lives in
-runtime `MeasurementBase` through `AdapterMeasurementExecutor`.
+factories and typed result handling. `Transport`, source/current adapters and
+active measurement paths также входят в общий интерактивный контур. Аппаратный
+`false`/exception передаётся с `deviceTask: true`; корректный измерительный ответ
+проверяется на норму внешним Engine-слоем и не смешивается с ошибкой оборудования.
 
 ### Real / Idle
 
@@ -882,14 +899,40 @@ raw manager/protocol failure
 → false/empty response or exception
 → application adapter / MeasurementBase
 → UserActionHelper.GetRunWithUserRepeatAsync
-→ IUserInteractionService asks Repeat/Continue/Abort according to settings
-→ retry or typed DeviceException factory
+→ IUserInteractionService.WaitUserActionAsync
+→ ProtocolUI shows Repeat/Finish
+→ Retry invokes the same captured equipment delegate through the same adapter
+→ successful retry keeps the dialog and enables Repeat/Continue/Finish
+→ Continue returns the last actual typed result without another equipment call
+→ Finish raises cancellation into the normal ActionExecutor finalization path
 → executor catches only when local recovery is defined
 → otherwise CommandExecutionManager emergency КЦ
 → ActionExecutor finalization
 ```
 
 `UserActionHelper` is the central reusable retry/user-decision mechanism.
+An initial successful call has no additional UI. Hardware failure always waits
+for the operator regardless of `ExecutionConfig.StopOnError`; `Continue` is
+available only after the latest attempt produced a valid equipment response.
+Retries are unlimited, and each retry passes through the original adapter,
+logging, protocol output and driver chain.
+
+Measurement verdicts use a separate branch:
+
+```text
+valid measurement response
+→ Engine range/tolerance comparison
+→ in range: continue without UI
+→ out of range + StopOnError OFF: retain failure result and continue
+→ out of range + StopOnError ON: Repeat/Continue/Finish
+→ Retry hardware failure: Repeat/Finish
+→ next valid measurement response: Repeat/Continue/Finish
+```
+
+Once measurement interaction has opened, a valid retry stays interactive even
+when its value is now in range. `EquipmentExecutionContext` suppresses all
+Retry/Continue/Finish requests during emergency `КЦ` and `ExecutionFinalizer`;
+errors there are logged and the remaining mandatory actions continue.
 `DeviceMessageBuilder` controls device result output using `DeviceDisplayConfig`.
 Typed factories are grouped in `Ask.Core/Services/Errors/Device/`.
 
@@ -1058,6 +1101,7 @@ ErrorItem → translator/runner ErrorList
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
+| `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |
 | `CommandExecutionManager` | orchestrator | Ask.Engine | sequential command execution | [Execution Engine](#execution-engine) |
 | `ICommandExecutor` | interface | Ask.Engine | executable mnemonic contract | [Execution Engine](#execution-engine) |
@@ -1066,6 +1110,8 @@ ErrorItem → translator/runner ErrorList
 | `BaseMeasurement` | template base | Ask.Engine | metrology lifecycle | [Metrology](#metrology-and-hardware-tests) |
 | `IDevice` | interface | Ask.Core | root device contract | [Equipment](#equipment-architecture) |
 | `IUserInteractionService` | interface | Ask.Core | Engine↔UI interaction | [Shared Contracts](#shared-contracts-and-dto) |
+| `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
+| `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
