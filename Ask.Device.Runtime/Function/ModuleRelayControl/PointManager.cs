@@ -52,6 +52,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          SetPointConnection(number, bus, false);
+          return false;
+        }
+
         SetPointConnection(number, bus, true);
         return true;
       }
@@ -84,6 +90,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          SetPointConnection(number, bus, false);
+          return false;
+        }
+
         SetPointConnection(number, bus, false);
         return true;
       }
@@ -116,6 +128,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          SetPointConnection(number, bus, false);
+          return false;
+        }
+
         SetPointConnection(number, bus, true);
         return true;
       }
@@ -148,6 +166,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          SetPointConnection(number, bus, false);
+          return false;
+        }
+
         SetPointConnection(number, bus, false);
         return true;
       }
@@ -180,6 +204,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          connectionState.SetRange(firstPoint, lastPoint, bus, false);
+          return false;
+        }
+
         connectionState.SetRange(firstPoint, lastPoint, bus, true);
         return true;
       }
@@ -219,6 +249,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          connectionState.SetRange(firstPoint, lastPoint, bus, false);
+          return false;
+        }
+
         connectionState.SetRange(firstPoint, lastPoint, bus, false);
         return true;
       }
@@ -271,6 +307,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          SetPointConnection(nubmerPoint, BusPoint.AB, false);
+          return false;
+        }
+
         if (bus == BusPoint.A)
         {
           SetPointConnection(nubmerPoint, BusPoint.B, false);

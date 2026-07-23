@@ -65,7 +65,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return voltage;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : voltage;
       }
       else
       {

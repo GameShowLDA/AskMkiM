@@ -79,7 +79,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _highLimit;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _highLimit;
       }
 
       return await CurrentLimitHelper.GetHighCurrentLimitAsync(_gptModel, _mode, _delay);
@@ -113,7 +113,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _lowLimit;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _lowLimit;
       }
 
       return await CurrentLimitHelper.GetLowCurrentLimitAsync(_gptModel, _mode, _delay);

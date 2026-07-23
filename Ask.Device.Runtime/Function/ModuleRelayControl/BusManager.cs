@@ -52,6 +52,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          connectionState.Set(bus, false);
+          return false;
+        }
+
         connectionState.Set(bus, true);
         return true;
       }
@@ -98,6 +104,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          connectionState.Set(bus, false);
+          return false;
+        }
+
         connectionState.Set(bus, false);
         return true;
       }

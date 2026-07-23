@@ -1,3 +1,5 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Runtime.ExceptionServices;
@@ -146,6 +148,7 @@ namespace Ask.Core.Services.UI
       while (true)
       {
         attempt++;
+        int outputLineBeforeAttempt = messageService?.GetLastLineNumber() ?? -1;
         T result = default!;
         Exception? hardwareException = null;
         bool operationSucceeded = false;
@@ -172,6 +175,8 @@ namespace Ask.Core.Services.UI
         }
 
         bool hardwareSucceeded = hardwareException == null && (!deviceTask || operationSucceeded);
+        bool attemptProducedOutput = messageService != null &&
+          messageService.GetLastLineNumber() != outputLineBeforeAttempt;
         if (!interactiveMode && hardwareSucceeded && operationSucceeded)
         {
           return result;
@@ -180,6 +185,16 @@ namespace Ask.Core.Services.UI
         if (messageService == null)
         {
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
+        }
+
+        if (ExecutionConfig.GetIsIdleModeEnabled() &&
+            deviceTask &&
+            !attemptProducedOutput)
+        {
+          await ShowAttemptResultAsync(
+            messageService,
+            hardwareSucceeded && operationSucceeded,
+            hardwareException);
         }
 
         bool forceInteraction = interactiveMode;
@@ -211,6 +226,23 @@ namespace Ask.Core.Services.UI
             continue;
         }
       }
+    }
+
+    private static async Task ShowAttemptResultAsync(
+      IUserInteractionService messageService,
+      bool success,
+      Exception? exception)
+    {
+      await messageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: success ? "Повторная аппаратная операция" : "Аппаратная операция",
+          message: success
+            ? "Повторная попытка выполнена успешно."
+            : exception?.Message ?? "Оборудование не выполнило операцию.",
+          type: success
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error),
+        skipPause: true);
     }
 
     private static T ResolveWithoutInteraction<T>(

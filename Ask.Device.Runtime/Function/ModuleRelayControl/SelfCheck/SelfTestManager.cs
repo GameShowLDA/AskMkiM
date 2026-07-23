@@ -68,7 +68,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       }
 
       await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
-      await _moduleRelay.MeterManager.ConnectMeterAsync();
+      await _moduleRelay.MeterManager.ConnectMeterAsync(
+        ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
       for (int point = 1; point <= _moduleRelay.PointCount; point++)
@@ -105,7 +106,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       for (int busNumber = 1; busNumber <= 4; busNumber++)
       {
-        await UserActionHelper.RunWithUserRepeatAsync(() => CheckBus(token, relaySwitchModule, busNumber, userMessageService), userMessageService);
+        await UserActionHelper.RunWithUserRepeatAsync(
+          () => CheckBus(token, relaySwitchModule, busNumber, userMessageService),
+          userMessageService,
+          deviceTask: ExecutionConfig.GetIsIdleModeEnabled());
       }
     }
 
@@ -113,7 +117,9 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(10, number);
@@ -234,7 +240,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
     private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, IUserInteractionService? userMessageService = null)
     {
-      (bool, string) answer = !ExecutionConfig.GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
+      (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
 
       ShowMessageModel showMessageModel;
       showMessageModel = new ShowMessageModel()
@@ -249,6 +255,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       if (!answer.Item1)
       {
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return false;
+        }
+
         SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
         showMessageModel = new ShowMessageModel()
         {

@@ -18,7 +18,9 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(GetModeAsync)}: Устройство в Idle Mode. Возвращаем пустую строку.", isDeviceLog: true);
-          return (true, string.Empty);
+          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+            : (true, string.Empty);
         }
 
         await Task.Delay(delay);
@@ -44,7 +46,9 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         LogInformation($"{nameof(SetModeAsync)}: Устройство в Idle Mode. Пропускаем установку режима.", isDeviceLog: true);
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       if (breakDown.Mode == typeMode)

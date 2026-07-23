@@ -85,7 +85,7 @@ internal static class CommandJumpService
 
     foreach (var device in EquipmentService.GetAllDevices())
     {
-      await device.ConnectableManager.ResetAsync(interactionService).ConfigureAwait(false);
+      await device.ConnectableManager.ResetAsync(interactionService);
     }
   }
 }

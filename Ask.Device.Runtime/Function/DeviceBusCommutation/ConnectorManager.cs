@@ -86,7 +86,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          return true;
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
         }
 
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
@@ -129,7 +129,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          return true;
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
         }
 
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
@@ -189,7 +189,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          return true;
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
         }
 
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
@@ -243,7 +243,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
@@ -263,7 +263,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       var command = new DeviceCommand(9, 2, 0, 1);
@@ -278,7 +278,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       var command = new DeviceCommand(9, 2, 0, 2);
@@ -313,7 +313,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       var command = new DeviceCommand(7, connect ? 1 : 2);
@@ -349,6 +349,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
+          return false;
+        }
+
         connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, true);
         return true;
       }
@@ -375,6 +381,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
+          return false;
+        }
+
         connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
         return true;
       }

@@ -34,9 +34,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 1);
@@ -57,9 +57,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 2);
@@ -76,7 +76,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       var cmd = new DeviceCommand(9, 1, 0, 1);
@@ -98,7 +98,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       var cmd = new DeviceCommand(9, 1, 0, 2);

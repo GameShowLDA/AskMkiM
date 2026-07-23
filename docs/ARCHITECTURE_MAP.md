@@ -19,7 +19,7 @@
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
-| Холостой режим | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
+| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
@@ -814,6 +814,31 @@ Selection is distributed, not DI-based:
 - GPT helpers/managers skip commands or return configured/simulated values;
 - specific Engine strategies may suppress physical validation.
 
+Idle error simulation has two independent persisted settings:
+
+```text
+ExecutionControl
+→ SettingsExecutionDto.IsErrorSimulationMode
+→ existing measurement simulation algorithms
+
+ExecutionControl
+→ SettingsExecutionDto.IsHardwareErrorSimulationMode
+→ ExecutionConfig
+→ IdleHardwareErrorSimulator.ShouldSimulateHardwareError
+→ Random.Shared.Next(2) == 0
+→ non-measurement Idle manager/transport contract
+→ existing adapter/UserActionHelper equipment-error flow
+```
+
+The nested `Выполнение с ошибками` settings group is visible only while Idle is
+enabled. Measurement simulation retains its existing generators, probabilities
+and tolerance semantics. Hardware simulation is disabled by default and affects
+only Idle initialization/reset, connection, mode/configuration, range,
+switching, source and power operations. Every equipment call, including a
+`Retry`, makes a new independent `1/2` decision. The simulated failure preserves
+the corresponding real contract: `false`, a failed tuple/status, or the
+operation-specific exception path. Real execution never enters this mechanism.
+
 EHT special case:
 
 ```text
@@ -897,6 +922,7 @@ and are displayed in translator/runner error lists.
 ```text
 raw manager/protocol failure
 → false/empty response or exception
+→ or IdleHardwareErrorSimulator failure with the same method contract
 → application adapter / MeasurementBase
 → UserActionHelper.GetRunWithUserRepeatAsync
 → IUserInteractionService.WaitUserActionAsync
@@ -1048,7 +1074,7 @@ clears and warms them.
 
 | Runtime config | Persisted DTO/table | Load/save bridge | Major consumers |
 | --- | --- | --- | --- |
-| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates |
+| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates; independent measurement/hardware Idle error settings |
 | `ProtocolConfig` | `SettingsProtocolDto` / `SettingsProtocol` | `ProtocolSettings` | protocol templates, output visibility, print |
 | `UserInterfaceConfig` | `UserInterfaceDto` / `UserInterface` | `UserInterfaceSettings` | MainWindow, theme/menu UI |
 | `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |
@@ -1113,6 +1139,7 @@ ErrorItem → translator/runner ErrorList
 | `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
 | `AdapterMeasurementExecutor` | helper | Ask.Device.Application | measured operation retry/logging | [Error Handling](#equipment-error-flow) |
