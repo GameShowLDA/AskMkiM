@@ -437,32 +437,99 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 
 #### Addressed reset of test equipment
 
-Широковещательный UDP-сброс удалён. Тесты сбрасывают только устройства,
-которые уже собраны для текущего запуска:
+Широковещательный UDP-сброс удалён. Для каждого запуска `ActionExecutor`
+создаёт отдельный `ExecutionSession`, которому принадлежит
+`EquipmentUsageSession`:
 
 ```text
-BaseNodeTest / BaseMethodExecutor / BaseMeasurement
-  / ModuleSelfExecutor / SystemSelfExecutor / MINT SelfTestManager
-  / CrossConnectionTests / RkommConnectionTests
-  / EquipmentService / КЦ / ОС / command jump
-→ фактически выбранные IDevice
+ActionExecutor.StartAsync
+→ ExecutionSession
+→ EquipmentUsageTracker.BeginSession
+→ StartDelegate / PreActionDelegate / StopDelegate inherit execution context
+→ production IDevice built by DeviceBuilder
+→ DeviceApplicationComposer
+→ EquipmentTrackingConnectable
+→ first Initialize/Connect/Disconnect/Reset attempt
+→ EquipmentUsageTracker.Register(IDevice)
+```
+
+Учёт происходит до фактической операции, поэтому неудачная попытка подключения
+тоже делает устройство использованным. Устройство, которое только присутствует
+в конфигурации, но до которого выполнение не дошло, в mandatory reset не попадает.
+Повторные обращения к тому же runtime-экземпляру не дублируют запись.
+
+Все terminal paths сходятся в одном finalizer:
+
+```text
+SUCCESS / FAILURE / EARLY RETURN
+USER FINISH / STOP / ABORT
+CANCEL / OperationCanceledException
+TIMEOUT / HARDWARE ERROR / COMMUNICATION ERROR / EXCEPTION
+→ ActionExecutor.FinalizeAsync (isExit prevents duplicate finalizer entry)
+→ ExecutionFinalizer.RunMandatoryStepsAsync
+  → EquipmentExecutionContext.EnterMandatoryFinalization
+  → cancel and await ProcessTask
+  → run scenario StopDelegate
+  → read the captured EquipmentUsageSession
+  → snapshot used equipment
+  → DeviceResetService.ResetDevicesAsync(
+      usedDevices,
+      ProtocolUI,
+      CancellationToken.None)
+  → clear executor/session state
+  → reset global execution state
+  → print/display/save protocol
+```
+
+`ActionExecutor` захватывает ссылку на `EquipmentUsageSession` перед запуском
+финализатора. Остановка фоновой задачи очищает только ссылку на `ProcessTask`;
+сам execution session освобождается после обязательного сброса. Поэтому очистка
+задачи не может удалить список оборудования до формирования snapshot.
+
+Главный invariant:
+
+```text
+Every execution terminal path
+→ Mandatory finalization
+→ Reset every equipment item used by that execution
+→ Finish
+```
+
+Финальный reset выполняется независимо от промежуточных reset внутри алгоритма.
+Локальные `FinalizeAsync`/`FinalizeMeasurement` сохраняют только сценарные
+результаты и внутреннее состояние; аппаратная гарантия принадлежит
+`ExecutionFinalizer`.
+
+Обязательный сброс:
+
+```text
+EquipmentUsageSession.GetUsedDevices
 → DeviceResetService.ResetDevicesAsync
 → последовательно для каждого уникального устройства
   → IConnectable.ResetAsync
   → Transport → адресный UDP/TCP/COM/USB driver
-  → проверка индивидуального ответа
-  → запись результата в протокол
-→ ошибка: ProtocolUI показывает только Repeat/Continue
-  → Repeat повторяет текущее устройство
-  → Continue переходит к следующему устройству
+  → bool/exception проверяется отдельно для устройства
+  → результат записывается в лог и протокол
+→ false/exception/output error
+  → log
+  → next device
 ```
 
-Список обходится до конца даже после выбора `Continue`. `ОК` и общий запуск
-программы контроля больше не сбрасывают всю конфигурацию до определения
-оборудования конкретного теста.
+В mandatory finalization интерактивное меню
+`Repeat/Continue/Finish` не открывается. Уже отменённый execution token не
+передаётся сбросу. В Idle используется тот же публичный `IConnectable.ResetAsync`;
+симулированная ошибка одного устройства фиксируется и не прерывает попытки
+сброса остальных.
 
-Финальный сброс гарантирован при успешном завершении, раннем выходе, отмене
-и исключении: тесты используют `finally` либо `ActionSettings.StopDelegate`.
+Вне mandatory finalization `DeviceResetService` сохраняет обычное интерактивное
+поведение `Repeat/Continue` для промежуточных алгоритмических сбросов (`ОС`,
+command jump и self-check stages).
+
+В программе контроля команда `КЦ` оформляет завершающий блок и формирует
+протокол, но не сбрасывает оборудование. Единственный Reset выполняет общий
+mandatory finalizer. Для `CheckType.ControlProgram` отдельный заголовок
+`Завершение теста` не выводится, поэтому результаты финального сброса остаются
+в блоке `КЦ`.
 
 При exception:
 
@@ -1167,6 +1234,9 @@ ErrorItem → translator/runner ErrorList
 | `IUserInteractionService` | interface | Ask.Core | Engine↔UI interaction | [Shared Contracts](#shared-contracts-and-dto) |
 | `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
 | `DeviceResetService` | static coordinator | Ask.Core | sequential addressed reset of devices used by a test | [Execution Engine](#addressed-reset-of-test-equipment) |
+| `EquipmentUsageTracker` | async execution context | Ask.Core | execution-scoped registration of actually addressed devices | [Execution Engine](#addressed-reset-of-test-equipment) |
+| `EquipmentUsageSession` | execution state | Ask.Core | ordered unique snapshot of equipment used by one run | [Execution Engine](#addressed-reset-of-test-equipment) |
+| `EquipmentTrackingConnectable` | decorator | Ask.Device.Application | registers device usage before connection lifecycle operations | [Execution Engine](#addressed-reset-of-test-equipment) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
