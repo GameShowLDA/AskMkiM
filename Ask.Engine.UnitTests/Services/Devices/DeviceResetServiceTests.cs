@@ -1,4 +1,6 @@
 using Ask.Core.Services.Devices;
+using Ask.Core.Services.UI;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -109,6 +111,133 @@ public sealed class DeviceResetServiceTests
       output);
   }
 
+  [Fact]
+  public async Task ResetDevicesAsync_MandatoryFinalizationContinuesWithoutInteraction()
+  {
+    var first = CreateDevice(1, false);
+    var second = CreateDevice(2, false);
+    var third = CreateDevice(3, true);
+    var interaction = CreateInteractionService();
+
+    using (EquipmentExecutionContext.EnterMandatoryFinalization())
+    {
+      await DeviceResetService.ResetDevicesAsync(
+        [first.Device.Object, second.Device.Object, third.Device.Object],
+        interaction.Object);
+    }
+
+    first.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    second.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    third.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    interaction.Verify(x => x.WaitRetryOrContinueAsync(), Times.Never);
+    interaction.Verify(x => x.WaitUserActionAsync(
+      It.IsAny<bool>(),
+      It.IsAny<bool>(),
+      It.IsAny<bool>()), Times.Never);
+  }
+
+  [Fact]
+  public async Task ResetDevicesAsync_MandatoryFinalizationIsolatesResetExceptions()
+  {
+    var first = CreateThrowingDevice(1);
+    var second = CreateThrowingDevice(2);
+    var third = CreateDevice(3, true);
+
+    using (EquipmentExecutionContext.EnterMandatoryFinalization())
+    {
+      await DeviceResetService.ResetDevicesAsync(
+        [first.Device.Object, second.Device.Object, third.Device.Object]);
+    }
+
+    first.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    second.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    third.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+  }
+
+  [Fact]
+  public async Task ResetDevicesAsync_MandatoryFinalizationIgnoresCanceledToken()
+  {
+    var device = CreateDevice(1, true);
+    using var cancellation = new CancellationTokenSource();
+    cancellation.Cancel();
+
+    using (EquipmentExecutionContext.EnterMandatoryFinalization())
+    {
+      await DeviceResetService.ResetDevicesAsync(
+        [device.Device.Object],
+        cancellationToken: cancellation.Token);
+    }
+
+    device.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+  }
+
+  [Fact]
+  public async Task ResetDevicesAsync_FinalResetRepeatsEarlierAlgorithmReset()
+  {
+    var device = CreateDevice(1, true, true);
+
+    await DeviceResetService.ResetDevicesAsync([device.Device.Object]);
+
+    using (EquipmentExecutionContext.EnterMandatoryFinalization())
+    {
+      await DeviceResetService.ResetDevicesAsync([device.Device.Object]);
+    }
+
+    device.Connectable.Verify(x => x.ResetAsync(null), Times.Exactly(2));
+  }
+
+  [Fact]
+  public async Task ResetDevicesAsync_IdleMandatoryFinalizationStillResetsDevice()
+  {
+    bool originalIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
+    var device = CreateDevice(1, true);
+
+    try
+    {
+      ExecutionConfig.SetIdleMode(true);
+      using (EquipmentExecutionContext.EnterMandatoryFinalization())
+      {
+        await DeviceResetService.ResetDevicesAsync([device.Device.Object]);
+      }
+    }
+    finally
+    {
+      ExecutionConfig.SetIdleMode(originalIdleMode);
+    }
+
+    device.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+  }
+
+  [Fact]
+  public async Task ResetDevicesAsync_MandatoryFinalizationContinuesAfterProtocolOutputFailure()
+  {
+    var first = CreateDevice(1, true);
+    var second = CreateDevice(2, true);
+    var interaction = CreateInteractionService();
+    interaction
+      .Setup(x => x.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()))
+      .ThrowsAsync(new InvalidOperationException("Ошибка протокола"));
+
+    using (EquipmentExecutionContext.EnterMandatoryFinalization())
+    {
+      await DeviceResetService.ResetDevicesAsync(
+        [first.Device.Object, second.Device.Object],
+        interaction.Object,
+        showTestCompletionHeader: true);
+    }
+
+    first.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    second.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+  }
+
   private static (
     Mock<IDevice> Device,
     Mock<IConnectable> Connectable) CreateDevice(
@@ -129,6 +258,17 @@ public sealed class DeviceResetServiceTests
     device.SetupProperty(x => x.ConnectableManager, connectable.Object);
 
     return (device, connectable);
+  }
+
+  private static (
+    Mock<IDevice> Device,
+    Mock<IConnectable> Connectable) CreateThrowingDevice(int number)
+  {
+    var result = CreateDevice(number, true);
+    result.Connectable
+      .Setup(x => x.ResetAsync(null))
+      .ThrowsAsync(new InvalidOperationException($"Ошибка {number}"));
+    return result;
   }
 
   private static Mock<IUserInteractionService> CreateInteractionService(

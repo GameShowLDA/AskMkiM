@@ -185,15 +185,12 @@ namespace Ask.Engine.Tests.NodeMethod
     public abstract Task PerformMeasurement(IUserInteractionService protocolUI, DataModel dataModel);
 
     /// <summary>
-    /// Завершает тест, выполняя очистку и отключение оборудования.
+    /// Завершает выполнение проверки методом узла.
     /// </summary>
-    public virtual async Task FinalizeAsync(IUserInteractionService messageService)
-    {
-      await RelayModuleHelper.ResetDevices(
-        Devices,
-        messageService,
-        showTestCompletionHeader: true);
-    }
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeAsync(IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Проверяет и подключает все необходимые устройства перед выполнением теста.

@@ -1,7 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Services.Devices;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -228,10 +227,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       }
       finally
       {
-        await DeviceResetService.ResetDevicesAsync(
-          [_module, _busSwitcher, _fastMeter],
-          _userInteractionService,
-          showTestCompletionHeader: true);
         needReset = false;
       }
     }

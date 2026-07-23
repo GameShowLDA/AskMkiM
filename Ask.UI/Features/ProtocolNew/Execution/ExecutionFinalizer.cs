@@ -15,7 +15,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution;
 internal sealed class ExecutionFinalizer
 {
   /// <summary>
-  /// Сервис системного и аппаратного сброса.
+  /// Сервис сброса глобального состояния выполнения.
   /// </summary>
   private readonly IExecutionSystemResetService _systemResetService;
 
@@ -43,19 +43,22 @@ internal sealed class ExecutionFinalizer
   /// <param name="settings">Настройки завершаемого действия.</param>
   /// <param name="protocol">Компонент протокола и управления UI.</param>
   /// <param name="cancelProcessAsync">Операция отмены и ожидания фоновой задачи.</param>
+  /// <param name="resetUsedEquipmentAsync">Операция сброса использованного оборудования.</param>
   /// <param name="resetExecutorState">Операция очистки внутреннего состояния исполнителя.</param>
   /// <param name="processingStateChanged">Уведомление об изменении состояния выполнения.</param>
   public async Task FinalizeAsync(
     ActionSettings settings,
     ProtocolUI protocol,
     Func<Task> cancelProcessAsync,
+    Func<Task> resetUsedEquipmentAsync,
     Action resetExecutorState,
     Action<bool>? processingStateChanged)
   {
     await RunMandatoryStepsAsync(
       ("остановка выполняемой задачи", cancelProcessAsync),
+      ("финальный сброс использованного оборудования", resetUsedEquipmentAsync),
       ("сброс состояния исполнителя", AsAsync(resetExecutorState)),
-      ("сброс оборудования", _systemResetService.ResetAsync),
+      ("сброс глобального состояния выполнения", _systemResetService.ResetAsync),
       ("печать протокола", AsAsync(
         () => _protocolCompletionService.PrintIfRequired(settings, protocol))),
       ("снятие блокировки системы", AsAsync(() => SystemStateManager.SetIsLocked(false))),

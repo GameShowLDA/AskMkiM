@@ -319,16 +319,15 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     }
 
     /// <summary>
-    /// Завершает измерение, размыкает реле и отключает прибор.
+    /// Завершает выполнение измерения.
     /// </summary>
-    public virtual async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
-    {
-      var devices = GetDevices(metrologicalModeRole);
-      await RelayModuleHelper.ResetDevices(
-        devices,
-        messageService,
-        showTestCompletionHeader: true);
-    }
+    /// <param name="metrologicalModeRole">Роль метрологического режима.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeMeasurement(
+      MeasurementTypeCommand metrologicalModeRole,
+      IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Добавляет устройство в коллекцию по роли, если оно ещё не добавлено.

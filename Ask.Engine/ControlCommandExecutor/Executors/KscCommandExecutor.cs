@@ -1,6 +1,5 @@
 ﻿using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -33,12 +32,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
-
-      var devices = EquipmentService.GetAllDevices();
-      await DeviceResetService.ResetDevicesAsync(
-        devices,
-        context.Console,
-        showTestCompletionHeader: true);
 
       GetProtocol(context, command, protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);

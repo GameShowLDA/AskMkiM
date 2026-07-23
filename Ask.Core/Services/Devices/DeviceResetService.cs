@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
@@ -28,17 +29,30 @@ public static class DeviceResetService
     bool showTestCompletionHeader = false)
   {
     ArgumentNullException.ThrowIfNull(devices);
+    bool mandatoryFinalization = EquipmentExecutionContext.IsMandatoryFinalization;
 
     if (showTestCompletionHeader && messageService != null)
     {
-      await messageService.AppendEmptyLineAsync();
-      await messageService.ShowMessageAsync(
-        new ShowMessageModel(
-          header: "Завершение теста",
-          type: ShowMessageModel.MessageType.Info),
-        IsBlockStart: true,
-        skipPause: true,
-        ignoreOutputValidation: true);
+      try
+      {
+        await messageService.AppendEmptyLineAsync();
+        await messageService.ShowMessageAsync(
+          new ShowMessageModel(
+            header: "Завершение теста",
+            type: ShowMessageModel.MessageType.Info),
+          IsBlockStart: true,
+          skipPause: true,
+          ignoreOutputValidation: true);
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка вывода заголовка финального сброса оборудования.", ex);
+
+        if (!mandatoryFinalization)
+        {
+          throw;
+        }
+      }
     }
 
     foreach (var device in GetUniqueDevices(devices))
@@ -46,7 +60,11 @@ public static class DeviceResetService
       bool retry;
       do
       {
-        cancellationToken.ThrowIfCancellationRequested();
+        if (!mandatoryFinalization)
+        {
+          cancellationToken.ThrowIfCancellationRequested();
+        }
+
         retry = false;
 
         bool reset;
@@ -62,8 +80,24 @@ public static class DeviceResetService
           LogException($"Ошибка адресного сброса {GetDeviceLabel(device)}.", ex, isDeviceLog: true);
         }
 
-        await ShowResultAsync(device, reset, error, messageService);
-        if (reset || messageService == null)
+        try
+        {
+          await ShowResultAsync(device, reset, error, messageService);
+        }
+        catch (Exception ex)
+        {
+          LogException(
+            $"Ошибка вывода результата адресного сброса {GetDeviceLabel(device)}.",
+            ex,
+            isDeviceLog: true);
+
+          if (!mandatoryFinalization)
+          {
+            throw;
+          }
+        }
+
+        if (reset || messageService == null || mandatoryFinalization)
         {
           continue;
         }
