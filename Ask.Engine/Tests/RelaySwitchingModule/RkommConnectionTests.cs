@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -219,11 +220,20 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      await _module.ConnectableManager.ResetAsync();
-      await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
-      await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
-      await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
-      needReset = false;
+      try
+      {
+        await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
+      }
+      finally
+      {
+        await DeviceResetService.ResetDevicesAsync(
+          [_module, _busSwitcher, _fastMeter],
+          _userInteractionService,
+          showTestCompletionHeader: true);
+        needReset = false;
+      }
     }
 
     #region Вспомогательные методы

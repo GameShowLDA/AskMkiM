@@ -1,3 +1,4 @@
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
@@ -160,10 +161,15 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task Stop(CancellationToken cancellationToken, IUserInteractionService _messageService = null)
     {
-      await testedModuleRelayControl.ConnectableManager.ResetAsync(_messageService);
-      await verificatModuleRelayControl.ConnectableManager.ResetAsync(_messageService);
+      if (!needReset)
+      {
+        return;
+      }
 
-      if (!needReset) return;
+      await DeviceResetService.ResetDevicesAsync(
+        [testedModuleRelayControl, verificatModuleRelayControl],
+        _messageService,
+        showTestCompletionHeader: true);
       needReset = false;
     }
 

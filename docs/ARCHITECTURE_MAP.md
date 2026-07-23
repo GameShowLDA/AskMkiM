@@ -441,8 +441,10 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 которые уже собраны для текущего запуска:
 
 ```text
-BaseNodeTest / BaseMeasurement / ModuleSelfExecutor / SystemSelfExecutor
-  / MINT SelfTestManager / EquipmentService / КЦ / ОС / command jump
+BaseNodeTest / BaseMethodExecutor / BaseMeasurement
+  / ModuleSelfExecutor / SystemSelfExecutor / MINT SelfTestManager
+  / CrossConnectionTests / RkommConnectionTests
+  / EquipmentService / КЦ / ОС / command jump
 → фактически выбранные IDevice
 → DeviceResetService.ResetDevicesAsync
 → последовательно для каждого уникального устройства
@@ -458,6 +460,9 @@ BaseNodeTest / BaseMeasurement / ModuleSelfExecutor / SystemSelfExecutor
 Список обходится до конца даже после выбора `Continue`. `ОК` и общий запуск
 программы контроля больше не сбрасывают всю конфигурацию до определения
 оборудования конкретного теста.
+
+Финальный сброс гарантирован при успешном завершении, раннем выходе, отмене
+и исключении: тесты используют `finally` либо `ActionSettings.StopDelegate`.
 
 При exception:
 
