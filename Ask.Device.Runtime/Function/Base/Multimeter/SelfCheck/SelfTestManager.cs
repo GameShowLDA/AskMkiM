@@ -19,7 +19,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private const double MinimumActiveResistance = 50;
     private const int RequiredCapacitanceMeasurements = 6;
     private const int MaxCapacitanceMeasurementAttempts = RequiredCapacitanceMeasurements * 5;
-    private const int MeasurementResponseDelayMs = 1000;
+    private const int MeasurementResponseDelayMs = 1200;
     private const string VoltageUnit = " В";
     private const string ResistanceUnit = " Ом";
     private const string CapacitanceUnit = " нФ";
@@ -34,25 +34,25 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
     private static readonly ResistanceCheck[] ResistanceChecks =
     {
-      new ResistanceCheck(1, 2, 50),
-      new ResistanceCheck(2, 100, 1),
-      new ResistanceCheck(3, 1_050, 1),
+      new ResistanceCheck(1, 150, 5),
+      new ResistanceCheck(2, 120, 1),
+      new ResistanceCheck(3, 1_000, 5),
       new ResistanceCheck(4, 10_000, 1),
       new ResistanceCheck(5, 100_000, 1),
       new ResistanceCheck(6, 1_000_000, 1),
-      new ResistanceCheck(7, 10_000_000, 6),
-      new ResistanceCheck(8, 86_000_000, 1),
+      new ResistanceCheck(7, 10_000_000, 5),
+      new ResistanceCheck(8, 85_000_000, 5),
     };
 
     private static readonly CapacitanceCheck[] CapacitanceChecks =
     {
       new CapacitanceCheck(1, 3.3),
       new CapacitanceCheck(2, 10),
-      new CapacitanceCheck(3, 130),
+      new CapacitanceCheck(3, 120),
       new CapacitanceCheck(4, 1_000),
       // Неисправен.
-      // new CapacitanceCheck(5, 6_800),
-      new CapacitanceCheck(6, 86_000),
+      new CapacitanceCheck(5, 6_800),
+      new CapacitanceCheck(6, 110_000),
     };
 
     /// <summary>
@@ -404,7 +404,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(responseDelay: MeasurementResponseDelayMs);
         var activeResistanceCorrect = activeResistance > MinimumActiveResistance;
 
-        await ShowActiveResistanceResultAsync(activeResistance, activeResistanceCorrect, userMessageService);
+        await ShowActiveResistanceResultAsync(activeResistance, activeResistanceCorrect, check.Number, userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
         if (!activeResistanceCorrect)
@@ -416,7 +416,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         var tolerance = CapacityTolerance(check.IdealResult);
 
-        var result = await MeasureAverageCapacitanceAsync(cancellationToken, meter, check.IdealResult, tolerance, userMessageService);
+        var result = await meter.CapacitanceManager.MeasureCapacitanceAsync(
+          check.IdealResult,
+          check.IdealResult - tolerance,
+          check.IdealResult + tolerance,
+          userMessageService: userMessageService,
+          measurementCount: 6,
+          responseDelay: MeasurementResponseDelayMs);
 
         cancellationToken.ThrowIfCancellationRequested();
         var resultStatus = SelfTestHelper.InRange(check.IdealResult, result, tolerance);
@@ -436,47 +442,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           await device.RelayManager.DisconnectCapacitor(check.Number, userMessageService);
         }
       }
-    }
-
-    /// <summary>
-    /// Выполняет серию измерений ёмкости и возвращает среднее значение успешных измерений.
-    /// </summary>
-    /// <param name="cancellationToken">Токен отмены выполнения проверки.</param>
-    /// <param name="meter">Проверяемый мультиметр.</param>
-    /// <param name="idealResult">Эталонная ёмкость.</param>
-    /// <param name="tolerance">Допустимое отклонение ёмкости.</param>
-    /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
-    /// <returns>Среднее значение ёмкости или -1, если не удалось получить нужное количество успешных измерений.</returns>
-    private static async Task<double> MeasureAverageCapacitanceAsync(CancellationToken cancellationToken, IMultimeter meter, double idealResult, double tolerance, IUserInteractionService userMessageService)
-    {
-      var successfulMeasurements = 0;
-      var attempts = 0;
-      var sum = 0d;
-
-      while (successfulMeasurements < RequiredCapacitanceMeasurements && attempts < MaxCapacitanceMeasurementAttempts)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-        attempts++;
-
-        var result = await meter.CapacitanceManager.MeasureCapacitanceAsync(
-          0,
-          idealResult - tolerance,
-          idealResult + tolerance,
-          userMessageService: userMessageService,
-          responseDelay: MeasurementResponseDelayMs);
-
-        if (result <= 0)
-        {
-          continue;
-        }
-
-        sum += result;
-        successfulMeasurements++;
-      }
-
-      return successfulMeasurements == RequiredCapacitanceMeasurements
-        ? sum / RequiredCapacitanceMeasurements
-        : -1;
     }
 
     /// <summary>
@@ -535,7 +500,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="isCorrect">Признак прохождения проверки активного сопротивления.</param>
     /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
     /// <returns>Задача вывода сообщения.</returns>
-    private static Task ShowActiveResistanceResultAsync(double result, bool isCorrect, IUserInteractionService userMessageService)
+    private static Task ShowActiveResistanceResultAsync(double result, bool isCorrect, int capacitorNumber, IUserInteractionService userMessageService)
     {
       var resultType = isCorrect
         ? ShowMessageModel.MessageType.Success
@@ -544,7 +509,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
-          header: $"Тест активного сопротивления (>{MinimumActiveResistance:N0}{ResistanceUnit})",
+          header: $"Тест активного сопротивления C{capacitorNumber} (>{MinimumActiveResistance:N0}{ResistanceUnit})",
           message: $"{meaning}{ResistanceUnit}",
           type: resultType)
         {
