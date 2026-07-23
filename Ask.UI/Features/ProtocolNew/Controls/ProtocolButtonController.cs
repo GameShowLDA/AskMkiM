@@ -67,6 +67,11 @@ internal sealed class ProtocolButtonController
           _view.ExitVisibility = Visibility.Visible;
           break;
 
+        case ProtocolButtonState.RetryOrContinue:
+          _view.RepeatVisibility = Visibility.Visible;
+          _view.ContinueVisibility = Visibility.Visible;
+          break;
+
         case ProtocolButtonState.ExitOnly:
           _view.ExitVisibility = Visibility.Visible;
           SetStepButtons(stepMode);

@@ -189,7 +189,10 @@ namespace Ask.Engine.Tests.NodeMethod
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await RelayModuleHelper.ResetDevices(Devices, messageService);
+      await RelayModuleHelper.ResetDevices(
+        Devices,
+        messageService,
+        showTestCompletionHeader: true);
     }
 
     /// <summary>
@@ -210,10 +213,10 @@ namespace Ask.Engine.Tests.NodeMethod
             return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
           }
 
-          await connectableDevice.ConnectableManager.ResetAsync(messageService);
         }
       }
 
+      await RelayModuleHelper.ResetDevices(Devices, messageService);
       return (true, string.Empty);
     }
 

@@ -130,7 +130,10 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// </summary>
     public virtual async Task FinalizeAsync(IUserInteractionService messageService)
     {
-      await RelayModuleHelper.ResetDevices(Devices, messageService);
+      await RelayModuleHelper.ResetDevices(
+        Devices,
+        messageService,
+        showTestCompletionHeader: true);
     }
 
     /// <summary>

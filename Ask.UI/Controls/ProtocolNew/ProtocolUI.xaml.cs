@@ -291,16 +291,18 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanExit =>
-      StopButtonElement.Visibility == Visibility.Visible
-      || ContinueButtonElement.Visibility == Visibility.Visible
-      || PauseButtonElement.Visibility == Visibility.Visible;
+      !_isRetryOrContinueInteraction
+      && (StopButtonElement.Visibility == Visibility.Visible
+          || ContinueButtonElement.Visibility == Visibility.Visible
+          || PauseButtonElement.Visibility == Visibility.Visible);
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanJumpToCommand =>
-      ContinueButtonElement.Visibility == Visibility.Visible;
+      !_isRetryOrContinueInteraction
+      && ContinueButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.Start() => StartFromHotkey();

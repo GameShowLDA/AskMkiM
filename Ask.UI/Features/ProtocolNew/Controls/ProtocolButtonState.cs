@@ -36,6 +36,11 @@ internal enum ProtocolButtonState
   InteractiveActions,
 
   /// <summary>
+  /// Доступны только повтор и продолжение интерактивной операции.
+  /// </summary>
+  RetryOrContinue,
+
+  /// <summary>
   /// Доступно только завершение текущего пользовательского сценария.
   /// </summary>
   ExitOnly,
