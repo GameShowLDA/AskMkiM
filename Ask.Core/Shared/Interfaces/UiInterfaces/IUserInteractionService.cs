@@ -23,6 +23,13 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
       bool deviceTask = false,
       bool canContinue = true);
 
+    /// <summary>
+    /// Ожидает выбора между повтором операции и переходом к следующей операции.
+    /// </summary>
+    /// <returns>Выбранное пользователем действие.</returns>
+    Task<UserAction> WaitRetryOrContinueAsync() =>
+      WaitUserActionAsync(loop: true, deviceTask: true, canContinue: true);
+
     CancellationToken GetCancellationToken();
 
     void AddError(ErrorItem errorItem);

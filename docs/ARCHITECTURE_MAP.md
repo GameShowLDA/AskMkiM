@@ -407,7 +407,8 @@ RunControl.Start(models)
 → ActionExecutor.StartAsync(ActionSettings)
   → ExecutionRunGuard.TryAcquire
   → clear protocol/errors and reset StepControlManager
-  → real mode only: power check + ExecutionSystemResetService.ResetAsync
+  → real mode only: power check
+  → ExecutionSystemResetService.ResetAsync clears global execution state
   → ActionSettings.PreActionDelegate (if any)
   → Task.Run(ActionSettings.StartDelegate)
 → RunControl.StartTest(...)
@@ -433,6 +434,35 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 `CommandExecutorRegistry` reflection-сканирует `Ask.Engine` и создаёт все concrete
 `ICommandExecutor`. Текущие executors: `ОК`, `РМ`, `СП`, `СК`, `ВШ`, `ПТ`, `ОТ`,
 `ЦУ`, `УП`, `КЦ`, `КС`, `ИЕ`, `ЭТ`, `ПР`, `СИ`, `ПИ`, `НЕ`, `ОС`.
+
+#### Addressed reset of test equipment
+
+Широковещательный UDP-сброс удалён. Тесты сбрасывают только устройства,
+которые уже собраны для текущего запуска:
+
+```text
+BaseNodeTest / BaseMethodExecutor / BaseMeasurement
+  / ModuleSelfExecutor / SystemSelfExecutor / MINT SelfTestManager
+  / CrossConnectionTests / RkommConnectionTests
+  / EquipmentService / КЦ / ОС / command jump
+→ фактически выбранные IDevice
+→ DeviceResetService.ResetDevicesAsync
+→ последовательно для каждого уникального устройства
+  → IConnectable.ResetAsync
+  → Transport → адресный UDP/TCP/COM/USB driver
+  → проверка индивидуального ответа
+  → запись результата в протокол
+→ ошибка: ProtocolUI показывает только Repeat/Continue
+  → Repeat повторяет текущее устройство
+  → Continue переходит к следующему устройству
+```
+
+Список обходится до конца даже после выбора `Continue`. `ОК` и общий запуск
+программы контроля больше не сбрасывают всю конфигурацию до определения
+оборудования конкретного теста.
+
+Финальный сброс гарантирован при успешном завершении, раннем выходе, отмене
+и исключении: тесты используют `finally` либо `ActionSettings.StopDelegate`.
 
 При exception:
 
@@ -1008,8 +1038,7 @@ Architecturally significant flows:
 - `ProtocolConfig.SaveProtocolAsyncEvent` and other config save events
   → DB static settings facades;
 - `LoggerUtility.ExceptionLogged`/callback → `IExceptionDiagnosticReporter`;
-- `Transport.IsReset` and `UdpBroadcastCommandSender.ResetAllDevicesSent`
-  → relay point state reset;
+- `Transport.IsReset` → local state reset for points and buses of the addressed device;
 - `ActionExecutor.StartProcessing` → execution-state consumers;
 - `ThemeSettings.ThemeChanged`/`LanguageSettings.LanguageChanged` → UI refresh.
 
@@ -1137,6 +1166,7 @@ ErrorItem → translator/runner ErrorList
 | `IDevice` | interface | Ask.Core | root device contract | [Equipment](#equipment-architecture) |
 | `IUserInteractionService` | interface | Ask.Core | Engine↔UI interaction | [Shared Contracts](#shared-contracts-and-dto) |
 | `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
+| `DeviceResetService` | static coordinator | Ask.Core | sequential addressed reset of devices used by a test | [Execution Engine](#addressed-reset-of-test-equipment) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |

@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -45,8 +44,6 @@ namespace Ask.Engine.Tests.NodeMethod.PI
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
-
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
       if (!connect.Connect)
       {

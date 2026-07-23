@@ -1,4 +1,5 @@
 using Ask.Core.Contracts.Debugging;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
@@ -83,9 +84,8 @@ internal static class CommandJumpService
       SkipStepModeCheck: true,
       skipPause: true).ConfigureAwait(false);
 
-    foreach (var device in EquipmentService.GetAllDevices())
-    {
-      await device.ConnectableManager.ResetAsync(interactionService);
-    }
+    await DeviceResetService.ResetDevicesAsync(
+      EquipmentService.GetAllDevices(),
+      interactionService);
   }
 }

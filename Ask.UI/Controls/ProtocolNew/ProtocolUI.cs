@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Features.ProtocolNew.Controls;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
@@ -57,6 +58,7 @@ namespace Ask.UI.Controls.ProtocolNew
     private readonly ActionExecutor ActionExecutor;
 
     private TaskCompletionSource<UserAction> _userActionTcs;
+    private bool _isRetryOrContinueInteraction;
 
     public ErrorManager Errors;
 
@@ -469,6 +471,25 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       return UserAction.None;
+    }
+
+    /// <inheritdoc />
+    public async Task<UserAction> WaitRetryOrContinueAsync()
+    {
+      _userActionTcs = new TaskCompletionSource<UserAction>(
+        TaskCreationOptions.RunContinuationsAsynchronously);
+      _isRetryOrContinueInteraction = true;
+      SetNonVisibleAllButton();
+      _buttonController.Apply(ProtocolButtonState.RetryOrContinue);
+
+      try
+      {
+        return await _userActionTcs.Task;
+      }
+      finally
+      {
+        _isRetryOrContinueInteraction = false;
+      }
     }
 
     /// <summary>

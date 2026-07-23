@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -340,12 +341,15 @@ namespace Ask.Engine.Tests.Base
       await uksh.ConnectorManager.DisconnectAllBuses(ui);
     }
 
-    public static async Task ResetDevices(List<IDevice> devices, IUserInteractionService? messageService = null)
+    public static async Task ResetDevices(
+      List<IDevice> devices,
+      IUserInteractionService? messageService = null,
+      bool showTestCompletionHeader = false)
     {
-      foreach (var device in devices)
-      {
-        await device.ConnectableManager.ResetAsync(messageService);
-      }
+      await DeviceResetService.ResetDevicesAsync(
+        devices,
+        messageService,
+        showTestCompletionHeader: showTestCompletionHeader);
     }
 
     #endregion

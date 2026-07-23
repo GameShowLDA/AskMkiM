@@ -47,6 +47,10 @@ namespace Ask.Engine.Tests.Metrology
       {
         StartDelegate = ExecuteMeasurementProcess,
         CheckType = CheckType.Metrology,
+        StopDelegate = async (CancellationToken token) =>
+        {
+          await testMeasurement.FinalizeMeasurement(metrologicalModeRole, _userInteractionService);
+        }
       };
 
       executionController.SetSettings(settings);
@@ -72,7 +76,6 @@ namespace Ask.Engine.Tests.Metrology
 
       var intrinsicCapacitance = testMeasurement.GetIntrinsicCapacitanceByPoints(data.FirstPoint, data.SecondPoint);
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService, intrinsicCapacitance), _userInteractionService, true);
-      await testMeasurement.FinalizeMeasurement(metrologicalModeRole, _userInteractionService);
     }
 
     public ITextAdapter GetControl()

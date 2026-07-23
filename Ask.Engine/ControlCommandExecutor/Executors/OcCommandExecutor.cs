@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Devices;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -22,10 +23,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
 
       var devices = EquipmentService.GetAllDevices();
-      foreach (var device in devices)
-      {
-        await device.ConnectableManager.ResetAsync(context.Console);
-      }
+      await DeviceResetService.ResetDevicesAsync(devices, context.Console);
     }
   }
 }

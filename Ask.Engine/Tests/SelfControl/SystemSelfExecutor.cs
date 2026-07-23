@@ -1,4 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Services.Devices;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -47,11 +49,33 @@ namespace Ask.Engine.Tests.SelfControl
       var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
       var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
 
-      await dbc.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), SwitchingDeviceTypeConnector.FullCheck, _messageService, dbc, meter);
+      var usedDevices = new List<IDevice?> { dbc, meter };
+      usedDevices.AddRange(mkr);
 
-      foreach (var item in mkr)
+      try
       {
-        await item.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), RelaySwitchTypeConnector.FullCheck, _messageService, dbc);
+        await dbc.SelfTestManager.StartSelfCheck(
+          _messageService.GetCancellationToken(),
+          SwitchingDeviceTypeConnector.FullCheck,
+          _messageService,
+          dbc,
+          meter);
+
+        foreach (var item in mkr)
+        {
+          await item.SelfTestManager.StartSelfCheck(
+            _messageService.GetCancellationToken(),
+            RelaySwitchTypeConnector.FullCheck,
+            _messageService,
+            dbc);
+        }
+      }
+      finally
+      {
+        await DeviceResetService.ResetDevicesAsync(
+          usedDevices,
+          _messageService,
+          showTestCompletionHeader: true);
       }
     }
   }

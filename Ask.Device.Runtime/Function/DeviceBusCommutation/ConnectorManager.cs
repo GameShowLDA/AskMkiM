@@ -4,7 +4,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Commands;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation
@@ -30,7 +29,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       _deviceBusCommutation = deviceBusCommutation;
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
-      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
 

@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -39,20 +38,24 @@ namespace Ask.Engine.Tests.NodeMethod.CI
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, voltageCheck: true);
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
-
       CiNodeMethod testMeasurement = new CiNodeMethod();
-      var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
-      if (!connect.Connect)
+      try
       {
-        await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
-        return;
-      }
+        var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
+        if (!connect.Connect)
+        {
+          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
+          return;
+        }
 
-      await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, BusPoint.A);
-      await testMeasurement.ConfigureMeter(_messageService, data);
-      await testMeasurement.PerformMeasurement(_messageService, data);
-      await testMeasurement.FinalizeAsync(_messageService);
+        await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, BusPoint.A);
+        await testMeasurement.ConfigureMeter(_messageService, data);
+        await testMeasurement.PerformMeasurement(_messageService, data);
+      }
+      finally
+      {
+        await testMeasurement.FinalizeAsync(_messageService);
+      }
     }
 
     private class CiNodeMethod : BaseNodeTest
@@ -135,6 +138,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       public override async Task FinalizeAsync(IUserInteractionService messageService)
       {
         await base.FinalizeAsync(messageService);
+        ResetPoints();
       }
     }
   }
