@@ -1,6 +1,8 @@
 using System;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
@@ -18,7 +20,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private const double VoltageRangeTo = 0.2;
     private const double MinimumActiveResistance = 50;
     private const int RequiredCapacitanceMeasurements = 6;
-    private const int MaxCapacitanceMeasurementAttempts = RequiredCapacitanceMeasurements * 5;
     private const int MeasurementResponseDelayMs = 1200;
     private const string VoltageUnit = " В";
     private const string ResistanceUnit = " Ом";
@@ -77,17 +78,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       ArgumentNullException.ThrowIfNull(meter);
 
       cancellationToken.ThrowIfCancellationRequested();
-      await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage());
+      await ShowStepHeaderAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage(), userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowActionHeaderAsync("Инициализация коммутационного устройства", userMessageService);
       await device.ConnectableManager.InitializeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowActionHeaderAsync("Инициализация мультиметра", userMessageService);
       await meter.ConnectableManager.InitializeAsync(userMessageService);
 
       try
       {
         cancellationToken.ThrowIfCancellationRequested();
+        await ShowActionHeaderAsync("Отключение всех шин", userMessageService);
         await device.ConnectorManager.DisconnectAllBuses(userMessageService);
 
         switch (selectedType)
@@ -150,12 +154,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private static async Task StartVoltageMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowActionHeaderAsync("Подключение мультиметра к шине AB1", userMessageService);
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB1, userMessageService);
 
       var relayEnabled = false;
 
       try
       {
+        await ShowActionHeaderAsync("Включение общего реле", userMessageService);
         await device.RelayManager.EnableRelay(userMessageService);
         relayEnabled = true;
 
@@ -211,6 +217,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       await ShowSectionHeaderAsync(header, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowActionHeaderAsync($"Установка режима: {header.TrimEnd(':')}", userMessageService);
       await setVoltageMode(userMessageService);
 
       try
@@ -243,9 +250,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       IUserInteractionService userMessageService)
     {
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowCheckStepAsync($"Проверка диапазона {range}{VoltageUnit}", userMessageService);
+      await ShowActionHeaderAsync($"Установка диапазона {range}{VoltageUnit}", userMessageService);
       await setVoltageRange(range, userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowActionHeaderAsync($"Измерение напряжения на диапазоне {range}{VoltageUnit}", userMessageService);
       var result = await measureVoltage(IdealVoltage, VoltageRangeFrom, VoltageRangeTo, userMessageService, MeasurementResponseDelayMs);
 
       cancellationToken.ThrowIfCancellationRequested();
@@ -272,6 +282,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           await ShowSectionHeaderAsync("Тест измерения сопротивления:", userMessageService);
 
           cancellationToken.ThrowIfCancellationRequested();
+          await ShowActionHeaderAsync("Установка режима измерения сопротивления", userMessageService);
           await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
           foreach (var check in ResistanceChecks)
@@ -293,6 +304,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private static async Task MeasureResistanceAsync(CancellationToken cancellationToken, ResistanceCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowCheckStepAsync(
+        $"Проверка резистора R{check.Number}",
+        $"{check.IdealResult:N0}{ResistanceUnit}",
+        userMessageService);
+      await ShowActionHeaderAsync($"Подключение резистора R{check.Number}", userMessageService);
       var resistorConnected = await device.RelayManager.ConnectResistor(check.Number, userMessageService);
 
       try
@@ -307,6 +323,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         for (int i = 0; i < 3; i++)
         {
+          await ShowCheckStepAsync(
+            $"Измерение сопротивления R{check.Number}",
+            $"попытка {i + 1}/3",
+            userMessageService,
+            indentLevel: 2);
+
           result = await meter.ResistanceManager.MeasureResistanceAsync(
           check.IdealResult,
           check.IdealResult - tolerance,
@@ -393,14 +415,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private static async Task MeasureCapacitanceAsync(CancellationToken cancellationToken, CapacitanceCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowCheckStepAsync(
+        $"Проверка конденсатора C{check.Number}",
+        $"{check.IdealResult:N0}{CapacitanceUnit}",
+        userMessageService);
+      await ShowActionHeaderAsync($"Подключение конденсатора C{check.Number}", userMessageService);
       var capacitorConnected = await device.RelayManager.ConnectCapacitor(check.Number, userMessageService);
 
       try
       {
         cancellationToken.ThrowIfCancellationRequested();
+        await ShowActionHeaderAsync("Установка режима измерения сопротивления", userMessageService);
         await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
+        await ShowCheckStepAsync($"Измерение активного сопротивления C{check.Number}", userMessageService);
         var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(responseDelay: MeasurementResponseDelayMs);
         var activeResistanceCorrect = activeResistance > MinimumActiveResistance;
 
@@ -412,16 +441,22 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           return;
         }
 
+        await ShowActionHeaderAsync("Установка режима измерения ёмкости", userMessageService);
         await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
 
         var tolerance = CapacityTolerance(check.IdealResult);
+
+        await ShowCheckStepAsync(
+          $"Измерение ёмкости C{check.Number}",
+          $"требуется {RequiredCapacitanceMeasurements} положительных результатов",
+          userMessageService);
 
         var result = await meter.CapacitanceManager.MeasureCapacitanceAsync(
           check.IdealResult,
           check.IdealResult - tolerance,
           check.IdealResult + tolerance,
           userMessageService: userMessageService,
-          measurementCount: 6,
+          measurementCount: RequiredCapacitanceMeasurements,
           responseDelay: MeasurementResponseDelayMs);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -455,6 +490,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private static async Task RunWithRcRelayAsync(CancellationToken cancellationToken, ISwitchingDevice device, IUserInteractionService userMessageService, Func<Task> runCheckAsync)
     {
       cancellationToken.ThrowIfCancellationRequested();
+      await ShowActionHeaderAsync("Подключение мультиметра к шине AB4", userMessageService);
       await device.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB4, userMessageService);
 
       var rcRelayConnected = false;
@@ -462,6 +498,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       try
       {
         cancellationToken.ThrowIfCancellationRequested();
+        await ShowActionHeaderAsync("Подключение RC реле", userMessageService);
         await device.RelayManager.ConnectRCRelay(userMessageService);
         rcRelayConnected = true;
 
@@ -486,11 +523,79 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача вывода сообщения.</returns>
     private static Task ShowSectionHeaderAsync(string header, IUserInteractionService userMessageService)
     {
-      return userMessageService.ShowMessageAsync(
+      return ShowStepHeaderAsync(
         new ShowMessageModel(
           header: header,
           headerColor: HeaderColor,
-          type: ShowMessageModel.MessageType.Info));
+          type: ShowMessageModel.MessageType.Command),
+        userMessageService);
+    }
+
+    /// <summary>
+    /// Выводит заголовок действия только в активном пошаговом режиме.
+    /// </summary>
+    private static Task ShowActionHeaderAsync(string header, IUserInteractionService userMessageService)
+    {
+      return ShowStepHeaderAsync(
+        new ShowMessageModel(
+          header: header,
+          headerColor: HeaderColor,
+          type: ShowMessageModel.MessageType.Command),
+        userMessageService,
+        onlyWhenStepMode: true);
+    }
+
+    /// <summary>
+    /// Выводит сообщение шага проверки только в активном пошаговом режиме.
+    /// </summary>
+    private static Task ShowCheckStepAsync(
+      string header,
+      IUserInteractionService userMessageService,
+      int indentLevel = 1)
+    {
+      return ShowCheckStepAsync(header, null, userMessageService, indentLevel);
+    }
+
+    /// <summary>
+    /// Выводит сообщение шага проверки только в активном пошаговом режиме.
+    /// </summary>
+    private static Task ShowCheckStepAsync(
+      string header,
+      string? message,
+      IUserInteractionService userMessageService,
+      int indentLevel = 1)
+    {
+      return ShowStepHeaderAsync(
+        new ShowMessageModel(
+          header: header,
+          headerColor: HeaderColor,
+          message: message,
+          type: ShowMessageModel.MessageType.Command)
+        {
+          IndentLevel = indentLevel,
+        },
+        userMessageService,
+        onlyWhenStepMode: true);
+    }
+
+    /// <summary>
+    /// Помечает сообщение как контрольную точку пошагового режима и выводит его.
+    /// </summary>
+    private static Task ShowStepHeaderAsync(
+      ShowMessageModel message,
+      IUserInteractionService userMessageService,
+      bool onlyWhenStepMode = false)
+    {
+      if (onlyWhenStepMode && !StepControlManager.StepMode)
+      {
+        return Task.CompletedTask;
+      }
+
+      message.Status = ShowMessageModel.MessageType.Command;
+      message.IsStepModeCheckpoint = true;
+      message.IsControlProgramCommandHeader = true;
+
+      return userMessageService.ShowMessageAsync(message, IsBlockStart: true);
     }
 
     /// <summary>
@@ -505,16 +610,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       var resultType = isCorrect
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
-      var meaning = MeasurementValueFormatter.IsOverloadValue(result) ? "Overload" : $"{result} Ом";
+      var meaning = MeasurementValueFormatter.IsOverloadValue(result) ? "Overload" : $"{result}";
+      var resultMessage = DeviceDisplayConfig.GetMeasurementResultsVisibility()
+        ? $"{meaning}{ResistanceUnit}"
+        : string.Empty;
 
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
           header: $"Тест активного сопротивления C{capacitorNumber} (>{MinimumActiveResistance:N0}{ResistanceUnit})",
-          message: $"{meaning}{ResistanceUnit}",
+          message: resultMessage,
           type: resultType)
         {
           IndentLevel = 1,
-        });
+          IsStepModeCheckpoint = true,
+        },
+        IsBlockStart: true);
     }
 
     private readonly struct ResistanceCheck

@@ -1,5 +1,7 @@
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
@@ -114,6 +116,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           param,
           rangeFrom,
           rangeTo,
+          userMessageService: userMessageService,
           responseDelay: responseDelay));
 
       if (!execution.Success)
@@ -124,21 +127,19 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           execution.ErrorMessage,
           false,
           2,
-          userMessageService);
+          userMessageService,
+          isStepCheckpoint: true);
 
         return -1;
       }
 
-      double result = execution.Value;
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        device,
-        $"Результат \"{header}\"",
-        $"{result} {unit}",
+      await ShowMeasurementResultAsync(
+        header,
+        $"{execution.Value} {unit}",
         true,
-        2,
         userMessageService);
 
-      return result;
+      return execution.Value;
     }
 
     /// <summary>
@@ -196,6 +197,15 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       for (int attempt = 1; attempt <= maxMeasurementAttempts && measurements.Count < measurementCount; attempt++)
       {
+        await ShowMeasurementAttemptStepAsync(
+          device,
+          header,
+          attempt,
+          maxMeasurementAttempts,
+          measurements.Count + 1,
+          measurementCount,
+          userMessageService);
+
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           device,
           header,
@@ -206,6 +216,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             param,
             rangeFrom,
             rangeTo,
+            userMessageService: userMessageService,
             responseDelay: responseDelay),
           maxAttempts: 1);
 
@@ -221,7 +232,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
               $"{execution.ErrorMessage}",
               false,
               2,
-              userMessageService);
+              userMessageService,
+              isStepCheckpoint: true);
           }
 
           continue;
@@ -239,7 +251,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             $"{measurement} {unit}",
             isPositive && isWithinRange,
             2,
-            userMessageService);
+            userMessageService,
+            isStepCheckpoint: true);
         }
 
         if (isPositive)
@@ -260,19 +273,19 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           errorMessage,
           false,
           2,
-          userMessageService);
+          userMessageService,
+          isStepCheckpoint: true);
 
         return -1;
       }
 
       double result = measurements.Average();
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        device,
-        $"Результат \"{header}\"",
+      await ShowMeasurementResultAsync(
+        header,
         $"{result} {unit}",
         IsWithinRange(result, rangeFrom, rangeTo),
-        2,
         userMessageService);
+
       return result;
     }
 
@@ -322,6 +335,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
+      await ShowMeasurementCommandStepAsync(device, header, profile.Measure, userMessageService);
+
       string response = await device.DeviceProtocol.QueryAsync(profile.Measure, responseDelay: responseDelay, timeout: profile.Timeout);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
@@ -358,6 +373,101 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       return match.Value.Replace(',', '.');
+    }
+
+    /// <summary>
+    /// Выводит итоговый результат измерения с учетом настроек отображения параметров устройства.
+    /// </summary>
+    static private async Task ShowMeasurementResultAsync(
+      string header,
+      string message,
+      bool result,
+      IUserInteractionService? userMessageService)
+    {
+      if (userMessageService == null || !DeviceDisplayConfig.GetExecutionParametersVisibility())
+      {
+        return;
+      }
+
+      var resultType = result
+        ? ShowMessageModel.MessageType.Success
+        : ShowMessageModel.MessageType.Error;
+      var resultMessage = DeviceDisplayConfig.GetMeasurementResultsVisibility()
+        ? message
+        : string.Empty;
+
+      await userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"Результат \"{header}\"",
+          message: resultMessage,
+          type: resultType)
+        {
+          IndentLevel = 2,
+          IsStepModeCheckpoint = true,
+        },
+        IsBlockStart: true,
+        skipPause: true);
+    }
+
+    /// <summary>
+    /// Выводит шаг отправки измерительной команды только при активном пошаговом режиме.
+    /// </summary>
+    static private Task ShowMeasurementCommandStepAsync(
+      IMultimeter device,
+      string header,
+      string command,
+      IUserInteractionService? userMessageService)
+    {
+      if (userMessageService == null || !StepControlManager.StepMode)
+      {
+        return Task.CompletedTask;
+      }
+
+      return userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"{device.Name}({device.NumberChassis}.{device.Number}) - Команда измерения \"{header}\"",
+          message: command,
+          type: ShowMessageModel.MessageType.Command)
+        {
+          IndentLevel = 2,
+          IsDeviceMessage = true,
+          IsStepModeCheckpoint = true,
+          IsControlProgramCommandHeader = true,
+        },
+        IsBlockStart: true,
+        skipPause: true);
+    }
+
+    /// <summary>
+    /// Выводит шаг очередной попытки измерения ёмкости только при активном пошаговом режиме.
+    /// </summary>
+    static private Task ShowMeasurementAttemptStepAsync(
+      IMultimeter device,
+      string header,
+      int attempt,
+      int maxAttempts,
+      int acceptedMeasurementNumber,
+      int requiredMeasurements,
+      IUserInteractionService? userMessageService)
+    {
+      if (userMessageService == null || !StepControlManager.StepMode)
+      {
+        return Task.CompletedTask;
+      }
+
+      return userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"{device.Name}({device.NumberChassis}.{device.Number}) - Попытка измерения \"{header}\"",
+          message: $"{attempt}/{maxAttempts}; принято {acceptedMeasurementNumber - 1}/{requiredMeasurements}",
+          type: ShowMessageModel.MessageType.Command)
+        {
+          IndentLevel = 2,
+          IsDeviceMessage = true,
+          IsStepModeCheckpoint = true,
+          IsControlProgramCommandHeader = true,
+        },
+        IsBlockStart: true,
+        skipPause: true);
     }
   }
 }

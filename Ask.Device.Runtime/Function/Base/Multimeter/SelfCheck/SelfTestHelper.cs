@@ -1,4 +1,5 @@
 using System;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -26,15 +27,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       var resultType = status
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
+      var resultMessage = DeviceDisplayConfig.GetMeasurementResultsVisibility()
+        ? $"{FormatResult(result)}{unit}"
+        : string.Empty;
 
-      return userMessageService.ShowMessageAsync(
-        new ShowMessageModel(
+      var model = new ShowMessageModel(
           header: $"Тест {param}{unit} {FormatFallibility(idealResult, percentageError)}",
-          message: $"{FormatResult(result)}{unit}",
+          message: resultMessage,
           type: resultType)
-        {
-          IndentLevel = 1,
-        });
+      {
+        IndentLevel = 1,
+        IsStepModeCheckpoint = true,
+      };
+
+      return userMessageService.ShowMessageAsync(model, IsBlockStart: true);
     }
 
     /// <summary>
