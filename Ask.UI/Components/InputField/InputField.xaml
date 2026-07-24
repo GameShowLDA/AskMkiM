@@ -187,165 +187,22 @@
                                           Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Шины для проверки-->
-            <Border Margin="5" Grid.Row="6" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"
-                  Visibility="{Binding IsBusVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                    Name="headerBusData" 
-                    FontFamily="{DynamicResource WinstonMedium}"  
-                    TextWrapping="Wrap" TextTrimming="None"  
-                    Text="{Binding Source={StaticResource LS_Input_Bus_Title}, Path=Value}" FontSize="18" Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <Border Name="BusBorder" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundInputPanelBrush}" CornerRadius="10" Margin="0,5,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                            </Grid.RowDefinitions>
-
-                            <CheckBox x:Name="ShinaACheckBox" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5" />
-                            <TextBlock Text="{Binding Source={StaticResource LS_Input_Bus_A}, Path=Value}" FontFamily="{DynamicResource WinstonMedium}" 
-                                   Grid.Column="1" Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" VerticalAlignment="Center" FontSize="18" Padding="5"/>
-
-                            <CheckBox x:Name="ShinaBCheckBox" Grid.Row="1" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
-                            <TextBlock Grid.Row="1" FontFamily="{DynamicResource WinstonMedium}" 
-                                   Text="{Binding Source={StaticResource LS_Input_Bus_B}, Path=Value}" Grid.Column="1" VerticalAlignment="Center" 
-                                   Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" FontSize="18" Padding="5"/>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Border>
+            <dataControls:BusInput Grid.Row="6"
+                                   x:Name="BusSelector"
+                                   Margin="5"
+                                   Header="{Binding Source={StaticResource LS_Input_Bus_Title}, Path=Value}"
+                                   ExecutionHeader="Шина для проверки"
+                                   SelectionMode="Bus"
+                                   Visibility="{Binding IsBusVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!-- Группа шин (AB1..AB4) -->
-            <Border Grid.Row="7"
-                Margin="5"
-                Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"
-                CornerRadius="10"
-                Visibility="{Binding IsBusGroupVisible,
-                             RelativeSource={RelativeSource AncestorType=UserControl},
-                             Converter={StaticResource BoolToVis}}">
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock x:Name="headerBusGroupData"
-                        FontFamily="{DynamicResource WinstonMedium}"
-                        TextWrapping="Wrap"
-                        TextTrimming="None"
-                        Text="{Binding Source={StaticResource LS_Input_Bus_Group_Title}, Path=Value}"
-                        FontSize="18"
-                        Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                        Margin="0,5"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Padding="5"/>
-
-                    <Border x:Name="BusGroupBorder"
-                        Grid.Row="1"
-                        Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"
-                        CornerRadius="10"
-                        Margin="0,5,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- AB1 -->
-                            <CheckBox x:Name="BusAB1CheckBox"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"
-                                Cursor="Hand"/>
-                            <TextBlock Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB1}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-
-                            <!-- AB2 -->
-                            <CheckBox x:Name="BusAB2CheckBox"
-                                Grid.Row="1"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"/>
-                            <TextBlock Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB2}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-
-                            <!-- AB3 -->
-                            <CheckBox x:Name="BusAB3CheckBox"
-                                Grid.Row="2"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"/>
-                            <TextBlock Grid.Row="2"
-                                Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB3}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-
-                            <!-- AB4 -->
-                            <CheckBox x:Name="BusAB4CheckBox"
-                                Grid.Row="3"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"/>
-                            <TextBlock Grid.Row="3"
-                                Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB4}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Border>
+            <dataControls:BusInput Grid.Row="7"
+                                   x:Name="BusGroupSelector"
+                                   Margin="5"
+                                   Header="{Binding Source={StaticResource LS_Input_Bus_Group_Title}, Path=Value}"
+                                   ExecutionHeader="Группа шин"
+                                   SelectionMode="BusGroup"
+                                   Visibility="{Binding IsBusGroupVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
         </Grid>
     </Grid>
 

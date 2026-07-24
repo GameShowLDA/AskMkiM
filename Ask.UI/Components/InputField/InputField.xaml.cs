@@ -201,20 +201,14 @@ namespace Ask.UI.Components.InputField
     /// <summary>
     /// Только геттер для получения активной шины.
     /// </summary>
-    public BusPoint ActiveBus { get; private set; }
+    public BusPoint ActiveBus => BusSelector.SelectedBus;
 
     /// <summary>
     /// Активная группа шин (AB1..AB4).
     /// </summary>
-    public SwitchingBusNew ActiveBusGroup { get; private set; } = SwitchingBusNew.AB1;
+    public SwitchingBusNew ActiveBusGroup => BusGroupSelector.SelectedBusGroup;
 
     #endregion
-
-    /// <summary>
-    /// Флаг, предотвращающий реакцию обработчиков Checked/Unchecked на изменения,
-    /// выполненные программно (во время синхронизации чекбоксов с <see cref="ActiveBusGroup"/>).
-    /// </summary>
-    private bool _busGroupInternalChange;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="InputField"/>.
@@ -223,12 +217,7 @@ namespace Ask.UI.Components.InputField
     {
       InitializeComponent();
 
-      _busGroupInternalChange = true;
-      SetActiveBusGroup(SwitchingBusNew.AB1);
-      _busGroupInternalChange = false;
-
       SubscribeToValidationEvents();
-      ShinaACheckBox.IsChecked = true;
       PreviewKeyDown += HotkeyChecked;
       Unloaded += InputField_Unloaded;
     }
@@ -266,31 +255,14 @@ namespace Ask.UI.Components.InputField
     /// </param>
     private void ActionExecutor_StartProcessing(bool obj)
     {
-      var secondBaseText = "Вторая точка";
-      var busBaseText = "Шина для проверки";
-      var busGroupBaseText = "Группа шин";
-
-      Visibility visibility = obj ? Visibility.Collapsed : Visibility.Visible;
       FirstPointTextBox.IsExecuting = obj;
       LastPointTextBox.IsExecuting = obj;
       TimeTextBox.IsExecuting = obj;
       TimeRampTextBox.IsExecuting = obj;
       ElectricalTextBox.IsExecuting = obj;
       VoltageTextBox.IsExecuting = obj;
-
-      BusBorder.Visibility = visibility;
-      BusGroupBorder.Visibility = visibility;
-
-      if (obj)
-      {
-        headerBusData.Text = $"{busBaseText}: {ActiveBus}";
-        headerBusGroupData.Text = $"{busGroupBaseText}: {ActiveBusGroup}";
-      }
-      else
-      {
-        headerBusData.Text = $"{busBaseText}";
-        headerBusGroupData.Text = busGroupBaseText;
-      }
+      BusSelector.IsExecuting = obj;
+      BusGroupSelector.IsExecuting = obj;
     }
 
     /// <summary>
@@ -324,50 +296,6 @@ namespace Ask.UI.Components.InputField
     {
       FirstPointTextBox.DataError();
       LastPointTextBox.DataError();
-    }
-
-    /// <summary>
-    /// Обрабатывает включение шины. Если одна шина включена, другая автоматически выключается.
-    /// </summary>
-    /// <param name="sender">Источник события (чекбокс).</param>
-    /// <param name="e">Параметры события.</param>
-    private void Switch_Checked(object sender, RoutedEventArgs e)
-    {
-      var checkbox = sender as CheckBox;
-
-      if (checkbox == ShinaACheckBox && ShinaACheckBox.IsChecked == true)
-      {
-        ShinaBCheckBox.IsChecked = false;
-        ActiveBus = BusPoint.A;
-      }
-
-      if (checkbox == ShinaBCheckBox && ShinaBCheckBox.IsChecked == true)
-      {
-        ShinaACheckBox.IsChecked = false;
-        ActiveBus = BusPoint.B;
-      }
-    }
-
-    /// <summary>
-    /// Обрабатывает выключение шины. Если одна шина выключена, автоматически включается другая.
-    /// </summary>
-    /// <param name="sender">Источник события (чекбокс).</param>
-    /// <param name="e">Параметры события.</param>
-    private void Switch_Unchecked(object sender, RoutedEventArgs e)
-    {
-      var checkbox = sender as CheckBox;
-
-      if (checkbox == ShinaACheckBox && ShinaACheckBox.IsChecked == false)
-      {
-        ShinaBCheckBox.IsChecked = true;
-        ActiveBus = BusPoint.B;
-      }
-
-      if (checkbox == ShinaBCheckBox && ShinaBCheckBox.IsChecked == false)
-      {
-        ShinaACheckBox.IsChecked = true;
-        ActiveBus = BusPoint.A;
-      }
     }
 
     /// <summary>
@@ -407,77 +335,6 @@ namespace Ask.UI.Components.InputField
               ? (FirstPoint, SecondPoint, ElectricalParameter)
               : (TestedNumber, TesterNumber, TestRange)
       );
-    }
-
-    /// <summary>
-    /// Устанавливает активную группу шин и синхронизирует состояние чекбоксов AB1..AB4.
-    /// </summary>
-    /// <param name="bus">Новая активная группа шин.</param>
-    private void SetActiveBusGroup(SwitchingBusNew bus)
-    {
-      ActiveBusGroup = bus;
-
-      BusAB1CheckBox.IsChecked = bus == SwitchingBusNew.AB1;
-      BusAB2CheckBox.IsChecked = bus == SwitchingBusNew.AB2;
-      BusAB3CheckBox.IsChecked = bus == SwitchingBusNew.AB3;
-      BusAB4CheckBox.IsChecked = bus == SwitchingBusNew.AB4;
-    }
-
-    /// <summary>
-    /// Возвращает следующую группу шин по кругу: AB1 → AB2 → AB3 → AB4 → AB1.
-    /// Используется, чтобы при снятии галочки с активной группы всегда оставалась выбранной какая-либо группа.
-    /// </summary>
-    private SwitchingBusNew NextBusGroup(SwitchingBusNew current) => current switch
-    {
-      SwitchingBusNew.AB1 => SwitchingBusNew.AB2,
-      SwitchingBusNew.AB2 => SwitchingBusNew.AB3,
-      SwitchingBusNew.AB3 => SwitchingBusNew.AB4,
-      _ => SwitchingBusNew.AB1
-    };
-
-    /// <summary>
-    /// Обработчик включения чекбокса группы шин (AB1..AB4).
-    /// При выборе одной группы остальные автоматически снимаются.
-    /// </summary>
-    private void BusGroup_Checked(object sender, RoutedEventArgs e)
-    {
-      if (_busGroupInternalChange) return;
-      if (sender is not CheckBox cb) return;
-
-      _busGroupInternalChange = true;
-
-      if (cb == BusAB1CheckBox) SetActiveBusGroup(SwitchingBusNew.AB1);
-      else if (cb == BusAB2CheckBox) SetActiveBusGroup(SwitchingBusNew.AB2);
-      else if (cb == BusAB3CheckBox) SetActiveBusGroup(SwitchingBusNew.AB3);
-      else if (cb == BusAB4CheckBox) SetActiveBusGroup(SwitchingBusNew.AB4);
-
-      _busGroupInternalChange = false;
-    }
-
-    /// <summary>
-    /// Обработчик выключения чекбокса группы шин.
-    /// Если пользователь пытается снять галочку с текущей активной группы, автоматически выбирается следующая группа,
-    /// чтобы не допустить состояния "ничего не выбрано".
-    /// </summary>
-    private void BusGroup_Unchecked(object sender, RoutedEventArgs e)
-    {
-      if (_busGroupInternalChange) return;
-      if (sender is not CheckBox cb) return;
-
-      bool wasActive =
-          (cb == BusAB1CheckBox && ActiveBusGroup == SwitchingBusNew.AB1) ||
-          (cb == BusAB2CheckBox && ActiveBusGroup == SwitchingBusNew.AB2) ||
-          (cb == BusAB3CheckBox && ActiveBusGroup == SwitchingBusNew.AB3) ||
-          (cb == BusAB4CheckBox && ActiveBusGroup == SwitchingBusNew.AB4);
-
-      _busGroupInternalChange = true;
-
-      if (wasActive)
-        SetActiveBusGroup(NextBusGroup(ActiveBusGroup));
-      else
-        SetActiveBusGroup(ActiveBusGroup);
-
-      _busGroupInternalChange = false;
     }
 
     /// <summary>
