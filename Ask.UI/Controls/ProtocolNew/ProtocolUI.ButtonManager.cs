@@ -221,9 +221,10 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Запустить\"");
 
-      // Режим шага выбирается только в момент запуска:
-      // F10/F11 выставляют флаг заранее, обычный старт сбрасывает его.
-      var startInStepMode = _startRequestedInStepMode;
+      // Обычный старт должен уважать сохранённую настройку пошагового режима,
+      // а F10/F11 дополнительно принудительно запускают выполнение по шагам.
+      var startInStepMode = _startRequestedInStepMode ||
+        ExecutionConfig.GetIsStepByStepModeEnabled();
       _startRequestedInStepMode = false;
       ExecutionConfig.SetStepByStepMode(startInStepMode);
 
@@ -309,7 +310,6 @@ namespace Ask.UI.Controls.ProtocolNew
       Application.Current.Dispatcher.Invoke(() =>
       {
         _startRequestedInStepMode = false;
-        ExecutionConfig.SetStepByStepMode(false);
         StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
       });
     }
