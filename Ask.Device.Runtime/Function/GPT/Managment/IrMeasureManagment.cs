@@ -1,13 +1,14 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.GPT.Managment
 {
@@ -50,6 +51,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     /// Выполняет измерение сопротивления изоляции.
     /// </summary>
     public async Task<(double value, string unit)> MeasureAsync(
+      ElectricalTestFunction electricalTestFunction,
       double param = 0,
       double rangeFrom = -1,
       double rangeTo = -1,

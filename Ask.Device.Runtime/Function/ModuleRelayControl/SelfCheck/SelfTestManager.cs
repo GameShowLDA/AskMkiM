@@ -68,7 +68,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       }
 
       await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
-      await _moduleRelay.MeterManager.ConnectMeterAsync();
+      await _moduleRelay.MeterManager.ConnectMeterAsync(
+        ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
 
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
       for (int point = 1; point <= _moduleRelay.PointCount; point++)
@@ -105,7 +106,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       for (int busNumber = 1; busNumber <= 4; busNumber++)
       {
-        await UserActionHelper.RunWithUserRepeatAsync(() => CheckBus(token, relaySwitchModule, busNumber, userMessageService), userMessageService);
+        await UserActionHelper.RunWithUserRepeatAsync(
+          () => CheckBus(token, relaySwitchModule, busNumber, userMessageService),
+          userMessageService,
+          deviceTask: ExecutionConfig.GetIsIdleModeEnabled());
       }
     }
 
@@ -113,7 +117,9 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       DeviceCommand cmd = new DeviceCommand(10, number);
@@ -166,22 +172,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       {
         model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
 
-        var pointErrors = new List<string>();
-        if (!model.ConnectPoint)
-        {
-          pointErrors.Add("Подключение точки");
-        }
-
-        if (!model.DisconnectBusA)
-        {
-          pointErrors.Add("Отключение с шины A");
-        }
-
-        if (!model.DisconnectBusB)
-        {
-          pointErrors.Add("Отключение с шины B");
-        }
-
         showMessageModel = new ShowMessageModel()
         {
           Header = $"Точка {point}",
@@ -189,7 +179,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
           ExecutionError = !model.SelfControl,
           ExecutionErrorMessage = model.SelfControl
             ? null
-            : $"Точка[{point}] - {string.Join("; ", pointErrors)}",
+            : string.Empty,
           IndentLevel = 1,
         };
         showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
@@ -205,7 +195,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
             Header = $"Подключение точки",
             Status = model.ConnectPoint ? MessageType.Success : MessageType.Error,
             CanBeDeleted = model.ConnectPoint,
-            ExecutionErrorMessage = string.Empty,
+            ExecutionErrorMessage = model.ConnectPoint ? string.Empty : $"Точка[{point}] - Подключение точки",
             IndentLevel = 2,
           };
           await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
@@ -215,7 +205,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
             Header = $"\t\tОтключение с шины А",
             Status = model.DisconnectBusA ? MessageType.Success : MessageType.Error,
             CanBeDeleted = model.DisconnectBusA,
-            ExecutionErrorMessage = string.Empty,
+            ExecutionErrorMessage = model.DisconnectBusA ? string.Empty : $"Точка[{point}] - Отключение с шины A",
             IndentLevel = 2,
           };
           await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
@@ -225,7 +215,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
             Header = $"\t\tОтключение с шины B",
             Status = model.DisconnectBusB ? MessageType.Success : MessageType.Error,
             CanBeDeleted = model.DisconnectBusB,
-            ExecutionErrorMessage = string.Empty,
+            ExecutionErrorMessage = model.DisconnectBusB ? string.Empty : $"Точка[{point}] - Отключение с шины B",
             IndentLevel = 2,
 
           };
@@ -250,7 +240,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
     private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, IUserInteractionService? userMessageService = null)
     {
-      (bool, string) answer = !ExecutionConfig.GetIsIdleModeEnabled() ? await TryGetCheckBusConntcrion(busNumber) : (true, string.Empty);
+      (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
 
       ShowMessageModel showMessageModel;
       showMessageModel = new ShowMessageModel()
@@ -265,6 +255,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       if (!answer.Item1)
       {
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return false;
+        }
+
         SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
         showMessageModel = new ShowMessageModel()
         {

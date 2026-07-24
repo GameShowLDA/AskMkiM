@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Services.Devices;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -34,6 +35,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     private static IMultimeter? ValidFastMeter { get; set; }
 
     /// <summary>
+    /// Устройства, использованные текущей программой контроля.
+    /// </summary>
+    private static readonly List<IDevice> UsedDevices = new();
+
+    /// <summary>
     /// Сохранённый список точек подключения, переданных при вызове <see cref="AnalyzePoints"/>.
     /// Используется для повторной проверки и валидации.
     /// </summary>
@@ -52,6 +58,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       PointsMap = keyValuePairs;
       AnalyzedPoints = null;
       ValidRelayModules = new List<IRelaySwitchModule>();
+      ValidBreakdownTester = null;
+      ValidFastMeter = null;
 
       var validChassisNumbers = await CheckChassisManagersAsync(points, userMessageService);
       if (validChassisNumbers == null)
@@ -77,6 +85,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
 
       ValidRelayModules = modules;
+      RegisterUsedDevices(modules);
+      RegisterUsedDevices([ValidSwitchingDevice]);
 
       await InitializeModulesAsync(modules, ValidSwitchingDevice, userMessageService);
       AnalyzedPoints = points;
@@ -212,11 +222,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       foreach (var module in modules)
       {
         await module.ConnectableManager.InitializeAsync(messageService);
-        await module.ConnectableManager.ResetAsync(messageService);
       }
 
       await switchingDevice.ConnectableManager.InitializeAsync(messageService);
-      await switchingDevice.ConnectableManager.ResetAsync(messageService);
+      await DeviceResetService.ResetDevicesAsync(
+        modules.Cast<IDevice>().Append(switchingDevice),
+        messageService);
     }
 
     /// <summary>
@@ -248,29 +259,21 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     public static List<IDevice> GetAllDevices()
     {
-      var devices = new List<IDevice>();
-      
-      if (ValidRelayModules != null)
-      { 
-        devices.AddRange(ValidRelayModules);
-      }
+      return UsedDevices.ToList();
+    }
 
-      if (ValidSwitchingDevice != null)
-      { 
-        devices.Add(ValidSwitchingDevice);
-      }
-
-      if (ValidBreakdownTester != null)
-      {
-        devices.Add(ValidBreakdownTester);
-      }
-
-      if (ValidFastMeter != null)
-      {
-        devices.Add(ValidFastMeter);
-      }
-
-      return devices;
+    /// <summary>
+    /// Очищает оборудование, зарегистрированное для предыдущей программы контроля.
+    /// </summary>
+    public static void ClearUsedDevices()
+    {
+      UsedDevices.Clear();
+      ValidRelayModules = null;
+      ValidSwitchingDevice = null;
+      ValidBreakdownTester = null;
+      ValidFastMeter = null;
+      AnalyzedPoints = null;
+      PointsMap = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -335,6 +338,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         if (tester != null)
         {
           ValidBreakdownTester = tester;
+          RegisterUsedDevices([tester]);
           return tester;
         }
       }
@@ -378,6 +382,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         if (meter != null)
         {
           ValidFastMeter = meter;
+          RegisterUsedDevices([meter]);
           return meter;
         }
       }
@@ -388,6 +393,25 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       { IndentLevel = 1 }, skipPause: true);
 
       throw new Exception("Ошибка конфигурации: не найдено устройство быстрого измерителя.");
+    }
+
+    private static void RegisterUsedDevices(IEnumerable<IDevice?> devices)
+    {
+      foreach (var device in devices.Where(static device => device != null).Cast<IDevice>())
+      {
+        bool alreadyRegistered = UsedDevices.Any(used =>
+          used.DeviceType == device.DeviceType
+          && used.Number == device.Number
+          && used.ConnectionDetails == device.ConnectionDetails
+          && (used is not IAttachableDevice usedAttachable
+              || device is not IAttachableDevice deviceAttachable
+              || usedAttachable.NumberChassis == deviceAttachable.NumberChassis));
+
+        if (!alreadyRegistered)
+        {
+          UsedDevices.Add(device);
+        }
+      }
     }
 
     /// <summary>

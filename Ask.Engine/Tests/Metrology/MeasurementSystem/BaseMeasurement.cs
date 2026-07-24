@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.Errors;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.Errors.Metrology;
@@ -16,7 +17,6 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
@@ -129,7 +129,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     {
       try
       {
-        CollectDevices(point1, point2, mode);
+        await CollectDevices(point1, point2, mode);
       }
       catch (Exception ex)
       {
@@ -174,6 +174,10 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
             }
           }
         }
+
+        await DeviceResetService.ResetDevicesAsync(
+          connectedDevices.OfType<IDevice>(),
+          messageService);
       }
       catch (Exception ex)
       {
@@ -315,13 +319,15 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     }
 
     /// <summary>
-    /// Завершает измерение, размыкает реле и отключает прибор.
+    /// Завершает выполнение измерения.
     /// </summary>
-    public virtual async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
-    {
-      var devices = GetDevices(metrologicalModeRole);
-      await RelayModuleHelper.ResetDevices(devices, messageService);
-    }
+    /// <param name="metrologicalModeRole">Роль метрологического режима.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeMeasurement(
+      MeasurementTypeCommand metrologicalModeRole,
+      IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Добавляет устройство в коллекцию по роли, если оно ещё не добавлено.

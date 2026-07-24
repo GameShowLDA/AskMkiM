@@ -33,7 +33,9 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, "Холостой режим");
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, "Холостой режим");
       }
 
       if ((await ConnectAsync()).Connect)
@@ -53,7 +55,9 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       if (_device.IPAddress == null)
@@ -95,7 +99,7 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       await _device.DeviceProtocol.OperationLock.WaitAsync();

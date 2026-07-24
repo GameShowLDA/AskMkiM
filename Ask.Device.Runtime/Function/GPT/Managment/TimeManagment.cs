@@ -79,7 +79,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _testTime;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _testTime;
       }
       else
       {
@@ -115,7 +115,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _rampTime;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _rampTime;
       }
       else
       {

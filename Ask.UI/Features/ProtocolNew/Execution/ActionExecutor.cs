@@ -1,5 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
@@ -7,6 +8,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
@@ -185,12 +187,20 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       Interlocked.Exchange(ref _commandJumpRequested, 0);
       _pauseController.Reset();
 
+      if (IsProcessRunning(actionSettings.Name))
+      {
+        return;
+      }
+
       if (!_runGuard.TryAcquire(actionSettings.Name, this, out var activeProcessName))
       {
         LogWarning($"Попытка запустить \"{actionSettings.Name}\", пока выполняется \"{activeProcessName}\".");
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true);
         return;
       }
+
+      _session?.Dispose();
+      _session = new ExecutionSession(actionSettings);
 
       try
       {
@@ -236,11 +246,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           StepControlManager.EnableStepMode(true);
           StepMode = true;
-        }
-
-        if (IsProcessRunning(actionSettings.Name))
-        {
-          return;
         }
 
         PrepareForStartAsync(actionSettings.Name);
@@ -295,13 +300,45 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       isExit = true;
       LogInformation($"Завершение \"{actionSettings.Name}\"");
+      var equipmentUsage = _session?.EquipmentUsage;
 
       await _finalizer.FinalizeAsync(
         actionSettings,
         ProtocolSelfCheck,
         () => CancelProcessTaskAsync(actionSettings.StopDelegate, actionSettings.Name),
+        () => ResetUsedEquipmentAsync(
+          equipmentUsage,
+          ShouldShowTestCompletionHeader(actionSettings.CheckType)),
         ResetState,
         value => StartProcessing?.Invoke(value));
+    }
+
+    /// <summary>
+    /// Определяет необходимость отдельного заголовка завершения теста.
+    /// </summary>
+    /// <param name="checkType">Тип выполняемой проверки.</param>
+    /// <returns>
+    /// <see langword="true"/>, если требуется отдельный заголовок завершения.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldShowTestCompletionHeader(CheckType checkType) =>
+      checkType != CheckType.ControlProgram;
+
+    /// <summary>
+    /// Сбрасывает оборудование, использованное текущим запуском.
+    /// </summary>
+    /// <param name="equipmentUsage">Сеанс учёта использованного оборудования.</param>
+    /// <param name="showTestCompletionHeader">Признак вывода заголовка завершения теста.</param>
+    private async Task ResetUsedEquipmentAsync(
+      EquipmentUsageSession? equipmentUsage,
+      bool showTestCompletionHeader)
+    {
+      var devices = equipmentUsage?.GetUsedDevices() ?? [];
+      await DeviceResetService.ResetDevicesAsync(
+        devices,
+        ProtocolSelfCheck,
+        CancellationToken.None,
+        showTestCompletionHeader);
     }
 
     /// <summary>
@@ -692,12 +729,10 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
     private async Task ExecuteTaskAsync(ActionSettings actionSettings)
     {
-      // Освобождаем ресурсы предыдущего запуска, если они ещё существуют.
-      _session?.Dispose();
       isExit = false;
 
-      // Создаём изолированное состояние нового запуска.
-      _session = new ExecutionSession(actionSettings);
+      var session = _session
+        ?? throw new InvalidOperationException("Сеанс выполнения не инициализирован.");
       _pauseController.Reset();
 
       if (actionSettings.StartDelegate != null)
@@ -711,7 +746,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
             ProtocolSelfCheck,
             ProtocolSelfCheck,
             ProtocolSelfCheck.GetInputHighlightService(),
-            _session.Cancellation.Token));
+            session.Cancellation.Token));
           SystemStateManager.SetIsLocked(true);
           await ProcessTask;
         }
@@ -781,15 +816,20 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       if (stopDelegate != null)
       {
-        var token = CancellationTokenSource?.Token ?? CancellationToken.None;
-        await stopDelegate(token);
+        try
+        {
+          var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+          await stopDelegate(token);
+        }
+        catch (Exception ex)
+        {
+          LogException($"Ошибка обязательного завершающего делегата \"{name}\".", ex);
+        }
       }
 
       if (_session != null)
       {
         _session.ProcessTask = null;
-        _session.Dispose();
-        _session = null;
       }
     }
 
@@ -799,6 +839,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     private void ResetState()
     {
       ProcessTask = null;
+      _session?.Dispose();
+      _session = null;
       _pauseController.Reset();
       StepMode = false;
       ShouldShowPauseMessage = true;

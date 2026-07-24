@@ -25,11 +25,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// </summary>
     private IRelaySwitchModule verificatModuleRelayControl;
 
-    /// <summary>
-    /// Флаг, указывающий на необходимость сброса модулей и системы после теста.
-    /// </summary>
-    private bool needReset = false;
-
     private IExecutionController _controller;
 
     private IUserInteractionService _userInteractionService;
@@ -46,10 +41,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       {
         StartDelegate = ExecuteTestProcess,
         CheckType = CheckType.Test,
-        StopDelegate = async (CancellationToken token) =>
-        {
-          await Stop(token, userInteractionService);
-        }
       };
 
       _controller.SetSettings(settings);
@@ -135,8 +126,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       LogInformation("Запуск теста CrossTestMKR...");
 
-      needReset = true;
-
       List<int> points = ParseRange(range);
 
       await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования"), IsBlockStart: true);
@@ -149,22 +138,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await RunPart1(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
       await RunPart2(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
       await RunPart3(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
-    }
-
-    /// <summary>
-    /// Принудительно останавливает выполнение теста CrossTestMKR:
-    ///  • выключает измеритель;
-    ///  • сбрасывает оба модуля;
-    ///  • выполняет общий Reset всей системы.
-    /// </summary>
-    /// <param name="cancellationToken">Токен отмены операции.</param>
-    private async Task Stop(CancellationToken cancellationToken, IUserInteractionService _messageService = null)
-    {
-      await testedModuleRelayControl.ConnectableManager.ResetAsync(_messageService);
-      await verificatModuleRelayControl.ConnectableManager.ResetAsync(_messageService);
-
-      if (!needReset) return;
-      needReset = false;
     }
 
     #region Логика теста

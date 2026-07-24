@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -87,7 +88,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        double result = (await GPTPunchControl.ModelGPT.AcwManger.Measure.MeasureAsync()).value;
+        double result = (await GPTPunchControl.ModelGPT.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC)).value;
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
       catch (Exception ex)

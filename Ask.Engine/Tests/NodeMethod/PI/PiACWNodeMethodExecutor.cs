@@ -4,8 +4,10 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.PI
@@ -24,6 +26,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
       {
         StartDelegate = ExecuteMeasurementProcess,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
         StopDelegate = async (CancellationToken token) =>
         {
           await testMeasurement.FinalizeAsync(userInteractionService);
@@ -41,8 +44,6 @@ namespace Ask.Engine.Tests.NodeMethod.PI
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
-
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
       if (!connect.Connect)
       {
@@ -73,7 +74,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService);
         await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);
-        await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
+        await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
       }
 
       /// <inheritdoc />
@@ -94,13 +95,34 @@ namespace Ask.Engine.Tests.NodeMethod.PI
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
-              var answer = await breakDown.AcwManger.Measure.MeasureAsync(dataModel.Param, userMessageService: protocolUI);
+              var answer = await breakDown.AcwManger.Measure.MeasureAsync(
+                ElectricalTestFunction.DielectricWithstandAC,
+                dataModel.Param,
+                userMessageService: protocolUI);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value >= dataModel.Param)
               {
                 type = ShowMessageModel.MessageType.Error;
               }
+
+              var formattedResult = NodeMethodProtocolBuilder.FormatValue(answer.value, CurrentUnit.MilliAmpere);
+              var resultMessage = new ShowMessageModel(
+                $"Результат измерения точки {connectResult.PointModel}",
+                message: formattedResult,
+                type: type)
+              {
+                IndentLevel = 2,
+                ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
+                  ? NodeMethodProtocolBuilder.BuildFailure(
+                    connectResult.PointModel,
+                    dataModel.Param,
+                    answer.value,
+                    CurrentUnit.MilliAmpere,
+                    MeasurementLimitKind.Maximum)
+                  : null,
+              };
+              await protocolUI.ShowMessageAsync(resultMessage, skipPause: true);
 
               return type == ShowMessageModel.MessageType.Success;
 

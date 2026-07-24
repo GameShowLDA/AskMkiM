@@ -34,7 +34,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             case ElectricalTestFunction.None:
               break;
             case ElectricalTestFunction.DielectricWithstandAC:
-              return 30;
+              return (rangeFrom + rangeTo) / 2;
             case ElectricalTestFunction.DielectricWithstandDC:
               return 1;
             case ElectricalTestFunction.InsulationResistance:
@@ -56,7 +56,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             case ElectricalTestFunction.DielectricWithstandAC:
               return new Random().Next(0, 80);
             case ElectricalTestFunction.DielectricWithstandDC:
-              return new Random().Next(0, 5);
+              return new Random().Next(0, 100);
             case ElectricalTestFunction.InsulationResistance:
               return new Random().Next(0, 60000);
           }

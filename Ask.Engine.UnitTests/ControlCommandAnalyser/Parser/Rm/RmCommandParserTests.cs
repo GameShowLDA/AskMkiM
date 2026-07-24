@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Config.Base;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Rm;
@@ -14,6 +15,7 @@ public class RmCommandParserTests : IDisposable
   public RmCommandParserTests()
   {
     ExecutionConfig.SetLegacyCompatibilityMode(false);
+    LegacyCompatibilityMapper.SetCompatibilityPointsMap(new());
   }
 
   [Fact(DisplayName = "РМ парсер команд: простая точка ОК сопоставляется с точкой АСК")]
@@ -179,6 +181,27 @@ public class RmCommandParserTests : IDisposable
     var lines = new RmCommandFormatter().Format(model).ToArray();
 
     Assert.Contains("\tхр1/1 = 1.1.1(1.2.1)", lines);
+  }
+
+  [Fact(DisplayName = "РМ парсер: режим совместимости сохраняет преобразованную точку и обратное соответствие")]
+  public void Parse_WithLegacyCompatibilityMode_SavesMappedPointAndReverseMapping()
+  {
+    ExecutionConfig.SetLegacyCompatibilityMode(true);
+    var legacyParser = new RmCommandParser(() => new[]
+    {
+      new LegacyRelaySwitchModuleInfo(2, 350, 1),
+      new LegacyRelaySwitchModuleInfo(4, 350, 1)
+    });
+
+    var model = Assert.IsType<RmCommandModel>(legacyParser.Parse(
+      "30",
+      "РМ",
+      30,
+      new List<string> { "30 РМ X1/1=1.1.1" }));
+
+    AssertErrorCodes(model);
+    Assert.Equal("1.2.1", model.PointsMap["X1/1"]);
+    Assert.Equal("1.1.1", LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress("1.2.1"));
   }
 
   public void Dispose()

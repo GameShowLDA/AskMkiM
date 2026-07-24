@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -113,11 +114,35 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await breakdownTester.IrManger.Voltage.SetVoltageAsync(item, userMessageService);
 
           (var lowerBound, var upperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
-          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(param, lowerBound, upperBound, userMessageService: userMessageService)).value;
+          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, lowerBound, upperBound)).value;
 
           var err = result - param;
-          await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления изоляции", message: MeasurementValueFormatter.FormatWithUnit(result, "МОм"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          await userMessageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения ({lowerBound} - {upperBound} МОм)", message: MeasurementValueFormatter.FormatWithUnit(err, "МОм"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+          var status = result >= lowerBound && result <= upperBound
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error;
+          var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "МОм");
+          var resultMessage = new ShowMessageModel(
+            "Результат измерения сопротивления изоляции",
+            message: formattedResult,
+            type: status)
+          {
+            IndentLevel = 1,
+            ExecutionErrorMessage = status == ShowMessageModel.MessageType.Error
+              ? $"СИ. Проверка при напряжении {item}В " +
+                $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
+              : null,
+          };
+          await userMessageService.ShowMessageAsync(resultMessage, skipPause: true);
+
+          var errorMessage = new ShowMessageModel(
+            $"Погрешность измерения ({lowerBound} - {upperBound} МОм)",
+            message: MeasurementValueFormatter.FormatWithUnit(err, "МОм"),
+            type: status)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = string.Empty,
+          };
+          await userMessageService.ShowMessageAsync(errorMessage, skipPause: true);
 
         }
       }
@@ -179,8 +204,29 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await breakdownTester.AcwManger.Measure.StopMeasure();
 
           var err = result - item;
-          await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат ACW", message: MeasurementValueFormatter.FormatWithUnit(result, "В"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          await userMessageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения ({lowerBound} - {upperBound} В)", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+          var status = result >= lowerBound && result <= upperBound
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error;
+          var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "В");
+          var resultMessage = new ShowMessageModel("Результат ACW", message: formattedResult, type: status)
+          {
+            IndentLevel = 1,
+            ExecutionErrorMessage = status == ShowMessageModel.MessageType.Error
+              ? $"ПИ ACW. Проверка при напряжении {item}В " +
+                $"({lowerBound} - {upperBound} В) : {formattedResult}"
+              : null,
+          };
+          await userMessageService.ShowMessageAsync(resultMessage, skipPause: true);
+
+          var errorMessage = new ShowMessageModel(
+            $"Погрешность измерения ({lowerBound} - {upperBound} В)",
+            message: MeasurementValueFormatter.FormatWithUnit(err, "В"),
+            type: status)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = string.Empty,
+          };
+          await userMessageService.ShowMessageAsync(errorMessage, skipPause: true);
 
         }
       }
@@ -241,8 +287,29 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await breakdownTester.DcwManger.Measure.StopMeasure();
 
           var err = result - item;
-          await userMessageService.ShowMessageAsync(new ShowMessageModel("Результат DCW", message: MeasurementValueFormatter.FormatWithUnit(result, "В"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-          await userMessageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения ({lowerBound} - {upperBound} В)", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result >= lowerBound && result <= upperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+          var status = result >= lowerBound && result <= upperBound
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error;
+          var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "В");
+          var resultMessage = new ShowMessageModel("Результат DCW", message: formattedResult, type: status)
+          {
+            IndentLevel = 1,
+            ExecutionErrorMessage = status == ShowMessageModel.MessageType.Error
+              ? $"ПИ DCW. Проверка при напряжении {item}В " +
+                $"({lowerBound} - {upperBound} В) : {formattedResult}"
+              : null,
+          };
+          await userMessageService.ShowMessageAsync(resultMessage, skipPause: true);
+
+          var errorMessage = new ShowMessageModel(
+            $"Погрешность измерения ({lowerBound} - {upperBound} В)",
+            message: MeasurementValueFormatter.FormatWithUnit(err, "В"),
+            type: status)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = string.Empty,
+          };
+          await userMessageService.ShowMessageAsync(errorMessage, skipPause: true);
 
         }
       }

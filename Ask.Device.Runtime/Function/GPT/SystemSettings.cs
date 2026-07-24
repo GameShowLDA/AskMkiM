@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -35,6 +36,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -50,6 +52,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -65,6 +68,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -81,6 +85,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -97,6 +102,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -112,6 +118,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -129,7 +136,7 @@ namespace Ask.Device.Runtime.Function.GPT
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return systemData;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? new SystemDataModel() : systemData;
       }
 
       try
@@ -186,10 +193,24 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       return ComPortResetNative.RestartDevice(_gptModel.COMPort.PortName);
+    }
+
+    /// <summary>
+    /// Выбрасывает ошибку оборудования для имитированной неудачной попытки.
+    /// </summary>
+    /// <exception cref="DeviceException">
+    /// Выбрасывается, если для текущего вызова выбрана аппаратная ошибка.
+    /// </exception>
+    private static void ThrowIfHardwareErrorSimulated()
+    {
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      {
+        throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
+      }
     }
 
   }

@@ -41,7 +41,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       if (device.TypeMode == profile.TypeMode)

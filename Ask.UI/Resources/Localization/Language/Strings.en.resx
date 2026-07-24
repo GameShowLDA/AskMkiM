@@ -484,7 +484,19 @@
     <value>Run with errors</value>
   </data>
   <data name="settings.execution.errorSimulation.description" xml:space="preserve">
-    <value>Adds random errors in idle mode to verify error handling.</value>
+    <value>Artificial error settings for idle execution mode.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.title" xml:space="preserve">
+    <value>Measurement error simulation</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
+    <value>Adds the existing random deviations of measurement results from their specified limits.</value>
+  </data>
+  <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
+    <value>Hardware error simulation</value>
+  </data>
+  <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
+    <value>Simulates a non-measurement hardware command failure with a 50% probability.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Operation time output</value>

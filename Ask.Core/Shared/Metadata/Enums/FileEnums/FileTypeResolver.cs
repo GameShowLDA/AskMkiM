@@ -1,4 +1,5 @@
 using System.IO;
+using Ask.Core.Shared.Metadata.Static;
 
 namespace Ask.Core.Shared.Metadata.Enums.FileEnums
 {
@@ -42,9 +43,12 @@ namespace Ask.Core.Shared.Metadata.Enums.FileEnums
         ".acs" => FileType.PK,
         ".opk" => FileType.OPK,
         ".opkw" => FileType.OPKW,
-        ".lst" => FileType.Protocol,
-        ".lstw" => FileType.Protocol,
-        ".rtlst" => FileType.InspectionProtocol,
+        ProtocolFileExtensions.Trace => FileType.Protocol,
+        ProtocolFileExtensions.Result => FileType.InspectionProtocol,
+        ProtocolFileExtensions.Report => FileType.InspectionProtocol,
+        ProtocolFileExtensions.LegacyTrace => FileType.Protocol,
+        ProtocolFileExtensions.LegacyUtf8Trace => FileType.Protocol,
+        ProtocolFileExtensions.LegacyResult => FileType.InspectionProtocol,
         _ => FileType.None,
       };
     }

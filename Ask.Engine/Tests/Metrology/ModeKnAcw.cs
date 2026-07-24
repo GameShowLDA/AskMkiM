@@ -132,7 +132,11 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
-        var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
+        var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(
+          param,
+          rangeFrom,
+          rangeTo,
+          userMessageService);
         return result;
       }
 

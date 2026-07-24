@@ -126,12 +126,12 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     }
 
     /// <summary>
-    /// Выполняет общий сброс оборудования.
+    /// Завершает выполнение группового метода.
     /// </summary>
-    public virtual async Task FinalizeAsync(IUserInteractionService messageService)
-    {
-      await RelayModuleHelper.ResetDevices(Devices, messageService);
-    }
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeAsync(IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Возвращает строку, где заданный разряд равен 1, остальные — 0.

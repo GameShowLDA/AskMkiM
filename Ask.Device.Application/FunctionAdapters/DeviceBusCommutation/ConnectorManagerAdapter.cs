@@ -261,7 +261,23 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService), userMessageService, deviceTask: true);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        bool success = await _connectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _deviceBusCommutation,
+            "Подключение пробойной установки и мультиметра",
+            success ? "Оборудование подключено" : IdleHardwareErrorSimulator.ErrorMessage,
+            success,
+            1,
+            userMessageService);
+        }
+
+        return success;
+      }, userMessageService, deviceTask: true);
+
       if (!result)
       {
         throw ConnectorExceptionFactory.ConnectBreakdownTesterAndMultimeterFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);
@@ -272,7 +288,23 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
     public async Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(() => _connectorManager.DisconnectBreakdownTesterAndMultimeter(userMessageService), userMessageService, deviceTask: true);
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        bool success = await _connectorManager.DisconnectBreakdownTesterAndMultimeter(userMessageService);
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _deviceBusCommutation,
+            "Отключение пробойной установки и мультиметра",
+            success ? "Оборудование отключено" : IdleHardwareErrorSimulator.ErrorMessage,
+            success,
+            1,
+            userMessageService);
+        }
+
+        return success;
+      }, userMessageService, deviceTask: true);
+
       if (!result)
       {
         throw ConnectorExceptionFactory.DisconnectBreakdownTesterAndMultimeterFailed(_deviceBusCommutation.Name, _deviceBusCommutation.NumberChassis, _deviceBusCommutation.Number);

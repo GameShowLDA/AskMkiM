@@ -18,32 +18,16 @@ namespace Ask.Core.Services.FilesUtility
       if (printDialog.ShowDialog() != true)
         return;
 
-      FlowDocument document = new FlowDocument
-      {
-        PagePadding = new Thickness(50),
-        ColumnWidth = double.PositiveInfinity
-      };
-      PrintSettingsService.ApplyTo(document);
+      FlowDocument document = CreateDocument();
 
       foreach (var model in messages)
       {
         var paragraph = new Paragraph();
+        string line = Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format(model);
 
-        if (!string.IsNullOrWhiteSpace(model.Header))
+        if (!string.IsNullOrWhiteSpace(line))
         {
-          paragraph.Inlines.Add(new Run(model.Header)
-          {
-            Foreground = new SolidColorBrush(Colors.Black),
-            FontSize = document.FontSize,
-            FontWeight = FontWeights.Bold
-          });
-        }
-
-        if (!string.IsNullOrWhiteSpace(model.Message))
-        {
-          paragraph.Inlines.Add(new Run(": "));
-
-          paragraph.Inlines.Add(new Run(model.Message)
+          paragraph.Inlines.Add(new Run(line)
           {
             Foreground = new SolidColorBrush(Colors.Black),
             FontSize = document.FontSize
@@ -57,7 +41,21 @@ namespace Ask.Core.Services.FilesUtility
       printDialog.PrintDocument(source.DocumentPaginator, "Печать протокола...");
     }
 
+    /// <summary>
+    /// Выводит текст протокола на печать.
+    /// </summary>
+    /// <param name="protocolModel">Модель протокола.</param>
+    /// <param name="protocolText">Текст протокола.</param>
     public static void PrintProtocol(ProtocolModel protocolModel, string protocolText)
+    {
+      PrintProtocol(protocolText);
+    }
+
+    /// <summary>
+    /// Выводит текст протокола на печать.
+    /// </summary>
+    /// <param name="protocolText">Текст протокола.</param>
+    public static void PrintProtocol(string protocolText)
     {
       try
       {
@@ -65,19 +63,13 @@ namespace Ask.Core.Services.FilesUtility
         if (printDialog.ShowDialog() != true)
           return;
 
-        FlowDocument document = new FlowDocument
-        {
-          PagePadding = new Thickness(50),
-          TextAlignment = TextAlignment.Left,
-          ColumnWidth = double.PositiveInfinity
-        };
-        PrintSettingsService.ApplyTo(document);
+        FlowDocument document = CreateDocument();
 
-        var protocolArray = protocolText.Split('\n');
+        var protocolArray = protocolText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
-        var paragraph = new Paragraph();
         foreach (var str in protocolArray)
         {
+          var paragraph = new Paragraph();
           if (!string.IsNullOrWhiteSpace(str))
           {
             paragraph.Inlines.Add(new Run(str)
@@ -97,6 +89,23 @@ namespace Ask.Core.Services.FilesUtility
       {
         LogException(ex, $"Произошла ошибка");
       }
+    }
+
+    /// <summary>
+    /// Создаёт документ печати с параметрами шрифта из настроек протокола.
+    /// </summary>
+    /// <returns>Настроенный документ печати.</returns>
+    private static FlowDocument CreateDocument()
+    {
+      var document = new FlowDocument
+      {
+        PagePadding = new Thickness(50),
+        TextAlignment = TextAlignment.Left,
+        ColumnWidth = double.PositiveInfinity
+      };
+
+      PrintSettingsService.ApplyTo(document);
+      return document;
     }
 
   }

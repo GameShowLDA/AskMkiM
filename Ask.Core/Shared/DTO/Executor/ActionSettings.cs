@@ -49,6 +49,11 @@ namespace Ask.Core.Shared.DTO.Executor
     public string Name { get; set; }
 
     /// <summary>
+    /// Операция получения имени запускаемого процесса перед началом выполнения.
+    /// </summary>
+    public Func<string?>? NameProvider { get; init; }
+
+    /// <summary>
     /// Время начала выполнения.
     /// </summary>
     public TimeOnly StartTime { get; set; }

@@ -26,7 +26,9 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       string pattern = GetUsbSearchPattern();
@@ -47,7 +49,7 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       using (await _device.DeviceProtocol.OperationLock.LockAsync())
@@ -69,7 +71,9 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, "Холостой режим");
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, "Холостой режим");
       }
 
       var connection = await ConnectAsync(userMessageService);
@@ -87,6 +91,11 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      {
+        return false;
+      }
+
       if (_device is IMultimeter multimeter)
       {
         multimeter.TypeMode = MultimeterTypeMode.None;
