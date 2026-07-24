@@ -5,6 +5,7 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
@@ -185,6 +186,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
+      var intermediateResultHeader = GetIntermediateMeasurementHeader(profile.ElectricalTest);
       var unit = profile.Unit.GetUnit();
 
       if (device.TypeMode != profile.TypeMode)
@@ -263,7 +265,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
-            $"Промежуточный результат \"{header}\"",
+            intermediateResultHeader,
             $"{measurement} {unit}",
             isPositive && isWithinRange,
             2,
@@ -317,6 +319,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// </returns>
     static private bool IsWithinRange(double value, double rangeFrom, double rangeTo)
       => value >= rangeFrom && value <= rangeTo;
+
+    /// <summary>
+    /// Возвращает короткое имя операции для вывода промежуточного результата измерения.
+    /// </summary>
+    static private string GetIntermediateMeasurementHeader(ElectricalTestFunction electricalTest)
+    {
+      return electricalTest switch
+      {
+        ElectricalTestFunction.Capacitance => "Измерение ёмкости",
+        ElectricalTestFunction.Resistance => "Измерение сопротивления",
+        ElectricalTestFunction.ACVoltage or ElectricalTestFunction.DCVoltage => "Измерение напряжения",
+        _ => EnumExtensions.GetDescription(electricalTest),
+      };
+    }
 
     /// <summary>
     /// Выполняет непосредственное измерение и преобразование ответа устройства.
