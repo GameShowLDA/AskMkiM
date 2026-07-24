@@ -138,65 +138,37 @@ namespace Ask.UI.Components.InputField
     /// <summary>
     /// Электрический параметр.
     /// </summary>
-    public string ElectricalParameter
-    {
-      get => ElectricalTextBox.Text;
-      set => ElectricalTextBox.Text = value;
-    }
+    public string ElectricalParameter => ElectricalTextBox.Text;
 
     /// <summary>
     /// Время выполнения теста.
     /// </summary>
-    public string Time
-    {
-      get => TimeTextBox.Text;
-      set => TimeTextBox.Text = value;
-    }
+    public string Time => TimeTextBox.Text;
 
     /// <summary>
     /// Время выполнения теста.
     /// </summary>
-    public string TimeRamp
-    {
-      get => TimeRampTextBox.Text;
-      set => TimeRampTextBox.Text = value;
-    }
+    public string TimeRamp => TimeRampTextBox.Text;
 
     /// <summary>
     /// Напряжение.
     /// </summary>
-    public string Voltage
-    {
-      get => VoltageTextBox.Text;
-      set => VoltageTextBox.Text = value;
-    }
+    public string Voltage => VoltageTextBox.Text;
 
     /// <summary>
     /// Получает или задаёт номер проверяемого устройства в формате a.b.
     /// </summary>
-    public string TestedNumber
-    {
-      get => TestedNumberBox.Text;
-      set => TestedNumberBox.Text = value;
-    }
+    public string TestedNumber => TestedNumberBox.Text;
 
     /// <summary>
     /// Получает или задаёт номер проверяющего устройства в формате a.b.
     /// </summary>
-    public string TesterNumber
-    {
-      get => TesterNumberBox.Text;
-      set => TesterNumberBox.Text = value;
-    }
+    public string TesterNumber => TesterNumberBox.Text;
 
     /// <summary>
     /// Получает или задаёт диапазон проверки в формате списка чисел и диапазонов (например, "1-3,5").
     /// </summary>
-    public string TestRange
-    {
-      get => TestRangeBox.Text;
-      set => TestRangeBox.Text = value;
-    }
+    public string TestRange => TestRangeBox.Text;
 
     /// <summary>
     /// Только геттер для получения активной шины.
@@ -270,26 +242,20 @@ namespace Ask.UI.Components.InputField
     /// <summary>
     /// Подсветка поля первой точки.
     /// </summary>
-    private void HighlightFirstTextBox()
-    {
+    private void HighlightFirstTextBox() =>
       FirstPointTextBox.DataError();
-    }
 
     /// <summary>
     /// Подсветка поля второй точки.
     /// </summary>
-    private void HighlightSecondTextBox()
-    {
+    private void HighlightSecondTextBox() =>
       LastPointTextBox.DataError();
-    }
 
     /// <summary>
     /// Подсветка поля параметра.
     /// </summary>
-    private void HighlightElectricalTextBox()
-    {
+    private void HighlightElectricalTextBox() =>
       ElectricalTextBox.DataError();
-    }
 
     /// <summary>
     /// Подсветка обоих точек при совпадении.
