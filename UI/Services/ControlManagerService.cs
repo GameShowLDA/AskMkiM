@@ -39,6 +39,7 @@ namespace UI.Services
 
       var controlManager = CreateControlManager();
       var tabButton = CreateTabButton(editorType);
+      tabButton.IsActive = true;
 
       controlManager.ShowControl(container, tabButton);
     }

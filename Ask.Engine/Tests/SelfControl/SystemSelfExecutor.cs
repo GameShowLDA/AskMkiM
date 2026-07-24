@@ -47,11 +47,20 @@ namespace Ask.Engine.Tests.SelfControl
       var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
       var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
 
-      await dbc.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), SwitchingDeviceTypeConnector.FullCheck, _messageService, dbc, meter);
+      await dbc.SelfTestManager.StartSelfCheck(
+        _messageService.GetCancellationToken(),
+        SwitchingDeviceTypeConnector.FullCheck,
+        _messageService,
+        dbc,
+        meter);
 
       foreach (var item in mkr)
       {
-        await item.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), RelaySwitchTypeConnector.FullCheck, _messageService, dbc);
+        await item.SelfTestManager.StartSelfCheck(
+          _messageService.GetCancellationToken(),
+          RelaySwitchTypeConnector.FullCheck,
+          _messageService,
+          dbc);
       }
     }
   }

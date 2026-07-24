@@ -499,7 +499,19 @@
     <value>Выполнение с ошибками</value>
   </data>
   <data name="settings.execution.errorSimulation.description" xml:space="preserve">
-    <value>Добавляет случайные ошибки при холостом режиме для проверки обработки ошибок.</value>
+    <value>Настройки искусственных ошибок при выполнении в холостом режиме.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.title" xml:space="preserve">
+    <value>Симуляция ошибок измерений</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
+    <value>Добавляет существующие случайные отклонения результатов измерений от заданных норм.</value>
+  </data>
+  <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
+    <value>Симуляция ошибок оборудования</value>
+  </data>
+  <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
+    <value>Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>

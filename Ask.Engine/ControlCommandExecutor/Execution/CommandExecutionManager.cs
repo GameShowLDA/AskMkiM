@@ -2,6 +2,7 @@
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
@@ -411,6 +412,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       if (_isExecutingEmergencyKsc)
         return;
 
+      using var finalizationScope = EquipmentExecutionContext.EnterMandatoryFinalization();
       _isExecutingEmergencyKsc = true;
       StepControlManager.EnableStepMode(false);
       try

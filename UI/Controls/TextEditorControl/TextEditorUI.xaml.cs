@@ -581,6 +581,7 @@ namespace UI.Controls.TextEditorControl
         FileType.OPK or FileType.OPKW => "MKI_OPKW.xshd",
         FileType.PK or FileType.PKW => "MKI_PK.xshd",
         FileType.Protocol => "MKI_PROTOCOL.xshd",
+        FileType.InspectionProtocol => "MKI_RESULT_PROTOCOL.xshd",
         _ => null
       };
 
@@ -1051,7 +1052,7 @@ namespace UI.Controls.TextEditorControl
     }
 
     private static bool IsReadOnlyFileType(FileType fileType)
-      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol;
+      => fileType is FileType.OPK or FileType.OPKW or FileType.Protocol or FileType.InspectionProtocol;
 
     #endregion
   }

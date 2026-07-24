@@ -30,9 +30,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> ConnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand command = new DeviceCommand(6, 2, number, 1);
@@ -49,9 +49,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
+        if (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       DeviceCommand command = new DeviceCommand(6, 2, number, 2);

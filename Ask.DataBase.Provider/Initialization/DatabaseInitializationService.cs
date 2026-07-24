@@ -69,6 +69,7 @@ public static class DatabaseInitializationService
 
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureHardwareErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureUserInterfaceUnderlineColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
@@ -345,6 +346,46 @@ public static class DatabaseInitializationService
 
     await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontFamily", "TEXT NOT NULL DEFAULT 'Consolas'", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontSize", "REAL NOT NULL DEFAULT 10.0", report, progress, cancellationToken);
+  }
+
+  /// <summary>
+  /// Добавляет настройку симуляции аппаратных ошибок в совместимую старую схему.
+  /// </summary>
+  /// <param name="databasePath">Путь к файлу базы данных.</param>
+  /// <param name="report">Отчёт об инициализации базы данных.</param>
+  /// <param name="progress">Обработчик сообщений о ходе инициализации.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  private static async Task EnsureHardwareErrorSimulationModeColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "Execution", cancellationToken)
+      || await ColumnExistsAsync(
+        connection,
+        "Execution",
+        "IsHardwareErrorSimulationMode",
+        cancellationToken))
+    {
+      return;
+    }
+
+    await using var command = connection.CreateCommand();
+    command.CommandText =
+      """
+      ALTER TABLE "Execution"
+      ADD COLUMN "IsHardwareErrorSimulationMode" INTEGER NOT NULL DEFAULT 0;
+      """;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    TraceWarning(
+      report,
+      progress,
+      "[DB] В старой схеме Execution добавлена колонка IsHardwareErrorSimulationMode.");
   }
 
   private static async Task EnsureUserInterfaceUnderlineColumnsAsync(

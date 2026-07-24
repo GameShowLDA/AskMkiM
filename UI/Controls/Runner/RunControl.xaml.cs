@@ -6,6 +6,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ErrorList;
@@ -336,7 +337,11 @@ namespace UI.Controls.Runner
         return;
       }
 
-      ProtocolUI.Header = BuildDerivedFileName(OpkFilePath, FileName, ".lst", "protocol.lst");
+      ProtocolUI.Header = BuildDerivedFileName(
+        OpkFilePath,
+        FileName,
+        ProtocolFileExtensions.Trace,
+        $"protocol{ProtocolFileExtensions.Trace}");
 
       ActionSettings settings = new ActionSettings()
       {

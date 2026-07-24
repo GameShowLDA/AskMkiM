@@ -4,8 +4,11 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
+using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.PI
@@ -21,7 +24,8 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        CheckType = CheckType.Test
+        CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -84,7 +88,9 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         await messageService.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          var answer = await breakDown.DcwManger.Measure.MeasureAsync();
+          var answer = await breakDown.DcwManger.Measure.MeasureAsync(
+            ElectricalTestFunction.DielectricWithstandDC,
+            userMessageService: messageService);
           var type = ShowMessageModel.MessageType.Success;
 
           if (answer.value >= dataModel.Param)
@@ -92,7 +98,26 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
             type = ShowMessageModel.MessageType.Error;
           }
 
-          await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {CurrentDischargeNumber}({GetBitString()})", message: $"{answer.ToString()} мА", type: type), skipPause: true);
+          var dischargeIndex = CurrentDischargeNumber - 1;
+          var bitString = GetBitString();
+          var formattedResult = GroupMethodProtocolBuilder.FormatValue(answer.value, CurrentUnit.MilliAmpere);
+          var resultMessage = new ShowMessageModel(
+            $"Результат измерения разряда {dischargeIndex} ({bitString})",
+            message: formattedResult,
+            type: type)
+          {
+            IndentLevel = 2,
+            ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
+              ? GroupMethodProtocolBuilder.BuildFailure(
+                dischargeIndex,
+                bitString,
+                dataModel.Param,
+                answer.value,
+                CurrentUnit.MilliAmpere,
+                MeasurementLimitKind.Maximum)
+              : null,
+          };
+          await messageService.ShowMessageAsync(resultMessage, skipPause: true);
 
           return type == ShowMessageModel.MessageType.Success;
 

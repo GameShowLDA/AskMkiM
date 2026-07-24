@@ -21,7 +21,9 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(SetTestTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return (true, string.Empty);
+          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+            : (true, string.Empty);
         }
 
         ManualCommand manualCommand = typeCommand switch
@@ -120,7 +122,9 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
           LogInformation($"{nameof(SetRampTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return (true, string.Empty);
+          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+            : (true, string.Empty);
         }
 
         await Task.Delay(delay);

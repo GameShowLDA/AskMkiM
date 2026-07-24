@@ -1,3 +1,4 @@
+using Ask.Core.Services.Devices;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -7,7 +8,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Commands;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 
 namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
@@ -38,17 +38,17 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       {
 
         case PowerSourceModuleTypeConnector.FullCheck:
-          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+          await ResetUsedDevicesAsync(dbc, powerDevice, meter, messageService, cancellationToken);
           await SettingsMeter(meter, messageService);
           await powerDevice.BusManager.ConnectBusToPositiveAsync(SwitchingBus.A2, messageService);
           await powerDevice.BusManager.ConnectBusToNegativeAsync(SwitchingBus.B2, messageService);
           await dbc.DeviceProtocol.QueryAsync(new DeviceCommand(5, 2, 2, 1).ToString());
           await VoltageCheckService.GenerateDiscreteVoltageCheck(cancellationToken, messageService, meter, powerDevice);
 
-          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+          await ResetUsedDevicesAsync(dbc, powerDevice, meter, messageService, cancellationToken);
           await SwitchingSelfControl.CheckSwitching(cancellationToken, messageService, meter, powerDevice, dbc);
 
-          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+          await ResetUsedDevicesAsync(dbc, powerDevice, meter, messageService, cancellationToken);
           await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
 
@@ -61,16 +61,29 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
           break;
 
         case PowerSourceModuleTypeConnector.CommutationCheck:
-          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+          await ResetUsedDevicesAsync(dbc, powerDevice, meter, messageService, cancellationToken);
           await SwitchingSelfControl.CheckSwitching(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
 
         case PowerSourceModuleTypeConnector.OutputCurrentCheck:
-          await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+          await ResetUsedDevicesAsync(dbc, powerDevice, meter, messageService, cancellationToken);
           await ResistanceMeasurementCheckService.PerformResistanceCheckAsync(cancellationToken, messageService, meter, powerDevice, dbc);
           break;
       }
 
+    }
+
+    private static Task ResetUsedDevicesAsync(
+      ISwitchingDevice dbc,
+      IPowerSourceModule powerDevice,
+      IMultimeter meter,
+      IUserInteractionService messageService,
+      CancellationToken cancellationToken)
+    {
+      return DeviceResetService.ResetDevicesAsync(
+        [dbc, powerDevice, meter],
+        messageService,
+        cancellationToken);
     }
 
     private static async Task<bool> CheckConnectionsAsync(IUserInteractionService messageService, ISwitchingDevice device, IMultimeter meter, IPowerSourceModule powerSource)

@@ -166,6 +166,7 @@ internal sealed class ApplicationAutoConfigurationService
     {
       IdleModeExecution = false,
       IsErrorSimulationMode = false,
+      IsHardwareErrorSimulationMode = false,
       StepByStepMode = false,
       StopOnError = false,
       LegacyCompatibilityMode = false

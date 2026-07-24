@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -26,33 +27,64 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
     {
       string label = voltageSources == VoltageSources.Supply12V ? "12 В" : "5 В";
 
-      try
+      await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await _voltageManager.SetSourceVoltageAsync(voltageSources);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Выбор источника напряжения", $"Источник: {label}", true, 1, messageService);
-      }
-      catch (Exception ex)
-      {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка выбора источника напряжения", ex.Message, false, 1, messageService);
-        throw VoltageExceptionFactory.SetSourceFailed(label, ex.Message);
-      }
+        try
+        {
+          await _voltageManager.SetSourceVoltageAsync(voltageSources);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Выбор источника напряжения",
+            $"Источник: {label}",
+            true,
+            1,
+            messageService);
+          return true;
+        }
+        catch (Exception ex)
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка выбора источника напряжения",
+            ex.Message,
+            false,
+            1,
+            messageService);
+          throw VoltageExceptionFactory.SetSourceFailed(label, ex.Message);
+        }
+      }, messageService, deviceTask: true);
     }
 
     public async Task SetVoltageLevelAsync(int integerPart, int decimalPart, IUserInteractionService? messageService = null)
     {
       string value = $"{integerPart}.{decimalPart}";
 
-      try
+      await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        await _voltageManager.SetVoltageLevelAsync(integerPart, decimalPart);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка уровня напряжения", $"Напряжение: {value} В", true, 1, messageService);
-      }
-      catch (Exception ex)
-      {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Ошибка установки напряжения", ex.Message, false, 1, messageService);
-
-        throw VoltageExceptionFactory.SetLevelFailed(value, ex.Message);
-      }
+        try
+        {
+          await _voltageManager.SetVoltageLevelAsync(integerPart, decimalPart);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Установка уровня напряжения",
+            $"Напряжение: {value} В",
+            true,
+            1,
+            messageService);
+          return true;
+        }
+        catch (Exception ex)
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка установки напряжения",
+            ex.Message,
+            false,
+            1,
+            messageService);
+          throw VoltageExceptionFactory.SetLevelFailed(value, ex.Message);
+        }
+      }, messageService, deviceTask: true);
     }
   }
 }

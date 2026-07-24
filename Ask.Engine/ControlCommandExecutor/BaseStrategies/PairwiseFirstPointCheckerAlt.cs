@@ -62,8 +62,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           var _basePoint = chains.PointModels.First();
           await ConnectToBusAAndBAsync(context.MessageService, _basePoint);
 
-          var Rt1 = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
-          if (Rt1 > 100)
+          var Rt1 = context.ValidatePointConnections
+            ? await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit)
+            : 0;
+          if (context.ValidatePointConnections && Rt1 > 100)
           {
             string machineAddress = string.Empty;
 
@@ -93,7 +95,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.MessageService.GetLastLineNumber(),
               baseCommandModel.FormattedStartLineNumber));
           }
-          else
+          else if (context.ValidatePointConnections)
           {
             string machineAddress = string.Empty;
 
@@ -128,8 +130,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var point = chains.PointModels[i];
             await ConnectToBusAAndBAsync(context.MessageService, point);
 
-            var Rt2 = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
-            if (Rt2 > 100)
+            var Rt2 = context.ValidatePointConnections
+              ? await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit)
+              : 0;
+            if (context.ValidatePointConnections && Rt2 > 100)
             {
               string machineAdress = string.Empty;
               if (DeviceDisplayConfig.GetMachineAddressVisibility())
@@ -158,7 +162,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {errorMessageModels.ToString()}"));
             }
-            else
+            else if (context.ValidatePointConnections)
             {
               string machineAdress = string.Empty;
               if (DeviceDisplayConfig.GetMachineAddressVisibility())
@@ -220,7 +224,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               Rt = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
 
-              if (Rt > 100)
+              if (context.ValidatePointConnections && Rt > 100)
               {
                 var errorMessageModels = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Rt, chains: $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}");
                 errorMessageModels.Status = ShowMessageModel.MessageType.Error;
@@ -345,7 +349,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
     {
       var fastMeter = await EquipmentService.GetFastMeterOrThrow(userMessageService);
-      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(
+        param,
+        rangeFrom,
+        rangeTo,
+        userMessageService);
       return result;
     }
 

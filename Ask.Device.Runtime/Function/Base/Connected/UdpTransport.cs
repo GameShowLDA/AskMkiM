@@ -34,7 +34,9 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, String.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Initialize, timeout: _device.ConnectedProfile.Timeout);
@@ -71,6 +73,11 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          return false;
+        }
+
         IsReset?.Invoke();
         return true;
       }

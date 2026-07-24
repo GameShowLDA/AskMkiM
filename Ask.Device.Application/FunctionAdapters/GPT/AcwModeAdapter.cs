@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Breakdown;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -880,12 +881,13 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Генерируется при ошибке выполнения измерения.  
       /// Сообщение исключения содержит текст ошибки, полученный от устройства.
       /// </exception>
-      public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение тока ACW",
-          () => _acwMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
+          () => _acwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, param, rangeFrom, rangeTo),
+          maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
         {
@@ -897,7 +899,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
             2,
             userMessageService);
 
-          throw new Exception($"Ошибка при измерении тока ACW: {execution.ErrorMessage}");
+          throw new DeviceException($"Ошибка при измерении тока ACW: {execution.ErrorMessage}");
         }
 
         var (result, unit) = execution.Value;
