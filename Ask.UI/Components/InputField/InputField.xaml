@@ -7,6 +7,7 @@
              xmlns:inputControls="clr-namespace:Ask.UI.Components.TextBoxPlaceholder"
              xmlns:dataControls="clr-namespace:Ask.UI.Components.InputField.Controls"
              mc:Ignorable="d" 
+             FocusVisualStyle="{x:Null}"
              d:DesignHeight="910" d:DesignWidth="250">
 
     <UserControl.Resources>
@@ -147,93 +148,43 @@
                 />
 
             <!--Электрический параметр-->
-            <Border  Margin="5" Grid.Row="2" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Name="headerElectricalData" 
-                           FontFamily="{DynamicResource WinstonMedium}" 
-                           TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_Electrical_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <inputControls:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Height="40" 
-                                          FontFamily="{DynamicResource WinstonLight}"
-                                          Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:ElectricalInput Grid.Row="2"
+                                          x:Name="ElectricalTextBox"
+                                          Margin="5"
+                                          Header="{Binding Source={StaticResource LS_Input_Electrical_Title}, Path=Value}"
+                                          ExecutionHeader="Электрический параметр"
+                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                                          Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <!--Время выполнения в сек.-->
-            <Border  Margin="5" Grid.Row="3" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10"
-                 Visibility="{Binding IsTimeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
-                 >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock x:Name="headerTimeData" 
-                           FontFamily="{DynamicResource WinstonMedium}" 
-                           TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_Time_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <inputControls:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}" 
-                                          Height="40" FontFamily="{DynamicResource WinstonLight}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}" 
-                                           Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"/>
-                </Grid>
-            </Border>
+            <dataControls:TimeInput Grid.Row="3"
+                                    x:Name="TimeTextBox"
+                                    Margin="5"
+                                    Header="{Binding Source={StaticResource LS_Input_Time_Title}, Path=Value}"
+                                    ExecutionHeader="Время выполнения"
+                                    Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
+                                    Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
+                                    Visibility="{Binding IsTimeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Время нарастания в сек.-->
-            <Border  Margin="5" Grid.Row="4" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"
-                 Visibility="{Binding IsTimeRampVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
-                 >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock x:Name="headerTimeRampData" 
-                           FontFamily="{DynamicResource WinstonMedium}" 
-                           TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_TimeRamp_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5" />
-                    <inputControls:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
-                                          Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
-                                          Height="40" FontFamily="{DynamicResource WinstonLight}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:TimeInput Grid.Row="4"
+                                    x:Name="TimeRampTextBox"
+                                    Margin="5"
+                                    Header="{Binding Source={StaticResource LS_Input_TimeRamp_Title}, Path=Value}"
+                                    ExecutionHeader="Время нарастания"
+                                    Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
+                                    Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
+                                    Visibility="{Binding IsTimeRampVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Напряжение в В.-->
-            <Border  Margin="5" Grid.Row="5" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"
-                  Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
-                 >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                    x:Name="headerVoltageData" 
-                    FontFamily="{DynamicResource WinstonMedium}" 
-                    TextWrapping="Wrap" TextTrimming="None" 
-                    Text="{Binding Source={StaticResource LS_Input_Voltage_Title}, Path=Value}" FontSize="18" 
-                    Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <inputControls:TextBoxPlaceholder x:Name="VoltageTextBox" 
-                                          Grid.Row="5" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Unit="{Binding Source={StaticResource LS_Unit_Volts}, Path=Value}" 
-                                          Height="40" FontFamily="{DynamicResource WinstonLight}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:ElectricalInput Grid.Row="5"
+                                          x:Name="VoltageTextBox"
+                                          Margin="5"
+                                          Header="{Binding Source={StaticResource LS_Input_Voltage_Title}, Path=Value}"
+                                          ExecutionHeader="Напряжение"
+                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                                          Unit="{Binding Source={StaticResource LS_Unit_Volts}, Path=Value}"
+                                          Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Шины для проверки-->
             <Border Margin="5" Grid.Row="6" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"

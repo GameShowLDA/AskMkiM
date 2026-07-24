@@ -267,39 +267,27 @@ namespace Ask.UI.Components.InputField
     private void ActionExecutor_StartProcessing(bool obj)
     {
       var secondBaseText = "Вторая точка";
-      var electricalBaseText = "Электрический параметр";
-      var timeBaseText = "Время выполнения";
-      var timeRampBaseText = "Время нарастания";
-      var voltageBaseText = "Напряжение";
       var busBaseText = "Шина для проверки";
       var busGroupBaseText = "Группа шин";
 
       Visibility visibility = obj ? Visibility.Collapsed : Visibility.Visible;
       FirstPointTextBox.IsExecuting = obj;
       LastPointTextBox.IsExecuting = obj;
+      TimeTextBox.IsExecuting = obj;
+      TimeRampTextBox.IsExecuting = obj;
+      ElectricalTextBox.IsExecuting = obj;
+      VoltageTextBox.IsExecuting = obj;
 
-      ElectricalTextBox.Visibility = visibility;
-      TimeTextBox.Visibility = visibility;
-      TimeRampTextBox.Visibility = visibility;
-      VoltageTextBox.Visibility = visibility;
       BusBorder.Visibility = visibility;
       BusGroupBorder.Visibility = visibility;
 
       if (obj)
       {
-        headerElectricalData.Text = $"{electricalBaseText}: {ElectricalTextBox.Text} {ElectricalTextBox.Unit}";
-        headerTimeData.Text = $"{timeBaseText}: {TimeTextBox.Text} {TimeTextBox.Unit}";
-        headerTimeRampData.Text = $"{timeRampBaseText}: {TimeRampTextBox.Text} {TimeRampTextBox.Unit}";
-        headerVoltageData.Text = $"{voltageBaseText}: {VoltageTextBox.Text} {VoltageTextBox.Unit}";
         headerBusData.Text = $"{busBaseText}: {ActiveBus}";
         headerBusGroupData.Text = $"{busGroupBaseText}: {ActiveBusGroup}";
       }
       else
       {
-        headerElectricalData.Text = $"{electricalBaseText}";
-        headerTimeData.Text = $"{timeBaseText} в сек.";
-        headerTimeRampData.Text = $"{timeRampBaseText} в сек.";
-        headerVoltageData.Text = $"{voltageBaseText} в В.";
         headerBusData.Text = $"{busBaseText}";
         headerBusGroupData.Text = busGroupBaseText;
       }
