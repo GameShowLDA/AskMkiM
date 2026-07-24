@@ -263,6 +263,8 @@ namespace Ask.UI.Components.InputField
       VoltageTextBox.IsExecuting = obj;
       BusSelector.IsExecuting = obj;
       BusGroupSelector.IsExecuting = obj;
+      TestedNumberBox.IsExecuting = obj;
+      TesterNumberBox.IsExecuting = obj;
     }
 
     /// <summary>

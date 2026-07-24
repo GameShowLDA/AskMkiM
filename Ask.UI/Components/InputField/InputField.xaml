@@ -28,61 +28,21 @@
             </Grid.RowDefinitions>
 
             <!--Проверяемый модуль-->
-            <Border  Margin="5" Grid.Row="0" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+            <dataControls:ModuleInput Grid.Row="0"
+                                      x:Name="TestedNumberBox"
+                                      Margin="5"
+                                      Header="Проверяемый модуль a.b"
+                                      ExecutionHeader="Проверяемый модуль"
+                                      Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"/>
 
-                    <TextBlock Name="headerTestedNumber" 
-                               FontFamily="{DynamicResource WinstonMedium}"
-                               TextWrapping="Wrap" 
-                               TextTrimming="None" 
-                               Text="Проверяемый модуль a.b" 
-                               FontSize="18" 
-                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"  
-                               Margin="0,5" 
-                               VerticalAlignment="Center" 
-                               HorizontalAlignment="Center" Padding="5"/>
-                    <inputControls:TextBoxPlaceholder Grid.Row="1" 
-                               FontFamily="{DynamicResource WinstonLight}" 
-                               x:Name="TestedNumberBox" 
-                               Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                               Height="40" 
-                               Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-
-                </Grid>
-            </Border>
-
-            <!--Провряющий модуль-->
-            <Border  Margin="5" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Name="headerTesterNumber" 
-                               FontFamily="{DynamicResource WinstonMedium}"
-                               TextWrapping="Wrap" 
-                               TextTrimming="None" 
-                               Text="Проверяющий модуль a.b" 
-                               FontSize="18" 
-                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"  
-                               Margin="0,5" 
-                               VerticalAlignment="Center" 
-                               HorizontalAlignment="Center" Padding="5"/>
-                    <inputControls:TextBoxPlaceholder Grid.Row="1" 
-                               FontFamily="{DynamicResource WinstonLight}" 
-                               x:Name="TesterNumberBox" 
-                               Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                               Height="40" 
-                               IsNumberInputEnabled="False"
-                               Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-
-                </Grid>
-            </Border>
+            <!--Проверяющий модуль-->
+            <dataControls:ModuleInput Grid.Row="1"
+                                      x:Name="TesterNumberBox"
+                                      Margin="5"
+                                      Header="Проверяющий модуль a.b"
+                                      ExecutionHeader="Проверяющий модуль"
+                                      Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                                      IsNumberInputEnabled="False"/>
 
             <!--Диапазон проверки-->
             <Border  Margin="5" Grid.Row="2" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
