@@ -242,6 +242,7 @@ namespace Ask.UI.Controls.ProtocolNew
         LastMessage,
         ignoreOutputValidation,
         _modeSettings.AccumulateErrorMessages,
+        _modeSettings.CheckType,
         AddError,
         callerName,
         callerFile,
