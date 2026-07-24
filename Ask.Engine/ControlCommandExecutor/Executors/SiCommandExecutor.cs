@@ -132,8 +132,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var answer = (await breadDown.IrManger.Measure.MeasureAsync(
           ElectricalTestFunction.InsulationResistance,
           value,
-          firstValue,
-          userMessageService: messageService)).value;
+          firstValue)).value;
         LogPerformance("node accumulation measurement device call", measurement);
 
         measurement.Restart();
@@ -163,8 +162,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           ElectricalTestFunction.InsulationResistance,
           value,
           value,
-          60000,
-          userMessageService: messageService);
+          60000);
         LogPerformance("node full measurement device call", measurement);
 
         measurement.Restart();
