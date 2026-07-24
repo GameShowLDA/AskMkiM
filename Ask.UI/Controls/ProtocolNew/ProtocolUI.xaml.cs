@@ -64,6 +64,7 @@ namespace Ask.UI.Controls.ProtocolNew
         control.header.Text = e.NewValue as string;
         control.headerFile.Text = e.NewValue as string;
         control.FileName.Text = e.NewValue as string;
+        control.UpdateInspectionProtocolTitle();
       }
     }
 
@@ -163,6 +164,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
+      LayoutUpdated += ProtocolUI_LayoutUpdated;
       _protocolStorage = new ProtocolStorageService();
       _inspectionProtocolAreaController = new InspectionProtocolAreaController(_protocolStorage, this);
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
@@ -209,6 +211,56 @@ namespace Ask.UI.Controls.ProtocolNew
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
       AttachEventSubscriptions();
+      UpdateProtocolManagerLayout();
+    }
+
+    private void ProtocolUI_LayoutUpdated(object? sender, EventArgs e)
+    {
+      UpdateProtocolManagerLayout();
+    }
+
+    private void UpdateProtocolManagerLayout()
+    {
+      if (ProtocolManager.Visibility != Visibility.Visible
+          || InspectionProtocolManager.Visibility != Visibility.Visible
+          || InspectionProtocolSplitter.Visibility != Visibility.Visible)
+      {
+        SetProtocolManagerColumnWidth(ExecutionProtocolManagerColumn, new GridLength(1, GridUnitType.Star));
+        SetProtocolManagerColumnWidth(ProtocolManagerSplitterColumn, new GridLength(0));
+        SetProtocolManagerColumnWidth(InspectionProtocolManagerColumn, new GridLength(0));
+        return;
+      }
+
+      double splitterLeft = InspectionProtocolSplitter
+        .TranslatePoint(new Point(0, 0), ProtocolManager)
+        .X;
+      double inspectionLeft = InspectionProtocolPanel
+        .TranslatePoint(new Point(0, 0), ProtocolManager)
+        .X;
+
+      if (!double.IsFinite(splitterLeft)
+          || !double.IsFinite(inspectionLeft)
+          || splitterLeft <= 0
+          || inspectionLeft <= splitterLeft)
+      {
+        return;
+      }
+
+      SetProtocolManagerColumnWidth(ExecutionProtocolManagerColumn, new GridLength(splitterLeft));
+      SetProtocolManagerColumnWidth(
+        ProtocolManagerSplitterColumn,
+        new GridLength(inspectionLeft - splitterLeft));
+      SetProtocolManagerColumnWidth(InspectionProtocolManagerColumn, new GridLength(1, GridUnitType.Star));
+    }
+
+    private static void SetProtocolManagerColumnWidth(ColumnDefinition column, GridLength width)
+    {
+      bool isSameValue = column.Width.GridUnitType == width.GridUnitType
+                         && Math.Abs(column.Width.Value - width.Value) < 0.1;
+      if (!isSameValue)
+      {
+        column.Width = width;
+      }
     }
 
     private void AttachEventSubscriptions()
@@ -239,16 +291,18 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanExit =>
-      StopButtonElement.Visibility == Visibility.Visible
-      || ContinueButtonElement.Visibility == Visibility.Visible
-      || PauseButtonElement.Visibility == Visibility.Visible;
+      !_isRetryOrContinueInteraction
+      && (StopButtonElement.Visibility == Visibility.Visible
+          || ContinueButtonElement.Visibility == Visibility.Visible
+          || PauseButtonElement.Visibility == Visibility.Visible);
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanJumpToCommand =>
-      ContinueButtonElement.Visibility == Visibility.Visible;
+      !_isRetryOrContinueInteraction
+      && ContinueButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.Start() => StartFromHotkey();
@@ -447,6 +501,42 @@ namespace Ask.UI.Controls.ProtocolNew
       OpenLatestProtocolFolder();
     }
 
+    private void OpenInspectionFileButton_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        OpenProtocolInEditor(_protocolStorage.ResolveLatestInspectionProtocolPath());
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка при открытии протокола проверки в редакторе", ex);
+      }
+    }
+
+    private void OpenInspectionFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        OpenProtocolFolder(_protocolStorage.ResolveLatestInspectionProtocolPath());
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка при открытии папки протокола проверки", ex);
+      }
+    }
+
+    private void PrintInspectionButton_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        PrintUtility.PrintProtocol(_protocolStorage.InspectionProtocolText);
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка печати протокола проверки", ex);
+      }
+    }
+
     private void PrintButton_Click(object sender, RoutedEventArgs e)
     {
       if (PrintRequested != null)
@@ -469,13 +559,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       try
       {
-        var latestProtocolPath = ResolveLatestProtocolPath();
-        if (string.IsNullOrWhiteSpace(latestProtocolPath))
-        {
-          return;
-        }
-
-        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(latestProtocolPath);
+        OpenProtocolInEditor(ResolveLatestProtocolPath());
       }
       catch (Exception ex)
       {
@@ -487,23 +571,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       try
       {
-        var latestProtocolPath = ResolveLatestProtocolPath();
-        if (!string.IsNullOrWhiteSpace(latestProtocolPath) && File.Exists(latestProtocolPath))
-        {
-          Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{Path.GetFullPath(latestProtocolPath)}\"")
-          {
-            UseShellExecute = true
-          });
-          return;
-        }
-
-        var historyDirectory = _protocolStorage.GetHistoryDirectory();
-        Directory.CreateDirectory(historyDirectory);
-
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
-        {
-          UseShellExecute = true
-        });
+        OpenProtocolFolder(ResolveLatestProtocolPath());
       }
       catch (Exception ex)
       {
@@ -514,6 +582,44 @@ namespace Ask.UI.Controls.ProtocolNew
     private string? ResolveLatestProtocolPath()
     {
       return _protocolStorage.ResolveLatestExecutionProtocolPath();
+    }
+
+    private static void OpenProtocolInEditor(string? protocolPath)
+    {
+      if (!string.IsNullOrWhiteSpace(protocolPath))
+      {
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(protocolPath);
+      }
+    }
+
+    private void OpenProtocolFolder(string? protocolPath)
+    {
+      if (!string.IsNullOrWhiteSpace(protocolPath) && File.Exists(protocolPath))
+      {
+        Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{Path.GetFullPath(protocolPath)}\"")
+        {
+          UseShellExecute = true
+        });
+        return;
+      }
+
+      var historyDirectory = _protocolStorage.GetHistoryDirectory();
+      Directory.CreateDirectory(historyDirectory);
+
+      Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
+      {
+        UseShellExecute = true
+      });
+    }
+
+    private void UpdateInspectionProtocolTitle()
+    {
+      if (InspectionFileName == null)
+      {
+        return;
+      }
+
+      InspectionFileName.Text = $"Протокол проверки {Header} от {DateTime.Now:dd.MM.yyyy}";
     }
   }
 }

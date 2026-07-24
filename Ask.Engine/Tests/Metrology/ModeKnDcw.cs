@@ -158,7 +158,11 @@ namespace Ask.Engine.Tests.Metrology
       /// <returns>Измеренное значение напряжения.</returns>
       private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
       {
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(
+          param,
+          rangeFrom,
+          rangeTo,
+          userMessageService);
         return result;
       }
 

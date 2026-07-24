@@ -165,7 +165,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(
+          param,
+          rangeFrom,
+          rangeTo,
+          userMessageService);
         return result;
       }
 
@@ -191,7 +195,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(
+          param,
+          rangeFrom,
+          rangeTo,
+          userMessageService);
         return result;
       }
 
@@ -206,7 +214,11 @@ namespace Ask.Engine.Tests.Metrology
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(
+          param,
+          rangeFrom,
+          rangeTo,
+          userMessageService);
         return result;
       }
 

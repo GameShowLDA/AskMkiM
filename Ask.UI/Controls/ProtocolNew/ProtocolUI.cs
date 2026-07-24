@@ -5,7 +5,9 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Features.ProtocolNew.Controls;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
@@ -56,6 +58,7 @@ namespace Ask.UI.Controls.ProtocolNew
     private readonly ActionExecutor ActionExecutor;
 
     private TaskCompletionSource<UserAction> _userActionTcs;
+    private bool _isRetryOrContinueInteraction;
 
     public ErrorManager Errors;
 
@@ -142,7 +145,18 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync() => await ActionExecutor.StartAsync(_modeSettings.Current);
+    public async Task StartAsync()
+    {
+      var actionSettings = _modeSettings.Current;
+      var executionName = actionSettings.NameProvider?.Invoke();
+      if (!string.IsNullOrWhiteSpace(executionName))
+      {
+        Header = executionName;
+        actionSettings.Name = executionName;
+      }
+
+      await ActionExecutor.StartAsync(actionSettings);
+    }
 
     /// <summary>
     /// Завершение текущей выполняемой задачи.
@@ -370,6 +384,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
+      UpdateInspectionProtocolTitle();
       _inspectionProtocolAreaController.Show(protocolText, InspectionProtocolHost);
     }
 
@@ -389,14 +404,17 @@ namespace Ask.UI.Controls.ProtocolNew
         : new GridLength(0);
       InspectionProtocolSplitter.Visibility = visibility;
       InspectionProtocolPanel.Visibility = visibility;
+      InspectionProtocolManager.Visibility = visibility;
     }
 
     /// <summary>
-    /// Сохраняет итоговый протокол в History в формате RTLST.
+    /// Сохраняет итоговый протокол в каталоге истории.
     /// </summary>
-    public async Task SaveInspectionProtocolAsync(string name)
+    /// <param name="name">Имя сохраняемого протокола.</param>
+    /// <param name="checkType">Тип завершённой проверки.</param>
+    public async Task SaveInspectionProtocolAsync(string name, CheckType checkType)
     {
-      await _protocolStorage.SaveInspectionProtocolAsync(name);
+      await _protocolStorage.SaveInspectionProtocolAsync(name, checkType);
     }
 
     #endregion
@@ -427,31 +445,69 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Асинхронно ожидает действие пользователя после возникновения ошибки или остановки.
     /// </summary>
     /// <remarks>
-    /// Метод создаёт новый <see cref="TaskCompletionSource{TResult}"/> для ожидания выбора пользователя 
-    /// (например, продолжить, пропустить или остановить выполнение).  
-    /// Если в конфигурации установлено свойство <c>IsStopOnErrorEnabled</c>,  
-    /// интерфейс переходит в режим паузы — скрываются все кнопки и отображаются кнопки управления паузой.  
-    /// После выбора действия пользователем результат возвращается как значение перечисления 
-    /// <see cref="IUserInteractionService.UserAction"/>.
+    /// Аппаратная операция ожидает решения независимо от настройки остановки при ошибке.
+    /// Для отрицательного результата измерения ожидание определяется этой настройкой.
     /// </remarks>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="canContinue">Признак доступности продолжения после последней попытки.</param>
     /// <returns>
-    /// Задача, представляющая ожидаемое действие пользователя.  
-    /// Если режим остановки на ошибке отключён, возвращается <see cref="IUserInteractionService.UserAction.None"/>.
+    /// Выбранное действие или <see cref="UserAction.None"/>, если ожидание не требуется.
     /// </returns>
-    public async Task<UserAction> WaitUserActionAsync(bool loop = false, bool deviceTask = false)
+    public async Task<UserAction> WaitUserActionAsync(
+      bool loop = false,
+      bool deviceTask = false,
+      bool canContinue = true)
     {
-      _userActionTcs = new TaskCompletionSource<UserAction>();
-
-      if (await ExecutionConfig.GetIsStopOnErrorEnabled() || loop || deviceTask)
+      bool stopOnError = await ExecutionConfig.GetIsStopOnErrorEnabled();
+      if (ShouldWaitForUserAction(stopOnError, loop, deviceTask))
       {
-
+        _userActionTcs = new TaskCompletionSource<UserAction>(
+          TaskCreationOptions.RunContinuationsAsynchronously);
         SetNonVisibleAllButton();
-        ShowButtonsOnPause(true);
+        ShowInteractiveActionButtons(canContinue);
 
         return await _userActionTcs.Task;
       }
 
       return UserAction.None;
+    }
+
+    /// <inheritdoc />
+    public async Task<UserAction> WaitRetryOrContinueAsync()
+    {
+      _userActionTcs = new TaskCompletionSource<UserAction>(
+        TaskCreationOptions.RunContinuationsAsynchronously);
+      _isRetryOrContinueInteraction = true;
+      SetNonVisibleAllButton();
+      _buttonController.Apply(ProtocolButtonState.RetryOrContinue);
+
+      try
+      {
+        return await _userActionTcs.Task;
+      }
+      finally
+      {
+        _isRetryOrContinueInteraction = false;
+      }
+    }
+
+    /// <summary>
+    /// Определяет необходимость ожидания решения оператора.
+    /// </summary>
+    /// <param name="stopOnError">Настройка остановки при отрицательном результате измерения.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <returns>
+    /// <see langword="true"/>, если требуется ожидать решение оператора.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldWaitForUserAction(
+      bool stopOnError,
+      bool loop,
+      bool deviceTask)
+    {
+      return stopOnError || loop || deviceTask;
     }
 
     public void AddError(ErrorItem errorItem)

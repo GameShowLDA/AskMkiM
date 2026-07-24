@@ -33,13 +33,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
 
-      var devices = EquipmentService.GetAllDevices();
-
-      foreach (var device in devices)
-      {
-        await device.ConnectableManager.ResetAsync(context.Console);
-      }
-
       GetProtocol(context, command, protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
     }

@@ -163,7 +163,7 @@ namespace UI.Services
     /// <param name="textEditorContainer">Контейнер редактора.</param>
     /// <param name="textEditor">Содержимое вкладки (например, редактор или архив).</param>
     /// <param name="editorType">Тип редактора (по умолчанию — текстовый редактор).</param>
-    internal async void ShowEditorDockItem(string nameFile, TextEditorContainer textEditorContainer, UserControl textEditor, EditorType editorType = null)
+    internal async Task ShowEditorDockItem(string nameFile, TextEditorContainer textEditorContainer, UserControl textEditor, EditorType editorType = null)
     {
       LogDebug($"Создание DockItem для файла {nameFile}");
       var dockItem = new DockItem

@@ -43,12 +43,10 @@ namespace UI.Controls.Settings.Execution
         if (isPowered)
         {
           IdleMode.Visibility = Visibility.Collapsed;
-          ErrorSimulation.Visibility = Visibility.Collapsed;
         }
         else
         {
           IdleMode.Visibility = Visibility.Visible;
-          ErrorSimulation.Visibility = Visibility.Visible;
         }
       });
     }
@@ -62,7 +60,8 @@ namespace UI.Controls.Settings.Execution
       {
         StopInError.CheckedChanged += CheckedChanged;
         StepByStepMode.CheckedChanged += CheckedChanged;
-        ErrorSimulation.CheckedChanged += CheckedChanged;
+        MeasurementErrorSimulation.CheckedChanged += CheckedChanged;
+        HardwareErrorSimulation.CheckedChanged += CheckedChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
         CompatibilityModeCheckBox.CheckedChanged += CheckedChanged;
@@ -145,7 +144,8 @@ namespace UI.Controls.Settings.Execution
       {
         StopOnError = StopInError.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
-        IsErrorSimulationMode = ErrorSimulation.IsChecked,
+        IsErrorSimulationMode = MeasurementErrorSimulation.IsChecked,
+        IsHardwareErrorSimulationMode = HardwareErrorSimulation.IsChecked,
         IdleModeExecution = IdleMode.IsChecked,
         LegacyCompatibilityMode = CompatibilityModeCheckBox.IsChecked,
       };
@@ -158,6 +158,7 @@ namespace UI.Controls.Settings.Execution
     private static bool ProtocolEquals(SettingsExecutionDto a, SettingsExecutionDto b) =>
       a.IdleModeExecution == b.IdleModeExecution &&
       a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
+      a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
       a.LegacyCompatibilityMode == b.LegacyCompatibilityMode;
@@ -168,7 +169,8 @@ namespace UI.Controls.Settings.Execution
     private void DefalultData()
     {
       IdleMode.IsChecked = _baseExecutionModel.IdleModeExecution;
-      ErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
+      MeasurementErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
+      HardwareErrorSimulation.IsChecked = _baseExecutionModel.IsHardwareErrorSimulationMode;
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;

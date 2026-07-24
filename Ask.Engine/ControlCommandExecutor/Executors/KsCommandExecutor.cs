@@ -120,7 +120,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue);
+        answer = await meter.ResistanceManager.MeasureResistanceAsync(
+          value,
+          firstValue,
+          secondValue,
+          messageService);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -150,7 +154,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ContinuityManager.CheckContinuityAsync(value, firstValue, secondValue);
+        answer = await meter.ContinuityManager.CheckContinuityAsync(
+          value,
+          firstValue,
+          secondValue,
+          messageService);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {

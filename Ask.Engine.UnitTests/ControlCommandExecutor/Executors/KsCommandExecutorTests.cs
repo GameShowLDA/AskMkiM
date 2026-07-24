@@ -443,7 +443,10 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var mock = new Mock<IUserInteractionService>();
     mock.SetupProperty(x => x.Header, string.Empty);
     mock.Setup(x => x.GetCancellationToken()).Returns(CancellationToken.None);
-    mock.Setup(x => x.WaitUserActionAsync(It.IsAny<bool>(), It.IsAny<bool>())).ReturnsAsync(UserAction.None);
+    mock.Setup(x => x.WaitUserActionAsync(
+      It.IsAny<bool>(),
+      It.IsAny<bool>(),
+      It.IsAny<bool>())).ReturnsAsync(UserAction.None);
     mock.Setup(x => x.ShowMessageAsync(
         It.IsAny<ShowMessageModel>(),
         It.IsAny<bool>(),

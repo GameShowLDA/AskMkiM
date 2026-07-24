@@ -1,6 +1,9 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Services.UI;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT;
 using Ask.Device.Runtime.Function.Helpers;
@@ -23,38 +26,56 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
     public async Task SetLcdContrastAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      await _systemSettings.SetLcdContrastAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка контрастности дисплея", $"{value}", true, 1, userMessageService);
+      await ExecuteSettingAsync(
+        () => _systemSettings.SetLcdContrastAsync(value),
+        "Установка контрастности дисплея",
+        $"{value}",
+        userMessageService);
     }
 
     public async Task SetLcdBrightnessAsync(double value, IUserInteractionService? userMessageService = null)
     {
-      await _systemSettings.SetLcdBrightnessAsync(value);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка яркости дисплея", $"{value}", true, 1, userMessageService);
+      await ExecuteSettingAsync(
+        () => _systemSettings.SetLcdBrightnessAsync(value),
+        "Установка яркости дисплея",
+        $"{value}",
+        userMessageService);
     }
 
     public async Task SetBuzzerPrimarySound(bool state, IUserInteractionService? userMessageService = null)
     {
-      await _systemSettings.SetBuzzerPrimarySound(state);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка звука успешного теста", state ? "ON" : "OFF", true, 1, userMessageService);
+      await ExecuteSettingAsync(
+        () => _systemSettings.SetBuzzerPrimarySound(state),
+        "Установка звука успешного теста",
+        state ? "ON" : "OFF",
+        userMessageService);
     }
 
     public async Task SetBuzzerFeedbackSound(bool state, IUserInteractionService? userMessageService = null)
     {
-      await _systemSettings.SetBuzzerFeedbackSound(state);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка звука ошибочного теста", state ? "ON" : "OFF", true, 1, userMessageService);
+      await ExecuteSettingAsync(
+        () => _systemSettings.SetBuzzerFeedbackSound(state),
+        "Установка звука ошибочного теста",
+        state ? "ON" : "OFF",
+        userMessageService);
     }
 
     public async Task SetBuzzerPrimaryTime(double duration, IUserInteractionService? userMessageService = null)
     {
-      await _systemSettings.SetBuzzerPrimaryTime(duration);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка длительности успешного сигнала", $"{duration} сек", true, 1, userMessageService);
+      await ExecuteSettingAsync(
+        () => _systemSettings.SetBuzzerPrimaryTime(duration),
+        "Установка длительности успешного сигнала",
+        $"{duration} сек",
+        userMessageService);
     }
 
     public async Task SetBuzzerFeedbackTime(double duration, IUserInteractionService? userMessageService = null)
     {
-      await _systemSettings.SetBuzzerFeedbackTime(duration);
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Установка длительности ошибочного сигнала", $"{duration} сек", true, 1, userMessageService);
+      await ExecuteSettingAsync(
+        () => _systemSettings.SetBuzzerFeedbackTime(duration),
+        "Установка длительности ошибочного сигнала",
+        $"{duration} сек",
+        userMessageService);
     }
 
     public async Task<SystemDataModel> ReadConfigurationAsync()
@@ -73,6 +94,52 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Применяет системную настройку GPT с поддержкой повторных попыток.
+    /// </summary>
+    /// <param name="operation">Операция изменения настройки.</param>
+    /// <param name="operationName">Название операции.</param>
+    /// <param name="value">Устанавливаемое значение.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    private async Task ExecuteSettingAsync(
+      Func<Task> operation,
+      string operationName,
+      string value,
+      IUserInteractionService? userMessageService)
+    {
+      bool success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      {
+        try
+        {
+          await operation();
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            operationName,
+            value,
+            true,
+            1,
+            userMessageService);
+          return true;
+        }
+        catch (Exception ex) when (ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            operationName,
+            ex.Message,
+            false,
+            1,
+            userMessageService);
+          return false;
+        }
+      }, ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null, deviceTask: true);
+
+      if (!success)
+      {
+        throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
+      }
     }
   }
 }

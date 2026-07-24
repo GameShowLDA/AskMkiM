@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
@@ -44,7 +45,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     }
 
     /// <inheritdoc />
-    public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+    public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
     {
       var time = await _getTestTime();
       var timeRamp = await _getRampTime();
@@ -59,6 +60,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         time,
         timeRamp,
         _delayBeforeCall,
+        electricalTestFunction,
         param,
         rangeFrom,
         rangeTo,
@@ -66,11 +68,11 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         userMessageService);
 
       var result = measurement;
-      var resistanceMOm = _gptModel.SystemInsulationResistanceGOhm * 1000;
 
       if (_gptModel.Mode == Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
       {
-        result.Item1 = (measurement.value * resistanceMOm) / (resistanceMOm - measurement.value);
+        var resistanceMOm = _gptModel.SystemInsulationResistanceGOhm * 1000;
+        result.Item1 = measurement.value * resistanceMOm / (resistanceMOm - measurement.value);
       }
 
       result = (MeasurementAdapterHelper.Round(result.value), result.unit);

@@ -34,7 +34,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          return true;
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
         }
 
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 1);
@@ -58,7 +58,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          return true;
+          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
         }
 
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 2);

@@ -63,6 +63,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         firstValue,
         secondValue);
       pairwiseFirstPointCheckerAlt.CabelResistance = cabelResistance;
+      pairwiseFirstPointCheckerAlt.ValidatePointConnections = ShouldValidatePointConnections();
 
       if (command.AlgorithmKey.Contains("Д"))
       {
@@ -82,6 +83,16 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         protocolModel.AddInfo(nameCommand, infoMessage);
       }
     }
+
+    /// <summary>
+    /// Проверяет, требуется ли контролировать подключение точек команды ЭТ.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если холостой режим выключен.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldValidatePointConnections()
+      => !ExecutionConfig.GetIsIdleModeEnabled();
 
     private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {

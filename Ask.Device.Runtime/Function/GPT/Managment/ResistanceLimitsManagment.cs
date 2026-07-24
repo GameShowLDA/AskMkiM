@@ -46,6 +46,11 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (_getIsIdleMode())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          return (false, IdleHardwareErrorSimulator.ErrorMessage);
+        }
+
         _highLimit = value;
         return (true, string.Empty);
       }
@@ -75,7 +80,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _highLimit;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _highLimit;
       }
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?", timeout: 1000);
       return ParseDouble(response, "G");
@@ -85,7 +90,12 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     public async Task<(bool Success, string Message)> SetLowResistanceLimitAsync(double value, IUserInteractionService? userMessageService = null)
     {
       if (_getIsIdleMode())
-      { 
+      {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          return (false, IdleHardwareErrorSimulator.ErrorMessage);
+        }
+
         _lowLimit = value;
         return (true, string.Empty);
       }
@@ -118,7 +128,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _lowLimit;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _lowLimit;
       }
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?", timeout: 1000);
       return ParseDouble(response, "M");

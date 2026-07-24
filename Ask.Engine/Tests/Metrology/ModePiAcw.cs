@@ -4,11 +4,11 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -65,8 +65,6 @@ namespace Ask.Engine.Tests.Metrology
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService, timeCheck: true, timeRampCheck: true);
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
-
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
       await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole, data);
@@ -117,7 +115,12 @@ namespace Ask.Engine.Tests.Metrology
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
-        await meterDevice.AcwManger.Measure.MeasureAsync(param, LowerBound, UpperBound);
+        await meterDevice.AcwManger.Measure.MeasureAsync(
+          ElectricalTestFunction.DielectricWithstandAC,
+          param,
+          LowerBound,
+          UpperBound,
+          userMessageService: userMessageService);
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
         var answer = result < LowerBound || result > UpperBound;

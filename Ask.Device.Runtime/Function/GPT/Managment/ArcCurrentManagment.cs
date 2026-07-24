@@ -70,7 +70,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _arcCurrent;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _arcCurrent;
       }
 
       return await ArcCurrentHelper.GetArcCurrentAsync(_gptModel, _mode, _delay);

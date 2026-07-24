@@ -45,12 +45,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <inheritdoc />
     static public string GetCircuitName(SwitchingDeviceTypeConnector testType, int busContact)
     {
+      var bus = GetBusContactName(busContact);
       if (CircuitNames.TryGetValue(testType, out string? circuitName))
       {
-        return $"{circuitName}, контакт {busContact}";
+        return $"{circuitName}, шина {bus}";
       }
 
-      return $"Неизвестная цепь, контакт {busContact}";
+      return $"Неизвестная цепь, шина {bus}";
     }
 
     /// <inheritdoc />
@@ -58,7 +59,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return 0;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? -1 : 0;
       }
 
       DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10, busContact, 0);
@@ -82,6 +83,51 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     static public Type GetTestTypeEnum()
     {
       return typeof(SwitchingDeviceTypeConnector);
+    }
+
+    /// <summary>
+    /// Преобразует номер шины и контакта в строковое представление.
+    /// <para>
+    /// Если передана одна цифра:
+    /// <list type="bullet">
+    /// <item><description>1 → A</description></item>
+    /// <item><description>2 → B</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Если переданы две цифры:
+    /// <list type="bullet">
+    /// <item><description>11 → A1</description></item>
+    /// <item><description>12 → A2</description></item>
+    /// <item><description>13 → A3</description></item>
+    /// <item><description>14 → A4</description></item>
+    /// <item><description>21 → B1</description></item>
+    /// <item><description>22 → B2</description></item>
+    /// <item><description>23 → B3</description></item>
+    /// <item><description>24 → B4</description></item>
+    /// </list>
+    /// </para>
+    /// </summary>
+    /// <param name="busContact">Номер шины и контакта.</param>
+    /// <returns>Строковое представление шины и контакта.</returns>
+    public static string GetBusContactName(int busContact)
+    {
+      if (busContact is 1 or 2)
+      {
+        return busContact == 1 ? "A" : "B";
+      }
+
+      int bus = busContact / 10;
+      int contact = busContact % 10;
+
+      if ((bus != 1 && bus != 2) || contact is < 1 or > 4)
+      {
+        throw new ArgumentOutOfRangeException(
+            nameof(busContact),
+            $"Недопустимое значение: {busContact}");
+      }
+
+      return $"{(bus == 1 ? "A" : "B")}{contact}";
     }
   }
 }

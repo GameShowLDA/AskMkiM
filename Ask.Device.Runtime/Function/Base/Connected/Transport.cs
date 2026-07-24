@@ -54,7 +54,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         }
 
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       return (connect, answer);
     }
@@ -72,7 +72,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         }
 
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       return connect;
     }
@@ -90,7 +90,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         }
 
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       return (connect, answer);
     }
@@ -108,7 +108,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         }
 
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       return connect;
     }

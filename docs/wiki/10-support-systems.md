@@ -81,7 +81,8 @@ flowchart TD
 
 - регистрирует `ProgId`;
 - записывает команду открытия;
-- связывает расширения `.pk`, `.pkw`, `.opk`, `.opkw`, `.lst`, `.lstw`, `.acs` с текущим exe.
+- связывает расширения `.pk`, `.pkw`, `.opk`, `.opkw`, `.asktrace`, `.askresult`, `.askreport`,
+  `.lst`, `.lstw`, `.rtlst`, `.acs` с текущим exe.
 
 ## Встроенная консоль
 

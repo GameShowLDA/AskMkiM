@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -8,7 +9,9 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
+using Ask.Engine.Tests.NodeMethod;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
@@ -68,6 +71,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       {
         StartDelegate = ExecuteTestProcess,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
         StopDelegate = Stop
       };
 
@@ -188,13 +192,41 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       try
       {
-        var (success, _) = await RelayModuleHelper.MeasureResistanceAsync(
+        const double lowerLimit = 0;
+        var (success, result) = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
-            _userInteractionService,
+            null!,
             cancellationToken,
             pointNumber,
             _module,
-            expectedResistance);
+            expectedResistance,
+            lowerLimit);
+
+        var point = new PointModel
+        {
+          DeviceNumber = _module.NumberChassis,
+          ModuleNumber = _module.Number,
+          PointNumber = pointNumber,
+        };
+        var type = success
+          ? ShowMessageModel.MessageType.Success
+          : ShowMessageModel.MessageType.Error;
+        var resultMessage = new ShowMessageModel(
+          $"Результат измерения точки {point}",
+          message: NodeMethodProtocolBuilder.FormatValue(result, ResistanceUnit.Ohm),
+          type: type)
+        {
+          IndentLevel = 2,
+          ExecutionErrorMessage = success
+            ? null
+            : NodeMethodProtocolBuilder.BuildRangeFailure(
+              point,
+              lowerLimit,
+              expectedResistance,
+              result,
+              ResistanceUnit.Ohm),
+        };
+        await _userInteractionService.ShowMessageAsync(resultMessage, skipPause: true);
 
         return success;
       }
@@ -218,11 +250,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      await _module.ConnectableManager.ResetAsync();
-      await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
-      await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
-      await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
-      needReset = false;
+      try
+      {
+        await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
+      }
+      finally
+      {
+        needReset = false;
+      }
     }
 
     #region Вспомогательные методы

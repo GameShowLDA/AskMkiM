@@ -1,9 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Core.Services.Config.Base
 {
@@ -22,7 +19,12 @@ namespace Ask.Core.Services.Config.Base
     {
       PointModel pointModel = PointModel.ParsePointString(compatibilityPoint);
 
-      var pair = CompatibilityPointsMap.FirstOrDefault(x => x.Value.Equals(pointModel));
+      if (pointModel == null)
+      {
+        return compatibilityPoint;
+      }
+
+      var pair = CompatibilityPointsMap.FirstOrDefault(x => x.Value?.Equals(pointModel) == true);
 
       if (pair.Key == null || string.IsNullOrWhiteSpace(pair.Key.ToString()))
       {
@@ -40,7 +42,13 @@ namespace Ask.Core.Services.Config.Base
     {
       PointModel pointModel = PointModel.ParsePointString(realAddress);
 
-      if (CompatibilityPointsMap.TryGetValue(pointModel, out PointModel? compatibilityPoint))
+      if (pointModel == null)
+      {
+        return realAddress;
+      }
+
+      if (CompatibilityPointsMap.TryGetValue(pointModel, out PointModel? compatibilityPoint)
+        && compatibilityPoint != null)
       {
         return compatibilityPoint.ToString();
       }
@@ -48,6 +56,6 @@ namespace Ask.Core.Services.Config.Base
       return realAddress;
     }
 
-    static Dictionary<PointModel, PointModel> CompatibilityPointsMap { get; set; } = null;
+    static Dictionary<PointModel, PointModel> CompatibilityPointsMap { get; set; } = new();
   }
 }

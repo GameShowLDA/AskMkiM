@@ -7,9 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.Ethernet.Udp.Broadcast;
 using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -187,12 +185,12 @@ namespace Ask.Engine.Tests.NodeMethod
     public abstract Task PerformMeasurement(IUserInteractionService protocolUI, DataModel dataModel);
 
     /// <summary>
-    /// Завершает тест, выполняя очистку и отключение оборудования.
+    /// Завершает выполнение проверки методом узла.
     /// </summary>
-    public virtual async Task FinalizeAsync(IUserInteractionService messageService)
-    {
-      await RelayModuleHelper.ResetDevices(Devices, messageService);
-    }
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeAsync(IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Проверяет и подключает все необходимые устройства перед выполнением теста.
@@ -212,10 +210,10 @@ namespace Ask.Engine.Tests.NodeMethod
             return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
           }
 
-          await connectableDevice.ConnectableManager.ResetAsync(messageService);
         }
       }
 
+      await RelayModuleHelper.ResetDevices(Devices, messageService);
       return (true, string.Empty);
     }
 
@@ -242,7 +240,7 @@ namespace Ask.Engine.Tests.NodeMethod
     {
       try
       {
-        CollectDevicesAsync(point1, point2);
+        await CollectDevicesAsync(point1, point2);
       }
       catch (Exception ex)
       {

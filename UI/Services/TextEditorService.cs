@@ -40,7 +40,7 @@ namespace UI.Services
       var container = _fileManager.ContainerService.GetEditorContainer(EditorType.TextEditor);
       if (container == null) return false;
 
-      var activeDockItem = container.DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem);
+      var activeDockItem = container.DockManager.DockItems.FirstOrDefault(item => item.IsSelected);
       if (activeDockItem?.Content is not TextEditorUI) return false;
 
       return activeDockItem.PerformClose();

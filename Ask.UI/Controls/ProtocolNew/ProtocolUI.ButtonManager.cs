@@ -499,6 +499,21 @@ namespace Ask.UI.Controls.ProtocolNew
       _buttonController.Apply(ProtocolButtonState.AdditionalActions);
     }
 
+    /// <summary>
+    /// Отображает действия интерактивной операции с учётом результата последней попытки.
+    /// </summary>
+    /// <param name="canContinue">
+    /// <see langword="true"/>, если последняя попытка завершилась корректно.
+    /// В противном случае — <see langword="false"/>.
+    /// </param>
+    public void ShowInteractiveActionButtons(bool canContinue)
+    {
+      _buttonController.Apply(
+        canContinue
+          ? ProtocolButtonState.InteractiveActions
+          : ProtocolButtonState.AdditionalActions);
+    }
+
     public void ShowOnlyExitButton()
     {
       _buttonController.Apply(ProtocolButtonState.ExitOnly, ActionExecutor.StepMode);
@@ -543,7 +558,11 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public void ShowProtocolManager()
     {
-      Application.Current.Dispatcher.Invoke(() => ProtocolManager.Visibility = Visibility.Visible);
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        ProtocolManager.Visibility = Visibility.Visible;
+        UpdateProtocolManagerLayout();
+      });
     }
 
     public void HideProtocolManager()

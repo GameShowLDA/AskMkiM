@@ -9,6 +9,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
   {
     internal double CabelResistance { get; set; } = 0;
 
+    /// <summary>
+    /// Признак выполнения проверок физического подключения точек.
+    /// </summary>
+    internal bool ValidatePointConnections { get; set; } = true;
+
     public PairwiseFirstPointAltContext() { }
     internal PairwiseFirstPointAltContext(
       CommandExecutionContext context,
