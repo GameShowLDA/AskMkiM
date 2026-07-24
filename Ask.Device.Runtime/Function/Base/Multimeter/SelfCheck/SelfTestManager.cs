@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Ask.Core.Services.App;
@@ -303,12 +304,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача, представляющая выполнение измерения сопротивления.</returns>
     private static async Task MeasureResistanceAsync(CancellationToken cancellationToken, ResistanceCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
+      var resistanceValue = FormatReferenceValue(check.IdealResult, ResistanceUnit);
+
       cancellationToken.ThrowIfCancellationRequested();
       await ShowCheckStepAsync(
-        $"Проверка резистора R{check.Number}",
-        $"{check.IdealResult:N0}{ResistanceUnit}",
+        $"Проверка резистора {resistanceValue}",
         userMessageService);
-      await ShowActionHeaderAsync($"Подключение резистора R{check.Number}", userMessageService);
+      await ShowActionHeaderAsync($"Подключение резистора {resistanceValue}", userMessageService);
       var resistorConnected = await device.RelayManager.ConnectResistor(check.Number, userMessageService);
 
       try
@@ -324,7 +326,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         for (int i = 0; i < 3; i++)
         {
           await ShowCheckStepAsync(
-            $"Измерение сопротивления R{check.Number}",
+            $"Измерение сопротивления резистора {resistanceValue}",
             $"попытка {i + 1}/3",
             userMessageService,
             indentLevel: 2);
@@ -414,12 +416,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача, представляющая выполнение измерения ёмкости.</returns>
     private static async Task MeasureCapacitanceAsync(CancellationToken cancellationToken, CapacitanceCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
+      var capacitanceValue = FormatReferenceValue(check.IdealResult, CapacitanceUnit);
+
       cancellationToken.ThrowIfCancellationRequested();
       await ShowCheckStepAsync(
-        $"Проверка конденсатора C{check.Number}",
-        $"{check.IdealResult:N0}{CapacitanceUnit}",
+        $"Проверка конденсатора {capacitanceValue}",
         userMessageService);
-      await ShowActionHeaderAsync($"Подключение конденсатора C{check.Number}", userMessageService);
+      await ShowActionHeaderAsync($"Подключение конденсатора {capacitanceValue}", userMessageService);
       var capacitorConnected = await device.RelayManager.ConnectCapacitor(check.Number, userMessageService);
 
       try
@@ -429,11 +432,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
-        await ShowCheckStepAsync($"Измерение активного сопротивления C{check.Number}", userMessageService);
+        await ShowCheckStepAsync($"Измерение активного сопротивления конденсатора {capacitanceValue}", userMessageService);
         var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(responseDelay: MeasurementResponseDelayMs);
         var activeResistanceCorrect = activeResistance > MinimumActiveResistance;
 
-        await ShowActiveResistanceResultAsync(activeResistance, activeResistanceCorrect, check.Number, userMessageService);
+        await ShowActiveResistanceResultAsync(activeResistance, activeResistanceCorrect, capacitanceValue, userMessageService);
 
         cancellationToken.ThrowIfCancellationRequested();
         if (!activeResistanceCorrect)
@@ -447,7 +450,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         var tolerance = CapacityTolerance(check.IdealResult);
 
         await ShowCheckStepAsync(
-          $"Измерение ёмкости C{check.Number}",
+          $"Измерение ёмкости конденсатора {capacitanceValue}",
           $"требуется {RequiredCapacitanceMeasurements} положительных результатов",
           userMessageService);
 
@@ -603,9 +606,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// </summary>
     /// <param name="result">Измеренное активное сопротивление.</param>
     /// <param name="isCorrect">Признак прохождения проверки активного сопротивления.</param>
+    /// <param name="capacitanceValue">Эталонная ёмкость проверяемого конденсатора.</param>
     /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
     /// <returns>Задача вывода сообщения.</returns>
-    private static Task ShowActiveResistanceResultAsync(double result, bool isCorrect, int capacitorNumber, IUserInteractionService userMessageService)
+    private static Task ShowActiveResistanceResultAsync(double result, bool isCorrect, string capacitanceValue, IUserInteractionService userMessageService)
     {
       var resultType = isCorrect
         ? ShowMessageModel.MessageType.Success
@@ -617,7 +621,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
-          header: $"Тест активного сопротивления C{capacitorNumber} (>{MinimumActiveResistance:N0}{ResistanceUnit})",
+          header: $"Тест активного сопротивления конденсатора {capacitanceValue} (>{MinimumActiveResistance:N0}{ResistanceUnit})",
           message: resultMessage,
           type: resultType)
         {
@@ -625,6 +629,24 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           IsStepModeCheckpoint = true,
         },
         IsBlockStart: true);
+    }
+
+    private static string FormatReferenceValue(double value, string unit)
+    {
+      var formattedValue = MeasurementValueFormatter.Round(value).ToString("N3", CultureInfo.CurrentCulture);
+      var decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+
+      if (formattedValue.Contains(decimalSeparator))
+      {
+        formattedValue = formattedValue.TrimEnd('0');
+
+        if (formattedValue.EndsWith(decimalSeparator, StringComparison.Ordinal))
+        {
+          formattedValue = formattedValue.Substring(0, formattedValue.Length - decimalSeparator.Length);
+        }
+      }
+
+      return $"{formattedValue}{unit}";
     }
 
     private readonly struct ResistanceCheck
