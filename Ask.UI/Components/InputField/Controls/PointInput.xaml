@@ -1,0 +1,62 @@
+<UserControl x:Class="Ask.UI.Components.InputField.Controls.PointInput"
+             x:Name="Root"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:inputControls="clr-namespace:Ask.UI.Components.TextBoxPlaceholder"
+             mc:Ignorable="d"
+             d:DesignHeight="100"
+             d:DesignWidth="250">
+
+    <Border CornerRadius="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"
+                    Padding="5"
+                    CornerRadius="10,10,0,0"
+                    x:Name="HeaderBorder"
+                    >
+                <Grid>
+                    <TextBlock x:Name="EditingHeaderTextBlock"
+                               FontFamily="{DynamicResource WinstonMedium}"
+                               TextWrapping="Wrap"
+                               TextTrimming="None"
+                               Text="{Binding Header, ElementName=Root}"
+                               FontSize="18"
+                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
+                               Margin="0,5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ExecutionHeaderTextBlock"
+                               FontFamily="{DynamicResource WinstonMedium}"
+                               TextWrapping="Wrap"
+                               TextTrimming="None"
+                               FontSize="18"
+                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
+                               Margin="0,5"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Visibility="Collapsed">
+                        <Run Text="{Binding ExecutionHeader, ElementName=Root, Mode=OneWay}"/>
+                        <Run Text=": "/>
+                        <Run Text="{Binding Text, ElementName=Root, Mode=OneWay}"/>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <inputControls:TextBoxPlaceholder Grid.Row="1"
+                                              x:Name="PointTextBox"
+                                              FontFamily="{DynamicResource WinstonLight}"
+                                              Placeholder="{Binding Placeholder, ElementName=Root}"
+                                              Text="{Binding Text, ElementName=Root, Mode=TwoWay}"
+                                              Visibility="{Binding PlaceholderVisibility, ElementName=Root}"
+                                              Height="40"
+                                              Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
+        </Grid>
+    </Border>
+</UserControl>

@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Ask.UI.Components.InputField
+namespace Ask.UI.Components.TextBoxPlaceholder
 {
   /// <summary>
   /// TextBox с Placeholder внутри самого поля.
@@ -334,7 +334,6 @@ namespace Ask.UI.Components.InputField
     /// <returns>Возвращает <see cref="Thickness"/> с отступом, основанным на значении Unit.</returns>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      // Если Unit не пустое, возвращаем отступ 10 пикселей, иначе 0
       return string.IsNullOrEmpty(value as string) ? new Thickness(0) : new Thickness(0, 0, 10, 0);
     }
 

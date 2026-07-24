@@ -4,9 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ask.UI.Components.InputField"
+             xmlns:inputControls="clr-namespace:Ask.UI.Components.TextBoxPlaceholder"
+             xmlns:dataControls="clr-namespace:Ask.UI.Components.InputField.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="910" d:DesignWidth="250">
-    <!--Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}"-->
+
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
@@ -42,7 +44,7 @@
                                Margin="0,5" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
+                    <inputControls:TextBoxPlaceholder Grid.Row="1" 
                                FontFamily="{DynamicResource WinstonLight}" 
                                x:Name="TestedNumberBox" 
                                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
@@ -70,7 +72,7 @@
                                Margin="0,5" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
+                    <inputControls:TextBoxPlaceholder Grid.Row="1" 
                                FontFamily="{DynamicResource WinstonLight}" 
                                x:Name="TesterNumberBox" 
                                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
@@ -99,7 +101,7 @@
                                Margin="0,5" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
+                    <inputControls:TextBoxPlaceholder Grid.Row="1" 
                                FontFamily="{DynamicResource WinstonLight}" 
                                x:Name="TestRangeBox" 
                                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
@@ -124,48 +126,25 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!--Начальная точка-->
-            <Border  Margin="5" Grid.Row="0" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
 
-                    <TextBlock Name="headerFirstData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_First_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"  Margin="0,5" VerticalAlignment="Center" 
-                           HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
-                                          FontFamily="{DynamicResource WinstonLight}" 
-                                          x:Name="FirstTextBox" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Text="1.6.1" Height="40" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
+            <dataControls:PointInput
+                Header="{Binding Source={StaticResource LS_Input_First_Title}, Path=Value}"
+                ExecutionHeader="Первая точка"
+                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                Margin="5"
+                x:Name="FirstPointTextBox"
+                Text="1.6.1"
+                />
 
-                </Grid>
-            </Border>
-
-            <!--Конечная точка-->
-            <Border  Margin="5" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                    Name="headerSecondData" 
-                    FontFamily="{DynamicResource WinstonMedium}" 
-                    TextWrapping="Wrap" TextTrimming="None" 
-                    Text="{Binding Source={StaticResource LS_Input_Second_Title}, Path=Value}" FontSize="18" 
-                    Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="SecondTextBox" 
-                                          FontFamily="{DynamicResource WinstonLight}" Grid.Row="1" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Text="1.6.100" Height="40" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:PointInput
+                Header="{Binding Source={StaticResource LS_Input_Second_Title}, Path=Value}"
+                ExecutionHeader="Вторая точка"
+                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                Margin="5"
+                x:Name="LastPointTextBox"
+                Text="1.6.100"
+                Grid.Row="1"
+                />
 
             <!--Электрический параметр-->
             <Border  Margin="5" Grid.Row="2" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10">
@@ -179,7 +158,7 @@
                            TextWrapping="Wrap" TextTrimming="None" 
                            Text="{Binding Source={StaticResource LS_Input_Electrical_Title}, Path=Value}" FontSize="18" 
                            Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" 
+                    <inputControls:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" 
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
                                           Height="40" 
                                           FontFamily="{DynamicResource WinstonLight}"
@@ -202,7 +181,7 @@
                            TextWrapping="Wrap" TextTrimming="None" 
                            Text="{Binding Source={StaticResource LS_Input_Time_Title}, Path=Value}" FontSize="18" 
                            Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" 
+                    <inputControls:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" 
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}" 
                                           Height="40" FontFamily="{DynamicResource WinstonLight}" 
                                           Background="{DynamicResource TestsInputBackgroundInputPanelBrush}" 
@@ -224,7 +203,7 @@
                            TextWrapping="Wrap" TextTrimming="None" 
                            Text="{Binding Source={StaticResource LS_Input_TimeRamp_Title}, Path=Value}" FontSize="18" 
                            Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5" />
-                    <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" 
+                    <inputControls:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" 
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
                                           Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
                                           Height="40" FontFamily="{DynamicResource WinstonLight}" 
@@ -247,7 +226,7 @@
                     TextWrapping="Wrap" TextTrimming="None" 
                     Text="{Binding Source={StaticResource LS_Input_Voltage_Title}, Path=Value}" FontSize="18" 
                     Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="VoltageTextBox" 
+                    <inputControls:TextBoxPlaceholder x:Name="VoltageTextBox" 
                                           Grid.Row="5" 
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
                                           Unit="{Binding Source={StaticResource LS_Unit_Volts}, Path=Value}" 

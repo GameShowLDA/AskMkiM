@@ -2,11 +2,11 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Ask.UI.Features.ProtocolNew.Execution;
-using Ask.UI.Features.ProtocolNew.Hotkeys;
 using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace Ask.UI.Components.InputField
@@ -128,20 +128,12 @@ namespace Ask.UI.Components.InputField
     /// <summary>
     /// Первая точка.
     /// </summary>
-    public string FirstPoint
-    {
-      get => FirstTextBox.Text;
-      set => FirstTextBox.Text = value;
-    }
+    public string FirstPoint => FirstPointTextBox.Text;
 
     /// <summary>
     /// Вторая точка.
     /// </summary>
-    public string SecondPoint
-    {
-      get => SecondTextBox.Text;
-      set => SecondTextBox.Text = value;
-    }
+    public string SecondPoint => LastPointTextBox.Text;
 
     /// <summary>
     /// Электрический параметр.
@@ -274,7 +266,6 @@ namespace Ask.UI.Components.InputField
     /// </param>
     private void ActionExecutor_StartProcessing(bool obj)
     {
-      var firstBaseText = "Первая точка";
       var secondBaseText = "Вторая точка";
       var electricalBaseText = "Электрический параметр";
       var timeBaseText = "Время выполнения";
@@ -284,8 +275,9 @@ namespace Ask.UI.Components.InputField
       var busGroupBaseText = "Группа шин";
 
       Visibility visibility = obj ? Visibility.Collapsed : Visibility.Visible;
-      FirstTextBox.Visibility = visibility;
-      SecondTextBox.Visibility = visibility;
+      FirstPointTextBox.IsExecuting = obj;
+      LastPointTextBox.IsExecuting = obj;
+
       ElectricalTextBox.Visibility = visibility;
       TimeTextBox.Visibility = visibility;
       TimeRampTextBox.Visibility = visibility;
@@ -295,8 +287,6 @@ namespace Ask.UI.Components.InputField
 
       if (obj)
       {
-        headerFirstData.Text = $"{firstBaseText}: {FirstTextBox.Text}";
-        headerSecondData.Text = $"{secondBaseText}: {SecondTextBox.Text}";
         headerElectricalData.Text = $"{electricalBaseText}: {ElectricalTextBox.Text} {ElectricalTextBox.Unit}";
         headerTimeData.Text = $"{timeBaseText}: {TimeTextBox.Text} {TimeTextBox.Unit}";
         headerTimeRampData.Text = $"{timeRampBaseText}: {TimeRampTextBox.Text} {TimeRampTextBox.Unit}";
@@ -306,8 +296,6 @@ namespace Ask.UI.Components.InputField
       }
       else
       {
-        headerFirstData.Text = $"{firstBaseText}: вида a.b.c";
-        headerSecondData.Text = $"{secondBaseText}: вида a.b.c";
         headerElectricalData.Text = $"{electricalBaseText}";
         headerTimeData.Text = $"{timeBaseText} в сек.";
         headerTimeRampData.Text = $"{timeRampBaseText} в сек.";
@@ -322,7 +310,7 @@ namespace Ask.UI.Components.InputField
     /// </summary>
     private void HighlightFirstTextBox()
     {
-      FirstTextBox.DataError();
+      FirstPointTextBox.DataError();
     }
 
     /// <summary>
@@ -330,7 +318,7 @@ namespace Ask.UI.Components.InputField
     /// </summary>
     private void HighlightSecondTextBox()
     {
-      SecondTextBox.DataError();
+      LastPointTextBox.DataError();
     }
 
     /// <summary>
@@ -346,7 +334,8 @@ namespace Ask.UI.Components.InputField
     /// </summary>
     private void HighlightBothPoints()
     {
-      SecondTextBox.DataError();
+      FirstPointTextBox.DataError();
+      LastPointTextBox.DataError();
     }
 
     /// <summary>
