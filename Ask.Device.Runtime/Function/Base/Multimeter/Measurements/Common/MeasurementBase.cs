@@ -400,7 +400,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       bool result,
       IUserInteractionService? userMessageService)
     {
-      if (userMessageService == null || !DeviceDisplayConfig.GetExecutionParametersVisibility())
+      if (userMessageService == null || (result && !DeviceDisplayConfig.GetExecutionParametersVisibility()))
       {
         return;
       }
@@ -408,7 +408,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       var resultType = result
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
-      var resultMessage = DeviceDisplayConfig.GetMeasurementResultsVisibility()
+      var resultMessage = !result || DeviceDisplayConfig.GetMeasurementResultsVisibility()
         ? message
         : string.Empty;
 

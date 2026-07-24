@@ -27,7 +27,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       var resultType = status
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
-      var resultMessage = DeviceDisplayConfig.GetMeasurementResultsVisibility()
+      var resultMessage = !status || DeviceDisplayConfig.GetMeasurementResultsVisibility()
         ? $"{FormatResult(result)}{unit}"
         : string.Empty;
 

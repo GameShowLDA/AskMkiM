@@ -611,7 +611,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
       var meaning = MeasurementValueFormatter.IsOverloadValue(result) ? "Overload" : $"{result}";
-      var resultMessage = DeviceDisplayConfig.GetMeasurementResultsVisibility()
+      var resultMessage = !isCorrect || DeviceDisplayConfig.GetMeasurementResultsVisibility()
         ? $"{meaning}{ResistanceUnit}"
         : string.Empty;
 
