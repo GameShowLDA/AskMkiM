@@ -145,7 +145,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           _userInteractionService,
           cancellationToken);
 
-      // Переводим мультиметр в режим измерения сопротивления
+      // Переводим мультиметр в режим прозвонки
       await RelayModuleHelper.EnsureResistanceModeAsync(
           _fastMeter,
           _userInteractionService,

@@ -860,6 +860,10 @@ executor/metrology
 → DeviceMessageBuilder
 ```
 
+Для `MultimeterTypeMode.Continuity` общий `MeasurementBase` не вызывает
+`RangeBase`: режим прозвонки задаётся профильной командой `CONF:CONT`, а
+измерительный запрос выполняется через `MEAS:CONT?` без установки диапазона.
+
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
 `UserActionHelper`, который повторяет тот же measurement delegate. Без UI-сервиса

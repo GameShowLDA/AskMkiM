@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
@@ -97,7 +98,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return random;
       }
 
-      await RangeBase.SetRangeForMeasurementAsync(device, param, userMessageService);
+      if (profile.TypeMode != MultimeterTypeMode.Continuity)
+      {
+        await RangeBase.SetRangeForMeasurementAsync(device, param, userMessageService);
+      }
 
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
