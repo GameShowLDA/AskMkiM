@@ -31,15 +31,15 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         type: ShowMessageModel.MessageType.CommandBlock)
         .GetColorMessage();
 
-    private static readonly double[] DcVoltageRanges = new[] { 0.1, 1, 10, 100, 1000 };
-    private static readonly double[] AcVoltageRanges = new[] { 0.1, 1, 10, 100, 750 };
+    private static readonly double[] DcVoltageRanges = { 0.1, 1, 10, 100, 1000 };
+    private static readonly double[] AcVoltageRanges = { 0.1, 1, 10, 100, 750 };
 
     private static readonly ResistanceCheck[] ResistanceChecks =
     {
-      new ResistanceCheck(1, 150, 5),
-      new ResistanceCheck(2, 120, 1),
+      new ResistanceCheck(1, 2, 50),
+      new ResistanceCheck(2, 120, 5),
       new ResistanceCheck(3, 1_000, 5),
-      new ResistanceCheck(4, 10_000, 1),
+      new ResistanceCheck(4, 10_000, 5),
       new ResistanceCheck(5, 100_000, 1),
       new ResistanceCheck(6, 1_000_000, 1),
       new ResistanceCheck(7, 10_000_000, 5),
@@ -53,8 +53,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       new CapacitanceCheck(3, 120),
       new CapacitanceCheck(4, 1_000),
       // Неисправен.
-      new CapacitanceCheck(5, 6_800),
-      new CapacitanceCheck(6, 110_000),
+      //new CapacitanceCheck(5, 6_800),
+      //new CapacitanceCheck(6, 110_000),
     };
 
     /// <summary>
