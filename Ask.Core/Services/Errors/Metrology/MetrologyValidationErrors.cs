@@ -56,7 +56,7 @@ namespace Ask.Core.Services.Errors.Metrology
       new(new ErrorItem
       {
         Code = ErrorCode.Metrology_Validation_InvalidVoltage,
-        Description = "Значение напряжения должно быть числом вида x.y."
+        Description = "Значение напряжения должно быть целым числом."
       });
 
     /// <summary>
@@ -67,6 +67,26 @@ namespace Ask.Core.Services.Errors.Metrology
       {
         Code = ErrorCode.Metrology_Validation_InvalidTime,
         Description = "Не удалось распознать время. Параметр должен быть целым или дробным числом(x.y)."
+      });
+
+    /// <summary>
+    /// Исключение: указано некорректное время выполнения.
+    /// </summary>
+    public static SystemExceptionBase InvalidExecutionTime() =>
+      new(new ErrorItem
+      {
+        Code = ErrorCode.Metrology_Validation_InvalidTime,
+        Description = "Время выполнения должно быть целым числом от 1 до 60 секунд."
+      });
+
+    /// <summary>
+    /// Исключение: указано некорректное время нарастания.
+    /// </summary>
+    public static SystemExceptionBase InvalidRampTime() =>
+      new(new ErrorItem
+      {
+        Code = ErrorCode.Metrology_Validation_InvalidTime,
+        Description = "Время нарастания должно быть числом от 0.1 до 10 секунд."
       });
 
     /// <summary>

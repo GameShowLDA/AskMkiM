@@ -125,6 +125,7 @@
                                     Margin="5"
                                     Header="{Binding Source={StaticResource LS_Input_Time_Title}, Path=Value}"
                                     ExecutionHeader="Время выполнения"
+                                    Role="ExecutionTime"
                                     Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
                                     Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
                                     Visibility="{Binding IsTimeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
@@ -135,6 +136,7 @@
                                     Margin="5"
                                     Header="{Binding Source={StaticResource LS_Input_TimeRamp_Title}, Path=Value}"
                                     ExecutionHeader="Время нарастания"
+                                    Role="RampTime"
                                     Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
                                     Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
                                     Visibility="{Binding IsTimeRampVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>

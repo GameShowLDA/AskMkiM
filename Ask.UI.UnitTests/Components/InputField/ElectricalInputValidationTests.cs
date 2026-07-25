@@ -42,6 +42,41 @@ namespace Ask.UI.UnitTests.Components.InputField
     }
 
     [Fact]
+    public void Validate_ReturnsVoltageErrorForFractionalValue()
+    {
+      RunInSta(() =>
+      {
+        var control = new ElectricalInput
+        {
+          Role = ElectricalInputRole.Voltage,
+          Text = "10.5"
+        };
+
+        var error = control.Validate();
+
+        Assert.NotNull(error);
+        Assert.Equal(ErrorCode.Metrology_Validation_InvalidVoltage, error.Code);
+      });
+    }
+
+    [Fact]
+    public void Validate_ReturnsNullForIntegerVoltage()
+    {
+      RunInSta(() =>
+      {
+        var control = new ElectricalInput
+        {
+          Role = ElectricalInputRole.Voltage,
+          Text = "10"
+        };
+
+        var error = control.Validate();
+
+        Assert.Null(error);
+      });
+    }
+
+    [Fact]
     public void Validate_ReturnsNullForValidParameter()
     {
       RunInSta(() =>

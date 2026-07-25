@@ -181,7 +181,7 @@ namespace Ask.UI.Components.InputField.Controls
     {
       var isValid = Role == ElectricalInputRole.Parameter
         ? double.TryParse(Text, NumberStyles.Float, CultureInfo.InvariantCulture, out _)
-        : double.TryParse(Text, out _);
+        : int.TryParse(Text, out _);
 
       if (isValid)
       {

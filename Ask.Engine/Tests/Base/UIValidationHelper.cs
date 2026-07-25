@@ -48,6 +48,7 @@ namespace Ask.Engine.Tests.Base
       {
         var validationErrors = inputAccessor.ValidatePoints().Errors
           .Concat(inputAccessor.ValidateElectricalParameters().Errors)
+          .Concat(inputAccessor.ValidateTimeParameters().Errors)
           .ToArray();
         if (validationErrors.Length > 0)
         {
@@ -458,7 +459,8 @@ namespace Ask.Engine.Tests.Base
 
       var timeString = inputField.GetTime();
 
-      if (double.TryParse(timeString, out double result))
+      if (int.TryParse(timeString, out int result) &&
+          result is >= 1 and <= 60)
       {
         return result;
       }
@@ -502,7 +504,12 @@ namespace Ask.Engine.Tests.Base
 
       var timeString = inputField.GetTimeRamp();
 
-      if (double.TryParse(timeString, out double result))
+      if (double.TryParse(
+            timeString.Replace(',', '.'),
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture,
+            out double result) &&
+          result is >= 0.1 and <= 10)
       {
         return result;
       }
@@ -632,7 +639,7 @@ namespace Ask.Engine.Tests.Base
 
       var voltageString = inputField.GetVoltage();
 
-      if (double.TryParse(voltageString, out double result))
+      if (int.TryParse(voltageString, out int result))
       {
         return result;
       }

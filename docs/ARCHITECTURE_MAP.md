@@ -1017,7 +1017,17 @@ protocol output marshals back into WPF controls.
 Числовой формат электрического параметра и активного поля напряжения проверяет
 `ElectricalInput.Validate()`. `ElectricalInputRole` выбирает
 `InvalidElectricalValue` или `InvalidVoltage`. Напряжение проверяется только при
-`InputField.IsVoltageVisible`; в module mode электрические поля не участвуют.
+`InputField.IsVoltageVisible` и должно быть целым числом; в module mode электрические
+поля не участвуют.
+
+Числовой формат активных полей времени проверяет `TimeInput.Validate()`.
+`TimeInputRole` различает время выполнения и время нарастания и выбирает
+`InvalidExecutionTime` или `InvalidRampTime`. Время выполнения проверяется только при
+`InputField.IsTimeVisible`, время нарастания — при `InputField.IsTimeRampVisible`;
+в module mode поля времени не участвуют. Время выполнения должно быть целым числом
+от 1 до 60 секунд, время нарастания — числом от 0,1 до 10 секунд включительно.
+Для ramp UI и Engine принимают точку или запятую как десятичный разделитель и
+нормализуют значение перед `double.TryParse` с `InvariantCulture`.
 
 `UIValidationHelper.EnsureValidMetrologyInputAsync()`
 → `IInputFieldAccessor.ValidatePoints()`
@@ -1025,6 +1035,8 @@ protocol output marshals back into WPF controls.
 → оба `PointInput.Validate()` без раннего выхода
 → `IInputFieldAccessor.ValidateElectricalParameters()`
 → активные `ElectricalInput.Validate()` без раннего выхода
+→ `IInputFieldAccessor.ValidateTimeParameters()`
+→ активные `TimeInput.Validate()` без раннего выхода
 → каждый невалидный control самостоятельно включает визуальное состояние ошибки
 → `InputValidationResult.Errors`
 → каждая ошибка передаётся в `IMessageOutputService`.

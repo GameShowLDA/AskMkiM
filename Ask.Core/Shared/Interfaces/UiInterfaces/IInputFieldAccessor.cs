@@ -22,6 +22,12 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     InputValidationResult ValidateElectricalParameters();
 
     /// <summary>
+    /// Проверяет формат активных полей времени.
+    /// </summary>
+    /// <returns>Совокупный результат проверки времени.</returns>
+    InputValidationResult ValidateTimeParameters();
+
+    /// <summary>
     /// Возвращает основные значения полей ввода:
     /// первую точку, вторую точку и электрический параметр.
     /// </summary>

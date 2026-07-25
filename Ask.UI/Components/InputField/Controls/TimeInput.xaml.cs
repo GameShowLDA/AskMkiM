@@ -1,3 +1,6 @@
+using Ask.Core.Services.Errors.Metrology;
+using Ask.Core.Services.Errors.Models;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -75,6 +78,15 @@ namespace Ask.UI.Components.InputField.Controls
       new PropertyMetadata(false, OnPresentationPropertyChanged));
 
     /// <summary>
+    /// Свойство зависимости для назначения поля времени.
+    /// </summary>
+    public static readonly DependencyProperty RoleProperty = DependencyProperty.Register(
+      nameof(Role),
+      typeof(TimeInputRole),
+      typeof(TimeInput),
+      new PropertyMetadata(TimeInputRole.ExecutionTime));
+
+    /// <summary>
     /// Заголовок поля времени.
     /// </summary>
     public string Header
@@ -138,6 +150,15 @@ namespace Ask.UI.Components.InputField.Controls
     }
 
     /// <summary>
+    /// Назначение поля времени.
+    /// </summary>
+    public TimeInputRole Role
+    {
+      get => (TimeInputRole)GetValue(RoleProperty);
+      set => SetValue(RoleProperty, value);
+    }
+
+    /// <summary>
     /// Создаёт поле ввода времени.
     /// </summary>
     public TimeInput()
@@ -153,6 +174,38 @@ namespace Ask.UI.Components.InputField.Controls
     /// Подсвечивает поле времени как некорректное.
     /// </summary>
     public void DataError() => TimeTextBox.DataError();
+
+    /// <summary>
+    /// Проверяет локальный числовой формат времени и отображает состояние ошибки.
+    /// </summary>
+    /// <returns>Ошибка формата либо <see langword="null"/>, если значение корректно.</returns>
+    public ErrorItem? Validate()
+    {
+      var value = Role == TimeInputRole.RampTime
+        ? Text.Replace(',', '.')
+        : Text;
+
+      var isValid = Role == TimeInputRole.ExecutionTime
+        ? int.TryParse(value, out var executionTime) &&
+          executionTime is >= 1 and <= 60
+        : double.TryParse(
+            value,
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture,
+            out var rampTime) &&
+          rampTime is >= 0.1 and <= 10;
+
+      if (isValid)
+      {
+        TimeTextBox.ClearError();
+        return null;
+      }
+
+      DataError();
+      return Role == TimeInputRole.ExecutionTime
+        ? MetrologyValidationErrors.InvalidExecutionTime().Error
+        : MetrologyValidationErrors.InvalidRampTime().Error;
+    }
 
     private void SetLocalizationBinding(DependencyProperty property, string resourceKey)
     {

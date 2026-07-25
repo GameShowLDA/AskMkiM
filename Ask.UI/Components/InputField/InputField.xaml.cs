@@ -347,6 +347,33 @@ namespace Ask.UI.Components.InputField
       });
     }
 
+    /// <inheritdoc />
+    public InputValidationResult ValidateTimeParameters()
+    {
+      return InvokeSafe(() =>
+      {
+        if (IsModuleInputMode)
+          return new InputValidationResult(Array.Empty<Ask.Core.Services.Errors.Models.ErrorItem>());
+
+        var errors = new List<Ask.Core.Services.Errors.Models.ErrorItem>();
+        if (IsTimeVisible)
+        {
+          var timeError = TimeTextBox.Validate();
+          if (timeError != null)
+            errors.Add(timeError);
+        }
+
+        if (IsTimeRampVisible)
+        {
+          var rampError = TimeRampTextBox.Validate();
+          if (rampError != null)
+            errors.Add(rampError);
+        }
+
+        return new InputValidationResult(errors);
+      });
+    }
+
     /// <summary>
     /// Возвращает значение времени выполнения теста.
     /// </summary>
