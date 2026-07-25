@@ -1066,6 +1066,10 @@ crash packages. Остальные исключения сохраняют пр�
 выведенные строки в `ActionSettings.InputParameters`. При завершении теста
 `InspectionProtocolBuilder.Build()` вставляет раздел `Введённые данные` перед
 `Заключением`; потоковый и итоговый протокол используют один набор значений.
+Обе темы `Ask.UI/Resources/Assets/SyntaxHighlighting/{Dark,Light}/MKI_RESULT_PROTOCOL.xshd`
+подсвечивают заголовок раздела и все формируемые названия входных параметров цветом
+`ProtocolMain`, а единицы `Ом/кОм/МОм/ГОм`, `В/мВ/кВ`, `А/мА`,
+`пФ/нФ/мкФ` и `с` — цветом `MeasurementUnit`.
 
 ### Translation and validation
 
