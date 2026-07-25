@@ -554,6 +554,21 @@ namespace Ask.UI.Controls.ProtocolNew
       return Dispatcher.Invoke(() => Header);
     }
 
+    /// <inheritdoc />
+    public void SetExecutionInputParameters(IReadOnlyList<string> parameters)
+    {
+      void SetParameters()
+      {
+        _modeSettings.Current.InputParameters.Clear();
+        _modeSettings.Current.InputParameters.AddRange(parameters);
+      }
+
+      if (Dispatcher.CheckAccess())
+        SetParameters();
+      else
+        Dispatcher.Invoke(SetParameters);
+    }
+
     public IInputHighlightService? GetInputHighlightService()
     {
       IInputHighlightService? result = null;

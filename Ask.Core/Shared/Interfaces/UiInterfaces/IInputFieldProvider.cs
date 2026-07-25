@@ -18,5 +18,11 @@
     /// Возвращает отображаемое название текущего режима выполнения.
     /// </summary>
     string GetExecutionTitle();
+
+    /// <summary>
+    /// Сохраняет подтверждённые входные параметры для итогового протокола.
+    /// </summary>
+    /// <param name="parameters">Строки параметров в порядке отображения.</param>
+    void SetExecutionInputParameters(IReadOnlyList<string> parameters);
   }
 }

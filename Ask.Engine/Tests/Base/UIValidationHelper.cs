@@ -91,7 +91,7 @@ namespace Ask.Engine.Tests.Base
         {
           await ShowMetrologyInputAsync(
             messageOutputService,
-            protocolUI.GetExecutionTitle(),
+            protocolUI,
             metrologyMode.Value,
             result,
             timeCheck,
@@ -112,7 +112,7 @@ namespace Ask.Engine.Tests.Base
 
     private static async Task ShowMetrologyInputAsync(
       IMessageOutputService messageOutputService,
-      string executionTitle,
+      IInputFieldProvider inputFieldProvider,
       MeasurementTypeCommand metrologyMode,
       DataModel data,
       bool timeCheck,
@@ -122,7 +122,7 @@ namespace Ask.Engine.Tests.Base
       bool pairBusCheck)
     {
       var messages = BuildMetrologyInputMessages(
-        executionTitle,
+        inputFieldProvider.GetExecutionTitle(),
         metrologyMode,
         data,
         timeCheck,
@@ -131,6 +131,42 @@ namespace Ask.Engine.Tests.Base
         busCheck,
         pairBusCheck);
 
+      inputFieldProvider.SetExecutionInputParameters(
+        messages
+          .Skip(1)
+          .Select(message => message.ToString())
+          .ToArray());
+
+      await ShowInputMessagesAsync(messageOutputService, messages);
+    }
+
+    internal static async Task ShowTestInputAsync(
+      IMessageOutputService messageOutputService,
+      IInputFieldProvider inputFieldProvider,
+      IReadOnlyList<(string Header, string Value)> parameters)
+    {
+      var messages = new List<ShowMessageModel>
+      {
+        new(
+          $"Запуск \"{inputFieldProvider.GetExecutionTitle()}\"",
+          type: ShowMessageModel.MessageType.Command)
+      };
+      messages.AddRange(parameters.Select(parameter =>
+        CreateInputMessage(parameter.Header, parameter.Value)));
+
+      inputFieldProvider.SetExecutionInputParameters(
+        messages
+          .Skip(1)
+          .Select(message => message.ToString())
+          .ToArray());
+
+      await ShowInputMessagesAsync(messageOutputService, messages);
+    }
+
+    private static async Task ShowInputMessagesAsync(
+      IMessageOutputService messageOutputService,
+      IReadOnlyList<ShowMessageModel> messages)
+    {
       await messageOutputService.ShowMessageAsync(
         messages[0],
         IsBlockStart: true,

@@ -1060,6 +1060,13 @@ crash packages. Остальные исключения сохраняют пр�
 `ShowMetrologyInputAsync()` выводит их через `IMessageOutputService` до первого
 `Mode*.ConnectToEquipment()`.
 
+Тот же стартовый блок включён для инженерных тестов СИ/ПИ (метод узла и групповой),
+перекрёстного теста МКР и проверки сопротивления коммутатора. После успешной
+валидации `IInputFieldProvider.SetExecutionInputParameters()` сохраняет фактически
+выведенные строки в `ActionSettings.InputParameters`. При завершении теста
+`InspectionProtocolBuilder.Build()` вставляет раздел `Введённые данные` перед
+`Заключением`; потоковый и итоговый протокол используют один набор значений.
+
 ### Translation and validation
 
 Typed `ErrorItem`/`WarningItem` originate from parsers, post-analyzers and

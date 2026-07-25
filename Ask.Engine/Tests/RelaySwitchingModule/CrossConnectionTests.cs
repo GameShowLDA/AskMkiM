@@ -118,6 +118,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
+      await UIValidationHelper.ShowTestInputAsync(
+        _messageService,
+        inputFieldProvider,
+        new[]
+        {
+          ("Проверяемый модуль", tested),
+          ("Проверяющий модуль", tester),
+          ("Диапазон проверки", range)
+        });
+
       if (!await SearchAndInitializeRelaySwitchModules(tested, tester))
       {
         LogError("Не были присвоены ссылки на модули");
