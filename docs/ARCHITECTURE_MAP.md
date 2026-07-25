@@ -1008,6 +1008,27 @@ protocol output marshals back into WPF controls.
 
 ## Error Handling Architecture
 
+### Input point validation
+
+Локальный формат первой и второй точки проверяет
+`Ask.UI.Components.InputField.Controls.PointInput.Validate()`.
+`PointInputRole` выбирает существующий `ErrorItem` первой или второй точки.
+
+`UIValidationHelper.EnsureValidMetrologyInputAsync()`
+→ `IInputFieldAccessor.ValidatePoints()`
+→ `InputField.ValidatePoints()`
+→ оба `PointInput.Validate()` без раннего выхода
+→ каждый невалидный control самостоятельно включает визуальное состояние ошибки
+→ `InputValidationResult.Errors`
+→ каждая ошибка передаётся в `IMessageOutputService`.
+
+После протоколирования `UIValidationHelper` выбрасывает ожидаемый
+`InputValidationException`. `ActionExecutor.ExecuteTaskAsync()` обрабатывает его
+отдельно без `LogException`, поэтому ошибки пользовательского ввода не создают
+crash packages. Остальные исключения сохраняют прежний аварийный путь.
+
+Проверки существования оборудования и уникальности двух точек остаются в Engine.
+
 ### Translation and validation
 
 Typed `ErrorItem`/`WarningItem` originate from parsers, post-analyzers and

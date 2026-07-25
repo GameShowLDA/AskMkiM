@@ -1,6 +1,5 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.DTO.Protocol;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -167,6 +166,8 @@ namespace Ask.UI.Components.TextBoxPlaceholder
 
     private void InputBox_GotFocus(object sender, RoutedEventArgs e)
     {
+      ClearError();
+
       if (InputBox.Text == Placeholder)
       {
         InputBox.Text = "";
@@ -312,8 +313,17 @@ namespace Ask.UI.Components.TextBoxPlaceholder
     /// </summary>
     public void DataError()
     {
-      BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.TitleColor);
-      Keyboard.ClearFocus();
+      BorderData.Background =
+        TryFindResource("TestsProtocolMessageErrorForeground") as Brush
+        ?? Brushes.IndianRed;
+    }
+
+    /// <summary>
+    /// Снимает визуальное состояние ошибки.
+    /// </summary>
+    public void ClearError()
+    {
+      BorderData.Background = Background;
     }
 
   }

@@ -91,6 +91,7 @@
             <dataControls:PointInput
                 Header="{Binding Source={StaticResource LS_Input_First_Title}, Path=Value}"
                 ExecutionHeader="Первая точка"
+                Role="First"
                 Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
                 Margin="5"
                 x:Name="FirstPointTextBox"
@@ -100,6 +101,7 @@
             <dataControls:PointInput
                 Header="{Binding Source={StaticResource LS_Input_Second_Title}, Path=Value}"
                 ExecutionHeader="Вторая точка"
+                Role="Second"
                 Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
                 Margin="5"
                 x:Name="LastPointTextBox"

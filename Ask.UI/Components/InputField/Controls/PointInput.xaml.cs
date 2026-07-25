@@ -1,3 +1,6 @@
+using Ask.Core.Services.Errors.Metrology;
+using Ask.Core.Services.Errors.Models;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -66,6 +69,15 @@ namespace Ask.UI.Components.InputField.Controls
       new PropertyMetadata(false, OnPresentationPropertyChanged));
 
     /// <summary>
+    /// Свойство зависимости для назначения поля точки.
+    /// </summary>
+    public static readonly DependencyProperty RoleProperty = DependencyProperty.Register(
+      nameof(Role),
+      typeof(PointInputRole),
+      typeof(PointInput),
+      new PropertyMetadata(PointInputRole.First));
+
+    /// <summary>
     /// Заголовок поля точки.
     /// </summary>
     public string Header
@@ -120,6 +132,15 @@ namespace Ask.UI.Components.InputField.Controls
     }
 
     /// <summary>
+    /// Назначение поля точки.
+    /// </summary>
+    public PointInputRole Role
+    {
+      get => (PointInputRole)GetValue(RoleProperty);
+      set => SetValue(RoleProperty, value);
+    }
+
+    /// <summary>
     /// Создаёт поле ввода точки.
     /// </summary>
     public PointInput()
@@ -131,6 +152,24 @@ namespace Ask.UI.Components.InputField.Controls
     }
 
     public void DataError() => PointTextBox.DataError();
+
+    /// <summary>
+    /// Проверяет локальный формат точки и отображает состояние ошибки.
+    /// </summary>
+    /// <returns>Ошибка формата либо <see langword="null"/>, если значение корректно.</returns>
+    public ErrorItem? Validate()
+    {
+      if (PointModel.ParsePointString(Text) != null)
+      {
+        PointTextBox.ClearError();
+        return null;
+      }
+
+      DataError();
+      return Role == PointInputRole.First
+        ? MetrologyValidationErrors.InvalidFirstPoint().Error
+        : MetrologyValidationErrors.InvalidSecondPoint().Error;
+    }
 
     private void SetLocalizationBinding(DependencyProperty property, string resourceKey)
     {

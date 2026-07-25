@@ -43,6 +43,32 @@ namespace Ask.Engine.Tests.Base
         bool busCheck = false,
         bool pairBusCheck = false)
     {
+      var inputAccessor = protocolUI.GetInputFieldAccessor();
+      if (inputAccessor != null)
+      {
+        var pointValidation = inputAccessor.ValidatePoints();
+        if (!pointValidation.IsValid)
+        {
+          foreach (var error in pointValidation.Errors)
+          {
+            await messageOutputService.ShowMessageAsync(
+              new ShowMessageModel(
+                "Ошибка данных",
+                message: error.Description,
+                type: ShowMessageModel.MessageType.Error),
+              SkipStepModeCheck: true);
+          }
+
+          throw new InputValidationException(new ErrorItem
+          {
+            Code = pointValidation.Errors[0].Code,
+            Description = string.Join(
+              Environment.NewLine,
+              pointValidation.Errors.Select(error => error.Description))
+          });
+        }
+      }
+
       try
       {
         var result = UIValidationHelper.TryValidateAndParseInputWithEquipment(

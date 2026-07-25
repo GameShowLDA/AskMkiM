@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+﻿using Ask.Core.Shared.DTO.Input;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.UiInterfaces
 {
@@ -8,6 +9,12 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
   /// </summary>
   public interface IInputFieldAccessor
   {
+    /// <summary>
+    /// Проверяет формат первой и второй точек подключения.
+    /// </summary>
+    /// <returns>Совокупный результат проверки точек.</returns>
+    InputValidationResult ValidatePoints();
+
     /// <summary>
     /// Возвращает основные значения полей ввода:
     /// первую точку, вторую точку и электрический параметр.

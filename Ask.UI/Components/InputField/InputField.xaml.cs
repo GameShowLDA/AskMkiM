@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Input;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
@@ -303,6 +304,23 @@ namespace Ask.UI.Components.InputField
               ? (FirstPoint, SecondPoint, ElectricalParameter)
               : (TestedNumber, TesterNumber, TestRange)
       );
+    }
+
+    /// <inheritdoc />
+    public InputValidationResult ValidatePoints()
+    {
+      return InvokeSafe(() =>
+      {
+        var errors = new[]
+        {
+          FirstPointTextBox.Validate(),
+          LastPointTextBox.Validate()
+        }
+        .Where(error => error != null)
+        .Cast<Ask.Core.Services.Errors.Models.ErrorItem>();
+
+        return new InputValidationResult(errors);
+      });
     }
 
     /// <summary>
