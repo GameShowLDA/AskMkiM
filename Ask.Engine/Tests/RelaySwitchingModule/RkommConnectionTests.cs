@@ -9,6 +9,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
 using Ask.Engine.Tests.NodeMethod;
@@ -91,6 +92,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       DataModel data = await EnsureValidMetrologyInputAsync(
           inputFieldProvider,
           _messageOutputService,
+          metrologyMode: MeasurementTypeCommand.KC,
           pairBusCheck: true);
 
       _pairBus = data.ActivePairBus;

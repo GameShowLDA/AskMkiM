@@ -1008,6 +1008,69 @@ protocol output marshals back into WPF controls.
 
 ## Error Handling Architecture
 
+### Input field validation
+
+Локальный формат первой и второй точки проверяет
+`Ask.UI.Components.InputField.Controls.PointInput.Validate()`.
+`PointInputRole` выбирает существующий `ErrorItem` первой или второй точки.
+
+Числовой формат электрического параметра и активного поля напряжения проверяет
+`ElectricalInput.Validate()`. `ElectricalInputRole` выбирает
+`InvalidElectricalValue` или `InvalidVoltage`. Напряжение проверяется только при
+`InputField.IsVoltageVisible` и должно быть целым числом; в module mode электрические
+поля не участвуют.
+
+Числовой формат активных полей времени проверяет `TimeInput.Validate()`.
+`TimeInputRole` различает время выполнения и время нарастания и выбирает
+`InvalidExecutionTime` или `InvalidRampTime`. Время выполнения проверяется только при
+`InputField.IsTimeVisible`, время нарастания — при `InputField.IsTimeRampVisible`;
+в module mode поля времени не участвуют. Время выполнения должно быть целым числом
+от 1 до 60 секунд, время нарастания — числом от 0,1 до 10 секунд включительно.
+Для ramp UI и Engine принимают точку или запятую как десятичный разделитель и
+нормализуют значение перед `double.TryParse` с `InvariantCulture`.
+
+`UIValidationHelper.EnsureValidMetrologyInputAsync()`
+→ `IInputFieldAccessor.ValidatePoints()`
+→ `InputField.ValidatePoints()`
+→ оба `PointInput.Validate()` без раннего выхода
+→ `IInputFieldAccessor.ValidateElectricalParameters()`
+→ активные `ElectricalInput.Validate()` без раннего выхода
+→ `IInputFieldAccessor.ValidateTimeParameters()`
+→ активные `TimeInput.Validate()` без раннего выхода
+→ каждый невалидный control самостоятельно включает визуальное состояние ошибки
+→ `InputValidationResult.Errors`
+→ каждая ошибка передаётся в `IMessageOutputService`.
+
+После протоколирования `UIValidationHelper` выбрасывает ожидаемый
+`InputValidationException`. `ActionExecutor.ExecuteTaskAsync()` обрабатывает его
+отдельно без `LogException`, поэтому ошибки пользовательского ввода не создают
+crash packages. Остальные исключения сохраняют прежний аварийный путь.
+
+Проверки существования оборудования и уникальности двух точек остаются в Engine.
+
+Для девяти режимов `Ask.Engine.Tests.Metrology.Mode*` в
+`EnsureValidMetrologyInputAsync(..., metrologyMode: ...)` после успешной проверки
+формируется стартовый блок протокола:
+`Запуск "{IInputFieldProvider.GetExecutionTitle()}"` → первая и вторая точки →
+заданное значение с единицей из `CommandDisplayInfo` → только активные дополнительные
+поля (время выполнения, время нарастания, напряжение, шина или группа шин).
+`ProtocolUI.GetExecutionTitle()` возвращает фактический локализованный `Header`
+открытого режима (например, `Режим КС`) с маршалингом в UI-поток.
+`UIValidationHelper.BuildMetrologyInputMessages()` формирует строки, затем
+`ShowMetrologyInputAsync()` выводит их через `IMessageOutputService` до первого
+`Mode*.ConnectToEquipment()`.
+
+Тот же стартовый блок включён для инженерных тестов СИ/ПИ (метод узла и групповой),
+перекрёстного теста МКР и проверки сопротивления коммутатора. После успешной
+валидации `IInputFieldProvider.SetExecutionInputParameters()` сохраняет фактически
+выведенные строки в `ActionSettings.InputParameters`. При завершении теста
+`InspectionProtocolBuilder.Build()` вставляет раздел `Введённые данные` перед
+`Заключением`; потоковый и итоговый протокол используют один набор значений.
+Обе темы `Ask.UI/Resources/Assets/SyntaxHighlighting/{Dark,Light}/MKI_RESULT_PROTOCOL.xshd`
+подсвечивают заголовок раздела и все формируемые названия входных параметров цветом
+`ProtocolMain`, а единицы `Ом/кОм/МОм/ГОм`, `В/мВ/кВ`, `А/мА`,
+`пФ/нФ/мкФ` и `с` — цветом `MeasurementUnit`.
+
 ### Translation and validation
 
 Typed `ErrorItem`/`WarningItem` originate from parsers, post-analyzers and

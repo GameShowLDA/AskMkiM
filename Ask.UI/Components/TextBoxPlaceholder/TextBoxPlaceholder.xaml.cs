@@ -1,6 +1,5 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Shared.DTO.Protocol;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -9,7 +8,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Ask.UI.Components.InputField
+namespace Ask.UI.Components.TextBoxPlaceholder
 {
   /// <summary>
   /// TextBox с Placeholder внутри самого поля.
@@ -167,6 +166,8 @@ namespace Ask.UI.Components.InputField
 
     private void InputBox_GotFocus(object sender, RoutedEventArgs e)
     {
+      ClearError();
+
       if (InputBox.Text == Placeholder)
       {
         InputBox.Text = "";
@@ -312,8 +313,17 @@ namespace Ask.UI.Components.InputField
     /// </summary>
     public void DataError()
     {
-      BorderData.Background = new SolidColorBrush(ShowMessageModel.ErrorMessage.TitleColor);
-      Keyboard.ClearFocus();
+      BorderData.Background =
+        TryFindResource("TestsProtocolMessageErrorForeground") as Brush
+        ?? Brushes.IndianRed;
+    }
+
+    /// <summary>
+    /// Снимает визуальное состояние ошибки.
+    /// </summary>
+    public void ClearError()
+    {
+      BorderData.Background = Background;
     }
 
   }
@@ -334,7 +344,6 @@ namespace Ask.UI.Components.InputField
     /// <returns>Возвращает <see cref="Thickness"/> с отступом, основанным на значении Unit.</returns>
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-      // Если Unit не пустое, возвращаем отступ 10 пикселей, иначе 0
       return string.IsNullOrEmpty(value as string) ? new Thickness(0) : new Thickness(0, 0, 10, 0);
     }
 
