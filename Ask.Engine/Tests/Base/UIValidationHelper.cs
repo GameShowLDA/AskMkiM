@@ -46,10 +46,12 @@ namespace Ask.Engine.Tests.Base
       var inputAccessor = protocolUI.GetInputFieldAccessor();
       if (inputAccessor != null)
       {
-        var pointValidation = inputAccessor.ValidatePoints();
-        if (!pointValidation.IsValid)
+        var validationErrors = inputAccessor.ValidatePoints().Errors
+          .Concat(inputAccessor.ValidateElectricalParameters().Errors)
+          .ToArray();
+        if (validationErrors.Length > 0)
         {
-          foreach (var error in pointValidation.Errors)
+          foreach (var error in validationErrors)
           {
             await messageOutputService.ShowMessageAsync(
               new ShowMessageModel(
@@ -61,10 +63,10 @@ namespace Ask.Engine.Tests.Base
 
           throw new InputValidationException(new ErrorItem
           {
-            Code = pointValidation.Errors[0].Code,
+            Code = validationErrors[0].Code,
             Description = string.Join(
               Environment.NewLine,
-              pointValidation.Errors.Select(error => error.Description))
+              validationErrors.Select(error => error.Description))
           });
         }
       }

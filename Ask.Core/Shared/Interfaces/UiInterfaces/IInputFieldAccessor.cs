@@ -16,6 +16,12 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     InputValidationResult ValidatePoints();
 
     /// <summary>
+    /// Проверяет формат активных электрических величин.
+    /// </summary>
+    /// <returns>Совокупный результат проверки электрических величин.</returns>
+    InputValidationResult ValidateElectricalParameters();
+
+    /// <summary>
     /// Возвращает основные значения полей ввода:
     /// первую точку, вторую точку и электрический параметр.
     /// </summary>

@@ -1,3 +1,6 @@
+using Ask.Core.Services.Errors.Metrology;
+using Ask.Core.Services.Errors.Models;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -75,6 +78,15 @@ namespace Ask.UI.Components.InputField.Controls
       new PropertyMetadata(false, OnPresentationPropertyChanged));
 
     /// <summary>
+    /// Свойство зависимости для назначения электрической величины.
+    /// </summary>
+    public static readonly DependencyProperty RoleProperty = DependencyProperty.Register(
+      nameof(Role),
+      typeof(ElectricalInputRole),
+      typeof(ElectricalInput),
+      new PropertyMetadata(ElectricalInputRole.Parameter));
+
+    /// <summary>
     /// Заголовок поля.
     /// </summary>
     public string Header
@@ -138,6 +150,15 @@ namespace Ask.UI.Components.InputField.Controls
     }
 
     /// <summary>
+    /// Назначение электрической величины.
+    /// </summary>
+    public ElectricalInputRole Role
+    {
+      get => (ElectricalInputRole)GetValue(RoleProperty);
+      set => SetValue(RoleProperty, value);
+    }
+
+    /// <summary>
     /// Создаёт поле ввода электрической величины.
     /// </summary>
     public ElectricalInput()
@@ -151,6 +172,28 @@ namespace Ask.UI.Components.InputField.Controls
     /// Подсвечивает поле как некорректное.
     /// </summary>
     public void DataError() => ValueTextBox.DataError();
+
+    /// <summary>
+    /// Проверяет локальный числовой формат электрической величины и отображает состояние ошибки.
+    /// </summary>
+    /// <returns>Ошибка формата либо <see langword="null"/>, если значение корректно.</returns>
+    public ErrorItem? Validate()
+    {
+      var isValid = Role == ElectricalInputRole.Parameter
+        ? double.TryParse(Text, NumberStyles.Float, CultureInfo.InvariantCulture, out _)
+        : double.TryParse(Text, out _);
+
+      if (isValid)
+      {
+        ValueTextBox.ClearError();
+        return null;
+      }
+
+      DataError();
+      return Role == ElectricalInputRole.Parameter
+        ? MetrologyValidationErrors.InvalidElectricalValue().Error
+        : MetrologyValidationErrors.InvalidVoltage().Error;
+    }
 
     private void SetLocalizationBinding(DependencyProperty property, string resourceKey)
     {

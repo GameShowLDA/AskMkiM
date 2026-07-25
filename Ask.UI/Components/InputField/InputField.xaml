@@ -115,6 +115,7 @@
                                           Margin="5"
                                           Header="{Binding Source={StaticResource LS_Input_Electrical_Title}, Path=Value}"
                                           ExecutionHeader="Электрический параметр"
+                                          Role="Parameter"
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
                                           Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -144,6 +145,7 @@
                                           Margin="5"
                                           Header="{Binding Source={StaticResource LS_Input_Voltage_Title}, Path=Value}"
                                           ExecutionHeader="Напряжение"
+                                          Role="Voltage"
                                           Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
                                           Unit="{Binding Source={StaticResource LS_Unit_Volts}, Path=Value}"
                                           Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>

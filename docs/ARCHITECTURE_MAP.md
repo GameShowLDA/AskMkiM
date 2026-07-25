@@ -1008,16 +1008,23 @@ protocol output marshals back into WPF controls.
 
 ## Error Handling Architecture
 
-### Input point validation
+### Input field validation
 
 Локальный формат первой и второй точки проверяет
 `Ask.UI.Components.InputField.Controls.PointInput.Validate()`.
 `PointInputRole` выбирает существующий `ErrorItem` первой или второй точки.
 
+Числовой формат электрического параметра и активного поля напряжения проверяет
+`ElectricalInput.Validate()`. `ElectricalInputRole` выбирает
+`InvalidElectricalValue` или `InvalidVoltage`. Напряжение проверяется только при
+`InputField.IsVoltageVisible`; в module mode электрические поля не участвуют.
+
 `UIValidationHelper.EnsureValidMetrologyInputAsync()`
 → `IInputFieldAccessor.ValidatePoints()`
 → `InputField.ValidatePoints()`
 → оба `PointInput.Validate()` без раннего выхода
+→ `IInputFieldAccessor.ValidateElectricalParameters()`
+→ активные `ElectricalInput.Validate()` без раннего выхода
 → каждый невалидный control самостоятельно включает визуальное состояние ошибки
 → `InputValidationResult.Errors`
 → каждая ошибка передаётся в `IMessageOutputService`.

@@ -323,6 +323,30 @@ namespace Ask.UI.Components.InputField
       });
     }
 
+    /// <inheritdoc />
+    public InputValidationResult ValidateElectricalParameters()
+    {
+      return InvokeSafe(() =>
+      {
+        if (IsModuleInputMode)
+          return new InputValidationResult(Array.Empty<Ask.Core.Services.Errors.Models.ErrorItem>());
+
+        var errors = new List<Ask.Core.Services.Errors.Models.ErrorItem>();
+        var parameterError = ElectricalTextBox.Validate();
+        if (parameterError != null)
+          errors.Add(parameterError);
+
+        if (IsVoltageVisible)
+        {
+          var voltageError = VoltageTextBox.Validate();
+          if (voltageError != null)
+            errors.Add(voltageError);
+        }
+
+        return new InputValidationResult(errors);
+      });
+    }
+
     /// <summary>
     /// Возвращает значение времени выполнения теста.
     /// </summary>
