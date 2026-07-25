@@ -1048,6 +1048,18 @@ crash packages. Остальные исключения сохраняют пр�
 
 Проверки существования оборудования и уникальности двух точек остаются в Engine.
 
+Для девяти режимов `Ask.Engine.Tests.Metrology.Mode*` в
+`EnsureValidMetrologyInputAsync(..., metrologyMode: ...)` после успешной проверки
+формируется стартовый блок протокола:
+`Запуск "{IInputFieldProvider.GetExecutionTitle()}"` → первая и вторая точки →
+заданное значение с единицей из `CommandDisplayInfo` → только активные дополнительные
+поля (время выполнения, время нарастания, напряжение, шина или группа шин).
+`ProtocolUI.GetExecutionTitle()` возвращает фактический локализованный `Header`
+открытого режима (например, `Режим КС`) с маршалингом в UI-поток.
+`UIValidationHelper.BuildMetrologyInputMessages()` формирует строки, затем
+`ShowMetrologyInputAsync()` выводит их через `IMessageOutputService` до первого
+`Mode*.ConnectToEquipment()`.
+
 ### Translation and validation
 
 Typed `ErrorItem`/`WarningItem` originate from parsers, post-analyzers and

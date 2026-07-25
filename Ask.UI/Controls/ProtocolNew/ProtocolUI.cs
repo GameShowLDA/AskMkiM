@@ -545,6 +545,15 @@ namespace Ask.UI.Controls.ProtocolNew
       return result;
     }
 
+    /// <inheritdoc />
+    public string GetExecutionTitle()
+    {
+      if (Dispatcher.CheckAccess())
+        return Header;
+
+      return Dispatcher.Invoke(() => Header);
+    }
+
     public IInputHighlightService? GetInputHighlightService()
     {
       IInputHighlightService? result = null;

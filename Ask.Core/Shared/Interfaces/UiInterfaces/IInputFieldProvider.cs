@@ -13,5 +13,10 @@
     IInputFieldAccessor? GetInputFieldAccessor();
 
     IInputHighlightService GetInputHighlightService();
+
+    /// <summary>
+    /// Возвращает отображаемое название текущего режима выполнения.
+    /// </summary>
+    string GetExecutionTitle();
   }
 }
