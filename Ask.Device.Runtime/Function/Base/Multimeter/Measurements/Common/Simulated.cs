@@ -38,7 +38,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             case ElectricalTestFunction.DielectricWithstandDC:
               return (rangeFrom + rangeTo) / 2;
             case ElectricalTestFunction.InsulationResistance:
-              return 60000;
+              return (rangeFrom + rangeTo) / 2;
 
             case ElectricalTestFunction.ACVoltage:
             case ElectricalTestFunction.DCVoltage:
