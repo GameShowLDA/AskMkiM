@@ -64,7 +64,7 @@ namespace Ask.Engine.Tests.Metrology
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, timeCheck: true, voltageCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, metrologyMode: metrologicalModeRole, timeCheck: true, voltageCheck: true);
 
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, messageService);
       await testMeasurement.SetupCommutation(messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);

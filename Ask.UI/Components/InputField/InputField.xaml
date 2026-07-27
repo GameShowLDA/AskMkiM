@@ -4,9 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ask.UI.Components.InputField"
+             xmlns:inputControls="clr-namespace:Ask.UI.Components.TextBoxPlaceholder"
+             xmlns:dataControls="clr-namespace:Ask.UI.Components.InputField.Controls"
              mc:Ignorable="d" 
+             FocusVisualStyle="{x:Null}"
              d:DesignHeight="910" d:DesignWidth="250">
-    <!--Header="{Binding Source={StaticResource LS_Menu_Test_Metrology_PR}, Path=Value}"-->
+
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
@@ -25,61 +28,21 @@
             </Grid.RowDefinitions>
 
             <!--Проверяемый модуль-->
-            <Border  Margin="5" Grid.Row="0" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+            <dataControls:ModuleInput Grid.Row="0"
+                                      x:Name="TestedNumberBox"
+                                      Margin="5"
+                                      Header="Проверяемый модуль a.b"
+                                      ExecutionHeader="Проверяемый модуль"
+                                      Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"/>
 
-                    <TextBlock Name="headerTestedNumber" 
-                               FontFamily="{DynamicResource WinstonMedium}"
-                               TextWrapping="Wrap" 
-                               TextTrimming="None" 
-                               Text="Проверяемый модуль a.b" 
-                               FontSize="18" 
-                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"  
-                               Margin="0,5" 
-                               VerticalAlignment="Center" 
-                               HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
-                               FontFamily="{DynamicResource WinstonLight}" 
-                               x:Name="TestedNumberBox" 
-                               Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                               Height="40" 
-                               Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-
-                </Grid>
-            </Border>
-
-            <!--Провряющий модуль-->
-            <Border  Margin="5" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Name="headerTesterNumber" 
-                               FontFamily="{DynamicResource WinstonMedium}"
-                               TextWrapping="Wrap" 
-                               TextTrimming="None" 
-                               Text="Проверяющий модуль a.b" 
-                               FontSize="18" 
-                               Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"  
-                               Margin="0,5" 
-                               VerticalAlignment="Center" 
-                               HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
-                               FontFamily="{DynamicResource WinstonLight}" 
-                               x:Name="TesterNumberBox" 
-                               Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                               Height="40" 
-                               IsNumberInputEnabled="False"
-                               Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-
-                </Grid>
-            </Border>
+            <!--Проверяющий модуль-->
+            <dataControls:ModuleInput Grid.Row="1"
+                                      x:Name="TesterNumberBox"
+                                      Margin="5"
+                                      Header="Проверяющий модуль a.b"
+                                      ExecutionHeader="Проверяющий модуль"
+                                      Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                                      IsNumberInputEnabled="False"/>
 
             <!--Диапазон проверки-->
             <Border  Margin="5" Grid.Row="2" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
@@ -99,7 +62,7 @@
                                Margin="0,5" 
                                VerticalAlignment="Center" 
                                HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
+                    <inputControls:TextBoxPlaceholder Grid.Row="1" 
                                FontFamily="{DynamicResource WinstonLight}" 
                                x:Name="TestRangeBox" 
                                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
@@ -124,298 +87,88 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!--Начальная точка-->
-            <Border  Margin="5" Grid.Row="0" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
 
-                    <TextBlock Name="headerFirstData" FontFamily="{DynamicResource WinstonMedium}" TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_First_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"  Margin="0,5" VerticalAlignment="Center" 
-                           HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder Grid.Row="1" 
-                                          FontFamily="{DynamicResource WinstonLight}" 
-                                          x:Name="FirstTextBox" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Text="1.6.1" Height="40" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
+            <dataControls:PointInput
+                Header="{Binding Source={StaticResource LS_Input_First_Title}, Path=Value}"
+                ExecutionHeader="Первая точка"
+                Role="First"
+                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                Margin="5"
+                x:Name="FirstPointTextBox"
+                Text="1.6.1"
+                />
 
-                </Grid>
-            </Border>
-
-            <!--Конечная точка-->
-            <Border  Margin="5" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                    Name="headerSecondData" 
-                    FontFamily="{DynamicResource WinstonMedium}" 
-                    TextWrapping="Wrap" TextTrimming="None" 
-                    Text="{Binding Source={StaticResource LS_Input_Second_Title}, Path=Value}" FontSize="18" 
-                    Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="SecondTextBox" 
-                                          FontFamily="{DynamicResource WinstonLight}" Grid.Row="1" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Text="1.6.100" Height="40" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:PointInput
+                Header="{Binding Source={StaticResource LS_Input_Second_Title}, Path=Value}"
+                ExecutionHeader="Вторая точка"
+                Role="Second"
+                Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                Margin="5"
+                x:Name="LastPointTextBox"
+                Text="1.6.100"
+                Grid.Row="1"
+                />
 
             <!--Электрический параметр-->
-            <Border  Margin="5" Grid.Row="2" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Name="headerElectricalData" 
-                           FontFamily="{DynamicResource WinstonMedium}" 
-                           TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_Electrical_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="ElectricalTextBox" Grid.Row="2" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Height="40" 
-                                          FontFamily="{DynamicResource WinstonLight}"
-                                          Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:ElectricalInput Grid.Row="2"
+                                          x:Name="ElectricalTextBox"
+                                          Margin="5"
+                                          Header="{Binding Source={StaticResource LS_Input_Electrical_Title}, Path=Value}"
+                                          ExecutionHeader="Электрический параметр"
+                                          Role="Parameter"
+                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                                          Unit="{Binding UnitElectrical, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <!--Время выполнения в сек.-->
-            <Border  Margin="5" Grid.Row="3" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"  CornerRadius="10"
-                 Visibility="{Binding IsTimeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
-                 >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock x:Name="headerTimeData" 
-                           FontFamily="{DynamicResource WinstonMedium}" 
-                           TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_Time_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="TimeTextBox" Grid.Row="1" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}" 
-                                          Height="40" FontFamily="{DynamicResource WinstonLight}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}" 
-                                           Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"/>
-                </Grid>
-            </Border>
+            <dataControls:TimeInput Grid.Row="3"
+                                    x:Name="TimeTextBox"
+                                    Margin="5"
+                                    Header="{Binding Source={StaticResource LS_Input_Time_Title}, Path=Value}"
+                                    ExecutionHeader="Время выполнения"
+                                    Role="ExecutionTime"
+                                    Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
+                                    Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
+                                    Visibility="{Binding IsTimeVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Время нарастания в сек.-->
-            <Border  Margin="5" Grid.Row="4" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"
-                 Visibility="{Binding IsTimeRampVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
-                 >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock x:Name="headerTimeRampData" 
-                           FontFamily="{DynamicResource WinstonMedium}" 
-                           TextWrapping="Wrap" TextTrimming="None" 
-                           Text="{Binding Source={StaticResource LS_Input_TimeRamp_Title}, Path=Value}" FontSize="18" 
-                           Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5" />
-                    <local:TextBoxPlaceholder x:Name="TimeRampTextBox" Grid.Row="4" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
-                                          Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
-                                          Height="40" FontFamily="{DynamicResource WinstonLight}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:TimeInput Grid.Row="4"
+                                    x:Name="TimeRampTextBox"
+                                    Margin="5"
+                                    Header="{Binding Source={StaticResource LS_Input_TimeRamp_Title}, Path=Value}"
+                                    ExecutionHeader="Время нарастания"
+                                    Role="RampTime"
+                                    Placeholder="{Binding Source={StaticResource LS_Input_Placeholder_Time}, Path=Value}"
+                                    Unit="{Binding Source={StaticResource LS_Unit_Seconds}, Path=Value}"
+                                    Visibility="{Binding IsTimeRampVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Напряжение в В.-->
-            <Border  Margin="5" Grid.Row="5" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"
-                  Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"
-                 >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                    x:Name="headerVoltageData" 
-                    FontFamily="{DynamicResource WinstonMedium}" 
-                    TextWrapping="Wrap" TextTrimming="None" 
-                    Text="{Binding Source={StaticResource LS_Input_Voltage_Title}, Path=Value}" FontSize="18" 
-                    Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <local:TextBoxPlaceholder x:Name="VoltageTextBox" 
-                                          Grid.Row="5" 
-                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}" 
-                                          Unit="{Binding Source={StaticResource LS_Unit_Volts}, Path=Value}" 
-                                          Height="40" FontFamily="{DynamicResource WinstonLight}" 
-                                          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"/>
-                </Grid>
-            </Border>
+            <dataControls:ElectricalInput Grid.Row="5"
+                                          x:Name="VoltageTextBox"
+                                          Margin="5"
+                                          Header="{Binding Source={StaticResource LS_Input_Voltage_Title}, Path=Value}"
+                                          ExecutionHeader="Напряжение"
+                                          Role="Voltage"
+                                          Placeholder="{Binding Source={StaticResource LS_Input_Placeholder}, Path=Value}"
+                                          Unit="{Binding Source={StaticResource LS_Unit_Volts}, Path=Value}"
+                                          Visibility="{Binding IsVoltageVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!--Шины для проверки-->
-            <Border Margin="5" Grid.Row="6" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10"
-                  Visibility="{Binding IsBusVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock 
-                    Name="headerBusData" 
-                    FontFamily="{DynamicResource WinstonMedium}"  
-                    TextWrapping="Wrap" TextTrimming="None"  
-                    Text="{Binding Source={StaticResource LS_Input_Bus_Title}, Path=Value}" FontSize="18" Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="5"/>
-                    <Border Name="BusBorder" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundInputPanelBrush}" CornerRadius="10" Margin="0,5,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                            </Grid.RowDefinitions>
-
-                            <CheckBox x:Name="ShinaACheckBox" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5" />
-                            <TextBlock Text="{Binding Source={StaticResource LS_Input_Bus_A}, Path=Value}" FontFamily="{DynamicResource WinstonMedium}" 
-                                   Grid.Column="1" Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" VerticalAlignment="Center" FontSize="18" Padding="5"/>
-
-                            <CheckBox x:Name="ShinaBCheckBox" Grid.Row="1" VerticalAlignment="Center" Style="{StaticResource AnimatedSwitch}" HorizontalAlignment="Left" Width="20" Checked="Switch_Checked" Unchecked="Switch_Unchecked" Margin="5"/>
-                            <TextBlock Grid.Row="1" FontFamily="{DynamicResource WinstonMedium}" 
-                                   Text="{Binding Source={StaticResource LS_Input_Bus_B}, Path=Value}" Grid.Column="1" VerticalAlignment="Center" 
-                                   Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" FontSize="18" Padding="5"/>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Border>
+            <dataControls:BusInput Grid.Row="6"
+                                   x:Name="BusSelector"
+                                   Margin="5"
+                                   Header="{Binding Source={StaticResource LS_Input_Bus_Title}, Path=Value}"
+                                   ExecutionHeader="Шина для проверки"
+                                   SelectionMode="Bus"
+                                   Visibility="{Binding IsBusVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
 
             <!-- Группа шин (AB1..AB4) -->
-            <Border Grid.Row="7"
-                Margin="5"
-                Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"
-                CornerRadius="10"
-                Visibility="{Binding IsBusGroupVisible,
-                             RelativeSource={RelativeSource AncestorType=UserControl},
-                             Converter={StaticResource BoolToVis}}">
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock x:Name="headerBusGroupData"
-                        FontFamily="{DynamicResource WinstonMedium}"
-                        TextWrapping="Wrap"
-                        TextTrimming="None"
-                        Text="{Binding Source={StaticResource LS_Input_Bus_Group_Title}, Path=Value}"
-                        FontSize="18"
-                        Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                        Margin="0,5"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Padding="5"/>
-
-                    <Border x:Name="BusGroupBorder"
-                        Grid.Row="1"
-                        Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"
-                        CornerRadius="10"
-                        Margin="0,5,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                                <RowDefinition Height="40"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- AB1 -->
-                            <CheckBox x:Name="BusAB1CheckBox"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"
-                                Cursor="Hand"/>
-                            <TextBlock Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB1}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-
-                            <!-- AB2 -->
-                            <CheckBox x:Name="BusAB2CheckBox"
-                                Grid.Row="1"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"/>
-                            <TextBlock Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB2}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-
-                            <!-- AB3 -->
-                            <CheckBox x:Name="BusAB3CheckBox"
-                                Grid.Row="2"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"/>
-                            <TextBlock Grid.Row="2"
-                                Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB3}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-
-                            <!-- AB4 -->
-                            <CheckBox x:Name="BusAB4CheckBox"
-                                Grid.Row="3"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource AnimatedSwitch}"
-                                HorizontalAlignment="Left"
-                                Width="20"
-                                Margin="5"
-                                Checked="BusGroup_Checked"
-                                Unchecked="BusGroup_Unchecked"/>
-                            <TextBlock Grid.Row="3"
-                                Grid.Column="1"
-                                Text="{Binding Source={StaticResource LS_Input_Bus_Group_AB4}, Path=Value}"
-                                FontFamily="{DynamicResource WinstonMedium}"
-                                Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
-                                VerticalAlignment="Center"
-                                FontSize="18"
-                                Padding="5"/>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Border>
+            <dataControls:BusInput Grid.Row="7"
+                                   x:Name="BusGroupSelector"
+                                   Margin="5"
+                                   Header="{Binding Source={StaticResource LS_Input_Bus_Group_Title}, Path=Value}"
+                                   ExecutionHeader="Группа шин"
+                                   SelectionMode="BusGroup"
+                                   Visibility="{Binding IsBusGroupVisible, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
         </Grid>
     </Grid>
 

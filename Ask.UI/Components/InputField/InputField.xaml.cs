@@ -1,12 +1,13 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Input;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.UI.Features.ProtocolNew.Execution;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Ask.UI.Features.ProtocolNew.Execution;
-using Ask.UI.Features.ProtocolNew.Hotkeys;
 using static Ask.Core.Services.EventCore.Adapters.ExecutionEventAdapter;
 
 namespace Ask.UI.Components.InputField
@@ -128,101 +129,59 @@ namespace Ask.UI.Components.InputField
     /// <summary>
     /// Первая точка.
     /// </summary>
-    public string FirstPoint
-    {
-      get => FirstTextBox.Text;
-      set => FirstTextBox.Text = value;
-    }
+    public string FirstPoint => FirstPointTextBox.Text;
 
     /// <summary>
     /// Вторая точка.
     /// </summary>
-    public string SecondPoint
-    {
-      get => SecondTextBox.Text;
-      set => SecondTextBox.Text = value;
-    }
+    public string SecondPoint => LastPointTextBox.Text;
 
     /// <summary>
     /// Электрический параметр.
     /// </summary>
-    public string ElectricalParameter
-    {
-      get => ElectricalTextBox.Text;
-      set => ElectricalTextBox.Text = value;
-    }
+    public string ElectricalParameter => ElectricalTextBox.Text;
 
     /// <summary>
     /// Время выполнения теста.
     /// </summary>
-    public string Time
-    {
-      get => TimeTextBox.Text;
-      set => TimeTextBox.Text = value;
-    }
+    public string Time => TimeTextBox.Text;
 
     /// <summary>
     /// Время выполнения теста.
     /// </summary>
-    public string TimeRamp
-    {
-      get => TimeRampTextBox.Text;
-      set => TimeRampTextBox.Text = value;
-    }
+    public string TimeRamp => TimeRampTextBox.Text;
 
     /// <summary>
     /// Напряжение.
     /// </summary>
-    public string Voltage
-    {
-      get => VoltageTextBox.Text;
-      set => VoltageTextBox.Text = value;
-    }
+    public string Voltage => VoltageTextBox.Text;
 
     /// <summary>
     /// Получает или задаёт номер проверяемого устройства в формате a.b.
     /// </summary>
-    public string TestedNumber
-    {
-      get => TestedNumberBox.Text;
-      set => TestedNumberBox.Text = value;
-    }
+    public string TestedNumber => TestedNumberBox.Text;
 
     /// <summary>
     /// Получает или задаёт номер проверяющего устройства в формате a.b.
     /// </summary>
-    public string TesterNumber
-    {
-      get => TesterNumberBox.Text;
-      set => TesterNumberBox.Text = value;
-    }
+    public string TesterNumber => TesterNumberBox.Text;
 
     /// <summary>
     /// Получает или задаёт диапазон проверки в формате списка чисел и диапазонов (например, "1-3,5").
     /// </summary>
-    public string TestRange
-    {
-      get => TestRangeBox.Text;
-      set => TestRangeBox.Text = value;
-    }
+    public string TestRange => TestRangeBox.Text;
 
     /// <summary>
     /// Только геттер для получения активной шины.
     /// </summary>
-    public BusPoint ActiveBus { get; private set; }
+    public BusPoint ActiveBus => BusSelector.SelectedBus;
 
     /// <summary>
     /// Активная группа шин (AB1..AB4).
     /// </summary>
-    public SwitchingBusNew ActiveBusGroup { get; private set; } = SwitchingBusNew.AB1;
+    public SwitchingBusNew ActiveBusGroup => BusGroupSelector.SelectedBusGroup;
 
     #endregion
-
-    /// <summary>
-    /// Флаг, предотвращающий реакцию обработчиков Checked/Unchecked на изменения,
-    /// выполненные программно (во время синхронизации чекбоксов с <see cref="ActiveBusGroup"/>).
-    /// </summary>
-    private bool _busGroupInternalChange;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="InputField"/>.
@@ -231,12 +190,7 @@ namespace Ask.UI.Components.InputField
     {
       InitializeComponent();
 
-      _busGroupInternalChange = true;
-      SetActiveBusGroup(SwitchingBusNew.AB1);
-      _busGroupInternalChange = false;
-
       SubscribeToValidationEvents();
-      ShinaACheckBox.IsChecked = true;
       PreviewKeyDown += HotkeyChecked;
       Unloaded += InputField_Unloaded;
     }
@@ -274,123 +228,43 @@ namespace Ask.UI.Components.InputField
     /// </param>
     private void ActionExecutor_StartProcessing(bool obj)
     {
-      var firstBaseText = "Первая точка";
-      var secondBaseText = "Вторая точка";
-      var electricalBaseText = "Электрический параметр";
-      var timeBaseText = "Время выполнения";
-      var timeRampBaseText = "Время нарастания";
-      var voltageBaseText = "Напряжение";
-      var busBaseText = "Шина для проверки";
-      var busGroupBaseText = "Группа шин";
-
-      Visibility visibility = obj ? Visibility.Collapsed : Visibility.Visible;
-      FirstTextBox.Visibility = visibility;
-      SecondTextBox.Visibility = visibility;
-      ElectricalTextBox.Visibility = visibility;
-      TimeTextBox.Visibility = visibility;
-      TimeRampTextBox.Visibility = visibility;
-      VoltageTextBox.Visibility = visibility;
-      BusBorder.Visibility = visibility;
-      BusGroupBorder.Visibility = visibility;
-
-      if (obj)
-      {
-        headerFirstData.Text = $"{firstBaseText}: {FirstTextBox.Text}";
-        headerSecondData.Text = $"{secondBaseText}: {SecondTextBox.Text}";
-        headerElectricalData.Text = $"{electricalBaseText}: {ElectricalTextBox.Text} {ElectricalTextBox.Unit}";
-        headerTimeData.Text = $"{timeBaseText}: {TimeTextBox.Text} {TimeTextBox.Unit}";
-        headerTimeRampData.Text = $"{timeRampBaseText}: {TimeRampTextBox.Text} {TimeRampTextBox.Unit}";
-        headerVoltageData.Text = $"{voltageBaseText}: {VoltageTextBox.Text} {VoltageTextBox.Unit}";
-        headerBusData.Text = $"{busBaseText}: {ActiveBus}";
-        headerBusGroupData.Text = $"{busGroupBaseText}: {ActiveBusGroup}";
-      }
-      else
-      {
-        headerFirstData.Text = $"{firstBaseText}: вида a.b.c";
-        headerSecondData.Text = $"{secondBaseText}: вида a.b.c";
-        headerElectricalData.Text = $"{electricalBaseText}";
-        headerTimeData.Text = $"{timeBaseText} в сек.";
-        headerTimeRampData.Text = $"{timeRampBaseText} в сек.";
-        headerVoltageData.Text = $"{voltageBaseText} в В.";
-        headerBusData.Text = $"{busBaseText}";
-        headerBusGroupData.Text = busGroupBaseText;
-      }
+      FirstPointTextBox.IsExecuting = obj;
+      LastPointTextBox.IsExecuting = obj;
+      TimeTextBox.IsExecuting = obj;
+      TimeRampTextBox.IsExecuting = obj;
+      ElectricalTextBox.IsExecuting = obj;
+      VoltageTextBox.IsExecuting = obj;
+      BusSelector.IsExecuting = obj;
+      BusGroupSelector.IsExecuting = obj;
+      TestedNumberBox.IsExecuting = obj;
+      TesterNumberBox.IsExecuting = obj;
     }
 
     /// <summary>
     /// Подсветка поля первой точки.
     /// </summary>
-    private void HighlightFirstTextBox()
-    {
-      FirstTextBox.DataError();
-    }
+    private void HighlightFirstTextBox() =>
+      FirstPointTextBox.DataError();
 
     /// <summary>
     /// Подсветка поля второй точки.
     /// </summary>
-    private void HighlightSecondTextBox()
-    {
-      SecondTextBox.DataError();
-    }
+    private void HighlightSecondTextBox() =>
+      LastPointTextBox.DataError();
 
     /// <summary>
     /// Подсветка поля параметра.
     /// </summary>
-    private void HighlightElectricalTextBox()
-    {
+    private void HighlightElectricalTextBox() =>
       ElectricalTextBox.DataError();
-    }
 
     /// <summary>
     /// Подсветка обоих точек при совпадении.
     /// </summary>
     private void HighlightBothPoints()
     {
-      SecondTextBox.DataError();
-    }
-
-    /// <summary>
-    /// Обрабатывает включение шины. Если одна шина включена, другая автоматически выключается.
-    /// </summary>
-    /// <param name="sender">Источник события (чекбокс).</param>
-    /// <param name="e">Параметры события.</param>
-    private void Switch_Checked(object sender, RoutedEventArgs e)
-    {
-      var checkbox = sender as CheckBox;
-
-      if (checkbox == ShinaACheckBox && ShinaACheckBox.IsChecked == true)
-      {
-        ShinaBCheckBox.IsChecked = false;
-        ActiveBus = BusPoint.A;
-      }
-
-      if (checkbox == ShinaBCheckBox && ShinaBCheckBox.IsChecked == true)
-      {
-        ShinaACheckBox.IsChecked = false;
-        ActiveBus = BusPoint.B;
-      }
-    }
-
-    /// <summary>
-    /// Обрабатывает выключение шины. Если одна шина выключена, автоматически включается другая.
-    /// </summary>
-    /// <param name="sender">Источник события (чекбокс).</param>
-    /// <param name="e">Параметры события.</param>
-    private void Switch_Unchecked(object sender, RoutedEventArgs e)
-    {
-      var checkbox = sender as CheckBox;
-
-      if (checkbox == ShinaACheckBox && ShinaACheckBox.IsChecked == false)
-      {
-        ShinaBCheckBox.IsChecked = true;
-        ActiveBus = BusPoint.B;
-      }
-
-      if (checkbox == ShinaBCheckBox && ShinaBCheckBox.IsChecked == false)
-      {
-        ShinaACheckBox.IsChecked = true;
-        ActiveBus = BusPoint.A;
-      }
+      FirstPointTextBox.DataError();
+      LastPointTextBox.DataError();
     }
 
     /// <summary>
@@ -432,75 +306,72 @@ namespace Ask.UI.Components.InputField
       );
     }
 
-    /// <summary>
-    /// Устанавливает активную группу шин и синхронизирует состояние чекбоксов AB1..AB4.
-    /// </summary>
-    /// <param name="bus">Новая активная группа шин.</param>
-    private void SetActiveBusGroup(SwitchingBusNew bus)
+    /// <inheritdoc />
+    public InputValidationResult ValidatePoints()
     {
-      ActiveBusGroup = bus;
+      return InvokeSafe(() =>
+      {
+        var errors = new[]
+        {
+          FirstPointTextBox.Validate(),
+          LastPointTextBox.Validate()
+        }
+        .Where(error => error != null)
+        .Cast<Ask.Core.Services.Errors.Models.ErrorItem>();
 
-      BusAB1CheckBox.IsChecked = bus == SwitchingBusNew.AB1;
-      BusAB2CheckBox.IsChecked = bus == SwitchingBusNew.AB2;
-      BusAB3CheckBox.IsChecked = bus == SwitchingBusNew.AB3;
-      BusAB4CheckBox.IsChecked = bus == SwitchingBusNew.AB4;
+        return new InputValidationResult(errors);
+      });
     }
 
-    /// <summary>
-    /// Возвращает следующую группу шин по кругу: AB1 → AB2 → AB3 → AB4 → AB1.
-    /// Используется, чтобы при снятии галочки с активной группы всегда оставалась выбранной какая-либо группа.
-    /// </summary>
-    private SwitchingBusNew NextBusGroup(SwitchingBusNew current) => current switch
+    /// <inheritdoc />
+    public InputValidationResult ValidateElectricalParameters()
     {
-      SwitchingBusNew.AB1 => SwitchingBusNew.AB2,
-      SwitchingBusNew.AB2 => SwitchingBusNew.AB3,
-      SwitchingBusNew.AB3 => SwitchingBusNew.AB4,
-      _ => SwitchingBusNew.AB1
-    };
+      return InvokeSafe(() =>
+      {
+        if (IsModuleInputMode)
+          return new InputValidationResult(Array.Empty<Ask.Core.Services.Errors.Models.ErrorItem>());
 
-    /// <summary>
-    /// Обработчик включения чекбокса группы шин (AB1..AB4).
-    /// При выборе одной группы остальные автоматически снимаются.
-    /// </summary>
-    private void BusGroup_Checked(object sender, RoutedEventArgs e)
-    {
-      if (_busGroupInternalChange) return;
-      if (sender is not CheckBox cb) return;
+        var errors = new List<Ask.Core.Services.Errors.Models.ErrorItem>();
+        var parameterError = ElectricalTextBox.Validate();
+        if (parameterError != null)
+          errors.Add(parameterError);
 
-      _busGroupInternalChange = true;
+        if (IsVoltageVisible)
+        {
+          var voltageError = VoltageTextBox.Validate();
+          if (voltageError != null)
+            errors.Add(voltageError);
+        }
 
-      if (cb == BusAB1CheckBox) SetActiveBusGroup(SwitchingBusNew.AB1);
-      else if (cb == BusAB2CheckBox) SetActiveBusGroup(SwitchingBusNew.AB2);
-      else if (cb == BusAB3CheckBox) SetActiveBusGroup(SwitchingBusNew.AB3);
-      else if (cb == BusAB4CheckBox) SetActiveBusGroup(SwitchingBusNew.AB4);
-
-      _busGroupInternalChange = false;
+        return new InputValidationResult(errors);
+      });
     }
 
-    /// <summary>
-    /// Обработчик выключения чекбокса группы шин.
-    /// Если пользователь пытается снять галочку с текущей активной группы, автоматически выбирается следующая группа,
-    /// чтобы не допустить состояния "ничего не выбрано".
-    /// </summary>
-    private void BusGroup_Unchecked(object sender, RoutedEventArgs e)
+    /// <inheritdoc />
+    public InputValidationResult ValidateTimeParameters()
     {
-      if (_busGroupInternalChange) return;
-      if (sender is not CheckBox cb) return;
+      return InvokeSafe(() =>
+      {
+        if (IsModuleInputMode)
+          return new InputValidationResult(Array.Empty<Ask.Core.Services.Errors.Models.ErrorItem>());
 
-      bool wasActive =
-          (cb == BusAB1CheckBox && ActiveBusGroup == SwitchingBusNew.AB1) ||
-          (cb == BusAB2CheckBox && ActiveBusGroup == SwitchingBusNew.AB2) ||
-          (cb == BusAB3CheckBox && ActiveBusGroup == SwitchingBusNew.AB3) ||
-          (cb == BusAB4CheckBox && ActiveBusGroup == SwitchingBusNew.AB4);
+        var errors = new List<Ask.Core.Services.Errors.Models.ErrorItem>();
+        if (IsTimeVisible)
+        {
+          var timeError = TimeTextBox.Validate();
+          if (timeError != null)
+            errors.Add(timeError);
+        }
 
-      _busGroupInternalChange = true;
+        if (IsTimeRampVisible)
+        {
+          var rampError = TimeRampTextBox.Validate();
+          if (rampError != null)
+            errors.Add(rampError);
+        }
 
-      if (wasActive)
-        SetActiveBusGroup(NextBusGroup(ActiveBusGroup));
-      else
-        SetActiveBusGroup(ActiveBusGroup);
-
-      _busGroupInternalChange = false;
+        return new InputValidationResult(errors);
+      });
     }
 
     /// <summary>

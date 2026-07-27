@@ -67,5 +67,10 @@ namespace Ask.Core.Shared.DTO.Executor
     /// Ошибки, сформированные во время выполнения действия.
     /// </summary>
     public List<string> ExecutionErrors { get; } = new();
+
+    /// <summary>
+    /// Подтверждённые входные параметры текущего выполнения.
+    /// </summary>
+    public List<string> InputParameters { get; } = new();
   }
 }

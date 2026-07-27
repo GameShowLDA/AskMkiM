@@ -20,6 +20,15 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     message.AppendLine($"\tВремя выполнения: {settings.ExecutionDuration:hh\\:mm\\:ss\\:fff}");
     message.AppendLine();
 
+    if (settings.InputParameters.Count > 0)
+    {
+      message.AppendLine("Введённые данные:");
+      foreach (var parameter in settings.InputParameters)
+        message.AppendLine($"\t{parameter}");
+
+      message.AppendLine();
+    }
+
     if (settings.ExecutionErrors.Count == 0)
     {
       message.AppendLine("\tЗаключение: ошибок не обнаружено");

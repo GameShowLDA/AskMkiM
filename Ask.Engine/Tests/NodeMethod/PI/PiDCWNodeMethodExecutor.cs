@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
@@ -43,7 +44,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: MeasurementTypeCommand.PI_DCW, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
       if (!connect.Connect)
       {
@@ -98,8 +99,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
               token.ThrowIfCancellationRequested();
 
               var answer = await breakDown.DcwManger.Measure.MeasureAsync(
-                ElectricalTestFunction.DielectricWithstandDC,
-                userMessageService: protocolUI);
+                ElectricalTestFunction.DielectricWithstandDC);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value >= dataModel.Param)
