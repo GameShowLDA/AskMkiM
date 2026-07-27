@@ -274,7 +274,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               if (ExecutionConfig.GetIsIdleModeEnabled())
               {
-                if (!await ExecutionConfig.GetIsErrorSimulationEnabled())
+                if (!ExecutionConfig.GetIsErrorSimulationEnabled())
                 {
                   result = (LowerBound + UpperBound) / 2;
                 }

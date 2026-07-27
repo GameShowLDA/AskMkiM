@@ -38,7 +38,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       var random = new Random();
       double value = measurementRange.TargetValue;
 
-      if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled() && ExecutionConfig.GetIsErrorSimulationEnabled())
       {
         if (measurementRange.UpperBound != -1)
         {

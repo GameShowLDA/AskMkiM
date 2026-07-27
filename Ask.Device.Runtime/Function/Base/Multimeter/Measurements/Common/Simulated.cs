@@ -27,7 +27,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (!ExecutionConfig.GetIsErrorSimulationEnabled().Result)
+        if (!ExecutionConfig.GetIsErrorSimulationEnabled())
         {
           switch (measurementTypeCommand)
           {

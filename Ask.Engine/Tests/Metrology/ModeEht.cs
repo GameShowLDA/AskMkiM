@@ -127,7 +127,11 @@ namespace Ask.Engine.Tests.Metrology
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: MeasurementValueFormatter.FormatWithUnit(Rt, "Ом")) { IndentLevel = 1 });
         }
 
-        var result = ExecutionConfig.GetIsIdleModeEnabled() ? param : Rt - ((Rt1 + Rt2) / 2);
+        var result = Rt - ((Rt1 + Rt2) / 2);
+        if (ExecutionConfig.GetIsIdleModeEnabled() && !ExecutionConfig.GetIsErrorSimulationEnabled())
+        {
+          result = param;
+        }
 
         var err = result - param;
         Measurements.Add(err);

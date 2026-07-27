@@ -260,7 +260,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
     {
-      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
+      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !ExecutionConfig.GetIsErrorSimulationEnabled();
 
       if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
       {

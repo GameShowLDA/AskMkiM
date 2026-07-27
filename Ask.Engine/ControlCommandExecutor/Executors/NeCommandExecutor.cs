@@ -161,7 +161,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// </returns>
     private static async Task<bool> ShouldReturnOverloadInIdleReverseModeAsync(ConnectedPointContext pointContext) =>
       ExecutionConfig.GetIsIdleModeEnabled()
-      && !await ExecutionConfig.GetIsErrorSimulationEnabled()
+      && !ExecutionConfig.GetIsErrorSimulationEnabled()
       && pointContext.IsOverloadExpected;
 
     private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
