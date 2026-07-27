@@ -369,7 +369,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await SelfTestHelper.IsCorrectRangeAsync(
           resultStatus,
           result,
-          check.IdealResult.ToString("N0"),
+          check.IdealResult.ToString("N1"),
           ResistanceUnit,
           RelativeErrorMarker,
           check.PercentageError,
@@ -471,7 +471,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await SelfTestHelper.IsCorrectRangeAsync(
           resultStatus,
           result,
-          check.IdealResult.ToString("N0"),
+          check.IdealResult.ToString("N1"),
           CapacitanceUnit,
           RelativeErrorMarker,
           5,
