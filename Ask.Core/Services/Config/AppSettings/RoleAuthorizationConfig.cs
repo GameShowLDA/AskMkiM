@@ -22,8 +22,10 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static void SetCurrentRole(RoleType role, string displayName)
     {
+      var wasDebugEnabled = DebugAccessConfig.IsDebugEnabled;
       CurrentRole = role;
       CurrentRoleDisplayName = displayName;
+      DebugAccessConfig.NotifyCurrentRoleChanged(wasDebugEnabled);
     }
 
     /// <summary>
@@ -31,8 +33,10 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static void Clear()
     {
+      var wasDebugEnabled = DebugAccessConfig.IsDebugEnabled;
       CurrentRole = null;
       CurrentRoleDisplayName = string.Empty;
+      DebugAccessConfig.NotifyCurrentRoleChanged(wasDebugEnabled);
     }
   }
 }

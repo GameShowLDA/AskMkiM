@@ -43,6 +43,7 @@
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
+| Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
 | Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
 
@@ -61,6 +62,7 @@
 - [Protocol generation, save and print](#protocol-flow)
 - [Error propagation and retry](#equipment-error-flow)
 - [Crash diagnostics](#crash-diagnostics-flow)
+- [Authentication and Debug access](#authentication-and-debug-access-flow)
 
 ## Solution Structure
 
@@ -214,6 +216,43 @@ App.OnStartup()
 → ApplicationActivator.FlushPendingFileRequests()
 → show main window
 ```
+
+### Authentication and Debug access flow
+
+Debug-доступ не является параметром запуска или независимо изменяемым состоянием.
+Единственный источник истины — фактически авторизованная текущая роль:
+
+```text
+RoleLoginWindow authenticates RoleCredentialModel successfully
+→ RoleApplicationConfigurator.Apply(role)
+→ RoleAuthorizationConfig.SetCurrentRole(role.Role, role.DisplayName)
+→ DebugAccessConfig.IsDebugEnabled
+  → true only for RoleType.Root
+  → false for every other role and for CurrentRole == null
+→ DebugAccessConfig.NotifyCurrentRoleChanged(previousState)
+→ SystemStateEventAdapter.RaiseDebugRightsChanged(newState), только если bool изменился
+→ EventAggregator.Publish<SystemStateEvents.DebugRightsChanged>
+→ уже открытые UI.Controls.ErrorList.ErrorListControl /
+   Ask.UI.Controls.ErrorList.ErrorListControl обновляют видимость DEBUG-колонки
+```
+
+Смена пользователя без перезапуска проходит через
+`MainWindow.SwitchCurrentUserAsync → RoleLoginWindowManager → успешная аутентификация
+→ RoleApplicationConfigurator.Apply`. Неуспешная попытка не вызывает `Apply` и не
+изменяет текущую роль или Debug-доступ. `RoleAuthorizationConfig.Clear()` при
+отсутствии/завершении сессии пересчитывает доступ и публикует выключение после `root`.
+
+Production consumers читают только `DebugAccessConfig.IsDebugEnabled`:
+
+- `Ask.UI/Features/ProtocolNew/Protocol/ProtocolEntryOutputService.cs` добавляет
+  source file/member/line в запись протокола;
+- `UI/Controls/ErrorList/ErrorListControl.xaml.cs` и
+  `Ask.UI/Controls/ErrorList/ErrorListControl.xaml.cs` задают начальную видимость
+  DEBUG-колонки и реактивно обновляют её по событию.
+
+`CommandLineParser` по-прежнему обрабатывает файловые пути и совместимый no-op
+switch `admin`; аргумент `debug` не распознаётся и не влияет на доступ. Отдельной
+консольной команды изменения Debug-состояния нет.
 
 ### Database startup flow
 
@@ -997,6 +1036,9 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
 active; do not assume one replaces the other.
 
+Авторизация и Debug-зависимый UI описаны в
+[Authentication and Debug access flow](#authentication-and-debug-access-flow).
+
 Dialogs:
 
 - `Message.MessageBoxCustom` — generic modal messages;
@@ -1173,6 +1215,10 @@ Architecturally significant flows:
 - `Transport.IsReset` → local state reset for points and buses of the addressed device;
 - `ActionExecutor.StartProcessing` → execution-state consumers;
 - `ThemeSettings.ThemeChanged`/`LanguageSettings.LanguageChanged` → UI refresh.
+- `RoleAuthorizationConfig.SetCurrentRole/Clear`
+  → `DebugAccessConfig.NotifyCurrentRoleChanged`
+  → `SystemStateEvents.DebugRightsChanged`
+  → DEBUG-колонки уже открытых ErrorList controls.
 
 `ApplicationLifecycleManager` constructs `SystemEventsBinder`, `UiEventsBinder`
 and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
@@ -1241,7 +1287,8 @@ clears and warms them.
 | `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |
 | `ThemeSettings` | value inside UI config | startup/UI save flow | resources and shell |
 | `LanguageSettings` | application settings/resources | startup | localization |
-| `RoleAuthorizationConfig` | role/credential files | login/configurator | menu and archive permissions |
+| `RoleAuthorizationConfig` | role/credential files | login/configurator | current session role, menu/archive permissions and Debug derivation |
+| `DebugAccessConfig` | derived session state | `RoleAuthorizationConfig.CurrentRole` | protocol debug source and ErrorList DEBUG-column visibility |
 | `LegacyMkiConfig` | legacy hardware profile/config file + DB storage | LegacyMki services | compatibility execution |
 
 Config managers are static global state. Their save events are subscribed once in
@@ -1305,6 +1352,8 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentTrackingConnectable` | decorator | Ask.Device.Application | registers device usage before connection lifecycle operations | [Execution Engine](#addressed-reset-of-test-equipment) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
+| `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
