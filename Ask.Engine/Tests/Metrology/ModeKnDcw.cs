@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -118,7 +119,9 @@ namespace Ask.Engine.Tests.Metrology
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(fastMeter, protocolUI, param);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_DCW, resultReferenceMeterMeasured);
-        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, param, LowerBound, UpperBound);
+
+        MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
+        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, measurementRange);
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Результат проверки"));
         var result = resultFastMeterMeasured >= LowerBound && resultFastMeterMeasured <= UpperBound;
@@ -156,13 +159,9 @@ namespace Ask.Engine.Tests.Metrology
       /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
       /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
       /// <returns>Измеренное значение напряжения.</returns>
-      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
+      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, MeasurementRange measurementRange)
       {
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(
-          param,
-          rangeFrom,
-          rangeTo,
-          userMessageService);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, userMessageService);
         return result;
       }
 

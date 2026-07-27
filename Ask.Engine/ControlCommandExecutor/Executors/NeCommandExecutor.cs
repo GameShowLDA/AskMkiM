@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -121,12 +122,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
+        MeasurementRange measurementRange = new MeasurementRange(answer, firstValue, secondValue);
         return await MessageManager.ShowMeasurementResultAsync(
           messageService,
           MeasurementTypeCommand.NE,
-          firstValue,
-          secondValue,
-          answer,
+          measurementRange,
           isOverloadExpected: pointContext.IsOverloadExpected);
       }, messageService);
 

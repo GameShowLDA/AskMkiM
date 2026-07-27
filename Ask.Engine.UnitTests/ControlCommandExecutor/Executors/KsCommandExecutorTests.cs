@@ -1,11 +1,6 @@
-using System.Reflection;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.Translator;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
@@ -26,6 +21,11 @@ using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors;
 using Ask.Engine.UnitTests.Fixtures;
 using Moq;
+using System.Globalization;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.Executors;
 
@@ -71,16 +71,15 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     using var harness = new KsExecutionHarness();
     var command = CreateCommand(5, 15, "\u0411", "\u0414");
 
-    harness.ContinuityManagerMock
-      .Setup(x => x.CheckContinuityAsync(10, 5, 15, It.IsAny<IUserInteractionService>()))
-      .ReturnsAsync(10);
+    MeasurementRange measurementRange = new MeasurementRange(10, 5, 15);
 
+    harness.ContinuityManagerMock.Setup(x => x.CheckContinuityAsync(measurementRange, It.IsAny<IUserInteractionService>())).ReturnsAsync(10);
     var protocol = await harness.ExecuteAsync(command);
 
     Assert.Empty(protocol.Errors);
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
     harness.ContinuityManagerMock.Verify(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
-    harness.ContinuityManagerMock.Verify(x => x.CheckContinuityAsync(10, 5, 15, It.IsAny<IUserInteractionService>()), Times.Once);
+    harness.ContinuityManagerMock.Verify(x => x.CheckContinuityAsync(measurementRange, It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Never);
     harness.ResistanceManagerMock.Verify(
       x => x.MeasureResistanceAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
@@ -224,17 +223,16 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     using var harness = new KsExecutionHarness(switchResistance: 10);
     var command = CreateCommand(0.5, 5, "Б");
 
-    harness.ContinuityManagerMock
-      .Setup(x => x.CheckContinuityAsync(2.75, 0.5, 5, It.IsAny<IUserInteractionService>()))
-      .ReturnsAsync(5);
+    MeasurementRange measurementRange = new MeasurementRange(2.75, 0.5, 5);
 
+    harness.ContinuityManagerMock.Setup(x => x.CheckContinuityAsync(measurementRange, It.IsAny<IUserInteractionService>())).ReturnsAsync(5);
     var protocol = await harness.ExecuteAsync(command);
     var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
     AssertMessage(error, "X1, X2 (0,5 - 5 Ом)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
     Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
-    harness.ContinuityManagerMock.Verify(x => x.CheckContinuityAsync(2.75, 0.5, 5, It.IsAny<IUserInteractionService>()), Times.Once);
+    harness.ContinuityManagerMock.Verify(x => x.CheckContinuityAsync(measurementRange, It.IsAny<IUserInteractionService>()), Times.Once);
   }
 
   /// <summary>
@@ -364,7 +362,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       x => x.MeasureResistanceAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
       Times.Never);
     harness.ContinuityManagerMock.Verify(
-      x => x.CheckContinuityAsync(It.IsAny<double>(), It.IsAny<double>(), It.IsAny<double>(), It.IsAny<IUserInteractionService>()),
+      x => x.CheckContinuityAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
       Times.Never);
   }
 

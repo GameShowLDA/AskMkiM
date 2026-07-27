@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -8,7 +9,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -349,11 +349,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     static private async Task<double> GetResistanceAsync(IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
     {
       var fastMeter = await EquipmentService.GetFastMeterOrThrow(userMessageService);
-      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(
-        param,
-        rangeFrom,
-        rangeTo,
-        userMessageService);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      var result = await fastMeter.ContinuityManager.CheckContinuityAsync(measurementRange, userMessageService);
+
       return result;
     }
 

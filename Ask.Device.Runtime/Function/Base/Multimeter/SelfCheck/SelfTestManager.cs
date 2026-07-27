@@ -64,7 +64,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(IdealVoltage);
+      MeasurementRange measurementRangeDc = new MeasurementRange(IdealVoltage, IdealVoltage / 2, IdealVoltage * 2);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRangeDc);
 
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealVoltage, result, "напряжения", userMessageService);

@@ -103,7 +103,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
         answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(measurementRange, userMessageService: messageService) - fixtureCapacitance;
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, secondValue, answer);
+        measurementRange.TargetValue = answer;
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, measurementRange);
       }, messageService);
 
       return result;

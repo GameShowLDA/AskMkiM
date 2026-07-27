@@ -282,7 +282,8 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
           await Task.Delay(1000);
 
-          var result = await meter.DcVoltageManager.MeasureDCVoltageAsync(item, lowerBound, upperBound);
+          MeasurementRange measurementRange = new MeasurementRange(item, lowerBound, upperBound);
+          var result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
           if (!ExecutionConfig.GetIsIdleModeEnabled())
           {
             result *= 10;

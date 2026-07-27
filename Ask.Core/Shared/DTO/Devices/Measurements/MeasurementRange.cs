@@ -21,7 +21,7 @@ namespace Ask.Core.Shared.DTO.Devices.Measurements
     /// <summary>
     /// Заданное значение измеряемой величины.
     /// </summary>
-    public double TargetValue { get; }
+    public double TargetValue { get; set; }
 
     /// <summary>
     /// Нижняя граница допустимого диапазона.

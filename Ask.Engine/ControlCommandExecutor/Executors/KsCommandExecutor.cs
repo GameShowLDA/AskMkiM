@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -120,6 +121,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
         answer = await meter.ResistanceManager.MeasureResistanceAsync(
           value,
           firstValue,
@@ -136,7 +138,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, firstValue, secondValue, answer);
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange, chains: null, isOverloadExpected: false);
       }, messageService);
 
       return result;
@@ -154,12 +156,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ContinuityManager.CheckContinuityAsync(
-          value,
-          firstValue,
-          secondValue,
-          messageService);
-
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+        answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
           answer -= errorResistance;
@@ -170,7 +168,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, firstValue, secondValue, answer);
+        measurementRange.TargetValue = answer;
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange);
 
       }, messageService);
 

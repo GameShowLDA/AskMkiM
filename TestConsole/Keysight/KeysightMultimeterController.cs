@@ -282,7 +282,8 @@ namespace TestConsole.Keysight
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
     }
 
     public async Task<double> MeasureAcVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
@@ -307,7 +308,9 @@ namespace TestConsole.Keysight
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.ContinuityManager.CheckContinuityAsync(measurementRange);
     }
 
     public async Task<double> CheckDiodeAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)

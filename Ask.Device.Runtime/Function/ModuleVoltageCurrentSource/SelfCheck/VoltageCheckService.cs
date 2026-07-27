@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -66,7 +67,8 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 
       await Task.Delay(10);
 
-      double result = await GetMeasurementResult(messageService, voltage, firstNorm, lastNorm, delay, fastMeter);
+      MeasurementRange measurementRange = new MeasurementRange(voltage, firstNorm, lastNorm);
+      double result = await GetMeasurementResult(messageService, measurementRange, delay, fastMeter);
       bool error = !(result >= firstNorm && result <= lastNorm);
 
       var status = error ? ShowMessageModel.MessageType.Error : ShowMessageModel.MessageType.Success;
@@ -84,10 +86,10 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
     /// <returns>Результат измерения.</returns>
-    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, double voltage, double rangeFrom, double rangeTo, int delay, IMultimeter meter)
+    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, MeasurementRange measurementRange, int delay, IMultimeter meter)
     {
       await Task.Delay(delay);
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage, rangeFrom, rangeTo, messageService);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, messageService);
       LogInformation($"Измеренное напряжение: {result} В", isDeviceLog: true);
       return result;
     }

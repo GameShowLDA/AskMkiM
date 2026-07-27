@@ -132,11 +132,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, 60000);
 
         var measurement = Stopwatch.StartNew();
-        var answer = (await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange)).value;
+        var answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
         LogPerformance("node accumulation measurement device call", measurement);
-
         measurement.Restart();
-        var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer);
+
+        measurementRange.TargetValue = answer.value;
+        var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, measurementRange);
         LogPerformance("node accumulation measurement message", measurement);
 
         return result;
@@ -165,7 +166,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         LogPerformance("node full measurement device call", measurement);
 
         measurement.Restart();
-        var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, firstValue, -1, answer.Value);
+        measurementRange.TargetValue = answer.Value;
+        var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, measurementRange);
         LogPerformance("node full measurement message", measurement);
         return result;
 

@@ -311,9 +311,7 @@ namespace TestConsole.B7783
     /// <param name="cancellationToken">Маркер отмены операции.</param>
     /// <returns>Результат выполнения команды.</returns>
     public async Task<B7783CommandResult> MeasureContinuityResistanceAsync(
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       int timeoutMs = MeasurementTimeoutMs,
       CancellationToken cancellationToken = default)
     {
@@ -331,7 +329,7 @@ namespace TestConsole.B7783
         timeoutMs,
         async token =>
         {
-          double result = await _device.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+          double result = await _device.ContinuityManager.CheckContinuityAsync(measurementRange);
           token.ThrowIfCancellationRequested();
           return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
         },
@@ -607,7 +605,9 @@ namespace TestConsole.B7783
       }
 
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
     }
 
     /// <summary>

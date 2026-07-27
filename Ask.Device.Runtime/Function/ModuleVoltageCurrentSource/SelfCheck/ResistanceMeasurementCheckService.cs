@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Translator;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -79,7 +80,8 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         double firstNorm = resistance - ((resistance / 100.0 * error.Percent) + error.Numeric);
         double lastNorm = resistance + ((resistance / 100.0 * error.Percent) + error.Numeric);
 
-        var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(resistance, firstNorm, lastNorm, messageService);
+        MeasurementRange measurementRange = new MeasurementRange(resistance, firstNorm, lastNorm);
+        var voltage = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, messageService);
         double result = resistance;
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
