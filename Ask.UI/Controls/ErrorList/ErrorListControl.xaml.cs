@@ -66,9 +66,9 @@ namespace Ask.UI.Controls.ErrorList
       IssuesTable.IssueNavigationRequested += IssuesTable_IssueNavigationRequested;
       IssuesTable.BreakpointToggleRequested += IssuesTable_BreakpointToggleRequested;
 
-      EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
+      EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebugEnabled));
 
-      if (AdminConfig.GetDebugRights())
+      if (DebugAccessConfig.IsDebugEnabled)
       {
         IssuesTable.DebugVisible = Visibility.Visible;
       }
