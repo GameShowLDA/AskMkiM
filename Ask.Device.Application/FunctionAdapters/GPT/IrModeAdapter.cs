@@ -734,6 +734,9 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           2,
           userMessageService);
 
+        if (result > _device.IrMaxResistanceMOhm)
+          result = _device.IrMaxResistanceMOhm;
+
         return (result, unit);
       }
 

@@ -25,6 +25,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// </returns>
     internal static double GetSimulatedValue(double rangeFrom, double rangeTo, ElectricalTestFunction measurementTypeCommand)
     {
+      if (rangeTo == -1)
+      {
+        rangeTo = rangeFrom * 2;
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (!ExecutionConfig.GetIsErrorSimulationEnabled())

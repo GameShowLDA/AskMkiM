@@ -28,6 +28,7 @@ namespace Ask.Device.Runtime.Device
       DcwMaxVoltage = 1000;
       IrMaxVoltage = 1000;
       IrMinVoltage = 50;
+      IrMaxResistanceMOhm = 60000;
       SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
 
@@ -86,6 +87,9 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public int IrMinVoltage { get; set; }
+
+    /// <inheritdoc />
+    public int IrMaxResistanceMOhm { get; set; }
 
     /// <inheritdoc />
     public int SystemInsulationResistanceGOhm { get; set; }

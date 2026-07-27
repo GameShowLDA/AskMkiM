@@ -990,6 +990,8 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+В правой области `RunControl` панель действий документа отображается только для
+транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
