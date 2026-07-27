@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
@@ -103,22 +104,23 @@ namespace Ask.Engine.Tests.Metrology
       {
         var points = GetPoints();
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.EHT, param);
+        MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
 
-        var Rt1 = await StepFirst(protocolUI, metrologicalModeRole, points.Point1, param, LowerBound, UpperBound);
+        var Rt1 = await StepFirst(protocolUI, metrologicalModeRole, points.Point1, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt1 > 100)
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: MeasurementValueFormatter.FormatWithUnit(Rt1, "Ом")) { IndentLevel = 1 });
         }
 
-        var Rt2 = await StepSecond(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param, LowerBound, UpperBound);
+        var Rt2 = await StepSecond(protocolUI, metrologicalModeRole, points.Point1, points.Point2, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt2 > 100)
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: MeasurementValueFormatter.FormatWithUnit(Rt2, "Ом")) { IndentLevel = 1 });
         }
 
-        var Rt = await StepThird(protocolUI, metrologicalModeRole, points.Point1, points.Point2, param, LowerBound, UpperBound);
+        var Rt = await StepThird(protocolUI, metrologicalModeRole, points.Point1, points.Point2, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt > 100)
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
@@ -151,7 +153,7 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, double param, double rangeFrom, double rangeTo)
+      private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, MeasurementRange measurementRange)
       {
         if (DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -165,15 +167,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(
-          param,
-          rangeFrom,
-          rangeTo,
-          userMessageService);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, userMessageService);
         return result;
       }
 
-      private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param, double rangeFrom, double rangeTo)
+      private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, MeasurementRange measurementRange)
       {
         if (DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -195,15 +193,11 @@ namespace Ask.Engine.Tests.Metrology
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(
-          param,
-          rangeFrom,
-          rangeTo,
-          userMessageService);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, userMessageService);
         return result;
       }
 
-      private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, double param, double rangeFrom, double rangeTo)
+      private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, MeasurementRange measurementRange)
       {
         if (DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -214,11 +208,7 @@ namespace Ask.Engine.Tests.Metrology
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
 
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
-        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(
-          param,
-          rangeFrom,
-          rangeTo,
-          userMessageService);
+        var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, userMessageService);
         return result;
       }
 

@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using System.Globalization;
 using TestConsole.Keysight;
 
@@ -75,7 +76,7 @@ namespace TestConsole
             PrintResult(await controller.SetResistanceModeAsync());
             break;
           case 7:
-            await PrintMeasurementAsync(() => controller.MeasureResistanceAsync(), "Resistance");
+            await PrintMeasurementAsync(() => controller.MeasureResistanceAsync(new MeasurementRange(0, 0, 0)), "Resistance");
             break;
           case 8:
             PrintResult(await controller.SetDcVoltageModeAsync());
@@ -83,7 +84,7 @@ namespace TestConsole
           case 9:
             var dcParameters = ReadVoltageParameters();
             await PrintVoltageMeasurementAsync(
-              () => controller.MeasureDcVoltageAsync(dcParameters.Param, dcParameters.RangeFrom, dcParameters.RangeTo),
+              () => controller.MeasureDcVoltageAsync(new MeasurementRange(dcParameters.Param, dcParameters.RangeFrom, dcParameters.RangeTo)),
               "DC voltage");
             break;
           case 10:
@@ -92,7 +93,7 @@ namespace TestConsole
           case 11:
             var acParameters = ReadVoltageParameters();
             await PrintVoltageMeasurementAsync(
-              () => controller.MeasureAcVoltageAsync(acParameters.Param, acParameters.RangeFrom, acParameters.RangeTo),
+              () => controller.MeasureAcVoltageAsync(new MeasurementRange(acParameters.Param, acParameters.RangeFrom, acParameters.RangeTo)),
               "AC voltage");
             break;
           case 12:
@@ -113,7 +114,7 @@ namespace TestConsole
           case 16:
             var capacitanceParameters = ReadCapacitanceParameters();
             await PrintMeasurementAsync(
-              () => controller.MeasureCapacitanceAsync(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo),
+              () => controller.MeasureCapacitanceAsync(new MeasurementRange(capacitanceParameters.Param, capacitanceParameters.RangeFrom, capacitanceParameters.RangeTo)),
               "Capacitance, nF");
             break;
           case 17:

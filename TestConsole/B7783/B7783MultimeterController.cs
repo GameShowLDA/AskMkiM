@@ -573,7 +573,7 @@ namespace TestConsole.B7783
         throw mode.Error ?? new InvalidOperationException("Failed to configure resistance mode.");
       }
 
-      return await _device.ResistanceManager.MeasureResistanceAsync();
+      return await _device.ResistanceManager.MeasureResistanceAsync(new MeasurementRange(0, 0, 0));
     }
 
     /// <summary>

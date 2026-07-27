@@ -122,11 +122,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
-        answer = await meter.ResistanceManager.MeasureResistanceAsync(
-          value,
-          firstValue,
-          secondValue,
-          messageService);
+        answer = await meter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -138,6 +134,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
+        measurementRange.TargetValue = answer;
         return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange, chains: null, isOverloadExpected: false);
       }, messageService);
 

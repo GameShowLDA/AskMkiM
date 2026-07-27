@@ -36,7 +36,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       bool isOverloadExpected = false)
     {
       var random = new Random();
-      double value = 0;
+      double value = measurementRange.TargetValue;
 
       if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
       {
