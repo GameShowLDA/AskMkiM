@@ -118,9 +118,8 @@ namespace Ask.Engine.Tests.Metrology
         await meterDevice.AcwManger.Measure.MeasureAsync(
           ElectricalTestFunction.DielectricWithstandAC,
           param,
-          LowerBound,
-          UpperBound,
-          userMessageService: userMessageService);
+          0,
+          10);
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
         var answer = result < LowerBound || result > UpperBound;

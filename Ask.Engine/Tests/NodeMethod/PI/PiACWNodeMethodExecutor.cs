@@ -96,9 +96,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
-              var answer = await breakDown.AcwManger.Measure.MeasureAsync(
-                ElectricalTestFunction.DielectricWithstandAC,
-                dataModel.Param);
+              var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, dataModel.Param / 2, 0, dataModel.Param);
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value >= dataModel.Param)

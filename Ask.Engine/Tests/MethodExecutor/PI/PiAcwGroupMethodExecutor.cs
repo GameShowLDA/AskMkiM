@@ -92,7 +92,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
           var answer = await breakDown.AcwManger.Measure.MeasureAsync(
             ElectricalTestFunction.DielectricWithstandAC,
-            dataModel.Param,
+            dataModel.Param / 2, 0, dataModel.Param,
             userMessageService: messageService);
           var type = ShowMessageModel.MessageType.Success;
           if (answer.value >= dataModel.Param)

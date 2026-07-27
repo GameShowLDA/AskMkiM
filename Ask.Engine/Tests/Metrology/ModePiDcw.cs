@@ -104,8 +104,8 @@ namespace Ask.Engine.Tests.Metrology
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
         await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
-        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
         await breakDown.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
       }
 
@@ -116,12 +116,7 @@ namespace Ask.Engine.Tests.Metrology
         await messageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_DCW, param);
-        await meterDevice.DcwManger.Measure.MeasureAsync(
-          ElectricalTestFunction.DielectricWithstandDC,
-          param,
-          LowerBound,
-          UpperBound,
-          userMessageService: messageService);
+        await meterDevice.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, param, 0, 60);
         var result = await MeasuredReferenceMeter(messageService, param);
 
         var answer = result < LowerBound || result > UpperBound;
