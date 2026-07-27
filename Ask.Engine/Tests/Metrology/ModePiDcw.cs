@@ -118,10 +118,11 @@ namespace Ask.Engine.Tests.Metrology
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_DCW, param);
 
-        MeasurementRange measurementRangeDcw = new MeasurementRange(param, 0, 60);
+        var result = await MeasuredReferenceMeter(messageService, param);
+
+        MeasurementRange measurementRangeDcw = new MeasurementRange(param, LowerBound, UpperBound);
         await meterDevice.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRangeDcw);
 
-        var result = await MeasuredReferenceMeter(messageService, param);
         var answer = result < LowerBound || result > UpperBound;
         var err = result - param;
 

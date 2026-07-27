@@ -117,7 +117,7 @@ namespace Ask.Engine.Tests.Metrology
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
 
-        MeasurementRange measurementRange = new MeasurementRange(param, 0, 10);
+        MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
         await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
 
         var result = await MeasuredReferenceMeter(userMessageService, param);
