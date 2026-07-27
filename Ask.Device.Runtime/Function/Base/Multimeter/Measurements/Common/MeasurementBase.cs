@@ -4,6 +4,7 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
@@ -85,7 +86,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return random;
       }
 
-      await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
+      if (profile.ElectricalTest == ElectricalTestFunction.DCVoltage
+      || profile.ElectricalTest == ElectricalTestFunction.ACVoltage
+      || profile.ElectricalTest == ElectricalTestFunction.Resistance
+      || profile.ElectricalTest == ElectricalTestFunction.Diode
+      || profile.ElectricalTest == ElectricalTestFunction.Capacitance)
+        await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
 
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
