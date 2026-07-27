@@ -147,11 +147,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         return 9.9E+37;
       }
 
-      return await meter.DiodeManager.CheckDiodeAsync(
-        value,
-        firstValue,
-        secondValue,
-        messageService);
+      MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+      return await meter.DiodeManager.CheckDiodeAsync(measurementRange, messageService);
     }
 
     /// <summary>

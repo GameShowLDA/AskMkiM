@@ -317,7 +317,9 @@ namespace TestConsole.Keysight
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.DiodeManager.CheckDiodeAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.DiodeManager.CheckDiodeAsync(measurementRange);
     }
 
     public async Task<KeysightCommandResult> QueryAsync(

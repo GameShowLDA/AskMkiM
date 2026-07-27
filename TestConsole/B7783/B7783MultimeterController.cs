@@ -368,7 +368,9 @@ namespace TestConsole.B7783
         timeoutMs,
         async token =>
         {
-          double result = await _device.DiodeManager.CheckDiodeAsync(param, rangeFrom, rangeTo);
+          MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+          double result = await _device.DiodeManager.CheckDiodeAsync(measurementRange);
+
           token.ThrowIfCancellationRequested();
           return result.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
         },
