@@ -17,8 +17,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
   public class SelfTestManager : ISelfTestCheckerMultimeter
   {
     private const double IdealVoltage = 0;
-    private const double VoltageRangeFrom = -0.2;
-    private const double VoltageRangeTo = 0.2;
+    private const double VoltageRange = 0.2;
     private const double MinimumActiveResistance = 50;
     private const int RequiredCapacitanceMeasurements = 6;
     private const int MeasurementResponseDelayMs = 1200;
@@ -48,11 +47,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
     private static readonly CapacitanceCheck[] CapacitanceChecks =
     {
-      new CapacitanceCheck(1, 3.3),
-      new CapacitanceCheck(2, 10),
+      new CapacitanceCheck(1, 3.6),
+      new CapacitanceCheck(2, 11),
       new CapacitanceCheck(3, 120),
       new CapacitanceCheck(4, 1_000),
-      // Неисправен.
+      // Неисправны.
       //new CapacitanceCheck(5, 6_800),
       //new CapacitanceCheck(6, 110_000),
     };
@@ -123,13 +122,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     }
 
     /// <summary>
-    /// Рассчитывает допустимое отклонение для измерения напряжения.
-    /// </summary>
-    /// <param name="voltage">Эталонное напряжение.</param>
-    /// <returns>Допустимое абсолютное отклонение напряжения.</returns>
-    private static double VoltageTolerance(double voltage) => (0.1 * voltage) + 0.02;
-
-    /// <summary>
     /// Рассчитывает допустимое отклонение для измерения сопротивления.
     /// </summary>
     /// <param name="resistance">Эталонное сопротивление.</param>
@@ -142,7 +134,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// </summary>
     /// <param name="capacity">Эталонная ёмкость.</param>
     /// <returns>Допустимое абсолютное отклонение ёмкости.</returns>
-    private static double CapacityTolerance(double capacity) => (0.05 * capacity) + 1;
+    private static double CapacityTolerance(double capacity) => 0.05 * capacity;
 
     /// <summary>
     /// Выполняет проверку измерения постоянного и переменного напряжения.
@@ -261,10 +253,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
       await ShowActionHeaderAsync($"Измерение напряжения на диапазоне {range}{VoltageUnit}", userMessageService);
-      var result = await measureVoltage(IdealVoltage, VoltageRangeFrom, VoltageRangeTo, userMessageService, MeasurementResponseDelayMs);
+      var result = await measureVoltage(IdealVoltage, -VoltageRange, VoltageRange, userMessageService, MeasurementResponseDelayMs);
 
       cancellationToken.ThrowIfCancellationRequested();
-      var resultStatus = SelfTestHelper.InRange(IdealVoltage, result, VoltageTolerance(IdealVoltage));
+      var resultStatus = SelfTestHelper.InRange(IdealVoltage, result, VoltageRange);
       await SelfTestHelper.IsCorrectRangeAsync(resultStatus, result, $"диапазона {range}", VoltageUnit, IdealVoltage, 2, userMessageService);
     }
 
