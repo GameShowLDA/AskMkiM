@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
 {
@@ -33,11 +34,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <exception cref="ArgumentOutOfRangeException">
     /// Выбрасывается, если <paramref name="measurementCount"/> меньше единицы.
     /// </exception>
-    Task<double> MeasureCapacitanceAsync(
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
-      IUserInteractionService? userMessageService = null,
-      int measurementCount = 5);
+    Task<double> MeasureCapacitanceAsync(MeasurementRange measurementRange, IUserInteractionService? userMessageService = null, int measurementCount = 5);
   }
 }

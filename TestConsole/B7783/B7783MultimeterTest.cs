@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using System.Globalization;
 
 namespace TestConsole.B7783
@@ -98,7 +99,7 @@ namespace TestConsole.B7783
             PrintResult(await controller.CheckContinuityAsync(expectedContinuity));
             break;
           case 13:
-            PrintResult(await controller.MeasureContinuityResistanceAsync());
+            PrintResult(await controller.MeasureContinuityResistanceAsync(new MeasurementRange(0, 0, 0)));
             break;
           case 14:
             PrintResult(await controller.SetCapacitanceModeAsync());

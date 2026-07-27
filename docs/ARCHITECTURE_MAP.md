@@ -990,6 +990,8 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+В правой области `RunControl` панель действий документа отображается только для
+транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
@@ -1257,7 +1259,8 @@ Main contract groups:
 - `Shared/Interfaces/ExecutionInterfaces` — execution/pause/run contracts;
 - `Shared/Metadata/View/EditorHost` — editor/workspace/run/translation service
   boundaries between `MainWindow` and `UI`;
-- `Shared/DTO/Devices` — EF entities and device materialization data;
+- `Shared/DTO/Devices` — EF entities, device materialization data and common
+  measurement parameters (`Measurements/MeasurementRange`);
 - `Shared/DTO/Settings` — persisted configuration;
 - `Shared/DTO/Protocol` — `ProtocolModel`, `ShowMessageModel` and action settings;
 - `ControlCommandAnalyser/Model` — parsed command models passed from translation

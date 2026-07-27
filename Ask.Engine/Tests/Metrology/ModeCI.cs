@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -109,12 +110,8 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции"));
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
 
-        var result = (await meterDevice.IrManger.Measure.MeasureAsync(
-          ElectricalTestFunction.InsulationResistance,
-          param,
-          LowerBound,
-          UpperBound,
-          userMessageService: protocolUI)).value;
+        MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
+        var result = (await meterDevice.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange, userMessageService: protocolUI)).value;
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {

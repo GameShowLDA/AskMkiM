@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -180,22 +181,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         double answer = 0;
+        MeasurementRange measurementRange = new MeasurementRange(resistance, lowValue, hightValue);
 
         if (continuityManager)
         {
-          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(
-            resistance,
-            lowValue,
-            hightValue,
-            messageService);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
         }
         else
         {
-          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(
-            resistance,
-            lowValue,
-            hightValue,
-            messageService);
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
         if (answer < 0)
@@ -203,7 +197,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, lowValue, -1, answer);
+        measurementRange.TargetValue = answer;
+
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, measurementRange);
 
       }, messageService);
 
@@ -221,18 +217,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         double answer = -1;
+        MeasurementRange measurementRange = new MeasurementRange(resistance, lowValue, hightValue);
 
         if (continuityManager)
         {
-          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue, messageService);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
         }
         else
         {
-          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(
-            resistance,
-            lowValue,
-            hightValue,
-            messageService);
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
         if (answer < 0)
@@ -240,7 +233,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, lowValue, hightValue, answer);
+        measurementRange.TargetValue = answer;
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, measurementRange);
       }, messageService);
 
       return result;
@@ -258,17 +252,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        MeasurementRange measurementRange = new MeasurementRange(resistance, lowValue, hightValue);
         if (continuityManager)
         {
-          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(resistance, lowValue, hightValue, messageService);
+          answer = await fastMeter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
         }
         else
         {
-          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(
-            resistance,
-            lowValue,
-            hightValue,
-            messageService);
+          answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
@@ -281,9 +272,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        var result = answer >= lowValue && answer <= hightValue;
+        measurementRange.TargetValue = answer;
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, measurementRange);
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, lowValue, hightValue, answer);
       }, messageService);
 
       return result;

@@ -93,7 +93,7 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Возвращает, включена ли симуляция ошибок в холостом режиме.
     /// </summary>
     /// <returns>true, если включена; false, если выключена.</returns>
-    public static Task<bool> GetIsErrorSimulationEnabled() => Task.FromResult(SettingsExecutionModel?.IsErrorSimulationMode ?? false);
+    public static bool GetIsErrorSimulationEnabled() => SettingsExecutionModel?.IsErrorSimulationMode ?? false;
 
     /// <summary>
     /// Проверяет, включена ли симуляция аппаратных ошибок оборудования.

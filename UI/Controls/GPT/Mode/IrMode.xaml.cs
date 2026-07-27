@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Message;
 using System.Windows;
@@ -81,7 +82,8 @@ namespace UI.Controls.GPT.Mode
         TimeValueText.Text = $"Время теста IR: {systemData.TestTime:F1} сек";
         RefValueText.Text = $"Смещение IR: {systemData.Offset:F1} G";
 
-        var answer = await GPTPunchControl.ModelGPT.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance);
+        MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
+        var answer = await GPTPunchControl.ModelGPT.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
         TestResultText.Text = $"Результат теста: {answer} ГОм";
       }
       catch (Exception ex)

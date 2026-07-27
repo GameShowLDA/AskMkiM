@@ -1,6 +1,7 @@
-﻿using Ask.Core.Services.Errors.Device;
-using Ask.Core.Services.Devices;
+﻿using Ask.Core.Services.Devices;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Adapters;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -244,15 +245,14 @@ namespace Ask.Engine.Tests.Base
       CancellationToken token,
       int pointNumber,
       IRelaySwitchModule _module,
-      double param = 0,
-      double lower = 0)
+      MeasurementRange measurementRange)
     {
-      var answer = await meter.ContinuityManager.CheckContinuityAsync(
-        param,
-        userMessageService: ui);
+      var answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, userMessageService: ui);
       token.ThrowIfCancellationRequested();
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
-      var (success, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, param, answer, point);
+      measurementRange.TargetValue = answer;
+
+      var (success, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, measurementRange, point);
       return (success, result);
     }
 
