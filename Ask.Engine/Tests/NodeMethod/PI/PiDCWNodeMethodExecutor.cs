@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -98,7 +99,9 @@ namespace Ask.Engine.Tests.NodeMethod.PI
             {
               token.ThrowIfCancellationRequested();
 
-              var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, dataModel.Param / 2, 0, dataModel.Param);
+              MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
+              var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
+
               var type = ShowMessageModel.MessageType.Success;
 
               if (answer.value >= dataModel.Param)

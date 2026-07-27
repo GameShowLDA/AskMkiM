@@ -1257,7 +1257,8 @@ Main contract groups:
 - `Shared/Interfaces/ExecutionInterfaces` — execution/pause/run contracts;
 - `Shared/Metadata/View/EditorHost` — editor/workspace/run/translation service
   boundaries between `MainWindow` and `UI`;
-- `Shared/DTO/Devices` — EF entities and device materialization data;
+- `Shared/DTO/Devices` — EF entities, device materialization data and common
+  measurement parameters (`Measurements/MeasurementRange`);
 - `Shared/DTO/Settings` — persisted configuration;
 - `Shared/DTO/Protocol` — `ProtocolModel`, `ShowMessageModel` and action settings;
 - `ControlCommandAnalyser/Model` — parsed command models passed from translation

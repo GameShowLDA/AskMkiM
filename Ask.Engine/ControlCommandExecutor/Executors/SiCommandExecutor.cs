@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -128,11 +129,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, 60000);
+
         var measurement = Stopwatch.StartNew();
-        var answer = (await breadDown.IrManger.Measure.MeasureAsync(
-          ElectricalTestFunction.InsulationResistance,
-          value,
-          firstValue)).value;
+        var answer = (await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange)).value;
         LogPerformance("node accumulation measurement device call", measurement);
 
         measurement.Restart();
@@ -157,12 +157,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
+        MeasurementRange measurementRange = new MeasurementRange(value, value, 60000);
+
         var measurement = Stopwatch.StartNew();
-        answer = await breadDown.IrManger.Measure.MeasureAsync(
-          ElectricalTestFunction.InsulationResistance,
-          value,
-          value,
-          60000);
+        answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
+
         LogPerformance("node full measurement device call", measurement);
 
         measurement.Restart();

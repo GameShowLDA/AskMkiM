@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Device.Runtime.Device;
 using System.Diagnostics;
 
@@ -640,7 +641,9 @@ namespace TestConsole.B7783
       }
 
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRangeAc = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.AcVoltageManager.MeasureACVoltageAsync(measurementRangeAc);
     }
 
     /// <summary>
@@ -674,7 +677,9 @@ namespace TestConsole.B7783
       }
 
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.CapacitanceManager.MeasureCapacitanceAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.CapacitanceManager.MeasureCapacitanceAsync(measurementRange);
     }
 
     /// <summary>

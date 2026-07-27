@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -52,14 +53,12 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     /// </summary>
     public async Task<(double value, string unit)> MeasureAsync(
       ElectricalTestFunction electricalTestFunction,
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
       if (await _getIsIdleMode())
-        return (MeasurementAdapterHelper.Round(param), string.Empty);
+        return (MeasurementAdapterHelper.Round(measurementRange.TargetValue), string.Empty);
 
       await StopMeasure();
       await Task.Delay(_delayBeforeCall);
@@ -96,7 +95,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
           {
             await _gptModel.DeviceProtocol.QueryAsync(testCommand);
           }
-          else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > param)
+          else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > measurementRange.TargetValue)
           {
             await StopMeasure();
             tickCount = totalTicks + 1;

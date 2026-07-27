@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -84,7 +85,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
     /// <inheritdoc />
     public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, param, rangeFrom, rangeTo, userMessageService);
+        => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, new MeasurementRange(param, rangeFrom, rangeTo), userMessageService);
 
     /// <summary>
     /// Проверяет проводимость между измерительными щупами.

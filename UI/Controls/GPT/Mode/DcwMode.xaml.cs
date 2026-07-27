@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -87,7 +88,8 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        double result = (await GPTPunchControl.ModelGPT.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC)).value;
+        MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
+        double result = (await GPTPunchControl.ModelGPT.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).value;
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
       catch (Exception ex)

@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -115,11 +116,10 @@ namespace Ask.Engine.Tests.Metrology
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
-        await meterDevice.AcwManger.Measure.MeasureAsync(
-          ElectricalTestFunction.DielectricWithstandAC,
-          param,
-          0,
-          10);
+
+        MeasurementRange measurementRange = new MeasurementRange(param, 0, 10);
+        await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
+
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
         var answer = result < LowerBound || result > UpperBound;

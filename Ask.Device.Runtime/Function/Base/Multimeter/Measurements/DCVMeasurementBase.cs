@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
@@ -29,7 +30,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
     /// <inheritdoc />
     public async Task<double> MeasureDCVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.DCVCommands, param, rangeFrom, rangeTo, userMessageService);
+        => await MeasurementBase.MeasureAsync(_device, _device.DCVCommands, new MeasurementRange(param, rangeFrom, rangeTo), userMessageService);
 
     /// <inheritdoc />
     public async Task<bool> SetDCVoltageRangeAsync(double range, IUserInteractionService? userMessageService = null)
