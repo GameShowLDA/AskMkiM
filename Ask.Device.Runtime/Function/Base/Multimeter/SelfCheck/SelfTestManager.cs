@@ -37,7 +37,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private static readonly ResistanceCheck[] ResistanceChecks =
     {
       new ResistanceCheck(1, 2, 50),
-      new ResistanceCheck(2, 120, 5),
+      new ResistanceCheck(2, 100, 5),
       new ResistanceCheck(3, 1_000, 5),
       new ResistanceCheck(4, 10_000, 5),
       new ResistanceCheck(5, 100_000, 1),
