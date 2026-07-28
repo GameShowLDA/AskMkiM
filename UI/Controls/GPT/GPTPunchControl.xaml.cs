@@ -21,8 +21,41 @@ namespace UI.Controls.GPT
     public GPTPunchControl()
     {
       InitializeComponent();
-      ModelGPT = BreakdownTesters.GetDevicesByNumberChassisAsync(1).GetAwaiter().GetResult().FirstOrDefault();
       Controller.Visibility = Visibility.Visible;
+      Loaded += GPTPunchControl_Loaded;
+    }
+
+    /// <summary>
+    /// Асинхронно загружает пробойную установку из конфигурации оборудования.
+    /// </summary>
+    /// <param name="sender">Загруженный элемент управления.</param>
+    /// <param name="e">Данные события загрузки.</param>
+    private async void GPTPunchControl_Loaded(object sender, RoutedEventArgs e)
+    {
+      Loaded -= GPTPunchControl_Loaded;
+
+      try
+      {
+        ModelGPT = (await BreakdownTesters.GetDevicesByNumberChassisAsync(1))
+          .FirstOrDefault();
+
+        if (ModelGPT == null)
+        {
+          Ask.LogLib.LoggerUtility.LogError(
+            "GPT — устройство не найдено в конфигурации шасси № 1.",
+            isDeviceLog: true);
+          return;
+        }
+
+        Ask.LogLib.LoggerUtility.LogInformation(
+          $"GPT — для ручного управления выбрано устройство «{ModelGPT.Name}».",
+          isDeviceLog: true);
+      }
+      catch (Exception ex)
+      {
+        ModelGPT = null;
+        GptUiOperation.ReportError("загрузка устройства", ex);
+      }
     }
   }
 }

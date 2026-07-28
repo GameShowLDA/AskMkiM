@@ -351,7 +351,17 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>
                     </MenuItem>
 
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin" Command="{Binding Admin.AdminPanelCommand}">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin">
+                        <MenuItem Header="Сервисные утилиты"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.ServiceUtilitiesCommand}"/>
+                        <MenuItem Header="База данных"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.DatabaseCommand}"/>
+                        <MenuItem Header="Сопротивление МКР"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.ResistanceCommand}"/>
+                        <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
                         <MenuItem Header="МеШ" Style="{DynamicResource StyleMenuItem}" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />

@@ -1,47 +1,54 @@
-using Ask.Core.Shared.Metadata.Enums.UiEnums;
-using Ask.DataBase.Engine.Static.Devices;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using UI.Controls.GPT;
-using UI.Controls.Keysight;
 
 namespace UI.Controls.AdminPanel
 {
   /// <summary>
-  /// Логика взаимодействия для AdminPanelControl.xaml
+  /// Предоставляет навигацию по административным и сервисным инструментам.
   /// </summary>
   public partial class AdminPanelControl : UserControl
   {
+    private ServiceUtilitiesControl? serviceUtilitiesControl;
+    private DataBaseView? dataBaseView;
+    private CheckResistanceControl? checkResistanceControl;
+
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="AdminPanelControl"/>.
+    /// </summary>
     public AdminPanelControl()
     {
       InitializeComponent();
+      ServiceUtilitiesNavigation.IsChecked = true;
     }
 
-    private void DatabaseButton_Click(object sender, MouseButtonEventArgs e)
+    /// <summary>
+    /// Отображает сервисные утилиты.
+    /// </summary>
+    /// <param name="sender">Выбранный элемент навигации.</param>
+    /// <param name="e">Данные события выбора.</param>
+    private void ServiceUtilitiesNavigation_Checked(object sender, RoutedEventArgs e)
     {
-      RightContentPresenter.Content = new DataBaseView();
+      RightContentPresenter.Content = serviceUtilitiesControl ??= new ServiceUtilitiesControl();
     }
 
-
-    private void SetCommandButton_Click(object sender, MouseButtonEventArgs e)
+    /// <summary>
+    /// Отображает инструменты работы с базой данных.
+    /// </summary>
+    /// <param name="sender">Выбранный элемент навигации.</param>
+    /// <param name="e">Данные события выбора.</param>
+    private void DatabaseNavigation_Checked(object sender, RoutedEventArgs e)
     {
-      RightContentPresenter.Content = new SetCommand();
+      RightContentPresenter.Content = dataBaseView ??= new DataBaseView();
     }
 
-    private void ResistanceButton_Click(object sender, MouseButtonEventArgs e)
+    /// <summary>
+    /// Отображает настройку сопротивления МКР.
+    /// </summary>
+    /// <param name="sender">Выбранный элемент навигации.</param>
+    /// <param name="e">Данные события выбора.</param>
+    private void ResistanceNavigation_Checked(object sender, RoutedEventArgs e)
     {
-      RightContentPresenter.Content = new CheckResistanceControl();
-    }
-
-    private void Gpt_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      RightContentPresenter.Content = new GPTPunchControl();
-    }
-
-    private async void Meter_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      RightContentPresenter.Content = new KeysightPunchControl();
+      RightContentPresenter.Content = checkResistanceControl ??= new CheckResistanceControl();
     }
   }
-
 }

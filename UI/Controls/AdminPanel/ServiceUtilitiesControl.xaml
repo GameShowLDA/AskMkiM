@@ -1,0 +1,126 @@
+<UserControl x:Class="UI.Controls.AdminPanel.ServiceUtilitiesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700"
+             d:DesignWidth="960">
+    <UserControl.Resources>
+        <Style x:Key="MacSegmentStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="MinWidth" Value="160"/>
+            <Setter Property="Padding" Value="22,0"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="SegmentSurface"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="9">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SegmentSurface"
+                                        Property="Background"
+                                        Value="{DynamicResource SettingCardBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SegmentSurface"
+                                        Property="Background"
+                                        Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource SettingsMainBackgroundSolidColorBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="92"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Padding="28,0"
+                Background="{DynamicResource SettingCardBackground}"
+                BorderBrush="{DynamicResource SettingCardBorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Сервисные утилиты"
+                               Foreground="{DynamicResource ForegrounfBrushes}"
+                               FontFamily="{DynamicResource WinstonMedium}"
+                               FontSize="27"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Margin="0,5,0,0"
+                               Text="Низкоуровневые инструменты управления оборудованием"
+                               Foreground="{DynamicResource ForegrounfBrushes85}"
+                               FontSize="14"
+                               Opacity="0.68"/>
+                </StackPanel>
+
+                <Border Grid.Column="1"
+                        Padding="4"
+                        VerticalAlignment="Center"
+                        Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                        BorderBrush="{DynamicResource SettingCardBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="SetCommandTab"
+                                     GroupName="UtilityNavigation"
+                                     Content="SetCommand"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="SetCommandTab_Checked"/>
+                        <RadioButton GroupName="UtilityNavigation"
+                                     Content="GPT"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="GptTab_Checked"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="22">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="UtilityColumn" Width="*"/>
+                <ColumnDefinition x:Name="UtilitySplitterColumn" Width="0"/>
+                <ColumnDefinition x:Name="ConsoleColumn" Width="0"/>
+            </Grid.ColumnDefinitions>
+
+            <ContentControl x:Name="UtilityContentPresenter"
+                            MinWidth="480"/>
+
+            <GridSplitter x:Name="UtilitySplitter"
+                          Grid.Column="1"
+                          Width="6"
+                          Margin="6,0"
+                          HorizontalAlignment="Center"
+                          Background="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                          ResizeBehavior="PreviousAndNext"
+                          ResizeDirection="Columns"
+                          ShowsPreview="True"
+                          Visibility="Collapsed"/>
+
+            <ContentControl x:Name="SideConsolePresenter"
+                            Grid.Column="2"
+                            MinWidth="420"/>
+        </Grid>
+    </Grid>
+</UserControl>

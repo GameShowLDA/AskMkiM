@@ -5,7 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Controls.GPT.Mode"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Background="{StaticResource PrimarySolidColorBrush}" FontSize="20" FontWeight="Bold" >
+             d:DesignHeight="450" d:DesignWidth="800" Background="Transparent" FontSize="14" Foreground="{DynamicResource ForegrounfBrushes}">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </UserControl.Resources>
+    <Border Margin="18"
+            Padding="24"
+            Background="{DynamicResource SettingCardBackground}"
+            BorderBrush="{DynamicResource SettingCardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12">
     <Grid>
         <!-- Определение строк -->
         <Grid.RowDefinitions>
@@ -74,4 +86,5 @@
                        HorizontalAlignment="Center" Margin="0,5,0,0" />
         </StackPanel>
     </Grid>
+    </Border>
 </UserControl>

@@ -1,6 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Message;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,7 +9,7 @@ namespace UI.Controls.GPT.Mode
   /// Компонент для работы с режимом ACW.
   /// При инициализации устанавливает режим ACW и загружает конфигурацию устройства.
   /// </summary>
-  public partial class AcwMode : UserControl
+  public partial class AcwMode : UserControl, IGptModeControl
   {
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcwMode"/>.
@@ -23,6 +22,12 @@ namespace UI.Controls.GPT.Mode
 
     private bool connect = false;
 
+    /// <inheritdoc />
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.ACW;
+
+    /// <inheritdoc />
+    public bool IsModeActive => connect;
+
     /// <summary>
     /// Асинхронно загружает конфигурацию устройства и обновляет элементы управления.
     /// </summary>
@@ -31,9 +36,9 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.AcwManger.Config.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice().AcwManger.Config.ReadConfigurationAsync();
 
-        VoltageSlider.Value = systemData.Voltage;
+        VoltageSlider.Value = systemData.Voltage * 1000.0;
         ChiSlider.Value = systemData.HighCurrentLimit;
         CloSlider.Value = systemData.LowCurrentLimit;
         TimeSlider.Value = systemData.TestTime;
@@ -53,7 +58,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        GptUiOperation.ReportError("загрузка конфигурации ACW", ex);
       }
     }
 
@@ -65,7 +70,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.AcwManger.Config.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice().AcwManger.Config.ReadConfigurationAsync();
         LastReadTimeText.Text = $"Дата и время: {DateTime.Now}";
         VoltageValueText.Text = $"Напряжение ACW: {systemData.Voltage:F3} кВ";
         ChiValueText.Text = $"Высокий предел тока ACW: {systemData.HighCurrentLimit:F3} мА";
@@ -77,7 +82,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        GptUiOperation.ReportError("чтение конфигурации ACW", ex);
       }
     }
 
@@ -90,13 +95,14 @@ namespace UI.Controls.GPT.Mode
       try
       {
         MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
-        double result = (await GPTPunchControl.ModelGPT.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).value;
+        double result = (await GptUiOperation.GetDevice().AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).value;
 
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        TestResultText.Text = "Результат теста: ошибка оборудования";
+        GptUiOperation.ReportError("запуск теста ACW", ex);
       }
     }
 
@@ -104,54 +110,79 @@ namespace UI.Controls.GPT.Mode
     {
       if (!connect)
       {
-        var mode = await GPTPunchControl.ModelGPT.AcwManger.Mode.SetModeAsync();
-        if (mode.Success)
-        {
-          PanelManagment.Visibility = Visibility.Visible;
-          await LoadConfigurationAsync();
-          connect = true;
-          ConnectButton.Content = "Отключить режим ACW";
-        }
+        await ActivateModeAsync();
       }
       else
       {
-        PanelManagment.Visibility = Visibility.Collapsed;
-        ConnectButton.Content = "Включить режим ACW";
-        connect = false;
+        DeactivateMode();
       }
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ActivateModeAsync()
+    {
+      try
+      {
+        var mode = await GptUiOperation.GetDevice().AcwManger.Mode.SetModeAsync();
+        GptUiOperation.EnsureSuccess(mode, "включение режима ACW");
+        PanelManagment.Visibility = Visibility.Visible;
+        await LoadConfigurationAsync();
+        connect = true;
+        ConnectButton.Content = "Отключить режим ACW";
+        return true;
+      }
+      catch (Exception ex)
+      {
+        GptUiOperation.ReportError("переключение режима ACW", ex);
+        return false;
+      }
+    }
+
+    /// <inheritdoc />
+    public void DeactivateMode()
+    {
+      PanelManagment.Visibility = Visibility.Collapsed;
+      ConnectButton.Content = "Включить режим ACW";
+      connect = false;
     }
 
     private async void Button_PreviewMouseDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-      double voltage = 0, chi = 0, clo = 0, time = 0, timeRamp = 0, refValue = 0, arcCurrent = 0;
-      int frequency = 50;
-
-      Dispatcher.Invoke(() =>
+      try
       {
-        voltage = Math.Round(VoltageSlider.Value, 3);
-        chi = Math.Round(ChiSlider.Value, 3);
-        clo = Math.Round(CloSlider.Value, 3);
-        time = Math.Round(TimeSlider.Value, 1);
-        timeRamp = Math.Round(RampTimeSlider.Value, 1);
-        refValue = Math.Round(RefSlider.Value, 3);
-        arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
+        double voltage = Math.Round(VoltageSlider.Value, 3);
+        double chi = Math.Round(ChiSlider.Value, 3);
+        double clo = Math.Round(CloSlider.Value, 3);
+        double time = Math.Round(TimeSlider.Value, 1);
+        double timeRamp = Math.Round(RampTimeSlider.Value, 1);
+        double refValue = Math.Round(RefSlider.Value, 3);
+        double arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
+        int frequency = 50;
 
         if (FrequencyComboBox.SelectedItem is ComboBoxItem selectedItem)
         {
-          string frequencyText = selectedItem.Content.ToString();
+          string frequencyText = selectedItem.Content.ToString() ?? string.Empty;
           if (double.TryParse(frequencyText.Replace("Гц", "").Trim(), out double freq))
+          {
             frequency = (int)freq;
+          }
         }
-      });
 
-      await GPTPunchControl.ModelGPT.AcwManger.Voltage.SetVoltageAsync(voltage);
-      await GPTPunchControl.ModelGPT.AcwManger.Time.SetTestTimeAsync(time);
-      await GPTPunchControl.ModelGPT.AcwManger.Time.SetRampTimeAsync(timeRamp).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.AcwManger.FrequencyConfigurable.SetFrequencyAsync(frequency).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(chi);
-      await GPTPunchControl.ModelGPT.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(clo).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.AcwManger.Offset.SetOffsetAsync(refValue).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.AcwManger.ArcCurrent.SetArcCurrentAsync(arcCurrent).ConfigureAwait(false);
+        var mode = GptUiOperation.GetDevice().AcwManger;
+        GptUiOperation.EnsureSuccess(await mode.Voltage.SetVoltageAsync(voltage), "напряжение ACW");
+        GptUiOperation.EnsureSuccess(await mode.Time.SetTestTimeAsync(time), "время теста ACW");
+        GptUiOperation.EnsureSuccess(await mode.Time.SetRampTimeAsync(timeRamp), "время нарастания ACW");
+        GptUiOperation.EnsureSuccess(await mode.FrequencyConfigurable.SetFrequencyAsync(frequency), "частота ACW");
+        GptUiOperation.EnsureSuccess(await mode.CurrentLimits.SetHighCurrentLimitAsync(chi), "верхний предел тока ACW");
+        GptUiOperation.EnsureSuccess(await mode.CurrentLimits.SetLowCurrentLimitAsync(clo), "нижний предел тока ACW");
+        GptUiOperation.EnsureSuccess(await mode.Offset.SetOffsetAsync(refValue), "смещение ACW");
+        GptUiOperation.EnsureSuccess(await mode.ArcCurrent.SetArcCurrentAsync(arcCurrent), "ток дуги ACW");
+        Ask.LogLib.LoggerUtility.LogInformation("GPT — параметры ACW сохранены.", isDeviceLog: true);
+      }
+      catch (Exception ex)
+      {
+        GptUiOperation.ReportError("сохранение параметров ACW", ex);
+      }
     }
   }
 }

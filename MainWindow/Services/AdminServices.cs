@@ -36,7 +36,33 @@ namespace MainWindowProgram.Services
 
     public async Task StartConsoleTest() => await Test.ConsoleTest.TestData.PrintTestData();
 
-    public void AdminPanel() => _multiWindow.WorkspaceService.AddControl("Панель администратора", new AdminPanelControl(), TypeWindow.Settings);
+    /// <summary>
+    /// Открывает сервисные утилиты в отдельной вкладке рабочего пространства.
+    /// </summary>
+    public void OpenServiceUtilities() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "Сервисные утилиты",
+        new ServiceUtilitiesControl(),
+        TypeWindow.Settings);
+
+    /// <summary>
+    /// Открывает административный интерфейс базы данных в отдельной вкладке рабочего пространства.
+    /// </summary>
+    public void OpenDatabase() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "База данных",
+        new DataBaseView(),
+        TypeWindow.Settings);
+
+    /// <summary>
+    /// Открывает настройку сопротивления МКР в отдельной вкладке рабочего пространства.
+    /// </summary>
+    public void OpenResistance() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "Сопротивление МКР",
+        new CheckResistanceControl(),
+        TypeWindow.Settings);
+
     public void ProtocolTest() => _multiWindow.WorkspaceService.AddControl("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
     public void ProtocolBaseTest() => _multiWindow.WorkspaceService.AddControl("Тест теста протокола", new ProtocolTemplateEditorControl(), TypeWindow.DeviceControl);
   }

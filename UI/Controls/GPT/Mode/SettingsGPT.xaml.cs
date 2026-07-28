@@ -10,13 +10,26 @@ namespace UI.Controls.GPT.Mode
   /// </summary>
   public partial class SettingsGPT : UserControl
   {
+    private bool isLoadingConfiguration = true;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="SettingsGPT"/>.
     /// </summary>
     public SettingsGPT()
     {
       InitializeComponent();
-      LoadConfigurationAsync().ConfigureAwait(true);
+      Loaded += SettingsGPT_Loaded;
+    }
+
+    /// <summary>
+    /// Загружает системные настройки после добавления элемента управления в визуальное дерево.
+    /// </summary>
+    /// <param name="sender">Загруженный элемент управления.</param>
+    /// <param name="e">Данные события загрузки.</param>
+    private async void SettingsGPT_Loaded(object sender, RoutedEventArgs e)
+    {
+      Loaded -= SettingsGPT_Loaded;
+      await LoadConfigurationAsync();
     }
 
     /// <summary>
@@ -27,7 +40,8 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.SystemManger.ReadConfigurationAsync();
+        isLoadingConfiguration = true;
+        var systemData = await GptUiOperation.GetDevice().SystemManger.ReadConfigurationAsync();
 
         SetContrast(systemData.LcdContrast);
         SetBrightness(systemData.LcdBrightness);
@@ -39,6 +53,10 @@ namespace UI.Controls.GPT.Mode
       catch (Exception ex)
       {
         ShowErrorNotification("Не удалось загрузить настройки GPT", ex);
+      }
+      finally
+      {
+        isLoadingConfiguration = false;
       }
     }
 
@@ -135,6 +153,11 @@ namespace UI.Controls.GPT.Mode
     /// </summary>
     private async void ContrastComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+      if (isLoadingConfiguration)
+      {
+        return;
+      }
+
       if (ContrastComboBox.SelectedItem is ComboBoxItem selectedItem)
       {
         string contrastValue = selectedItem.Content.ToString();
@@ -142,7 +165,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("LCD_CONTRAST", contrast);
 
         await ExecuteSettingChangeAsync(
-          () => GPTPunchControl.ModelGPT.SystemManger.SetLcdContrastAsync(contrast),
+          () => GptUiOperation.GetDevice().SystemManger.SetLcdContrastAsync(contrast),
           "Не удалось изменить контраст дисплея");
       }
     }
@@ -153,6 +176,11 @@ namespace UI.Controls.GPT.Mode
     /// </summary>
     private async void BrightnessComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+      if (isLoadingConfiguration)
+      {
+        return;
+      }
+
       if (BrightnessComboBox.SelectedItem is ComboBoxItem selectedItem)
       {
         string brightnessValue = selectedItem.Content.ToString().Split('-')[0].Trim();
@@ -160,7 +188,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("LCD_BRIGHTNESS", brightness);
 
         await ExecuteSettingChangeAsync(
-          () => GPTPunchControl.ModelGPT.SystemManger.SetLcdBrightnessAsync(brightness),
+          () => GptUiOperation.GetDevice().SystemManger.SetLcdBrightnessAsync(brightness),
           "Не удалось изменить яркость дисплея");
       }
     }
@@ -171,6 +199,11 @@ namespace UI.Controls.GPT.Mode
     /// </summary>
     private async void SuccessSoundComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+      if (isLoadingConfiguration)
+      {
+        return;
+      }
+
       if (SuccessSoundComboBox.SelectedItem is ComboBoxItem selectedItem)
       {
         string soundState = selectedItem.Content.ToString();
@@ -178,7 +211,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("BUZZER_PSOUND", value);
 
         await ExecuteSettingChangeAsync(
-          () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimarySound(value == 1),
+          () => GptUiOperation.GetDevice().SystemManger.SetBuzzerPrimarySound(value == 1),
           "Не удалось изменить звук успешного теста");
       }
     }
@@ -189,6 +222,11 @@ namespace UI.Controls.GPT.Mode
     /// </summary>
     private async void ErrorSoundComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+      if (isLoadingConfiguration)
+      {
+        return;
+      }
+
       if (ErrorSoundComboBox.SelectedItem is ComboBoxItem selectedItem)
       {
         string soundState = selectedItem.Content.ToString();
@@ -196,7 +234,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("BUZZER_FSOUND", value);
 
         await ExecuteSettingChangeAsync(
-          () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackSound(value == 1),
+          () => GptUiOperation.GetDevice().SystemManger.SetBuzzerFeedbackSound(value == 1),
           "Не удалось изменить звук ошибочного теста");
       }
     }
@@ -207,10 +245,15 @@ namespace UI.Controls.GPT.Mode
     /// </summary>
     private async void SuccessSoundSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
+      if (isLoadingConfiguration)
+      {
+        return;
+      }
+
       double duration = SuccessSoundSlider.Value;
       OnValueChanged("BUZZER_PTIME", duration);
       await ExecuteSettingChangeAsync(
-        () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerPrimaryTime(duration),
+        () => GptUiOperation.GetDevice().SystemManger.SetBuzzerPrimaryTime(duration),
         "Не удалось изменить длительность звука успешного теста");
     }
 
@@ -220,10 +263,15 @@ namespace UI.Controls.GPT.Mode
     /// </summary>
     private async void ErrorSoundSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
+      if (isLoadingConfiguration)
+      {
+        return;
+      }
+
       double duration = ErrorSoundSlider.Value;
       OnValueChanged("BUZZER_FTIME", duration);
       await ExecuteSettingChangeAsync(
-        () => GPTPunchControl.ModelGPT.SystemManger.SetBuzzerFeedbackTime(duration),
+        () => GptUiOperation.GetDevice().SystemManger.SetBuzzerFeedbackTime(duration),
         "Не удалось изменить длительность звука ошибочного теста");
     }
 
@@ -241,6 +289,7 @@ namespace UI.Controls.GPT.Mode
 
     private static void ShowErrorNotification(string message, Exception exception)
     {
+      GptUiOperation.ReportError(message, exception);
       OperationNotificationService.ShowError(
         "Настройки GPT",
         $"{message}: {exception.Message}");

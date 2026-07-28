@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.LogLib;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,6 +12,8 @@ namespace UI.Controls.AdminPanel
 {
   public partial class SetCommand : UserControl
   {
+    private const int MaxConsoleLines = 2000;
+
     #region Data.
     private static readonly DeviceHelpInfo MkrHelp = new()
     {
@@ -548,11 +551,69 @@ namespace UI.Controls.AdminPanel
     // История команд
     private readonly List<string> _history = new();
     private int _historyIndex = -1;
+
     public SetCommand()
     {
       InitializeComponent();
       socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+      Loaded += SetCommand_Loaded;
+      Unloaded += SetCommand_Unloaded;
     }
+
+    /// <summary>
+    /// Подписывает консоль на общий поток журналирования приложения.
+    /// </summary>
+    /// <param name="sender">Загруженный элемент управления.</param>
+    /// <param name="e">Данные события загрузки.</param>
+    private void SetCommand_Loaded(object sender, RoutedEventArgs e)
+    {
+      LoggerUtility.LogMessageWritten -= LoggerUtility_LogMessageWritten;
+      LoggerUtility.LogMessageWritten += LoggerUtility_LogMessageWritten;
+    }
+
+    /// <summary>
+    /// Отписывает консоль от общего потока журналирования приложения.
+    /// </summary>
+    /// <param name="sender">Выгруженный элемент управления.</param>
+    /// <param name="e">Данные события выгрузки.</param>
+    private void SetCommand_Unloaded(object sender, RoutedEventArgs e)
+    {
+      LoggerUtility.LogMessageWritten -= LoggerUtility_LogMessageWritten;
+    }
+
+    /// <summary>
+    /// Добавляет сообщение общего журнала в консоль SetCommand.
+    /// </summary>
+    /// <param name="sender">Источник сообщения журнала.</param>
+    /// <param name="e">Данные сообщения журнала.</param>
+    private void LoggerUtility_LogMessageWritten(
+      object? sender,
+      ApplicationLogMessageEventArgs e)
+    {
+      var levelLabel = e.Level switch
+      {
+        ApplicationLogLevel.Debug => "DBG",
+        ApplicationLogLevel.Information => "INF",
+        ApplicationLogLevel.Warning => "WRN",
+        ApplicationLogLevel.Error => "ERR",
+        _ => "LOG"
+      };
+
+      var color = e.Level switch
+      {
+        ApplicationLogLevel.Debug => Brushes.SlateGray,
+        ApplicationLogLevel.Information => Brushes.LightGray,
+        ApplicationLogLevel.Warning => Brushes.Khaki,
+        ApplicationLogLevel.Error => Brushes.LightCoral,
+        _ => Brushes.LightGray
+      };
+
+      var deviceLabel = e.IsDeviceLog ? " DEV" : string.Empty;
+      AddConsoleLine(
+        $"{e.Timestamp:HH:mm:ss.fff} [{levelLabel}{deviceLabel}] {e.Message}",
+        color);
+    }
+
     private async void CommandInput_KeyDown(object sender, KeyEventArgs e)
     {
       if (e.Key == Key.Up)
@@ -622,7 +683,11 @@ namespace UI.Controls.AdminPanel
         input = input.Trim();
         if (input.StartsWith("clear", StringComparison.OrdinalIgnoreCase))
         {
-          Dispatcher.Invoke(() => ConsolePanel.Children.Clear());
+          Dispatcher.Invoke(() =>
+          {
+            ConsolePanel.Children.Clear();
+            EmptyConsoleHint.Visibility = Visibility.Visible;
+          });
           return;
         }
 
@@ -733,29 +798,37 @@ namespace UI.Controls.AdminPanel
 
     private void AddConsoleLine(string text, Brush color, bool replaceLast = false)
     {
-      Dispatcher.Invoke(() =>
+      if (!Dispatcher.CheckAccess())
       {
-        if (replaceLast && lastStatusLine != null)
-        {
-          lastStatusLine.Text = text;
-          return;
-        }
+        Dispatcher.BeginInvoke(() => AddConsoleLine(text, color, replaceLast));
+        return;
+      }
 
-        var line = new TextBlock
-        {
-          Text = text,
-          Foreground = color,
-          FontFamily = new FontFamily("Consolas"),
-          FontSize = 14,
-          Margin = new Thickness(0, 0, 0, 4)
-        };
+      EmptyConsoleHint.Visibility = Visibility.Collapsed;
 
-        ConsolePanel.Children.Add(line);
+      if (replaceLast && lastStatusLine != null)
+      {
+        lastStatusLine.Text = text;
+        return;
+      }
 
-        lastStatusLine = line;
+      var line = new TextBlock
+      {
+        Text = text,
+        Foreground = color,
+        FontFamily = new FontFamily("Consolas"),
+        FontSize = 14,
+        Margin = new Thickness(0, 0, 0, 4)
+      };
 
-        ConsoleScroll.ScrollToEnd();
-      });
+      ConsolePanel.Children.Add(line);
+      while (ConsolePanel.Children.Count > MaxConsoleLines)
+      {
+        ConsolePanel.Children.RemoveAt(0);
+      }
+
+      lastStatusLine = line;
+      ConsoleScroll.ScrollToEnd();
     }
 
     private void ClearLastStatusLine()
