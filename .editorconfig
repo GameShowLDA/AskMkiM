@@ -1,56 +1,115 @@
 ﻿[*.cs]
 
+# SA1010: проверяет пробелы около открывающей квадратной скобки.
 dotnet_diagnostic.SA1010.severity = none
+# SA1025: запрещает несколько последовательных пробелов в коде.
 dotnet_diagnostic.SA1025.severity = none
+# SA1028: запрещает пробелы в конце строки.
 dotnet_diagnostic.SA1028.severity = none
 
+
+
+# SA1101: требует обращаться к членам экземпляра через this.
 dotnet_diagnostic.SA1101.severity = none
+# SA1116: требует начинать параметры многострочного вызова с новой строки.
 dotnet_diagnostic.SA1116.severity = none
+# SA1119: запрещает необязательные круглые скобки в выражениях.
 dotnet_diagnostic.SA1119.severity = none
+# SA1124: запрещает директивы region.
 dotnet_diagnostic.SA1124.severity = none
+# SA1127: требует размещать ограничения универсального типа на отдельных строках.
 dotnet_diagnostic.SA1127.severity = none
+# SA1128: требует размещать инициализатор конструктора на отдельной строке.
 dotnet_diagnostic.SA1128.severity = none
+# SA1134: требует размещать атрибуты на отдельных строках.
 dotnet_diagnostic.SA1134.severity = none
 
+
+
+# SA1200: проверяет расположение директив using.
 dotnet_diagnostic.SA1200.severity = none
+# SA1201: проверяет порядок объявлений элементов внутри типа.
 dotnet_diagnostic.SA1201.severity = none
+# SA1202: проверяет порядок элементов по уровню доступа.
 dotnet_diagnostic.SA1202.severity = none
+# SA1206: проверяет порядок ключевых слов в объявлении.
 dotnet_diagnostic.SA1206.severity = none
+# SA1208: требует размещать директивы using для System перед остальными.
 dotnet_diagnostic.SA1208.severity = none
+# SA1217: требует сортировать директивы using static по алфавиту.
 dotnet_diagnostic.SA1217.severity = none
 
+
+
+# SA1300: требует начинать имена элементов с прописной буквы.
 dotnet_diagnostic.SA1300.severity = none
+# SA1309: запрещает начинать имена полей со знака подчёркивания.
 dotnet_diagnostic.SA1309.severity = none
 
+
+
+# SA1401: требует делать поля закрытыми.
 dotnet_diagnostic.SA1401.severity = none
+# SA1402: разрешает объявлять в файле только один тип.
 dotnet_diagnostic.SA1402.severity = none
+# SA1413: требует завершающую запятую в многострочных инициализаторах.
 dotnet_diagnostic.SA1413.severity = none
 
+
+
+# SA1502: запрещает размещать тело элемента в одной строке.
 dotnet_diagnostic.SA1502.severity = none
+# SA1503: запрещает опускать фигурные скобки.
 dotnet_diagnostic.SA1503.severity = none
+# SA1505: запрещает пустую строку после открывающей фигурной скобки.
 dotnet_diagnostic.SA1505.severity = none
+# SA1506: запрещает пустую строку после XML-документации элемента.
 dotnet_diagnostic.SA1506.severity = none
+# SA1507: запрещает несколько последовательных пустых строк.
 dotnet_diagnostic.SA1507.severity = none
+# SA1508: запрещает пустую строку перед закрывающей фигурной скобкой.
 dotnet_diagnostic.SA1508.severity = none
+# SA1509: запрещает пустую строку перед открывающей фигурной скобкой.
 dotnet_diagnostic.SA1509.severity = none
+# SA1512: запрещает пустую строку после однострочного комментария.
+dotnet_diagnostic.SA1512.severity = none
+# SA1513: требует пустую строку после закрывающей фигурной скобки.
 dotnet_diagnostic.SA1513.severity = none
+# SA1514: требует пустую строку перед XML-документацией элемента.
 dotnet_diagnostic.SA1514.severity = none
+# SA1515: требует пустую строку перед однострочным комментарием.
 dotnet_diagnostic.SA1515.severity = none
+# SA1516: требует разделять элементы пустой строкой.
 dotnet_diagnostic.SA1516.severity = none
 
-dotnet_diagnostic.SA1600.severity = none
-dotnet_diagnostic.SA1611.severity = none
-dotnet_diagnostic.SA1612.severity = none
-dotnet_diagnostic.SA1615.severity = none
-dotnet_diagnostic.SA1618.severity = none
-dotnet_diagnostic.SA1623.severity = none
-dotnet_diagnostic.SA1629.severity = none
-dotnet_diagnostic.SA1633.severity = none
-dotnet_diagnostic.SA1642.severity = none
-dotnet_diagnostic.SA1648.severity = none
-dotnet_diagnostic.SA1649.severity = none
-dotnet_diagnostic.SA1512.severity = none
 
+
+# SA1600: требует XML-документацию для элементов.
+dotnet_diagnostic.SA1600.severity = none
+# SA1611: требует XML-документацию для параметров элемента.
+dotnet_diagnostic.SA1611.severity = none
+# SA1612: требует соответствия XML-документации фактическим параметрам элемента.
+dotnet_diagnostic.SA1612.severity = none
+# SA1615: требует XML-документацию возвращаемого значения.
+dotnet_diagnostic.SA1615.severity = none
+# SA1618: требует XML-документацию параметров универсального типа.
+dotnet_diagnostic.SA1618.severity = none
+# SA1623: проверяет формулировку XML-документации свойства.
+dotnet_diagnostic.SA1623.severity = none
+# SA1629: требует завершать текст XML-документации точкой.
+dotnet_diagnostic.SA1629.severity = none
+# SA1633: требует заголовок файла с уведомлением об авторских правах.
+dotnet_diagnostic.SA1633.severity = none
+# SA1642: проверяет стандартную формулировку XML-документации конструктора.
+dotnet_diagnostic.SA1642.severity = none
+# SA1648: запрещает inheritdoc у элементов, которые ничего не наследуют и не реализуют.
+dotnet_diagnostic.SA1648.severity = none
+# SA1649: требует совпадения имени файла с первым объявленным типом.
+dotnet_diagnostic.SA1649.severity = none
+
+
+
+# CS8618: сообщает о неинициализированном поле или свойстве, не допускающем null.
 dotnet_diagnostic.CS8618.severity = none
 
 csharp_space_around_binary_operators = before_and_after

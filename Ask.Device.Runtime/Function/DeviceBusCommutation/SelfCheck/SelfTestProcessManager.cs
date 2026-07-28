@@ -192,13 +192,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка целостности цепи {circuitName}...") { IndentLevel = 1 });
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
-        () => SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(
-          cancellationToken,
-          messageService,
-          selfTestChecker,
-          testType,
-          busContact,
-          circuitName),
+        () => SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(cancellationToken, messageService, selfTestChecker, testType, busContact, circuitName),
         messageService,
         deviceTask: true))
       {
@@ -218,14 +212,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
           if (continuityResult)
           {
-            bool relayResult = await PerformRelayCheck(
-              cancellationToken,
-              messageService,
-              selfTestChecker,
-              testType,
-              circuitName,
-              busContact,
-              meter);
+            bool relayResult = await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
 
             if (ExecutionConfig.GetIsIdleModeEnabled())
             {
