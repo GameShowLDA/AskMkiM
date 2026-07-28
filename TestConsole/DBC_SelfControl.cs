@@ -61,21 +61,21 @@ namespace TestConsole
             await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.Multimeter);
             break;
 
-          case 3:
-            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.ADC);
-            break;
+          //case 3:
+          //  await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.ADC);
+          //  break;
 
-          case 4:
-            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.ADCReversed);
-            break;
+          //case 4:
+          //  await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.ADCReversed);
+          //  break;
 
-          case 5:
-            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.PINT);
-            break;
+          //case 5:
+          //  await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.PINT);
+          //  break;
 
-          case 6:
-            await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.Shunt);
-            break;
+          //case 6:
+          //  await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.Shunt);
+          //  break;
 
           case 7:
             await SelfCheckCircuitAsync(SwitchingDeviceTypeConnector.BreakdownTester);
