@@ -117,27 +117,28 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
     private async Task<bool> SetADCState(bool connect, SwitchingBusNew bus, bool reversePolarity, IUserInteractionService? userMessageService = null)
     {
-      int numberConnector = (int)SwitchingDeviceTypeConnector.ADC;
-      if (reversePolarity)
-      {
-        numberConnector++;
-      }
+      throw new Exception("Временно откличли в Ask.Device.Runtime.Function.DeviceBusCommutation.ConnectorManager.SetADCState");
+      //int numberConnector = (int)SwitchingDeviceTypeConnector.ADC;
+      //if (reversePolarity)
+      //{
+      //  numberConnector++;
+      //}
 
-      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
-      {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-        }
+      //if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
+      //{
+      //  if (ExecutionConfig.GetIsIdleModeEnabled())
+      //  {
+      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+      //  }
 
-        var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-        await Task.Delay(10);
-        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
-      }
+      //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
+      //  var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      //  await Task.Delay(10);
+      //  return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
+      //}
 
-      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
-      return false;
+      //LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
+      //return false;
     }
 
     #endregion
@@ -182,22 +183,23 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
     private async Task<bool> SetPINTState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
-      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
-      {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-        }
+      throw new Exception("Временно откличли в Ask.Device.Runtime.Function.DeviceBusCommutation.ConnectorManager.SetPINTState");
+      //int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
+      //if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
+      //{
+      //  if (ExecutionConfig.GetIsIdleModeEnabled())
+      //  {
+      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+      //  }
 
-        var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-        await Task.Delay(10);
-        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
-      }
+      //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
+      //  var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      //  await Task.Delay(10);
+      //  return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
+      //}
 
-      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
-      return false;
+      //LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
+      //return false;
     }
 
     #endregion
