@@ -1,7 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.LogLib;
 
-namespace UI.Controls.GPT
+namespace Ask.UI.Features.ServiceTools.Gpt
 {
   /// <summary>
   /// Выполняет операции административного интерфейса GPT без распространения аппаратных ошибок в UI-поток.
@@ -15,9 +15,10 @@ namespace UI.Controls.GPT
     /// <exception cref="InvalidOperationException">
     /// Выбрасывается, если пробойная установка не настроена или не загружена.
     /// </exception>
-    internal static IBreakdownTester GetDevice()
+    /// <param name="deviceContext">Контекст устройства текущей вкладки.</param>
+    internal static IBreakdownTester GetDevice(GptDeviceContext deviceContext)
     {
-      return GPTPunchControl.ModelGPT
+      return deviceContext.Device
         ?? throw new InvalidOperationException(
           "Пробойная установка GPT не найдена. Проверьте конфигурацию оборудования.");
     }

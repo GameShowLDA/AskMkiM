@@ -1,9 +1,9 @@
-using Ask.Core.Shared.DTO.Devices.Measurements;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace UI.Controls.GPT.Mode
+namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 {
   /// <summary>
   /// Компонент для работы с режимом ACW.
@@ -11,12 +11,16 @@ namespace UI.Controls.GPT.Mode
   /// </summary>
   public partial class AcwMode : UserControl, IGptModeControl
   {
+    private readonly GptDeviceContext deviceContext;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="AcwMode"/>.
     /// При инициализации устанавливается режим ACW и запускается загрузка конфигурации.
     /// </summary>
-    public AcwMode()
+    /// <param name="deviceContext">Контекст пробойной установки текущей вкладки.</param>
+    internal AcwMode(GptDeviceContext deviceContext)
     {
+      this.deviceContext = deviceContext;
       InitializeComponent();
     }
 
@@ -36,7 +40,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GptUiOperation.GetDevice().AcwManger.Config.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice(deviceContext).AcwManger.Config.ReadConfigurationAsync();
 
         VoltageSlider.Value = systemData.Voltage * 1000.0;
         ChiSlider.Value = systemData.HighCurrentLimit;
@@ -70,7 +74,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GptUiOperation.GetDevice().AcwManger.Config.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice(deviceContext).AcwManger.Config.ReadConfigurationAsync();
         LastReadTimeText.Text = $"Дата и время: {DateTime.Now}";
         VoltageValueText.Text = $"Напряжение ACW: {systemData.Voltage:F3} кВ";
         ChiValueText.Text = $"Высокий предел тока ACW: {systemData.HighCurrentLimit:F3} мА";
@@ -95,7 +99,7 @@ namespace UI.Controls.GPT.Mode
       try
       {
         MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
-        double result = (await GptUiOperation.GetDevice().AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).value;
+        double result = (await GptUiOperation.GetDevice(deviceContext).AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).value;
 
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
@@ -123,12 +127,12 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var mode = await GptUiOperation.GetDevice().AcwManger.Mode.SetModeAsync();
+        var mode = await GptUiOperation.GetDevice(deviceContext).AcwManger.Mode.SetModeAsync();
         GptUiOperation.EnsureSuccess(mode, "включение режима ACW");
         PanelManagment.Visibility = Visibility.Visible;
         await LoadConfigurationAsync();
         connect = true;
-        ConnectButton.Content = "Отключить режим ACW";
+        SetConnectButtonState(isEnabled: true);
         return true;
       }
       catch (Exception ex)
@@ -142,8 +146,19 @@ namespace UI.Controls.GPT.Mode
     public void DeactivateMode()
     {
       PanelManagment.Visibility = Visibility.Collapsed;
-      ConnectButton.Content = "Включить режим ACW";
+      SetConnectButtonState(isEnabled: false);
       connect = false;
+    }
+
+    private void SetConnectButtonState(bool isEnabled)
+    {
+      ConnectButton.Content = isEnabled ? "Выключить" : "Включить";
+      ConnectButton.SetResourceReference(
+        BackgroundProperty,
+        isEnabled ? "RedColorSolidColorBrush" : "GreenColorSolidColorBrush");
+      ConnectButton.SetResourceReference(
+        BorderBrushProperty,
+        isEnabled ? "RedColorSolidColorBrush" : "GreenColorSolidColorBrush");
     }
 
     private async void Button_PreviewMouseDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -168,7 +183,7 @@ namespace UI.Controls.GPT.Mode
           }
         }
 
-        var mode = GptUiOperation.GetDevice().AcwManger;
+        var mode = GptUiOperation.GetDevice(deviceContext).AcwManger;
         GptUiOperation.EnsureSuccess(await mode.Voltage.SetVoltageAsync(voltage), "напряжение ACW");
         GptUiOperation.EnsureSuccess(await mode.Time.SetTestTimeAsync(time), "время теста ACW");
         GptUiOperation.EnsureSuccess(await mode.Time.SetRampTimeAsync(timeRamp), "время нарастания ACW");

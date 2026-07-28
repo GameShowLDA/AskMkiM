@@ -105,7 +105,7 @@
             </Grid.ColumnDefinitions>
 
             <ContentControl x:Name="UtilityContentPresenter"
-                            MinWidth="480"/>
+                            MinWidth="720"/>
 
             <GridSplitter x:Name="UtilitySplitter"
                           Grid.Column="1"
@@ -120,7 +120,7 @@
 
             <ContentControl x:Name="SideConsolePresenter"
                             Grid.Column="2"
-                            MinWidth="420"/>
+                            MinWidth="460"/>
         </Grid>
     </Grid>
 </UserControl>

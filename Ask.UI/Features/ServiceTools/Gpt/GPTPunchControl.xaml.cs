@@ -1,25 +1,24 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.DataBase.Engine.Static.Devices;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace UI.Controls.GPT
+namespace Ask.UI.Features.ServiceTools.Gpt
 {
   /// <summary>
   /// Контрол для управления режимом GPTPunch.
   /// </summary>
   public partial class GPTPunchControl : UserControl
   {
-    /// <summary>
-    /// Статическая модель GPT, используемая для подключения и проверки связи.
-    /// </summary>
-    static internal IBreakdownTester? ModelGPT { get; set; }
+    private readonly Func<Task<IBreakdownTester?>> deviceProvider;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="GPTPunchControl"/>.
     /// </summary>
-    public GPTPunchControl()
+    /// <param name="deviceProvider">Функция получения настроенной пробойной установки.</param>
+    public GPTPunchControl(Func<Task<IBreakdownTester?>> deviceProvider)
     {
+      this.deviceProvider = deviceProvider
+        ?? throw new ArgumentNullException(nameof(deviceProvider));
       InitializeComponent();
       Controller.Visibility = Visibility.Visible;
       Loaded += GPTPunchControl_Loaded;
@@ -36,10 +35,10 @@ namespace UI.Controls.GPT
 
       try
       {
-        ModelGPT = (await BreakdownTesters.GetDevicesByNumberChassisAsync(1))
-          .FirstOrDefault();
+        var device = await deviceProvider();
+        Controller.Device = device;
 
-        if (ModelGPT == null)
+        if (device == null)
         {
           Ask.LogLib.LoggerUtility.LogError(
             "GPT — устройство не найдено в конфигурации шасси № 1.",
@@ -48,12 +47,12 @@ namespace UI.Controls.GPT
         }
 
         Ask.LogLib.LoggerUtility.LogInformation(
-          $"GPT — для ручного управления выбрано устройство «{ModelGPT.Name}».",
+          $"GPT — для ручного управления выбрано устройство «{device.Name}».",
           isDeviceLog: true);
       }
       catch (Exception ex)
       {
-        ModelGPT = null;
+        Controller.Device = null;
         GptUiOperation.ReportError("загрузка устройства", ex);
       }
     }

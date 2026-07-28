@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace UI.Controls.GPT
+namespace Ask.UI.Features.ServiceTools.Gpt
 {
   /// <summary>
   /// Логика взаимодействия для GPTController.xaml.
@@ -9,8 +9,17 @@ namespace UI.Controls.GPT
   public partial class GPTController : UserControl
   {
     private readonly Dictionary<string, UserControl> modeControls = new();
+    private readonly GptDeviceContext deviceContext = new();
     private RadioButton? currentModeButton;
     private bool isSwitchingMode;
+
+    /// <summary>
+    /// Пробойная установка текущей вкладки управления.
+    /// </summary>
+    internal Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.IBreakdownTester? Device
+    {
+      set => deviceContext.Device = value;
+    }
 
     /// <summary>
     /// Контроллер для управления режимами GPT.
@@ -99,10 +108,10 @@ namespace UI.Controls.GPT
 
       modeControl = mode switch
       {
-        "Mode1" => new Mode.AcwMode(),
-        "Mode2" => new Mode.DcwMode(),
-        "Mode3" => new Mode.IrMode(),
-        "Mode4" => new Mode.SettingsGPT(),
+        "Mode1" => new Modes.AcwMode(deviceContext),
+        "Mode2" => new Modes.DcwMode(deviceContext),
+        "Mode3" => new Modes.IrMode(deviceContext),
+        "Mode4" => new Modes.SettingsGPT(deviceContext),
         _ => throw new InvalidOperationException($"Неизвестный режим GPT: {mode}.")
       };
       modeControls.Add(mode, modeControl);

@@ -1,4 +1,4 @@
-<UserControl x:Class="UI.Controls.GPT.GPTController"
+<UserControl x:Class="Ask.UI.Features.ServiceTools.Gpt.GPTController"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,10 +8,10 @@
              d:DesignWidth="900">
     <UserControl.Resources>
         <Style x:Key="GptModeStyle" TargetType="RadioButton">
-            <Setter Property="Height" Value="52"/>
+            <Setter Property="Height" Value="56"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Padding" Value="15,0"/>
-            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontSize" Value="17"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -67,7 +67,7 @@
             ClipToBounds="True">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="210"/>
+                <ColumnDefinition Width="230"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -85,12 +85,12 @@
                     <StackPanel Margin="2,2,2,22">
                         <TextBlock Text="GPT"
                                    Foreground="{DynamicResource ForegrounfBrushes}"
-                                   FontSize="24"
+                                   FontSize="27"
                                    FontWeight="SemiBold"/>
                         <TextBlock Margin="0,4,0,0"
                                    Text="Режим испытания"
                                    Foreground="{DynamicResource ForegrounfBrushes85}"
-                                   FontSize="13"
+                                   FontSize="15"
                                    Opacity="0.65"/>
                     </StackPanel>
 
@@ -132,7 +132,7 @@
                                      Fill="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
                             <TextBlock Text="Управление оборудованием"
                                        Foreground="{DynamicResource ForegrounfBrushes85}"
-                                       FontSize="12"/>
+                                       FontSize="14"/>
                         </StackPanel>
                     </Border>
                 </Grid>

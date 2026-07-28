@@ -817,7 +817,7 @@ namespace UI.Controls.AdminPanel
         Text = text,
         Foreground = color,
         FontFamily = new FontFamily("Consolas"),
-        FontSize = 14,
+        FontSize = 16,
         Margin = new Thickness(0, 0, 0, 4)
       };
 

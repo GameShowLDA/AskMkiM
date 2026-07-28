@@ -1,6 +1,7 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.UI.Features.ServiceTools.Gpt;
 using System.Windows;
 using System.Windows.Controls;
-using UI.Controls.GPT;
 
 namespace UI.Controls.AdminPanel
 {
@@ -11,12 +12,16 @@ namespace UI.Controls.AdminPanel
   {
     private SetCommand? setCommandControl;
     private GPTPunchControl? gptControl;
+    private readonly Func<Task<IBreakdownTester?>> gptProvider;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ServiceUtilitiesControl"/>.
     /// </summary>
-    public ServiceUtilitiesControl()
+    /// <param name="gptProvider">Функция получения настроенной пробойной установки.</param>
+    public ServiceUtilitiesControl(Func<Task<IBreakdownTester?>> gptProvider)
     {
+      this.gptProvider = gptProvider
+        ?? throw new ArgumentNullException(nameof(gptProvider));
       InitializeComponent();
       SetCommandTab.IsChecked = true;
     }
@@ -32,6 +37,7 @@ namespace UI.Controls.AdminPanel
 
       SideConsolePresenter.Content = null;
       UtilityContentPresenter.Content = setCommand;
+      UtilityContentPresenter.HorizontalAlignment = HorizontalAlignment.Stretch;
       UtilityColumn.Width = new GridLength(1, GridUnitType.Star);
       UtilitySplitterColumn.Width = new GridLength(0);
       ConsoleColumn.Width = new GridLength(0);
@@ -50,11 +56,12 @@ namespace UI.Controls.AdminPanel
       UtilityContentPresenter.Content = null;
       SideConsolePresenter.Content = null;
 
-      UtilityContentPresenter.Content = gptControl ??= new GPTPunchControl();
+      UtilityContentPresenter.Content = gptControl ??= new GPTPunchControl(gptProvider);
       SideConsolePresenter.Content = setCommand;
-      UtilityColumn.Width = new GridLength(1, GridUnitType.Star);
+      UtilityContentPresenter.HorizontalAlignment = HorizontalAlignment.Left;
+      UtilityColumn.Width = GridLength.Auto;
       UtilitySplitterColumn.Width = new GridLength(18);
-      ConsoleColumn.Width = new GridLength(520);
+      ConsoleColumn.Width = new GridLength(1, GridUnitType.Star);
       UtilitySplitter.Visibility = Visibility.Visible;
     }
   }

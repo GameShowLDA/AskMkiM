@@ -1,8 +1,8 @@
-using Ask.UI.Services.Notifications;
+﻿using Ask.UI.Services.Notifications;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace UI.Controls.GPT.Mode
+namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 {
   /// <summary>
   /// Компонент для управления настройками устройства GPT.
@@ -10,13 +10,16 @@ namespace UI.Controls.GPT.Mode
   /// </summary>
   public partial class SettingsGPT : UserControl
   {
+    private readonly GptDeviceContext deviceContext;
     private bool isLoadingConfiguration = true;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="SettingsGPT"/>.
     /// </summary>
-    public SettingsGPT()
+    /// <param name="deviceContext">Контекст пробойной установки текущей вкладки.</param>
+    internal SettingsGPT(GptDeviceContext deviceContext)
     {
+      this.deviceContext = deviceContext;
       InitializeComponent();
       Loaded += SettingsGPT_Loaded;
     }
@@ -41,7 +44,7 @@ namespace UI.Controls.GPT.Mode
       try
       {
         isLoadingConfiguration = true;
-        var systemData = await GptUiOperation.GetDevice().SystemManger.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice(deviceContext).SystemManger.ReadConfigurationAsync();
 
         SetContrast(systemData.LcdContrast);
         SetBrightness(systemData.LcdBrightness);
@@ -165,7 +168,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("LCD_CONTRAST", contrast);
 
         await ExecuteSettingChangeAsync(
-          () => GptUiOperation.GetDevice().SystemManger.SetLcdContrastAsync(contrast),
+          () => GptUiOperation.GetDevice(deviceContext).SystemManger.SetLcdContrastAsync(contrast),
           "Не удалось изменить контраст дисплея");
       }
     }
@@ -188,7 +191,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("LCD_BRIGHTNESS", brightness);
 
         await ExecuteSettingChangeAsync(
-          () => GptUiOperation.GetDevice().SystemManger.SetLcdBrightnessAsync(brightness),
+          () => GptUiOperation.GetDevice(deviceContext).SystemManger.SetLcdBrightnessAsync(brightness),
           "Не удалось изменить яркость дисплея");
       }
     }
@@ -211,7 +214,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("BUZZER_PSOUND", value);
 
         await ExecuteSettingChangeAsync(
-          () => GptUiOperation.GetDevice().SystemManger.SetBuzzerPrimarySound(value == 1),
+          () => GptUiOperation.GetDevice(deviceContext).SystemManger.SetBuzzerPrimarySound(value == 1),
           "Не удалось изменить звук успешного теста");
       }
     }
@@ -234,7 +237,7 @@ namespace UI.Controls.GPT.Mode
         OnValueChanged("BUZZER_FSOUND", value);
 
         await ExecuteSettingChangeAsync(
-          () => GptUiOperation.GetDevice().SystemManger.SetBuzzerFeedbackSound(value == 1),
+          () => GptUiOperation.GetDevice(deviceContext).SystemManger.SetBuzzerFeedbackSound(value == 1),
           "Не удалось изменить звук ошибочного теста");
       }
     }
@@ -253,7 +256,7 @@ namespace UI.Controls.GPT.Mode
       double duration = SuccessSoundSlider.Value;
       OnValueChanged("BUZZER_PTIME", duration);
       await ExecuteSettingChangeAsync(
-        () => GptUiOperation.GetDevice().SystemManger.SetBuzzerPrimaryTime(duration),
+        () => GptUiOperation.GetDevice(deviceContext).SystemManger.SetBuzzerPrimaryTime(duration),
         "Не удалось изменить длительность звука успешного теста");
     }
 
@@ -271,7 +274,7 @@ namespace UI.Controls.GPT.Mode
       double duration = ErrorSoundSlider.Value;
       OnValueChanged("BUZZER_FTIME", duration);
       await ExecuteSettingChangeAsync(
-        () => GptUiOperation.GetDevice().SystemManger.SetBuzzerFeedbackTime(duration),
+        () => GptUiOperation.GetDevice(deviceContext).SystemManger.SetBuzzerFeedbackTime(duration),
         "Не удалось изменить длительность звука ошибочного теста");
     }
 

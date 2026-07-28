@@ -31,7 +31,7 @@
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <TextBlock Text="Командная консоль"
                                        Foreground="#F2F4F8"
-                                       FontSize="15"
+                                       FontSize="17"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
@@ -42,7 +42,7 @@
                             <Ellipse Width="8" Height="8" Margin="0,0,8,0" Fill="#28C840"/>
                             <TextBlock Text="Готово к работе"
                                        Foreground="#AEB6C3"
-                                       FontSize="12"/>
+                                       FontSize="14"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -53,7 +53,7 @@
                                Text="История команд появится здесь"
                                Foreground="#687180"
                                FontFamily="Consolas"
-                               FontSize="14"
+                               FontSize="16"
                                IsHitTestVisible="False"
                                VerticalAlignment="Top"/>
                     <ScrollViewer x:Name="ConsoleScroll"

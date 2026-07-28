@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.DataBase.Engine.Static.Devices;
+using Ask.UI.Features.ServiceTools.Gpt;
 using MainWindowProgram.Test.Protocol;
 using UI.Controls.AdminPanel;
 using UI.Controls.DeviceHealthView;
-using UI.Controls.GPT;
 using UI.Controls.Settings.Protocol;
 using static UI.Components.Invoke.OpenFileButton;
 
@@ -32,7 +34,11 @@ namespace MainWindowProgram.Services
     /// Открывает элемент управления для работы с программируемой пробойной установкой (ППУ).
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию.</returns>
-    public void OpenGptServiceAsync() => _multiWindow.WorkspaceService.AddControl("GptManagement", new GPTPunchControl(), TypeWindow.DeviceControl);
+    public void OpenGptServiceAsync() =>
+      _multiWindow.WorkspaceService.AddControl(
+        "GptManagement",
+        new GPTPunchControl(GetGptAsync),
+        TypeWindow.DeviceControl);
 
     public async Task StartConsoleTest() => await Test.ConsoleTest.TestData.PrintTestData();
 
@@ -42,8 +48,18 @@ namespace MainWindowProgram.Services
     public void OpenServiceUtilities() =>
       _multiWindow.WorkspaceService.AddControl(
         "Сервисные утилиты",
-        new ServiceUtilitiesControl(),
+        new ServiceUtilitiesControl(GetGptAsync),
         TypeWindow.Settings);
+
+    /// <summary>
+    /// Возвращает пробойную установку, настроенную для первого шасси.
+    /// </summary>
+    /// <returns>Найденная пробойная установка или <see langword="null"/>.</returns>
+    private static async Task<IBreakdownTester?> GetGptAsync()
+    {
+      return (await BreakdownTesters.GetDevicesByNumberChassisAsync(1))
+        .FirstOrDefault();
+    }
 
     /// <summary>
     /// Открывает административный интерфейс базы данных в отдельной вкладке рабочего пространства.

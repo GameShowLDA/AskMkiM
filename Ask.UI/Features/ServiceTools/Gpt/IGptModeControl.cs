@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
-namespace UI.Controls.GPT
+namespace Ask.UI.Features.ServiceTools.Gpt
 {
   /// <summary>
   /// Определяет управление состоянием режима GPT в административном интерфейсе.
