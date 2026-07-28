@@ -14,17 +14,27 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <summary>
     /// Выполняет самопроверку цепи блокирующего реле.
     /// </summary>
-    static internal async Task RunSelfCheckBlockingRelayAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISwitchingDevice device = null, IMultimeter meter = null)
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
+    /// <param name="device">Проверяемое устройство коммутации шин.</param>
+    /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
+    static internal async Task RunSelfCheckBlockingRelayAsync(CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.BlockingRelay, messageService, device, meter);
+      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.BlockingRelay, messageService, getNextTestNumber, device, meter);
     }
 
     /// <summary>
     /// Выполняет самопроверку цепи мультиметра.
     /// </summary>
-    static internal async Task RunSelfCheckMultimeterAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISwitchingDevice device = null, IMultimeter meter = null)
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
+    /// <param name="device">Проверяемое устройство коммутации шин.</param>
+    /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
+    static internal async Task RunSelfCheckMultimeterAsync(CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.Multimeter, messageService, device, meter);
+      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.Multimeter, messageService, getNextTestNumber, device, meter);
     }
 
     /// <summary>
@@ -71,9 +81,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <summary>
     /// Выполняет самопроверку цепи пробойной установки (ПКИ).
     /// </summary>
-    static internal async Task RunSelfCheckBreakdownTesterAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISwitchingDevice device = null, IMultimeter meter = null)
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
+    /// <param name="device">Проверяемое устройство коммутации шин.</param>
+    /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
+    static internal async Task RunSelfCheckBreakdownTesterAsync(CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.BreakdownTester, messageService, device, meter);
+      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.BreakdownTester, messageService, getNextTestNumber, device, meter);
     }
 
   }

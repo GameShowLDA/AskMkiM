@@ -49,24 +49,27 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         return;
       }
 
+      int testNumber = 0;
+      Func<int> getNextTestNumber = () => ++testNumber;
+
       switch (type)
       {
         case SwitchingDeviceTypeConnector.FullCheck:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
           // await SelfTestRunner.RunSelfCheckAdcAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckAdcReversedAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckPintAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckShuntAsync(cancellationToken, messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         case SwitchingDeviceTypeConnector.BlockingRelay:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         case SwitchingDeviceTypeConnector.Multimeter:
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         // case SwitchingDeviceTypeConnector.ADC:
@@ -86,7 +89,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         //  break;
 
         case SwitchingDeviceTypeConnector.BreakdownTester:
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         default:
@@ -107,6 +110,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="cancellationToken">Токен отмены операции.</param>
     /// <param name="testType">Тип цепи для проверки.</param>
     /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
     /// <returns>
@@ -116,7 +120,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <exception cref="OperationCanceledException">
     /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
     /// </exception>
-    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, ISwitchingDevice device = null, IMultimeter meter = null)
+    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       if (!SelfTestManager.MeterConnect && !SelfTestManager.DbcConnect)
       {
@@ -144,6 +148,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       }
 
       bool allTestsPassed = true;
+      string testName = GetTestName(testType);
+
+      await messageService.ShowMessageAsync(
+        new ShowMessageModel($"\n{getNextTestNumber()}. Тест \"{testName}\""),
+        IsBlockStart: true,
+        ignoreOutputValidation: true);
 
       foreach (int busContact in contacts)
       {
@@ -173,6 +183,18 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     }
 
     /// <summary>
+    /// Возвращает название теста без обозначения шины и контакта.
+    /// </summary>
+    /// <param name="testType">Тип проверяемой цепи.</param>
+    /// <returns>Название теста или строковое представление типа проверки.</returns>
+    private static string GetTestName(SwitchingDeviceTypeConnector testType)
+    {
+      return SelfTestMetadataProvider.CircuitNames.TryGetValue(testType, out string? testName)
+        ? testName
+        : testType.ToString();
+    }
+
+    /// <summary>
     /// Выполняет проверку указанной цепи: замыкает, проверяет целостность цепи и размыкает.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
@@ -188,11 +210,15 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// </returns>
     private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Запуск теста {circuitName}"), true);
+      string testName = GetTestName(testType);
+      string busName = SelfTestMetadataProvider.GetBusContactName(busContact);
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка целостности цепи {circuitName}...") { IndentLevel = 1 });
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
-        () => SelfTestRetryHelper.TryCloseCircuitWithRetryAsync(cancellationToken, messageService, selfTestChecker, testType, busContact, circuitName),
+        () => ExecuteCircuitOperationAsync(
+          () => selfTestChecker.ExecuteSelfTestAsync(cancellationToken, testType, busContact, 1),
+          messageService,
+          testName,
+          $"Подключение к шине {busName}"),
         messageService,
         deviceTask: true))
       {
@@ -208,7 +234,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           continuityResult = await meter.ContinuityManager.CheckContinuityAsync(
             true,
             messageService);
-          await messageService.ShowMessageAsync(new ShowMessageModel($"{circuitName}", message: "Проверка подключение", type: continuityResult ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: !continuityResult);
 
           if (continuityResult)
           {
@@ -220,6 +245,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
             }
           }
 
+          await ShowCircuitOperationResultAsync(
+            messageService,
+            testName,
+            $"Подключение к шине {busName}",
+            continuityResult,
+            skipPause: !continuityResult);
+
           return continuityResult;
 
         }, messageService);
@@ -230,26 +262,85 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       }
 
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
-        () => SelfTestRetryHelper.ExecuteHardwareOperationAsync(
+        () => ExecuteCircuitOperationAsync(
           () => selfTestChecker.ExecuteSelfTestAsync(cancellationToken, testType, busContact, 2),
           messageService,
-          $"Размыкание цепи {circuitName}"),
+          testName,
+          $"Отключение от шины {busName}"),
         ExecutionConfig.GetIsIdleModeEnabled() ? messageService : null,
         deviceTask: true))
       {
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          await messageService.ShowMessageAsync(
-            new ShowMessageModel(
-              $"Размыкание цепи {circuitName}",
-              type: ShowMessageModel.MessageType.Error));
-        }
-
         return false;
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\" отключен.", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
+      await ShowCircuitOperationResultAsync(
+        messageService,
+        testName,
+        $"Отключение от шины {busName}",
+        result: true);
+
       return continuityResult;
+    }
+
+    /// <summary>
+    /// Выполняет операцию над цепью и выводит результат только при аппаратной ошибке.
+    /// </summary>
+    /// <param name="operation">Аппаратная операция над цепью.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="testName">Название выполняемого теста.</param>
+    /// <param name="operationName">Название операции над шиной.</param>
+    /// <returns>
+    /// <see langword="true"/>, если операция выполнена успешно.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private static async Task<bool> ExecuteCircuitOperationAsync(
+      Func<Task<bool>> operation,
+      IUserInteractionService messageService,
+      string testName,
+      string operationName)
+    {
+      bool result = await operation();
+      if (!result)
+      {
+        await ShowCircuitOperationResultAsync(
+          messageService,
+          testName,
+          operationName,
+          result: false);
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Выводит результат подключения или отключения проверяемой шины.
+    /// </summary>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="testName">Название выполняемого теста.</param>
+    /// <param name="operationName">Название операции над шиной.</param>
+    /// <param name="result">Результат операции.</param>
+    /// <param name="skipPause">
+    /// <see langword="true"/>, чтобы не приостанавливать выполнение после вывода результата.
+    /// </param>
+    /// <returns>Задача, представляющая асинхронный вывод результата.</returns>
+    private static Task ShowCircuitOperationResultAsync(
+      IUserInteractionService messageService,
+      string testName,
+      string operationName,
+      bool result,
+      bool skipPause = false)
+    {
+      return messageService.ShowMessageAsync(
+        new ShowMessageModel(
+          testName,
+          message: operationName,
+          type: result
+            ? ShowMessageModel.MessageType.Success
+            : ShowMessageModel.MessageType.Error)
+        {
+          IndentLevel = 1,
+        },
+        skipPause: skipPause);
     }
 
     /// <summary>
