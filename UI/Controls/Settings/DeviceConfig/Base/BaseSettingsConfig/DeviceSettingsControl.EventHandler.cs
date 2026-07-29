@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Usb;
@@ -13,6 +14,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
+using UI.Controls.Settings.DeviceConfig.Base;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
@@ -460,6 +463,12 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="e">Аргументы события нажатия кнопки мыши.</param>
     private void SaveButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      if (!ValidateRequiredParameters())
+      {
+        e.Handled = true;
+        return;
+      }
+
       SaveEvent?.Invoke(this, e);
     }
 
@@ -472,6 +481,258 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       RequestClose?.Invoke(this, e);
     }
+
+    /// <summary>
+    /// Проверяет обязательные параметры перед сохранением устройства.
+    /// </summary>
+    public bool ValidateRequiredParameters()
+    {
+      ClearValidationHighlights();
+
+      var issues = new List<RequiredParameterIssue>();
+
+      AddIssueIf(
+        issues,
+        DeviceModelSelectionBox.SelectedItem is not string,
+        "Модель устройства",
+        DeviceModelContainer,
+        DeviceModelSelectionBox);
+
+      AddIssueIf(
+        issues,
+        DeviceNumberContainer.Visibility == Visibility.Visible && NumberDevice < 0,
+        "Номер устройства",
+        DeviceNumberContainer,
+        DeviceNumberTextBox);
+
+      AddIssueIf(
+        issues,
+        BusTypeContainer.Visibility == Visibility.Visible && BusTypeSelectionBox.SelectedItem is not SwitchingBusNew,
+        "Тип структурной шины",
+        BusTypeContainer,
+        BusTypeSelectionBox);
+
+      AddIssueIf(
+        issues,
+        RelayPointCountContainer.Visibility == Visibility.Visible && RelayPointCount <= 0,
+        "Количество точек (каналов)",
+        RelayPointCountContainer,
+        RelayPointCountTextBox);
+
+      AddIssueIf(
+        issues,
+        ResistanceContainer.Visibility == Visibility.Visible &&
+        !DeviceRequiredParameterValidator.IsNonNegativeNumber(ResistanceTextBox.Text),
+        "Сопротивление коммутатора",
+        ResistanceContainer,
+        ResistanceTextBox);
+
+      AddIssueIf(
+        issues,
+        CapacitanceContainer.Visibility == Visibility.Visible &&
+        !DeviceRequiredParameterValidator.IsNonNegativeNumber(CapacitanceTextBox.Text),
+        "Емкость коммутатора",
+        CapacitanceContainer,
+        CapacitanceTextBox);
+
+      string connectionType = GetSelectedConnectionType();
+      AddIssueIf(
+        issues,
+        ConnectionTypeContainer.Visibility == Visibility.Visible && string.IsNullOrWhiteSpace(connectionType),
+        "Тип подключения устройства",
+        ConnectionTypeContainer,
+        ConnectionTypeSelectionBox);
+
+      AddConnectionDetailsIssues(issues, connectionType);
+      AddAdditionalSettingsIssues(issues);
+
+      if (issues.Count == 0)
+      {
+        return true;
+      }
+
+      foreach (var issue in issues)
+      {
+        HighlightInvalidSection(issue.Section);
+      }
+
+      ScrollToIssue(issues[0]);
+      DeviceConfigNotifications.ShowRequiredParametersMissing(issues.Select(issue => issue.Name));
+
+      return false;
+    }
+
+    private void AddConnectionDetailsIssues(List<RequiredParameterIssue> issues, string connectionType)
+    {
+      if (string.Equals(connectionType, "IP", StringComparison.OrdinalIgnoreCase))
+      {
+        AddIssueIf(
+          issues,
+          IPAddressContainer.Visibility == Visibility.Visible && !IsValidIpAddress(),
+          "IP Address",
+          IPAddressContainer,
+          IpPart1);
+        return;
+      }
+
+      if (string.Equals(connectionType, "COM", StringComparison.OrdinalIgnoreCase))
+      {
+        bool isInvalid = COMContainer.Visibility == Visibility.Visible &&
+          (string.IsNullOrWhiteSpace(COMContainer.PortName) ||
+           COMContainer.BaudRate < 0 ||
+           COMContainer.DataBits < 0);
+
+        AddIssueIf(
+          issues,
+          isInvalid,
+          "Параметры COM-порта",
+          COMContainer,
+          COMContainer);
+        return;
+      }
+
+      if (string.Equals(connectionType, "USB", StringComparison.OrdinalIgnoreCase))
+      {
+        AddIssueIf(
+          issues,
+          USBContainer.Visibility == Visibility.Visible && string.IsNullOrWhiteSpace(UsbConnectionDetails),
+          "USB устройство",
+          USBContainer,
+          USBContainer);
+      }
+    }
+
+    private void AddAdditionalSettingsIssues(List<RequiredParameterIssue> issues)
+    {
+      AddIssueIf(
+        issues,
+        _acwPpuDividerCoefficientPercentTextBox != null &&
+        !DeviceRequiredParameterValidator.IsPositiveNumber(_acwPpuDividerCoefficientPercentTextBox.Text),
+        "Коэффициент делителя ППУ ACW",
+        AdditionalSettingsContainer.Content as FrameworkElement ?? AdditionalSettingsContainer,
+        _acwPpuDividerCoefficientPercentTextBox);
+
+      AddIssueIf(
+        issues,
+        _dcwPpuDividerCoefficientPercentTextBox != null &&
+        !DeviceRequiredParameterValidator.IsPositiveNumber(_dcwPpuDividerCoefficientPercentTextBox.Text),
+        "Коэффициент делителя ППУ DCW",
+        AdditionalSettingsContainer.Content as FrameworkElement ?? AdditionalSettingsContainer,
+        _dcwPpuDividerCoefficientPercentTextBox);
+
+      AddIssueIf(
+        issues,
+        _systemInsulationResistanceGOhmTextBox != null &&
+        GetSystemInsulationResistanceGOhm() is < 1 or > 60,
+        "Сопротивление изоляции системы",
+        AdditionalSettingsContainer.Content as FrameworkElement ?? AdditionalSettingsContainer,
+        _systemInsulationResistanceGOhmTextBox);
+    }
+
+    private string GetSelectedConnectionType()
+    {
+      if (ConnectionTypeSelectionBox.SelectedItem is not ComboBoxItem item ||
+          item.IsEnabled == false)
+      {
+        return string.Empty;
+      }
+
+      return DeviceRequiredParameterValidator.NormalizeConnectionType(
+        item.Content?.ToString(),
+        item.IsEnabled);
+    }
+
+    private bool IsValidIpAddress()
+    {
+      return DeviceRequiredParameterValidator.IsValidIpAddress(
+        IpPart1Value,
+        IpPart2Value,
+        IpPart3Value,
+        IpPart4Value);
+    }
+
+    private static void AddIssueIf(
+      List<RequiredParameterIssue> issues,
+      bool condition,
+      string name,
+      FrameworkElement section,
+      FrameworkElement focusTarget)
+    {
+      if (condition)
+      {
+        issues.Add(new RequiredParameterIssue(name, section, focusTarget));
+      }
+    }
+
+    private void ClearValidationHighlights()
+    {
+      foreach (Border border in EnumerateVisualChildren<Border>(this))
+      {
+        if (Equals(border.Tag, "DeviceSettingsValidation"))
+        {
+          border.ClearValue(Border.BorderBrushProperty);
+          border.ClearValue(Border.BorderThicknessProperty);
+          border.Tag = null;
+        }
+      }
+
+      COMContainer.SetValidationHighlight(false);
+    }
+
+    private void HighlightInvalidSection(FrameworkElement section)
+    {
+      if (section == COMContainer)
+      {
+        COMContainer.SetValidationHighlight(true);
+        return;
+      }
+
+      if (section is not Border border)
+      {
+        return;
+      }
+
+      border.BorderBrush = GetValidationBrush();
+      border.BorderThickness = new Thickness(2);
+      border.Tag = "DeviceSettingsValidation";
+    }
+
+    private Brush GetValidationBrush()
+    {
+      return TryFindResource("RedColorSolidColorBrush") as Brush ?? Brushes.IndianRed;
+    }
+
+    private void ScrollToIssue(RequiredParameterIssue issue)
+    {
+      issue.Section.BringIntoView();
+      SettingsScrollViewer.UpdateLayout();
+      issue.Section.BringIntoView();
+      issue.FocusTarget.Focus();
+    }
+
+    private static IEnumerable<T> EnumerateVisualChildren<T>(DependencyObject root)
+      where T : DependencyObject
+    {
+      int count = VisualTreeHelper.GetChildrenCount(root);
+      for (int index = 0; index < count; index++)
+      {
+        DependencyObject child = VisualTreeHelper.GetChild(root, index);
+        if (child is T typedChild)
+        {
+          yield return typedChild;
+        }
+
+        foreach (T descendant in EnumerateVisualChildren<T>(child))
+        {
+          yield return descendant;
+        }
+      }
+    }
+
+    private sealed record RequiredParameterIssue(
+      string Name,
+      FrameworkElement Section,
+      FrameworkElement FocusTarget);
 
   }
 }

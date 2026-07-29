@@ -631,7 +631,7 @@
             </Grid>
         </Grid>
 
-        <askUiNotifications:WindowNotificationManagerControl Panel.ZIndex="9998" />
+        <askUiNotifications:WindowNotificationManagerControl Panel.ZIndex="10000" />
         <askUi:DrawerControl Panel.ZIndex="9999" />
     </Grid>
 </Window>

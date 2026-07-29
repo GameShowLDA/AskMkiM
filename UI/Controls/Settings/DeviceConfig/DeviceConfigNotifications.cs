@@ -40,6 +40,23 @@ internal static class DeviceConfigNotifications
       NotificationType.Error);
   }
 
+  public static void ShowRequiredParametersMissing(IEnumerable<string> parameterNames)
+  {
+    var missingParameters = parameterNames
+      .Where(name => !string.IsNullOrWhiteSpace(name))
+      .ToList();
+
+    string message = missingParameters.Count == 0
+      ? "Заполните обязательные параметры перед сохранением."
+      : "Заполните обязательные параметры перед сохранением:\n" +
+        string.Join("\n", missingParameters.Select(name => $"• {name}"));
+
+    NotificationHostService.Instance.Show(
+      "Не все параметры заполнены",
+      message,
+      NotificationType.Warning);
+  }
+
   private static string FormatDevice(DeviceDto device)
   {
     string name = string.IsNullOrWhiteSpace(device.Name) ? "Устройство" : device.Name.Trim();
