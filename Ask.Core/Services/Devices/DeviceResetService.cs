@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -145,7 +144,7 @@ public static class DeviceResetService
       LogError($"{label}: {logResult}", isDeviceLog: true);
     }
 
-    if (messageService == null || (reset && !DeviceDisplayConfig.GetExecutionParametersVisibility()))
+    if (messageService == null)
     {
       return;
     }
