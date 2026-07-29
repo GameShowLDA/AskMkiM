@@ -1,5 +1,4 @@
 using Ask.LogLib;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -19,10 +18,9 @@ namespace UI.Controls.AdminPanel
   public partial class SetCommand : UserControl
   {
     private const int MaxConsoleLines = 2000;
-    private const int MaxExchangeCards = 200;
+    private const int MaxCommandOutputLength = 65536;
     private readonly List<string> history = [];
     private readonly List<ServiceDeviceAddressInfo> configuredDevices = [];
-    private readonly ObservableCollection<CommandExchangeViewModel> exchanges = [];
     private readonly Func<Task<IReadOnlyList<ServiceDeviceAddressInfo>>> addressesProvider;
     private int historyIndex = -1;
     private bool suppressAutocomplete;
@@ -37,7 +35,6 @@ namespace UI.Controls.AdminPanel
       this.addressesProvider = addressesProvider
         ?? throw new ArgumentNullException(nameof(addressesProvider));
       InitializeComponent();
-      ExchangeList.ItemsSource = exchanges;
       Loaded += SetCommand_Loaded;
       Unloaded += SetCommand_Unloaded;
     }
@@ -112,6 +109,7 @@ namespace UI.Controls.AdminPanel
         suggestions.Add(new("help — список устройств", "help"));
         suggestions.Add(new("clear — очистить консоль", "clear"));
         suggestions.Add(new("ping IP — проверить доступность устройства", "ping "));
+        suggestions.Add(new("cmd COMMAND — выполнить системную команду", "cmd "));
         suggestions.AddRange(configuredDevices
           .Select(device => new ConsoleSuggestion(device.DisplayText, $"{device.Address} ")));
         suggestions.AddRange(history.TakeLast(6).Reverse()
@@ -127,6 +125,11 @@ namespace UI.Controls.AdminPanel
       if ("ping".StartsWith(text, StringComparison.OrdinalIgnoreCase))
       {
         suggestions.Add(new("ping IP — проверить доступность устройства", "ping "));
+      }
+
+      if ("cmd".StartsWith(text, StringComparison.OrdinalIgnoreCase))
+      {
+        suggestions.Add(new("cmd COMMAND — выполнить системную команду", "cmd "));
       }
 
       if (text.StartsWith("ping ", StringComparison.OrdinalIgnoreCase))
@@ -146,9 +149,14 @@ namespace UI.Controls.AdminPanel
       if (text.StartsWith("help ", StringComparison.OrdinalIgnoreCase))
       {
         string filter = text[5..].Trim();
-        suggestions.AddRange(DeviceCommandCatalog.DeviceAliases
+        suggestions.AddRange(new[] { "console", "all" }
+          .Concat(DeviceCommandCatalog.DeviceAliases)
           .Where(alias => alias.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-          .Select(alias => new ConsoleSuggestion($"Справка по {alias}", $"help {alias}")));
+          .Select(alias => new ConsoleSuggestion(
+            alias.Equals("all", StringComparison.OrdinalIgnoreCase)
+              ? "Полная справка по всем функциям"
+              : $"Справка по {alias}",
+            $"help {alias}")));
         return suggestions;
       }
 
@@ -314,7 +322,6 @@ namespace UI.Controls.AdminPanel
       if (input.Equals("clear", StringComparison.OrdinalIgnoreCase))
       {
         ConsolePanel.Children.Clear();
-        exchanges.Clear();
         EmptyConsoleHint.Visibility = Visibility.Visible;
         return;
       }
@@ -339,6 +346,19 @@ namespace UI.Controls.AdminPanel
         return;
       }
 
+      if (input.StartsWith("cmd ", StringComparison.OrdinalIgnoreCase))
+      {
+        string command = input[4..].Trim();
+        if (string.IsNullOrWhiteSpace(command))
+        {
+          AddConsoleLine("Формат: cmd COMMAND. Пример: cmd ipconfig", Brushes.OrangeRed);
+          return;
+        }
+
+        await ExecuteSystemCommandAsync(command);
+        return;
+      }
+
       string[] parts = input.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
       if (parts.Length < 2 || !IPAddress.TryParse(parts[0], out IPAddress? address))
       {
@@ -347,6 +367,113 @@ namespace UI.Controls.AdminPanel
       }
 
       await SendCommandAsync(address, parts[1]);
+    }
+
+    /// <summary>
+    /// Выполняет команду через системный интерпретатор Windows и отображает её вывод.
+    /// </summary>
+    /// <param name="command">Командная строка, передаваемая в <c>cmd.exe</c>.</param>
+    private async Task ExecuteSystemCommandAsync(string command)
+    {
+      var exchange = new CommandExchangeViewModel
+      {
+        Endpoint = $"Локальный CMD · {Environment.MachineName}",
+        Command = command
+      };
+      AddExchange(exchange);
+      var stopwatch = Stopwatch.StartNew();
+      commandInProgress = true;
+
+      try
+      {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        Encoding commandEncoding = Encoding.GetEncoding(
+          System.Globalization.CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
+        var startInfo = new ProcessStartInfo
+        {
+          FileName = "cmd.exe",
+          UseShellExecute = false,
+          RedirectStandardOutput = true,
+          RedirectStandardError = true,
+          StandardOutputEncoding = commandEncoding,
+          StandardErrorEncoding = commandEncoding,
+          CreateNoWindow = true,
+          WorkingDirectory = Environment.CurrentDirectory
+        };
+        startInfo.ArgumentList.Add("/d");
+        startInfo.ArgumentList.Add("/s");
+        startInfo.ArgumentList.Add("/c");
+        startInfo.ArgumentList.Add(command);
+
+        using var process = new Process { StartInfo = startInfo };
+        if (!process.Start())
+        {
+          throw new InvalidOperationException("Не удалось запустить cmd.exe.");
+        }
+
+        Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+        Task<string> errorTask = process.StandardError.ReadToEndAsync();
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        try
+        {
+          await process.WaitForExitAsync(timeout.Token);
+        }
+        catch (OperationCanceledException)
+        {
+          if (!process.HasExited)
+          {
+            process.Kill(entireProcessTree: true);
+          }
+
+          await process.WaitForExitAsync();
+          exchange.Response = "Выполнение остановлено: превышен таймаут 30 секунд.";
+          exchange.StatusBrush = Brushes.Khaki;
+          return;
+        }
+
+        string output = (await outputTask).Trim();
+        string error = (await errorTask).Trim();
+        string response = string.Join(
+          Environment.NewLine,
+          new[] { output, error }
+            .Where(value => !string.IsNullOrWhiteSpace(value)));
+        if (string.IsNullOrWhiteSpace(response))
+        {
+          response = "Команда завершена без текстового вывода.";
+        }
+
+        exchange.Response = LimitOutput(response);
+        exchange.StatusBrush = process.ExitCode == 0
+          ? Brushes.LightGreen
+          : Brushes.LightCoral;
+        exchange.Duration = $"код {process.ExitCode} · {stopwatch.ElapsedMilliseconds} мс";
+      }
+      catch (Exception exception)
+      {
+        exchange.Response = $"Ошибка CMD: {exception.Message}";
+        exchange.StatusBrush = Brushes.LightCoral;
+      }
+      finally
+      {
+        stopwatch.Stop();
+        if (string.IsNullOrEmpty(exchange.Duration))
+        {
+          exchange.Duration = $"{stopwatch.ElapsedMilliseconds} мс";
+        }
+
+        commandInProgress = false;
+        RefreshExchangeList();
+      }
+    }
+
+    private static string LimitOutput(string output)
+    {
+      if (output.Length <= MaxCommandOutputLength)
+      {
+        return output;
+      }
+
+      return $"{output[..MaxCommandOutputLength]}{Environment.NewLine}… вывод сокращён";
     }
 
     /// <summary>
@@ -441,11 +568,13 @@ namespace UI.Controls.AdminPanel
 
     private void AddExchange(CommandExchangeViewModel exchange)
     {
-      exchanges.Add(exchange);
-      while (exchanges.Count > MaxExchangeCards)
+      var card = new ContentControl
       {
-        exchanges.RemoveAt(0);
-      }
+        Content = exchange,
+        ContentTemplate = (DataTemplate)FindResource("CommandExchangeTemplate")
+      };
+      ConsolePanel.Children.Add(card);
+      TrimConsole();
 
       EmptyConsoleHint.Visibility = Visibility.Collapsed;
       ConsoleScroll.ScrollToEnd();
@@ -453,7 +582,6 @@ namespace UI.Controls.AdminPanel
 
     private void RefreshExchangeList()
     {
-      ExchangeList.Items.Refresh();
       ConsoleScroll.ScrollToEnd();
     }
 
@@ -476,25 +604,82 @@ namespace UI.Controls.AdminPanel
         TextWrapping = TextWrapping.Wrap
       };
       ConsolePanel.Children.Add(line);
+      TrimConsole();
+
+      ConsoleScroll.ScrollToEnd();
+    }
+
+    private void TrimConsole()
+    {
       while (ConsolePanel.Children.Count > MaxConsoleLines)
       {
         ConsolePanel.Children.RemoveAt(0);
       }
-
-      ConsoleScroll.ScrollToEnd();
     }
 
     private void ShowHelp(string? device = null)
     {
       if (string.IsNullOrWhiteSpace(device))
       {
-        AddConsoleLine(
-          $"Доступные устройства: {string.Join(", ", DeviceCommandCatalog.DeviceAliases)}",
-          Brushes.LightGray);
-        AddConsoleLine("Используйте help <DEVICE> или начните вводить IP для подсказок.", Brushes.Gray);
+        ShowConsoleHelp();
+        AddConsoleLine("", Brushes.Gray);
+        AddConsoleLine("Справочники оборудования", Brushes.LightSkyBlue);
+        foreach (string alias in DeviceCommandCatalog.DeviceAliases)
+        {
+          if (DeviceCommandCatalog.TryGetDevice(alias, out var help))
+          {
+            AddConsoleLine(
+              $"  help {alias,-4} — {help.DeviceName}, функций: {help.Commands.Count}",
+              Brushes.LightGray);
+          }
+        }
+
+        AddConsoleLine("  help all  — все функции всех устройств", Brushes.LightGray);
         return;
       }
 
+      if (device.Equals("console", StringComparison.OrdinalIgnoreCase))
+      {
+        ShowConsoleHelp();
+        return;
+      }
+
+      if (device.Equals("all", StringComparison.OrdinalIgnoreCase))
+      {
+        ShowConsoleHelp();
+        foreach (string alias in DeviceCommandCatalog.DeviceAliases)
+        {
+          AddConsoleLine("", Brushes.Gray);
+          ShowDeviceHelp(alias);
+        }
+
+        return;
+      }
+
+      ShowDeviceHelp(device);
+    }
+
+    private void ShowConsoleHelp()
+    {
+      AddConsoleLine("Функции командной консоли", Brushes.LightSkyBlue);
+      AddConsoleLine("  help                 — краткая справка", Brushes.LightGreen);
+      AddConsoleLine("  help console         — команды и горячие клавиши консоли", Brushes.LightGreen);
+      AddConsoleLine("  help <MKR|DBC|MS>    — функции выбранного устройства", Brushes.LightGreen);
+      AddConsoleLine("  help all             — полная справка", Brushes.LightGreen);
+      AddConsoleLine("  clear                — очистить журнал и карточки обмена", Brushes.LightGreen);
+      AddConsoleLine("  ping <IP>            — проверить доступность, задержку и TTL", Brushes.LightGreen);
+      AddConsoleLine("  cmd <COMMAND>        — выполнить локальную команду Windows", Brushes.LightGreen);
+      AddConsoleLine("  <IP> <COMMAND>       — отправить низкоуровневую UDP-команду", Brushes.LightGreen);
+      AddConsoleLine("", Brushes.Gray);
+      AddConsoleLine("Горячие клавиши", Brushes.LightSkyBlue);
+      AddConsoleLine("  Tab                  — применить выбранную подсказку", Brushes.Gray);
+      AddConsoleLine("  ↑ / ↓                — подсказки или история команд", Brushes.Gray);
+      AddConsoleLine("  Esc                  — закрыть автодополнение", Brushes.Gray);
+      AddConsoleLine("  Enter                — выполнить команду", Brushes.Gray);
+    }
+
+    private void ShowDeviceHelp(string device)
+    {
       if (!DeviceCommandCatalog.TryGetDevice(device, out var help))
       {
         AddConsoleLine($"Устройство «{device}» отсутствует в каталоге.", Brushes.OrangeRed);
@@ -505,10 +690,15 @@ namespace UI.Controls.AdminPanel
       foreach (var command in help.Commands)
       {
         AddConsoleLine($"[{command.Id}] {command.Name}", Brushes.LightGreen);
-        AddConsoleLine($"  {command.Syntax}", Brushes.Gray);
+        AddConsoleLine($"  Синтаксис: {command.Syntax}", Brushes.Gray);
         if (command.Variables != "-")
         {
-          AddConsoleLine($"  {command.Variables}", Brushes.DarkGray);
+          AddConsoleLine($"  Параметры: {command.Variables}", Brushes.DarkGray);
+        }
+
+        if (command.Response != "-")
+        {
+          AddConsoleLine($"  Ответ: {command.Response}", Brushes.DarkGray);
         }
       }
     }
