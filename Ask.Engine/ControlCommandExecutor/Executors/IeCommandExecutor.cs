@@ -1,16 +1,11 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -105,13 +100,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(
-          value,
-          firstValue,
-          secondValue,
-          userMessageService: messageService) - fixtureCapacitance;
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(measurementRange, userMessageService: messageService) - fixtureCapacitance;
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, secondValue, answer);
+        measurementRange.TargetValue = answer;
+        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, measurementRange);
       }, messageService);
 
       return result;

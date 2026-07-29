@@ -7,13 +7,14 @@
 	<Color name="MeasurementUnit" foreground="#FFD700" fontWeight="bold" />
 
 	<RuleSet ignoreCase="true">
+		<Rule color="ProtocolMain">^\s*(?:Введённые\s+данные|Первая\s+точка|Вторая\s+точка|Заданное\s+значение\s+[^:\r\n]+|Время\s+выполнения|Время\s+нарастания|Напряжение|Шина|Группа\s+шин|Проверяемый\s+модуль|Проверяющий\s+модуль|Диапазон\s+проверки):</Rule>
 		<Rule color="ProtocolMain">^\s*Начало\s+проверки:</Rule>
 		<Rule color="ProtocolMain">^\s*Время\s+выполнения:</Rule>
 		<Rule color="ProtocolMain">(?&lt;=")[^"\r\n]+(?="\s+от\b)</Rule>
 		<Rule color="ProtocolMain">^\s*Заключение:</Rule>
 		<Rule color="OkParam">(?&lt;=Точка)\[\d+(?:\.\d+)*\]</Rule>
 		<Rule color="OkParam">(?&lt;=Разряд-\s)\d+</Rule>
-		<Rule color="MeasurementUnit">(?-i:(?&lt;![А-Яа-яA-Za-z])(?:мкФ|пФ|нФ|мА|А|ГОм|МОм|КОм|Ом|кВ|мВ|В)(?![А-Яа-яA-Za-z]))</Rule>
+		<Rule color="MeasurementUnit">(?-i:(?&lt;![А-Яа-яA-Za-z])(?:мкФ|пФ|нФ|мА|А|ГОм|МОм|кОм|КОм|Ом|кВ|мВ|В|с)(?![А-Яа-яA-Za-z]))</Rule>
 		<Rule color="Error">\[БРАК\]</Rule>
 	</RuleSet>
 </SyntaxDefinition>

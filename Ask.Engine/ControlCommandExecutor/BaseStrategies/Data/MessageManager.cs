@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -30,19 +31,18 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     public static async Task<(bool, double)> ShowMeasurementResultAsync(
       IUserInteractionService messageService,
       MeasurementTypeCommand measurementTypeCommand,
-      double lowerLimit,
-      double upperLimit,
-      double value,
+      MeasurementRange measurementRange,
       string? chains = null,
       bool isOverloadExpected = false)
     {
       var random = new Random();
+      double value = measurementRange.TargetValue;
 
-      if (ExecutionConfig.GetIsIdleModeEnabled() && await ExecutionConfig.GetIsErrorSimulationEnabled())
+      if (ExecutionConfig.GetIsIdleModeEnabled() && ExecutionConfig.GetIsErrorSimulationEnabled())
       {
-        if (upperLimit != -1)
+        if (measurementRange.UpperBound != -1)
         {
-          value = random.NextDouble() * ((upperLimit + 1) * 2);
+          value = random.NextDouble() * ((measurementRange.UpperBound + 1) * 2);
         }
         else
         {
@@ -52,11 +52,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
 
       bool result = isOverloadExpected
         ? IsOverloadValue(value)
-        : upperLimit != -1 ? value >= lowerLimit && value <= upperLimit : value >= lowerLimit;
+        : measurementRange.UpperBound != -1 ? value >= measurementRange.LowerBound && value <= measurementRange.UpperBound : value >= measurementRange.LowerBound;
 
       if (messageService != null && (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility()))
       {
-        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, lowerLimit, upperLimit, value, chains: chains);
+        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, measurementRange.LowerBound, measurementRange.UpperBound, value, chains: chains);
         message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
         message.IndentLevel = 2;
 

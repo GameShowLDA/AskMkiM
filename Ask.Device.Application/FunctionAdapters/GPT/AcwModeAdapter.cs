@@ -1,8 +1,9 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -881,12 +882,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Генерируется при ошибке выполнения измерения.  
       /// Сообщение исключения содержит текст ошибки, полученный от устройства.
       /// </exception>
-      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение тока ACW",
-          () => _acwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, param, rangeFrom, rangeTo),
+          () => _acwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange),
           maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
@@ -908,7 +909,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           _device,
           "Измерение тока ACW",
           $"{result} мА",
-          result < param,
+          result < measurementRange.TargetValue,
           2,
           userMessageService);
 

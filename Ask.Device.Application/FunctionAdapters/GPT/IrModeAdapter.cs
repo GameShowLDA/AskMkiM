@@ -1,8 +1,9 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -693,12 +694,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Результат измерения сопротивления изоляции в МОм.  
       /// В случае ошибки возвращает значение <c>-1</c>.
       /// </returns>
-      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = 600000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение сопротивления изоляции",
-          () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, rangeFrom, rangeTo),
+          () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange),
           maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
@@ -729,9 +730,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           _device,
           "Измерение сопротивления изоляции",
           $"{result} МОм",
-          result >= rangeFrom && result <= rangeTo,
+          result >= measurementRange.LowerBound && result <= measurementRange.UpperBound,
           2,
           userMessageService);
+
+        if (result > _device.IrMaxResistanceMOhm)
+          result = _device.IrMaxResistanceMOhm;
 
         return (result, unit);
       }

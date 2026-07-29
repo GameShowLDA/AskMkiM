@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -64,7 +65,7 @@ namespace Ask.Engine.Tests.Metrology
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService, timeCheck: true, timeRampCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService, metrologyMode: metrologicalModeRole, timeCheck: true, timeRampCheck: true);
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
       await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole, data);
@@ -115,12 +116,10 @@ namespace Ask.Engine.Tests.Metrology
         await userMessageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
-        await meterDevice.AcwManger.Measure.MeasureAsync(
-          ElectricalTestFunction.DielectricWithstandAC,
-          param,
-          LowerBound,
-          UpperBound,
-          userMessageService: userMessageService);
+
+        MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
+        await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
+
         var result = await MeasuredReferenceMeter(userMessageService, param);
 
         var answer = result < LowerBound || result > UpperBound;

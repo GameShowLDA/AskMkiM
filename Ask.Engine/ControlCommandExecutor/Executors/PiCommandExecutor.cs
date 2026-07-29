@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -199,26 +200,23 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+
+
         if (type == VoltageEnum.Type.ACW)
         {
-          var answer = await breadDown.AcwManger.Measure.MeasureAsync(
-            ElectricalTestFunction.DielectricWithstandAC,
-            value,
-            0,
-            amperhMaxACW,
-            userMessageService: messageService);
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer.value);
+
+          MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
+          measurementRange.TargetValue = answer.value;
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, measurementRange);
           return result;
         }
         else
         {
-          var answer = await breadDown.DcwManger.Measure.MeasureAsync(
-            ElectricalTestFunction.DielectricWithstandDC,
-            value,
-            0,
-            amperhMaxDCW,
-            userMessageService: messageService);
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer.value);
+          MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
+          measurementRange.TargetValue = answer.value;
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, measurementRange);
           return result;
         }
 
@@ -241,24 +239,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(
-            ElectricalTestFunction.DielectricWithstandAC,
-            value,
-            0,
-            amperhMaxACW,
-            userMessageService: messageService)).value;
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, 0, amperhMaxACW, answer);
+          MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
+          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService)).value;
+          measurementRange.TargetValue = answer;
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, measurementRange);
           return result;
         }
         else
         {
-          answer = (await breadDown.DcwManger.Measure.MeasureAsync(
-            ElectricalTestFunction.DielectricWithstandDC,
-            value,
-            0,
-            amperhMaxDCW,
-            userMessageService: messageService)).value;
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, 0, amperhMaxDCW, answer);
+          MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
+          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService)).value;
+          measurementRange.TargetValue = answer;
+          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, measurementRange);
           return result;
         }
       }, messageService);
@@ -268,7 +260,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
     {
-      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !await ExecutionConfig.GetIsErrorSimulationEnabled();
+      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !ExecutionConfig.GetIsErrorSimulationEnabled();
 
       if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
       {

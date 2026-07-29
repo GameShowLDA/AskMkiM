@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -103,11 +104,13 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 
       var connectBus = await switchingDevice.ConnectorManager.ConnectMultimeter(busSwitch, messageService);
 
+      MeasurementRange measurementRange = new MeasurementRange(5, 0, 50);
       if (switchingBus.ToString().StartsWith("A"))
       {
         await powerSource.BusManager.ConnectBusToPositiveAsync(switchingBus, messageService);
         await Task.Delay(100);
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(5, userMessageService: messageService);
+
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, userMessageService: messageService);
 
         if (Math.Abs(result - 5.0) < 0.15)
         {
@@ -122,7 +125,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       else if (switchingBus.ToString().StartsWith("B"))
       {
         await powerSource.BusManager.ConnectBusToNegativeAsync(switchingBus, messageService);
-        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(5, userMessageService: messageService);
+        var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, userMessageService: messageService);
 
         if (Math.Abs(result - 5.0) < 0.15)
         {

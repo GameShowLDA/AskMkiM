@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -26,9 +27,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       double timeRamp,
       int delayBeforeCall,
       ElectricalTestFunction electricalTestFunction,
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
@@ -42,7 +41,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, electricalTestFunction);
+        var random = Simulated.GetSimulatedValue(measurementRange.LowerBound, measurementRange.UpperBound, electricalTestFunction);
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
         return (random, "");
       }

@@ -10,6 +10,7 @@
              xmlns:ErrorList="clr-namespace:Ask.UI.Controls.ErrorList;assembly=Ask.UI"
              xmlns:MultiWindow="clr-namespace:UI.Components"
              xmlns:Icons="clr-namespace:UI.Icon"
+             xmlns:SharedIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -65,7 +66,72 @@
         HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Columns"/>
 
         <Grid Grid.Column="2">
-            <Grid Grid.Column="2" x:Name="TranstatedFile">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border x:Name="DocumentActionPanel"
+                    Grid.Row="0"
+                    Height="40"
+                    MaxHeight="40"
+                    Margin="5"
+                    Padding="6,4"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                    Style="{DynamicResource SettingCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Click="OpenActiveDocumentButton_Click"
+                            ToolTip="Открыть файл в редакторе"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <SharedIcons:EyeOpenedIcon Size="16"
+                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
+
+                    <Button Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="OpenActiveDocumentFolderButton_Click"
+                            ToolTip="Показать файл в папке"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <SharedIcons:FolderOpenIcon Size="16"
+                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
+
+                    <Button Grid.Column="2"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="PrintActiveDocumentButton_Click"
+                            ToolTip="Печать файла"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <SharedIcons:PrintIcon Size="16"
+                                               IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
+
+                    <TextBlock x:Name="ActiveDocumentFileName"
+                               Grid.Column="3"
+                               Margin="12,0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               FontFamily="{DynamicResource WinstonBold}"
+                               FontSize="16"
+                               Foreground="{DynamicResource ForegrounfBrushes}"
+                               TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" x:Name="TranstatedFile">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition/>

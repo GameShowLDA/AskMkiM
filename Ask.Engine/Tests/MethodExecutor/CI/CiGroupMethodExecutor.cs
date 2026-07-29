@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -6,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
 using Ask.Engine.Tests.Protocol;
@@ -38,7 +40,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, voltageCheck: true, busCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: MeasurementTypeCommand.SI, timeCheck: true, voltageCheck: true, busCheck: true);
       TestMeasurement testMeasurement = new TestMeasurement();
       try
       {
@@ -87,12 +89,9 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
           await messageService.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
 
-          var answer = await breakDown.IrManger.Measure.MeasureAsync(
-            ElectricalTestFunction.InsulationResistance,
-            dataModel.Param,
-            dataModel.Param,
-            60000,
-            userMessageService: messageService);
+          MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, dataModel.Param, 60000);
+          var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange, userMessageService: messageService);
+
           var type = ShowMessageModel.MessageType.Success;
           if (answer.value < dataModel.Param)
           {

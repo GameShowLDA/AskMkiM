@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Runtime.Device;
 using System.Diagnostics;
@@ -270,46 +271,50 @@ namespace TestConsole.Keysight
         cancellationToken);
     }
 
-    public async Task<double> MeasureResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<double> MeasureResistanceAsync(MeasurementRange measurementRange, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.ResistanceManager.MeasureResistanceAsync(param, rangeFrom, rangeTo);
+      return await _device.ResistanceManager.MeasureResistanceAsync(measurementRange);
     }
 
-    public async Task<double> MeasureDcVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<double> MeasureDcVoltageAsync(MeasurementRange measurementRange, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.DcVoltageManager.MeasureDCVoltageAsync(param, rangeFrom, rangeTo);
+      return await _device.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
     }
 
-    public async Task<double> MeasureAcVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<double> MeasureAcVoltageAsync(MeasurementRange measurementRange, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
+      return await _device.AcVoltageManager.MeasureACVoltageAsync(measurementRange);
     }
 
-    public async Task<double> MeasureCapacitanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
+    public async Task<double> MeasureCapacitanceAsync(MeasurementRange measurementRange, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.CapacitanceManager.MeasureCapacitanceAsync(param, rangeFrom, rangeTo);
+      return await _device.CapacitanceManager.MeasureCapacitanceAsync(measurementRange);
     }
 
     public async Task<double> MeasureContinuityResistanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.ContinuityManager.CheckContinuityAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.ContinuityManager.CheckContinuityAsync(measurementRange);
     }
 
     public async Task<double> CheckDiodeAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, int timeoutMs = MeasurementTimeoutMs, CancellationToken cancellationToken = default)
     {
       await EnsureConnectedAsync(timeoutMs, cancellationToken);
       cancellationToken.ThrowIfCancellationRequested();
-      return await _device.DiodeManager.CheckDiodeAsync(param, rangeFrom, rangeTo);
+
+      MeasurementRange measurementRange = new MeasurementRange(param, rangeFrom, rangeTo);
+      return await _device.DiodeManager.CheckDiodeAsync(measurementRange);
     }
 
     public async Task<KeysightCommandResult> QueryAsync(

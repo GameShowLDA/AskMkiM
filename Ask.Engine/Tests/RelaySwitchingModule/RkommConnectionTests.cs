@@ -1,7 +1,8 @@
-﻿using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -9,6 +10,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
 using Ask.Engine.Tests.NodeMethod;
@@ -91,6 +93,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       DataModel data = await EnsureValidMetrologyInputAsync(
           inputFieldProvider,
           _messageOutputService,
+          metrologyMode: MeasurementTypeCommand.KC,
           pairBusCheck: true);
 
       _pairBus = data.ActivePairBus;
@@ -163,14 +166,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           const double lowerLimit = 0;
+
+          MeasurementRange measurementRange = new MeasurementRange(data.Param, lowerLimit, 1000000000);
+
           var (success, result) = await RelayModuleHelper.MeasureResistanceAsync(
               _fastMeter,
               null!,
               cancellationToken,
               i,
               _module,
-              data.Param,
-              lowerLimit);
+              measurementRange);
 
           var point = new PointModel
           {

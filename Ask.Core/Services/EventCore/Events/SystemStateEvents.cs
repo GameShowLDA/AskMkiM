@@ -74,17 +74,17 @@ namespace Ask.Core.Services.EventCore.Events
     public class DebugRightsChanged : IEvent
     {
       /// <summary>
-      /// Указывает, активен ли режим администратора.
+      /// Указывает, доступны ли отладочные функции.
       /// </summary>
-      public bool IsDebug { get; }
+      public bool IsDebugEnabled { get; }
 
       /// <summary>
-      /// Создаёт новое событие изменения прав администратора.
+      /// Создаёт новое событие изменения доступности отладочных функций.
       /// </summary>
-      /// <param name="isAdmin">Новое состояние прав администратора: true — права администратора активны; false — обычный пользователь.</param>
-      public DebugRightsChanged(bool isAdmin)
+      /// <param name="isDebugEnabled">Признак доступности отладочных функций.</param>
+      public DebugRightsChanged(bool isDebugEnabled)
       {
-        IsDebug = isAdmin;
+        IsDebugEnabled = isDebugEnabled;
       }
     }
 

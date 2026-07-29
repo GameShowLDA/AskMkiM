@@ -11,6 +11,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Controls.ErrorList;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.UI.Services.Notifications;
 using ResultProtocolEditor = Ask.UI.Controls.TextEditorControl.TextEditorUI;
 using Ask.UI.Features.Archive.Services;
 using Ask.UI.Shared.Formatting;
@@ -110,6 +111,8 @@ namespace UI.Controls.Runner
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
 
       Loaded += RunControl_Loaded;
+      ChildTextEditorContainer.DockManager.ActiveItemChanged += RunnerDocument_ActiveChanged;
+      ChildTextEditorContainer.DockManager.ActiveDocumentChanged += RunnerDocument_ActiveChanged;
       LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
 
       // Вкладка "Точки остановки"
@@ -178,7 +181,85 @@ namespace UI.Controls.Runner
     {
       ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
       ErrorListBoxVertical.RefreshLayoutFromHost();
+      UpdateDocumentActionPanel();
       FocusMainContent();
+    }
+
+    private void RunnerDocument_ActiveChanged(object? sender, EventArgs e) =>
+      UpdateDocumentActionPanel();
+
+    private void UpdateDocumentActionPanel()
+    {
+      var activeDocument = GetActiveRunnerDocument();
+      bool isTranslatedFile = activeDocument?.Content is TranslatorEditor;
+      bool isInspectionProtocol = activeDocument == _inspectionProtocolDockItem;
+
+      DocumentActionPanel.Visibility = isTranslatedFile || isInspectionProtocol
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+      ActiveDocumentFileName.Text = DocumentActionPanel.Visibility == Visibility.Visible
+        ? activeDocument?.TabText ?? activeDocument?.Title ?? string.Empty
+        : string.Empty;
+    }
+
+    private DockItem? GetActiveRunnerDocument() =>
+      ChildTextEditorContainer.DockManager.DockItems.FirstOrDefault(
+        item => item.IsActiveDocument || item.IsActiveItem || item.IsSelected);
+
+    private void OpenActiveDocumentButton_Click(object sender, RoutedEventArgs e)
+    {
+      var activeDocument = GetActiveRunnerDocument();
+      if (activeDocument == _inspectionProtocolDockItem)
+      {
+        ProtocolUI.OpenInspectionProtocolInEditor();
+        return;
+      }
+
+      if (activeDocument?.Content is TranslatorEditor translatorEditor)
+      {
+        var filePath = translatorEditor.GetTextEditor().TextEditorModel?.FilePath;
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+          FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(filePath);
+        }
+      }
+    }
+
+    private void OpenActiveDocumentFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+      var activeDocument = GetActiveRunnerDocument();
+      if (activeDocument == _inspectionProtocolDockItem)
+      {
+        ProtocolUI.OpenInspectionProtocolFolder();
+        return;
+      }
+
+      if (activeDocument?.Content is TranslatorEditor translatorEditor)
+      {
+        var filePath = translatorEditor.GetTextEditor().TextEditorModel?.FilePath;
+        if (!string.IsNullOrWhiteSpace(filePath))
+        {
+          FolderService.OpenFileFolder(filePath);
+        }
+      }
+    }
+
+    private async void PrintActiveDocumentButton_Click(object sender, RoutedEventArgs e)
+    {
+      var activeDocument = GetActiveRunnerDocument();
+      string? text = activeDocument switch
+      {
+        _ when activeDocument == _inspectionProtocolDockItem => _inspectionProtocolEditor?.Text,
+        { Content: TranslatorEditor translatorEditor } => translatorEditor.Text,
+        _ => null,
+      };
+
+      if (!string.IsNullOrWhiteSpace(text))
+      {
+        await PrintOperationNotificationService.PrintTextAsync(
+          text,
+          activeDocument?.TabText ?? "Печать документа");
+      }
     }
     private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
@@ -403,6 +484,7 @@ namespace UI.Controls.Runner
 
         DocumentTab.SetHideCloseButton(_inspectionProtocolDockItem, true);
         _inspectionProtocolDockItem.Show(dockManager, DockPosition.Document);
+        UpdateDocumentActionPanel();
       });
     }
 
@@ -430,6 +512,7 @@ namespace UI.Controls.Runner
 
       _inspectionProtocolDockItem = null;
       _inspectionProtocolEditor = null;
+      UpdateDocumentActionPanel();
     }
 
     private async Task StartTest(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Message;
 using System.IO;
+using System.Text;
 using System.Windows;
 using UI.Controls;
 using UI.Controls.TextEditorControl;
@@ -115,7 +116,9 @@ namespace UI.Services.FileManager
         return HandleMissingFile();
       }
 
-      var diskContent = File.ReadAllText(filePath);
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+      var encoding = editor.TextEditorModel?.Encoding ?? Encoding.UTF8;
+      var diskContent = File.ReadAllText(filePath, encoding);
       return !string.Equals(
         NormalizeText(diskContent),
         NormalizeText(editor.Text),
@@ -137,6 +140,7 @@ namespace UI.Services.FileManager
     private static string NormalizeText(string? text)
     {
       return (text ?? string.Empty)
+        .TrimStart('\uFEFF')
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
     }

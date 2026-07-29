@@ -3,6 +3,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
@@ -753,6 +754,10 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         catch (OperationCanceledException)
         {
           // Отмена ожидаема при остановке выполнения.
+        }
+        catch (InputValidationException)
+        {
+          // Ошибка ввода уже отображена пользователю и не является сбоем приложения.
         }
         catch (Exception ex)
         {

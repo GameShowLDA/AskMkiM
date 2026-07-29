@@ -146,13 +146,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       string answer = !ExecutionConfig.GetIsIdleModeEnabled()
         ? await relaySwitchModule.PointManager.CheckPoint(point, userMessageService)
-        : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
+        : !ExecutionConfig.GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
 
       SelfPointModel model;
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         Random random = new Random();
-        bool isErrorSimulation = await ExecutionConfig.GetIsErrorSimulationEnabled();
+        bool isErrorSimulation = ExecutionConfig.GetIsErrorSimulationEnabled();
         isErrorSimulation = isErrorSimulation && point % 10 == 0;
         model = new SelfPointModel
         {

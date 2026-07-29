@@ -89,7 +89,6 @@ flowchart TD
 `ConsoleUI` добавляет служебные команды:
 
 - `admin`
-- `debug`
 - `add-log`
 - `clear`
 - `del-admin`
