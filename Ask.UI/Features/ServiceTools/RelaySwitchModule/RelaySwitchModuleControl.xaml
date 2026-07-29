@@ -1,0 +1,227 @@
+<UserControl x:Class="Ask.UI.Features.ServiceTools.RelaySwitchModule.RelaySwitchModuleControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{DynamicResource ForegrounfBrushes}">
+    <UserControl.Resources>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+        </Style>
+        <Style x:Key="Title" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,7"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Opacity" Value="0.72"/>
+        </Style>
+        <Style x:Key="Input" TargetType="TextBox">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="Action" TargetType="Button" BasedOn="{StaticResource ButtonStyleV11}">
+            <Setter Property="MinWidth" Value="128"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="On" TargetType="Button" BasedOn="{StaticResource Action}">
+            <Setter Property="Background" Value="{DynamicResource GreenColorSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource GreenColorSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style x:Key="Off" TargetType="Button" BasedOn="{StaticResource Action}">
+            <Setter Property="Background" Value="{DynamicResource RedColorSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedColorSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Padding="18" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid MaxWidth="1180">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="StatusIndicator" Width="10" Height="10" Margin="0,0,10,0"
+                                    VerticalAlignment="Center" Background="IndianRed" CornerRadius="5"/>
+                            <TextBlock Text="Модуль коммутации реле" Style="{StaticResource Title}"/>
+                        </StackPanel>
+                        <TextBlock x:Name="StatusText" Margin="0,5,0,0" Text="Загрузка МКР…" FontSize="15" Opacity="0.7"/>
+                    </StackPanel>
+                    <ComboBox x:Name="ModuleComboBox" Grid.Column="1" Height="42" FontSize="16"
+                              DisplayMemberPath="Name" Style="{StaticResource CustomComboBoxStyle}"
+                              SelectionChanged="ModuleComboBox_SelectionChanged"/>
+                    <Button Grid.Column="3" Content="Обновить" Style="{StaticResource Action}"
+                            Click="RefreshButton_Click"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.08*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="0.92*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <Border Margin="0,0,0,16" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Управление точкой" Style="{StaticResource Title}"/>
+                            <TextBlock Margin="0,4,0,16" Text="Подключение одной точки к выбранной шине."
+                                       FontSize="14" Opacity="0.65"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Номер точки" Style="{StaticResource Label}"/>
+                                    <TextBox x:Name="PointNumberTextBox" Text="1" Style="{StaticResource Input}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Шина точки" Style="{StaticResource Label}"/>
+                                    <ComboBox x:Name="PointBusComboBox" Height="42" FontSize="16"
+                                              Style="{StaticResource CustomComboBoxStyle}"/>
+                                </StackPanel>
+                            </Grid>
+                            <WrapPanel Margin="0,14,0,0">
+                                <Button Content="Подключить" Style="{StaticResource On}" Click="ConnectPointButton_Click"/>
+                                <Button Content="Отключить" Style="{StaticResource Off}" Click="DisconnectPointButton_Click"/>
+                                <Button Content="Подключить с проверкой" MinWidth="190"
+                                        Style="{StaticResource On}" Click="ConnectPointVerifiedButton_Click"/>
+                                <Button Content="Отключить с проверкой" MinWidth="190"
+                                        Style="{StaticResource Off}" Click="DisconnectPointVerifiedButton_Click"/>
+                                <Button Content="Перевести на эту шину" MinWidth="190"
+                                        Style="{StaticResource Action}" Click="MovePointButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0,0,0,16" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Диапазон точек" Style="{StaticResource Title}"/>
+                            <TextBlock Margin="0,4,0,16" Text="Групповая коммутация последовательного диапазона."
+                                       FontSize="14" Opacity="0.65"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Первая точка" Style="{StaticResource Label}"/>
+                                    <TextBox x:Name="FirstPointTextBox" Text="1" Style="{StaticResource Input}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Последняя точка" Style="{StaticResource Label}"/>
+                                    <TextBox x:Name="LastPointTextBox" Text="8" Style="{StaticResource Input}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="Шина" Style="{StaticResource Label}"/>
+                                    <ComboBox x:Name="GroupBusComboBox" Height="42" FontSize="16"
+                                              Style="{StaticResource CustomComboBoxStyle}"/>
+                                </StackPanel>
+                            </Grid>
+                            <WrapPanel Margin="0,14,0,0">
+                                <Button Content="Подключить диапазон" MinWidth="175"
+                                        Style="{StaticResource On}" Click="ConnectGroupButton_Click"/>
+                                <Button Content="Отключить диапазон" MinWidth="175"
+                                        Style="{StaticResource Off}" Click="DisconnectGroupButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Общие операции" Style="{StaticResource Title}"/>
+                            <WrapPanel Margin="0,16,0,0">
+                                <Button Content="Измеритель: вкл." Style="{StaticResource On}" Click="ConnectMeterButton_Click"/>
+                                <Button Content="Измеритель: выкл." Style="{StaticResource Off}" Click="DisconnectMeterButton_Click"/>
+                                <Button Content="Отключить все точки" MinWidth="175"
+                                        Style="{StaticResource Off}" Click="DisconnectAllPointsButton_Click"/>
+                                <Button Content="Отключить шину A" Style="{StaticResource Off}" Click="DisconnectBusAPointsButton_Click"/>
+                                <Button Content="Отключить шину B" Style="{StaticResource Off}" Click="DisconnectBusBPointsButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Border Margin="0,0,0,16" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Коммутация шин" Style="{StaticResource Title}"/>
+                            <TextBlock Margin="0,4,0,16" Text="Низковольтные и высоковольтные линии A, B и AB."
+                                       FontSize="14" Opacity="0.65"/>
+                            <TextBlock Text="Шина МКР" Style="{StaticResource Label}"/>
+                            <ComboBox x:Name="SwitchingBusComboBox" Height="42" Margin="0,0,0,14"
+                                      FontSize="16" Style="{StaticResource CustomComboBoxStyle}"/>
+                            <WrapPanel>
+                                <Button Content="Подключить шину" Style="{StaticResource On}" Click="ConnectBusButton_Click"/>
+                                <Button Content="Отключить шину" Style="{StaticResource Off}" Click="DisconnectBusButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Активные подключения" Style="{StaticResource Title}"/>
+                                <Border Grid.Column="1" Padding="10,4"
+                                        Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                        CornerRadius="10">
+                                    <TextBlock Text="LIVE" FontSize="11" FontWeight="Bold"
+                                               Foreground="{DynamicResource GreenColorSolidColorBrush}"/>
+                                </Border>
+                            </Grid>
+                            <ItemsControl x:Name="ConnectionsList" Margin="0,14,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,8" Padding="13,10"
+                                                Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                                CornerRadius="8">
+                                            <TextBlock Text="{Binding}" FontSize="15" TextWrapping="Wrap"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="NoConnectionsText" Margin="0,14,0,0"
+                                       Text="Сейчас нет зарегистрированных подключений."
+                                       FontSize="14" Opacity="0.62" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

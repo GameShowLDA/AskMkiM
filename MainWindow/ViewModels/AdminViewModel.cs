@@ -24,8 +24,23 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void Gpt() => _service.OpenGptServiceAsync();
 
+    /// <summary>
+    /// Открывает вкладку сервисных утилит.
+    /// </summary>
     [RelayCommand]
-    private async Task AdminPanel() => _service.AdminPanel();
+    private void ServiceUtilities() => _service.OpenServiceUtilities();
+
+    /// <summary>
+    /// Открывает вкладку базы данных.
+    /// </summary>
+    [RelayCommand]
+    private void Database() => _service.OpenDatabase();
+
+    /// <summary>
+    /// Открывает вкладку настройки сопротивления МКР.
+    /// </summary>
+    [RelayCommand]
+    private void Resistance() => _service.OpenResistance();
 
     [RelayCommand]
     private void Protocol() => _service.ProtocolTest();

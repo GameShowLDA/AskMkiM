@@ -1,23 +1,26 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Message;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace UI.Controls.GPT.Mode
+namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 {
   /// <summary>
   /// Компонент для управления режимом DCW.
   /// При инициализации устанавливается режим DCW и загружается конфигурация устройства.
   /// </summary>
-  public partial class DcwMode : UserControl
+  public partial class DcwMode : UserControl, IGptModeControl
   {
+    private readonly GptDeviceContext deviceContext;
+
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DcwMode"/>.
     /// При инициализации устанавливается режим DCW и запускается загрузка конфигурации устройства.
     /// </summary>
-    public DcwMode()
+    /// <param name="deviceContext">Контекст пробойной установки текущей вкладки.</param>
+    internal DcwMode(GptDeviceContext deviceContext)
     {
+      this.deviceContext = deviceContext;
       InitializeComponent();
     }
 
@@ -29,9 +32,9 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.DcwManger.Config.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice(deviceContext).DcwManger.Config.ReadConfigurationAsync();
 
-        VoltageSlider.Value = systemData.Voltage;
+        VoltageSlider.Value = systemData.Voltage * 1000.0;
         ChiSlider.Value = systemData.HighCurrentLimit;
         CloSlider.Value = systemData.LowCurrentLimit;
         TimeSlider.Value = systemData.TestTime;
@@ -49,7 +52,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        GptUiOperation.ReportError("загрузка конфигурации DCW", ex);
       }
     }
 
@@ -63,7 +66,7 @@ namespace UI.Controls.GPT.Mode
     {
       try
       {
-        var systemData = await GPTPunchControl.ModelGPT.DcwManger.Config.ReadConfigurationAsync();
+        var systemData = await GptUiOperation.GetDevice(deviceContext).DcwManger.Config.ReadConfigurationAsync();
         LastReadTimeText.Text = $"Дата и время: {DateTime.Now}";
         VoltageValueText.Text = $"Напряжение ACW: {systemData.Voltage:F3} кВ";
         ChiValueText.Text = $"Высокий предел тока ACW: {systemData.HighCurrentLimit:F3} мА";
@@ -74,7 +77,7 @@ namespace UI.Controls.GPT.Mode
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при считывании конфигурации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        GptUiOperation.ReportError("чтение конфигурации DCW", ex);
       }
     }
 
@@ -89,61 +92,101 @@ namespace UI.Controls.GPT.Mode
       try
       {
         MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
-        double result = (await GPTPunchControl.ModelGPT.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).value;
+        double result = (await GptUiOperation.GetDevice(deviceContext).DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).value;
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }
       catch (Exception ex)
       {
-        MessageBoxCustom.Show($"Ошибка при запуске теста: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        TestResultText.Text = "Результат теста: ошибка оборудования";
+        GptUiOperation.ReportError("запуск теста DCW", ex);
       }
     }
 
     private bool connect = false;
+
+    /// <inheritdoc />
+    public BreakdownTypeMode ModeType => BreakdownTypeMode.DCW;
+
+    /// <inheritdoc />
+    public bool IsModeActive => connect;
+
     private async void Button_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
       if (!connect)
       {
-        var mode = await GPTPunchControl.ModelGPT.DcwManger.Mode.SetModeAsync();
-        if (mode.Success)
-        {
-          PanelManagment.Visibility = Visibility.Visible;
-          await LoadConfigurationAsync();
-          connect = true;
-          ConnectButton.Content = "Отключить режим DCW";
-        }
+        await ActivateModeAsync();
       }
       else
       {
-        PanelManagment.Visibility = Visibility.Collapsed;
-        ConnectButton.Content = "Включить режим DCW";
-        connect = false;
+        DeactivateMode();
       }
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ActivateModeAsync()
+    {
+      try
+      {
+        var mode = await GptUiOperation.GetDevice(deviceContext).DcwManger.Mode.SetModeAsync();
+        GptUiOperation.EnsureSuccess(mode, "включение режима DCW");
+        PanelManagment.Visibility = Visibility.Visible;
+        await LoadConfigurationAsync();
+        connect = true;
+        SetConnectButtonState(isEnabled: true);
+        return true;
+      }
+      catch (Exception ex)
+      {
+        GptUiOperation.ReportError("переключение режима DCW", ex);
+        return false;
+      }
+    }
+
+    /// <inheritdoc />
+    public void DeactivateMode()
+    {
+      PanelManagment.Visibility = Visibility.Collapsed;
+      SetConnectButtonState(isEnabled: false);
+      connect = false;
+    }
+
+    private void SetConnectButtonState(bool isEnabled)
+    {
+      ConnectButton.Content = isEnabled ? "Выключить" : "Включить";
+      ConnectButton.SetResourceReference(
+        BackgroundProperty,
+        isEnabled ? "RedColorSolidColorBrush" : "GreenColorSolidColorBrush");
+      ConnectButton.SetResourceReference(
+        BorderBrushProperty,
+        isEnabled ? "RedColorSolidColorBrush" : "GreenColorSolidColorBrush");
     }
 
     private async void Button_PreviewMouseDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-      // Сначала собираем значения с UI строго в UI-потоке
-      double voltage = 0, chi = 0, clo = 0, time = 0, timeRamp = 0, refValue = 0, arcCurrent = 0;
-
-      Dispatcher.Invoke(() =>
+      try
       {
-        voltage = Math.Round(VoltageSlider.Value, 3);
-        chi = Math.Round(ChiSlider.Value, 3);
-        clo = Math.Round(CloSlider.Value, 3);
-        time = Math.Round(TimeSlider.Value, 1);
-        timeRamp = Math.Round(RampSlider.Value, 1);
-        refValue = Math.Round(RefSlider.Value, 3);
-        arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
-      });
+        double voltage = Math.Round(VoltageSlider.Value, 3);
+        double chi = Math.Round(ChiSlider.Value, 3);
+        double clo = Math.Round(CloSlider.Value, 3);
+        double time = Math.Round(TimeSlider.Value, 1);
+        double timeRamp = Math.Round(RampSlider.Value, 1);
+        double refValue = Math.Round(RefSlider.Value, 3);
+        double arcCurrent = Math.Round(ArcCurrentSlider.Value, 3);
 
-      await GPTPunchControl.ModelGPT.DcwManger.Voltage.SetVoltageAsync(voltage).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.DcwManger.Time.SetTestTimeAsync(time).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.DcwManger.Time.SetRampTimeAsync(timeRamp).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.DcwManger.Offset.SetOffsetAsync(refValue).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.DcwManger.ArcCurrent.SetArcCurrentAsync(arcCurrent).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(clo).ConfigureAwait(false);
-      await GPTPunchControl.ModelGPT.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(chi).ConfigureAwait(false);
-
+        var mode = GptUiOperation.GetDevice(deviceContext).DcwManger;
+        GptUiOperation.EnsureSuccess(await mode.Voltage.SetVoltageAsync(voltage), "напряжение DCW");
+        GptUiOperation.EnsureSuccess(await mode.Time.SetTestTimeAsync(time), "время теста DCW");
+        GptUiOperation.EnsureSuccess(await mode.Time.SetRampTimeAsync(timeRamp), "время нарастания DCW");
+        GptUiOperation.EnsureSuccess(await mode.Offset.SetOffsetAsync(refValue), "смещение DCW");
+        GptUiOperation.EnsureSuccess(await mode.ArcCurrent.SetArcCurrentAsync(arcCurrent), "ток дуги DCW");
+        GptUiOperation.EnsureSuccess(await mode.CurrentLimits.SetLowCurrentLimitAsync(clo), "нижний предел тока DCW");
+        GptUiOperation.EnsureSuccess(await mode.CurrentLimits.SetHighCurrentLimitAsync(chi), "верхний предел тока DCW");
+        Ask.LogLib.LoggerUtility.LogInformation("GPT — параметры DCW сохранены.", isDeviceLog: true);
+      }
+      catch (Exception ex)
+      {
+        GptUiOperation.ReportError("сохранение параметров DCW", ex);
+      }
     }
   }
 }
