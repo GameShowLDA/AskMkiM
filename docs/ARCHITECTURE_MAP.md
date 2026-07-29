@@ -1044,7 +1044,7 @@ active; do not assume one replaces the other.
 
 - `AdminViewModel.ServiceUtilitiesCommand`
   → `AdminServices.OpenServiceUtilities()`
-  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync, GetMultimetersAsync), TypeWindow.Settings)`;
+  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync, GetMultimetersAsync, GetServiceDeviceAddressesAsync), TypeWindow.Settings)`;
 - `AdminViewModel.DatabaseCommand`
   → `AdminServices.OpenDatabase()`
   → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
@@ -1054,9 +1054,17 @@ active; do not assume one replaces the other.
 
 `ServiceUtilitiesControl` сохраняет экземпляры вложенных
   утилит при переключении;
-  - `SetCommand` — отправка низкоуровневых команд и отображение общего потока
-    `LoggerUtility.LogMessageWritten`; занимает всю область на собственной вкладке
-    и переносится в постоянную правую панель при выборе другой утилиты;
+    - `SetCommand` — отправка низкоуровневых команд и отображение общего потока
+      `LoggerUtility.LogMessageWritten`; занимает всю область на собственной вкладке
+      и переносится в постоянную правую панель при выборе другой утилиты.
+      `DeviceCommandCatalog` хранит справочник MKR/DBC/MS отдельно от code-behind
+      и служит единым источником для `help` и контекстного автодополнения.
+      `AdminServices.GetServiceDeviceAddressesAsync` собирает IP сервисного
+      оборудования, которые также предлагаются в строке ввода. Ручной UDP-обмен
+      сначала открывает входной порт, затем отправляет команду и отображает
+      связанную карточку `endpoint → команда → ответ/таймаут → длительность`;
+      встроенная команда `ping IP` выполняет ICMP-проверку и показывает
+      доступность, задержку и TTL в такой же карточке;
   - `Ask.UI.Features.ServiceTools.Gpt.GPTPunchControl` → `GPTController` —
     ручное управление пробойной установкой; feature полностью находится в
     `Ask.UI`, не зависит от legacy `UI` или БД и получает
@@ -1112,6 +1120,7 @@ active; do not assume one replaces the other.
 `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs`,
 `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml(.cs)`,
 `UI/Controls/AdminPanel/SetCommand.xaml(.cs)`,
+`UI/Controls/AdminPanel/Commands/*.cs`,
 `Ask.UI/Features/ServiceTools/Gpt/GPTController.xaml(.cs)`,
 `Ask.UI/Features/ServiceTools/Gpt/GptUiOperation.cs`,
 `Ask.UI/Features/ServiceTools/Gpt/IGptModeControl.cs`,

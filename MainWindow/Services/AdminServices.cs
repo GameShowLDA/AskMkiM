@@ -8,6 +8,7 @@ using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
 using MainWindowProgram.Test.Protocol;
 using UI.Controls.AdminPanel;
+using UI.Controls.AdminPanel.Commands;
 using UI.Controls.DeviceHealthView;
 using UI.Controls.Settings.Protocol;
 using static UI.Components.Invoke.OpenFileButton;
@@ -56,7 +57,8 @@ namespace MainWindowProgram.Services
           GetGptAsync,
           GetSwitchingDeviceAsync,
           GetRelaySwitchModulesAsync,
-          GetMultimetersAsync),
+          GetMultimetersAsync,
+          GetServiceDeviceAddressesAsync),
         TypeWindow.Settings);
 
     /// <summary>
@@ -95,6 +97,33 @@ namespace MainWindowProgram.Services
     private static async Task<IReadOnlyList<IMultimeter>> GetMultimetersAsync()
     {
       return await FastMeters.GetDevicesByNumberChassisAsync(1);
+    }
+
+    /// <summary>
+    /// Возвращает уникальные IP-адреса оборудования, доступного сервисным утилитам.
+    /// </summary>
+    /// <returns>Корректные уникальные IP-адреса устройств.</returns>
+    private static async Task<IReadOnlyList<ServiceDeviceAddressInfo>> GetServiceDeviceAddressesAsync()
+    {
+      var devices = new List<Ask.Core.Shared.Interfaces.DeviceInterfaces.IDevice>();
+      devices.AddRange(await BreakdownTesters.GetDevicesByNumberChassisAsync(1));
+      devices.AddRange(await SwitchingDevices.GetDevicesByNumberChassisAsync(1));
+      devices.AddRange(await RelaySwitchModules.GetDevicesByNumberChassisAsync(1));
+      devices.AddRange(await FastMeters.GetDevicesByNumberChassisAsync(1));
+
+      return devices
+        .OfType<Ask.Core.Shared.Interfaces.DeviceInterfaces.IAttachableDevice>()
+        .Where(device => System.Net.IPAddress.TryParse(device.ConnectionDetails, out _))
+        .Select(device => new ServiceDeviceAddressInfo(
+          device.Name,
+          device.NumberChassis,
+          device.Number,
+          device.ConnectionDetails))
+        .DistinctBy(device => (
+          device.Address,
+          device.ChassisNumber,
+          device.ModuleNumber))
+        .ToList();
     }
 
     /// <summary>

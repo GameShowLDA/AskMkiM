@@ -6,6 +6,7 @@ using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.Multimeter;
 using Ask.UI.Features.ServiceTools.RelaySwitchModule;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
+using UI.Controls.AdminPanel.Commands;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -25,6 +26,7 @@ namespace UI.Controls.AdminPanel
     private readonly Func<Task<ISwitchingDevice?>> switchingDeviceProvider;
     private readonly Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider;
     private readonly Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider;
+    private readonly Func<Task<IReadOnlyList<ServiceDeviceAddressInfo>>> deviceAddressesProvider;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ServiceUtilitiesControl"/>.
@@ -33,11 +35,13 @@ namespace UI.Controls.AdminPanel
     /// <param name="switchingDeviceProvider">Функция получения настроенного устройства коммутации шин.</param>
     /// <param name="relaySwitchModulesProvider">Функция получения модулей коммутации реле.</param>
     /// <param name="multimetersProvider">Функция получения мультиметров.</param>
+    /// <param name="deviceAddressesProvider">Функция получения адресов сервисного оборудования.</param>
     public ServiceUtilitiesControl(
       Func<Task<IBreakdownTester?>> gptProvider,
       Func<Task<ISwitchingDevice?>> switchingDeviceProvider,
       Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider,
-      Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider)
+      Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider,
+      Func<Task<IReadOnlyList<ServiceDeviceAddressInfo>>> deviceAddressesProvider)
     {
       this.gptProvider = gptProvider
         ?? throw new ArgumentNullException(nameof(gptProvider));
@@ -47,6 +51,8 @@ namespace UI.Controls.AdminPanel
         ?? throw new ArgumentNullException(nameof(relaySwitchModulesProvider));
       this.multimetersProvider = multimetersProvider
         ?? throw new ArgumentNullException(nameof(multimetersProvider));
+      this.deviceAddressesProvider = deviceAddressesProvider
+        ?? throw new ArgumentNullException(nameof(deviceAddressesProvider));
       InitializeComponent();
       SetCommandTab.IsChecked = true;
     }
@@ -58,7 +64,7 @@ namespace UI.Controls.AdminPanel
     /// <param name="e">Данные события выбора.</param>
     private void SetCommandTab_Checked(object sender, RoutedEventArgs e)
     {
-      var setCommand = setCommandControl ??= new SetCommand();
+      var setCommand = setCommandControl ??= new SetCommand(deviceAddressesProvider);
 
       SideConsolePresenter.Content = null;
       UtilityContentPresenter.Content = setCommand;
@@ -76,7 +82,7 @@ namespace UI.Controls.AdminPanel
     /// <param name="e">Данные события выбора.</param>
     private void GptTab_Checked(object sender, RoutedEventArgs e)
     {
-      var setCommand = setCommandControl ??= new SetCommand();
+      var setCommand = setCommandControl ??= new SetCommand(deviceAddressesProvider);
 
       UtilityContentPresenter.Content = null;
       SideConsolePresenter.Content = null;
@@ -97,7 +103,7 @@ namespace UI.Controls.AdminPanel
     /// <param name="e">Данные события выбора.</param>
     private void SwitchingDeviceTab_Checked(object sender, RoutedEventArgs e)
     {
-      var setCommand = setCommandControl ??= new SetCommand();
+      var setCommand = setCommandControl ??= new SetCommand(deviceAddressesProvider);
 
       UtilityContentPresenter.Content = null;
       SideConsolePresenter.Content = null;
@@ -119,7 +125,7 @@ namespace UI.Controls.AdminPanel
     /// <param name="e">Данные события выбора.</param>
     private void RelaySwitchModuleTab_Checked(object sender, RoutedEventArgs e)
     {
-      var setCommand = setCommandControl ??= new SetCommand();
+      var setCommand = setCommandControl ??= new SetCommand(deviceAddressesProvider);
 
       UtilityContentPresenter.Content = null;
       SideConsolePresenter.Content = null;
@@ -140,7 +146,7 @@ namespace UI.Controls.AdminPanel
     /// <param name="e">Данные события выбора.</param>
     private void MultimeterTab_Checked(object sender, RoutedEventArgs e)
     {
-      var setCommand = setCommandControl ??= new SetCommand();
+      var setCommand = setCommandControl ??= new SetCommand(deviceAddressesProvider);
 
       UtilityContentPresenter.Content = null;
       SideConsolePresenter.Content = null;

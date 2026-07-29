@@ -60,7 +60,56 @@
                                   Padding="24,20"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="ConsolePanel"/>
+                        <StackPanel>
+                            <ItemsControl x:Name="ExchangeList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,12"
+                                                Padding="14"
+                                                Background="#20242B"
+                                                BorderBrush="#3A414C"
+                                                BorderThickness="1"
+                                                CornerRadius="9">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="4"/>
+                                                    <ColumnDefinition Width="14"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Background="{Binding StatusBrush}" CornerRadius="2"/>
+                                                <StackPanel Grid.Column="2">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Endpoint}"
+                                                                   Foreground="#AEB6C3"
+                                                                   FontSize="13"/>
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding Duration}"
+                                                                   Foreground="#7F8998"
+                                                                   FontSize="12"/>
+                                                    </Grid>
+                                                    <TextBlock Margin="0,8,0,0"
+                                                               Text="{Binding Command, StringFormat=→ {0}}"
+                                                               Foreground="#77A8E8"
+                                                               FontFamily="Consolas"
+                                                               FontSize="16"/>
+                                                    <TextBlock Margin="0,6,0,0"
+                                                               Text="{Binding Response, StringFormat=← {0}}"
+                                                               Foreground="{Binding StatusBrush}"
+                                                               FontFamily="Consolas"
+                                                               FontSize="15"
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel x:Name="ConsolePanel"/>
+                        </StackPanel>
                     </ScrollViewer>
                 </Grid>
 
@@ -101,6 +150,7 @@
                                  FontFamily="Consolas"
                                  FontSize="16"
                                  VerticalContentAlignment="Center"
+                                 TextChanged="CommandInput_TextChanged"
                                  PreviewKeyDown="CommandInput_KeyDown"/>
 
                         <Border Grid.Column="2"
@@ -128,6 +178,9 @@
                                  Foreground="#F4F6FA"
                                  FontFamily="Consolas"
                                  FontSize="14"
+                                 DisplayMemberPath="DisplayText"
+                                 PreviewKeyDown="AutocompleteBox_PreviewKeyDown"
+                                 MouseDoubleClick="AutocompleteBox_MouseDoubleClick"
                                  Visibility="Collapsed"/>
                     </Grid>
                 </Border>
