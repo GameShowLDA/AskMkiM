@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Folder Include="Services\FileFormats\Opk\" />
+    <Folder Include="Shared\DTO\Devices\Measurements\" />
     <Folder Include="Shared\Entity\MeasurementError\" />
     <Folder Include="Shared\Interfaces\DeviceInterfaces\Rack\Capabilities\" />
   </ItemGroup>

@@ -2,6 +2,7 @@ using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -37,9 +38,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     static public async Task<double> MeasureAsync(
       IMultimeter device,
       IMeasurementProfile profile,
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       int measurementCount = 1,
       double responseDelay = 0)
@@ -49,9 +48,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return await MeasureCapacitanceAsync(
           device,
           profile,
-          param,
-          rangeFrom,
-          rangeTo,
+          measurementRange,
           userMessageService,
           measurementCount,
           responseDelay);
@@ -60,9 +57,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return await MeasureOtherAsync(
         device,
         profile,
-        param,
-        rangeFrom,
-        rangeTo,
+        measurementRange,
         userMessageService,
         responseDelay);
     }
@@ -81,9 +76,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     static private async Task<double> MeasureOtherAsync(
       IMultimeter device,
       IMeasurementProfile profile,
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       double responseDelay = 0)
     {
@@ -95,18 +88,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         await SetModeBase.SetModeAsync(device, profile, userMessageService);
       }
 
-      if (rangeTo == -1)
-      {
-        rangeTo = double.MaxValue;
-      }
-
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, profile.ElectricalTest);
+      var random = Simulated.GetSimulatedValue(measurementRange.LowerBound, measurementRange.UpperBound, profile.ElectricalTest);
       if (random != -1)
       {
         return random;
       }
 
-      await RangeBase.SetRangeForMeasurementAsync(device, param, userMessageService);
+      if (profile.ElectricalTest == ElectricalTestFunction.DCVoltage
+      || profile.ElectricalTest == ElectricalTestFunction.ACVoltage
+      || profile.ElectricalTest == ElectricalTestFunction.Resistance
+      || profile.ElectricalTest == ElectricalTestFunction.Diode
+      || profile.ElectricalTest == ElectricalTestFunction.Capacitance)
+        await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
 
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
@@ -115,9 +108,9 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           device,
           profile,
           header,
-          param,
-          rangeFrom,
-          rangeTo,
+          measurementRange.TargetValue,
+          measurementRange.LowerBound,
+          measurementRange.UpperBound,
           userMessageService: userMessageService,
           responseDelay: responseDelay),
         maxAttempts: userMessageService == null ? 2 : 1);
@@ -170,9 +163,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     static private async Task<double> MeasureCapacitanceAsync(
       IMultimeter device,
       IMeasurementProfile profile,
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       int measurementCount = 1,
       double responseDelay = 0)
@@ -194,12 +185,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         await SetModeBase.SetModeAsync(device, profile, userMessageService);
       }
 
-      if (rangeTo == -1)
-      {
-        rangeTo = double.MaxValue;
-      }
-
-      await RangeBase.SetRangeForMeasurementAsync(device, param, userMessageService);
+      await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
 
       var measurements = new List<double>(measurementCount);
       int maxMeasurementAttempts = measurementCount + 5;
@@ -224,9 +210,9 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             device,
             profile,
             header,
-            param,
-            rangeFrom,
-            rangeTo,
+            measurementRange.TargetValue,
+            measurementRange.LowerBound,
+            measurementRange.UpperBound,
             userMessageService: userMessageService,
             responseDelay: responseDelay),
           maxAttempts: 1);
@@ -259,7 +245,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         double measurement = execution.Value;
         bool isPositive = measurement > 0;
-        bool isWithinRange = IsWithinRange(measurement, rangeFrom, rangeTo);
+        bool isWithinRange = IsWithinRange(measurement, measurementRange.LowerBound, measurementRange.UpperBound);
 
         if (showIntermediateResults)
         {
@@ -301,7 +287,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       await ShowMeasurementResultAsync(
         header,
         $"{result} {unit}",
-        IsWithinRange(result, rangeFrom, rangeTo),
+        IsWithinRange(result, measurementRange.LowerBound, measurementRange.UpperBound),
         userMessageService);
 
       return result;

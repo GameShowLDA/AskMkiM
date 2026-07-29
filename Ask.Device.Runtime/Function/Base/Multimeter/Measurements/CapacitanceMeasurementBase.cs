@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
@@ -41,18 +42,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
     /// <inheritdoc />
     public async Task<double> MeasureCapacitanceAsync(
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       int measurementCount = 5,
       double responseDelay = 0)
         => await MeasurementBase.MeasureAsync(
           _device,
           _device.CapacitanceCommands,
-          param,
-          rangeFrom,
-          rangeTo,
+          measurementRange,
           userMessageService,
           measurementCount,
           responseDelay);

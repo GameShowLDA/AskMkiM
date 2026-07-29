@@ -3,6 +3,77 @@ using System.Runtime.CompilerServices;
 
 namespace Ask.LogLib
 {
+  /// <summary>
+  /// Уровень сообщения общего журнала приложения.
+  /// </summary>
+  public enum ApplicationLogLevel
+  {
+    /// <summary>
+    /// Отладочное сообщение.
+    /// </summary>
+    Debug,
+
+    /// <summary>
+    /// Информационное сообщение.
+    /// </summary>
+    Information,
+
+    /// <summary>
+    /// Предупреждение.
+    /// </summary>
+    Warning,
+
+    /// <summary>
+    /// Ошибка.
+    /// </summary>
+    Error
+  }
+
+  /// <summary>
+  /// Содержит данные сообщения, записанного в общий журнал приложения.
+  /// </summary>
+  public sealed class ApplicationLogMessageEventArgs : EventArgs
+  {
+    /// <summary>
+    /// Инициализирует новый экземпляр класса <see cref="ApplicationLogMessageEventArgs"/>.
+    /// </summary>
+    /// <param name="timestamp">Время записи сообщения.</param>
+    /// <param name="level">Уровень сообщения.</param>
+    /// <param name="message">Отформатированный текст сообщения.</param>
+    /// <param name="isDeviceLog">Признак сообщения журнала оборудования.</param>
+    public ApplicationLogMessageEventArgs(
+      DateTimeOffset timestamp,
+      ApplicationLogLevel level,
+      string message,
+      bool isDeviceLog)
+    {
+      Timestamp = timestamp;
+      Level = level;
+      Message = message;
+      IsDeviceLog = isDeviceLog;
+    }
+
+    /// <summary>
+    /// Время записи сообщения.
+    /// </summary>
+    public DateTimeOffset Timestamp { get; }
+
+    /// <summary>
+    /// Уровень сообщения.
+    /// </summary>
+    public ApplicationLogLevel Level { get; }
+
+    /// <summary>
+    /// Отформатированный текст сообщения.
+    /// </summary>
+    public string Message { get; }
+
+    /// <summary>
+    /// Признак сообщения журнала оборудования.
+    /// </summary>
+    public bool IsDeviceLog { get; }
+  }
+
   public sealed class LoggedExceptionEventArgs : EventArgs
   {
     public LoggedExceptionEventArgs(Exception exception, string? customMessage, bool isDeviceLog, string callerFilePath, int lineNumber, bool onlyProjectStack)
@@ -34,6 +105,11 @@ namespace Ask.LogLib
 
     public static event EventHandler<LoggedExceptionEventArgs>? ExceptionLogged;
 
+    /// <summary>
+    /// Возникает после записи сообщения в общий журнал приложения.
+    /// </summary>
+    public static event EventHandler<ApplicationLogMessageEventArgs>? LogMessageWritten;
+
     public static Action<LoggedExceptionEventArgs>? ExceptionLoggedCallback { get; set; }
 
     /// <summary>
@@ -47,7 +123,9 @@ namespace Ask.LogLib
     public static string LogInformation(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Info(BuildMessage(message, callerFilePath, lineNumber));
+      var formattedMessage = BuildMessage(message, callerFilePath, lineNumber);
+      logger.Info(formattedMessage);
+      NotifyLogMessageWritten(ApplicationLogLevel.Information, formattedMessage, isDeviceLog);
       return message;
     }
 
@@ -62,7 +140,9 @@ namespace Ask.LogLib
     public static string LogWarning(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Warn(BuildMessage(message, callerFilePath, lineNumber));
+      var formattedMessage = BuildMessage(message, callerFilePath, lineNumber);
+      logger.Warn(formattedMessage);
+      NotifyLogMessageWritten(ApplicationLogLevel.Warning, formattedMessage, isDeviceLog);
       return message;
     }
 
@@ -77,7 +157,9 @@ namespace Ask.LogLib
     public static string LogError(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Error(BuildMessage(message, callerFilePath, lineNumber));
+      var formattedMessage = BuildMessage(message, callerFilePath, lineNumber);
+      logger.Error(formattedMessage);
+      NotifyLogMessageWritten(ApplicationLogLevel.Error, formattedMessage, isDeviceLog);
       return message;
     }
 
@@ -92,7 +174,9 @@ namespace Ask.LogLib
     public static string LogDebug(string message, bool isDeviceLog = false, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
     {
       var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog));
-      logger.Debug(BuildMessage(message, callerFilePath, lineNumber));
+      var formattedMessage = BuildMessage(message, callerFilePath, lineNumber);
+      logger.Debug(formattedMessage);
+      NotifyLogMessageWritten(ApplicationLogLevel.Debug, formattedMessage, isDeviceLog);
       return message;
     }
 
@@ -122,6 +206,7 @@ namespace Ask.LogLib
       if (!onlyProjectStack)
       {
         logger.Error(ex, message);
+        NotifyLogMessageWritten(ApplicationLogLevel.Error, message, isDeviceLog);
         NotifyExceptionLogged(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
         return;
       }
@@ -134,6 +219,7 @@ namespace Ask.LogLib
       string filtered = string.Join(Environment.NewLine, filteredStack);
 
       logger.Error($"{message}{Environment.NewLine}{filtered}");
+      NotifyLogMessageWritten(ApplicationLogLevel.Error, message, isDeviceLog);
       NotifyExceptionLogged(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
     }
 
@@ -152,7 +238,9 @@ namespace Ask.LogLib
       var logger = LogManager.GetLogger(GetLoggerName(file, isDeviceLog));
       if (!string.IsNullOrWhiteSpace(userHint))
       {
-        logger.Error(BuildMessage(userHint, file, line));
+        var formattedUserHint = BuildMessage(userHint, file, line);
+        logger.Error(formattedUserHint);
+        NotifyLogMessageWritten(ApplicationLogLevel.Error, formattedUserHint, isDeviceLog);
       }
 
       LogException(ex, customMessage, isDeviceLog, file, line, onlyProjectStack);
@@ -218,6 +306,43 @@ namespace Ask.LogLib
       finally
       {
         IsNotifyingExceptionLogged.Value = false;
+      }
+    }
+
+    /// <summary>
+    /// Уведомляет подписчиков о записи сообщения в общий журнал.
+    /// </summary>
+    /// <param name="level">Уровень сообщения.</param>
+    /// <param name="message">Отформатированный текст сообщения.</param>
+    /// <param name="isDeviceLog">Признак сообщения журнала оборудования.</param>
+    private static void NotifyLogMessageWritten(
+      ApplicationLogLevel level,
+      string message,
+      bool isDeviceLog)
+    {
+      var handler = LogMessageWritten;
+      if (handler == null)
+      {
+        return;
+      }
+
+      var args = new ApplicationLogMessageEventArgs(
+        DateTimeOffset.Now,
+        level,
+        message,
+        isDeviceLog);
+
+      foreach (EventHandler<ApplicationLogMessageEventArgs> subscriber in handler.GetInvocationList())
+      {
+        try
+        {
+          subscriber(null, args);
+        }
+        catch (Exception ex)
+        {
+          System.Diagnostics.Debug.WriteLine(
+            $"Ошибка подписчика общего журнала: {ex.Message}");
+        }
       }
     }
 

@@ -1,8 +1,9 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -810,12 +811,12 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Измеренное значение тока утечки в миллиамперах (мА).  
       /// В случае ошибки возвращается <c>-1</c>.
       /// </returns>
-      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, double param = 0, double rangeFrom = -1, double rangeTo = 1000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение тока DCW",
-          () => _dcwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, param, rangeFrom, rangeTo),
+          () => _dcwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange),
           maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)

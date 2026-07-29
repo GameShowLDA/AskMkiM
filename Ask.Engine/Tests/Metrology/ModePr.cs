@@ -1,6 +1,7 @@
 
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -104,11 +105,8 @@ namespace Ask.Engine.Tests.Metrology
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления"), IsBlockStart: true);
         var (firstNorm, lastNorm, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PR, param);
 
-        var result = await fastMeter.ContinuityManager.CheckContinuityAsync(
-          param,
-          firstNorm,
-          lastNorm,
-          protocolUI);
+        MeasurementRange measurementRange = new MeasurementRange(param, firstNorm, lastNorm);
+        var result = await fastMeter.ContinuityManager.CheckContinuityAsync(measurementRange, protocolUI);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {

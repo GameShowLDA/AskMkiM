@@ -1,0 +1,182 @@
+<UserControl x:Class="Ask.UI.Features.ServiceTools.Multimeter.MultimeterControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{DynamicResource ForegrounfBrushes}">
+    <UserControl.Resources>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+        </Style>
+        <Style x:Key="Title" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,0,7"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Opacity" Value="0.72"/>
+        </Style>
+        <Style x:Key="Input" TargetType="TextBox">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="Action" TargetType="Button" BasedOn="{StaticResource ButtonStyleV11}">
+            <Setter Property="MinWidth" Value="130"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="On" TargetType="Button" BasedOn="{StaticResource Action}">
+            <Setter Property="Background" Value="{DynamicResource GreenColorSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource GreenColorSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style x:Key="Off" TargetType="Button" BasedOn="{StaticResource Action}">
+            <Setter Property="Background" Value="{DynamicResource RedColorSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedColorSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Padding="18" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid MaxWidth="1180">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="StatusIndicator" Width="10" Height="10" Margin="0,0,10,0"
+                                    VerticalAlignment="Center" Background="IndianRed" CornerRadius="5"/>
+                            <TextBlock Text="Управление мультиметром" Style="{StaticResource Title}"/>
+                        </StackPanel>
+                        <TextBlock x:Name="StatusText" Margin="0,5,0,0" Text="Загрузка приборов…"
+                                   FontSize="15" Opacity="0.7"/>
+                    </StackPanel>
+                    <ComboBox x:Name="MeterComboBox" Grid.Column="1" Height="42" FontSize="16"
+                              DisplayMemberPath="Name" Style="{StaticResource CustomComboBoxStyle}"
+                              SelectionChanged="MeterComboBox_SelectionChanged"/>
+                    <Button Grid.Column="3" Content="Обновить" Style="{StaticResource Action}"
+                            Click="RefreshButton_Click"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.08*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="0.92*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <Border Margin="0,0,0,16" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Подключение" Style="{StaticResource Title}"/>
+                            <TextBlock Margin="0,4,0,16" Text="Управление транспортом выбранного прибора."
+                                       FontSize="14" Opacity="0.65"/>
+                            <WrapPanel>
+                                <Button Content="Подключить" Style="{StaticResource On}" Click="ConnectButton_Click"/>
+                                <Button Content="Отключить" Style="{StaticResource Off}" Click="DisconnectButton_Click"/>
+                                <Button Content="Инициализировать" MinWidth="170"
+                                        Style="{StaticResource Action}" Click="InitializeButton_Click"/>
+                                <Button Content="Сбросить" Style="{StaticResource Off}" Click="ResetButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Режим измерения" Style="{StaticResource Title}"/>
+                            <TextBlock Margin="0,4,0,16"
+                                       Text="Режим и диапазон отправляются в прибор отдельными командами."
+                                       FontSize="14" Opacity="0.65"/>
+                            <TextBlock Text="Функция" Style="{StaticResource Label}"/>
+                            <ComboBox x:Name="ModeComboBox" Height="42" Margin="0,0,0,14"
+                                      FontSize="16" Style="{StaticResource CustomComboBoxStyle}"/>
+                            <TextBlock Text="Диапазон (0 — автоматический)" Style="{StaticResource Label}"/>
+                            <TextBox x:Name="RangeTextBox" Margin="0,0,0,14" Text="0"
+                                     Style="{StaticResource Input}"/>
+                            <WrapPanel>
+                                <Button Content="Установить режим" MinWidth="170"
+                                        Style="{StaticResource On}" Click="SetModeButton_Click"/>
+                                <Button Content="Установить диапазон" MinWidth="180"
+                                        Style="{StaticResource Action}" Click="SetRangeButton_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Border Margin="0,0,0,16" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Ручное измерение" Style="{StaticResource Title}"/>
+                            <TextBlock Margin="0,4,0,16"
+                                       Text="Границы используются штатным измерительным менеджером."
+                                       FontSize="14" Opacity="0.65"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Ожидаемое" Style="{StaticResource Label}"/>
+                                    <TextBox x:Name="TargetTextBox" Text="0" Style="{StaticResource Input}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Минимум" Style="{StaticResource Label}"/>
+                                    <TextBox x:Name="LowerTextBox" Text="0" Style="{StaticResource Input}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="Максимум" Style="{StaticResource Label}"/>
+                                    <TextBox x:Name="UpperTextBox" Text="1000000000" Style="{StaticResource Input}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Button Margin="0,16,0,0" Content="Измерить" MinWidth="170"
+                                    HorizontalAlignment="Left" Style="{StaticResource On}"
+                                    Click="MeasureButton_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Последний результат" Style="{StaticResource Title}"/>
+                            <Border Margin="0,16,0,0" Padding="18"
+                                    Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                    CornerRadius="10">
+                                <StackPanel>
+                                    <TextBlock x:Name="ResultValueText" Text="—"
+                                               FontSize="30" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
+                                    <TextBlock x:Name="ResultDetailsText" Margin="0,7,0,0"
+                                               Text="Измерение ещё не выполнялось."
+                                               FontSize="14" Opacity="0.68" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

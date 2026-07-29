@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -101,7 +102,9 @@ namespace Ask.Engine.Tests.Metrology
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(protocolUI, param);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_ACW, resultReferenceMeterMeasured);
-        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, param, LowerBound, UpperBound);
+
+        MeasurementRange measurementRangeAc = new MeasurementRange(param, LowerBound, UpperBound);
+        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, measurementRangeAc);
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Результат проверки"));
 
@@ -130,13 +133,9 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
+      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, MeasurementRange measurementRange)
       {
-        var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(
-          param,
-          rangeFrom,
-          rangeTo,
-          userMessageService);
+        var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(measurementRange, userMessageService);
         return result;
       }
 

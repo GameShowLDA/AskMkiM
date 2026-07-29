@@ -43,6 +43,8 @@
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
+| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml`, `UI/Controls/AdminPanel/CheckResistanceControl.xaml` |
+| Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
 | Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
 
@@ -61,6 +63,7 @@
 - [Protocol generation, save and print](#protocol-flow)
 - [Error propagation and retry](#equipment-error-flow)
 - [Crash diagnostics](#crash-diagnostics-flow)
+- [Authentication and Debug access](#authentication-and-debug-access-flow)
 
 ## Solution Structure
 
@@ -72,7 +75,7 @@
 | --- | --- | --- | --- |
 | `MainWindowProgram` | `MainWindow/MainWindowProgram.csproj` | WPF entry point, shell, startup, ручная композиция UI; `MainWindowProgram.*` | `Ask.Diagnostics`, `Ask.DataBase.Engine`, `Ask.Support`, `Ask.UI`, `ConsoleUI`, `Message`, `UI` |
 | `UI` | `UI/UI.csproj` | Legacy WPF workspace, editor, runner, settings, protocol/file services; `UI.*` | `Ask.Core`, `Ask.DataBase.Provider`, `Ask.Engine`, `Ask.Support`, `Ask.UI`, `Message`, `Ask.Device.Runtime` |
-| `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime` |
+| `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
 | `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
@@ -84,7 +87,7 @@
 | `Ask.Support` | `Ask.Support/Ask.Support.csproj` | Local Kestrel help server, Photino help window, WPF help routing; `Ask.Support` | `Ask.LogLib` |
 | `ConsoleUI` | `ConsoleUI/ConsoleUI.csproj` | Встроенная сервисная консоль и команды; `ConsoleUI.*` | `Ask.DataBase.Engine` |
 | `Message` | `Message/Message.csproj` | Кастомные WPF message boxes; `Message` | нет |
-| `Ask.LogLib` | `Ask.LogLib/Ask.LogLib.csproj` | NLog facade and exception event bridge; `Ask.LogLib` | нет |
+| `Ask.LogLib` | `Ask.LogLib/Ask.LogLib.csproj` | NLog facade, exception bridge and live application-log event; `Ask.LogLib` | нет |
 
 Архитектурно значимые внешние зависимости:
 
@@ -214,6 +217,43 @@ App.OnStartup()
 → ApplicationActivator.FlushPendingFileRequests()
 → show main window
 ```
+
+### Authentication and Debug access flow
+
+Debug-доступ не является параметром запуска или независимо изменяемым состоянием.
+Единственный источник истины — фактически авторизованная текущая роль:
+
+```text
+RoleLoginWindow authenticates RoleCredentialModel successfully
+→ RoleApplicationConfigurator.Apply(role)
+→ RoleAuthorizationConfig.SetCurrentRole(role.Role, role.DisplayName)
+→ DebugAccessConfig.IsDebugEnabled
+  → true only for RoleType.Root
+  → false for every other role and for CurrentRole == null
+→ DebugAccessConfig.NotifyCurrentRoleChanged(previousState)
+→ SystemStateEventAdapter.RaiseDebugRightsChanged(newState), только если bool изменился
+→ EventAggregator.Publish<SystemStateEvents.DebugRightsChanged>
+→ уже открытые UI.Controls.ErrorList.ErrorListControl /
+   Ask.UI.Controls.ErrorList.ErrorListControl обновляют видимость DEBUG-колонки
+```
+
+Смена пользователя без перезапуска проходит через
+`MainWindow.SwitchCurrentUserAsync → RoleLoginWindowManager → успешная аутентификация
+→ RoleApplicationConfigurator.Apply`. Неуспешная попытка не вызывает `Apply` и не
+изменяет текущую роль или Debug-доступ. `RoleAuthorizationConfig.Clear()` при
+отсутствии/завершении сессии пересчитывает доступ и публикует выключение после `root`.
+
+Production consumers читают только `DebugAccessConfig.IsDebugEnabled`:
+
+- `Ask.UI/Features/ProtocolNew/Protocol/ProtocolEntryOutputService.cs` добавляет
+  source file/member/line в запись протокола;
+- `UI/Controls/ErrorList/ErrorListControl.xaml.cs` и
+  `Ask.UI/Controls/ErrorList/ErrorListControl.xaml.cs` задают начальную видимость
+  DEBUG-колонки и реактивно обновляют её по событию.
+
+`CommandLineParser` по-прежнему обрабатывает файловые пути и совместимый no-op
+switch `admin`; аргумент `debug` не распознаётся и не влияет на доступ. Отдельной
+консольной команды изменения Debug-состояния нет.
 
 ### Database startup flow
 
@@ -990,10 +1030,99 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+В правой области `RunControl` панель действий документа отображается только для
+транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
 active; do not assume one replaces the other.
+
+### Административные утилиты
+
+Меню `MainWindow.xaml:Admin` содержит отдельные команды, каждая из которых открывает
+собственную вкладку рабочего пространства:
+
+- `AdminViewModel.ServiceUtilitiesCommand`
+  → `AdminServices.OpenServiceUtilities()`
+  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync, GetMultimetersAsync), TypeWindow.Settings)`;
+- `AdminViewModel.DatabaseCommand`
+  → `AdminServices.OpenDatabase()`
+  → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
+- `AdminViewModel.ResistanceCommand`
+  → `AdminServices.OpenResistance()`
+  → `IWorkspaceService.AddControl("Сопротивление МКР", new CheckResistanceControl(), TypeWindow.Settings)`.
+
+`ServiceUtilitiesControl` сохраняет экземпляры вложенных
+  утилит при переключении;
+  - `SetCommand` — отправка низкоуровневых команд и отображение общего потока
+    `LoggerUtility.LogMessageWritten`; занимает всю область на собственной вкладке
+    и переносится в постоянную правую панель при выборе другой утилиты;
+  - `Ask.UI.Features.ServiceTools.Gpt.GPTPunchControl` → `GPTController` —
+    ручное управление пробойной установкой; feature полностью находится в
+    `Ask.UI`, не зависит от legacy `UI` или БД и получает
+    `Func<Task<IBreakdownTester?>>` из `AdminServices`;
+    каждая открытая вкладка хранит устройство в собственном `GptDeviceContext`,
+    поэтому параллельные вкладки не разделяют статическое состояние;
+    `GPTController` лениво создаёт и сохраняет контролы режимов ACW/DCW/IR/общих
+    настроек; активные ACW/DCW/IR реализуют `IGptModeControl`, поэтому при выборе
+    другого режима контроллер сначала переключает реальное устройство, затем
+    деактивирует предыдущий режим в UI; при ошибке сохраняет прежнее состояние
+    и возвращает выбор на прежнюю вкладку; `AdminServices.GetGptAsync`
+    разрешает устройство через `BreakdownTesters.GetDevicesByNumberChassisAsync(1)`,
+    `GPTPunchControl.Loaded` асинхронно вызывает переданный provider, а UI-операции проходят
+    через `GptUiOperation`: отсутствие устройства, исключения транспорта и
+    отрицательные результаты аппаратных команд записываются в
+    `LoggerUtility.LogMessageWritten` и не распространяются в WPF UI thread;
+  - `Ask.UI.Features.ServiceTools.SwitchingDevice.SwitchingDeviceControl` —
+    ручное управление УКШ без ввода протокольных команд: мультиметр по выбранной
+    шине, ППУ, совместная коммутация ППУ и мультиметра, все шины, делитель,
+    отдельные и общие реле, резисторы, конденсаторы и замыкание/размыкание
+    выбранной цепи самоконтроля; список типов и контактов формируется через
+    `ISelfTestCheckerDeviceBusCommutation.GetSupportedTestTypes()` и
+    `GetValidBusContacts()`, а команда передаётся в `ExecuteSelfTestAsync()`;
+    provider
+    `AdminServices.GetSwitchingDeviceAsync`
+    разрешает первое устройство через
+    `SwitchingDevices.GetDevicesByNumberChassisAsync(1)` и передаёт только
+    `ISwitchingDevice`; операции вызывают application adapters из properties
+    устройства, обновляют программный список подключений, а исключения и
+    отрицательные результаты записывают в постоянную консоль SetCommand;
+    ПИНТ показан как недоступный, поскольку его runtime-реализация намеренно
+    выбрасывает исключение;
+  - `Ask.UI.Features.ServiceTools.RelaySwitchModule.RelaySwitchModuleControl` —
+    сервисное управление выбранным МКР первого шасси: одиночные точки,
+    операции с аппаратной проверкой, диапазоны, перевод точки между шинами,
+    коммутация шин, измеритель и общее отключение точек. Provider
+    `AdminServices.GetRelaySwitchModulesAsync` получает список через
+    `RelaySwitchModules.GetDevicesByNumberChassisAsync(1)`; UI вызывает
+    `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
+    читает через `GetConnectedPoints()` и `GetConnectedBuses()`;
+  - `Ask.UI.Features.ServiceTools.Multimeter.MultimeterControl` — сервисное
+    управление мультиметрами первого шасси через общий `IMultimeter`: выбор
+    Keysight/В7-78/3, подключение, инициализация, сброс, установка режима и
+    диапазона, ручные измерения сопротивления, AC/DC-напряжения, ёмкости,
+    прозвонки и диода. `AdminServices.GetMultimetersAsync` получает приборы через
+    `FastMeters.GetDevicesByNumberChassisAsync(1)`; измерения передаются
+    соответствующему capability manager с `MeasurementRange`, результаты и
+    ошибки публикуются в постоянную консоль SetCommand;
+- `DataBaseView` — административный просмотр таблиц БД;
+- `CheckResistanceControl` — настройка сопротивления МКР.
+
+Файлы: `MainWindow/MainWindow.xaml`,
+`MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs`,
+`UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml(.cs)`,
+`UI/Controls/AdminPanel/SetCommand.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/Gpt/GPTController.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/Gpt/GptUiOperation.cs`,
+`Ask.UI/Features/ServiceTools/Gpt/IGptModeControl.cs`,
+`Ask.UI/Features/ServiceTools/Gpt/Modes/*.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/SwitchingDevice/SwitchingDeviceControl.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/RelaySwitchModule/RelaySwitchModuleControl.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/Multimeter/MultimeterControl.xaml(.cs)`,
+`Ask.UI/Shared/Controls/NumericComboBox.cs`, `Ask.LogLib/LoggerUtility.cs`.
+
+Авторизация и Debug-зависимый UI описаны в
+[Authentication and Debug access flow](#authentication-and-debug-access-flow).
 
 Dialogs:
 
@@ -1171,6 +1300,10 @@ Architecturally significant flows:
 - `Transport.IsReset` → local state reset for points and buses of the addressed device;
 - `ActionExecutor.StartProcessing` → execution-state consumers;
 - `ThemeSettings.ThemeChanged`/`LanguageSettings.LanguageChanged` → UI refresh.
+- `RoleAuthorizationConfig.SetCurrentRole/Clear`
+  → `DebugAccessConfig.NotifyCurrentRoleChanged`
+  → `SystemStateEvents.DebugRightsChanged`
+  → DEBUG-колонки уже открытых ErrorList controls.
 
 `ApplicationLifecycleManager` constructs `SystemEventsBinder`, `UiEventsBinder`
 and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
@@ -1239,7 +1372,8 @@ clears and warms them.
 | `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |
 | `ThemeSettings` | value inside UI config | startup/UI save flow | resources and shell |
 | `LanguageSettings` | application settings/resources | startup | localization |
-| `RoleAuthorizationConfig` | role/credential files | login/configurator | menu and archive permissions |
+| `RoleAuthorizationConfig` | role/credential files | login/configurator | current session role, menu/archive permissions and Debug derivation |
+| `DebugAccessConfig` | derived session state | `RoleAuthorizationConfig.CurrentRole` | protocol debug source and ErrorList DEBUG-column visibility |
 | `LegacyMkiConfig` | legacy hardware profile/config file + DB storage | LegacyMki services | compatibility execution |
 
 Config managers are static global state. Their save events are subscribed once in
@@ -1257,7 +1391,8 @@ Main contract groups:
 - `Shared/Interfaces/ExecutionInterfaces` — execution/pause/run contracts;
 - `Shared/Metadata/View/EditorHost` — editor/workspace/run/translation service
   boundaries between `MainWindow` and `UI`;
-- `Shared/DTO/Devices` — EF entities and device materialization data;
+- `Shared/DTO/Devices` — EF entities, device materialization data and common
+  measurement parameters (`Measurements/MeasurementRange`);
 - `Shared/DTO/Settings` — persisted configuration;
 - `Shared/DTO/Protocol` — `ProtocolModel`, `ShowMessageModel` and action settings;
 - `ControlCommandAnalyser/Model` — parsed command models passed from translation
@@ -1302,6 +1437,8 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentTrackingConnectable` | decorator | Ask.Device.Application | registers device usage before connection lifecycle operations | [Execution Engine](#addressed-reset-of-test-equipment) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
+| `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |

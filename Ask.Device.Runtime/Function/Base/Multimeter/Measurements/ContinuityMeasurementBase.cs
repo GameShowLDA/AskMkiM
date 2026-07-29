@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -39,7 +40,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        bool isErrorSimulationEnabled = await ExecutionConfig.GetIsErrorSimulationEnabled();
+        bool isErrorSimulationEnabled = ExecutionConfig.GetIsErrorSimulationEnabled();
         return !isErrorSimulationEnabled || Random.Shared.Next(2) == 1;
       }
 
@@ -97,8 +98,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     }
 
     /// <inheritdoc />
-    public async Task<double> CheckContinuityAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null, double responseDelay = 0)
-        => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, param, rangeFrom, rangeTo, userMessageService, responseDelay: responseDelay);
+    public async Task<double> CheckContinuityAsync(
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
+        => await MeasurementBase.MeasureAsync(
+          _device,
+          _device.ContinuityCommands,
+          measurementRange,
+          userMessageService,
+          responseDelay: responseDelay);
 
     /// <summary>
     /// Проверяет проводимость между измерительными щупами.

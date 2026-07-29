@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
@@ -207,7 +208,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       string modeHeader,
       Func<IUserInteractionService?, Task<bool>> setVoltageMode,
       Func<double, IUserInteractionService?, Task<bool>> setVoltageRange,
-      Func<double, double, double, IUserInteractionService?, double, Task<double>> measureVoltage,
+      Func<MeasurementRange, IUserInteractionService?, double, Task<double>> measureVoltage,
       double[] ranges,
       IUserInteractionService userMessageService)
     {
@@ -243,7 +244,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       CancellationToken cancellationToken,
       double range,
       Func<double, IUserInteractionService?, Task<bool>> setVoltageRange,
-      Func<double, double, double, IUserInteractionService?, double, Task<double>> measureVoltage,
+      Func<MeasurementRange, IUserInteractionService?, double, Task<double>> measureVoltage,
       IUserInteractionService userMessageService)
     {
       cancellationToken.ThrowIfCancellationRequested();
@@ -253,7 +254,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       cancellationToken.ThrowIfCancellationRequested();
       await ShowActionHeaderAsync($"Измерение напряжения на диапазоне {range}{VoltageUnit}", userMessageService);
-      var result = await measureVoltage(IdealVoltage, -VoltageRange, VoltageRange, userMessageService, MeasurementResponseDelayMs);
+      var measurementRange = new MeasurementRange(IdealVoltage, -VoltageRange, VoltageRange);
+      var result = await measureVoltage(measurementRange, userMessageService, MeasurementResponseDelayMs);
 
       cancellationToken.ThrowIfCancellationRequested();
       var resultStatus = SelfTestHelper.InRange(IdealVoltage, result, VoltageRange);
@@ -327,12 +329,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
             userMessageService,
             indentLevel: 2);
 
+          var measurementRange = new MeasurementRange(
+            check.IdealResult,
+            check.IdealResult - tolerance,
+            check.IdealResult + tolerance);
           result = await meter.ResistanceManager.MeasureResistanceAsync(
-          check.IdealResult,
-          check.IdealResult - tolerance,
-          check.IdealResult + tolerance,
-          userMessageService,
-          responseDelay: MeasurementResponseDelayMs);
+            measurementRange,
+            userMessageService,
+            responseDelay: MeasurementResponseDelayMs);
 
           if (SelfTestHelper.InRange(check.IdealResult, result, tolerance))
           {
@@ -429,7 +433,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         cancellationToken.ThrowIfCancellationRequested();
         await ShowCheckStepAsync($"Измерение активного сопротивления конденсатора {capacitanceValue}", userMessageService);
-        var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(responseDelay: MeasurementResponseDelayMs);
+        var activeResistanceRange = new MeasurementRange(0, -1, -1);
+        var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(
+          activeResistanceRange,
+          responseDelay: MeasurementResponseDelayMs);
         var activeResistanceCorrect = activeResistance > MinimumActiveResistance;
 
         await ShowActiveResistanceResultAsync(activeResistance, activeResistanceCorrect, capacitanceValue, userMessageService);
@@ -450,10 +457,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           $"требуется {RequiredCapacitanceMeasurements} положительных результатов",
           userMessageService);
 
-        var result = await meter.CapacitanceManager.MeasureCapacitanceAsync(
+        var measurementRange = new MeasurementRange(
           check.IdealResult,
           check.IdealResult - tolerance,
-          check.IdealResult + tolerance,
+          check.IdealResult + tolerance);
+        var result = await meter.CapacitanceManager.MeasureCapacitanceAsync(
+          measurementRange,
           userMessageService: userMessageService,
           measurementCount: RequiredCapacitanceMeasurements,
           responseDelay: MeasurementResponseDelayMs);

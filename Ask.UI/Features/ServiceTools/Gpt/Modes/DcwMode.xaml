@@ -1,0 +1,154 @@
+﻿<UserControl x:Class="Ask.UI.Features.ServiceTools.Gpt.Modes.DcwMode"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:shared="clr-namespace:Ask.UI.Shared.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ask.UI.Features.ServiceTools.Gpt.Modes"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Background="Transparent" FontSize="16" Foreground="{DynamicResource ForegrounfBrushes}">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style TargetType="{x:Type shared:NumericComboBox}"
+               BasedOn="{StaticResource CustomComboBoxStyle}">
+            <Setter Property="Width" Value="160"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Margin" Value="10,6"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+    <Grid MaxWidth="1180" Margin="22" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Border Padding="16,12"
+                    Background="{DynamicResource SettingCardBackground}"
+                    BorderBrush="{DynamicResource SettingCardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Режим DCW" FontSize="20" FontWeight="SemiBold"/>
+                        <TextBlock Margin="0,4,0,0"
+                                   Text="Испытание изоляции постоянным напряжением"
+                                   Opacity="0.7"/>
+                    </StackPanel>
+                    <Button Name="ConnectButton"
+                            Grid.Column="1"
+                            MinWidth="210"
+                            Height="40"
+                            Style="{DynamicResource ButtonStyleV8}"
+                            Content="Включить"
+                            Background="{DynamicResource GreenColorSolidColorBrush}"
+                            BorderBrush="{DynamicResource GreenColorSolidColorBrush}"
+                            Foreground="White"
+                            PreviewMouseDown="Button_PreviewMouseDown"/>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="1" Name="PanelManagment" Margin="0,14,0,0" Visibility="Collapsed">
+            <!-- Определение строк -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <!-- Левая колонка -->
+                <ColumnDefinition Width="2*" />
+                <!-- Правая колонка -->
+            </Grid.ColumnDefinitions>
+
+            <!-- MANU_DCW_VOLTAGE -->
+            <TextBlock Grid.Row="0" Text="Напряжение DCW (100 - 1000 В):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="VoltageSlider" Grid.Row="0" Grid.Column="1"
+                                    Minimum="100" Maximum="1000" Increment="100" Unit="В"/>
+
+            <!-- MANU_DCW_CHISET -->
+            <TextBlock Grid.Row="1" Text="Высокий предел тока DCW (1 - 20 мА):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="ChiSlider" Grid.Row="1" Grid.Column="1"
+                                    Minimum="1" Maximum="20" Increment="1" Unit="мА"/>
+
+            <!-- MANU_DCW_CLOSET -->
+            <TextBlock Grid.Row="2" Text="Низкий предел тока DCW (0 - 20 мА):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="CloSlider" Grid.Row="2" Grid.Column="1"
+                                    Minimum="0" Maximum="20" Increment="1" Unit="мА"/>
+
+            <!-- MANU_DCW_TTIME -->
+            <TextBlock Grid.Row="3" Text="Время теста DCW (0.5 - 10 сек):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="TimeSlider" Grid.Row="3" Grid.Column="1"
+                                    Minimum="0.5" Maximum="10" Increment="0.1"
+                                    DecimalPlaces="1" Unit="сек"/>
+
+            <TextBlock Grid.Row="4" Text="Время нарастания DCW (0.1 - 10 сек):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="RampSlider" Grid.Row="4" Grid.Column="1"
+                                    Minimum="0.1" Maximum="10" Increment="0.1"
+                                    DecimalPlaces="1" Unit="сек"/>
+
+            <!-- MANU_DCW_REF -->
+            <TextBlock Grid.Row="5" Text="Смещение DCW (0 - 109 мА):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="RefSlider" Grid.Row="5" Grid.Column="1"
+                                    Minimum="0" Maximum="109" Increment="1" Unit="мА"/>
+
+            <!-- MANU_DCW_ARCCURRENT -->
+            <TextBlock Grid.Row="6" Text="Ток дуги DCW (2.000 - 200.0 мА):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
+            <shared:NumericComboBox x:Name="ArcCurrentSlider" Grid.Row="6" Grid.Column="1"
+                                    Minimum="2" Maximum="200" Increment="1"
+                                    DecimalPlaces="3" Unit="мА"/>
+
+            <!-- MANU_ACW_ARCCURRENT -->
+            <Button Grid.Row="7" Grid.ColumnSpan="2"
+                    Style="{DynamicResource ButtonStyleV8}" Content="Сохранить" 
+                    Height="42" Margin="10"
+                    PreviewMouseDown="Button_PreviewMouseDown_1"
+                    >
+            </Button>
+            
+            <!-- Последняя строка: левая колонка (конфигурация) -->
+            <Border Grid.Row="8" Grid.Column="0" Margin="10" Background="{DynamicResource SettingCardBackground}" BorderBrush="{DynamicResource SettingCardBorderBrush}" BorderThickness="1" Padding="18" CornerRadius="12">
+                <StackPanel >
+                    <TextBlock Text="Последнее считывание конфигурации:" FontWeight="Bold" />
+                    <TextBlock x:Name="LastReadTimeText" Text="Дата и время: Нет данных" Margin="0,8,0,16" Opacity="0.7" />
+                    <TextBlock x:Name="VoltageValueText" Text="Напряжение DCW: Нет данных" Margin="0,4" />
+                    <TextBlock x:Name="ChiValueText" Text="Высокий предел тока DCW: Нет данных" Margin="0,4" />
+                    <TextBlock x:Name="CloValueText" Text="Низкий предел тока DCW: Нет данных" Margin="0,4" />
+                    <TextBlock x:Name="TimeValueText" Text="Время теста DCW: Нет данных" Margin="0,4" />
+                    <TextBlock x:Name="RefValueText" Text="Смещение DCW: Нет данных" Margin="0,4" />
+                    <TextBlock x:Name="ArcCurrentValueText" Text="Текущее значение тока DCW: Нет данных" Margin="0,4" />
+                    <Button Content="Считать с устройства" Click="ReadConfigurationButton_Click" Height="38" Margin="0,16,0,0" Style="{DynamicResource ButtonStyleV11}" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="8" Grid.Column="1" Margin="10" Background="{DynamicResource SettingCardBackground}" BorderBrush="{DynamicResource SettingCardBorderBrush}" BorderThickness="1" Padding="18" CornerRadius="12">
+                <StackPanel >
+                    <TextBlock Text="Управление тестами:" FontWeight="Bold" />
+                    <TextBlock x:Name="TestResultText" Text="Результат теста: Нет данных" Margin="0,10,0,0" />
+                    <Button Content="Запустить тест" Click="StartTestButton_Click" Height="38" Margin="0,16,0,0" Style="{DynamicResource ButtonStyleV11}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+    </ScrollViewer>
+</UserControl>

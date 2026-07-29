@@ -15,10 +15,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         {
             { SwitchingDeviceTypeConnector.BlockingRelay, new List<int> { 11, 21 } },
             { SwitchingDeviceTypeConnector.Multimeter, new List<int> { 11,12,13,14,21,22,23,24} },
-            { SwitchingDeviceTypeConnector.ADC, new List<int> { 11,12,13,14,21,22,23,24} },
-            { SwitchingDeviceTypeConnector.ADCReversed, new List<int> { 11,12,13,14,21,22,23,24} },
-            { SwitchingDeviceTypeConnector.PINT, new List<int> { 12, 13, 22, 23 } },
-            { SwitchingDeviceTypeConnector.Shunt, new List<int> { 1, 2 } },
+            //{ SwitchingDeviceTypeConnector.ADC, new List<int> { 11,12,13,14,21,22,23,24} },
+            //{ SwitchingDeviceTypeConnector.ADCReversed, new List<int> { 11,12,13,14,21,22,23,24} },
+            //{ SwitchingDeviceTypeConnector.PINT, new List<int> { 12, 13, 22, 23 } },
+            //{ SwitchingDeviceTypeConnector.Shunt, new List<int> { 1, 2 } },
             { SwitchingDeviceTypeConnector.BreakdownTester, new List<int> { 11, 21 } },
         };
 
@@ -29,10 +29,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         {
             { SwitchingDeviceTypeConnector.BlockingRelay, "Блокировочное реле" },
             { SwitchingDeviceTypeConnector.Multimeter, "Мультиметр" },
-            { SwitchingDeviceTypeConnector.ADC, "АЦП" },
-            { SwitchingDeviceTypeConnector.ADCReversed, "АЦП с переполюсовкой" },
-            { SwitchingDeviceTypeConnector.PINT, "ПИНТ" },
-            { SwitchingDeviceTypeConnector.Shunt, "Шунт" },
+            //{ SwitchingDeviceTypeConnector.ADC, "АЦП" },
+            //{ SwitchingDeviceTypeConnector.ADCReversed, "АЦП с переполюсовкой" },
+            //{ SwitchingDeviceTypeConnector.PINT, "ПИНТ" },
+            //{ SwitchingDeviceTypeConnector.Shunt, "Шунт" },
             { SwitchingDeviceTypeConnector.BreakdownTester, "ППУ" },
         };
 

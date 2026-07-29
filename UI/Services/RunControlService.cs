@@ -48,7 +48,7 @@ namespace UI.Services
           ?? _fileManager.ContainerService.CreateEditorContainer(editorType, TypeWindow.DeviceControl);
 
         await _fileManager.DockItemService.ShowEditorDockItem(runControl.FileName, runContainer, runControl.View, editorType); 
-        _fileManager.ControlManagerService.ShowEditorContainer(runContainer, EditorType.Translator);
+        _fileManager.ControlManagerService.ShowEditorContainer(runContainer, editorType);
       }
       catch (Exception ex)
       {

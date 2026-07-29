@@ -45,9 +45,9 @@ namespace UI.Controls.ErrorList
       Loaded += ErrorListControl_Loaded;
       DataContext = this;
 
-      EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebug));
+      EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(e => DebugChanged(e.IsDebugEnabled));
 
-      if (AdminConfig.GetDebugRights())
+      if (DebugAccessConfig.IsDebugEnabled)
       {
         DebugColumn.Visibility = Visibility.Visible;
       }

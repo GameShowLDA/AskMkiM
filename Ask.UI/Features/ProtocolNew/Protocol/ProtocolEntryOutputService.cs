@@ -94,7 +94,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       string callerFile,
       int callerLine)
     {
-      if (!AdminConfig.GetDebugRights())
+      if (!DebugAccessConfig.IsDebugEnabled)
       {
         return;
       }

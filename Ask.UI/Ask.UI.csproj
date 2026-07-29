@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+	  <ProjectReference Include="..\Ask.LogLib\Ask.LogLib.csproj" />
 	  <ProjectReference Include="..\Ask.Engine\Ask.Engine.csproj" />
 	  <ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
 	  <ProjectReference Include="..\Message\Message.csproj" />
