@@ -1,7 +1,9 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.UI.Features.ServiceTools.Gpt;
+using Ask.UI.Features.ServiceTools.Multimeter;
 using Ask.UI.Features.ServiceTools.RelaySwitchModule;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
 using System.Windows;
@@ -18,9 +20,11 @@ namespace UI.Controls.AdminPanel
     private GPTPunchControl? gptControl;
     private SwitchingDeviceControl? switchingDeviceControl;
     private RelaySwitchModuleControl? relaySwitchModuleControl;
+    private MultimeterControl? multimeterControl;
     private readonly Func<Task<IBreakdownTester?>> gptProvider;
     private readonly Func<Task<ISwitchingDevice?>> switchingDeviceProvider;
     private readonly Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider;
+    private readonly Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ServiceUtilitiesControl"/>.
@@ -28,10 +32,12 @@ namespace UI.Controls.AdminPanel
     /// <param name="gptProvider">Функция получения настроенной пробойной установки.</param>
     /// <param name="switchingDeviceProvider">Функция получения настроенного устройства коммутации шин.</param>
     /// <param name="relaySwitchModulesProvider">Функция получения модулей коммутации реле.</param>
+    /// <param name="multimetersProvider">Функция получения мультиметров.</param>
     public ServiceUtilitiesControl(
       Func<Task<IBreakdownTester?>> gptProvider,
       Func<Task<ISwitchingDevice?>> switchingDeviceProvider,
-      Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider)
+      Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider,
+      Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider)
     {
       this.gptProvider = gptProvider
         ?? throw new ArgumentNullException(nameof(gptProvider));
@@ -39,6 +45,8 @@ namespace UI.Controls.AdminPanel
         ?? throw new ArgumentNullException(nameof(switchingDeviceProvider));
       this.relaySwitchModulesProvider = relaySwitchModulesProvider
         ?? throw new ArgumentNullException(nameof(relaySwitchModulesProvider));
+      this.multimetersProvider = multimetersProvider
+        ?? throw new ArgumentNullException(nameof(multimetersProvider));
       InitializeComponent();
       SetCommandTab.IsChecked = true;
     }
@@ -117,6 +125,27 @@ namespace UI.Controls.AdminPanel
       SideConsolePresenter.Content = null;
       UtilityContentPresenter.Content = relaySwitchModuleControl
         ??= new RelaySwitchModuleControl(relaySwitchModulesProvider);
+      SideConsolePresenter.Content = setCommand;
+      UtilityContentPresenter.HorizontalAlignment = HorizontalAlignment.Left;
+      UtilityColumn.Width = GridLength.Auto;
+      UtilitySplitterColumn.Width = new GridLength(18);
+      ConsoleColumn.Width = new GridLength(1, GridUnitType.Star);
+      UtilitySplitter.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
+    /// Отображает панель сервисного управления мультиметрами.
+    /// </summary>
+    /// <param name="sender">Выбранная вкладка.</param>
+    /// <param name="e">Данные события выбора.</param>
+    private void MultimeterTab_Checked(object sender, RoutedEventArgs e)
+    {
+      var setCommand = setCommandControl ??= new SetCommand();
+
+      UtilityContentPresenter.Content = null;
+      SideConsolePresenter.Content = null;
+      UtilityContentPresenter.Content = multimeterControl
+        ??= new MultimeterControl(multimetersProvider);
       SideConsolePresenter.Content = setCommand;
       UtilityContentPresenter.HorizontalAlignment = HorizontalAlignment.Left;
       UtilityColumn.Width = GridLength.Auto;

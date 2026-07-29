@@ -1044,7 +1044,7 @@ active; do not assume one replaces the other.
 
 - `AdminViewModel.ServiceUtilitiesCommand`
   → `AdminServices.OpenServiceUtilities()`
-  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync), TypeWindow.Settings)`;
+  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync, GetMultimetersAsync), TypeWindow.Settings)`;
 - `AdminViewModel.DatabaseCommand`
   → `AdminServices.OpenDatabase()`
   → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
@@ -1097,6 +1097,14 @@ active; do not assume one replaces the other.
     `RelaySwitchModules.GetDevicesByNumberChassisAsync(1)`; UI вызывает
     `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
     читает через `GetConnectedPoints()` и `GetConnectedBuses()`;
+  - `Ask.UI.Features.ServiceTools.Multimeter.MultimeterControl` — сервисное
+    управление мультиметрами первого шасси через общий `IMultimeter`: выбор
+    Keysight/В7-78/3, подключение, инициализация, сброс, установка режима и
+    диапазона, ручные измерения сопротивления, AC/DC-напряжения, ёмкости,
+    прозвонки и диода. `AdminServices.GetMultimetersAsync` получает приборы через
+    `FastMeters.GetDevicesByNumberChassisAsync(1)`; измерения передаются
+    соответствующему capability manager с `MeasurementRange`, результаты и
+    ошибки публикуются в постоянную консоль SetCommand;
 - `DataBaseView` — административный просмотр таблиц БД;
 - `CheckResistanceControl` — настройка сопротивления МКР.
 
@@ -1110,6 +1118,7 @@ active; do not assume one replaces the other.
 `Ask.UI/Features/ServiceTools/Gpt/Modes/*.xaml(.cs)`,
 `Ask.UI/Features/ServiceTools/SwitchingDevice/SwitchingDeviceControl.xaml(.cs)`,
 `Ask.UI/Features/ServiceTools/RelaySwitchModule/RelaySwitchModuleControl.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/Multimeter/MultimeterControl.xaml(.cs)`,
 `Ask.UI/Shared/Controls/NumericComboBox.cs`, `Ask.LogLib/LoggerUtility.cs`.
 
 Авторизация и Debug-зависимый UI описаны в

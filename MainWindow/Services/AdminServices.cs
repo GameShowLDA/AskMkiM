@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
@@ -51,7 +52,11 @@ namespace MainWindowProgram.Services
     public void OpenServiceUtilities() =>
       _multiWindow.WorkspaceService.AddControl(
         "Сервисные утилиты",
-        new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync),
+        new ServiceUtilitiesControl(
+          GetGptAsync,
+          GetSwitchingDeviceAsync,
+          GetRelaySwitchModulesAsync,
+          GetMultimetersAsync),
         TypeWindow.Settings);
 
     /// <summary>
@@ -81,6 +86,15 @@ namespace MainWindowProgram.Services
     private static async Task<IReadOnlyList<IRelaySwitchModule>> GetRelaySwitchModulesAsync()
     {
       return await RelaySwitchModules.GetDevicesByNumberChassisAsync(1);
+    }
+
+    /// <summary>
+    /// Возвращает мультиметры, настроенные для первого шасси.
+    /// </summary>
+    /// <returns>Мультиметры первого шасси.</returns>
+    private static async Task<IReadOnlyList<IMultimeter>> GetMultimetersAsync()
+    {
+      return await FastMeters.GetDevicesByNumberChassisAsync(1);
     }
 
     /// <summary>

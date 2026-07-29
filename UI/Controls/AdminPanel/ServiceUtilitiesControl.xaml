@@ -100,6 +100,10 @@
                                      Content="МКР"
                                      Style="{StaticResource MacSegmentStyle}"
                                      Checked="RelaySwitchModuleTab_Checked"/>
+                        <RadioButton GroupName="UtilityNavigation"
+                                     Content="Мультиметры"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="MultimeterTab_Checked"/>
                     </StackPanel>
                 </Border>
             </Grid>
