@@ -433,7 +433,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
         cancellationToken.ThrowIfCancellationRequested();
         await ShowCheckStepAsync($"Измерение активного сопротивления конденсатора {capacitanceValue}", userMessageService);
-        var activeResistanceRange = new MeasurementRange(0, -1, -1);
+        var activeResistanceRange = new MeasurementRange(-1, 51, 2_000_000);
         var activeResistance = await meter.ResistanceManager.MeasureResistanceAsync(
           activeResistanceRange,
           responseDelay: MeasurementResponseDelayMs);
