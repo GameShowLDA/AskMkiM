@@ -1044,7 +1044,7 @@ active; do not assume one replaces the other.
 
 - `AdminViewModel.ServiceUtilitiesCommand`
   → `AdminServices.OpenServiceUtilities()`
-  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync), TypeWindow.Settings)`;
+  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync), TypeWindow.Settings)`;
 - `AdminViewModel.DatabaseCommand`
   → `AdminServices.OpenDatabase()`
   → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
@@ -1089,6 +1089,14 @@ active; do not assume one replaces the other.
     отрицательные результаты записывают в постоянную консоль SetCommand;
     ПИНТ показан как недоступный, поскольку его runtime-реализация намеренно
     выбрасывает исключение;
+  - `Ask.UI.Features.ServiceTools.RelaySwitchModule.RelaySwitchModuleControl` —
+    сервисное управление выбранным МКР первого шасси: одиночные точки,
+    операции с аппаратной проверкой, диапазоны, перевод точки между шинами,
+    коммутация шин, измеритель и общее отключение точек. Provider
+    `AdminServices.GetRelaySwitchModulesAsync` получает список через
+    `RelaySwitchModules.GetDevicesByNumberChassisAsync(1)`; UI вызывает
+    `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
+    читает через `GetConnectedPoints()` и `GetConnectedBuses()`;
 - `DataBaseView` — административный просмотр таблиц БД;
 - `CheckResistanceControl` — настройка сопротивления МКР.
 
@@ -1101,6 +1109,7 @@ active; do not assume one replaces the other.
 `Ask.UI/Features/ServiceTools/Gpt/IGptModeControl.cs`,
 `Ask.UI/Features/ServiceTools/Gpt/Modes/*.xaml(.cs)`,
 `Ask.UI/Features/ServiceTools/SwitchingDevice/SwitchingDeviceControl.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/RelaySwitchModule/RelaySwitchModuleControl.xaml(.cs)`,
 `Ask.UI/Shared/Controls/NumericComboBox.cs`, `Ask.LogLib/LoggerUtility.cs`.
 
 Авторизация и Debug-зависимый UI описаны в

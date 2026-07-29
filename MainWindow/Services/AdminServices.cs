@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
@@ -50,7 +51,7 @@ namespace MainWindowProgram.Services
     public void OpenServiceUtilities() =>
       _multiWindow.WorkspaceService.AddControl(
         "Сервисные утилиты",
-        new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync),
+        new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync),
         TypeWindow.Settings);
 
     /// <summary>
@@ -71,6 +72,15 @@ namespace MainWindowProgram.Services
     {
       return (await SwitchingDevices.GetDevicesByNumberChassisAsync(1))
         .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Возвращает модули коммутации реле, настроенные для первого шасси.
+    /// </summary>
+    /// <returns>Модули коммутации реле первого шасси.</returns>
+    private static async Task<IReadOnlyList<IRelaySwitchModule>> GetRelaySwitchModulesAsync()
+    {
+      return await RelaySwitchModules.GetDevicesByNumberChassisAsync(1);
     }
 
     /// <summary>

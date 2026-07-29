@@ -96,6 +96,10 @@
                                      Content="УКШ"
                                      Style="{StaticResource MacSegmentStyle}"
                                      Checked="SwitchingDeviceTab_Checked"/>
+                        <RadioButton GroupName="UtilityNavigation"
+                                     Content="МКР"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="RelaySwitchModuleTab_Checked"/>
                     </StackPanel>
                 </Border>
             </Grid>
