@@ -92,6 +92,10 @@
                                      Content="GPT"
                                      Style="{StaticResource MacSegmentStyle}"
                                      Checked="GptTab_Checked"/>
+                        <RadioButton GroupName="UtilityNavigation"
+                                     Content="УКШ"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="SwitchingDeviceTab_Checked"/>
                     </StackPanel>
                 </Border>
             </Grid>

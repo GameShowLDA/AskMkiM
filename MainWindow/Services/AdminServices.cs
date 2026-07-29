@@ -1,7 +1,9 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Features.ServiceTools.Gpt;
+using Ask.UI.Features.ServiceTools.SwitchingDevice;
 using MainWindowProgram.Test.Protocol;
 using UI.Controls.AdminPanel;
 using UI.Controls.DeviceHealthView;
@@ -48,7 +50,7 @@ namespace MainWindowProgram.Services
     public void OpenServiceUtilities() =>
       _multiWindow.WorkspaceService.AddControl(
         "Сервисные утилиты",
-        new ServiceUtilitiesControl(GetGptAsync),
+        new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync),
         TypeWindow.Settings);
 
     /// <summary>
@@ -58,6 +60,16 @@ namespace MainWindowProgram.Services
     private static async Task<IBreakdownTester?> GetGptAsync()
     {
       return (await BreakdownTesters.GetDevicesByNumberChassisAsync(1))
+        .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Возвращает устройство коммутации шин, настроенное для первого шасси.
+    /// </summary>
+    /// <returns>Найденное устройство коммутации шин или <see langword="null"/>.</returns>
+    private static async Task<ISwitchingDevice?> GetSwitchingDeviceAsync()
+    {
+      return (await SwitchingDevices.GetDevicesByNumberChassisAsync(1))
         .FirstOrDefault();
     }
 

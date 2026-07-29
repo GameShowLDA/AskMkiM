@@ -43,7 +43,7 @@
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
-| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/Gpt/`, `UI/Controls/AdminPanel/DataBaseView.xaml`, `UI/Controls/AdminPanel/CheckResistanceControl.xaml` |
+| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml`, `UI/Controls/AdminPanel/CheckResistanceControl.xaml` |
 | Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
 | Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
@@ -1044,7 +1044,7 @@ active; do not assume one replaces the other.
 
 - `AdminViewModel.ServiceUtilitiesCommand`
   → `AdminServices.OpenServiceUtilities()`
-  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync), TypeWindow.Settings)`;
+  → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync), TypeWindow.Settings)`;
 - `AdminViewModel.DatabaseCommand`
   → `AdminServices.OpenDatabase()`
   → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
@@ -1073,6 +1073,22 @@ active; do not assume one replaces the other.
     через `GptUiOperation`: отсутствие устройства, исключения транспорта и
     отрицательные результаты аппаратных команд записываются в
     `LoggerUtility.LogMessageWritten` и не распространяются в WPF UI thread;
+  - `Ask.UI.Features.ServiceTools.SwitchingDevice.SwitchingDeviceControl` —
+    ручное управление УКШ без ввода протокольных команд: мультиметр по выбранной
+    шине, ППУ, совместная коммутация ППУ и мультиметра, все шины, делитель,
+    отдельные и общие реле, резисторы, конденсаторы и замыкание/размыкание
+    выбранной цепи самоконтроля; список типов и контактов формируется через
+    `ISelfTestCheckerDeviceBusCommutation.GetSupportedTestTypes()` и
+    `GetValidBusContacts()`, а команда передаётся в `ExecuteSelfTestAsync()`;
+    provider
+    `AdminServices.GetSwitchingDeviceAsync`
+    разрешает первое устройство через
+    `SwitchingDevices.GetDevicesByNumberChassisAsync(1)` и передаёт только
+    `ISwitchingDevice`; операции вызывают application adapters из properties
+    устройства, обновляют программный список подключений, а исключения и
+    отрицательные результаты записывают в постоянную консоль SetCommand;
+    ПИНТ показан как недоступный, поскольку его runtime-реализация намеренно
+    выбрасывает исключение;
 - `DataBaseView` — административный просмотр таблиц БД;
 - `CheckResistanceControl` — настройка сопротивления МКР.
 
@@ -1084,6 +1100,7 @@ active; do not assume one replaces the other.
 `Ask.UI/Features/ServiceTools/Gpt/GptUiOperation.cs`,
 `Ask.UI/Features/ServiceTools/Gpt/IGptModeControl.cs`,
 `Ask.UI/Features/ServiceTools/Gpt/Modes/*.xaml(.cs)`,
+`Ask.UI/Features/ServiceTools/SwitchingDevice/SwitchingDeviceControl.xaml(.cs)`,
 `Ask.UI/Shared/Controls/NumericComboBox.cs`, `Ask.LogLib/LoggerUtility.cs`.
 
 Авторизация и Debug-зависимый UI описаны в
