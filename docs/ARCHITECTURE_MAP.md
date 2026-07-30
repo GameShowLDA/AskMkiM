@@ -1037,6 +1037,41 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
 active; do not assume one replaces the other.
 
+### Валидация конфигурации устройств
+
+Все окна настройки оборудования в `UI/Controls/Settings/DeviceConfig/` используют
+общий `DeviceSettingsControl`. Поток сохранения:
+
+```text
+DeviceSettingsControl.SaveButton_PreviewMouseDown
+→ DeviceSettingsControl.ValidateRequiredParameters
+→ DeviceRequiredParameterValidator (тип подключения, IP и числовые поля)
+→ проверка видимых общих, transport-specific и model-specific полей
+→ при ошибке: подсветка секций + переход к первому полю
+  + DeviceConfigNotifications.ShowRequiredParametersMissing
+→ при успехе: DeviceSettingsControl.SaveEvent
+→ обработчик конкретного *Window.SetSettings
+→ DeviceSettingsProcessorBase.ProcessDevice
+→ BaseHandler.GetConnectionDetails
+→ целевой static device facade CreateAsync/UpdateAsync
+→ Ask.DataBase.Engine → Ask.DataBase.Provider → SQLite
+```
+
+COM-секция делегирует создание настроек в
+`Ask.UI.Components.ComSettingsComponent.CreateSettings`; её общая подсветка
+управляется через `SetValidationHighlight`. `InitializeValidationTracking`
+связывает редактируемые поля с секциями: изменение значения сразу снимает
+подсветку соответствующей ошибки; `ComSettingsComponent.SettingsChanged`
+обеспечивает тот же поток для внутренних полей COM. Проверка выполняется только
+для видимых секций, выбранных текущей моделью устройства.
+
+Ключевые файлы:
+`UI/Controls/Settings/DeviceConfig/Base/BaseSettingsConfig/DeviceSettingsControl.EventHandler.cs`,
+`UI/Controls/Settings/DeviceConfig/Base/BaseSettingsConfig/DeviceSettingsControl.Validation.cs`,
+`UI/Controls/Settings/DeviceConfig/Base/DeviceRequiredParameterValidator.cs`,
+`UI/Controls/Settings/DeviceConfig/DeviceConfigNotifications.cs`,
+`Ask.UI/Components/ComSettingsComponent.xaml.cs`.
+
 ### Административные утилиты
 
 Меню `MainWindow.xaml:Admin` содержит отдельные команды, каждая из которых открывает
