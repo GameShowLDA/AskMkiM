@@ -831,7 +831,7 @@ TaskScheduler.UnobservedTaskException / LoggerUtility.ExceptionLogged
 → ICrashDataCollector collection
 → exception, caller artifacts, screenshot, command history, device state,
   config, logs, system info and metadata
-→ History/CrashReports
+→ Bin/CrashReports
 → NotificationHostService
 ```
 
@@ -847,7 +847,7 @@ TranslationServices.CreateNewTranslator/EditExistingTranslator catch
 → IExceptionDiagnosticReporter.ReportAsync
 → CrashPackageService.CreateAsync
 → ExceptionCollector + CrashReportArtifactCollector + остальные collectors
-→ History/CrashReports/<timestamp>_<exception>.zip
+→ Bin/CrashReports/<timestamp>_<exception>.zip
 → LoggerUtility.LogError (повторный auto-report подавлен на exception.Data)
 → MessageBoxCustom.Show
 ```

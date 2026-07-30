@@ -92,8 +92,7 @@ namespace MainWindowProgram.Init
             services.AddCrashDiagnostics(
               options =>
               {
-                options.Path = Path.GetFullPath(
-                  Path.Combine(AppContext.BaseDirectory, "..", "History", "CrashReports"));
+                options.Path = Path.Combine(AppContext.BaseDirectory, "CrashReports");
                 options.MaxRetainedReports = 30;
                 options.IncludeScreenshot = true;
                 options.IncludeLogs = true;
@@ -143,9 +142,8 @@ namespace MainWindowProgram.Init
 
       LoggerUtility.ExceptionLoggedCallback = args => LoggerUtility_ExceptionLogged(null, args);
       LoggerUtility.ExceptionLogged += LoggerUtility_ExceptionLogged;
-      LogInformation(
-        $"Crash diagnostics logger hook registered. Reports path: " +
-        $"{Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "History", "CrashReports"))}");
+      LogInformation($"Crash diagnostics logger hook registered. Reports path: " +
+        $"{Path.Combine(AppContext.BaseDirectory, "CrashReports")}");
     }
 
     private static void LoggerUtility_ExceptionLogged(object? sender, LoggedExceptionEventArgs e)
