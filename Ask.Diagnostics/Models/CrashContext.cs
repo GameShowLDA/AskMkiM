@@ -26,13 +26,15 @@ namespace Ask.Diagnostics.Models
       DateTimeOffset timestamp,
       string rootDirectory,
       string packageDirectory,
-      string packageName)
+      string packageName,
+      IReadOnlyList<CrashReportArtifact>? artifacts = null)
     {
       Exception = exception ?? throw new ArgumentNullException(nameof(exception));
       Timestamp = timestamp;
       RootDirectory = rootDirectory ?? throw new ArgumentNullException(nameof(rootDirectory));
       PackageDirectory = packageDirectory ?? throw new ArgumentNullException(nameof(packageDirectory));
       PackageName = packageName ?? throw new ArgumentNullException(nameof(packageName));
+      Artifacts = artifacts ?? Array.Empty<CrashReportArtifact>();
     }
 
     /// <summary>
@@ -59,6 +61,11 @@ namespace Ask.Diagnostics.Models
     /// Имя диагностического пакета.
     /// </summary>
     public string PackageName { get; }
+
+    /// <summary>
+    /// Дополнительные диагностические вложения источника ошибки.
+    /// </summary>
+    public IReadOnlyList<CrashReportArtifact> Artifacts { get; }
 
     /// <summary>
     /// Сведения об ошибках, возникших при сборе диагностической информации.

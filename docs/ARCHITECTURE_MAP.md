@@ -39,7 +39,7 @@
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
 | Самоконтроль и инженерные тесты | `MainWindow/Services/TestService.cs`, `MainWindow/Services/SelfTestServices.cs` | `Ask.UI/Controls/ExecutorControls/TestsControls/`, `Ask.Engine/Tests/` |
 | Ошибки трансляции | `Ask.Core/Services/Errors/Translation/` | целевой parser/validator, `Ask.UI/Controls/ErrorList/`, `UI/Controls/ErrorList/` |
-| Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Collectors/` |
+| Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `MainWindow/Services/TranslationServices.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Services/ExceptionDiagnosticReporter.cs`, `Ask.Diagnostics/Collectors/` |
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
@@ -314,7 +314,7 @@ PreStartupInitializer.InitializeAppHost()
 | `IHostedService` | `CommandHistoryBridgeHostedService` | Hosted singleton | `AddCrashDiagnostics` |
 | `ICrashPackageService` | `CrashPackageService` | Singleton | `AddCrashDiagnostics` |
 | `IExceptionDiagnosticReporter` | `ExceptionDiagnosticReporter` | Singleton | `AddCrashDiagnostics` |
-| `ICrashDataCollector` | 8 collector implementations | Singleton, multiple | `AddCrashDiagnostics` |
+| `ICrashDataCollector` | 9 collector implementations | Singleton, multiple | `AddCrashDiagnostics` |
 | `IDiagnosticStateProvider` | delegate provider `"Application"` | Singleton | `AddDiagnosticStateProvider` |
 | `IDiagnosticConfigProvider` | delegate provider `"AppSettings"` | Singleton | `AddDiagnosticConfigProvider` |
 
@@ -332,7 +332,7 @@ MultiWindowService
 → MainWindow.Services.FileService
 → MetrologyService через ActivatorUtilities + ServiceLocator
 → AdminServices / TestService / SettingsService / WindowService
-→ SelfTestServices / TranslationServices / RunServices
+→ SelfTestServices / TranslationServices (с `IExceptionDiagnosticReporter` из DI) / RunServices
 → MainWindowViewModel и дочерние menu ViewModels
 ```
 
@@ -829,11 +829,38 @@ TaskScheduler.UnobservedTaskException / LoggerUtility.ExceptionLogged
 → IExceptionDiagnosticReporter or App.CreateCrashPackage
 → CrashPackageService
 → ICrashDataCollector collection
-→ exception, screenshot, command history, device state, config, logs,
-  system info and metadata
-→ CrashReports
+→ exception, caller artifacts, screenshot, command history, device state,
+  config, logs, system info and metadata
+→ Bin/CrashReports
 → NotificationHostService
 ```
+
+Для необработанного исключения трансляции используется синхронизированный с UI
+путь, гарантирующий создание отчёта до окна ошибки:
+
+```text
+TranslationServices.CreateNewTranslator/EditExistingTranslator catch
+→ ShowTranslationErrorAsync(ex, editor, normalizedSourceText, operation)
+→ CrashReportArtifact.Json("translation-parameters.json", ...)
+  + CrashReportArtifact.Text("source-program.txt", editor.Text)
+  + optional "translation-input.txt" when normalized input differs
+→ IExceptionDiagnosticReporter.ReportAsync
+→ CrashPackageService.CreateAsync
+→ ExceptionCollector + CrashReportArtifactCollector + остальные collectors
+→ Bin/CrashReports/<timestamp>_<exception>.zip
+→ LoggerUtility.LogError (повторный auto-report подавлен на exception.Data)
+→ MessageBoxCustom.Show
+```
+
+`CrashReportArtifact` — общий extension point для контекстных JSON/текстовых
+файлов без зависимости `Ask.Diagnostics` от вызывающей подсистемы.
+`CrashReportArtifactCollector` проверяет, что имя вложения остаётся внутри
+каталога пакета. Параметры трансляции содержат операцию, путь/имя/расширение
+исходника, длину и число строк. Исходная программа сохраняется без изменения;
+если фактический нормализованный вход транслятора отличается, он добавляется
+отдельным файлом. Регистрация и путь задаются в
+`MainWindow/Init/PreStartupInitializer.cs`; общий `ICrashPackageService` также
+используется глобальными WPF/AppDomain/TaskScheduler handlers.
 
 `CommandHistoryBridgeHostedService` connects static
 `DiagnosticCommandHistory.RecordCommand/RecordResponse` calls from transport
@@ -1514,6 +1541,8 @@ ErrorItem → translator/runner ErrorList
 | `AppDbContext` | EF DbContext | Ask.DataBase.Provider | SQLite model | [Database](#database-architecture) |
 | `DatabaseInitializationService` | initializer | Ask.DataBase.Provider | integrity, schema and seed | [Database](#database-architecture) |
 | `CrashPackageService` | service | Ask.Diagnostics | diagnostic package collection | [Support](#support-and-diagnostics) |
+| `IExceptionDiagnosticReporter` | interface | Ask.Diagnostics | automatic and awaited exception reporting with duplicate suppression | [Support](#support-and-diagnostics) |
+| `CrashReportArtifactCollector` | collector | Ask.Diagnostics | contextual JSON/text files supplied by an error source | [Support](#support-and-diagnostics) |
 | `HelpServer` | hosted service facade | Ask.Support | local documentation server | [Support](#support-and-diagnostics) |
 
 ## Maintenance Checklist
