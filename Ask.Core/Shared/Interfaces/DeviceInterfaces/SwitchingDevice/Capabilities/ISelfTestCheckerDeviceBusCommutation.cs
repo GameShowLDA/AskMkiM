@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
@@ -17,7 +18,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabiliti
     /// <param name="selectedType">Выбранное значение перечисления.</param>
     /// <param name="device">Устройство коммутации шин (необязательно).</param>
     /// <param name="meter">Измеритель (необязательно).</param>
-    Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null);
+    Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, ActionSettings settings, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null);
 
     /// <summary>
     /// Выполняет проверку цепи самоконтроля.

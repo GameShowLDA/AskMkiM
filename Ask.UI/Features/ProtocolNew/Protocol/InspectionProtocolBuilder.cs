@@ -15,7 +15,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     ArgumentNullException.ThrowIfNull(settings);
 
     var message = new StringBuilder();
-    message.AppendLine($"Проверка \"{settings.Name}\" от {DateTime.Now:dd.MM.yyyy} завершена.");
+    message.AppendLine($"Проверка \"{settings.Name}\" от {DateTime.Now:dd.MM.yyyy} завершена ({settings.Mode}).");
     message.AppendLine($"\tНачало проверки: {settings.StartTime:HH:mm:ss}");
     message.AppendLine($"\tВремя выполнения: {settings.ExecutionDuration:hh\\:mm\\:ss\\:fff}");
     message.AppendLine();
@@ -28,6 +28,35 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
 
       message.AppendLine();
     }
+
+    if (settings.DeviceResults.Count > 1)
+    {
+
+      int i = 1;
+      foreach (var deviceResult in settings.DeviceResults)
+      {
+        message.AppendLine($"\t{i}. {deviceResult.DeviceName}");
+        int j = 1;
+        foreach (var testResult in deviceResult.Tests)
+        {
+          if (testResult.Errors.Count > 0)
+          {
+            message.AppendLine($"\t\t{testResult.TestName} {testResult.Errors.Count} ошибок:");
+            for (var index = 0; index < testResult.Errors.Count; index++)
+            {
+              message.AppendLine($"\t\t\t{index + 1}. {testResult.Errors[index].Message} [БРАК]");
+            }
+          }
+          else
+          {
+            message.AppendLine($"\t\t{i}.{j}. {testResult.TestName} [НОРМА]");
+            j++;
+          }
+        }
+        i++;
+      }
+    }
+
 
     if (settings.ExecutionErrors.Count == 0)
     {

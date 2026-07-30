@@ -744,6 +744,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           actionSettings.StartTime = TimeOnly.FromDateTime(DateTime.Now);
 
           ProcessTask = Task.Run(() => actionSettings.StartDelegate(
+            actionSettings,
             ProtocolSelfCheck,
             ProtocolSelfCheck,
             ProtocolSelfCheck.GetInputHighlightService(),

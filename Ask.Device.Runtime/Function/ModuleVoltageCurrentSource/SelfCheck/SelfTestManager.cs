@@ -1,5 +1,7 @@
 using Ask.Core.Services.Devices;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
@@ -15,7 +17,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
   {
 
     /// <inheritdoc />
-    public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice dbc = null, IPowerSourceModule powerDevice = null, IMultimeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ActionSettings settings, System.Enum selectedType, ISwitchingDevice dbc = null, IPowerSourceModule powerDevice = null, IMultimeter meter = null)
     {
       if (selectedType is not PowerSourceModuleTypeConnector type)
       {
@@ -31,8 +33,12 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       {
         return;
       }
-
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice));
+      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice);
+      settings.DeviceResults.Add(new DeviceExecutionResult
+      {
+        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+      });
+      await messageService.ShowMessageAsync(deviceTitle);
 
       switch (type)
       {

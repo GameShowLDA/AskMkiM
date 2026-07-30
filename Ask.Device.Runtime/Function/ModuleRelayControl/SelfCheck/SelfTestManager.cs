@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
@@ -31,9 +32,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     }
 
     /// <inheritdoc />
-    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, ActionSettings settings, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
-      await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(_moduleRelay));
+      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(_moduleRelay);
+      settings.DeviceResults.Add(new DeviceExecutionResult
+      {
+        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+      });
+      await userMessageService.ShowMessageAsync(deviceTitle);
 
       switch (typeConnector)
       {

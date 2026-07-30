@@ -10,7 +10,7 @@ public sealed class InspectionProtocolBuilderTests
   {
     var settings = new ActionSettings
     {
-      StartDelegate = (_, _, _, _) => Task.CompletedTask,
+      StartDelegate = (_, _, _, _, _) => Task.CompletedTask,
       Name = "Самоконтроль модуля МКР-350 1.4",
     };
     settings.ExecutionErrors.Add("Точка[20] - Отключение с шины A");
@@ -27,7 +27,7 @@ public sealed class InspectionProtocolBuilderTests
   {
     var settings = new ActionSettings
     {
-      StartDelegate = (_, _, _, _) => Task.CompletedTask,
+      StartDelegate = (_, _, _, _, _) => Task.CompletedTask,
       Name = "СИ - Метод узла",
     };
     settings.InputParameters.Add("Первая точка: 1.2.3");

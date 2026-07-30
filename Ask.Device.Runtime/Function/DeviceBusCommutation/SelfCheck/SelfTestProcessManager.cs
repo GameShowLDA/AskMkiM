@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -27,7 +28,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="selectedType">Тип выполняемой проверки.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
-    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
+    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ActionSettings settings, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       SelfTestManager.MeterConnect = false;
       SelfTestManager.DbcConnect = false;
@@ -40,8 +41,15 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           type: ShowMessageModel.MessageType.Error));
         return;
       }
+      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(device);
+      
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(device));
+      settings.DeviceResults.Add(new DeviceExecutionResult
+      {
+        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+      });
+
+      await messageService.ShowMessageAsync(deviceTitle);
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
 
       if (!await SelfTestConnectionHelper.SettingsMeter(meter, messageService))
@@ -55,21 +63,21 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       switch (type)
       {
         case SwitchingDeviceTypeConnector.FullCheck:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           // await SelfTestRunner.RunSelfCheckAdcAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckAdcReversedAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckPintAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckShuntAsync(cancellationToken, messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         case SwitchingDeviceTypeConnector.BlockingRelay:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         case SwitchingDeviceTypeConnector.Multimeter:
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         // case SwitchingDeviceTypeConnector.ADC:
@@ -89,7 +97,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         //  break;
 
         case SwitchingDeviceTypeConnector.BreakdownTester:
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         default:
@@ -120,7 +128,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <exception cref="OperationCanceledException">
     /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
     /// </exception>
-    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
+    internal static async Task<bool> SelfCheckCircuitAsync(ActionSettings settings, CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       if (!SelfTestManager.MeterConnect && !SelfTestManager.DbcConnect)
       {
@@ -150,8 +158,16 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool allTestsPassed = true;
       string testName = GetTestName(testType);
 
+      var testDescription = $"\n{getNextTestNumber()}. Тест \"{testName}\"";
+      var testResult = new TestExecutionResult
+      {
+        TestName = $"Тест \"{testName}\"",
+      };
+
+      settings.DeviceResults.LastOrDefault()?.Tests.Add(testResult);
+
       await messageService.ShowMessageAsync(
-        new ShowMessageModel($"\n{getNextTestNumber()}. Тест \"{testName}\""),
+        new ShowMessageModel(testDescription),
         IsBlockStart: true,
         ignoreOutputValidation: true);
 

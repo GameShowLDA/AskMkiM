@@ -85,6 +85,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(
+        ActionSettings settings,
         IUserInteractionService _messageService,
         IInputFieldProvider inputFieldProvider,
         IInputHighlightService inputHighlightService,

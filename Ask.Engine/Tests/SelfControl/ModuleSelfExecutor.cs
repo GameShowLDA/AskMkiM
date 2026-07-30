@@ -56,7 +56,7 @@ namespace Ask.Engine.Tests.SelfControl
     /// Выполнение контроля.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
-    private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
+    private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       IDeviceSelector deviceSelector = _deviceSelectorProvider.GetDeviceSelector();
 
@@ -81,6 +81,7 @@ namespace Ask.Engine.Tests.SelfControl
             await relay.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               dbc);
             break;
@@ -89,6 +90,7 @@ namespace Ask.Engine.Tests.SelfControl
             await switcher.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               switcher,
               meter);
@@ -100,6 +102,7 @@ namespace Ask.Engine.Tests.SelfControl
             await mint.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               _messageService,
+              settings,
               part,
               switcher1,
               mint,
@@ -112,6 +115,7 @@ namespace Ask.Engine.Tests.SelfControl
             await breakdown.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               breakdown,
               switcher2,
@@ -124,6 +128,7 @@ namespace Ask.Engine.Tests.SelfControl
             await multimeter.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               switcher3,
               multimeter);

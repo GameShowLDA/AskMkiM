@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -22,7 +23,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     {
       return typeof(MultimeterTypeConnector);
     }
-    public async Task StartSelfCheck(CancellationToken cancellationToken, Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, Enum selectedType, ActionSettings settings, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildMultimeterSetupMessage());
 

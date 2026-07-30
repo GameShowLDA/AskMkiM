@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -39,9 +40,15 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
     }
 
     /// <inheritdoc />
-    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, ActionSettings settings, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester));
+      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester);
+      settings.DeviceResults.Add(new DeviceExecutionResult
+      {
+        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+      });
+
+      await userMessageService.ShowMessageAsync(deviceTitle);
       await InitDevices(userMessageService, device, meter, breakdownTester);
 
       await device.ConnectorManager.ConnectBreakdownTester(userMessageService);
