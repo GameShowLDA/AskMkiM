@@ -92,12 +92,13 @@ namespace MainWindowProgram.Init
             services.AddCrashDiagnostics(
               options =>
               {
-                options.Path = Path.Combine(AppContext.BaseDirectory, "CrashReports");
+                options.Path = Path.GetFullPath(
+                  Path.Combine(AppContext.BaseDirectory, "..", "History", "CrashReports"));
                 options.MaxRetainedReports = 30;
                 options.IncludeScreenshot = true;
                 options.IncludeLogs = true;
                 options.IncludeConfig = true;
-                options.AutoZip = false;
+                options.AutoZip = true;
                 options.CreatePackageForLoggedExceptions = true;
                 options.LoggedExceptionThrottleWindow = TimeSpan.FromMinutes(2);
                 options.LoggedExceptionReportTimeout = TimeSpan.FromSeconds(30);
@@ -142,7 +143,9 @@ namespace MainWindowProgram.Init
 
       LoggerUtility.ExceptionLoggedCallback = args => LoggerUtility_ExceptionLogged(null, args);
       LoggerUtility.ExceptionLogged += LoggerUtility_ExceptionLogged;
-      LogInformation($"Crash diagnostics logger hook registered. Reports path: {Path.Combine(AppContext.BaseDirectory, "CrashReports")}");
+      LogInformation(
+        $"Crash diagnostics logger hook registered. Reports path: " +
+        $"{Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "History", "CrashReports"))}");
     }
 
     private static void LoggerUtility_ExceptionLogged(object? sender, LoggedExceptionEventArgs e)

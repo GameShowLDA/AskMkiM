@@ -34,6 +34,7 @@ namespace Ask.Diagnostics.Extensions
       services.AddSingleton<IExceptionDiagnosticReporter, ExceptionDiagnosticReporter>();
 
       services.AddSingleton<ICrashDataCollector, ExceptionCollector>();
+      services.AddSingleton<ICrashDataCollector, CrashReportArtifactCollector>();
       services.AddSingleton<ICrashDataCollector, ScreenshotCollector>();
       services.AddSingleton<ICrashDataCollector, CommandHistoryCollector>();
       services.AddSingleton<ICrashDataCollector, DeviceStateCollector>();
