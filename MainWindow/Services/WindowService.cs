@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace MainWindowProgram.Services
 {
@@ -12,16 +11,6 @@ namespace MainWindowProgram.Services
     private readonly MainWindow _mainWindow;
 
     /// <summary>
-    /// Главное меню (элемент управления Menu).
-    /// </summary>
-    private readonly Menu _mainMenu;
-
-    /// <summary>
-    /// Панель с кнопками управления окном.
-    /// </summary>
-    private readonly StackPanel _buttonsPanel;
-
-    /// <summary>
     /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
@@ -30,38 +19,11 @@ namespace MainWindowProgram.Services
     /// Инициализирует новый экземпляр класса <see cref="WindowService"/>.
     /// </summary>
     /// <param name="mainWindow">Главное окно.</param>
-    /// <param name="mainMenu">Меню, отображаемое в окне.</param>
-    /// <param name="buttonsPanel">Панель кнопок управления окном.</param>
     /// <param name="isLockedProvider">Функция, возвращающая признак блокировки интерфейса.</param>
-    public WindowService(MainWindow mainWindow, Menu mainMenu, StackPanel buttonsPanel, Func<bool> isLockedProvider)
+    public WindowService(MainWindow mainWindow, Func<bool> isLockedProvider)
     {
       _mainWindow = mainWindow;
-      _mainMenu = mainMenu;
-      _buttonsPanel = buttonsPanel;
       _isLockedProvider = isLockedProvider;
-    }
-
-    /// <summary>
-    /// Асинхронно изменяет размер шрифта в главном меню в зависимости от ширины окна.
-    /// </summary>
-    public async Task AdjustMainMenuFontAsync()
-    {
-      await Application.Current.Dispatcher.InvokeAsync(() =>
-      {
-        var maxWidth = _mainWindow.ActualWidth - _mainMenu.ActualWidth - 50;
-        var minWidth = 50 + _buttonsPanel.ActualWidth + _mainMenu.ActualWidth;
-
-        double minFontSize = 11;
-        double maxFontSize = 15;
-        double minWindowWidth = 300;
-        double maxWindowWidth = 800;
-
-        double fontSize = minFontSize + ((maxFontSize - minFontSize) * ((maxWidth - minWindowWidth) / (maxWindowWidth - minWindowWidth)));
-
-        fontSize = Math.Clamp(fontSize, minFontSize, maxFontSize);
-
-        _mainMenu.FontSize = fontSize;
-      });
     }
 
     /// <summary>
