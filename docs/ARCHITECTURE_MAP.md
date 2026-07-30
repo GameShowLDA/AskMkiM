@@ -1018,6 +1018,31 @@ same path with gates enabled and performs real transport I/O.
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
 
+### Главное меню и адаптивная верхняя панель
+
+Единственное дерево главного меню объявлено в `MainWindow/MainWindow.xaml`.
+Пункты напрямую связываются с дочерними ViewModel из `MainWindowViewModel`;
+`UiEventsBinder` изменяет видимость контекстных файловых команд и передаёт меню
+в `MenuHotkeyBinder.BindAutoRenumbering`.
+
+Верхняя панель делит доступную ширину между меню (`*`) и блоком пользователя,
+темы и оконных кнопок (`Auto`). `Menu.ItemsPanel` использует горизонтальный
+`WrapPanel`: при нехватке места существующие пункты переносятся на следующие
+строки, а высота строки shell увеличивается автоматически. Механизм работает
+от фактического WPF layout и DPI-независимых единиц, не проверяет разрешение или
+ширину окна и не создаёт вторую версию меню. `WindowService` управляет только
+состоянием окна; адаптация меню не проходит через ViewModel или обработчик
+`SizeChanged`. Размер блока пользователя, темы и оконных кнопок привязан к
+высоте одного пункта `File`, а не к суммарной высоте `mainMenu`; это исключает
+цикл обратной связи «перенос меню → увеличение кнопок → уменьшение места меню».
+
+Ключевые файлы: `MainWindow/MainWindow.xaml`,
+`MainWindow/ViewModels/MainWindowViewModel.cs`,
+`MainWindow/Events/UiEventsBinder.cs`,
+`MainWindow/HotkeyBindings/MenuHotkeyBinder.cs`,
+`MainWindow/Services/WindowService.cs`,
+`MainWindow/Engine/AppServices.cs`.
+
 `UI.Components.MultiEditorControl` is the main workspace. It exposes:
 
 - `IEditorDocumentService` → `UI.Services.FileManager.FileService`;
