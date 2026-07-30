@@ -19,8 +19,16 @@ namespace Ask.UI.Components
     public ComSettingsComponent()
     {
       InitializeComponent();
+      AddHandler(
+        ComboBox.SelectionChangedEvent,
+        new SelectionChangedEventHandler(OnSettingsSelectionChanged));
       Reset();
     }
+
+    /// <summary>
+    /// Возникает при изменении одного из параметров COM-порта.
+    /// </summary>
+    public event EventHandler? SettingsChanged;
 
     /// <summary>
     /// Получает имя выбранного COM-порта.
@@ -206,8 +214,9 @@ namespace Ask.UI.Components
     }
 
     /// <summary>
-    /// Shows or clears validation highlight for the whole COM settings section.
+    /// Показывает или удаляет подсветку ошибки для секции параметров COM-порта.
     /// </summary>
+    /// <param name="isInvalid">Признак наличия ошибки в параметрах COM-порта.</param>
     public void SetValidationHighlight(bool isInvalid)
     {
       if (isInvalid)
@@ -219,6 +228,16 @@ namespace Ask.UI.Components
 
       COMContainer.ClearValue(Border.BorderBrushProperty);
       COMContainer.ClearValue(Border.BorderThicknessProperty);
+    }
+
+    /// <summary>
+    /// Оповещает подписчиков об изменении параметров COM-порта.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы изменения выбранного значения.</param>
+    private void OnSettingsSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      SettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>

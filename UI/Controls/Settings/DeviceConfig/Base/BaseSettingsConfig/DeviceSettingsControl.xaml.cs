@@ -33,6 +33,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       InitializeComponent();
       VisibilityElements();
+      InitializeValidationTracking();
     }
 
     /// <summary>

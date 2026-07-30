@@ -406,7 +406,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
                     <Grid Background="Transparent">
-                        <Track Name="PART_Track" IsDirectionReversed="true">
+                        <Track Name="PART_Track"
+                               IsDirectionReversed="true"
+                               Orientation="{TemplateBinding Orientation}">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="ScrollBar.LineUpCommand"
                                               Style="{StaticResource ScrollBarButtonStyle}"
@@ -435,7 +437,7 @@
     </Style>
 
     <Style x:Key="ConfigurationScrollBarThumbStyle" TargetType="Thumb">
-        <Setter Property="Background" Value="#1CA3E9"/>
+        <Setter Property="Background" Value="{DynamicResource SettingsInfoTabloBackgroundSolidColorBrush}"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Template">
@@ -450,10 +452,10 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#38B6F2"/>
+                <Setter Property="Opacity" Value="0.85"/>
             </Trigger>
             <Trigger Property="IsDragging" Value="True">
-                <Setter Property="Background" Value="#93D2F4"/>
+                <Setter Property="Opacity" Value="0.7"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -465,7 +467,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
                     <Grid Background="Transparent">
-                        <Track Name="PART_Track" IsDirectionReversed="true">
+                        <Track Name="PART_Track"
+                               IsDirectionReversed="true"
+                               Orientation="{TemplateBinding Orientation}">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="ScrollBar.LineUpCommand"
                                               Style="{StaticResource ScrollBarButtonStyle}"
@@ -488,7 +492,7 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Vertical">
-                <Setter Property="Margin" Value="0,0,5,0"/>
+                <Setter Property="Margin" Value="8,0,3,0"/>
             </Trigger>
         </Style.Triggers>
     </Style>
