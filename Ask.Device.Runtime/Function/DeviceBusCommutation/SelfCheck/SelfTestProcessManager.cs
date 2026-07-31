@@ -10,6 +10,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Commands;
 using System.Net;
+using YamlDotNet.Serialization;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
@@ -177,8 +178,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         string circuitName = selfTestChecker.GetCircuitName(testType, busContact);
-
-        if (!await PerformCircuitTestAsync(cancellationToken, messageService, selfTestChecker, meter, testType, circuitName, busContact))
+        var test = settings.DeviceResults.LastOrDefault()?.Tests.LastOrDefault();
+        if (!await PerformCircuitTestAsync(cancellationToken, messageService, selfTestChecker, meter, testType, circuitName, busContact, test))
         {
           LogError($"Проверка {circuitName} завершилась с ошибкой!", isDeviceLog: true);
           allTestsPassed = false;
@@ -224,7 +225,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <see langword="true"/>, если цепь и её реле прошли проверку.
     /// В противном случае — <see langword="false"/>.
     /// </returns>
-    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, TestExecutionResult testResult)
     {
       string testName = GetTestName(testType);
       string busName = SelfTestMetadataProvider.GetBusContactName(busContact);
@@ -253,7 +254,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
           if (continuityResult)
           {
-            bool relayResult = await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
+            bool relayResult = await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter, testResult);
 
             if (ExecutionConfig.GetIsIdleModeEnabled())
             {
@@ -376,7 +377,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <exception cref="OperationCanceledException">
     /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
     /// </exception>
-    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IMultimeter meter)
+    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IMultimeter meter, TestExecutionResult testResult)
     {
       int relayCount = await GetRelayCountAsync(
         messageService,
@@ -401,7 +402,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           circuitName,
           busContact,
           meter,
-          relay))
+          relay,
+          testResult))
         {
           return false;
         }
@@ -502,7 +504,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       string circuitName,
       int busContact,
       IMultimeter meter,
-      int relay)
+      int relay,
+      TestExecutionResult testResult)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await messageService.ShowMessageAsync(
@@ -516,7 +519,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         busContact,
         relay,
         action: 2,
-        operationMessage: $"Включение реле {relay} в цепи {circuitName}"))
+        operationMessage: $"Включение реле {relay} в цепи {circuitName}",
+        testResult))
       {
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -546,7 +550,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         busContact,
         relay,
         action: 1,
-        operationMessage: $"Выключение реле {relay} в цепи {circuitName}"))
+        operationMessage: $"Выключение реле {relay} в цепи {circuitName}",
+        testResult))
       {
         return true;
       }
@@ -578,7 +583,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       int busContact,
       int relay,
       int action,
-      string operationMessage)
+      string operationMessage, 
+      TestExecutionResult testResult)
     {
       return UserActionHelper.GetRunWithUserRepeatAsync(
         () => SelfTestRetryHelper.ExecuteHardwareOperationAsync(

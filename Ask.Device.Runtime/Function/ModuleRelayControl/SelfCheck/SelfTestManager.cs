@@ -10,6 +10,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Commands;
+using YamlDotNet.Serialization;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
@@ -44,16 +45,16 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       switch (typeConnector)
       {
         case RelaySwitchTypeConnector.Points:
-          await PerformClosureCycle(cancellationToken, _moduleRelay, userMessageService);
+          await PerformClosureCycle(cancellationToken, _moduleRelay, settings, userMessageService);
           break;
 
         case RelaySwitchTypeConnector.BusCommutation:
-          await CheckBusesConnection(cancellationToken, _moduleRelay, device, userMessageService);
+          await CheckBusesConnection(cancellationToken, _moduleRelay, device, settings, userMessageService);
           break;
 
         case RelaySwitchTypeConnector.FullCheck:
-          await PerformClosureCycle(cancellationToken, _moduleRelay, userMessageService);
-          await CheckBusesConnection(cancellationToken, _moduleRelay, device, userMessageService);
+          await PerformClosureCycle(cancellationToken, _moduleRelay, settings, userMessageService, 1.ToString());
+          await CheckBusesConnection(cancellationToken, _moduleRelay, device, settings, userMessageService, 2.ToString());
           break;
       }
       await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
@@ -65,7 +66,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// и формируется сообщение с результатом проверки.
     /// </summary>
     /// <param name="token">Токен отмены операции.</param>
-    private async Task PerformClosureCycle(CancellationToken token, IRelaySwitchModule relaySwitchModule, IUserInteractionService? userMessageService = null)
+    private async Task PerformClosureCycle(CancellationToken token, IRelaySwitchModule relaySwitchModule, ActionSettings settings, IUserInteractionService? userMessageService = null, string testNumber = null)
     {
       await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
       if (!(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
@@ -76,15 +77,23 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
       await _moduleRelay.MeterManager.ConnectMeterAsync(
         ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
-
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
+      var testName = "Тест подключения точек";
+      settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult
+      {
+        TestName = testName,
+      });
+      if (!string.IsNullOrEmpty(testNumber))
+      {
+        testName = $"{testNumber}. {testName}";
+      }
+      await userMessageService.ShowMessageAsync(new ShowMessageModel(testName));
       for (int point = 1; point <= _moduleRelay.PointCount; point++)
       {
-        await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, userMessageService), userMessageService);
+        await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, settings, userMessageService), userMessageService);
       }
     }
 
-    private async Task CheckBusesConnection(CancellationToken token, IRelaySwitchModule relaySwitchModule, ISwitchingDevice switchingDevice, IUserInteractionService? userMessageService = null)
+    private async Task CheckBusesConnection(CancellationToken token, IRelaySwitchModule relaySwitchModule, ISwitchingDevice switchingDevice, ActionSettings settings, IUserInteractionService? userMessageService = null, string testNumber = null)
     {
 
       if (switchingDevice == null)
@@ -93,7 +102,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
+      await userMessageService.ShowMessageAsync(new ShowMessageModel("\tНастройка устройств"));
 
       if (!(await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
@@ -107,13 +116,21 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       {
         return;
       }
-
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка коммутации шин"));
+      var testName = "Тест коммутации шин";
+      settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult
+      {
+        TestName = testName,
+      });
+      if(!string.IsNullOrEmpty(testNumber))
+      {
+        testName = $"{testNumber}. {testName}";
+      }
+      await userMessageService.ShowMessageAsync(new ShowMessageModel(testName));
 
       for (int busNumber = 1; busNumber <= 4; busNumber++)
       {
         await UserActionHelper.RunWithUserRepeatAsync(
-          () => CheckBus(token, relaySwitchModule, busNumber, userMessageService),
+          () => CheckBus(token, relaySwitchModule, busNumber, settings, userMessageService),
           userMessageService,
           deviceTask: ExecutionConfig.GetIsIdleModeEnabled());
       }
@@ -146,7 +163,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       }
     }
 
-    private async Task<bool> CheckPoint(CancellationToken token, IRelaySwitchModule relaySwitchModule, int point, IUserInteractionService? userMessageService = null)
+    private async Task<bool> CheckPoint(CancellationToken token, IRelaySwitchModule relaySwitchModule, int point, ActionSettings settings, IUserInteractionService? userMessageService = null)
     {
       token.ThrowIfCancellationRequested();
 
@@ -189,7 +206,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
           IndentLevel = 1,
         };
         showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
-
+        if (showMessageModel.Status.Value == MessageType.Error)
+        {
+          settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
+          {
+            Message = $"Точка {point} - Ошибка подключения точки",
+          });
+        }
         await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
 
         if (!model.SelfControl)
@@ -244,7 +267,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       return true;
     }
 
-    private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, IUserInteractionService? userMessageService = null)
+    private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, ActionSettings settings, IUserInteractionService? userMessageService = null)
     {
       (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
 
@@ -256,6 +279,13 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         ExecutionError = !answer.Item1,
         IndentLevel = 2,
       };
+      if (showMessageModel.Status.Value == MessageType.Error)
+      {
+        settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
+        {
+          Message = $"{showMessageModel.Header} - Ошибка коммутации шин",
+        });
+      }
       showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
       await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
 

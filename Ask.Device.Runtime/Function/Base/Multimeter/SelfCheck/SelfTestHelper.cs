@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Newtonsoft.Json.Linq;
@@ -21,7 +22,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
     /// <param name="unit">Единица измерения результата</param>
     /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    public static async Task IsCorrectRangeAsync(bool status, double result, string param, string? unit = null, IUserInteractionService? userMessageService = null)
+    public static async Task IsCorrectRangeAsync(bool status, double result, string param, ActionSettings settings, string? unit = null, IUserInteractionService? userMessageService = null)
     {
       var formattedResult = string.IsNullOrWhiteSpace(unit)
         ? $"{result.ToString("0.000###;-0.000###;0.000")}"
@@ -34,6 +35,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
             header: $"Тест {param}",
             message: $"{formattedResult} [НОРМА]",
             type: ShowMessageModel.MessageType.Success));
+        var testResult = new TestExecutionResult
+        {
+          TestName = $"Тест {param} {formattedResult}",
+        };
+        settings.DeviceResults[0].Tests.Add(testResult);
       }
       else
       {
@@ -42,6 +48,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
             header: $"Тест {param}",
             message: $"{formattedResult} [БРАК]",
             type: ShowMessageModel.MessageType.Error));
+        var testResult = new TestExecutionResult
+        {
+          TestName = $"Тест {param} {formattedResult}",
+        };
+        settings.DeviceResults[0].Tests.Add(testResult);
       }
     }
 
