@@ -196,8 +196,8 @@ namespace Ask.Engine.Tests.Base
         new(
           $"Запуск \"{executionTitle}\"",
           type: ShowMessageModel.MessageType.Command),
-        CreateInputMessage("Первая точка", data.FirstPoint.ToString()),
-        CreateInputMessage("Вторая точка", data.SecondPoint.ToString()),
+        CreateInputMessage("Начальная точка", data.FirstPoint.ToString()),
+        CreateInputMessage("Конечная точка", data.SecondPoint.ToString()),
         CreateInputMessage(
           $"Заданное значение {displayInfo.MeasurementDescription.ToLowerInvariant()}",
           MeasurementValueFormatter.FormatWithUnit(data.Param, displayInfo.Unit))
