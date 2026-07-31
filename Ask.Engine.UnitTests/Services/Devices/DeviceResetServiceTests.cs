@@ -109,6 +109,13 @@ public sealed class DeviceResetServiceTests
     Assert.Equal(
       ["<пустая строка>", "Завершение теста", "Устройство 1(1)"],
       output);
+
+    var completionHeader = interaction.Invocations
+      .Where(invocation => invocation.Method.Name == nameof(IUserInteractionService.ShowMessageAsync))
+      .Select(invocation => (ShowMessageModel)invocation.Arguments[0])
+      .Single(message => message.Header == "Завершение теста");
+
+    Assert.Equal(ShowMessageModel.MessageType.Command, completionHeader.Status);
   }
 
   [Fact]
