@@ -34,27 +34,28 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private static readonly double[] DcVoltageRanges = { 0.1, 1, 10, 100, 1000 };
     private static readonly double[] AcVoltageRanges = { 0.1, 1, 10, 100, 750 };
 
-    private static readonly ResistanceCheck[] ResistanceChecks =
+    private static readonly ObjectCheck[] ResistanceChecks =
     {
-      new ResistanceCheck(1, 2, 50),
-      new ResistanceCheck(2, 100, 5),
-      new ResistanceCheck(3, 1_000, 5),
-      new ResistanceCheck(4, 10_000, 5),
-      new ResistanceCheck(5, 100_000, 1),
-      new ResistanceCheck(6, 1_000_000, 1),
-      new ResistanceCheck(7, 10_000_000, 5),
-      new ResistanceCheck(8, 85_000_000, 5),
+      new ObjectCheck(1, 2, 50),
+      new ObjectCheck(2, 100, 5),
+      new ObjectCheck(3, 1_000, 5),
+      new ObjectCheck(4, 10_000, 5),
+      new ObjectCheck(5, 100_000, 1),
+      new ObjectCheck(6, 1_000_000, 1),
+      new ObjectCheck(7, 10_000_000, 5),
+      new ObjectCheck(8, 85_000_000, 5)
+
     };
 
-    private static readonly CapacitanceCheck[] CapacitanceChecks =
+    private static readonly ObjectCheck[] CapacitanceChecks =
     {
-      new CapacitanceCheck(1, 3.6),
-      new CapacitanceCheck(2, 11),
-      new CapacitanceCheck(3, 120),
-      new CapacitanceCheck(4, 1_000),
+      new ObjectCheck(1, 3.6, 10),
+      new ObjectCheck(2, 11, 10),
+      new ObjectCheck(3, 120, 10),
+      new ObjectCheck(4, 1_000, 10),
       // Неисправны.
-      //new CapacitanceCheck(5, 6_800),
-      //new CapacitanceCheck(6, 110_000),
+      //new ObjectCheck(5, 6_800, 10),
+      //new ObjectCheck(6, 110_000, 10)
     };
 
     /// <summary>
@@ -123,19 +124,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     }
 
     /// <summary>
-    /// Рассчитывает допустимое отклонение для измерения сопротивления.
+    /// Рассчитывает допустимое отклонение для измерения объекта.
     /// </summary>
-    /// <param name="resistance">Эталонное сопротивление.</param>
+    /// <param name="idealResult">Идеальный результат измерения.</param>
     /// <param name="percentageError">Допустимая относительная погрешность в процентах.</param>
-    /// <returns>Допустимое абсолютное отклонение сопротивления.</returns>
-    private static double ResistanceTolerance(double resistance, double percentageError) => (percentageError / 100) * resistance;
-
-    /// <summary>
-    /// Рассчитывает допустимое отклонение для измерения ёмкости.
-    /// </summary>
-    /// <param name="capacity">Эталонная ёмкость.</param>
-    /// <returns>Допустимое абсолютное отклонение ёмкости.</returns>
-    private static double CapacityTolerance(double capacity) => 0.05 * capacity;
+    /// <returns>Допустимое абсолютное отклонение.</returns>
+    private static double ObjectTolerance(double idealResult, double percentageError) => (percentageError / 100d) * idealResult;
 
     /// <summary>
     /// Выполняет проверку измерения постоянного и переменного напряжения.
@@ -300,7 +294,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="meter">Проверяемый мультиметр.</param>
     /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
     /// <returns>Задача, представляющая выполнение измерения сопротивления.</returns>
-    private static async Task MeasureResistanceAsync(CancellationToken cancellationToken, ResistanceCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
+    private static async Task MeasureResistanceAsync(CancellationToken cancellationToken, ObjectCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
       var resistanceValue = FormatReferenceValue(check.IdealResult, ResistanceUnit);
 
@@ -313,7 +307,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       try
       {
-        var tolerance = ResistanceTolerance(check.IdealResult, check.PercentageError);
+        var tolerance = ObjectTolerance(check.IdealResult, check.PercentageError);
 
         double result = -1;
         bool resultStatus = false;
@@ -414,7 +408,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="meter">Проверяемый мультиметр.</param>
     /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
     /// <returns>Задача, представляющая выполнение измерения ёмкости.</returns>
-    private static async Task MeasureCapacitanceAsync(CancellationToken cancellationToken, CapacitanceCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
+    private static async Task MeasureCapacitanceAsync(CancellationToken cancellationToken, ObjectCheck check, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {
       var capacitanceValue = FormatReferenceValue(check.IdealResult, CapacitanceUnit);
 
@@ -450,7 +444,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await ShowActionHeaderAsync("Режим измерения ёмкости", userMessageService);
         await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
 
-        var tolerance = CapacityTolerance(check.IdealResult);
+        var tolerance = ObjectTolerance(check.IdealResult, check.PercentageError);
 
         await ShowCheckStepAsync(
           $"Измерение ёмкости конденсатора {capacitanceValue}",
@@ -475,7 +469,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           check.IdealResult.ToString("N1"),
           CapacitanceUnit,
           RelativeErrorMarker,
-          5,
+          check.PercentageError,
           userMessageService);
       }
       finally
@@ -656,33 +650,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       return $"{formattedValue}{unit}";
     }
 
-    private readonly struct ResistanceCheck
+    private readonly struct ObjectCheck
     {
-      public ResistanceCheck(int number, double idealResult, int percentageError)
+      public ObjectCheck(int number, double idealResult, int percentageError)
       {
         Number = number;
         IdealResult = idealResult;
         PercentageError = percentageError;
       }
-
       public int Number { get; }
-
       public double IdealResult { get; }
-
       public int PercentageError { get; }
-    }
-
-    private readonly struct CapacitanceCheck
-    {
-      public CapacitanceCheck(int number, double idealResult)
-      {
-        Number = number;
-        IdealResult = idealResult;
-      }
-
-      public int Number { get; }
-
-      public double IdealResult { get; }
     }
   }
 }
