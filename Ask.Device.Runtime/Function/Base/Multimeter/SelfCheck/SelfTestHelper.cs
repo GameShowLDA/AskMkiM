@@ -32,12 +32,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
-            header: $"Тест {param}",
+            header: $"Тест измерения {param}",
             message: $"{formattedResult} [НОРМА]",
             type: ShowMessageModel.MessageType.Success));
         var testResult = new TestExecutionResult
         {
-          TestName = $"Тест {param} {formattedResult}",
+          TestName = $"Тест измерения {param}",
         };
         settings.DeviceResults[0].Tests.Add(testResult);
       }
@@ -45,12 +45,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       {
         await userMessageService.ShowMessageAsync(
           new ShowMessageModel(
-            header: $"Тест {param}",
+            header: $"Тест измерения {param}",
             message: $"{formattedResult} [БРАК]",
             type: ShowMessageModel.MessageType.Error));
         var testResult = new TestExecutionResult
         {
-          TestName = $"Тест {param} {formattedResult}",
+          TestName = $"Тест измерения {param} {formattedResult}",
         };
         settings.DeviceResults[0].Tests.Add(testResult);
       }

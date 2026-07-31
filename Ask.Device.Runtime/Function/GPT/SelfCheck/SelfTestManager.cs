@@ -197,7 +197,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
-        var testName = "Тест напряжения ACW с ППУ";
+        var testName = "Тест измерения напряжения ACW";
         settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
         if (!string.IsNullOrEmpty(testNumber))
         {
@@ -298,7 +298,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
-        var testName = "Тест напряжения DCW с ППУ";
+        var testName = "Тест измерения напряжения DCW";
         settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
         if (!string.IsNullOrEmpty(testNumber))
         {

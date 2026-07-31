@@ -159,7 +159,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool allTestsPassed = true;
       string testName = GetTestName(testType);
 
-      var testDescription = $"\n{getNextTestNumber()}. Тест \"{testName}\"";
+      var testDescription = $"\n{getNextTestNumber()}. Тест подключения \"{testName}\"";
       var testResult = new TestExecutionResult
       {
         TestName = $"Тест \"{testName}\"",

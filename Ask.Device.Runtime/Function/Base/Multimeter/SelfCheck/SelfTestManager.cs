@@ -79,7 +79,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealVoltage, result, "напряжения", userMessageService);
       bool result_status = SelfTestHelper.InRange(IdealVoltage, result, VoltageRange());
-      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "напряжения", settings, "В", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "напряжения DCW", settings, "В", userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
@@ -91,7 +91,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealResistance, result, "напряжения", userMessageService);
       result_status = SelfTestHelper.InRange(IdealVoltage, result, VoltageRange(result));
-      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "напряжения", settings, "В", userMessageService);
+      await SelfTestHelper.IsCorrectRangeAsync(result_status, result, "напряжения ACW", settings, "В", userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await device.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB1, userMessageService);

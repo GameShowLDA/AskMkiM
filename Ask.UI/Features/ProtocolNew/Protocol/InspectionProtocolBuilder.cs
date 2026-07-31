@@ -15,7 +15,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     ArgumentNullException.ThrowIfNull(settings);
 
     var message = new StringBuilder();
-    message.AppendLine($"Проверка \"{settings.Name}\" завершена ({settings.Mode}).");
+    message.AppendLine($"Проверка \"{settings.Name}\" ({settings.Mode}).");
     message.AppendLine($"\tНачало проверки: {DateTime.Now:dd.MM.yyyy} {settings.StartTime:HH:mm:ss}");
     message.AppendLine($"\tВремя выполнения: {settings.ExecutionDuration:hh\\:mm\\:ss\\:fff}");
     message.AppendLine();
@@ -70,14 +70,16 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
 
     if (settings.ExecutionErrors.Count == 0)
     {
-      message.AppendLine("\tЗаключение: ошибок не обнаружено");
+      message.AppendLine("\nЗаключение: ошибок не обнаружено");
       return message.ToString();
     }
-
-    message.AppendLine("\nЗаключение:");
-    for (var index = 0; index < settings.ExecutionErrors.Count; index++)
+    else if(settings.ExecutionErrors.Count == 1)
     {
-      message.AppendLine($"\t{index + 1}. {settings.ExecutionErrors[index]} [БРАК]");
+      message.AppendLine($"\nЗаключение: обнаружена {settings.ExecutionErrors.Count} ошибка");
+    }
+    else
+    {
+      message.AppendLine($"\nЗаключение: обнаружено {settings.ExecutionErrors.Count} ошибок");
     }
 
     return message.ToString();
@@ -85,7 +87,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
 
   private static void WriteErrorMessage(StringBuilder message, int i, TestExecutionResult testResult)
   {
-    message.AppendLine($"\t\t{i}. {testResult.TestName} {testResult.Errors.Count} ошибок:");
+    message.AppendLine($"\t\t{i}. {testResult.TestName}:");
     for (var index = 0; index < testResult.Errors.Count; index++)
     {
       message.AppendLine($"\t\t\t{i}.{index + 1}. {testResult.Errors[index].Message} [БРАК]");
