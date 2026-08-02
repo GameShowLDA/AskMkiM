@@ -1,8 +1,9 @@
 ﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
@@ -56,7 +57,8 @@ namespace MainWindowProgram.Services
           GetGptAsync,
           GetSwitchingDeviceAsync,
           GetRelaySwitchModulesAsync,
-          GetMultimetersAsync),
+          GetMultimetersAsync,
+          GetChassisAsync),
         TypeWindow.Settings);
 
     /// <summary>
@@ -95,6 +97,15 @@ namespace MainWindowProgram.Services
     private static async Task<IReadOnlyList<IMultimeter>> GetMultimetersAsync()
     {
       return await FastMeters.GetDevicesByNumberChassisAsync(1);
+    }
+
+    /// <summary>
+    /// Возвращает первый настроенный контроллер шасси.
+    /// </summary>
+    /// <returns>Контроллер шасси или <see langword="null"/>.</returns>
+    private static async Task<IChassisManager?> GetChassisAsync()
+    {
+      return (await ChassisManagers.GetAllAsync()).FirstOrDefault();
     }
 
     /// <summary>

@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
     <ProjectReference Include="..\Ask.Device.Communication\Ask.Device.Communication.csproj" />
+    <ProjectReference Include="..\Ask.Device.Emulator\Ask.Device.Emulator.csproj" />
   </ItemGroup>
 
 </Project>
