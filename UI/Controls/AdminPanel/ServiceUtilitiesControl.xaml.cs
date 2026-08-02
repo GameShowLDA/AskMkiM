@@ -1,7 +1,9 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.UI.Features.ServiceTools.Chassis;
 using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.Multimeter;
 using Ask.UI.Features.ServiceTools.RelaySwitchModule;
@@ -16,15 +18,17 @@ namespace UI.Controls.AdminPanel
   /// </summary>
   public partial class ServiceUtilitiesControl : UserControl
   {
+    private readonly Func<Task<IBreakdownTester?>> gptProvider;
+    private readonly Func<Task<ISwitchingDevice?>> switchingDeviceProvider;
+    private readonly Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider;
+    private readonly Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider;
+    private readonly Func<Task<IChassisManager?>> chassisProvider;
     private SetCommand? setCommandControl;
     private GPTPunchControl? gptControl;
     private SwitchingDeviceControl? switchingDeviceControl;
     private RelaySwitchModuleControl? relaySwitchModuleControl;
     private MultimeterControl? multimeterControl;
-    private readonly Func<Task<IBreakdownTester?>> gptProvider;
-    private readonly Func<Task<ISwitchingDevice?>> switchingDeviceProvider;
-    private readonly Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider;
-    private readonly Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider;
+    private ChassisControl? chassisControl;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ServiceUtilitiesControl"/>.
@@ -33,11 +37,13 @@ namespace UI.Controls.AdminPanel
     /// <param name="switchingDeviceProvider">Функция получения настроенного устройства коммутации шин.</param>
     /// <param name="relaySwitchModulesProvider">Функция получения модулей коммутации реле.</param>
     /// <param name="multimetersProvider">Функция получения мультиметров.</param>
+    /// <param name="chassisProvider">Функция получения контроллера шасси.</param>
     public ServiceUtilitiesControl(
       Func<Task<IBreakdownTester?>> gptProvider,
       Func<Task<ISwitchingDevice?>> switchingDeviceProvider,
       Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider,
-      Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider)
+      Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider,
+      Func<Task<IChassisManager?>> chassisProvider)
     {
       this.gptProvider = gptProvider
         ?? throw new ArgumentNullException(nameof(gptProvider));
@@ -47,8 +53,25 @@ namespace UI.Controls.AdminPanel
         ?? throw new ArgumentNullException(nameof(relaySwitchModulesProvider));
       this.multimetersProvider = multimetersProvider
         ?? throw new ArgumentNullException(nameof(multimetersProvider));
+      this.chassisProvider = chassisProvider
+        ?? throw new ArgumentNullException(nameof(chassisProvider));
       InitializeComponent();
       SetCommandTab.IsChecked = true;
+    }
+
+    private void ChassisTab_Checked(object sender, RoutedEventArgs e)
+    {
+      var setCommand = setCommandControl ??= new SetCommand();
+
+      UtilityContentPresenter.Content = null;
+      SideConsolePresenter.Content = null;
+      UtilityContentPresenter.Content = chassisControl ??= new ChassisControl(chassisProvider);
+      SideConsolePresenter.Content = setCommand;
+      UtilityContentPresenter.HorizontalAlignment = HorizontalAlignment.Left;
+      UtilityColumn.Width = GridLength.Auto;
+      UtilitySplitterColumn.Width = new GridLength(18);
+      ConsoleColumn.Width = new GridLength(1, GridUnitType.Star);
+      UtilitySplitter.Visibility = Visibility.Visible;
     }
 
     /// <summary>

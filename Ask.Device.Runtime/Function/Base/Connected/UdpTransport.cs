@@ -1,7 +1,9 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.ManagerChassis;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -32,6 +34,14 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IChassisManager chassis)
+      {
+        string response = await new ChassisQueryExecutor(chassis).QueryAsync(
+          _device.ConnectedProfile.Initialize,
+          _device.ConnectedProfile.Timeout);
+        return ValidateInitialization(response);
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
@@ -40,13 +50,18 @@ namespace Ask.Device.Runtime.Function.Connected
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Initialize, timeout: _device.ConnectedProfile.Timeout);
-      if (string.IsNullOrEmpty(result))
+      return ValidateInitialization(result);
+    }
+
+    private (bool Connect, string Answer) ValidateInitialization(string response)
+    {
+      if (string.IsNullOrEmpty(response))
       {
         IsReset?.Invoke();
         return (false, $"Нет ответа от устройства {_device.Name}({_device.Number})");
       }
 
-      var initializationResult = _device.InitializationValidationDelegate(result, _device);
+      var initializationResult = _device.InitializationValidationDelegate(response, _device);
       if (initializationResult.Success)
       {
         return (true, string.Empty);
@@ -71,6 +86,14 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IChassisManager chassis)
+      {
+        string response = await new ChassisQueryExecutor(chassis).QueryAsync(
+          _device.ConnectedProfile.Reset,
+          _device.ConnectedProfile.Timeout);
+        return ValidateReset(response);
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
@@ -83,15 +106,15 @@ namespace Ask.Device.Runtime.Function.Connected
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Reset, timeout: _device.ConnectedProfile.Timeout);
-      var resetResult = _device.ResetValidationDelegate(result, _device);
+      return ValidateReset(result);
+    }
+
+    private bool ValidateReset(string response)
+    {
+      var resetResult = _device.ResetValidationDelegate(response, _device);
       IsReset?.Invoke();
 
-      if (resetResult)
-      {
-        return true;
-      }
-
-      return false;
+      return resetResult;
     }
 
   }
