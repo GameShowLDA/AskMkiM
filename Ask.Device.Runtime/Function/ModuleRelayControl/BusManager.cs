@@ -1,4 +1,3 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
@@ -17,6 +16,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
   {
     private IRelaySwitchModule _moduleRelayControl { get; set; }
     private readonly BusConnectionStateStore connectionState = new BusConnectionStateStore();
+    private readonly ModuleRelayControlQueryExecutor _queryExecutor;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="BusManager"/>.
@@ -25,6 +25,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     public BusManager(IRelaySwitchModule moduleRelayControl)
     {
       _moduleRelayControl = moduleRelayControl;
+      _queryExecutor = new ModuleRelayControlQueryExecutor(_moduleRelayControl);
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
@@ -48,18 +49,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
-        {
-          connectionState.Set(bus, false);
-          return false;
-        }
-
-        connectionState.Set(bus, true);
-        return true;
-      }
-
       int typeVoltage = numberBus;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
       string commandText = cmd.ToString();
@@ -68,7 +57,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
         var parsed = BaseResponse.FromJson(response);
 
         if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
@@ -100,18 +89,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
-        {
-          connectionState.Set(bus, false);
-          return false;
-        }
-
-        connectionState.Set(bus, false);
-        return true;
-      }
-
       int typeVoltage = numberBus;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 2);
       string commandText = cmd.ToString();
@@ -120,7 +97,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
         var parsed = BaseResponse.FromJson(response);
 
         if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}.2")

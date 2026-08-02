@@ -1,9 +1,11 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.ManagerChassis;
+using Ask.Device.Runtime.Function.ModuleRelayControl;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -34,6 +36,14 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IRelaySwitchModule module)
+      {
+        string response = await new ModuleRelayControlQueryExecutor(module).QueryAsync(
+          _device.ConnectedProfile.Initialize,
+          _device.ConnectedProfile.Timeout);
+        return ValidateInitialization(response);
+      }
+
       if (_device is IChassisManager chassis)
       {
         string response = await new ChassisQueryExecutor(chassis).QueryAsync(
@@ -86,6 +96,14 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IRelaySwitchModule module)
+      {
+        string response = await new ModuleRelayControlQueryExecutor(module).QueryAsync(
+          _device.ConnectedProfile.Reset,
+          _device.ConnectedProfile.Timeout);
+        return ValidateReset(response);
+      }
+
       if (_device is IChassisManager chassis)
       {
         string response = await new ChassisQueryExecutor(chassis).QueryAsync(

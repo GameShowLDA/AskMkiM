@@ -21,7 +21,7 @@
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
-| МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/` |
+| МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
 | Пробойная установка GPT | `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
@@ -80,7 +80,7 @@
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
 | `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator` |
-| `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
+| `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
@@ -170,7 +170,7 @@ AskMkiM/
 │  └─ Services/Protocols/      history protocol persistence
 ├─ Ask.Device.Application/     adapters and application composition
 ├─ Ask.Device.Runtime/         device classes and raw function managers
-├─ Ask.Device.Emulator/        stateful chassis protocol emulation for Idle mode
+├─ Ask.Device.Emulator/        stateful chassis and МКР protocol emulation for Idle mode
 ├─ Ask.Device.Communication/   wire protocols
 ├─ Ask.DataBase.Engine/        runtime device/data facade
 ├─ Ask.DataBase.Provider/      EF Core/SQLite provider
@@ -886,7 +886,7 @@ the global `ExecutionConfig`.
 | Interface | Runtime implementation | Managers/adapters | Protocol/transport | DB facade |
 | --- | --- | --- | --- | --- |
 | `IChassisManager` | `ManagerChassis` | runtime `PowerManager`; no application adapter | `ChassisQueryExecutor` → Real UDP / stateful Idle emulator | `ChassisManagers` |
-| `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `Transport` → `UdpProtocol` | `RelaySwitchModules` |
+| `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `ModuleRelayControlQueryExecutor` → Real UDP / stateful Idle emulator | `RelaySwitchModules` |
 | `IPowerSourceModule` | `ModuleVoltageCurrentSource` | adapters for Voltage/Current/Bus; runtime SelfTest | `Transport` → UDP | `PowerSourceModules` |
 | `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `Transport` → UDP | `SwitchingDevices` |
 | `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `Transport` → `TcpProtocol:5025` | `FastMeters` |
@@ -975,8 +975,9 @@ SettingsExecutionDto.IdleModeExecution (SQLite)
 Selection is distributed, not DI-based:
 
 - `ActionExecutor.StartAsync` skips power validation and system reset in idle;
-- chassis initialization/reset and power commands use `DeviceProtocolEmulator`, which
-  selects the real UDP protocol or one shared stateful emulator per chassis;
+- chassis and МКР initialization/reset and runtime commands use
+  `DeviceProtocolEmulator`, which selects the real UDP protocol or the matching
+  stateful emulator;
 - UDP/TCP/COM/USB connectable managers return simulated success or bypass I/O;
 - relay/source/switch managers update in-memory state and return success;
 - `Simulated.GetSimulatedValue` returns values for measurement paths;
@@ -1008,22 +1009,25 @@ switching, source and power operations. Every equipment call, including a
 the corresponding real contract: `false`, a failed tuple/status, or the
 operation-specific exception path. Real execution never enters this mechanism.
 
-Chassis Idle flow preserves the device command contract without a separate response
-processor:
+Chassis and МКР Idle flows preserve their device command contracts without a
+separate response processor:
 
 ```text
-Transport / PowerManager
-→ ChassisQueryExecutor
-→ DeviceProtocolEmulator.CreateChassis (ConditionalWeakTable state per chassis)
+Transport / target runtime manager
+→ ChassisQueryExecutor / ModuleRelayControlQueryExecutor
+→ DeviceProtocolEmulator.CreateChassis / CreateModuleRelayControl
 → ModeSelectingDeviceProtocol
-  → Real: current chassis DeviceProtocol
-  → Idle: ChassisEmulatorProtocol
-→ existing DeviceWithIP validation or PowerManager result check
+  → Real: current device protocol
+  → Idle: ChassisEmulatorProtocol / ModuleRelayControlEmulatorProtocol
+→ existing runtime response models and validation
 ```
 
 The emulator handles initialization (`1.0.0.0`), reset (`2.1.0.0`), power on/off
 and power-state query. Reset clears its in-memory power state. Hardware-error
 simulation returns an empty response and enters the existing retry/error contract.
+The МКР emulator returns firmware-compatible JSON envelopes for bus, point,
+verified point, group, meter and self-check commands. Runtime connection stores
+are updated only after the existing response models accept the emulated answer.
 
 EHT special case:
 
@@ -1058,7 +1062,7 @@ same path with gates enabled and performs real transport I/O.
 - adapters: `Ask.Device.Application/FunctionAdapters/`
 - concrete devices: `Ask.Device.Runtime/Device/`
 - managers: `Ask.Device.Runtime/Function/`
-- chassis emulation: `Ask.Device.Emulator/Chassis/`, factory in
+- chassis and МКР emulation: `Ask.Device.Emulator/{Chassis,ModuleRelayControl}/`, factory in
   `Ask.Device.Emulator/DeviceProtocolEmulator.cs`
 - protocols: `Ask.Device.Communication/`
 - persistence: `Ask.DataBase.Engine/Static/Devices/`, `Ask.DataBase.Provider/Services/Devices/`
@@ -1215,7 +1219,8 @@ COM-секция делегирует создание настроек в
     `AdminServices.GetRelaySwitchModulesAsync` получает список через
     `RelaySwitchModules.GetDevicesByNumberChassisAsync(1)`; UI вызывает
     `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
-    читает через `GetConnectedPoints()` и `GetConnectedBuses()`;
+    читает через `GetConnectedPoints()` и `GetConnectedBuses()`; в Idle те же
+    операции проходят через `ModuleRelayControlEmulatorProtocol`;
   - `Ask.UI.Features.ServiceTools.Multimeter.MultimeterControl` — сервисное
     управление мультиметрами первого шасси через общий `IMultimeter`: выбор
     Keysight/В7-78/3, подключение, инициализация, сброс, установка режима и
@@ -1562,8 +1567,9 @@ ErrorItem → translator/runner ErrorList
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
-| `DeviceProtocolEmulator` | public static factory | Ask.Device.Emulator | returns a Real/Idle-selecting, stateful chassis protocol | [Equipment](#real--idle) |
+| `DeviceProtocolEmulator` | public static factory | Ask.Device.Emulator | returns Real/Idle-selecting protocols for chassis and МКР | [Equipment](#real--idle) |
 | `ChassisQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs chassis commands through the real protocol or emulator | [Equipment](#real--idle) |
+| `ModuleRelayControlQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs МКР commands through the real protocol or emulator | [Equipment](#real--idle) |
 | `AdapterMeasurementExecutor` | helper | Ask.Device.Application | measured operation retry/logging | [Error Handling](#equipment-error-flow) |
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |

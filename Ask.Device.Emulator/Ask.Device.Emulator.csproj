@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="DeviceBusCommutation\" />
-    <Folder Include="ModuleRelayControl\" />
     <Folder Include="Multimeter\" />
   </ItemGroup>
 
