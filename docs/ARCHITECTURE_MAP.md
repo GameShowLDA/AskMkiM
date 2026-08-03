@@ -919,16 +919,28 @@ Representative Keysight measurement:
 executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
-→ MeasurementBase.MeasureAsync
-→ SetModeBase / RangeBase
-→ AdapterMeasurementExecutor
-→ MeasurementBase.MeasureCoreAsync
-→ MultimeterQueryExecutor.QueryAsync(profile.Measure, idleResponse)
-  → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
-  → Idle: SCPI-compatible scientific-notation response from MeasurementRange
-→ numeric parsing/rounding
-→ DeviceMessageBuilder
+→ MeasurementBase.MeasureResistanceAsync
+→ SetModeBase / RangeBase → MultimeterQueryExecutor
+→ repeat correctMeasurementCount + falseMeasurementCount times
+  → AdapterMeasurementExecutor
+  → MeasurementBase.MeasureCoreAsync
+  → Simulated.GetSimulatedValue builds idleResponse
+  → MultimeterQueryExecutor.QueryAsync(profile.Measure, idleResponse)
+    → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
+    → Idle: SCPI-compatible scientific-notation response from MeasurementRange
+  → numeric parsing/rounding
+→ range verdict and DeviceMessageBuilder
 ```
+
+По умолчанию измерение сопротивления выполняет три замера:
+`correctMeasurementCount = 2` и `falseMeasurementCount = 1`. Правильным
+считается числовой ответ внутри `MeasurementRange`; аппаратная ошибка
+не считается ложным замером и идёт в обычный equipment retry flow. Серия
+проходит при двух или трёх правильных замерах. Прошедшая серия
+возвращает среднее правильных значений; непрошедшая — значение вне
+диапазона, сохраняя существующие verdict/retry semantics в Engine. Перегрузка
+`IResistanceMeasurement.MeasureResistanceAsync` позволяет вызывающему коду
+явно задать оба количества.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
