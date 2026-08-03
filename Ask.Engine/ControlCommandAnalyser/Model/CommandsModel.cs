@@ -166,14 +166,17 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
         }
         else
         {
-          if (CompareSchemes(scheme, foundScheme) == false)
+          if (scheme != null && foundScheme != null)
           {
-            scheme.AddGroups(foundScheme.GroupModels);
-          }
-          else
-          {
-            model.Errors.Add(GeneralErrors.SchemeConflict(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
-            scheme.GroupModels.Clear();
+            if (CompareSchemes(scheme, foundScheme) == false)
+            {
+              scheme.AddGroups(foundScheme.GroupModels);
+            }
+            else
+            {
+              model.Errors.Add(GeneralErrors.SchemeConflict(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
+              scheme.GroupModels.Clear();
+            }
           }
         }
       }
@@ -187,17 +190,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     public static bool CompareSchemes(SchemeModel modelScheme, SchemeModel addedScheme)
     {
       List<PointModel> allPoints = GetAllPoints(addedScheme);
-      foreach (var point in allPoints)
+      if (allPoints.Count > 0)
       {
-        foreach (var groupModel in modelScheme.GroupModels)
+        foreach (var point in allPoints)
         {
-          foreach (var chainModel in groupModel.ChainModels)
+          foreach (var groupModel in modelScheme.GroupModels)
           {
-            foreach (var pointModel in chainModel.PointModels)
+            foreach (var chainModel in groupModel.ChainModels)
             {
-              if (pointModel.ToString() == point.ToString())
+              foreach (var pointModel in chainModel.PointModels)
               {
-                return true;
+                if (pointModel.ToString() == point.ToString())
+                {
+                  return true;
+                }
               }
             }
           }
@@ -209,14 +215,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
     private static List<PointModel> GetAllPoints(SchemeModel addedScheme)
     {
       var allPoints = new List<PointModel>();
-      foreach (var groupModel in addedScheme.GroupModels)
+      if (addedScheme != null || addedScheme.GroupModels.Count > 0)
       {
-        foreach (var chainModel in groupModel.ChainModels)
+        foreach (var groupModel in addedScheme.GroupModels)
         {
-          allPoints.AddRange(chainModel.PointModels);
+          foreach (var chainModel in groupModel.ChainModels)
+          {
+            allPoints.AddRange(chainModel.PointModels);
+          }
         }
       }
-
       return allPoints;
     }
 
