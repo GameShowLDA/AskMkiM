@@ -889,8 +889,8 @@ the global `ExecutionConfig`.
 | `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `ModuleRelayControlQueryExecutor` → Real UDP / stateful Idle emulator | `RelaySwitchModules` |
 | `IPowerSourceModule` | `ModuleVoltageCurrentSource` | adapters for Voltage/Current/Bus; runtime SelfTest | `Transport` → UDP | `PowerSourceModules` |
 | `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `DeviceBusCommutationQueryExecutor` → Real UDP / Idle emulator | `SwitchingDevices` |
-| `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `Transport` → `TcpProtocol:5025` | `FastMeters` |
-| `IMultimeter` | `MultimeterB7783` | shared runtime measurement managers | `Transport` → `UsbProtocol` → `UsbCommandHandler` | `FastMeters` |
+| `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `MultimeterQueryExecutor` → Real `TcpProtocol:5025` / Idle SCPI response | `FastMeters` |
+| `IMultimeter` | `MultimeterB7783` | shared runtime measurement managers | `MultimeterQueryExecutor` → Real `UsbProtocol` / Idle SCPI response | `FastMeters` |
 | `IBreakdownTester` | `GPT79904` | application ACW/DCW/IR/System adapters over runtime managers | `Transport` → `ComProtocol` | `BreakdownTesters` |
 | `IUninterruptiblePowerSupply` | `MikUps1101rRmDevice` | application Connectable/Power adapters | `UsbProtocol` → `UsbCommandHandler`/ViewPower | `UninterruptiblePowerSupplies` |
 | `IRack` | отдельной реализации в текущем production-коде нет | data/identity role | не определён | `Racks`; сохранённый `DeviceClass` должен указывать на доступный совместимый тип |
@@ -920,15 +920,29 @@ executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
 → MeasurementBase.MeasureAsync
-→ simulated check
 → SetModeBase / RangeBase
 → AdapterMeasurementExecutor
 → MeasurementBase.MeasureCoreAsync
-→ TcpProtocol.QueryAsync(profile.Measure)
-→ TcpClient/NetworkStream
+→ MultimeterQueryExecutor.QueryAsync(profile.Measure, idleResponse)
+  → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
+  → Idle: SCPI-compatible scientific-notation response from MeasurementRange
 → numeric parsing/rounding
 → DeviceMessageBuilder
 ```
+
+Инициализация обоих мультиметров использует тот же журнал команд:
+
+```text
+IMultimeter.ConnectableManager.InitializeAsync()
+→ TcpTransport.InitializeAsync() / UsbTransport.InitializeAsync()
+→ MultimeterQueryExecutor.QueryAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
+  → Real: TcpProtocol / UsbProtocol
+  → Idle: идентификационный SCPI-ответ
+→ проверка непустого ответа
+```
+
+`MultimeterQueryExecutor` записывает каждую операцию двумя строками единого формата:
+`Команда мультиметра: "..."` и `Ответ мультиметра на "...": "..."`.
 
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
@@ -983,7 +997,7 @@ Selection is distributed, not DI-based:
     в формате прошивки: JSON для `4/5/7/9`, строковое значение для `6/8/41`;
   - остальные UDP/TCP/COM/USB connectable managers возвращают simulated success или обходят I/O;
 - relay/source/switch managers update in-memory state and return success;
-- `Simulated.GetSimulatedValue` returns values for measurement paths;
+- `Simulated.GetSimulatedValue` supplies values to the Idle multimeter SCPI-response path;
 - GPT helpers/managers skip commands or return configured/simulated values;
 - specific Engine strategies may suppress physical validation.
 
@@ -1577,6 +1591,7 @@ ErrorItem → translator/runner ErrorList
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
+| `MultimeterQueryExecutor` | runtime helper | Ask.Device.Runtime | logs SCPI exchange and selects real transport or an Idle response for Keysight/B7-78/3 | [Equipment](#device-matrix) |
 | `KeysightDevice` | device | Ask.Device.Runtime | TCP multimeter | [Equipment](#device-matrix) |
 | `MultimeterB7783` | device | Ask.Device.Runtime | USB multimeter | [Equipment](#device-matrix) |
 | `GPT79904` | device | Ask.Device.Runtime | COM breakdown tester | [Equipment](#device-matrix) |
