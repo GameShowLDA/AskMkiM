@@ -80,12 +80,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         await SetModeBase.SetModeAsync(device, profile, userMessageService);
       }
 
-      var random = Simulated.GetSimulatedValue(measurementRange.LowerBound, measurementRange.UpperBound, profile.ElectricalTest);
-      if (random != -1)
-      {
-        return random;
-      }
-
       if (profile.ElectricalTest == ElectricalTestFunction.DCVoltage
       || profile.ElectricalTest == ElectricalTestFunction.ACVoltage
       || profile.ElectricalTest == ElectricalTestFunction.Resistance
@@ -427,18 +421,26 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <returns>Измеренное значение.</returns>
     static private async Task<double> MeasureCoreAsync(IMultimeter device, IMeasurementProfile profile, string header, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
     {
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, profile.ElectricalTest);
-      if (random != -1)
-      {
-        return random;
-      }
-
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, responseDelay: 1500, timeout: profile.Timeout);
+      double simulatedValue = Simulated.GetSimulatedValue(rangeFrom, rangeTo, profile.ElectricalTest);
+      if (profile.Unit is CapacitanceUnit && simulatedValue != -1)
+      {
+        simulatedValue /= 1e9;
+      }
+
+      string idleResponse = simulatedValue == -1
+        ? string.Empty
+        : simulatedValue.ToString("+0.00000000E+00;-0.00000000E+00", CultureInfo.InvariantCulture);
+      string response = await MultimeterQueryExecutor.QueryAsync(
+        device,
+        profile.Measure,
+        idleResponse,
+        responseDelay: 1500,
+        timeout: profile.Timeout);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       response = response.Trim().Replace("+", "");

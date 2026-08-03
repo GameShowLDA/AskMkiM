@@ -84,7 +84,11 @@ namespace Ask.UI.Features.ServiceTools.Multimeter
         IsEnabled = false;
         if (!await action(Meter))
         {
-          throw new InvalidOperationException("Прибор вернул отрицательный результат.");
+          LoggerUtility.LogError(
+            $"Мультиметр — {operation}: прибор вернул отрицательный результат.",
+            isDeviceLog: true);
+          UpdateStatus();
+          return;
         }
 
         LoggerUtility.LogInformation($"Мультиметр — {operation}: выполнено.", isDeviceLog: true);

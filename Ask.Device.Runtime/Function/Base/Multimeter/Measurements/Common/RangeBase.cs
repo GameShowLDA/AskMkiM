@@ -165,12 +165,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double[] supportedRanges,
       double rangeCommandMultiplier)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
@@ -184,7 +179,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ? setAutoRangeCommand
         : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
-      await device.DeviceProtocol.QueryAsync(command, timeout: profile.Timeout);
+      await MultimeterQueryExecutor.QueryAsync(device, command, string.Empty, timeout: profile.Timeout);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
 
       return true;
@@ -256,7 +251,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return;
       }
 
-      var error = await device.DeviceProtocol.QueryAsync(getRangeErrorCommand, timeout: timeout);
+      var error = await MultimeterQueryExecutor.QueryAsync(
+        device,
+        getRangeErrorCommand,
+        "+0,\"No error\"",
+        timeout: timeout);
       var normalizedError = error?.TrimStart();
       if (!string.IsNullOrWhiteSpace(normalizedError)
         && !normalizedError.StartsWith("+0", StringComparison.Ordinal)

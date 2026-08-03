@@ -27,6 +27,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// Устройство коммутации шин.
     /// </summary>
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
+    private readonly DeviceBusCommutationQueryExecutor queryExecutor;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ConnectorManager"/>.
@@ -35,6 +36,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     public ConnectorManager(Device.DeviceBusCommutation deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation;
+      queryExecutor = new DeviceBusCommutationQueryExecutor(deviceBusCommutation);
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
@@ -96,13 +98,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       int numberConnector = (int)SwitchingDeviceTypeConnector.Multimeter;
       if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-        }
-
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+        var answer = await queryExecutor.QueryAsync(command.ToString());
         await Task.Delay(10);
         var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
         return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
@@ -295,13 +292,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.BreakdownTester;
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
       var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
 
       return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
@@ -315,13 +307,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     public async Task<bool> EnableDivider(IUserInteractionService? userMessageService = null)
     {
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       var command = new DeviceCommand(9, 2, 0, 1);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
       var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
 
       return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
@@ -331,13 +318,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     public async Task<bool> DisableDivider(IUserInteractionService? userMessageService = null)
     {
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       var command = new DeviceCommand(9, 2, 0, 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
       var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
 
       return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
@@ -371,13 +353,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// </returns>
     private async Task<bool> SetAllBusesStatus(bool connect, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       var command = new DeviceCommand(7, connect ? 1 : 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
       return !string.IsNullOrWhiteSpace(answer) && (connect ? answer.Contains("7.1") : answer.Contains("7.2"));
     }
 
@@ -410,20 +387,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
-        {
-          connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
-          return false;
-        }
-
-        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, true);
-        return true;
-      }
-
       var command = new DeviceCommand(5, 7, 0, 1);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
       var expectingResult = command.ToString();
       var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
 
@@ -442,20 +407,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
-        {
-          connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
-          return false;
-        }
-
-        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
-        return true;
-      }
-
       var command = new DeviceCommand(5, 7, 0, 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
       var expectingResult = command.ToString();
       var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
 
