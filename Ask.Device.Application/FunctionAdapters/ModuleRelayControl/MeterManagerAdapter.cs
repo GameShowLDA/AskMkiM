@@ -64,8 +64,8 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnectMeter)
-        return false;
+      if (!IsConnectMeter)
+        return true;
 
       const string description = "модуля МКР";
 
