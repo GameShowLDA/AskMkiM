@@ -178,7 +178,9 @@ AskMkiM/
 ├─ Ask.Support/                help server and packaged AppHelp
 ├─ ConsoleUI/, Message/, Ask.LogLib/
 ├─ docs/                       maintained documentation and this map
-└─ Ask.*.UnitTests/            automated tests, excluded from runtime map
+├─ Ask.Device.Emulator.UnitTests/ protocol-level tests for chassis, МКР, УКШ,
+│                                multimeter, ППУ and Real/Idle routing
+└─ Ask.*.UnitTests/            other automated tests, excluded from runtime map
 ```
 
 `NewCore/`, `DataBaseConfigruration/`, `Ask.Diagnostics.Video/` have no active
@@ -1091,8 +1093,10 @@ same path with gates enabled and performs real transport I/O.
 - adapters: `Ask.Device.Application/FunctionAdapters/`
 - concrete devices: `Ask.Device.Runtime/Device/`
 - managers: `Ask.Device.Runtime/Function/`
-- chassis and МКР emulation: `Ask.Device.Emulator/{Chassis,ModuleRelayControl}/`, factory in
-  `Ask.Device.Emulator/DeviceProtocolEmulator.cs`
+- Idle emulation for chassis, МКР, УКШ, multimeters and ППУ:
+  `Ask.Device.Emulator/{Chassis,ModuleRelayControl,DeviceBusCommutation,Multimeter,BreakdownTester}/`;
+  routing factory: `Ask.Device.Emulator/DeviceProtocolEmulator.cs`;
+  protocol and Real/Idle regression tests: `Ask.Device.Emulator.UnitTests/`
 - protocols: `Ask.Device.Communication/`
 - persistence: `Ask.DataBase.Engine/Static/Devices/`, `Ask.DataBase.Provider/Services/Devices/`
 
