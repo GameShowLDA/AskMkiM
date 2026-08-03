@@ -40,23 +40,22 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <inheritdoc />
     static private async Task<bool> SetModeCoreAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       if (device.TypeMode == profile.TypeMode)
       {
         return true;
       }
 
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await device.DeviceProtocol.QueryAsync(profile.SetMode);
-      var answer = await device.DeviceProtocol.QueryAsync(profile.GetMode, timeout: profile.Timeout);
+      await MultimeterQueryExecutor.QueryAsync(device, profile.SetMode, string.Empty, timeout: profile.Timeout);
+      var answer = await MultimeterQueryExecutor.QueryAsync(
+        device,
+        profile.GetMode,
+        profile.CheckMode,
+        timeout: profile.Timeout);
       if (answer.Contains(profile.CheckMode))
       {
         device.TypeMode = profile.TypeMode;

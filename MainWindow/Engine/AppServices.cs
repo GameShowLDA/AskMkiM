@@ -1,4 +1,5 @@
 using Ask.Core.Services.App;
+using Ask.Diagnostics.Abstractions;
 using Ask.Support;
 using MainWindowProgram.Services;
 using MainWindowProgram.ViewModels;
@@ -29,9 +30,10 @@ namespace MainWindowProgram.Engine
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
       var settings = new SettingsService(multi);
-      var windowService = new WindowService(window, window.mainMenu, window.ButtonsPanel, () => window.IsLocked);
+      var windowService = new WindowService(window, () => window.IsLocked);
       var selfTest = new SelfTestServices(multi);
-      var translation = new TranslationServices(multi, file);
+      var crashReporter = ServiceLocator.Services.GetRequiredService<IExceptionDiagnosticReporter>();
+      var translation = new TranslationServices(multi, file, crashReporter);
       var run = new RunServices(multi, file);
 
       var viewModel = new MainWindowViewModel(

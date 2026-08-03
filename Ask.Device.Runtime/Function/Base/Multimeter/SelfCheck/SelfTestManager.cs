@@ -330,6 +330,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           result = await meter.ResistanceManager.MeasureResistanceAsync(
             measurementRange,
             userMessageService,
+            correctMeasurementCount: 1,
+            falseMeasurementCount: 0,
             responseDelay: MeasurementResponseDelayMs);
 
           if (SelfTestHelper.InRange(check.IdealResult, result, tolerance))

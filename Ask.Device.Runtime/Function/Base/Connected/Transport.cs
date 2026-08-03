@@ -48,9 +48,10 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       {
         var result = await _connectionTransport.ConnectAsync(userMessageService);
 
-        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        if ((!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
+            && _device is IAttachableDevice attachableDevice)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Подключение {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Подключение {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
         }
 
         return result;
@@ -66,9 +67,10 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       {
         var result = await _connectionTransport.DisconnectAsync(userMessageService);
 
-        if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        if ((!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
+            && _device is IAttachableDevice attachableDevice)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Отключение {_device.Name}", result ? "Соединение разорвано" : "Ошибка отключения", result, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Отключение {_device.Name}", result ? "Соединение разорвано" : "Ошибка отключения", result, 1, userMessageService);
         }
 
         return result;
@@ -84,9 +86,10 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       {
         var result = await _connectionTransport.InitializeAsync(userMessageService);
 
-        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        if ((!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
+            && _device is IAttachableDevice attachableDevice)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Инициализация {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Инициализация {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
         }
 
         return result;
@@ -102,9 +105,10 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       {
         var result = await _connectionTransport.ResetAsync(userMessageService);
 
-        if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        if ((!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
+            && _device is IAttachableDevice attachableDevice)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Сброс {_device.Name}", result ? "Устройство сброшено" : "Ошибка сброса", result, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Сброс {_device.Name}", result ? "Устройство сброшено" : "Ошибка сброса", result, 1, userMessageService);
         }
 
         return result;

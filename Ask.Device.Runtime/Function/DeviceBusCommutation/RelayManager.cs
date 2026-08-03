@@ -15,12 +15,17 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// Устройство коммутации шин.
     /// </summary>
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
+    private readonly DeviceBusCommutationQueryExecutor queryExecutor;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public RelayManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
+    public RelayManager(Device.DeviceBusCommutation deviceBusCommutation)
+    {
+      _deviceBusCommutation = deviceBusCommutation;
+      queryExecutor = new DeviceBusCommutationQueryExecutor(deviceBusCommutation);
+    }
 
     /// <summary>
     /// Подключения реле.
@@ -34,15 +39,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 1);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
     }
 
     /// <summary>
@@ -57,15 +57,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 2);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
     }
 
     /// <summary>
@@ -74,20 +69,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>Результат проверки и выполнения команды.</returns>
     public async Task<bool> EnableRelay(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       var cmd = new DeviceCommand(9, 1, 0, 1);
-      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
 
       await Task.Delay(10);
-
-      if (answer == null || answer.Length == 0) return false;
-      if (!answer.Contains("disconnect")) return true;
-
-      return true;
+      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(cmd.ToString());
     }
 
     /// <summary>
@@ -96,20 +82,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>Результат проверки и выполнения команды.</returns>
     public async Task<bool> DisableRelay(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       var cmd = new DeviceCommand(9, 1, 0, 2);
-      string answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
 
       await Task.Delay(10);
-
-      if (answer == null || answer.Length == 0) return false;
-      //if (!answer.Contains("disconnect")) return false;
-
-      return true;
+      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(cmd.ToString());
     }
 
     /// <inheritdoc />

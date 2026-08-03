@@ -38,12 +38,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         await SetContinuityModeAsync(userMessageService);
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        bool isErrorSimulationEnabled = ExecutionConfig.GetIsErrorSimulationEnabled();
-        return !isErrorSimulationEnabled || Random.Shared.Next(2) == 1;
-      }
-
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         _device,
         "Прозвонка",
@@ -118,12 +112,27 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
     private async Task<bool> CheckContinuityCoreAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null, double responseDelay = 0)
     {
-      if (!_device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !_device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await _device.DeviceProtocol.QueryAsync(_device.ContinuityCommands.Measure, responseDelay: responseDelay, timeout: _device.ContinuityCommands.Timeout);
+      bool actualOutcome = !ExecutionConfig.GetIsErrorSimulationEnabled()
+        || Random.Shared.Next(2) == 1
+        ? expectedOutcome
+        : !expectedOutcome;
+      string idleResponse = actualOutcome ? "+1.00000000E+00" : "+9.90000000E+37";
+      string response = await MultimeterQueryExecutor.QueryAsync(
+        _device,
+        _device.ContinuityCommands.Measure,
+        idleResponse,
+        responseDelay: responseDelay,
+        timeout: _device.ContinuityCommands.Timeout);
+      if (string.IsNullOrWhiteSpace(response))
+      {
+        throw new InvalidOperationException("Мультиметр вернул пустой ответ.");
+      }
+
       return response != "+9.90000000E+37" == expectedOutcome;
     }
   }
