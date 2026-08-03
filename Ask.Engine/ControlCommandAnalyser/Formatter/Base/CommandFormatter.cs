@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Interface;
 
 namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
@@ -87,7 +88,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
     protected static IEnumerable<string> FormatSchemeWithRmCheckDisconnectedPoints(
       IHasScheme model,
       string title,
-      string rmNotSetMessage = "\t\tРњРѕРґРµР»СЊ Р Рњ РЅРµ Р·Р°РґР°РЅР°!")
+      string rmNotSetMessage = "\t\tМодель РМ не задана!")
     {
       yield return title;
 
@@ -97,22 +98,37 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
         yield break;
       }
 
-      foreach (var line in SchemeFormatter.FormatDisconnectedPoints(model.Scheme))
+      if (model.Scheme == null || model.Scheme.IsEmpty())
       {
-        yield return line;
+        yield return "\t\tТочки не заданы!";
+        yield break;
+      }
+
+      if (model.Scheme != null)
+      {
+        foreach (var line in SchemeFormatter.FormatDisconnectedPoints(model.Scheme))
+        {
+          yield return line;
+        }
       }
     }
 
     protected static IEnumerable<string> FormatSchemeWithRmCheckConnectedPoints(
       IHasScheme model,
       string title,
-      string rmNotSetMessage = "\t\tРњРѕРґРµР»СЊ Р Рњ РЅРµ Р·Р°РґР°РЅР°!")
+      string rmNotSetMessage = "\t\tМодель РМ не задана!")
     {
       yield return title;
 
       if (!HasRmModel())
       {
         yield return rmNotSetMessage;
+        yield break;
+      }
+
+      if (model.Scheme == null || model.Scheme.IsEmpty())
+      {
+        yield return "\t\tТочки не заданы!";
         yield break;
       }
 
