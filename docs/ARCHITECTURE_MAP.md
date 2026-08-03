@@ -919,16 +919,26 @@ Representative Keysight measurement:
 executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
-→ MeasurementBase.MeasureAsync
-→ simulated check
+→ MeasurementBase.MeasureResistanceAsync
 → SetModeBase / RangeBase
-→ AdapterMeasurementExecutor
-→ MeasurementBase.MeasureCoreAsync
-→ TcpProtocol.QueryAsync(profile.Measure)
-→ TcpClient/NetworkStream
-→ numeric parsing/rounding
-→ DeviceMessageBuilder
+→ repeat correctMeasurementCount + falseMeasurementCount times
+  → AdapterMeasurementExecutor
+  → MeasurementBase.MeasureCoreAsync
+  → simulated check or TcpProtocol.QueryAsync(profile.Measure)
+  → TcpClient/NetworkStream
+  → numeric parsing/rounding
+→ range verdict and DeviceMessageBuilder
 ```
+
+По умолчанию измерение сопротивления выполняет три замера:
+`correctMeasurementCount = 2` и `falseMeasurementCount = 1`. Правильным
+считается числовой ответ внутри `MeasurementRange`; аппаратная ошибка
+не считается ложным замером и идёт в обычный equipment retry flow. Серия
+проходит при двух или трёх правильных замерах. Прошедшая серия
+возвращает среднее правильных значений; непрошедшая — значение вне
+диапазона, сохраняя существующие verdict/retry semantics в Engine. Перегрузка
+`IResistanceMeasurement.MeasureResistanceAsync` позволяет вызывающему коду
+явно задать оба количества.
 
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
