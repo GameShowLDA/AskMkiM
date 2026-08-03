@@ -602,20 +602,16 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       DeviceCommand cmd = new DeviceCommand(41, ((int)testType * 10) + relayNumber, busContact, action);
       LogInformation($"Управление реле {relayNumber} в цепи {testType}, контакт {busContact}, действие {action} : команда {cmd.ToString()}", isDeviceLog: true);
 
-      if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
+      if (!ExecutionConfig.GetIsIdleModeEnabled()
+        && !IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
       {
         LogError("Некорректный IP-адрес устройства коммутации шин.", isDeviceLog: true);
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
-      // TODO : Получить и обработать ответ
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return true;
+      string answer = await new DeviceBusCommutationQueryExecutor(_deviceBusCommutation)
+        .QueryAsync(cmd.ToString(), cancellationToken: cancellationToken);
+      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
     }
 
     /// <summary>
@@ -638,22 +634,19 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       DeviceCommand cmd = new DeviceCommand(4, (int)testType, busContact, action);
       LogInformation($"Отправка команды самоконтроля: {cmd}", isDeviceLog: true);
 
-      if (!IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
+      if (!ExecutionConfig.GetIsIdleModeEnabled()
+        && !IPAddress.TryParse(_deviceBusCommutation.ConnectionDetails, out IPAddress ipAddress))
       {
         LogError("Некорректный IP-адрес устройства коммутации шин.", isDeviceLog: true);
         return false;
       }
 
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return true;
+      string answer = await new DeviceBusCommutationQueryExecutor(_deviceBusCommutation)
+        .QueryAsync(cmd.ToString(), cancellationToken: cancellationToken);
+      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
     }
   }
 }

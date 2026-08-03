@@ -888,7 +888,7 @@ the global `ExecutionConfig`.
 | `IChassisManager` | `ManagerChassis` | runtime `PowerManager`; no application adapter | `ChassisQueryExecutor` → Real UDP / stateful Idle emulator | `ChassisManagers` |
 | `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `ModuleRelayControlQueryExecutor` → Real UDP / stateful Idle emulator | `RelaySwitchModules` |
 | `IPowerSourceModule` | `ModuleVoltageCurrentSource` | adapters for Voltage/Current/Bus; runtime SelfTest | `Transport` → UDP | `PowerSourceModules` |
-| `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `Transport` → UDP | `SwitchingDevices` |
+| `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `DeviceBusCommutationQueryExecutor` → Real UDP / Idle emulator | `SwitchingDevices` |
 | `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `Transport` → `TcpProtocol:5025` | `FastMeters` |
 | `IMultimeter` | `MultimeterB7783` | shared runtime measurement managers | `Transport` → `UsbProtocol` → `UsbCommandHandler` | `FastMeters` |
 | `IBreakdownTester` | `GPT79904` | application ACW/DCW/IR/System adapters over runtime managers | `Transport` → `ComProtocol` | `BreakdownTesters` |
@@ -978,7 +978,10 @@ Selection is distributed, not DI-based:
 - chassis and МКР initialization/reset and runtime commands use
   `DeviceProtocolEmulator`, which selects the real UDP protocol or the matching
   stateful emulator;
-- UDP/TCP/COM/USB connectable managers return simulated success or bypass I/O;
+  - УКШ runtime-команды `4`, `5`, `6`, `7`, `8`, `9`, `41` проходят через
+    `DeviceBusCommutationQueryExecutor` и `DeviceBusCommutationEmulatorProtocol`, формируя журналируемый ответ
+    в формате прошивки: JSON для `4/5/7/9`, строковое значение для `6/8/41`;
+  - остальные UDP/TCP/COM/USB connectable managers возвращают simulated success или обходят I/O;
 - relay/source/switch managers update in-memory state and return success;
 - `Simulated.GetSimulatedValue` returns values for measurement paths;
 - GPT helpers/managers skip commands or return configured/simulated values;
@@ -1014,11 +1017,11 @@ separate response processor:
 
 ```text
 Transport / target runtime manager
-→ ChassisQueryExecutor / ModuleRelayControlQueryExecutor
-→ DeviceProtocolEmulator.CreateChassis / CreateModuleRelayControl
+→ ChassisQueryExecutor / ModuleRelayControlQueryExecutor / DeviceBusCommutationQueryExecutor
+→ DeviceProtocolEmulator.CreateChassis / CreateModuleRelayControl / CreateDeviceBusCommutation
 → ModeSelectingDeviceProtocol
   → Real: current device protocol
-  → Idle: ChassisEmulatorProtocol / ModuleRelayControlEmulatorProtocol
+  → Idle: ChassisEmulatorProtocol / ModuleRelayControlEmulatorProtocol / DeviceBusCommutationEmulatorProtocol
 → existing runtime response models and validation
 ```
 
@@ -1573,6 +1576,7 @@ ErrorItem → translator/runner ErrorList
 | `AdapterMeasurementExecutor` | helper | Ask.Device.Application | measured operation retry/logging | [Error Handling](#equipment-error-flow) |
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
+| `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
 | `KeysightDevice` | device | Ask.Device.Runtime | TCP multimeter | [Equipment](#device-matrix) |
 | `MultimeterB7783` | device | Ask.Device.Runtime | USB multimeter | [Equipment](#device-matrix) |
 | `GPT79904` | device | Ask.Device.Runtime | COM breakdown tester | [Equipment](#device-matrix) |

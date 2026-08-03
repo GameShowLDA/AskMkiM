@@ -1,7 +1,9 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Device.Emulator.Chassis;
+using Ask.Device.Emulator.DeviceBusCommutation;
 using Ask.Device.Emulator.ModuleRelayControl;
 using Ask.Device.Emulator.Protocols;
 using System.Runtime.CompilerServices;
@@ -15,6 +17,22 @@ namespace Ask.Device.Emulator
   {
     private static readonly ConditionalWeakTable<IChassisManager, IDeviceProtocol> Chassis = new();
     private static readonly ConditionalWeakTable<IRelaySwitchModule, IDeviceProtocol> RelaySwitchModules = new();
+    private static readonly ConditionalWeakTable<ISwitchingDevice, IDeviceProtocol> SwitchingDevices = new();
+
+    /// <summary>
+    /// Создаёт общий протокол эмуляции для экземпляра УКШ.
+    /// </summary>
+    public static IDeviceProtocol CreateDeviceBusCommutation(ISwitchingDevice device)
+    {
+      ArgumentNullException.ThrowIfNull(device);
+      return SwitchingDevices.GetValue(
+        device,
+        item => new ModeSelectingDeviceProtocol(
+          () => item.DeviceProtocol,
+          new DeviceBusCommutationEmulatorProtocol(
+            () => item.Number,
+            () => item.NumberChassis)));
+    }
 
     /// <summary>
     /// Создаёт общий stateful-протокол эмуляции для экземпляра МКР.
