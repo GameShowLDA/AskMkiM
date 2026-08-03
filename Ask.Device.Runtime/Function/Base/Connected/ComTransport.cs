@@ -50,6 +50,11 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (_device is IBreakdownTester)
+        {
+          return await InitializeCoreAsync();
+        }
+
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
           ? (false, IdleHardwareErrorSimulator.ErrorMessage)
           : (true, string.Empty);
@@ -91,6 +96,11 @@ namespace Ask.Device.Runtime.Function.Connected
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (_device is IBreakdownTester)
+        {
+          return await SendResetCommandsAsync("отключении устройства");
+        }
+
         return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
@@ -122,6 +132,17 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (_device is IBreakdownTester)
+        {
+          bool isReset = await SendResetCommandsAsync("сбросе устройства");
+          if (isReset)
+          {
+            IsReset?.Invoke();
+          }
+
+          return isReset;
+        }
+
         return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 

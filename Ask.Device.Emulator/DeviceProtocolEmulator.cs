@@ -1,10 +1,12 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Device.Emulator.Chassis;
+using Ask.Device.Emulator.BreakdownTester;
 using Ask.Device.Emulator.DeviceBusCommutation;
 using Ask.Device.Emulator.ModuleRelayControl;
 using Ask.Device.Emulator.Multimeter;
@@ -22,6 +24,18 @@ namespace Ask.Device.Emulator
     private static readonly ConditionalWeakTable<IChassisManager, IDeviceProtocol> Chassis = new();
     private static readonly ConditionalWeakTable<IRelaySwitchModule, IDeviceProtocol> RelaySwitchModules = new();
     private static readonly ConditionalWeakTable<ISwitchingDevice, IDeviceProtocol> SwitchingDevices = new();
+
+    /// <summary>
+    /// Создаёт протокол ППУ с единым логированием и автоматическим выбором Real/Idle.
+    /// </summary>
+    public static IDeviceProtocol CreateBreakdownTester(
+      IBreakdownTester device,
+      IDeviceProtocol realProtocol)
+    {
+      ArgumentNullException.ThrowIfNull(device);
+      ArgumentNullException.ThrowIfNull(realProtocol);
+      return new BreakdownTesterCommandProtocol(device, realProtocol);
+    }
 
     /// <summary>
     /// Выполняет команду мультиметра через реальный протокол или эмулятор и записывает обмен в журнал.

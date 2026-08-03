@@ -891,7 +891,7 @@ the global `ExecutionConfig`.
 | `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `DeviceBusCommutationQueryExecutor` → Real UDP / Idle emulator | `SwitchingDevices` |
 | `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `DeviceProtocolEmulator.QueryMultimeterAsync` → Real `TcpProtocol:5025` / `MultimeterEmulatorProtocol` | `FastMeters` |
 | `IMultimeter` | `MultimeterB7783` | shared runtime measurement managers | `DeviceProtocolEmulator.QueryMultimeterAsync` → Real `UsbProtocol` / `MultimeterEmulatorProtocol` | `FastMeters` |
-| `IBreakdownTester` | `GPT79904` | application ACW/DCW/IR/System adapters over runtime managers | `Transport` → `ComProtocol` | `BreakdownTesters` |
+| `IBreakdownTester` | `GPT79904` | application ACW/DCW/IR/System adapters over runtime managers | `BreakdownTesterCommandProtocol` → Real `ComProtocol` / `BreakdownTesterEmulatorProtocol` | `BreakdownTesters` |
 | `IUninterruptiblePowerSupply` | `MikUps1101rRmDevice` | application Connectable/Power adapters | `UsbProtocol` → `UsbCommandHandler`/ViewPower | `UninterruptiblePowerSupplies` |
 | `IRack` | отдельной реализации в текущем production-коде нет | data/identity role | не определён | `Racks`; сохранённый `DeviceClass` должен указывать на доступный совместимый тип |
 
@@ -1592,6 +1592,8 @@ ErrorItem → translator/runner ErrorList
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
+| `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |
+| `BreakdownTesterEmulatorProtocol` | stateful Idle protocol | Ask.Device.Emulator | emulates GPT79904 SCPI identification, configuration, test state and measurement responses | [Equipment](#device-matrix) |
 | `KeysightDevice` | device | Ask.Device.Runtime | TCP multimeter | [Equipment](#device-matrix) |
 | `MultimeterB7783` | device | Ask.Device.Runtime | USB multimeter | [Equipment](#device-matrix) |
 | `GPT79904` | device | Ask.Device.Runtime | COM breakdown tester | [Equipment](#device-matrix) |
