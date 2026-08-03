@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -291,7 +292,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       string idleResponse = simulatedValue == -1
         ? string.Empty
         : simulatedValue.ToString("+0.00000000E+00;-0.00000000E+00", CultureInfo.InvariantCulture);
-      string response = await MultimeterQueryExecutor.QueryAsync(
+      string response = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         profile.Measure,
         idleResponse,

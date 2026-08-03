@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -179,7 +180,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ? setAutoRangeCommand
         : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
-      await MultimeterQueryExecutor.QueryAsync(device, command, string.Empty, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty, timeout: profile.Timeout);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
 
       return true;
@@ -251,7 +252,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return;
       }
 
-      var error = await MultimeterQueryExecutor.QueryAsync(
+      var error = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         getRangeErrorCommand,
         "+0,\"No error\"",
