@@ -15,14 +15,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetModeAsync)}: Устройство в Idle Mode. Возвращаем пустую строку.", isDeviceLog: true);
-          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
-            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
-            : (true, string.Empty);
-        }
-
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(ManualCommand.MANU_EDIT_MODE)} ?";
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
@@ -42,14 +34,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     static public async Task<(bool Success, string Message)> SetModeAsync(IBreakdownTester breakDown, BreakdownTypeMode typeMode, int delay)
     {
       LogInformation($"Начало выполнения {nameof(SetModeAsync)}", isDeviceLog: true);
-
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        LogInformation($"{nameof(SetModeAsync)}: Устройство в Idle Mode. Пропускаем установку режима.", isDeviceLog: true);
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
-          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
-          : (true, string.Empty);
-      }
 
       if (breakDown.Mode == typeMode)
       {

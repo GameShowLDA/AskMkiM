@@ -60,19 +60,6 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         return (true, string.Empty);
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
-        {
-          return (false, IdleHardwareErrorSimulator.ErrorMessage);
-        }
-
-        _setFrequency(frequency);
-        LogInformation($"{nameof(SetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-        _frequency = frequency;
-        return (true, string.Empty);
-      }
-
       try
       {
         await Task.Delay(_delay);
@@ -117,11 +104,6 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     /// </summary>
     public async Task<int> GetFrequencyAsync()
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _frequency;
-      }
-
       try
       {
         var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} ?";

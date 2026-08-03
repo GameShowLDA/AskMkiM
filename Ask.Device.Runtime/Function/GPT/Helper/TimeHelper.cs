@@ -18,14 +18,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(SetTestTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
-            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
-            : (true, string.Empty);
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_TTIME,
@@ -77,12 +69,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetTestTimeAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
-          return 0;
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_TTIME,
@@ -119,14 +105,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(SetRampTimeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
-            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
-            : (true, string.Empty);
-        }
-
         await Task.Delay(delay);
         string command = $"{GetCommandSyntax(ManualCommand.MANU_RTIME)} {value:F1}".Replace(',', '.');
         await breakDown.DeviceProtocol.QueryAsync(command);
@@ -170,12 +148,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetRampTimeAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
-          return 0;
-        }
-
         var query = GetCommandSyntax(ManualCommand.MANU_RTIME) + "?";
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
         LogDebug($"Ответ на {nameof(GetRampTimeAsync)}: \"{response}\"", isDeviceLog: true);

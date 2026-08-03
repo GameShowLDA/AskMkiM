@@ -889,9 +889,9 @@ the global `ExecutionConfig`.
 | `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `ModuleRelayControlQueryExecutor` → Real UDP / stateful Idle emulator | `RelaySwitchModules` |
 | `IPowerSourceModule` | `ModuleVoltageCurrentSource` | adapters for Voltage/Current/Bus; runtime SelfTest | `Transport` → UDP | `PowerSourceModules` |
 | `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `DeviceBusCommutationQueryExecutor` → Real UDP / Idle emulator | `SwitchingDevices` |
-| `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `MultimeterQueryExecutor` → Real `TcpProtocol:5025` / Idle SCPI response | `FastMeters` |
-| `IMultimeter` | `MultimeterB7783` | shared runtime measurement managers | `MultimeterQueryExecutor` → Real `UsbProtocol` / Idle SCPI response | `FastMeters` |
-| `IBreakdownTester` | `GPT79904` | application ACW/DCW/IR/System adapters over runtime managers | `Transport` → `ComProtocol` | `BreakdownTesters` |
+| `IMultimeter` | `KeysightDevice` | runtime measurement profiles/managers | `DeviceProtocolEmulator.QueryMultimeterAsync` → Real `TcpProtocol:5025` / `MultimeterEmulatorProtocol` | `FastMeters` |
+| `IMultimeter` | `MultimeterB7783` | shared runtime measurement managers | `DeviceProtocolEmulator.QueryMultimeterAsync` → Real `UsbProtocol` / `MultimeterEmulatorProtocol` | `FastMeters` |
+| `IBreakdownTester` | `GPT79904` | application ACW/DCW/IR/System adapters over runtime managers | `BreakdownTesterCommandProtocol` → Real `ComProtocol` / `BreakdownTesterEmulatorProtocol` | `BreakdownTesters` |
 | `IUninterruptiblePowerSupply` | `MikUps1101rRmDevice` | application Connectable/Power adapters | `UsbProtocol` → `UsbCommandHandler`/ViewPower | `UninterruptiblePowerSupplies` |
 | `IRack` | отдельной реализации в текущем production-коде нет | data/identity role | не определён | `Racks`; сохранённый `DeviceClass` должен указывать на доступный совместимый тип |
 
@@ -920,12 +920,12 @@ executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
 → MeasurementBase.MeasureResistanceAsync
-→ SetModeBase / RangeBase → MultimeterQueryExecutor
+→ SetModeBase / RangeBase → DeviceProtocolEmulator.QueryMultimeterAsync
 → repeat correctMeasurementCount + falseMeasurementCount times
   → AdapterMeasurementExecutor
   → MeasurementBase.MeasureCoreAsync
   → Simulated.GetSimulatedValue builds idleResponse
-  → MultimeterQueryExecutor.QueryAsync(profile.Measure, idleResponse)
+  → DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
     → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
     → Idle: SCPI-compatible scientific-notation response from MeasurementRange
   → numeric parsing/rounding
@@ -947,13 +947,13 @@ executor/metrology
 ```text
 IMultimeter.ConnectableManager.InitializeAsync()
 → TcpTransport.InitializeAsync() / UsbTransport.InitializeAsync()
-→ MultimeterQueryExecutor.QueryAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
+→ DeviceProtocolEmulator.QueryMultimeterAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
 → проверка непустого ответа
 ```
 
-`MultimeterQueryExecutor` записывает каждую операцию двумя строками единого формата:
+`DeviceProtocolEmulator.QueryMultimeterAsync` записывает каждую операцию двумя строками единого формата:
 `Команда мультиметра: "..."` и `Ответ мультиметра на "...": "..."`.
 
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
@@ -1603,7 +1603,9 @@ ErrorItem → translator/runner ErrorList
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
-| `MultimeterQueryExecutor` | runtime helper | Ask.Device.Runtime | logs SCPI exchange and selects real transport or an Idle response for Keysight/B7-78/3 | [Equipment](#device-matrix) |
+| `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
+| `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |
+| `BreakdownTesterEmulatorProtocol` | stateful Idle protocol | Ask.Device.Emulator | emulates GPT79904 SCPI identification, configuration, test state and measurement responses | [Equipment](#device-matrix) |
 | `KeysightDevice` | device | Ask.Device.Runtime | TCP multimeter | [Equipment](#device-matrix) |
 | `MultimeterB7783` | device | Ask.Device.Runtime | USB multimeter | [Equipment](#device-matrix) |
 | `GPT79904` | device | Ask.Device.Runtime | COM breakdown tester | [Equipment](#device-matrix) |
