@@ -1,11 +1,10 @@
-﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Connected;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.Runtime.Function.Base.Connected
 {
@@ -47,13 +46,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ConnectAsync(userMessageService);
-
-        if ((!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
-            && _device is IAttachableDevice attachableDevice)
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Подключение {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
-        }
-
+        await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer, userMessageService);
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -66,13 +59,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.DisconnectAsync(userMessageService);
-
-        if ((!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
-            && _device is IAttachableDevice attachableDevice)
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Отключение {_device.Name}", result ? "Соединение разорвано" : "Ошибка отключения", result, 1, userMessageService);
-        }
-
+        await EquipmentMessages.PublishDisconnectionResultAsync(_device, result, outputService: userMessageService);
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -85,15 +72,10 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.InitializeAsync(userMessageService);
-
-        if ((!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
-            && _device is IAttachableDevice attachableDevice)
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Инициализация {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
-        }
-
+        await EquipmentMessages.PublishInitializationResultAsync(_device, result.Connect, string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer, userMessageService);
         return result;
-      }, userMessageService, deviceTask: true);
+      }, userMessageService,
+      deviceTask: true);
 
       return (connect, answer);
     }
@@ -104,12 +86,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ResetAsync(userMessageService);
-
-        if ((!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
-            && _device is IAttachableDevice attachableDevice)
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(attachableDevice, $"Сброс {_device.Name}", result ? "Устройство сброшено" : "Ошибка сброса", result, 1, userMessageService);
-        }
+        await EquipmentMessages.PublishResetResultAsync(_device, result, outputService: userMessageService);
 
         return result;
       }, userMessageService, deviceTask: true);

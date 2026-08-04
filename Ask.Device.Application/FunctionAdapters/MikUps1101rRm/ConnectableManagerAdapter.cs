@@ -1,10 +1,9 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
 {
@@ -34,16 +33,7 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
       var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var state = await _manager.InitializeAsync(messageService);
-        if (!state.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _device,
-            "Инициализация бесперебойника",
-            string.IsNullOrWhiteSpace(state.Answer) ? "OK" : state.Answer,
-            state.Connect,
-            1,
-            messageService);
-        }
+        await EquipmentMessages.PublishInitializationResultAsync(_device, state.Connect, state.Answer, outputService: messageService);
 
         return state;
       }, messageService, deviceTask: true);
@@ -62,16 +52,7 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
       var (result, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var state = await _manager.ConnectAsync(messageService);
-        if (!state.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
-            _device,
-            "Подключение бесперебойника",
-            string.IsNullOrWhiteSpace(state.Answer) ? "OK" : state.Answer,
-            state.Connect,
-            1,
-            messageService);
-        }
+        await EquipmentMessages.PublishConnectionResultAsync(_device, state.Connect, state.Answer, outputService: messageService);
 
         return state;
       }, messageService, deviceTask: true);
@@ -90,10 +71,7 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var success = await _manager.DisconnectAsync(messageService);
-        if (!success || DeviceDisplayConfig.GetExecutionParametersVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение бесперебойника", success, 1, messageService);
-        }
+        await EquipmentMessages.PublishDisconnectionResultAsync(_device, success, outputService: messageService);
 
         return success;
       }, messageService, deviceTask: true);
@@ -112,10 +90,7 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var success = await _manager.ResetAsync(messageService);
-        if (!success || DeviceDisplayConfig.GetExecutionParametersVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Сброс бесперебойника", success, 1, messageService);
-        }
+        await EquipmentMessages.PublishResetResultAsync(_device, success, outputService: messageService);
 
         return success;
       }, messageService, deviceTask: true);

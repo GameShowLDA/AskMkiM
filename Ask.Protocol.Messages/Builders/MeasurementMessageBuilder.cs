@@ -1,8 +1,8 @@
-namespace Ask.Protocol.Messages;
+namespace Ask.Protocol.Messages.Builders;
 
 /// <summary>
 /// Формирует сообщения об измеренных значениях, допустимых диапазонах, погрешностях и результатах измерений.
 /// </summary>
-public static class MeasurementMessageBuilder
+internal static class MeasurementMessageBuilder
 {
 }

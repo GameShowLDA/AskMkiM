@@ -1,8 +1,8 @@
-namespace Ask.Protocol.Messages;
+namespace Ask.Protocol.Messages.Builders;
 
 /// <summary>
 /// Формирует сообщения о выполнении команд программы контроля, проверке цепей, точек и разрядов.
 /// </summary>
-public static class CommandMessageBuilder
+internal static class CommandMessageBuilder
 {
 }
