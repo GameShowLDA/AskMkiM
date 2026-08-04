@@ -21,7 +21,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private const double VoltageRange = 0.2;
     private const double MinimumActiveResistance = 50;
     private const int RequiredCapacitanceMeasurements = 6;
-    private const int MeasurementResponseDelayMs = 1200;
+    private const int MeasurementResponseDelayMs = 0;
     private const string VoltageUnit = " В";
     private const string ResistanceUnit = " Ом";
     private const string CapacitanceUnit = " нФ";
