@@ -106,23 +106,21 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                 type = ShowMessageModel.MessageType.Error;
               }
 
-              var formattedResult = NodeMethodProtocolBuilder.FormatValue(answer.value, ResistanceUnit.MegaOhm);
-              var resultMessage = new ShowMessageModel(
-                $"Результат измерения точки {connectResult.PointModel}",
-                message: formattedResult,
-                type: type)
-              {
-                IndentLevel = 2,
-                ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
-                  ? NodeMethodProtocolBuilder.BuildFailure(
-                    connectResult.PointModel,
-                    dataModel.Param,
-                    answer.value,
-                    ResistanceUnit.MegaOhm,
-                    MeasurementLimitKind.Minimum)
-                  : null,
-              };
-              await protocolUI.ShowMessageAsync(resultMessage, skipPause: true);
+              string? executionErrorMessage = type == ShowMessageModel.MessageType.Error
+                ? NodeMethodProtocolBuilder.BuildFailure(
+                  connectResult.PointModel,
+                  dataModel.Param,
+                  answer.value,
+                  ResistanceUnit.MegaOhm,
+                  MeasurementLimitKind.Minimum)
+                : null;
+              await MeasurementMessages.PublishResultAsync(
+                ResistanceUnit.MegaOhm,
+                new MeasurementRange(answer.value, dataModel.Param, -1),
+                type == ShowMessageModel.MessageType.Success,
+                connectResult.PointModel.ToString(),
+                executionErrorMessage,
+                protocolUI);
               return type == ShowMessageModel.MessageType.Success;
 
             }, protocolUI);

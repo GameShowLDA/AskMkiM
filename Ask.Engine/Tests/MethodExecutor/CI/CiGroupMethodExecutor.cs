@@ -100,24 +100,22 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
 
           var dischargeIndex = CurrentDischargeNumber - 1;
           var bitString = GetBitString();
-          var formattedResult = GroupMethodProtocolBuilder.FormatValue(answer.value, ResistanceUnit.MegaOhm);
-          var resultMessage = new ShowMessageModel(
-            $"Результат измерения разряда {dischargeIndex} ({bitString})",
-            message: formattedResult,
-            type: type)
-          {
-            IndentLevel = 2,
-            ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
-              ? GroupMethodProtocolBuilder.BuildFailure(
-                dischargeIndex,
-                bitString,
-                dataModel.Param,
-                answer.value,
-                ResistanceUnit.MegaOhm,
-                MeasurementLimitKind.Minimum)
-              : null,
-          };
-          await messageService.ShowMessageAsync(resultMessage, skipPause: true);
+          string? executionErrorMessage = type == ShowMessageModel.MessageType.Error
+            ? GroupMethodProtocolBuilder.BuildFailure(
+              dischargeIndex,
+              bitString,
+              dataModel.Param,
+              answer.value,
+              ResistanceUnit.MegaOhm,
+              MeasurementLimitKind.Minimum)
+            : null;
+          await MeasurementMessages.PublishResultAsync(
+            ResistanceUnit.MegaOhm,
+            new MeasurementRange(answer.value, dataModel.Param, -1),
+            type == ShowMessageModel.MessageType.Success,
+            $"Разряд {dischargeIndex} ({bitString})",
+            executionErrorMessage,
+            messageService);
           return type == ShowMessageModel.MessageType.Success;
         }, messageService);
       }

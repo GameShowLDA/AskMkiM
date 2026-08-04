@@ -110,21 +110,21 @@ namespace Ask.Engine.Tests.Metrology
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt1 > 100)
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: MeasurementValueFormatter.FormatWithUnit(Rt1, "Ом")) { IndentLevel = 1 });
+          await MeasurementMessages.PublishIntermediateResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(Rt1, LowerBound, UpperBound), true, outputService: protocolUI);
         }
 
         var Rt2 = await StepSecond(protocolUI, metrologicalModeRole, points.Point1, points.Point2, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt2 > 100)
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: MeasurementValueFormatter.FormatWithUnit(Rt2, "Ом")) { IndentLevel = 1 });
+          await MeasurementMessages.PublishIntermediateResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(Rt2, LowerBound, UpperBound), true, outputService: protocolUI);
         }
 
         var Rt = await StepThird(protocolUI, metrologicalModeRole, points.Point1, points.Point2, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt > 100)
         {
           await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерений", message: MeasurementValueFormatter.FormatWithUnit(Rt, "Ом")) { IndentLevel = 1 });
+          await MeasurementMessages.PublishIntermediateResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(Rt, LowerBound, UpperBound), true, outputService: protocolUI);
         }
 
         var result = Rt - ((Rt1 + Rt2) / 2);
@@ -141,7 +141,7 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, result, LowerBound, UpperBound, "Ом");
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: $"Rизм= {MeasurementValueFormatter.Format(result)} Ом", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error), skipPause: true);
+        await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: protocolUI);
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "Ом"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
 
         await StepReset(protocolUI, metrologicalModeRole, points.Point1, points.Point2);

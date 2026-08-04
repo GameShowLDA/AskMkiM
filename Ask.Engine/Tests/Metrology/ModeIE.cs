@@ -122,13 +122,13 @@ namespace Ask.Engine.Tests.Metrology
             AddMetrologyError(protocolUI, metrologicalModeRole, result, LowerBound, UpperBound, "нФ");
           }
 
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения ёмкости", message: MeasurementValueFormatter.FormatWithUnit(result, "нФ"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+          await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.IE, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: protocolUI);
           await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "нФ"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
         }
         else
         {
           AddMetrologyError(protocolUI, metrologicalModeRole, "Overload", LowerBound, UpperBound, "нФ");
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения ёмкости", message: $"Overload", type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+          await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.IE, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: protocolUI);
         }
         return true;
       }

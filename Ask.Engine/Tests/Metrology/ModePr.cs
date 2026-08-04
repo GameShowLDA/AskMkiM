@@ -121,7 +121,7 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, result, firstNorm, lastNorm, "Ом");
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения сопротивления", message: MeasurementValueFormatter.FormatWithUnit(result, "Ом"), type: result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
+        await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.PR, new MeasurementRange(result, firstNorm, lastNorm), result >= firstNorm && result <= lastNorm, outputService: protocolUI);
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "Ом"), type: result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
 
         return true;

@@ -50,4 +50,37 @@ public sealed class MeasurementMessagesTests
 
     Assert.Contains("Overload", message.Message);
   }
+
+  [Fact]
+  public void BuildMeasurementResultMessage_UpperLimit_FormatsUnitBeforeLimit()
+  {
+    var message = MeasurementMessages.BuildMeasurementResultMessage(
+      MeasurementTypeCommand.KC,
+      new MeasurementRange(5, 0, 10),
+      "A1");
+
+    Assert.Contains("A1 (Ом<10)", message.Header);
+  }
+
+  [Fact]
+  public void BuildMeasurementResultMessage_Range_FormatsUnitBetweenLimits()
+  {
+    var message = MeasurementMessages.BuildMeasurementResultMessage(
+      MeasurementTypeCommand.KC,
+      new MeasurementRange(9, 8, 10),
+      "A1,B2");
+
+    Assert.Contains("A1,B2 (8<Ом<10)", message.Header);
+  }
+
+  [Fact]
+  public void BuildMeasurementResultMessage_LowerLimit_FormatsLimitBeforeUnit()
+  {
+    var message = MeasurementMessages.BuildMeasurementResultMessage(
+      MeasurementTypeCommand.SI,
+      new MeasurementRange(9, 8, -1),
+      "A1");
+
+    Assert.Contains("A1 (8<МОм)", message.Header);
+  }
 }

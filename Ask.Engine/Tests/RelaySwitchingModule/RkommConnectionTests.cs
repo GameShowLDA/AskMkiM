@@ -179,25 +179,21 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
             ModuleNumber = _module.Number,
             PointNumber = i,
           };
-          var type = success
-            ? ShowMessageModel.MessageType.Success
-            : ShowMessageModel.MessageType.Error;
-          var resultMessage = new ShowMessageModel(
-            $"Результат измерения точки {point}",
-            message: NodeMethodProtocolBuilder.FormatValue(result, ResistanceUnit.Ohm),
-            type: type)
-          {
-            IndentLevel = 2,
-            ExecutionErrorMessage = success
-              ? null
-              : NodeMethodProtocolBuilder.BuildRangeFailure(
-                point,
-                lowerLimit,
-                data.Param,
-                result,
-                ResistanceUnit.Ohm),
-          };
-          await _userInteractionService.ShowMessageAsync(resultMessage, skipPause: true);
+          string? executionErrorMessage = success
+            ? null
+            : NodeMethodProtocolBuilder.BuildRangeFailure(
+              point,
+              lowerLimit,
+              data.Param,
+              result,
+              ResistanceUnit.Ohm);
+          await MeasurementMessages.PublishResultAsync(
+            ResistanceUnit.Ohm,
+            new MeasurementRange(result, lowerLimit, data.Param),
+            success,
+            point.ToString(),
+            executionErrorMessage,
+            _userInteractionService);
 
           return success;
         }, _userInteractionService);

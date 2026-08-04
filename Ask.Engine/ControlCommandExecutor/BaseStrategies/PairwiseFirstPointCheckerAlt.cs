@@ -81,7 +81,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var errorMessageModels = new ShowMessageModel($"{_basePoint.Mnemonic}{machineAddress}", message: "Rизм = Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
             errorPoint = true;
 
-            await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Результат измерений"));
             await context.MessageService.ShowMessageAsync(errorMessageModels);
 
             errorsMessgae.Add(errorMessageModels);
@@ -108,15 +107,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
-            {
-              await context.MessageService.ShowMessageAsync(
-                new ShowMessageModel(
-                  $"Результат измерений ({_basePoint.Mnemonic}{machineAddress})",
-                  message: MeasurementValueFormatter.FormatWithUnit(Rt1, "Ом"),
-                  type: ShowMessageModel.MessageType.Info)
-                { IndentLevel = 1 });
-            }
+            await MeasurementMessages.PublishIntermediateResultAsync(
+              context.TypeCommand,
+              new MeasurementRange(Rt1, context.LowerLimit, context.HigherLimit),
+              true,
+              $"{_basePoint.Mnemonic}{machineAddress}",
+              outputService: context.MessageService);
           }
 
           await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
@@ -174,15 +170,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 }
               }
 
-              if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
-              {
-                await context.MessageService.ShowMessageAsync(
-                  new ShowMessageModel(
-                    $"Результат измерений ({point.Mnemonic}{machineAdress})",
-                    message: MeasurementValueFormatter.FormatWithUnit(Rt2, "Ом"),
-                    type: ShowMessageModel.MessageType.Info)
-                  { IndentLevel = 1 });
-              }
+              await MeasurementMessages.PublishIntermediateResultAsync(
+                context.TypeCommand,
+                new MeasurementRange(Rt2, context.LowerLimit, context.HigherLimit),
+                true,
+                $"{point.Mnemonic}{machineAdress}",
+                outputService: context.MessageService);
             }
 
             await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
@@ -245,15 +238,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
               else
               {
-                if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
-                {
-                  await context.MessageService.ShowMessageAsync(
-                    new ShowMessageModel(
-                      $"Результат измерений ({_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond})",
-                      message: MeasurementValueFormatter.FormatWithUnit(Rt, "Ом"),
-                      type: ShowMessageModel.MessageType.Info)
-                    { IndentLevel = 1 });
-                }
+                await MeasurementMessages.PublishIntermediateResultAsync(
+                  context.TypeCommand,
+                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
+                  true,
+                  $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}",
+                  outputService: context.MessageService);
               }
             }
 

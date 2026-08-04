@@ -263,7 +263,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
         device,
         $"Результат \"{header}\"",
-        $"{result} {unit} (правильных: {correctMeasurements.Count}/{totalMeasurementCount})",
+        $"{result} {unit}",
         isSuccessful,
         2,
         userMessageService);

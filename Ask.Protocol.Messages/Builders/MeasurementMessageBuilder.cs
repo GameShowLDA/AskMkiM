@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -47,6 +48,24 @@ internal static class MeasurementMessageBuilder
     return new ShowMessageModel(header, message: measuredValue);
   }
 
+  internal static ShowMessageModel BuildResult(
+    Enum measurementUnit,
+    MeasurementRange measurementRange,
+    string? measurementTarget = null,
+    string comparisonSign = "=")
+  {
+    ArgumentNullException.ThrowIfNull(measurementUnit);
+    ArgumentNullException.ThrowIfNull(measurementRange);
+
+    string unit = measurementUnit.GetUnit();
+    string symbol = measurementUnit.GetQuantitySymbol().ToString();
+    string header = BuildMeasurementHeader(measurementTarget ?? string.Empty, measurementRange, unit);
+    string message = $"{symbol}изм{comparisonSign} " +
+      $"{MeasurementValueFormatter.Format(measurementRange.TargetValue)} {unit}";
+
+    return new ShowMessageModel(header, message: message);
+  }
+
   private static string BuildMeasuredValue(
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
@@ -85,9 +104,16 @@ internal static class MeasurementMessageBuilder
     MeasurementRange measurementRange,
     string unit)
   {
-    return measurementRange.UpperBound != -1
-      ? $"{chains} ({FormatMeasurementLimit(measurementRange.LowerBound)} - {FormatMeasurementLimit(measurementRange.UpperBound)} {unit})"
-      : $"{chains}({FormatMeasurementLimit(measurementRange.LowerBound)}<{unit})";
+    string range = measurementRange.UpperBound == -1
+      ? $"{FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}"
+      : measurementRange.LowerBound == 0
+        ? $"{unit}<{FormatMeasurementLimit(measurementRange.UpperBound)}"
+        : $"{FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}<" +
+          FormatMeasurementLimit(measurementRange.UpperBound);
+
+    return string.IsNullOrWhiteSpace(chains)
+      ? $"({range})"
+      : $"{chains} ({range})";
   }
 
   private static string FormatMeasurementLimit(double value)

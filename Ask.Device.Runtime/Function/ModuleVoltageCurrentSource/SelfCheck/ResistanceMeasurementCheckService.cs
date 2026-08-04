@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 
 namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
@@ -89,14 +90,14 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
           result = voltage / currentAmps;
         }
 
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})",
-          message: $"{result:F2}",
-          type: (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error
-          );
-
-        showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
-        showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-        await messageService.ShowMessageAsync(showMessageModel);
+        bool isSuccessful = result >= firstNorm && result <= lastNorm;
+        await MeasurementMessages.PublishResultAsync(
+          ResistanceUnit.Ohm,
+          new MeasurementRange(result, firstNorm, lastNorm),
+          isSuccessful,
+          outputService: messageService,
+          executionError: !isSuccessful,
+          canBeDeleted: !isSuccessful);
 
         await DisconnectResistorByNumberAsync(relayModule, resistorNumber, messageService);
       }

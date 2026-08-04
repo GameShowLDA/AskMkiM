@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
@@ -72,7 +73,11 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       bool error = !(result >= firstNorm && result <= lastNorm);
 
       var status = error ? ShowMessageModel.MessageType.Error : ShowMessageModel.MessageType.Success;
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Результат измерения", message: $"{result}В", type: status) { IndentLevel = 2 });
+      await MeasurementMessages.PublishResultAsync(
+        VoltageUnit.Volt,
+        new MeasurementRange(result, firstNorm, lastNorm),
+        !error,
+        outputService: messageService);
       await messageService.ShowMessageAsync(new ShowMessageModel($"Диапазон значений", message: $"от {firstNorm} до {lastNorm}В") { IndentLevel = 3 });
       await messageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения", message: $"{Math.Abs(result - voltage)}В", type: status) { IndentLevel = 3 });
 

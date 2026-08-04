@@ -79,6 +79,66 @@ public static class MeasurementMessages
   }
 
   /// <summary>
+  /// Публикует результат измерения с явно заданной единицей измерения.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
+  /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
+  /// <param name="measurementTarget">Обозначение измеряемой точки, цепи или разряда.</param>
+  /// <param name="executionErrorMessage">Описание брака для итогового заключения.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="executionError">Признак ошибки выполнения, связанной с сообщением.</param>
+  /// <param name="canBeDeleted">Признак возможности удаления сообщения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="measurementUnit"/> или
+  /// <paramref name="measurementRange"/> равен <see langword="null"/>.
+  /// </exception>
+  public static Task PublishResultAsync(
+    Enum measurementUnit,
+    MeasurementRange measurementRange,
+    bool isSuccessful,
+    string? measurementTarget = null,
+    string? executionErrorMessage = null,
+    IMessageOutputService? outputService = null,
+    bool executionError = false,
+    bool canBeDeleted = false,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(measurementUnit);
+    ArgumentNullException.ThrowIfNull(measurementRange);
+
+    if (outputService == null || (isSuccessful && !DeviceDisplayConfig.GetMeasurementResultsVisibility()))
+    {
+      return Task.CompletedTask;
+    }
+
+    ShowMessageModel message = MeasurementMessageBuilder.BuildResult(
+      measurementUnit,
+      measurementRange,
+      measurementTarget);
+    message.Status = isSuccessful
+      ? ShowMessageModel.MessageType.Success
+      : ShowMessageModel.MessageType.Error;
+    message.IndentLevel = 2;
+    message.ExecutionErrorMessage = executionErrorMessage;
+    message.ExecutionError = executionError;
+    message.CanBeDeleted = canBeDeleted;
+
+    return MeasurementMessagePublisher.PublishAsync(
+      message,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
   /// Публикует промежуточный результат измерения цепи.
   /// </summary>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>

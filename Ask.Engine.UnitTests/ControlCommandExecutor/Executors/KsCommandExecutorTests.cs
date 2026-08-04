@@ -54,7 +54,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     Assert.Empty(protocol.Errors);
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
-    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5 - 15 Ом)", "Rизм= 10 Ом");
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5<Ом<15)", "Rизм= 10 Ом");
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ResistanceManagerMock.Verify(
       x => x.MeasureResistanceAsync(
@@ -133,7 +133,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var protocol = await harness.ExecuteAsync(command);
 
     AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
-    AssertMessage(protocol.Errors[GetCommandKey(command)][0], "X1, X2 (5 - 15 Ом)", "Rизм= 20 Ом");
+    AssertMessage(protocol.Errors[GetCommandKey(command)][0], "X1, X2 (5<Ом<15)", "Rизм= 20 Ом");
     Assert.Empty(protocol.Info);
     Assert.Single(harness.PublishedErrors);
     Assert.Contains("X1", harness.PublishedErrors[0].Description);
@@ -232,7 +232,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var protocol = await harness.ExecuteAsync(command);
     var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
-    AssertMessage(error, "X1, X2 (0,5 - 5 Ом)", "Rизм= 0 Ом");
+    AssertMessage(error, "X1, X2 (0,5<Ом<5)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
     Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
   }
@@ -252,7 +252,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var protocol = await harness.ExecuteAsync(command);
     var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
-    AssertMessage(error, "X1, X2 (0,5 - 5 Ом)", "Rизм= 0 Ом");
+    AssertMessage(error, "X1, X2 (0,5<Ом<5)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
     Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
     harness.ContinuityManagerMock.Verify(
@@ -324,7 +324,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     Assert.Empty(protocol.Errors);
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
-    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5 - 15 Ом)", "Rизм= 10 Ом");
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5<Ом<15)", "Rизм= 10 Ом");
   }
 
   /// <summary>
@@ -349,8 +349,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     Assert.Empty(protocol.Errors);
     Assert.Equal(2, messages.Count);
-    Assert.Contains(messages, item => item.Header == "X1, X2 (5 - 15 Ом)" && item.Message == "Rизм= 10 Ом");
-    Assert.Contains(messages, item => item.Header == "X1, X3 (5 - 15 Ом)" && item.Message == "Rизм= 10 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X2 (5<Ом<15)" && item.Message == "Rизм= 10 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X3 (5<Ом<15)" && item.Message == "Rизм= 10 Ом");
   }
 
   /// <summary>
@@ -374,8 +374,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var messages = protocol.Errors[GetCommandKey(command)];
 
     Assert.Equal(2, messages.Count);
-    Assert.Contains(messages, item => item.Header == "X1, X2 (5 - 15 Ом)" && item.Message == "Rизм= 20 Ом");
-    Assert.Contains(messages, item => item.Header == "X1, X3 (5 - 15 Ом)" && item.Message == "Rизм= 25 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X2 (5<Ом<15)" && item.Message == "Rизм= 20 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X3 (5<Ом<15)" && item.Message == "Rизм= 25 Ом");
     Assert.Equal(2, harness.PublishedErrors.Count);
   }
 

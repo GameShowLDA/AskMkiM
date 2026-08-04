@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
@@ -124,18 +125,17 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             ? ShowMessageModel.MessageType.Success
             : ShowMessageModel.MessageType.Error;
           var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "МОм");
-          var resultMessage = new ShowMessageModel(
-            "Результат измерения сопротивления изоляции",
-            message: formattedResult,
-            type: status)
-          {
-            IndentLevel = 1,
-            ExecutionErrorMessage = status == ShowMessageModel.MessageType.Error
-              ? $"СИ. Проверка при напряжении {item}В " +
-                $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
-              : null,
-          };
-          await userMessageService.ShowMessageAsync(resultMessage, skipPause: true);
+          string? executionErrorMessage = status == ShowMessageModel.MessageType.Error
+            ? $"СИ. Проверка при напряжении {item}В " +
+              $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
+            : null;
+          await MeasurementMessages.PublishResultAsync(
+            ResistanceUnit.MegaOhm,
+            new MeasurementRange(result, lowerBound, upperBound),
+            status == ShowMessageModel.MessageType.Success,
+            $"Проверка при напряжении {item}В",
+            executionErrorMessage,
+            outputService: userMessageService);
 
           var errorMessage = new ShowMessageModel(
             $"Погрешность измерения ({lowerBound} - {upperBound} МОм)",
