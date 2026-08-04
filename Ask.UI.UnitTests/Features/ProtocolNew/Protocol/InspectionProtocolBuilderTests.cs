@@ -21,4 +21,26 @@ public sealed class InspectionProtocolBuilderTests
     Assert.Contains("1. Точка[20] - Отключение с шины A [БРАК]", result);
     Assert.Contains("2. Точка[20] - Отключение с шины B [БРАК]", result);
   }
+
+  [Fact(DisplayName = "Входные параметры выводятся перед заключением")]
+  public void Build_WhenInputParametersExist_WritesThemBeforeConclusion()
+  {
+    var settings = new ActionSettings
+    {
+      StartDelegate = (_, _, _, _) => Task.CompletedTask,
+      Name = "СИ - Метод узла",
+    };
+    settings.InputParameters.Add("Первая точка: 1.2.3");
+    settings.InputParameters.Add("Вторая точка: 1.2.4");
+
+    var result = new InspectionProtocolBuilder().Build(settings);
+
+    var inputIndex = result.IndexOf("Введённые данные:", StringComparison.Ordinal);
+    var conclusionIndex = result.IndexOf("Заключение:", StringComparison.Ordinal);
+
+    Assert.True(inputIndex >= 0);
+    Assert.True(conclusionIndex > inputIndex);
+    Assert.Contains("\tПервая точка: 1.2.3", result);
+    Assert.Contains("\tВторая точка: 1.2.4", result);
+  }
 }

@@ -502,6 +502,12 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     private void OpenInspectionFileButton_Click(object sender, RoutedEventArgs e)
+      => OpenInspectionProtocolInEditor();
+
+    /// <summary>
+    /// Открывает последний итоговый протокол в редакторе.
+    /// </summary>
+    public void OpenInspectionProtocolInEditor()
     {
       try
       {
@@ -514,6 +520,12 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     private void OpenInspectionFolderButton_Click(object sender, RoutedEventArgs e)
+      => OpenInspectionProtocolFolder();
+
+    /// <summary>
+    /// Открывает папку последнего итогового протокола.
+    /// </summary>
+    public void OpenInspectionProtocolFolder()
     {
       try
       {

@@ -19,12 +19,17 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// Устройство коммутации шин.
     /// </summary>
     private readonly IRelaySwitchModule _moduleRelay;
+    private readonly ModuleRelayControlQueryExecutor _queryExecutor;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public SelfTestManager(IRelaySwitchModule moduleRelay) => _moduleRelay = moduleRelay;
+    public SelfTestManager(IRelaySwitchModule moduleRelay)
+    {
+      _moduleRelay = moduleRelay;
+      _queryExecutor = new ModuleRelayControlQueryExecutor(moduleRelay);
+    }
     public Type GetTestTypeEnum()
     {
       return typeof(RelaySwitchTypeConnector);
@@ -115,15 +120,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
     public async Task<(bool, string)> TryGetCheckBusConntcrion(int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
-          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
-          : (true, string.Empty);
-      }
-
       DeviceCommand cmd = new DeviceCommand(10, number);
-      string answer = await _moduleRelay.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
       SelfBusModel busModel = SelfBusModel.FromJson(answer);
       if (busModel == null)
       {
@@ -144,28 +142,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     {
       token.ThrowIfCancellationRequested();
 
-      string answer = !ExecutionConfig.GetIsIdleModeEnabled()
-        ? await relaySwitchModule.PointManager.CheckPoint(point, userMessageService)
-        : !await ExecutionConfig.GetIsErrorSimulationEnabled() ? "104.1" : "104.2";
-
-      SelfPointModel model;
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        Random random = new Random();
-        bool isErrorSimulation = await ExecutionConfig.GetIsErrorSimulationEnabled();
-        isErrorSimulation = isErrorSimulation && point % 10 == 0;
-        model = new SelfPointModel
-        {
-          DisconnectBusB = !isErrorSimulation || random.Next(2) == 1,
-          DisconnectBusA = !isErrorSimulation || random.Next(2) == 1,
-          ConnectPoint = !isErrorSimulation || random.Next(2) == 1,
-        };
-        model.SelfControl = model.DisconnectBusB && model.DisconnectBusA && model.ConnectPoint;
-      }
-      else
-      {
-        model = SelfPointModel.FromJson(answer);
-      }
+      string answer = await relaySwitchModule.PointManager.CheckPoint(point, userMessageService);
+      SelfPointModel model = SelfPointModel.FromJson(answer);
 
       ShowMessageModel showMessageModel;
       if (model != null)
@@ -255,11 +233,6 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       if (!answer.Item1)
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return false;
-        }
-
         SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
         showMessageModel = new ShowMessageModel()
         {

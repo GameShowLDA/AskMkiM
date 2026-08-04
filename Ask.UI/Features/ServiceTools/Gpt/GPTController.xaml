@@ -1,0 +1,149 @@
+<UserControl x:Class="Ask.UI.Features.ServiceTools.Gpt.GPTController"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700"
+             d:DesignWidth="900">
+    <UserControl.Resources>
+        <Style x:Key="GptModeStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="56"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="ModeSurface"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                                <Ellipse x:Name="ModeState"
+                                         Grid.Column="1"
+                                         Width="7"
+                                         Height="7"
+                                         Fill="Transparent"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ModeSurface"
+                                        Property="Background"
+                                        Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ModeSurface"
+                                        Property="Background"
+                                        Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
+                                <Setter TargetName="ModeState"
+                                        Property="Fill"
+                                        Value="White"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource SettingCardBackground}"
+            BorderBrush="{DynamicResource SettingCardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="14"
+            ClipToBounds="True">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Padding="18"
+                    Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                    BorderBrush="{DynamicResource SettingCardBorderBrush}"
+                    BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="2,2,2,22">
+                        <TextBlock Text="GPT"
+                                   Foreground="{DynamicResource ForegrounfBrushes}"
+                                   FontSize="27"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Margin="0,4,0,0"
+                                   Text="Режим испытания"
+                                   Foreground="{DynamicResource ForegrounfBrushes85}"
+                                   FontSize="15"
+                                   Opacity="0.65"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1">
+                        <RadioButton x:Name="AcwModeButton"
+                                     GroupName="Modes"
+                                     Tag="Mode1"
+                                     Content="ACW"
+                                     Style="{StaticResource GptModeStyle}"
+                                     Checked="Mode_Checked"/>
+                        <RadioButton x:Name="DcwModeButton"
+                                     GroupName="Modes"
+                                     Tag="Mode2"
+                                     Content="DCW"
+                                     Style="{StaticResource GptModeStyle}"
+                                     Checked="Mode_Checked"/>
+                        <RadioButton x:Name="IrModeButton"
+                                     GroupName="Modes"
+                                     Tag="Mode3"
+                                     Content="IR"
+                                     Style="{StaticResource GptModeStyle}"
+                                     Checked="Mode_Checked"/>
+                        <RadioButton x:Name="SettingsModeButton"
+                                     GroupName="Modes"
+                                     Tag="Mode4"
+                                     Content="Общие настройки"
+                                     Style="{StaticResource GptModeStyle}"
+                                     Checked="Mode_Checked"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="2"
+                            Padding="12,10"
+                            Background="{DynamicResource SettingCardBackground}"
+                            CornerRadius="9">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8"
+                                     Height="8"
+                                     Margin="0,0,9,0"
+                                     Fill="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
+                            <TextBlock Text="Управление оборудованием"
+                                       Foreground="{DynamicResource ForegrounfBrushes85}"
+                                       FontSize="14"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Column="1"
+                          Padding="18"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <Grid x:Name="ModeContent"/>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>

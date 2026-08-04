@@ -1,7 +1,7 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl
@@ -11,16 +11,16 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
   /// </summary>
   public class MeterManager : IMeterManager
   {
-    /// <summary>
-    /// Экземпляр интерфейса модуля коммутации реле.
-    /// </summary>
-    private readonly IRelaySwitchModule _moduleRelayControl;
+    private readonly ModuleRelayControlQueryExecutor _queryExecutor;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="MeterManager"/>.
     /// </summary>
     /// <param name="moduleRelayControl">Экземпляр интерфейса модуля реле.</param>
-    public MeterManager(IRelaySwitchModule moduleRelayControl) => _moduleRelayControl = moduleRelayControl;
+    public MeterManager(IRelaySwitchModule moduleRelayControl)
+    {
+      _queryExecutor = new ModuleRelayControlQueryExecutor(moduleRelayControl);
+    }
 
     /// <summary>
     /// Включает измеритель модуля МКР.
@@ -31,14 +31,9 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> ConnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       DeviceCommand cmd = new DeviceCommand(5, 1);
-      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return true;
+      string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
+      return BaseResponse.FromJson(answer)?.Answer == "5.1";
     }
 
     /// <summary>
@@ -50,14 +45,9 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> DisconnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       DeviceCommand cmd = new DeviceCommand(5, 2);
-      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      return true;
+      string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
+      return BaseResponse.FromJson(answer)?.Answer == "5.2";
     }
 
     /// <summary>
@@ -69,17 +59,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// </remarks>
     public async Task<bool> GetMeterResponseAsync(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
       DeviceCommand cmd = new DeviceCommand(7);
-      var answer = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
 
-      // TODO : Нормально распарсить ответ МКР.
-      var result = answer.Contains("7.1");
-      return result;
+      return BaseResponse.FromJson(answer)?.Answer == "7.1";
     }
   }
 }

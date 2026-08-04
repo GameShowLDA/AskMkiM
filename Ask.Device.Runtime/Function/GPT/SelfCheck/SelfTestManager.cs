@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -114,7 +115,9 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           await breakdownTester.IrManger.Voltage.SetVoltageAsync(item, userMessageService);
 
           (var lowerBound, var upperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
-          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, param, lowerBound, upperBound)).value;
+
+          MeasurementRange measurementRange = new MeasurementRange(param, lowerBound, upperBound);
+          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange)).value;
 
           var err = result - param;
           var status = result >= lowerBound && result <= upperBound
@@ -194,7 +197,8 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
           await Task.Delay(1000);
 
-          var result = await meter.AcVoltageManager.MeasureACVoltageAsync(item, lowerBound, upperBound);
+          MeasurementRange measurementRangeAc = new MeasurementRange(item, lowerBound, upperBound);
+          var result = await meter.AcVoltageManager.MeasureACVoltageAsync(measurementRangeAc);
           if (!ExecutionConfig.GetIsIdleModeEnabled())
           {
             result *= 10;
@@ -278,7 +282,8 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
           await Task.Delay(1000);
 
-          var result = await meter.DcVoltageManager.MeasureDCVoltageAsync(item, lowerBound, upperBound);
+          MeasurementRange measurementRange = new MeasurementRange(item, lowerBound, upperBound);
+          var result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
           if (!ExecutionConfig.GetIsIdleModeEnabled())
           {
             result *= 10;

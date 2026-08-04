@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -65,7 +66,7 @@ namespace Ask.Engine.Tests.Metrology
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: metrologicalModeRole, timeCheck: true, timeRampCheck: true);
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _messageService);
       await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_messageService, metrologicalModeRole, data);
@@ -104,8 +105,8 @@ namespace Ask.Engine.Tests.Metrology
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
         await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
-        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
         await breakDown.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);
+        await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(10, messageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
       }
 
@@ -116,13 +117,11 @@ namespace Ask.Engine.Tests.Metrology
         await messageService.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления изоляции", headerColor: ShowMessageModel.SuccessMessage.TitleColor));
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_DCW, param);
-        await meterDevice.DcwManger.Measure.MeasureAsync(
-          ElectricalTestFunction.DielectricWithstandDC,
-          param,
-          LowerBound,
-          UpperBound,
-          userMessageService: messageService);
+
         var result = await MeasuredReferenceMeter(messageService, param);
+
+        MeasurementRange measurementRangeDcw = new MeasurementRange(param, LowerBound, UpperBound);
+        await meterDevice.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRangeDcw);
 
         var answer = result < LowerBound || result > UpperBound;
         var err = result - param;

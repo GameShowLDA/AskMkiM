@@ -25,9 +25,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// </returns>
     internal static double GetSimulatedValue(double rangeFrom, double rangeTo, ElectricalTestFunction measurementTypeCommand)
     {
+      if (rangeTo == -1)
+      {
+        rangeTo = rangeFrom * 2;
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (!ExecutionConfig.GetIsErrorSimulationEnabled().Result)
+        if (!ExecutionConfig.GetIsErrorSimulationEnabled())
         {
           switch (measurementTypeCommand)
           {
@@ -36,9 +41,9 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             case ElectricalTestFunction.DielectricWithstandAC:
               return (rangeFrom + rangeTo) / 2;
             case ElectricalTestFunction.DielectricWithstandDC:
-              return 1;
+              return (rangeFrom + rangeTo) / 2;
             case ElectricalTestFunction.InsulationResistance:
-              return 60000;
+              return (rangeFrom + rangeTo) / 2;
 
             case ElectricalTestFunction.ACVoltage:
             case ElectricalTestFunction.DCVoltage:

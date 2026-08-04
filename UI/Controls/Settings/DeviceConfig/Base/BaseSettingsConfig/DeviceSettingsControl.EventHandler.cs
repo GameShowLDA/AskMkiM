@@ -1,5 +1,5 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
@@ -27,6 +27,19 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// Признак синхронизации номера устройства и последнего октета IP-адреса.
     /// </summary>
     private bool _synchronizingDeviceNumberAndIp;
+
+    /// <summary>
+    /// Обновляет контейнер дополнительных настроек при изменении свойства <see cref="AdditionalSettings"/>.
+    /// </summary>
+    /// <param name="d">Объект зависимости.</param>
+    /// <param name="e">Аргументы изменения свойства.</param>
+    private static void OnAdditionalSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+      if (d is DeviceSettingsControl control)
+      {
+        control.AdditionalSettingsContainer.Content = e.NewValue;
+      }
+    }
 
     /// <summary>
     /// Обрабатывает изменение выбранной модели шасси.
@@ -64,7 +77,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private void DeviceModelSelectionBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
       if (DeviceModelSelectionBox.SelectedItem is not string selectedModel ||
-          !DeviceModelMap.TryGetValue(selectedModel, out Type selectedType))
+          !DeviceModelMap.TryGetValue(selectedModel, out Type? selectedType) ||
+          selectedType is null)
       {
         return;
       }
@@ -86,7 +100,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           BusTypeContainer.Visibility = Visibility.Visible;
           ResistanceContainer.Visibility = Visibility.Visible;
           CapacitanceContainer.Visibility = Visibility.Visible;
-          var relayModule = (IRelaySwitchModule)Activator.CreateInstance(selectedType)!;
+          var relayModule = (IRelaySwitchModule)(Activator.CreateInstance(selectedType) ??
+            throw new InvalidOperationException($"Не удалось создать модель устройства {selectedType.Name}."));
           RelayPointCountContainer.Visibility = Visibility.Visible;
           SetRelayPointCount(relayModule.PointCount);
         }
@@ -100,7 +115,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
         if (typeof(IMultimeter).IsAssignableFrom(selectedType))
         {
-          ShowFastMeterAdditionalSettings(sender as IMultimeter);
+          ShowFastMeterAdditionalSettings();
         }
         else if (typeof(IBreakdownTester).IsAssignableFrom(selectedType))
         {
@@ -108,7 +123,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         }
         if (baseClass == typeof(DeviceWithCOM))
         {
-          object deviceModel = Activator.CreateInstance(selectedType);
+          object deviceModel = Activator.CreateInstance(selectedType) ??
+            throw new InvalidOperationException($"Не удалось создать модель устройства {selectedType.Name}.");
           COMContainer.ApplyModelDefaults(deviceModel);
         }
 
@@ -151,10 +167,12 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       ClearUsbFields();
     }
 
-    private void ShowFastMeterAdditionalSettings(IMultimeter multimeter)
+    private void ShowFastMeterAdditionalSettings()
     {
       _acwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
       _dcwPpuDividerCoefficientPercentTextBox = CreatePpuDividerTextBox();
+      RegisterValidationSource(_acwPpuDividerCoefficientPercentTextBox, AdditionalSettingsContainer);
+      RegisterValidationSource(_dcwPpuDividerCoefficientPercentTextBox, AdditionalSettingsContainer);
 
       var container = new Border
       {
@@ -215,6 +233,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         MaxLength = 2
       };
       _systemInsulationResistanceGOhmTextBox.PreviewTextInput += IntegerDevice_PreviewTextInput;
+      RegisterValidationSource(_systemInsulationResistanceGOhmTextBox, AdditionalSettingsContainer);
 
       var container = new Border
       {
@@ -243,7 +262,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       AdditionalSettingsContainer.Content = container;
     }
 
-    private static void IntegerDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    private void IntegerDevice_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
       e.Handled = !e.Text.All(char.IsDigit);
     }
@@ -440,26 +459,18 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     }
 
     /// <summary>
-    /// Обработчик изменений свойства <see cref="AdditionalSettings"/>.
-    /// Обновляет содержимое контейнера дополнительных настроек.
-    /// </summary>
-    /// <param name="d">Объект зависимости.</param>
-    /// <param name="e">Аргументы изменения свойства.</param>
-    private static void OnAdditionalSettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-      if (d is DeviceSettingsControl control)
-      {
-        control.AdditionalSettingsContainer.Content = e.NewValue;
-      }
-    }
-
-    /// <summary>
     /// Обрабатывает нажатие кнопки сохранения.
     /// </summary>
     /// <param name="sender">Источник события.</param>
     /// <param name="e">Аргументы события нажатия кнопки мыши.</param>
     private void SaveButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      if (!ValidateRequiredParameters())
+      {
+        e.Handled = true;
+        return;
+      }
+
       SaveEvent?.Invoke(this, e);
     }
 

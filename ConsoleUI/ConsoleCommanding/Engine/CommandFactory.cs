@@ -13,7 +13,6 @@ namespace ConsoleUI.ConsoleCommanding.Engine
       var context = new CommandContext(writer);
 
       commands.Add(new AdminCommand());
-      commands.Add(new DebugCommand());
       commands.Add(new AddLogCommand());
       commands.Add(new ClearCommand());
       commands.Add(new DelAdminCommand());

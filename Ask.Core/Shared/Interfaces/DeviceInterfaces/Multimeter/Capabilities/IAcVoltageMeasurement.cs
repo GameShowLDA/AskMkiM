@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
 {
@@ -23,6 +24,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// Измеряет переменное напряжение.
     /// </summary>
     /// <param name="param">Ожидаемое значение.</param>
-    Task<double> MeasureACVoltageAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null);
+    Task<double> MeasureACVoltageAsync(MeasurementRange measurementRange, IUserInteractionService? userMessageService = null);
   }
 }

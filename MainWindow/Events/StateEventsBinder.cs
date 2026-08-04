@@ -38,7 +38,6 @@ namespace MainWindowProgram.Events
       ExecutionConfig.IdleModeChange += OnIdleModeChange;
 
       AdminCommand.AdminModeChanged += AdminModeChanged;
-      DebugCommand.DebugModeChanged += DebugModeChanged;
       AdminCommand.PauseInStopChanged += AdminCommand_PauseInStopChanged;
       AdminCommand.PowerChanged += AdminCommand_PowerChanged;
       AdminCommand.UpsPowerChanged += AdminCommand_UpsPowerChanged;
@@ -51,11 +50,6 @@ namespace MainWindowProgram.Events
       OnIdleModeChange(null, idleMode);
       OnConsoleAccessChanged(RoleAuthorizationConfig.CurrentRole == RoleType.Root);
       OnTestsMenuVisibilityChanged(RoleAuthorizationConfig.CurrentRole != RoleType.Developer);
-    }
-
-    private void DebugModeChanged(object? sender, bool e)
-    {
-      AdminConfig.SetDebugRights(e).ConfigureAwait(true);
     }
 
     private void AdminCommand_PowerChanged(object? sender, bool e)

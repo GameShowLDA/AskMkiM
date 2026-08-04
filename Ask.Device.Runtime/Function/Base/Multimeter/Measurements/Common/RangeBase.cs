@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -16,17 +17,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
   {
     private static readonly ConcurrentDictionary<string, double> SelectedRanges = new();
 
-    public static Task<bool> SetRangeAsync(
+    public static async Task<bool> SetRangeAsync(
         IMultimeter device,
         double range,
         IUserInteractionService? userMessageService = null)
     {
       return device.TypeMode switch
       {
-        MultimeterTypeMode.AcVoltage => SetACVoltageRangeAsync(device, range, userMessageService),
-        MultimeterTypeMode.DcVoltage => SetDCVoltageRangeAsync(device, range, userMessageService),
-        MultimeterTypeMode.Capacitance => SetCapacitanceRangeAsync(device, range, userMessageService),
-        MultimeterTypeMode.Resistance => SetResistanceRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.AcVoltage => await SetACVoltageRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.DcVoltage => await SetDCVoltageRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.Capacitance => await SetCapacitanceRangeAsync(device, range, userMessageService),
+        MultimeterTypeMode.Resistance => await SetResistanceRangeAsync(device, range, userMessageService),
         _ => throw new InvalidOperationException($"Невозможно установить диапазон для режима {device.TypeMode}.")
       };
     }
@@ -43,12 +44,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return SetRangeAsync(device, effectiveRange, userMessageService);
     }
 
-    private static Task<bool> SetACVoltageRangeAsync(
+    private static async Task<bool> SetACVoltageRangeAsync(
       IMultimeter device,
       double range,
       IUserInteractionService? userMessageService = null)
     {
-      return SetMeasurementRangeAsync(
+      return await SetMeasurementRangeAsync(
         device,
         device.ACVCommands,
         range,
@@ -60,12 +61,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
-    private static Task<bool> SetDCVoltageRangeAsync(
+    private static async Task<bool> SetDCVoltageRangeAsync(
       IMultimeter device,
       double range,
       IUserInteractionService? userMessageService = null)
     {
-      return SetMeasurementRangeAsync(
+      return await SetMeasurementRangeAsync(
         device,
         device.DCVCommands,
         range,
@@ -77,12 +78,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
-    private static Task<bool> SetResistanceRangeAsync(
+    private static async Task<bool> SetResistanceRangeAsync(
       IMultimeter device,
       double range,
       IUserInteractionService? userMessageService = null)
     {
-      return SetMeasurementRangeAsync(
+      return await SetMeasurementRangeAsync(
         device,
         device.ResistanceCommands,
         range,
@@ -94,21 +95,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
-    private static Task<bool> SetCapacitanceRangeAsync(
+    private static async Task<bool> SetCapacitanceRangeAsync(
       IMultimeter device,
       double range,
       IUserInteractionService? userMessageService = null)
     {
-      return SetMeasurementRangeAsync(
-        device,
-        device.CapacitanceCommands,
-        range,
-        profile => profile.SetRange,
-        profile => profile.SetAutoRange,
-        profile => profile.GetRangeError,
-        profile => profile.SupportedRanges,
-        profile => profile.RangeCommandMultiplier,
-        userMessageService);
+      return true;
     }
 
     private static async Task<bool> SetMeasurementRangeAsync<TProfile>(
@@ -174,12 +166,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double[] supportedRanges,
       double rangeCommandMultiplier)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
@@ -193,7 +180,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ? setAutoRangeCommand
         : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
-      await device.DeviceProtocol.QueryAsync(command, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty, timeout: profile.Timeout);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
 
       return true;
@@ -265,7 +252,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return;
       }
 
-      var error = await device.DeviceProtocol.QueryAsync(getRangeErrorCommand, timeout: timeout);
+      var error = await DeviceProtocolEmulator.QueryMultimeterAsync(
+        device,
+        getRangeErrorCommand,
+        "+0,\"No error\"",
+        timeout: timeout);
       var normalizedError = error?.TrimStart();
       if (!string.IsNullOrWhiteSpace(normalizedError)
         && !normalizedError.StartsWith("+0", StringComparison.Ordinal)

@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -225,7 +226,8 @@ namespace TestConsole.MINT
     static private async Task<double> GetMeasurementResult(double voltage, int delay, IMultimeter meter)
     {
       await Task.Delay(delay);
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync();
+      MeasurementRange measurementRange = new MeasurementRange(voltage, 0, voltage * 2);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
       LogInformation($"Измеренное напряжение: {result} В");
       return result;
     }

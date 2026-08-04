@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -121,12 +122,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
+        MeasurementRange measurementRange = new MeasurementRange(answer, firstValue, secondValue);
         return await MessageManager.ShowMeasurementResultAsync(
           messageService,
           MeasurementTypeCommand.NE,
-          firstValue,
-          secondValue,
-          answer,
+          measurementRange,
           isOverloadExpected: pointContext.IsOverloadExpected);
       }, messageService);
 
@@ -147,11 +147,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         return 9.9E+37;
       }
 
-      return await meter.DiodeManager.CheckDiodeAsync(
-        value,
-        firstValue,
-        secondValue,
-        messageService);
+      MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+      return await meter.DiodeManager.CheckDiodeAsync(measurementRange, messageService);
     }
 
     /// <summary>
@@ -164,7 +161,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// </returns>
     private static async Task<bool> ShouldReturnOverloadInIdleReverseModeAsync(ConnectedPointContext pointContext) =>
       ExecutionConfig.GetIsIdleModeEnabled()
-      && !await ExecutionConfig.GetIsErrorSimulationEnabled()
+      && !ExecutionConfig.GetIsErrorSimulationEnabled()
       && pointContext.IsOverloadExpected;
 
     private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)

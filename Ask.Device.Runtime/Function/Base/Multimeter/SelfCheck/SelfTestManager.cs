@@ -1,15 +1,10 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
@@ -69,7 +64,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(IdealVoltage);
+      MeasurementRange measurementRangeDc = new MeasurementRange(IdealVoltage, IdealVoltage, IdealVoltage);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRangeDc);
 
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealVoltage, result, "напряжения", userMessageService);
@@ -80,7 +76,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       await meter.AcVoltageManager.SetACVoltageModeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      result = await meter.AcVoltageManager.MeasureACVoltageAsync(IdealVoltage);
+      MeasurementRange measurementRangeAc = new MeasurementRange(IdealVoltage, IdealVoltage, IdealVoltage);
+      result = await meter.AcVoltageManager.MeasureACVoltageAsync(measurementRangeAc);
 
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealResistance, result, "напряжения", userMessageService);
@@ -100,7 +97,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       await meter.ResistanceManager.SetResistanceModeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      double result = await meter.ResistanceManager.MeasureResistanceAsync(rangeFrom: IdealResistance, rangeTo: IdealResistance);
+      MeasurementRange measurementRangeRes = new MeasurementRange(IdealResistance, IdealResistance, IdealResistance);
+      double result = await meter.ResistanceManager.MeasureResistanceAsync(measurementRangeRes);
 
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealResistance, result, "сопротивления", userMessageService);
@@ -123,7 +121,9 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       await meter.CapacitanceManager.SetCapacitanceModeAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
-      double result = await meter.CapacitanceManager.MeasureCapacitanceAsync(IdealCapacity);
+
+      MeasurementRange measurementRangeCap = new MeasurementRange(IdealCapacity, IdealCapacity / 2, IdealCapacity * 2);
+      double result = await meter.CapacitanceManager.MeasureCapacitanceAsync(measurementRangeCap);
 
       cancellationToken.ThrowIfCancellationRequested();
       //await SelfTestHelper.IsCorrectRangeAsync(IdealCapacity, result, "емкости", userMessageService);

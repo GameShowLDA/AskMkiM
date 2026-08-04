@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -6,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
 using Ask.Engine.Tests.Protocol;
@@ -39,7 +41,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, metrologyMode: MeasurementTypeCommand.PI_ACW, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       PiACWMethodExecutorMeasurement testMeasurement = new PiACWMethodExecutorMeasurement();
       try
       {
@@ -89,10 +91,10 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
-          var answer = await breakDown.AcwManger.Measure.MeasureAsync(
-            ElectricalTestFunction.DielectricWithstandAC,
-            dataModel.Param,
-            userMessageService: messageService);
+
+          MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
+          var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
+
           var type = ShowMessageModel.MessageType.Success;
           if (answer.value >= dataModel.Param)
           {

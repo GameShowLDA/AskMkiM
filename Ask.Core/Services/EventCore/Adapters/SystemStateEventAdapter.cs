@@ -71,8 +71,8 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// SystemStateEventAdapter.RaiseAdminRightsChanged(true);
     /// </code>
     /// </example>
-    public static void RaiseDebugRightsChanged(bool isDebug) =>
-      EventAggregator.Publish(new SystemStateEvents.DebugRightsChanged(isDebug));
+    public static void RaiseDebugRightsChanged(bool isDebugEnabled) =>
+      EventAggregator.Publish(new SystemStateEvents.DebugRightsChanged(isDebugEnabled));
 
     /// <summary>
     /// Генерирует событие изменения доступа к консоли администратора.

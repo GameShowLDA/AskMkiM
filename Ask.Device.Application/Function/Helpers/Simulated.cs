@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
 namespace Ask.Device.Application.Function.Helpers
 {
@@ -27,7 +26,7 @@ namespace Ask.Device.Application.Function.Helpers
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (!ExecutionConfig.GetIsErrorSimulationEnabled().Result)
+        if (!ExecutionConfig.GetIsErrorSimulationEnabled())
         {
           switch (measurementTypeCommand)
           {

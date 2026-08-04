@@ -35,7 +35,7 @@
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
         </Style>
 
-        <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}" />
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource ConfigurationScrollBarStyle}" />
 
         <DropShadowEffect x:Key="ShadowEffect" 
                          BlurRadius="20" 
@@ -65,7 +65,7 @@
                        TextWrapping="Wrap"
                        Foreground="{DynamicResource ForegrounfBrushes}" FontSize="25" FontWeight="Bold"/>
 
-            <ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" Padding="2,0">
+            <ScrollViewer x:Name="SettingsScrollViewer" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" Padding="2,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
