@@ -63,7 +63,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     {
       return MeasurementValueFormatter.IsOverloadValue(result)
         ? "Overload"
-        : MeasurementValueFormatter.Round(result).ToString("N0");
+        : MeasurementValueFormatter.Format(result);
     }
 
     private static string FormatFallibility(double idealResult, int percentageError)

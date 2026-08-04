@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -132,7 +133,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       await ShowMeasurementResultAsync(
         header,
-        $"{execution.Value} {unit}",
+        MeasurementValueFormatter.FormatWithUnit(execution.Value, unit),
         true,
         userMessageService);
 
@@ -265,7 +266,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
             GetIntermediateMeasurementHeader(profile.ElectricalTest),
-            $"{measurement} {unit}",
+            MeasurementValueFormatter.FormatWithUnit(measurement, unit),
             isCorrect,
             2,
             userMessageService,
@@ -280,7 +281,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       await ShowMeasurementResultAsync(
         header,
-        $"{result} {unit} (правильных: {correctMeasurements.Count}/{totalMeasurementCount})",
+        $"{MeasurementValueFormatter.FormatWithUnit(result, unit)} (правильных: {correctMeasurements.Count}/{totalMeasurementCount})",
         isSuccessful,
         userMessageService);
 
@@ -394,7 +395,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
             intermediateResultHeader,
-            $"{measurement} {unit}",
+            MeasurementValueFormatter.FormatWithUnit(measurement, unit),
             isPositive && isWithinRange,
             2,
             userMessageService,
@@ -428,7 +429,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double result = measurements.Average();
       await ShowMeasurementResultAsync(
         header,
-        $"{result} {unit}",
+        MeasurementValueFormatter.FormatWithUnit(result, unit),
         IsWithinRange(result, measurementRange.LowerBound, measurementRange.UpperBound),
         userMessageService);
 

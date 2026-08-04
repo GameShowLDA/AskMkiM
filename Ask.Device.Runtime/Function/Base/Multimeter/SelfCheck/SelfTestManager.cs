@@ -587,7 +587,9 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       var resultType = isCorrect
         ? ShowMessageModel.MessageType.Success
         : ShowMessageModel.MessageType.Error;
-      var meaning = MeasurementValueFormatter.IsOverloadValue(result) ? "Overload" : $"{result}";
+      var meaning = MeasurementValueFormatter.IsOverloadValue(result)
+        ? "Overload"
+        : MeasurementValueFormatter.Format(result);
 
       return userMessageService.ShowMessageAsync(
         new ShowMessageModel(
