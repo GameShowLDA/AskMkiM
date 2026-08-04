@@ -199,7 +199,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ? setAutoRangeCommand
         : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
-      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
 
       return true;

@@ -51,7 +51,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty);
       var answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         profile.GetMode,
