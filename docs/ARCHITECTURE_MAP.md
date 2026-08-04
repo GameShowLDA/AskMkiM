@@ -954,6 +954,10 @@ executor/metrology
 → range verdict and DeviceMessageBuilder
 ```
 
+Для `MultimeterTypeMode.Continuity` общий `MeasurementBase` не вызывает
+`RangeBase`: режим прозвонки задаётся профильной командой `CONF:CONT`, а
+измерительный запрос выполняется через `MEAS:CONT?` без установки диапазона.
+
 По умолчанию измерение сопротивления выполняет три замера:
 `correctMeasurementCount = 2` и `falseMeasurementCount = 1`. Правильным
 считается числовой ответ внутри `MeasurementRange`; аппаратная ошибка
@@ -977,6 +981,8 @@ IMultimeter.ConnectableManager.InitializeAsync()
 
 `DeviceProtocolEmulator.QueryMultimeterAsync` записывает каждую операцию двумя строками единого формата:
 `Команда мультиметра: "..."` и `Ответ мультиметра на "...": "..."`.
+Для SCPI-команд мультиметра без `?` этот шлюз передаёт в транспорт `timeout = 0`
+и не ждёт ответа; команды с `?` сохраняют заданный `timeout` и `responseDelay`.
 
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до

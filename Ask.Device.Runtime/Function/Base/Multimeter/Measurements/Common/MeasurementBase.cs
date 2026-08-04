@@ -86,7 +86,9 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       || profile.ElectricalTest == ElectricalTestFunction.Resistance
       || profile.ElectricalTest == ElectricalTestFunction.Diode
       || profile.ElectricalTest == ElectricalTestFunction.Capacitance)
+      {
         await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
+      }
 
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
