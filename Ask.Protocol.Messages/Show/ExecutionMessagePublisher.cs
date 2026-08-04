@@ -1,8 +1,38 @@
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using System.IO;
+using System.Runtime.CompilerServices;
+
 namespace Ask.Protocol.Messages.Show;
 
 /// <summary>
-/// Записывает сообщения о выполнении процессов в журнал и передаёт их в экранный протокол.
+/// Передаёт сообщения о выполнении процессов в экранный протокол.
 /// </summary>
 internal static class ExecutionMessagePublisher
 {
+  internal static Task PublishAsync(
+    ShowMessageModel message,
+    IMessageOutputService? outputService,
+    string callerName,
+    string callerFile,
+    int callerLine,
+    [CallerFilePath] string publisherFile = "",
+    [CallerLineNumber] int publisherLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(message);
+
+    if (outputService == null)
+    {
+      return Task.CompletedTask;
+    }
+
+    string origin = $"{Path.GetFileName(callerFile)} → {callerName}, строка {callerLine}";
+    string displayCallerName = $"{nameof(PublishAsync)} (вызван из {origin})";
+
+    return outputService.ShowMessageAsync(
+      message,
+      callerName: displayCallerName,
+      callerFile: publisherFile,
+      callerLine: publisherLine);
+  }
 }

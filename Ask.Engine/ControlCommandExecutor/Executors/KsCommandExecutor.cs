@@ -135,7 +135,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange, chains: null, isOverloadExpected: false);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.KC,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
       }, messageService);
 
       return result;
@@ -166,7 +172,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.KC,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
 
       }, messageService);
 

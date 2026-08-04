@@ -104,7 +104,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(measurementRange, userMessageService: messageService) - fixtureCapacitance;
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.IE,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
       }, messageService);
 
       return result;

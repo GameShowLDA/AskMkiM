@@ -123,11 +123,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         MeasurementRange measurementRange = new MeasurementRange(answer, firstValue, secondValue);
-        return await MessageManager.ShowMeasurementResultAsync(
-          messageService,
-          MeasurementTypeCommand.NE,
+        var measurementResult = MeasurementResultEvaluator.Evaluate(
           measurementRange,
-          isOverloadExpected: pointContext.IsOverloadExpected);
+          pointContext.IsOverloadExpected);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.NE,
+          new MeasurementRange(
+            measurementResult.Value,
+            measurementRange.LowerBound,
+            measurementRange.UpperBound),
+          measurementResult.IsSuccessful,
+          outputService: messageService);
+        return measurementResult;
       }, messageService);
 
       return result;

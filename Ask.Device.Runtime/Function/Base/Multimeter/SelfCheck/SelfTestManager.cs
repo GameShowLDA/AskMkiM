@@ -24,7 +24,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     }
     public async Task StartSelfCheck(CancellationToken cancellationToken, Enum selectedType, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await userMessageService.ShowMessageAsync(ExecutionMessages.BuildMultimeterSetupMessage());
+      await ExecutionMessages.ShowMultimeterSetupAsync(userMessageService);
 
       await device.ConnectableManager.InitializeAsync();
       await meter.ConnectableManager.InitializeAsync();

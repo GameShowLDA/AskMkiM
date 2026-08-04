@@ -529,10 +529,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </param>
     internal static async Task ShowDevicesPreparationMessageIfNeededAsync(CommandExecutionContext context)
     {
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutionMessages.BuildDevicesPreparationMessage());
-      }
+      await ExecutionMessages.ShowDevicesPreparationAsync(context.Console);
     }
   }
 }

@@ -18,11 +18,27 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
+  /// <summary>
+  /// Выполняет команду проверки сопротивления изоляции СИ.
+  /// </summary>
   internal class SiCommandExecutor : CommandExecutorBase, ICommandExecutor
   {
+    /// <summary>
+    /// Отображаемое имя команды СИ.
+    /// </summary>
     public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.SI).DisplayName;
 
+    /// <summary>
+    /// Нижняя граница сопротивления для измерений методом накапливающего узла.
+    /// </summary>
     private double firstValue = 0;
+
+    /// <summary>
+    /// Выполняет команду СИ и сохраняет обнаруженные ошибки в модели протокола.
+    /// </summary>
+    /// <param name="context">Контекст выполнения команды.</param>
+    /// <param name="protocolModel">Модель протокола программы контроля.</param>
+    /// <returns>Задача, представляющая выполнение команды.</returns>
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<SiCommandModel>(context);
@@ -101,16 +117,23 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await TimedAsync("complete protocol command", () => CompleteProtocolCommandAsync(context, protocolModel, nameCommand));
       LogInformation($"[PERF][SI] total: {total.ElapsedMilliseconds} ms", isDeviceLog: true);
     }
+
+    /// <summary>
+    /// Настраивает пробойную установку для измерения сопротивления изоляции.
+    /// </summary>
+    /// <param name="breakDown">Пробойная установка.</param>
+    /// <param name="userMessageService">Сервис вывода сообщений в протокол.</param>
+    /// <param name="time">Продолжительность испытания.</param>
+    /// <param name="resistance">Нижняя граница сопротивления изоляции.</param>
+    /// <param name="voltage">Испытательное напряжение.</param>
+    /// <returns>Задача, представляющая настройку пробойной установки.</returns>
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double resistance, double voltage)
     {
       string name = breakDown.Name;
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await userMessageService.ShowMessageAsync(ExecutionMessages.BuildBreakdownTesterSetupMessage());
-      }
+      await ExecutionMessages.ShowBreakdownTesterSetupAsync(userMessageService);
 
       await breakDown.IrManger.Mode.SetModeAsync(userMessageService);
       await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService);
@@ -122,7 +145,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Выполняет измерение между уже подключёнными точками.
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
-    /// <returns>Задача, представляющая измерение.</returns>
+    /// <param name="value">Заданное значение сопротивления.</param>
+    /// <param name="messageService">Сервис вывода сообщений в протокол.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="errorResistance">Сопротивление, используемое при моделировании ошибки.</param>
+    /// <param name="typeVoltage">Тип испытательного напряжения.</param>
+    /// <returns>Результат проверки и измеренное сопротивление.</returns>
     private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
@@ -137,7 +165,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         measurement.Restart();
 
         measurementRange.TargetValue = answer.value;
-        var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.SI,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
         LogPerformance("node accumulation measurement message", measurement);
 
         return result;
@@ -150,7 +183,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Выполняет измерение между уже подключёнными точками.
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
-    /// <returns>Задача, представляющая измерение.</returns>
+    /// <param name="value">Заданное значение сопротивления.</param>
+    /// <param name="messageService">Сервис вывода сообщений в протокол.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="errorResistance">Сопротивление, используемое при моделировании ошибки.</param>
+    /// <param name="typeVoltage">Тип испытательного напряжения.</param>
+    /// <returns>Результат проверки и измеренное сопротивление.</returns>
     private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
@@ -167,7 +205,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurement.Restart();
         measurementRange.TargetValue = answer.Value;
-        var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.SI, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.SI,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
         LogPerformance("node full measurement message", measurement);
         return result;
 
@@ -176,6 +219,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
+    /// <summary>
+    /// Выполняет асинхронный этап и записывает его продолжительность в журнал производительности.
+    /// </summary>
+    /// <param name="stageName">Имя измеряемого этапа.</param>
+    /// <param name="action">Асинхронная операция этапа.</param>
+    /// <returns>Задача, представляющая выполнение этапа.</returns>
     private static async Task TimedAsync(string stageName, Func<Task> action)
     {
       var stopwatch = Stopwatch.StartNew();
@@ -189,6 +238,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
     }
 
+    /// <summary>
+    /// Выполняет асинхронный этап с результатом и записывает его продолжительность в журнал производительности.
+    /// </summary>
+    /// <typeparam name="T">Тип результата операции.</typeparam>
+    /// <param name="stageName">Имя измеряемого этапа.</param>
+    /// <param name="action">Асинхронная операция этапа.</param>
+    /// <returns>Результат выполненной операции.</returns>
     private static async Task<T> TimedAsync<T>(string stageName, Func<Task<T>> action)
     {
       var stopwatch = Stopwatch.StartNew();
@@ -202,6 +258,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
     }
 
+    /// <summary>
+    /// Останавливает таймер этапа и записывает его продолжительность в журнал оборудования.
+    /// </summary>
+    /// <param name="stageName">Имя измеряемого этапа.</param>
+    /// <param name="stopwatch">Таймер измеряемого этапа.</param>
     private static void LogPerformance(string stageName, Stopwatch stopwatch)
     {
       stopwatch.Stop();

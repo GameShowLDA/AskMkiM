@@ -152,10 +152,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = meter.NumberChassis;
       int number = meter.Number;
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await userMessageService.ShowMessageAsync(ExecutionMessages.BuildMultimeterSetupMessage());
-      }
+      await ExecutionMessages.ShowMultimeterSetupAsync(userMessageService);
 
       if (continuityManager)
       {
@@ -199,7 +196,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer;
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.PR,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
 
       }, messageService);
 
@@ -234,7 +237,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.PR,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
       }, messageService);
 
       return result;
@@ -273,7 +282,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PR, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(
+          MeasurementTypeCommand.PR,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
 
       }, messageService);
 

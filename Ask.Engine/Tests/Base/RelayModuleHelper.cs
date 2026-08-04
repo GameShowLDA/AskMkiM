@@ -252,8 +252,14 @@ namespace Ask.Engine.Tests.Base
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
       measurementRange.TargetValue = answer;
 
-      var (success, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, measurementRange, point);
-      return (success, result);
+      var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+      await MeasurementMessages.PublishResultAsync(
+        MeasurementTypeCommand.KC,
+        new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+        result.IsSuccessful,
+        point,
+        outputService: ui);
+      return result;
     }
 
     /// <summary>

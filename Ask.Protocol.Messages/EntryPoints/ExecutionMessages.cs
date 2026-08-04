@@ -1,31 +1,70 @@
-using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Protocol.Messages.Builders;
+using Ask.Protocol.Messages.Show;
+using System.Runtime.CompilerServices;
 
 namespace Ask.Protocol.Messages.EntryPoints;
 
 /// <summary>
-/// Предоставляет единые точки формирования сообщений о выполнении процессов.
+/// Формирует и выводит сообщения о выполнении процессов.
 /// </summary>
 public static class ExecutionMessages
 {
   /// <summary>
-  /// Формирует сообщение о подготовке устройств.
+  /// Выводит сообщение о подготовке устройств, если включён вывод параметров выполнения.
   /// </summary>
-  /// <returns>Сообщение о подготовке устройств.</returns>
-  public static ShowMessageModel BuildDevicesPreparationMessage()
-    => ExecutionMessageBuilder.BuildDevicesPreparationMessage();
+  public static Task ShowDevicesPreparationAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetExecutionParametersVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    var message = ExecutionMessageBuilder.BuildDevicesPreparationMessage();
+    return ExecutionMessagePublisher.PublishAsync(
+      message, outputService, callerName, callerFile, callerLine);
+  }
 
   /// <summary>
-  /// Формирует сообщение о настройке мультиметра.
+  /// Выводит сообщение о настройке мультиметра, если включён вывод параметров выполнения.
   /// </summary>
-  /// <returns>Сообщение о настройке мультиметра.</returns>
-  public static ShowMessageModel BuildMultimeterSetupMessage()
-    => ExecutionMessageBuilder.BuildMultimeterSetupMessage();
+  public static Task ShowMultimeterSetupAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetExecutionParametersVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    var message = ExecutionMessageBuilder.BuildMultimeterSetupMessage();
+    return ExecutionMessagePublisher.PublishAsync(
+      message, outputService, callerName, callerFile, callerLine);
+  }
 
   /// <summary>
-  /// Формирует сообщение о настройке пробойной установки.
+  /// Выводит сообщение о настройке пробойной установки, если включён вывод параметров выполнения.
   /// </summary>
-  /// <returns>Сообщение о настройке пробойной установки.</returns>
-  public static ShowMessageModel BuildBreakdownTesterSetupMessage()
-    => ExecutionMessageBuilder.BuildBreakdownTesterSetupMessage();
+  public static Task ShowBreakdownTesterSetupAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetExecutionParametersVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    var message = ExecutionMessageBuilder.BuildBreakdownTesterSetupMessage();
+    return ExecutionMessagePublisher.PublishAsync(
+      message, outputService, callerName, callerFile, callerLine);
+  }
 }
