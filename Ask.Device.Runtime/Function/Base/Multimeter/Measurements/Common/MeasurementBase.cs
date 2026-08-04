@@ -264,7 +264,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
-            $"{GetIntermediateMeasurementHeader(profile.ElectricalTest)} ({measurementNumber}/{totalMeasurementCount})",
+            GetIntermediateMeasurementHeader(profile.ElectricalTest),
             $"{measurement} {unit}",
             isCorrect,
             2,

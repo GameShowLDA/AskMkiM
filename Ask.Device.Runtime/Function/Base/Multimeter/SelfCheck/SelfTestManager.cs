@@ -309,53 +309,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       {
         var tolerance = ObjectTolerance(check.IdealResult, check.PercentageError);
 
-        double result = -1;
-        bool resultStatus = false;
+        await ShowCheckStepAsync(
+          $"Измерение сопротивления резистора {resistanceValue}",
+          userMessageService,
+          indentLevel: 2);
 
-        double[] allResults = new double[3];
-        bool[] resultIsGood = { false, false, false };
-
-        for (int i = 0; i < 3; i++)
-        {
-          await ShowCheckStepAsync(
-            $"Измерение сопротивления резистора {resistanceValue}",
-            $"попытка {i + 1}/3",
-            userMessageService,
-            indentLevel: 2);
-
-          var measurementRange = new MeasurementRange(
-            check.IdealResult,
-            check.IdealResult - tolerance,
-            check.IdealResult + tolerance);
-          result = await meter.ResistanceManager.MeasureResistanceAsync(
-            measurementRange,
-            userMessageService,
-            correctMeasurementCount: 1,
-            falseMeasurementCount: 0,
-            responseDelay: MeasurementResponseDelayMs);
-
-          if (SelfTestHelper.InRange(check.IdealResult, result, tolerance))
-          {
-            resultIsGood[i] = true;
-          }
-          allResults[i] = result;
-        }
-
-        result = 0;
-        int goodResultsCount = resultIsGood.Count(b => b == true);
-
-        if (goodResultsCount >= 2)
-        {
-          for (int i = 0; i < 3; i++)
-            if (resultIsGood[i]) result += allResults[i];
-          result /= goodResultsCount;
-          resultStatus = true;
-        }
-        else
-        {
-          result = allResults.Sum() / 3;
-          resultStatus = false;
-        }
+        var measurementRange = new MeasurementRange(
+          check.IdealResult,
+          check.IdealResult - tolerance,
+          check.IdealResult + tolerance);
+        var result = await meter.ResistanceManager.MeasureResistanceAsync(
+          measurementRange,
+          userMessageService,
+          responseDelay: MeasurementResponseDelayMs);
+        var resultStatus = SelfTestHelper.InRange(check.IdealResult, result, tolerance);
 
         cancellationToken.ThrowIfCancellationRequested();
         await SelfTestHelper.IsCorrectRangeAsync(
