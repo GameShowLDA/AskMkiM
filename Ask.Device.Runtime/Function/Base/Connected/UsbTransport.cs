@@ -6,8 +6,8 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Device.Communication.Usb.Discovery;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Function.Base.Multimeter;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -82,7 +82,7 @@ namespace Ask.Device.Runtime.Function.Connected
         }
 
         string idleResponse = $"ASK,{_device.Name},0,IDLE";
-        string answer = await MultimeterQueryExecutor.QueryAsync(
+        string answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
           multimeter,
           _device.ConnectedProfile.Initialize,
           idleResponse,

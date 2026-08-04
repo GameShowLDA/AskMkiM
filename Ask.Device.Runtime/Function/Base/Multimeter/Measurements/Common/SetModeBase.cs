@@ -5,6 +5,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
@@ -50,8 +51,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await MultimeterQueryExecutor.QueryAsync(device, profile.SetMode, string.Empty, timeout: profile.Timeout);
-      var answer = await MultimeterQueryExecutor.QueryAsync(
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty, timeout: profile.Timeout);
+      var answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         profile.GetMode,
         profile.CheckMode,

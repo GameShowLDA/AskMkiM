@@ -16,14 +16,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(SetOffsetAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
-            ? (false, IdleHardwareErrorSimulator.ErrorMessage)
-            : (true, string.Empty);
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_REF,
@@ -74,12 +66,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetOffsetAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
-          return 0;
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_REF,
