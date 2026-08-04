@@ -34,6 +34,7 @@
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
+| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/` | Текущие `ExecutorMessageBuilder` в `Ask.Core` и `DeviceMessageBuilder` в `Ask.Device.Runtime`; новые builders пока являются заглушками и не включены в runtime flow |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
@@ -78,6 +79,7 @@
 | `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
+| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Заготовка библиотеки унифицированного формирования `ShowMessageModel`; статические builders команд, оборудования, измерений, выполнения, валидации и метрологии; `Ask.Protocol.Messages` | `Ask.Core`; runtime-потребители пока отсутствуют |
 | `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
@@ -129,7 +131,14 @@ MainWindowProgram
 ├─ Ask.UI
 ├─ ConsoleUI
 └─ Message
+
+Ask.Protocol.Messages ── Ask.Core ── Ask.LogLib
 ```
+
+`Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека, но пока не подключён
+к runtime-проектам. Его классы являются документированными точками расширения без методов; существующие
+потоки продолжают использовать `ExecutorMessageBuilder`, `DeviceMessageBuilder` и локальное создание
+`ShowMessageModel`.
 
 `Directory.Build.props` направляет обычные результаты сборки в
 `Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path
@@ -168,6 +177,7 @@ AskMkiM/
 │  ├─ Services/Errors/         typed errors/warnings/factories
 │  ├─ Services/FileFormats/    PK/OPK/APK/APKW and format helpers
 │  └─ Services/Protocols/      history protocol persistence
+├─ Ask.Protocol.Messages/      заготовки унифицированных builders экранных сообщений
 ├─ Ask.Device.Application/     adapters and application composition
 ├─ Ask.Device.Runtime/         device classes and raw function managers
 ├─ Ask.Device.Emulator/        stateful chassis and МКР protocol emulation for Idle mode
@@ -1578,6 +1588,12 @@ ErrorItem → translator/runner ErrorList
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
+| `CommandMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения команд, цепей, точек и разрядов; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `EquipmentMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения жизненного цикла оборудования; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения значений, диапазонов и погрешностей; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения жизненного цикла выполнения; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения проверки входных данных и конфигурации; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `MetrologyMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения метрологических режимов; методов пока нет | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
 | `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |

@@ -18,7 +18,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
   /// <summary>
   /// Формирует сообщения, используемые в процессе выполнения программ контроля.
   /// </summary>
-  public static class ExecutorMessageBuilder
+  public static class .
   {
     private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
 
