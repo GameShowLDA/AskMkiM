@@ -36,7 +36,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice);
       settings.DeviceResults.Add(new DeviceExecutionResult
       {
-        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
       });
       await messageService.ShowMessageAsync(deviceTitle);
 

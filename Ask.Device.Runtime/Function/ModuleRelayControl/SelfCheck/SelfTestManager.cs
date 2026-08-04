@@ -38,7 +38,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(_moduleRelay);
       settings.DeviceResults.Add(new DeviceExecutionResult
       {
-        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
       });
       await userMessageService.ShowMessageAsync(deviceTitle);
 

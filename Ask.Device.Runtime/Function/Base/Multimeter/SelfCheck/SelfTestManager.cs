@@ -32,7 +32,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
       settings.DeviceResults.Add(new DeviceExecutionResult
       {
-        DeviceName = $"{deviceTitle.Header} {deviceTitle.Message}"
+        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
       });
 
       await device.ConnectableManager.InitializeAsync();
