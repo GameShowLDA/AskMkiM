@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
@@ -152,7 +152,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
-        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
+        await userMessageService.ShowMessageAsync(ExecutionMessages.BuildBreakdownTesterSetupMessage());
       }
 
       if (voltageType == VoltageEnum.Type.ACW)
@@ -264,7 +264,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
       {
-        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(MeasurementTypeCommand.IE, lowerLimit, upperLimit, value);
+        var message = MeasurementMessages.BuildMeasurementResultMessage(
+          MeasurementTypeCommand.IE,
+          new MeasurementRange(value, lowerLimit, upperLimit));
         message.Status = value >= lowerLimit && value <= upperLimit ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
         message.IndentLevel = 2;
 

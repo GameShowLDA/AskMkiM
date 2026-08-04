@@ -32,7 +32,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         return;
       }
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice));
+      await messageService.ShowMessageAsync(EquipmentMessages.BuildDeviceHealthCheckTitle(powerDevice));
 
       switch (type)
       {

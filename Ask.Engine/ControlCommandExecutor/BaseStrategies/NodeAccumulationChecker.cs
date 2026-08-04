@@ -48,7 +48,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       {
-        await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
+        await messageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
       }
 
       foreach (var chain in groupChains.ChainModels)
@@ -64,7 +64,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         if (ProtocolConfig.GetTestStepMessagesInProtocol())
         {
-          await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str), IsBlockStart: true);
+          await messageService.ShowMessageAsync(CommandMessages.BuildChainCheckBlock(str), IsBlockStart: true);
         }
 
         foreach (var point in chain.PointModels)

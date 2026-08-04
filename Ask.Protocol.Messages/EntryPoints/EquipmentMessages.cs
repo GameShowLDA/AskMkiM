@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Protocol.Messages.Builders;
@@ -12,6 +13,19 @@ namespace Ask.Protocol.Messages.EntryPoints;
 /// </summary>
 public static class EquipmentMessages
 {
+  /// <summary>
+  /// Формирует заголовок проверки работоспособности устройства.
+  /// </summary>
+  /// <param name="device">Проверяемое устройство.</param>
+  /// <returns>Заголовок проверки работоспособности устройства.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="device"/> равен <see langword="null"/>.
+  /// </exception>
+  public static ShowMessageModel BuildDeviceHealthCheckTitle(IAttachableDevice device)
+  {
+    return EquipmentMessageBuilder.BuildHealthCheckTitle(device);
+  }
+
   /// <summary>
   /// Публикует результат подключения устройства.
   /// </summary>

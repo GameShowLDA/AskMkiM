@@ -34,7 +34,7 @@
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
-| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; оборудование реализовано, остальные группы пока являются заглушками |
+| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования и измерений перенесены из `ExecutorMessageBuilder`, метрология и валидация пока являются заглушками |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
@@ -77,9 +77,9 @@
 | `MainWindowProgram` | `MainWindow/MainWindowProgram.csproj` | WPF entry point, shell, startup, ручная композиция UI; `MainWindowProgram.*` | `Ask.Diagnostics`, `Ask.DataBase.Engine`, `Ask.Support`, `Ask.UI`, `ConsoleUI`, `Message`, `UI` |
 | `UI` | `UI/UI.csproj` | Legacy WPF workspace, editor, runner, settings, protocol/file services; `UI.*` | `Ask.Core`, `Ask.DataBase.Provider`, `Ask.Engine`, `Ask.Support`, `Ask.UI`, `Message`, `Ask.Device.Runtime` |
 | `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
-| `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Message` |
+| `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Ask.Protocol.Messages`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
-| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; классы разделены по ролям между `EntryPoints`, `Builders` и `Show`; оборудование реализовано, остальные группы пока являются заглушками | `Ask.Core`, `Ask.LogLib`; первый потребитель — `Ask.Device.Runtime` |
+| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; содержит фасады и builders для executor-команд, блоков проверки, оборудования и измерений | `Ask.Core`, `Ask.LogLib`; потребители — `Ask.Device.Runtime`, `Ask.Engine` |
 | `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
@@ -119,6 +119,7 @@ MainWindowProgram
 │  │  │        └─ Ask.Device.Emulator ── Ask.Core
 │  │  ├─ Ask.Core
 │  │  ├─ Ask.LogLib
+│  │  ├─ Ask.Protocol.Messages
 │  │  └─ Message
 │  ├─ Ask.UI
 │  ├─ Ask.Support
@@ -144,8 +145,9 @@ Ask.Protocol.Messages
 Фасад сохраняет метаданные исходного места вызова, а publisher передаёт в экранный протокол
 собственный источник и исходный метод в формате `PublishAsync (вызван из File.cs → Method, строка N)`.
 `Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
-отключения, инициализации и сброса; остальные runtime-потоки пока продолжают использовать
-`ExecutorMessageBuilder`, `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
+отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
+`CommandMessages`, `ExecutionMessages`, `EquipmentMessages` и `MeasurementMessages`. Остальные runtime-потоки
+пока продолжают использовать `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
 
 `Directory.Build.props` направляет обычные результаты сборки в
 `Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path
@@ -1598,12 +1600,16 @@ ErrorItem → translator/runner ErrorList
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
-| `CommandMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения команд, цепей, точек и разрядов; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `CommandMessages` | static facade | Ask.Protocol.Messages | формирует сообщения команд, блоков проверки, цепей, точек и разрядов | [Protocols](#protocols-and-file-formats) |
+| `CommandMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит перенесённую из `ExecutorMessageBuilder` логику сообщений команд и блоков проверки | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
-| `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки и сброса оборудования | [Protocols](#protocols-and-file-formats) |
+| `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
-| `MeasurementMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения значений, диапазонов и погрешностей; методов пока нет | [Protocols](#protocols-and-file-formats) |
-| `ExecutionMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения жизненного цикла выполнения; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessages` | static facade | Ask.Protocol.Messages | принимает единый `MeasurementRange` с измеренным значением и границами, формирует и публикует итоговые и промежуточные результаты с отдельными настройками видимости | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | по `MeasurementRange` формирует цепь, допустимый диапазон, измеренное значение, `ПРОБОЙ` и `Overload` для `MeasurementTypeCommand` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает опубликованные измерения в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessages` | static facade | Ask.Protocol.Messages | формирует сообщения подготовки устройств и настройки измерительного оборудования | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит сообщения подготовки устройств, мультиметра и пробойной установки | [Protocols](#protocols-and-file-formats) |
 | `ValidationMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения проверки входных данных и конфигурации; методов пока нет | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения метрологических режимов; методов пока нет | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |

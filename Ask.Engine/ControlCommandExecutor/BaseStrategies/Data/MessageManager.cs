@@ -17,9 +17,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     /// </summary>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <param name="measurementTypeCommand">Тип выполняемого измерения.</param>
-    /// <param name="lowerLimit">Нижняя граница допустимого значения.</param>
-    /// <param name="upperLimit">Верхняя граница допустимого значения.</param>
-    /// <param name="value">Измеренное значение.</param>
+    /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
     /// <param name="chains">Обозначение измеряемых цепей.</param>
     /// <param name="isOverloadExpected">
     /// <see langword="true"/>, если ожидается проверка значения на перегрузку прибора;
@@ -54,14 +52,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
         ? IsOverloadValue(value)
         : measurementRange.UpperBound != -1 ? value >= measurementRange.LowerBound && value <= measurementRange.UpperBound : value >= measurementRange.LowerBound;
 
-      if (messageService != null && (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility()))
-      {
-        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(measurementTypeCommand, measurementRange.LowerBound, measurementRange.UpperBound, value, chains: chains);
-        message.Status = result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
-        message.IndentLevel = 2;
-
-        await messageService.ShowMessageAsync(message, skipPause: true);
-      }
+      await MeasurementMessages.PublishResultAsync(
+        measurementTypeCommand,
+        new MeasurementRange(value, measurementRange.LowerBound, measurementRange.UpperBound),
+        result,
+        chains,
+        outputService: messageService);
 
       return (result, value);
     }

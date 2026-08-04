@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Protocol;
+
 namespace Ask.Protocol.Messages.Builders;
 
 /// <summary>
@@ -5,4 +7,12 @@ namespace Ask.Protocol.Messages.Builders;
 /// </summary>
 internal static class ExecutionMessageBuilder
 {
+  internal static ShowMessageModel BuildDevicesPreparationMessage()
+    => new(header: "Подготовка устройств", type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildMultimeterSetupMessage()
+    => new(header: "Настройка мультиметра", type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildBreakdownTesterSetupMessage()
+    => new(header: "Настройка пробойной установки", type: ShowMessageModel.MessageType.Info);
 }

@@ -35,7 +35,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       { 
-        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
+        await methodExecutionContext.MessageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
       }
 
       HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
@@ -48,7 +48,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         if (ProtocolConfig.GetTestStepMessagesInProtocol())
         {
-          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(dischargeNumber, stepStr), IsBlockStart: true);
+          await methodExecutionContext.MessageService.ShowMessageAsync(CommandMessages.BuildDischargeCheckBlock(dischargeNumber, stepStr), IsBlockStart: true);
         }
 
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
@@ -59,7 +59,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
-          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckError(dischargeNumber, stepStr), IsBlockStart: true);
+          await methodExecutionContext.MessageService.ShowMessageAsync(CommandMessages.BuildDischargeCheckError(dischargeNumber, stepStr), IsBlockStart: true);
           showMessageModels.Add(new ShowMessageModel($"Разряд {dischargeNumber} ({stepStr})({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
 
           NodeFullContext contextNodeFull = methodExecutionContext.CreateChild<NodeFullContext>();

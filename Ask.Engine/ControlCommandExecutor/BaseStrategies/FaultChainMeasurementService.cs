@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -65,11 +66,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       string chainDisplay,
       double value)
     {
-      var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(
+      var message = MeasurementMessages.BuildMeasurementResultMessage(
         context.TypeCommand,
-        context.LowerLimit,
-        context.HigherLimit,
-        value,
+        new MeasurementRange(value, context.LowerLimit, context.HigherLimit),
         chainDisplay);
 
       message.Status = ShowMessageModel.MessageType.Error;

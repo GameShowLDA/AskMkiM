@@ -531,7 +531,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
+        await context.Console.ShowMessageAsync(ExecutionMessages.BuildDevicesPreparationMessage());
       }
     }
   }

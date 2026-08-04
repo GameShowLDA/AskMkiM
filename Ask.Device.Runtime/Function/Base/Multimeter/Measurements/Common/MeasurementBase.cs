@@ -115,6 +115,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       double result = execution.Value;
+
       await DeviceMessageBuilder.ShowConnectionMessageAsync(
         device,
         $"Результат \"{header}\"",

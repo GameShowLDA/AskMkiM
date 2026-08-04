@@ -41,7 +41,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester));
+      await userMessageService.ShowMessageAsync(EquipmentMessages.BuildDeviceHealthCheckTitle(breakdownTester));
       await InitDevices(userMessageService, device, meter, breakdownTester);
 
       await device.ConnectorManager.ConnectBreakdownTester(userMessageService);

@@ -38,7 +38,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       { 
-        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
+        await context.MessageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
       }
 
       foreach (var chainModels in groupChains.ChainModels)

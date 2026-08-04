@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       message += BuildSourceLinesMessage(command);
       var total = Stopwatch.StartNew();
-      await TimedAsync("show command message", () => context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true));
+      await TimedAsync("show command message", () => context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true));
       await TimedAsync("show devices preparation message", () => DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context));
 
       var stage = Stopwatch.StartNew();
@@ -109,7 +109,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (DeviceDisplayConfig.GetExecutionParametersVisibility())
       {
-        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
+        await userMessageService.ShowMessageAsync(ExecutionMessages.BuildBreakdownTesterSetupMessage());
       }
 
       await breakDown.IrManger.Mode.SetModeAsync(userMessageService);

@@ -1,6 +1,7 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -79,7 +80,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         : ControlCheckAlgorithm.MessageRelativeToFirstPoint;
 
       return context.MessageService.ShowMessageAsync(
-        ExecutorMessageBuilder.BuildCheckBlockHeader(algorithm, context.IsPolarityReversed));
+        CommandMessages.BuildCheckBlockHeader(algorithm, context.IsPolarityReversed));
     }
 
     /// <summary>
@@ -198,7 +199,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       {
         await context.MessageService.AppendEmptyLineAsync();
-        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(chainDisplay), IsBlockStart: true);
+        await context.MessageService.ShowMessageAsync(CommandMessages.BuildChainCheckBlock(chainDisplay), IsBlockStart: true);
       }
     }
 
@@ -359,11 +360,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </summary>
     private static ShowMessageModel CreateFailedMeasurementError(ConnectedPointContext context, FailedMeasurement failedMeasurement)
     {
-      var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
+      var error = MeasurementMessages.BuildMeasurementResultMessage(
         context.TypeCommand,
-        context.LowerLimit,
-        context.HigherLimit,
-        failedMeasurement.Value,
+        new MeasurementRange(failedMeasurement.Value, context.LowerLimit, context.HigherLimit),
         chains: failedMeasurement.Chain);
 
       error.Status = ShowMessageModel.MessageType.Error;
@@ -400,11 +399,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var value = result.FirstFailureValue ?? 0;
       valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
 
-      var error = ExecutorMessageBuilder.BuildMeasurementResultMessage(
+      var error = MeasurementMessages.BuildMeasurementResultMessage(
         context.TypeCommand,
-        context.LowerLimit,
-        context.HigherLimit,
-        value,
+        new MeasurementRange(value, context.LowerLimit, context.HigherLimit),
         chainStr);
 
       error.Status = ShowMessageModel.MessageType.Error;
@@ -565,7 +562,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       {
         await messageService.ShowMessageAsync(
-        ExecutorMessageBuilder.BuildPointsCheckHeaderAsync(basePoint, point, CircuitFaultType.ShortCircuit),
+        CommandMessages.BuildPointsCheckHeaderAsync(basePoint, point, CircuitFaultType.ShortCircuit),
         IsBlockStart: true);
       }
     }
@@ -707,11 +704,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return;
       }
 
-      var info = ExecutorMessageBuilder.BuildMeasurementResultMessage(
+      var info = MeasurementMessages.BuildMeasurementResultMessage(
         context.TypeCommand,
-        context.LowerLimit,
-        context.HigherLimit,
-        measured.Value,
+        new MeasurementRange(measured.Value, context.LowerLimit, context.HigherLimit),
         chainStr);
 
       info.IndentLevel = indentLevel + 1;

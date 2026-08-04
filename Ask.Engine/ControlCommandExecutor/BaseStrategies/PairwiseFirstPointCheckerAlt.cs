@@ -37,7 +37,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       {
-        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
+        await context.MessageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
       }
 
       foreach (var groups in pointsListSource)
@@ -56,7 +56,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           if (ProtocolConfig.GetTestStepMessagesInProtocol())
           {
-            await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildChainCheckBlock(str));
+            await context.MessageService.ShowMessageAsync(CommandMessages.BuildChainCheckBlock(str));
           }
 
           var _basePoint = chains.PointModels.First();
@@ -226,7 +226,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               if (context.ValidatePointConnections && Rt > 100)
               {
-                var errorMessageModels = ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, Rt, chains: $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}");
+                var errorMessageModels = MeasurementMessages.BuildMeasurementResultMessage(
+                  context.TypeCommand,
+                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
+                  chains: $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}");
                 errorMessageModels.Status = ShowMessageModel.MessageType.Error;
                 errorMessageModels.IndentLevel = 1;
                 errorPoint = true;
@@ -328,7 +331,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               if (context.IsProtocolAttribute)
               {
-                infoMessage.Add(ExecutorMessageBuilder.BuildMeasurementResultMessage(context.TypeCommand, context.LowerLimit, context.HigherLimit, result, $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}"));
+                infoMessage.Add(MeasurementMessages.BuildMeasurementResultMessage(
+                  context.TypeCommand,
+                  new MeasurementRange(result, context.LowerLimit, context.HigherLimit),
+                  $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}"));
               }
             }
           }
