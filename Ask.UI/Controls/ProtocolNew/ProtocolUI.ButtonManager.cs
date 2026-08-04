@@ -221,8 +221,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Запустить\"");
 
-      // Обычный старт должен уважать сохранённую настройку пошагового режима,
-      // а F10/F11 дополнительно принудительно запускают выполнение по шагам.
       var startInStepMode = _startRequestedInStepMode ||
         ExecutionConfig.GetIsStepByStepModeEnabled();
       _startRequestedInStepMode = false;
@@ -250,7 +248,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Продолжить\"");
 
-      // Для брейкпоинта "Продолжить" должно отправлять управляющее событие выполнения.
       if (StepControlManager.IsBreakpointStepModeActive)
       {
         StepControlManager.DisableStepMode();
@@ -259,7 +256,6 @@ namespace Ask.UI.Controls.ProtocolNew
         return;
       }
 
-      // "Продолжить" в UI всегда продолжает без пошагового режима.
       if (ActionExecutor.StepMode || StepControlManager.StepMode)
       {
         ExecutionConfig.SetStepByStepMode(false);
