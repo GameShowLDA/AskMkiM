@@ -1,8 +1,8 @@
-namespace Ask.Protocol.Messages;
+namespace Ask.Protocol.Messages.Builders;
 
 /// <summary>
 /// Формирует сообщения о подготовке, запуске, этапах и завершении выполняемого процесса.
 /// </summary>
-public static class ExecutionMessageBuilder
+internal static class ExecutionMessageBuilder
 {
 }
