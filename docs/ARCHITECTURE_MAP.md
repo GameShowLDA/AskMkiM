@@ -79,9 +79,9 @@
 | `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
-| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; классы разделены по ролям между `EntryPoints`, `Builders` и `Show`; оборудование реализовано, остальные группы пока являются заглушками | `Ask.Core`, `Ask.LogLib`; runtime-потребители пока отсутствуют |
+| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; классы разделены по ролям между `EntryPoints`, `Builders` и `Show`; оборудование реализовано, остальные группы пока являются заглушками | `Ask.Core`, `Ask.LogLib`; первый потребитель — `Ask.Device.Runtime` |
 | `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
-| `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator` |
+| `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
@@ -137,12 +137,15 @@ Ask.Protocol.Messages
 └─ Ask.LogLib
 ```
 
-`Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека, но пока не подключён
-к runtime-проектам. `EntryPoints/EquipmentMessages` является публичным фасадом, внутренний
+`Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека.
+`EntryPoints/EquipmentMessages` является публичным фасадом, внутренний
 `Builders/EquipmentMessageBuilder` формирует результаты операций, а
 `Show/EquipmentMessagePublisher` записывает их в device log и передаёт `IMessageOutputService`.
-Существующие runtime-потоки продолжают использовать `ExecutorMessageBuilder`, `DeviceMessageBuilder`
-и локальное создание `ShowMessageModel`.
+Фасад сохраняет метаданные исходного места вызова, а publisher передаёт в экранный протокол
+собственный источник и исходный метод в формате `PublishAsync (вызван из File.cs → Method, строка N)`.
+`Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
+отключения, инициализации и сброса; остальные runtime-потоки пока продолжают использовать
+`ExecutorMessageBuilder`, `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
 
 `Directory.Build.props` направляет обычные результаты сборки в
 `Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path

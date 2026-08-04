@@ -80,7 +80,7 @@ internal static class EquipmentMessageBuilder
     bool isSuccessful,
     string? details = null)
   {
-    return BuildOperationResult(device, "Сброс", isSuccessful, details);
+    return BuildOperationResult(device, "Сброс устройства", isSuccessful, details);
   }
 
   /// <summary>
