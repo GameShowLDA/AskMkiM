@@ -195,11 +195,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       try
       {
-        const double lowerLimit = 0;
         MeasurementRange measurementRange = new MeasurementRange(
           expectedResistance,
-          lowerLimit,
-          1000000000);
+          0d,
+          expectedResistance);
         var (success, result) = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
             null!,
@@ -227,7 +226,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
             ? null
             : NodeMethodProtocolBuilder.BuildRangeFailure(
               point,
-              lowerLimit,
+              0d,
               expectedResistance,
               result,
               ResistanceUnit.Ohm),
