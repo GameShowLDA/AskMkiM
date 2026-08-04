@@ -1,13 +1,12 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using System;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
@@ -18,7 +17,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
   /// <summary>
   /// Формирует сообщения, используемые в процессе выполнения программ контроля.
   /// </summary>
-  public static class .
+  public static class ExecutorMessageBuilder
   {
     private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
 
@@ -143,7 +142,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     public static ShowMessageModel BuildPointsCheckHeaderAsync(PointModel firstPoint, PointModel secondPoint, CircuitFaultType circuitFaultType)
     {
       string firstAddress = string.Empty;
-      string secondAddress =string.Empty;
+      string secondAddress = string.Empty;
 
       if (DeviceDisplayConfig.GetMachineAddressVisibility())
       {
