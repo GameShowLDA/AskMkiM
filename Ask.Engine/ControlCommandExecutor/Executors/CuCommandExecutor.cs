@@ -23,7 +23,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var sourceMessage = BuildSourceLinesMessage(command);
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, sourceMessage));
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, sourceMessage, isBlockStart: false);
 
       var isQuestion = command.CuType == CuCommandType.Question ||
                        command.MessageText.TrimEnd().EndsWith("?");

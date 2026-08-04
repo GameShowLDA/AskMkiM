@@ -19,7 +19,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
 
       var relayModules = EquipmentService.ValidRelayModules;
       foreach (var realysModule in relayModules)

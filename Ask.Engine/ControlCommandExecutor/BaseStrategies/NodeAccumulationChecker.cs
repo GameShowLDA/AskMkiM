@@ -46,10 +46,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var messageService = context.MessageService;
       var cancellationToken = messageService.GetCancellationToken();
 
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      {
-        await messageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.AccumulatingNode, context.IsPolarityReversed));
-      }
+      await CommandMessages.ShowCheckBlockHeaderAsync(
+        messageService,
+        ControlCheckAlgorithm.AccumulatingNode,
+        context.IsPolarityReversed);
 
       foreach (var chain in groupChains.ChainModels)
       {
@@ -62,10 +62,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         }
         str = str.Remove(str.Length - 1);
 
-        if (ProtocolConfig.GetTestStepMessagesInProtocol())
-        {
-          await messageService.ShowMessageAsync(CommandMessages.BuildChainCheckBlock(str), IsBlockStart: true);
-        }
+        await CommandMessages.ShowChainCheckBlockAsync(messageService, str);
 
         foreach (var point in chain.PointModels)
         {

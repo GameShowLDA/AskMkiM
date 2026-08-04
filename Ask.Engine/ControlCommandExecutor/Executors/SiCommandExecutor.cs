@@ -46,7 +46,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       message += BuildSourceLinesMessage(command);
       var total = Stopwatch.StartNew();
-      await TimedAsync("show command message", () => context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true));
+      await TimedAsync("show command message", () => CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message));
       await TimedAsync("show devices preparation message", () => DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context));
 
       var stage = Stopwatch.StartNew();

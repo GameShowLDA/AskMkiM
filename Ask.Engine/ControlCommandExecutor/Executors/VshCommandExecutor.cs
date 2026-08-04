@@ -18,7 +18,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
 
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
 
       var rsm = EquipmentService.ValidRelayModules;
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(rsm, context.Console);

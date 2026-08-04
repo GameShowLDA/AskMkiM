@@ -29,7 +29,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);

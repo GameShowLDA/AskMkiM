@@ -31,7 +31,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message));
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message, isBlockStart: false);
 
       GetProtocol(context, command, protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);

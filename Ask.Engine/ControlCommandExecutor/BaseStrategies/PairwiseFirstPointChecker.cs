@@ -34,10 +34,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       _basePoint = groupChains.ChainModels.FirstOrDefault();
       var messageService = context.MessageService;
 
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      {
-        await messageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint, context.IsPolarityReversed));
-      }
+      await CommandMessages.ShowCheckBlockHeaderAsync(
+        messageService,
+        ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint,
+        context.IsPolarityReversed);
 
       await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
 
@@ -59,10 +59,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         str = str.Remove(str.Length - 1);
         str += "*";
 
-        if (ProtocolConfig.GetTestStepMessagesInProtocol())
-        {
-          await messageService.ShowMessageAsync(CommandMessages.BuildChainCheckBlock(str), IsBlockStart: true);
-        }
+        await CommandMessages.ShowChainCheckBlockAsync(messageService, str);
 
         await DeviceManager.RelayModule.ChainManager.ConnectChainToBusAAsync(chain, messageService, context.IsPolarityReversed);
         chainConnectedToBusA = true;

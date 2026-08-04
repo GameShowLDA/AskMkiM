@@ -154,10 +154,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           _userInteractionService,
           cancellationToken);
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Инициализация завершена, тест начат!"),
-          IsBlockStart: true);
-
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
         cancellationToken.ThrowIfCancellationRequested();

@@ -79,8 +79,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         ? ControlCheckAlgorithm.ResistanceRelativeToFirstPoint
         : ControlCheckAlgorithm.MessageRelativeToFirstPoint;
 
-      return context.MessageService.ShowMessageAsync(
-        CommandMessages.BuildCheckBlockHeader(algorithm, context.IsPolarityReversed));
+      return CommandMessages.ShowCheckBlockHeaderAsync(
+        context.MessageService,
+        algorithm,
+        context.IsPolarityReversed);
     }
 
     /// <summary>
@@ -199,8 +201,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (ProtocolConfig.GetTestStepMessagesInProtocol())
       {
         await context.MessageService.AppendEmptyLineAsync();
-        await context.MessageService.ShowMessageAsync(CommandMessages.BuildChainCheckBlock(chainDisplay), IsBlockStart: true);
       }
+
+      await CommandMessages.ShowChainCheckBlockAsync(context.MessageService, chainDisplay);
     }
 
     /// <summary>
@@ -559,12 +562,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </summary>
     private static async Task ShowPointCheckHeaderAsync(PointModel basePoint, PointModel point, IUserInteractionService messageService)
     {
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      {
-        await messageService.ShowMessageAsync(
-        CommandMessages.BuildPointsCheckHeaderAsync(basePoint, point, CircuitFaultType.ShortCircuit),
-        IsBlockStart: true);
-      }
+      await CommandMessages.ShowPointsCheckHeaderAsync(
+        messageService,
+        basePoint,
+        point,
+        CircuitFaultType.ShortCircuit);
     }
 
     /// <summary>

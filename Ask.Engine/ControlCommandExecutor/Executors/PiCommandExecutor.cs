@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 

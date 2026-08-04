@@ -33,10 +33,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return showMessageModels;
       }
 
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      { 
-        await methodExecutionContext.MessageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
-      }
+      await CommandMessages.ShowCheckBlockHeaderAsync(
+        methodExecutionContext.MessageService,
+        ControlCheckAlgorithm.Group,
+        methodExecutionContext.IsPolarityReversed);
 
       HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
       var binaryPoints = ConvertToReversedBinaryRange(groupChains, HighestBitCount);
@@ -46,10 +46,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         string stepStr = GetBitString(step);
         int dischargeNumber = GetDischargeNumber(step);
 
-        if (ProtocolConfig.GetTestStepMessagesInProtocol())
-        {
-          await methodExecutionContext.MessageService.ShowMessageAsync(CommandMessages.BuildDischargeCheckBlock(dischargeNumber, stepStr), IsBlockStart: true);
-        }
+        await CommandMessages.ShowDischargeCheckBlockAsync(
+          methodExecutionContext.MessageService,
+          dischargeNumber,
+          stepStr);
 
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
@@ -59,7 +59,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
-          await methodExecutionContext.MessageService.ShowMessageAsync(CommandMessages.BuildDischargeCheckError(dischargeNumber, stepStr), IsBlockStart: true);
+          await CommandMessages.ShowDischargeCheckErrorAsync(
+            methodExecutionContext.MessageService,
+            dischargeNumber,
+            stepStr);
           showMessageModels.Add(new ShowMessageModel($"Разряд {dischargeNumber} ({stepStr})({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
 
           NodeFullContext contextNodeFull = methodExecutionContext.CreateChild<NodeFullContext>();

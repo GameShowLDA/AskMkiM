@@ -36,10 +36,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
       ErrorsPoints = new List<ChainModel>();
 
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      { 
-        await context.MessageService.ShowMessageAsync(CommandMessages.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
-      }
+      await CommandMessages.ShowCheckBlockHeaderAsync(
+        context.MessageService,
+        ControlCheckAlgorithm.FullNode,
+        context.IsPolarityReversed);
 
       foreach (var chainModels in groupChains.ChainModels)
       {

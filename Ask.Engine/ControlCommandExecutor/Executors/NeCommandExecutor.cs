@@ -30,7 +30,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = BuildSourceLinesMessage(command);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(CommandMessages.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
 
       List<ShowMessageModel> errorMessage = new();
       List<ShowMessageModel> infoMessage = new();
