@@ -139,7 +139,7 @@ namespace Ask.Engine.Tests.Base
 
     /// <summary>
     /// Возвращает мультиметр (FastMeter), привязанный к указанному шасси.
-    /// Используется для точного измерения электрического сопротивления.
+    /// Используется для проверки контактного сопротивления RKOMM в режиме прозвонки.
     /// </summary>
     /// <param name="numberChassis">Номер шасси, в котором требуется найти мультиметр.</param>
     /// <returns>Экземпляр <see cref="IMultimeter"/>.</returns>
@@ -202,14 +202,14 @@ namespace Ask.Engine.Tests.Base
     }
 
     /// <summary>
-    /// Переводит мультиметр в режим измерения электрического сопротивления.
-    /// Должен быть вызван перед выполнением любых измерений.
+    /// Переводит мультиметр в режим прозвонки.
+    /// Должен быть вызван перед проверкой контактного сопротивления RKOMM.
     /// </summary>
     /// <param name="meter">Экземпляр мультиметра.</param>
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
     /// <exception cref="DeviceException">
-    /// Генерируется, если не удалось установить режим измерения сопротивления.
+    /// Генерируется, если не удалось установить режим прозвонки.
     /// </exception>
     public static async Task EnsureResistanceModeAsync(
       IMultimeter meter,
@@ -222,17 +222,13 @@ namespace Ask.Engine.Tests.Base
     }
 
     /// <summary>
-    /// Выполняет измерение электрического сопротивления с использованием мультиметра.
+    /// Выполняет проверку контактного сопротивления в режиме прозвонки.
     /// Возвращает измеренное значение в Омах.
     /// </summary>
     /// <param name="meter">Экземпляр мультиметра.</param>
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
-    /// <param name="param">
-    /// Ожидаемое значение сопротивления (может быть 0, если эталон отсутствует).
-    /// </param>
-    /// <param name="lower">Нижняя граница допустимого диапазона.</param>
-    /// <param name="upper">Верхняя граница допустимого диапазона.</param>
+    /// <param name="measurementRange">Заданное значение и допустимые границы сопротивления.</param>
     /// <returns>
     /// Признак соответствия сопротивления допустимому диапазону и измеренное значение в омах.
     /// </returns>
@@ -248,6 +244,7 @@ namespace Ask.Engine.Tests.Base
       MeasurementRange measurementRange)
     {
       var answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, userMessageService: ui);
+
       token.ThrowIfCancellationRequested();
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
       measurementRange.TargetValue = answer;
@@ -267,10 +264,10 @@ namespace Ask.Engine.Tests.Base
     ///  • поиск устройств по номеру шасси;
     ///  • подключение к устройствам;
     ///  • коммутация мультиметра к заданной паре шин;
-    ///  • установка режима измерения сопротивления.
+    ///  • установка режима прозвонки.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <param name="pairBus">Пара шин для измерения.</param>
+    /// <param name="pairBus">Пара шин для прозвонки.</param>
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
     /// <returns>

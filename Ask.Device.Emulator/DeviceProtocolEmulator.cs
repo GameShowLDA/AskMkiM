@@ -58,10 +58,11 @@ namespace Ask.Device.Emulator
       var protocol = new ModeSelectingDeviceProtocol(
         () => device.DeviceProtocol,
         new MultimeterEmulatorProtocol(idleResponse));
+      bool expectsResponse = command.Contains('?');
       string response = await protocol.QueryAsync(
         command,
-        responseDelay,
-        timeout,
+        expectsResponse ? responseDelay : 0,
+        expectsResponse ? timeout : 0,
         port,
         cancellationToken: cancellationToken);
 

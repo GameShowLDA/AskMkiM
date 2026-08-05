@@ -31,26 +31,30 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     /// <inheritdoc />
     public async Task<double> MeasureResistanceAsync(
       MeasurementRange measurementRange,
-      IUserInteractionService? userMessageService = null)
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
         => await MeasureResistanceAsync(
           measurementRange,
           userMessageService,
           DefaultCorrectMeasurementCount,
-          DefaultFalseMeasurementCount);
+          DefaultFalseMeasurementCount,
+          responseDelay);
 
     /// <inheritdoc />
     public async Task<double> MeasureResistanceAsync(
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService,
       int correctMeasurementCount,
-      int falseMeasurementCount)
+      int falseMeasurementCount,
+      double responseDelay = 0)
         => await MeasurementBase.MeasureResistanceAsync(
           _device,
           _device.ResistanceCommands,
           measurementRange,
           userMessageService,
           correctMeasurementCount,
-          falseMeasurementCount);
+          falseMeasurementCount,
+          responseDelay);
 
     /// <inheritdoc />
     public async Task<bool> SetResistanceModeAsync(IUserInteractionService? userMessageService = null) => await SetModeBase.SetModeAsync(_device, _device.ResistanceCommands, userMessageService);

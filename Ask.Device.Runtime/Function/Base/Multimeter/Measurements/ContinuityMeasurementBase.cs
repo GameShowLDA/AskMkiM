@@ -32,7 +32,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     public async Task<bool> SetContinuityModeAsync(IUserInteractionService? userMessageService = null) => await SetModeBase.SetModeAsync(_device, _device.ContinuityCommands, userMessageService);
 
     /// <inheritdoc />
-    public async Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
+    public async Task<bool> CheckContinuityAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null, double responseDelay = 0)
     {
       if (_device.TypeMode != MultimeterTypeMode.Continuity)
       {
@@ -42,11 +42,25 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         _device,
         "Прозвонка",
-        () => CheckContinuityCoreAsync(expectedOutcome),
+        () => CheckContinuityCoreAsync(expectedOutcome, responseDelay: responseDelay),
+        value => !value,
         maxAttempts: userMessageService == null ? 2 : 1);
 
       if (!execution.Success)
       {
+        if (execution.HasValue)
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка при прозвонке",
+            "Результат прозвонки не соответствует ожидаемому состоянию.",
+            false,
+            2,
+            userMessageService);
+
+          return execution.Value;
+        }
+
         await DeviceMessageBuilder.ShowConnectionMessageAsync(
           _device,
           "Ошибка при прозвонке",
@@ -79,8 +93,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     }
 
     /// <inheritdoc />
-    public async Task<double> CheckContinuityAsync(MeasurementRange measurementRange, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.ContinuityCommands, measurementRange, userMessageService);
+    public async Task<double> CheckContinuityAsync(
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
+        => await MeasurementBase.MeasureAsync(
+          _device,
+          _device.ContinuityCommands,
+          measurementRange,
+          userMessageService,
+          responseDelay: responseDelay);
 
     /// <summary>
     /// Проверяет проводимость между измерительными щупами.
@@ -89,7 +111,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
     /// <c>true</c>, если обнаружено соединение (низкое сопротивление), иначе <c>false</c>.
     /// </returns>
     /// <exception cref="InvalidOperationException">Выбрасывается, если прибор не подключен.</exception>
-    private async Task<bool> CheckContinuityCoreAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null)
+    private async Task<bool> CheckContinuityCoreAsync(bool expectedOutcome, IUserInteractionService? userMessageService = null, double responseDelay = 0)
     {
       if (!ExecutionConfig.GetIsIdleModeEnabled() && !_device.ConnectionInfo.IsConnected)
       {
@@ -105,6 +127,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         _device,
         _device.ContinuityCommands.Measure,
         idleResponse,
+        responseDelay: responseDelay,
         timeout: _device.ContinuityCommands.Timeout);
       if (string.IsNullOrWhiteSpace(response))
       {

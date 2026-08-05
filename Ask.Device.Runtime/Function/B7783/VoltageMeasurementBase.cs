@@ -92,9 +92,43 @@ namespace Ask.Device.Runtime.Function.B7783
       throw new FormatException($"Invalid B7-78/3 {FunctionName} voltage response: '{response}'.");
     }
 
+    protected async Task<bool> SetVoltageRangeCoreAsync(
+      VoltageRange mode,
+      IUserInteractionService? userMessageService = null)
+    {
+      double? range = ResolveRange(mode);
+      if (range.HasValue && !IsSupportedRange(range.Value))
+      {
+        return false;
+      }
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        return true;
+      }
+
+      EnsureConnected();
+
+      await ConfigureVoltageMeasurementAsync(range);
+      string function = await Device.DeviceProtocol.QueryAsync("FUNCTION?", timeout: CommandTimeoutMs);
+
+      if (function.Contains(ModeResponseToken, StringComparison.OrdinalIgnoreCase))
+      {
+        Device.TypeMode = TargetMode;
+        return true;
+      }
+
+      return false;
+    }
+
     private async Task ConfigureVoltageMeasurementAsync(double param, double rangeFrom, double rangeTo)
     {
       double? range = ResolveRange(param, rangeFrom, rangeTo);
+      await ConfigureVoltageMeasurementAsync(range);
+    }
+
+    private async Task ConfigureVoltageMeasurementAsync(double? range)
+    {
       await Device.DeviceProtocol.QueryAsync("*CLS", timeout: CommandTimeoutMs);
 
       if (range.HasValue)
@@ -137,6 +171,26 @@ namespace Ask.Device.Runtime.Function.B7783
       }
 
       return _supportedRanges[^1];
+    }
+
+    private static double? ResolveRange(VoltageRange mode)
+    {
+      return mode switch
+      {
+        VoltageRange.Auto => null,
+        VoltageRange.mV_100 => 0.1d,
+        VoltageRange.V_1 => 1d,
+        VoltageRange.V_10 => 10d,
+        VoltageRange.V_100 => 100d,
+        VoltageRange.V_750 => 750d,
+        VoltageRange.V_1000 => 1000d,
+        _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unsupported voltage range.")
+      };
+    }
+
+    private bool IsSupportedRange(double range)
+    {
+      return Array.Exists(_supportedRanges, supportedRange => supportedRange == range);
     }
 
     private static bool HasMeasurementConfiguration(double param, double rangeFrom, double rangeTo)

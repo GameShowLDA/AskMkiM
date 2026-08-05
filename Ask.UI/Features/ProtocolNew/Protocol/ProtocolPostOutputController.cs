@@ -82,13 +82,20 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
         return false;
       }
 
-      if (!IsControlProgramCommandStart(message, isBlockStart))
+      if (!IsStepOverCheckpoint(message, isBlockStart))
       {
         return false;
       }
 
       StepControlManager.CompleteStepOverUntilNextControlCommand();
       return true;
+    }
+
+    /// <summary>Проверяет, является ли запись контрольной точкой для F10.</summary>
+    private static bool IsStepOverCheckpoint(ShowMessageModel message, bool isBlockStart)
+    {
+      return message.IsStepModeCheckpoint
+        || IsControlProgramCommandStart(message, isBlockStart);
     }
 
     /// <summary>Проверяет, является ли запись заголовком новой команды программы контроля.</summary>
