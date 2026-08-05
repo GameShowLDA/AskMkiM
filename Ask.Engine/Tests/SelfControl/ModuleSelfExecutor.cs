@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -69,7 +68,7 @@ namespace Ask.Engine.Tests.SelfControl
         var meter = deviceSelector.GetFastMeterSafe();
         if (meter == null)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось преобразовать объект в измеритель!", type: ShowMessageModel.MessageType.Error));
+          await ValidationMessages.PublishMeterUnavailableAsync(_messageService);
           return;
         }
 
@@ -132,7 +131,7 @@ namespace Ask.Engine.Tests.SelfControl
       }
       else
       {
-        await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось получить устройство.", type: ShowMessageModel.MessageType.Error));
+        await ValidationMessages.PublishDeviceUnavailableAsync(_messageService);
         return;
       }
     }

@@ -111,7 +111,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var (ok, message, tested, tester, range) = UIValidationHelperLightweight.TryValidateAndParseInput(_messageService, inputFieldProvider, inputHighlightService);
+      var (ok, message, tested, tester, range) = await UIValidationHelperLightweight.TryValidateAndParseInputAsync(
+        _messageService,
+        inputFieldProvider,
+        inputHighlightService);
       if (!ok)
       {
         LogError($"Валидация не пройдена: {message}");
