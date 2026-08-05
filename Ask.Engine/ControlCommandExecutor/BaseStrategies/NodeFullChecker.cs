@@ -92,14 +92,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.CommandModel.FormattedStartLineNumber));
           errorChains.AddRange(chain.Chain);
 
-          var err = await FaultChainMeasurementService.MeasureAsync(
+          var faultResult = await FaultChainMeasurementService.MeasureAsync(
             context,
             chain.Chain,
             chainStr,
             (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
             context.VoltageType);
 
-          executionResult.Errors.Add(err);
+          var err = faultResult.Errors.Single();
+          executionResult.AddRange(faultResult);
           await ExecutionMessages.PublishDebugAsync($"Добавлена ошибка: {err}", context.MessageService);
         }
       }

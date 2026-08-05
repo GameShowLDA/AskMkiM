@@ -142,6 +142,28 @@ internal static class ExecutionMessageBuilder
       IndentLevel = 3,
     };
 
+  internal static ShowMessageModel BuildUnknownCommandMessage(string mnemonic)
+    => new("Неизвестная команда", message: mnemonic, type: ShowMessageModel.MessageType.Error);
+
+  internal static ShowMessageModel BuildEmergencyExecutionMessage(
+    string commandName,
+    string details)
+  {
+    return new ShowMessageModel(
+      "\r\nОшибка выполнения команды",
+      message: $"Команда: {commandName}. {details} Запускается аварийное выполнение КЦ.",
+      type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 3,
+    };
+  }
+
+  internal static ShowMessageModel BuildEmergencyKscErrorMessage(string details)
+    => new("Ошибка аварийного выполнения КЦ", message: details, type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 3,
+    };
+
   internal static ShowMessageModel BuildModuleBusConnectionMessage(string moduleName, int moduleNumber)
     => new($"{moduleName}({moduleNumber})", message: "Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info);
 

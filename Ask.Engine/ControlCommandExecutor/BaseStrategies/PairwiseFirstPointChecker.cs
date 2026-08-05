@@ -75,7 +75,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           chainConnectedToBusA = false;
           await DeviceManager.RelayModule.ChainManager.DisconnectChainFromBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
 
-          var err = await FaultChainMeasurementService.MeasureAsync(
+          var faultResult = await FaultChainMeasurementService.MeasureAsync(
             context,
             faultChain,
             chainStr,
@@ -83,9 +83,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             context.VoltageType);
 
           await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
+          var err = faultResult.Errors.Single();
           await MeasurementMessages.PublishBuiltMessageAsync(err, messageService);
 
-          executionResult.Errors.Add(err);
+          executionResult.AddRange(faultResult);
           context.CommandManager.AddErrorMethod(
             context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
             chainStr,

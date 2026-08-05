@@ -149,6 +149,19 @@ internal static class CommandMessageBuilder
     };
   }
 
+  internal static ShowMessageModel BuildCommandJumpMessage(
+    string commandName,
+    string commandBody)
+  {
+    return new ShowMessageModel(
+      header: $"\r\nПереход к команде {commandName}",
+      message: commandBody,
+      type: ShowMessageModel.MessageType.Command)
+    {
+      IndentLevel = 1,
+    };
+  }
+
   internal static ShowMessageModel BuildControlProgramStartMessage(
     string objectName,
     string objectCode)

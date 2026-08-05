@@ -80,13 +80,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var strError = await PointFormater.GetFormatDisconnectPoint(faultChain);
             errorChains.Add((chain, localized));
 
-            var err = await FaultChainMeasurementService.MeasureAsync(
+            var faultResult = await FaultChainMeasurementService.MeasureAsync(
               context,
               faultChain,
               strError,
               (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
               context.VoltageType);
 
+            var err = faultResult.Errors.Single();
             await MeasurementMessages.PublishBuiltMessageAsync(err, messageService);
 
             if (context.CommandModel.PointErrors != null)
@@ -100,7 +101,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 context.CommandModel.FormattedStartLineNumber));
             }
 
-            executionResult.Errors.Add(err);
+            executionResult.AddRange(faultResult);
             await ExecutionMessages.PublishDebugAsync($"Добавлена ошибка: {err}", messageService);
 
           }

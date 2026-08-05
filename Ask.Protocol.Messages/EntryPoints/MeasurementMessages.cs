@@ -35,6 +35,25 @@ public static class MeasurementMessages
     return MeasurementMessagePublisher.PublishAsync(
       message, outputService, callerName, callerFile, callerLine);
   }
+
+  /// <summary>
+  /// Формирует результат повторного измерения неисправной цепи.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и допустимые границы.</param>
+  /// <param name="chainDisplay">Обозначение измеренной цепи.</param>
+  /// <returns>Результат алгоритма с сообщением об ошибке измерения.</returns>
+  public static AlgorithmExecutionResult BuildFaultChainResult(
+    MeasurementTypeCommand measurementTypeCommand,
+    MeasurementRange measurementRange,
+    string chainDisplay)
+  {
+    var message = BuildMeasurementResultMessage(
+      measurementTypeCommand, measurementRange, chainDisplay);
+    message.Status = ShowMessageModel.MessageType.Error;
+    message.IndentLevel = 3;
+    return AlgorithmExecutionResult.FromErrors(new List<ShowMessageModel> { message });
+  }
   /// <summary>
   /// Публикует заголовок начала измерения.
   /// </summary>

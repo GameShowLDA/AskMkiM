@@ -239,10 +239,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           }
           else
           {
-            await _console.ShowMessageAsync(
-                new ShowMessageModel("Неизвестная команда",
-                    message: command.Mnemonic,
-                    type: ShowMessageModel.MessageType.Error));
+            await ExecutionMessages.PublishUnknownCommandAsync(command.Mnemonic, _console);
           }
 
           bool hasExecutionErrors =
@@ -419,12 +416,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         if (!IsStepCancellation(ex))
         {
-          await _console.ShowMessageAsync(
-          new ShowMessageModel(
-            "\r\nОшибка выполнения команды",
-            message: $"Команда: {failedCommand.CommandNumber} {failedCommand.Mnemonic}. {ex.Message} Запускается аварийное выполнение КЦ.",
-            type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 3 });
+          await ExecutionMessages.PublishEmergencyExecutionAsync(
+            $"{failedCommand.CommandNumber} {failedCommand.Mnemonic}",
+            ex.Message,
+            _console);
         }
 
         var kscCommand = _commands
@@ -445,12 +440,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
       catch (Exception kscEx)
       {
-        await _console.ShowMessageAsync(
-          new ShowMessageModel(
-            "Ошибка аварийного выполнения КЦ",
-            message: kscEx.Message,
-            type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 3 });
+        await ExecutionMessages.PublishEmergencyKscErrorAsync(kscEx.Message, _console);
       }
       finally
       {

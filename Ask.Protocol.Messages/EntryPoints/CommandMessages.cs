@@ -211,6 +211,34 @@ public static class CommandMessages
   }
 
   /// <summary>
+  /// Выводит сообщение о переходе к выбранной команде программы контроля.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="commandNumber">Номер целевой команды.</param>
+  /// <param name="mnemonic">Мнемоника целевой команды.</param>
+  /// <param name="commandBody">Тело целевой команды.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowCommandJumpAsync(
+    IMessageOutputService outputService,
+    string commandNumber,
+    string mnemonic,
+    string? commandBody,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    string commandName = $"{commandNumber} {mnemonic}".Trim();
+    string displayedBody = string.IsNullOrWhiteSpace(commandBody) ? "<пусто>" : commandBody;
+    var model = CommandMessageBuilder.BuildCommandJumpMessage(commandName, displayedBody);
+    return CommandMessagePublisher.PublishAsync(
+      model, outputService, true, callerName, callerFile, callerLine,
+      skipStepModeCheck: true, skipPause: true);
+  }
+
+  /// <summary>
   /// Выводит заголовок начала выполнения программы контроля.
   /// </summary>
   /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>

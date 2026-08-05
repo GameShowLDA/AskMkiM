@@ -1,6 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -19,7 +18,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       double errorResistance,
       VoltageEnum.Type type = VoltageEnum.Type.DCW);
 
-    public static async Task<ShowMessageModel> MeasureAsync(
+    public static async Task<AlgorithmExecutionResult> MeasureAsync(
       ExecutorContext context,
       IReadOnlyList<ChainModel> chainParts,
       string chainDisplay,
@@ -28,7 +27,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     {
       if (chainParts == null || chainParts.Count < 2)
       {
-        return BuildProtocolMessage(context, chainDisplay, 0);
+        return BuildResult(context, chainDisplay, 0);
       }
 
       var firstPart = chainParts[0];
@@ -53,7 +52,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           switchResistance,
           voltageType);
 
-        return BuildProtocolMessage(context, chainDisplay, measured.Value);
+        return BuildResult(context, chainDisplay, measured.Value);
       }
       finally
       {
@@ -61,19 +60,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
     }
 
-    private static ShowMessageModel BuildProtocolMessage(
+    private static AlgorithmExecutionResult BuildResult(
       ExecutorContext context,
       string chainDisplay,
       double value)
     {
-      var message = MeasurementMessages.BuildMeasurementResultMessage(
+      return MeasurementMessages.BuildFaultChainResult(
         context.TypeCommand,
         new MeasurementRange(value, context.LowerLimit, context.HigherLimit),
         chainDisplay);
-
-      message.Status = ShowMessageModel.MessageType.Error;
-      message.IndentLevel = 3;
-      return message;
     }
 
     private static double GetSwitchResistance(ChainModel chain)

@@ -629,7 +629,8 @@ executor throws
   через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
 - `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; возвращает `AlgorithmExecutionResult`, а создание
   и публикацию измерений, ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
-- `FaultChainMeasurementService` — повторное измерение проблемных цепей;
+- `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
+  `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
 `ПИ` вызывает `СИ` как вложенный executor до и после основной ACW/DCW-проверки.
@@ -650,8 +651,14 @@ ProtocolUI.RequestCommandJump
 → drawer events
 → ActionExecutor.InterruptPauseForCommandJump
 → CommandJumpRequestedException
+→ CommandJumpService.PrepareAsync
+→ CommandMessages.ShowCommandJumpAsync
+→ DeviceResetService.ResetDevicesAsync
 → CommandExecutionManager resumes at selected command
 ```
+
+`CommandExecutionManager` передаёт сообщения о неизвестной команде, запуске аварийного
+`КЦ` и ошибке аварийного `КЦ` в `ExecutionMessages`; моделей экранного протокола сам не создаёт.
 
 `ExecutionFinalizer` последовательно отменяет текущую задачу, очищает состояние,
 сбрасывает оборудование, печатает при включённой настройке, восстанавливает UI,

@@ -3,7 +3,6 @@ using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution;
@@ -67,22 +66,11 @@ internal static class CommandJumpService
     BaseCommandModel targetCommand,
     IUserInteractionService interactionService)
   {
-    var commandName = $"{targetCommand.CommandNumber} {targetCommand.Mnemonic}".Trim();
-    var commandBody = string.IsNullOrWhiteSpace(targetCommand.CommandBody)
-      ? "<пусто>"
-      : targetCommand.CommandBody;
-
-    await interactionService.ShowMessageAsync(
-      new ShowMessageModel(
-        header: $"\r\nПереход к команде {commandName}",
-        message: commandBody,
-        type: ShowMessageModel.MessageType.Command)
-      {
-        IndentLevel = 1
-      },
-      IsBlockStart: true,
-      SkipStepModeCheck: true,
-      skipPause: true).ConfigureAwait(false);
+    await CommandMessages.ShowCommandJumpAsync(
+      interactionService,
+      targetCommand.CommandNumber,
+      targetCommand.Mnemonic,
+      targetCommand.CommandBody).ConfigureAwait(false);
 
     await DeviceResetService.ResetDevicesAsync(
       EquipmentService.GetAllDevices(),
