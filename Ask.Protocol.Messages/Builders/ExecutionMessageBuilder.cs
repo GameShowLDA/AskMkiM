@@ -77,6 +77,16 @@ internal static class ExecutionMessageBuilder
     };
   }
 
+  internal static ShowMessageModel BuildDelayBeforeDisablingMessage(double? seconds)
+  {
+    return new ShowMessageModel(
+      "Задержка перед отключением",
+      message: $"{seconds}сек.")
+    {
+      IndentLevel = 2,
+    };
+  }
+
   internal static ShowMessageModel BuildDebugMessage(string details)
     => new(debug: details);
 }

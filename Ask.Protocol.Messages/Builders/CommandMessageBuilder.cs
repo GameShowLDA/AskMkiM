@@ -149,6 +149,18 @@ internal static class CommandMessageBuilder
     };
   }
 
+  internal static ShowMessageModel BuildControlProgramStartMessage(
+    string objectName,
+    string objectCode)
+  {
+    return new ShowMessageModel(
+      $"Выполнение программы контроля для \"{objectName}({objectCode})\"",
+      type: ShowMessageModel.MessageType.Command)
+    {
+      IsControlProgramCommandHeader = true,
+    };
+  }
+
   private static void ApplyCommandBlockBackground(ShowMessageModel model)
   {
     if (!UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting())

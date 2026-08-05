@@ -209,4 +209,32 @@ public static class CommandMessages
       skipStepModeCheck: true,
       skipPause: true);
   }
+
+  /// <summary>
+  /// Выводит заголовок начала выполнения программы контроля.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="objectName">Наименование объекта контроля.</param>
+  /// <param name="objectCode">Обозначение объекта контроля.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowControlProgramStartAsync(
+    IMessageOutputService outputService,
+    string objectName,
+    string objectCode,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    var model = CommandMessageBuilder.BuildControlProgramStartMessage(objectName, objectCode);
+    return CommandMessagePublisher.PublishAsync(
+      model,
+      outputService,
+      isBlockStart: true,
+      callerName,
+      callerFile,
+      callerLine);
+  }
 }
