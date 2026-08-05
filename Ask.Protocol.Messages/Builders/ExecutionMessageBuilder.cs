@@ -15,4 +15,13 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildBreakdownTesterSetupMessage()
     => new(header: "Настройка пробойной установки", type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildEquipmentInitializationMessage()
+    => new(header: "Инициализация оборудования");
+
+  internal static ShowMessageModel BuildEquipmentSetupMessage()
+    => new(header: "Настройка оборудования");
+
+  internal static ShowMessageModel BuildTestStartedMessage()
+    => new(header: "Инициализация завершена, тест начат!");
 }

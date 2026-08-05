@@ -16,6 +16,7 @@ internal static class ExecutionMessagePublisher
     string callerName,
     string callerFile,
     int callerLine,
+    bool isBlockStart = false,
     [CallerFilePath] string publisherFile = "",
     [CallerLineNumber] int publisherLine = 0)
   {
@@ -31,6 +32,7 @@ internal static class ExecutionMessagePublisher
 
     return outputService.ShowMessageAsync(
       message,
+      IsBlockStart: isBlockStart,
       callerName: displayCallerName,
       callerFile: publisherFile,
       callerLine: publisherLine);

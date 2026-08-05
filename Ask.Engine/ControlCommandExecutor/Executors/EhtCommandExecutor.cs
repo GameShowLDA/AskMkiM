@@ -23,9 +23,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = GetRequiredCommand<EhtCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
-
       SetActiveLine(context, command);
 
       await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
@@ -71,16 +68,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(pairwiseFirstPointCheckerAlt);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
+      if (messageResult.errorMessage.Count > 0)
       {
-        protocolModel.AddErrors(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, messageResult.errorMessage);
       }
-      if (infoMessage.Count > 0)
+      if (messageResult.infoMessage.Count > 0)
       {
-        protocolModel.AddInfo(nameCommand, infoMessage);
+        protocolModel.AddInfo(nameCommand, messageResult.infoMessage);
       }
     }
 

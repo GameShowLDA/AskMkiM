@@ -67,4 +67,73 @@ public static class ExecutionMessages
     return ExecutionMessagePublisher.PublishAsync(
       message, outputService, callerName, callerFile, callerLine);
   }
+
+  /// <summary>
+  /// Выводит заголовок начала инициализации оборудования.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishEquipmentInitializationAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildEquipmentInitializationMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок начала настройки оборудования.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishEquipmentSetupAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildEquipmentSetupMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит сообщение о завершении инициализации и начале теста.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishTestStartedAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildTestStartedMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
 }
