@@ -188,7 +188,7 @@ AskMkiM/
 │  ├─ Services/FileFormats/    PK/OPK/APK/APKW and format helpers
 │  └─ Services/Protocols/      history protocol persistence
 ├─ Ask.Protocol.Messages/      унифицированное формирование, логирование и отображение сообщений
-│  ├─ EntryPoints/             публичные фасады групп сообщений
+│  ├─ EntryPoints/             публичные фасады групп сообщений и контейнер `AlgorithmExecutionResult`
 │  ├─ Builders/                внутреннее формирование `ShowMessageModel`
 │  └─ Show/                    внутреннее логирование и передача в экранный протокол
 ├─ Ask.Device.Application/     adapters and application composition
@@ -1624,6 +1624,7 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
+| `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | хранит накопленные ошибки и информационные `ShowMessageModel` алгоритма, не раскрывая эту зависимость внутри Ask.Engine | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, границы этапов, инициализацию, настройку оборудования, подключение шин/диапазонов и подключение/отключение точек; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
