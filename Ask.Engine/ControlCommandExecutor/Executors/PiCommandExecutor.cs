@@ -62,7 +62,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
-      List<ShowMessageModel> errorMessage = new();
+      var executionResult = new AlgorithmExecutionResult(new(), new());
 
       NodeAccumulationContext nodeAccumulationContext = new NodeAccumulationContext(context, command, command);
       nodeAccumulationContext.LowerLimit = 0;
@@ -105,31 +105,31 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
         var errMes = await NodeFullChecker.CheckSequenceAsync(nodeFullContext);
-        errorMessage.AddRange(errMes);
+        executionResult.Errors.AddRange(errMes);
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
         methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
         var errMes = await MethodExecutor.CheckSequenceAsync(methodExecutionContext);
-        errorMessage.AddRange(errMes);
+        executionResult.Errors.AddRange(errMes);
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
         var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
-        errorMessage.AddRange(errMes);
+        executionResult.Errors.AddRange(errMes);
       }
       else
       {
         nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
         var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
-        errorMessage.AddRange(errMes);
+        executionResult.Errors.AddRange(errMes);
       }
 
-      await PointFormater.MessageResult(errorMessage, context.Console);
-      if (errorMessage.Count > 0)
+      await PointFormater.MessageResult(executionResult.Errors, context.Console);
+      if (executionResult.Errors.Count > 0)
       {
-        protocolModel.AddErrors(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, executionResult.Errors);
       }
 
       await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);

@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Protocol.Messages.Builders;
 using Ask.Protocol.Messages.Show;
@@ -354,6 +355,94 @@ public static class ExecutionMessages
 
     return ExecutionMessagePublisher.PublishAsync(
       ExecutionMessageBuilder.BuildPointConnectionMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок подключения заданной точки, если включён вывод сведений о коммутации.
+  /// </summary>
+  /// <param name="point">Подключаемая точка.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowPointConnectionAsync(
+    PointModel point,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildPointConnectionMessage(point),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок отключения заданной точки, если включён вывод сведений о коммутации.
+  /// </summary>
+  /// <param name="point">Отключаемая точка.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowPointDisconnectionAsync(
+    PointModel point,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildPointDisconnectionMessage(point),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок отключения точек, если включён вывод сведений о коммутации.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowPointsDisconnectionAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildPointsDisconnectionMessage(),
       outputService,
       callerName,
       callerFile,

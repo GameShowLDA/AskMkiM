@@ -3,7 +3,6 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -13,7 +12,6 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -180,10 +178,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, MeasurementRange measurementRange)
       {
-        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подключение точки {point1}"), IsBlockStart: true);
-        }
+        await ExecutionMessages.ShowPointConnectionAsync(point1, userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
@@ -198,20 +193,14 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, MeasurementRange measurementRange)
       {
-        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point1}"), IsBlockStart: true);
-        }
+        await ExecutionMessages.ShowPointDisconnectionAsync(point1, userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService);
         relayModule = GetRelayModules(metrologicalModeRole).Last();
 
-        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Подлючение точки {point2}"), IsBlockStart: true);
-        }
+        await ExecutionMessages.ShowPointConnectionAsync(point2, userMessageService);
 
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService);
@@ -224,10 +213,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, MeasurementRange measurementRange)
       {
-        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точки {point2}"), IsBlockStart: true);
-        }
+        await ExecutionMessages.ShowPointDisconnectionAsync(point2, userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).Last();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
@@ -239,10 +225,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task StepReset(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2)
       {
-        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel(header: $"Отлючение точек"), IsBlockStart: true);
-        }
+        await ExecutionMessages.ShowPointsDisconnectionAsync(userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService);

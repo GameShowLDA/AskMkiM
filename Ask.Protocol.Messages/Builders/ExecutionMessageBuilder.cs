@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Protocol.Messages.Builders;
 
@@ -63,6 +64,15 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildPointConnectionMessage()
     => new("Подключение точек");
+
+  internal static ShowMessageModel BuildPointConnectionMessage(PointModel point)
+    => new($"Подлючение точки {point}");
+
+  internal static ShowMessageModel BuildPointDisconnectionMessage(PointModel point)
+    => new($"Отлючение точки {point}");
+
+  internal static ShowMessageModel BuildPointsDisconnectionMessage()
+    => new("Отлючение точек");
 
   internal static ShowMessageModel BuildPointsResetMessage()
     => new("Сброс точек") { IndentLevel = 1 };
