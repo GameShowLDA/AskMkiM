@@ -167,6 +167,76 @@ public static class ValidationMessages
       callerLine);
   }
 
+  /// <summary>
+  /// Публикует сообщение об ошибке введённых данных.
+  /// </summary>
+  /// <param name="details">Описание ошибки введённых данных.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishDataErrorAsync(
+    string details,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ValidationMessagePublisher.PublishAsync(
+      ValidationMessageBuilder.BuildDataError(details),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      skipStepModeCheck: true);
+  }
+
+  /// <summary>
+  /// Публикует заголовок запуска и введённые пользователем параметры.
+  /// </summary>
+  /// <param name="executionTitle">Название запускаемой проверки.</param>
+  /// <param name="parameters">Названия и отображаемые значения введённых параметров.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="isCommandHeader">Признак командного типа заголовка.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщений.</returns>
+  public static async Task PublishInputParametersAsync(
+    string executionTitle,
+    IReadOnlyList<(string Header, string Value)> parameters,
+    IMessageOutputService outputService,
+    bool isCommandHeader,
+    bool isBlockStart = true,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(parameters);
+
+    await ValidationMessagePublisher.PublishAsync(
+      ValidationMessageBuilder.BuildInputHeader(executionTitle, isCommandHeader),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart,
+      skipStepModeCheck: true);
+
+    foreach ((string header, string value) in parameters)
+    {
+      await ValidationMessagePublisher.PublishAsync(
+        ValidationMessageBuilder.BuildInputParameter(header, value),
+        outputService,
+        callerName,
+        callerFile,
+        callerLine,
+        skipStepModeCheck: true);
+    }
+  }
+
   private static Task PublishAsync(
     ShowMessageModel message,
     IMessageOutputService outputService,

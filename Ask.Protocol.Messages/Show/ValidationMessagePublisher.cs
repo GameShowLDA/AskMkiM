@@ -18,6 +18,8 @@ internal static class ValidationMessagePublisher
   /// <param name="callerName">Имя исходного метода.</param>
   /// <param name="callerFile">Путь к исходному файлу.</param>
   /// <param name="callerLine">Номер строки исходного вызова.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="skipStepModeCheck">Признак вывода без проверки пошагового режима.</param>
   /// <param name="publisherFile">Путь к файлу издателя.</param>
   /// <param name="publisherLine">Номер строки вызова внутри издателя.</param>
   /// <returns>Задача, представляющая вывод сообщения.</returns>
@@ -27,6 +29,8 @@ internal static class ValidationMessagePublisher
     string callerName,
     string callerFile,
     int callerLine,
+    bool isBlockStart = false,
+    bool skipStepModeCheck = false,
     [CallerFilePath] string publisherFile = "",
     [CallerLineNumber] int publisherLine = 0)
   {
@@ -38,6 +42,8 @@ internal static class ValidationMessagePublisher
 
     return outputService.ShowMessageAsync(
       message,
+      IsBlockStart: isBlockStart,
+      SkipStepModeCheck: skipStepModeCheck,
       callerName: displayCallerName,
       callerFile: publisherFile,
       callerLine: publisherLine);

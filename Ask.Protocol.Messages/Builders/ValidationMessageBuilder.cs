@@ -71,6 +71,48 @@ internal static class ValidationMessageBuilder
     return BuildSelectionError("Не удалось получить устройство.");
   }
 
+  /// <summary>
+  /// Формирует сообщение об ошибке введённых данных.
+  /// </summary>
+  /// <param name="details">Описание ошибки введённых данных.</param>
+  /// <returns>Сообщение об ошибке данных.</returns>
+  internal static ShowMessageModel BuildDataError(string details)
+  {
+    return new ShowMessageModel(
+      "Ошибка данных",
+      message: details,
+      type: ShowMessageModel.MessageType.Error);
+  }
+
+  /// <summary>
+  /// Формирует заголовок запуска с введёнными параметрами.
+  /// </summary>
+  /// <param name="executionTitle">Название запускаемой проверки.</param>
+  /// <param name="isCommand">Признак заголовка пользовательского запуска.</param>
+  /// <returns>Заголовок запуска проверки.</returns>
+  internal static ShowMessageModel BuildInputHeader(string executionTitle, bool isCommand)
+  {
+    return new ShowMessageModel(
+      $"Запуск \"{executionTitle}\"",
+      type: isCommand
+        ? ShowMessageModel.MessageType.Command
+        : ShowMessageModel.MessageType.Info);
+  }
+
+  /// <summary>
+  /// Формирует сообщение об одном введённом параметре запуска.
+  /// </summary>
+  /// <param name="header">Название параметра.</param>
+  /// <param name="value">Отображаемое значение параметра.</param>
+  /// <returns>Сообщение о введённом параметре.</returns>
+  internal static ShowMessageModel BuildInputParameter(string header, string value)
+  {
+    return new ShowMessageModel(header, message: value)
+    {
+      IndentLevel = 1,
+    };
+  }
+
   private static ShowMessageModel BuildFieldError(string header)
   {
     return new ShowMessageModel(header, ShowMessageModel.ErrorMessage.TitleColor);
