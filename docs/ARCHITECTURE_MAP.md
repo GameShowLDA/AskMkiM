@@ -631,6 +631,12 @@ executor throws
   и публикацию измерений, ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
 - `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
   `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
+- `IeCommandExecutor` и `KsCommandExecutor` передают `Errors`/`Info` из
+  `AlgorithmExecutionResult` напрямую в `ProtocolModel`, не создавая собственные коллекции
+  моделей сообщений;
+- `ParallelTestRunner` публикует этап общего сброса через `ExecutionMessages`, а
+  `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
+  `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
 `ПИ` вызывает `СИ` как вложенный executor до и после основной ACW/DCW-проверки.

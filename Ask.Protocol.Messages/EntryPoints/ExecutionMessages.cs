@@ -474,6 +474,23 @@ public static class ExecutionMessages
   }
 
   /// <summary>
+  /// Выводит сообщение об общем сбросе точек после шага параллельной проверки.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishGeneralPointsResetAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildGeneralPointsResetMessage(),
+      outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
   /// Выводит продолжительность задержки перед включением оборудования.
   /// </summary>
   /// <param name="seconds">Продолжительность задержки в секундах.</param>

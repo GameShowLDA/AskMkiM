@@ -24,8 +24,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var command = GetRequiredCommand<IeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var message = BuildSourceLinesMessage(command);
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
 
       SetActiveLine(context, command);
 
@@ -75,16 +73,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.Errors);
-      infoMessage.AddRange(messageResult.Info);
 
-      if (errorMessage.Count > 0)
+      if (messageResult.Errors.Count > 0)
       {
-        protocolModel.AddErrors(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, messageResult.Errors);
       }
-      if (infoMessage.Count > 0)
+      if (messageResult.Info.Count > 0)
       {
-        protocolModel.AddInfo(nameCommand, infoMessage);
+        protocolModel.AddInfo(nameCommand, messageResult.Info);
       }
     }
 

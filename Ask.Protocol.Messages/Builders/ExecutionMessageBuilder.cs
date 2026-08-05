@@ -77,6 +77,9 @@ internal static class ExecutionMessageBuilder
   internal static ShowMessageModel BuildPointsResetMessage()
     => new("Сброс точек") { IndentLevel = 1 };
 
+  internal static ShowMessageModel BuildGeneralPointsResetMessage()
+    => new("\tОбщий сброс точек");
+
   internal static ShowMessageModel BuildDelayBeforeEnablingMessage(double? seconds)
   {
     return new ShowMessageModel(
