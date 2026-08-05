@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -72,7 +73,10 @@ namespace Ask.Engine.Tests.Metrology
 
       var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, data.Param);
       await _userInteractionService.AppendEmptyLineAsync();
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} В"));
+      await RangeMessages.PublishAllowedRangeAsync(
+        VoltageUnit.Volt,
+        new MeasurementRange(LowerBound, LowerBound, UpperBound),
+        _userInteractionService);
 
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
     }
@@ -139,7 +143,10 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
         await PrintResult(messageService, MeasurementTypeCommand.PI_ACW);
-        await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} В"));
+        await RangeMessages.PublishAllowedRangeAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(LowerBound, LowerBound, UpperBound),
+          messageService);
         await base.FinalizeMeasurement(metrologicalModeRole, messageService);
 
         Measurements.Clear();

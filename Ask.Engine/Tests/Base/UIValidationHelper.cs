@@ -137,7 +137,7 @@ namespace Ask.Engine.Tests.Base
           .Select(message => message.ToString())
           .ToArray());
 
-      await ShowInputMessagesAsync(messageOutputService, messages);
+      await ShowInputMessagesAsync(messageOutputService, messages, isBlockStart: false);
     }
 
     internal static async Task ShowTestInputAsync(
@@ -165,11 +165,12 @@ namespace Ask.Engine.Tests.Base
 
     private static async Task ShowInputMessagesAsync(
       IMessageOutputService messageOutputService,
-      IReadOnlyList<ShowMessageModel> messages)
+      IReadOnlyList<ShowMessageModel> messages,
+      bool isBlockStart = true)
     {
       await messageOutputService.ShowMessageAsync(
         messages[0],
-        IsBlockStart: true,
+        IsBlockStart: isBlockStart,
         SkipStepModeCheck: true);
 
       foreach (var message in messages.Skip(1))
@@ -195,7 +196,7 @@ namespace Ask.Engine.Tests.Base
       {
         new(
           $"Запуск \"{executionTitle}\"",
-          type: ShowMessageModel.MessageType.Command),
+          type: ShowMessageModel.MessageType.Info),
         CreateInputMessage("Первая точка", data.FirstPoint.ToString()),
         CreateInputMessage("Вторая точка", data.SecondPoint.ToString()),
         CreateInputMessage(

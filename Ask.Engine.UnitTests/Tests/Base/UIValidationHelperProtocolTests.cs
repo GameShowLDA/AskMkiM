@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Tests.Base;
@@ -24,7 +25,11 @@ namespace Ask.Engine.UnitTests.Tests.Base
 
       Assert.Collection(
         messages,
-        message => Assert.Equal("Запуск \"Режим КС\"", message.Header),
+        message =>
+        {
+          Assert.Equal("Запуск \"Режим КС\"", message.Header);
+          Assert.Equal(ShowMessageModel.MessageType.Info, message.Status);
+        },
         message => Assert.Equal("1.2.3", message.Message),
         message => Assert.Equal("1.2.4", message.Message),
         message =>

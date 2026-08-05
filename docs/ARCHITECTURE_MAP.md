@@ -34,7 +34,7 @@
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
-| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования и измерений перенесены из `ExecutorMessageBuilder`, метрология и валидация пока являются заглушками |
+| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования, измерений и допустимых диапазонов формируются централизованно; валидация пока является заглушкой |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
@@ -146,7 +146,8 @@ Ask.Protocol.Messages
 собственный источник и исходный метод в формате `PublishAsync (вызван из File.cs → Method, строка N)`.
 `Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
 отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
-`CommandMessages`, `ExecutionMessages`, `EquipmentMessages` и `MeasurementMessages`. Остальные runtime-потоки
+`CommandMessages`, `ExecutionMessages`, `EquipmentMessages` и `MeasurementMessages`. Допустимые диапазоны
+значений независимо от вызывающей подсистемы публикуются через `RangeMessages`. Остальные runtime-потоки
 пока продолжают использовать `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
 
 `Directory.Build.props` направляет обычные результаты сборки в
@@ -1614,7 +1615,10 @@ ErrorItem → translator/runner ErrorList
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит сообщения подготовки устройств, мультиметра и пробойной установки | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `ValidationMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения проверки входных данных и конфигурации; методов пока нет | [Protocols](#protocols-and-file-formats) |
-| `MetrologyMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения метрологических режимов; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `RangeMessages` | static facade | Ask.Protocol.Messages | принимает `MeasurementRange` и типизированную единицу, публикует допустимый диапазон независимо от вызывающей подсистемы | [Protocols](#protocols-and-file-formats) |
+| `RangeMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует единый текст допустимого диапазона значений | [Protocols](#protocols-and-file-formats) |
+| `RangeMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения о диапазонах в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
+| `MetrologyMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие специфичные сообщения метрологических режимов; методов пока нет | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
 | `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |

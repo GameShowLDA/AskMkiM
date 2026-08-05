@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -136,7 +137,11 @@ namespace Ask.Engine.Tests.Metrology
 
         await protocolUI.ShowMessageAsync(new ShowMessageModel($"Значение эталоного напряжения ", null, MeasurementValueFormatter.FormatWithUnit(resultReferenceMeterMeasured, "В")) { IndentLevel = 1 });
         await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KN_DCW, new MeasurementRange(resultFastMeterMeasured, LowerBound, UpperBound), result, outputService: protocolUI);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {MeasurementValueFormatter.Format(LowerBound)} до {MeasurementValueFormatter.Format(UpperBound)} В") { IndentLevel = 2 }, skipPause: true);
+        await RangeMessages.PublishAllowedRangeAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(LowerBound, LowerBound, UpperBound),
+          protocolUI,
+          indentLevel: 2);
         await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
 
         return true;

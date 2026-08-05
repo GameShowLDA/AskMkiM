@@ -78,7 +78,12 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         new MeasurementRange(result, firstNorm, lastNorm),
         !error,
         outputService: messageService);
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Диапазон значений", message: $"от {firstNorm} до {lastNorm}В") { IndentLevel = 3 });
+      await RangeMessages.PublishAllowedRangeAsync(
+        VoltageUnit.Volt,
+        new MeasurementRange(voltage, firstNorm, lastNorm),
+        messageService,
+        indentLevel: 3,
+        header: "Диапазон значений");
       await messageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения", message: $"{Math.Abs(result - voltage)}В", type: status) { IndentLevel = 3 });
 
       await Task.Delay(1);

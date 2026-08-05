@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -73,7 +74,10 @@ namespace Ask.Engine.Tests.Metrology
       var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KC, data.Param);
 
       await _userInteractionService.AppendEmptyLineAsync();
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} Ом"));
+      await RangeMessages.PublishAllowedRangeAsync(
+        ResistanceUnit.Ohm,
+        new MeasurementRange(LowerBound, LowerBound, UpperBound),
+        _userInteractionService);
 
       var realyModule = testMeasurement.GetRelayModuleWithMaxNumber(metrologicalModeRole);
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService, realyModule.SwitchResistance), _userInteractionService, true);
@@ -129,7 +133,11 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
         await PrintResult(messageService, MeasurementTypeCommand.KC);
-        await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {LowerBound} до {UpperBound} Ом") { IndentLevel = 1 }, skipPause: true);
+        await RangeMessages.PublishAllowedRangeAsync(
+          ResistanceUnit.Ohm,
+          new MeasurementRange(LowerBound, LowerBound, UpperBound),
+          messageService,
+          indentLevel: 1);
         await base.FinalizeMeasurement(metrologicalModeRole, messageService);
 
         Measurements.Clear();

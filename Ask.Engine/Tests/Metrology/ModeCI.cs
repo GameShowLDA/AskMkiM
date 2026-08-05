@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -73,7 +74,10 @@ namespace Ask.Engine.Tests.Metrology
       var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, data.Param);
 
       await messageService.AppendEmptyLineAsync();
-      await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", headerColor: ShowMessageModel.SuccessMessage.TitleColor, message: $"от {LowerBound} до {UpperBound} Ом"));
+      await RangeMessages.PublishAllowedRangeAsync(
+        ResistanceUnit.Ohm,
+        new MeasurementRange(LowerBound, LowerBound, UpperBound),
+        messageService);
 
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, messageService), _userInteractionService, true);
     }
@@ -136,7 +140,11 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
         await PrintResult(messageService, MeasurementTypeCommand.SI);
-        await messageService.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {LowerBound} до {UpperBound} Ом") { IndentLevel = 1 }, skipPause: true);
+        await RangeMessages.PublishAllowedRangeAsync(
+          ResistanceUnit.Ohm,
+          new MeasurementRange(LowerBound, LowerBound, UpperBound),
+          messageService,
+          indentLevel: 1);
         await base.FinalizeMeasurement(metrologicalModeRole, messageService);
         Measurements.Clear();
       }
