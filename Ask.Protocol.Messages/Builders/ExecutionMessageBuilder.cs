@@ -63,4 +63,7 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildPointConnectionMessage()
     => new("Подключение точек");
+
+  internal static ShowMessageModel BuildPointsResetMessage()
+    => new("Сброс точек") { IndentLevel = 1 };
 }

@@ -358,4 +358,26 @@ public static class ExecutionMessages
       callerLine,
       isBlockStart: true);
   }
+
+  /// <summary>
+  /// Выводит сообщение о сбросе всех точек коммутации.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishPointsResetAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildPointsResetMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
 }
