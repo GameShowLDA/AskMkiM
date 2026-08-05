@@ -131,4 +131,46 @@ public static class CommandMessages
     return CommandMessagePublisher.PublishAsync(
       model, outputService, true, callerName, callerFile, callerLine);
   }
+
+  /// <summary>
+  /// Выводит заголовок направления проверки диода.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="isDirectDirection">Признак проверки в прямом направлении.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowDiodeDirectionAsync(
+    IMessageOutputService outputService,
+    bool isDirectDirection,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    var model = CommandMessageBuilder.BuildDiodeDirectionMessage(isDirectDirection);
+    return CommandMessagePublisher.PublishAsync(
+      model, outputService, true, callerName, callerFile, callerLine);
+  }
+
+  /// <summary>
+  /// Выводит заголовок подключения точек.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowPointsConnectionAsync(
+    IMessageOutputService outputService,
+    int indentLevel,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    var model = CommandMessageBuilder.BuildPointsConnectionMessage(indentLevel);
+    return CommandMessagePublisher.PublishAsync(
+      model, outputService, true, callerName, callerFile, callerLine);
+  }
 }

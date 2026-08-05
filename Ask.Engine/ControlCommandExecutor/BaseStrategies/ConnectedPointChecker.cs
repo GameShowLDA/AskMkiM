@@ -3,7 +3,6 @@ using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -39,23 +38,22 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронно выполняет проверку соединённых точек в схеме, формируя новый список цепей (ССИРТ)
     /// с учётом обнаруженных разрывов.
     /// </summary>
-    static public async Task<(List<ShowMessageModel> errorMessage, List<ShowMessageModel> infoMessage)> CheckSequenceAsync(ConnectedPointContext context, PreMeasurementDelegate preMeasurementDelegate = null)
+    static public async Task<AlgorithmExecutionResult> CheckSequenceAsync(ConnectedPointContext context, PreMeasurementDelegate preMeasurementDelegate = null)
     {
-      var errors = new List<ShowMessageModel>();
-      var infos = new List<ShowMessageModel>();
+      var messages = new AlgorithmExecutionResult(new(), new());
       var sourceGroups = GetSourceGroups(context);
 
       if (!HasGroupsToProcess(sourceGroups))
       {
-        return (errors, infos);
+        return messages;
       }
 
       await ShowCheckBlockHeaderAsync(context);
 
-      var newGroups = await BuildCheckedGroupsAsync(sourceGroups, context, preMeasurementDelegate, errors, infos);
+      var newGroups = await BuildCheckedGroupsAsync(sourceGroups, context, preMeasurementDelegate, messages);
       context.NewScheme = new SchemeModel(newGroups);
 
-      return (errors, infos);
+      return messages;
     }
 
     /// <summary>
@@ -91,14 +89,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       List<GroupModel> sourceGroups,
       ConnectedPointContext context,
       PreMeasurementDelegate preMeasurementDelegate,
-      List<ShowMessageModel> errors,
-      List<ShowMessageModel> infos)
+      AlgorithmExecutionResult messages)
     {
       var newGroups = new List<GroupModel>();
 
       foreach (var group in sourceGroups)
       {
-        var checkedGroup = await ProcessGroupAsync(group, context, preMeasurementDelegate, errors, infos);
+        var checkedGroup = await ProcessGroupAsync(group, context, preMeasurementDelegate, messages);
         if (checkedGroup.ChainModels.Count > 0)
         {
           newGroups.Add(checkedGroup);
@@ -115,14 +112,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       GroupModel group,
       ConnectedPointContext context,
       PreMeasurementDelegate preMeasurementDelegate,
-      List<ShowMessageModel> errors,
-      List<ShowMessageModel> infos)
+      AlgorithmExecutionResult messages)
     {
       var newGroup = new GroupModel();
 
       foreach (var chain in group.ChainModels)
       {
-        var checkedChain = await ProcessChainEntryAsync(chain, context, preMeasurementDelegate, errors, infos);
+        var checkedChain = await ProcessChainEntryAsync(chain, context, preMeasurementDelegate, messages);
         if (checkedChain != null)
         {
           newGroup.ChainModels.AddRange(checkedChain.Fragments);
@@ -140,8 +136,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       ChainModel chain,
       ConnectedPointContext context,
       PreMeasurementDelegate preMeasurementDelegate,
-      List<ShowMessageModel> errors,
-      List<ShowMessageModel> infos)
+      AlgorithmExecutionResult messages)
     {
       var chainCopy = CloneChain(chain);
       if (!HasPoints(chainCopy))
@@ -161,8 +156,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         context,
         preMeasurementDelegate,
         directPolarity,
-        errors,
-        infos,
+        messages,
         isNeCommand,
         isDirectDirection: true,
         currentNeDirectionSign: ResolveNeDirectionSign(directPolarity, isDirectPass: true));
@@ -174,8 +168,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           context,
           preMeasurementDelegate,
           !directPolarity,
-          errors,
-          infos,
+          messages,
           isNeCommand: true,
           isDirectDirection: false,
           currentNeDirectionSign: ResolveNeDirectionSign(directPolarity, isDirectPass: false));
@@ -235,8 +228,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       ConnectedPointContext context,
       PreMeasurementDelegate preMeasurementDelegate,
       bool polarity,
-      List<ShowMessageModel> errors,
-      List<ShowMessageModel> infos,
+      AlgorithmExecutionResult messages,
       bool isNeCommand,
       bool isDirectDirection,
       string? currentNeDirectionSign)
@@ -264,10 +256,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await context.MessageService.WaitIfPausedAsync();
 
-      errors.AddRange(result.Errors);
-      infos.AddRange(result.Infos);
+      messages.AddRange(result.Messages);
 
-      await AppendChainErrorsAsync(result, context, errors);
+      await AppendChainErrorsAsync(result, context, messages);
 
       return result;
     }
@@ -296,16 +287,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return Task.CompletedTask;
       }
 
-      var directionMessage = isDirectDirection
-        ? "Проверка диода в прямом направлении:"
-        : "Проверка диода в обратном направлении:";
-
-      return context.MessageService.ShowMessageAsync(
-        new ShowMessageModel(directionMessage)
-        {
-          IndentLevel = 1
-        },
-        IsBlockStart: true);
+      return CommandMessages.ShowDiodeDirectionAsync(context.MessageService, isDirectDirection);
     }
 
     /// <summary>
@@ -314,17 +296,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     private static async Task AppendChainErrorsAsync(
       ChainProcessingResult result,
       ConnectedPointContext context,
-      List<ShowMessageModel> errors)
+      AlgorithmExecutionResult messages)
     {
       if (ShouldReportEveryFailedMeasurement(context))
       {
-        await AppendFailedMeasurementsAsync(result, context, errors);
+        await AppendFailedMeasurementsAsync(result, context, messages);
         return;
       }
 
       if (HasDisconnections(result))
       {
-        await AppendDisconnectedChainErrorAsync(result, context, errors);
+        await AppendDisconnectedChainErrorAsync(result, context, messages);
       }
     }
 
@@ -345,32 +327,30 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     private static async Task AppendFailedMeasurementsAsync(
       ChainProcessingResult result,
       ConnectedPointContext context,
-      List<ShowMessageModel> errors)
+      AlgorithmExecutionResult messages)
     {
       foreach (var failedMeasurement in result.FailedMeasurements)
       {
-        var error = CreateFailedMeasurementError(context, failedMeasurement);
-        errors.Add(error);
+        var range = new MeasurementRange(
+          failedMeasurement.Value,
+          context.LowerLimit,
+          context.HigherLimit);
+        var error = MeasurementMessages.BuildMeasurementResultMessage(
+          context.TypeCommand,
+          range,
+          false,
+          failedMeasurement.Chain,
+          indentLevel: 2);
+        messages.Errors.Add(error);
 
         RegisterDisconnectChainError(context, error.Header, error.Message);
-        await context.MessageService.ShowMessageAsync(error);
+        await MeasurementMessages.PublishResultAsync(
+          context.TypeCommand,
+          range,
+          false,
+          failedMeasurement.Chain,
+          outputService: context.MessageService);
       }
-    }
-
-    /// <summary>
-    /// Создаёт сообщение об ошибке по одному неуспешному измерению.
-    /// </summary>
-    private static ShowMessageModel CreateFailedMeasurementError(ConnectedPointContext context, FailedMeasurement failedMeasurement)
-    {
-      var error = MeasurementMessages.BuildMeasurementResultMessage(
-        context.TypeCommand,
-        new MeasurementRange(failedMeasurement.Value, context.LowerLimit, context.HigherLimit),
-        chains: failedMeasurement.Chain);
-
-      error.Status = ShowMessageModel.MessageType.Error;
-      error.IndentLevel = 2;
-
-      return error;
     }
 
     /// <summary>
@@ -379,37 +359,27 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     private static async Task AppendDisconnectedChainErrorAsync(
       ChainProcessingResult result,
       ConnectedPointContext context,
-      List<ShowMessageModel> errors)
+      AlgorithmExecutionResult messages)
     {
       var chainStr = BuildDisconnectionDisplayString(result.Fragments);
-      var error = CreateDisconnectedChainError(result, context, chainStr, out var valueForProtocol);
-
-      errors.Add(error);
-      await context.MessageService.ShowMessageAsync(error);
-      RegisterDisconnectChainError(context, chainStr, valueForProtocol);
-    }
-
-    /// <summary>
-    /// Создаёт общее сообщение об ошибке по цепи с разрывом.
-    /// </summary>
-    private static ShowMessageModel CreateDisconnectedChainError(
-      ChainProcessingResult result,
-      ConnectedPointContext context,
-      string chainStr,
-      out string valueForProtocol)
-    {
       var value = result.FirstFailureValue ?? 0;
-      valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
-
+      var range = new MeasurementRange(value, context.LowerLimit, context.HigherLimit);
       var error = MeasurementMessages.BuildMeasurementResultMessage(
         context.TypeCommand,
-        new MeasurementRange(value, context.LowerLimit, context.HigherLimit),
-        chainStr);
+        range,
+        false,
+        chainStr,
+        indentLevel: 2);
+      var valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
 
-      error.Status = ShowMessageModel.MessageType.Error;
-      error.IndentLevel = 2;
-
-      return error;
+      messages.Errors.Add(error);
+      await MeasurementMessages.PublishResultAsync(
+        context.TypeCommand,
+        range,
+        false,
+        chainStr,
+        outputService: context.MessageService);
+      RegisterDisconnectChainError(context, chainStr, valueForProtocol);
     }
 
     /// <summary>
@@ -494,7 +464,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       bool revers,
       PreMeasurementDelegate preMeasurementDelegate)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек") { IndentLevel = indentLevel }, IsBlockStart: true);
+      await CommandMessages.ShowPointsConnectionAsync(messageService, indentLevel);
       await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(basePoint, messageService, revers);
 
       if (preMeasurementDelegate != null)
@@ -708,10 +678,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var info = MeasurementMessages.BuildMeasurementResultMessage(
         context.TypeCommand,
         new MeasurementRange(measured.Value, context.LowerLimit, context.HigherLimit),
-        chainStr);
+        measured.Result,
+        chainStr,
+        indentLevel + 1);
 
-      info.IndentLevel = indentLevel + 1;
-      state.Result.Infos.Add(info);
+      state.Result.Messages.Info.Add(info);
     }
 
     /// <summary>
@@ -863,8 +834,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     private sealed class ChainProcessingResult
     {
       public List<ChainModel> Fragments { get; } = new();
-      public List<ShowMessageModel> Errors { get; } = new();
-      public List<ShowMessageModel> Infos { get; } = new();
+      public AlgorithmExecutionResult Messages { get; } = new(new(), new());
       public List<FailedMeasurement> FailedMeasurements { get; } = new();
       public double? FirstFailureValue { get; set; }
 
@@ -877,8 +847,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           return;
 
         Fragments.AddRange(other.Fragments);
-        Errors.AddRange(other.Errors);
-        Infos.AddRange(other.Infos);
+        Messages.AddRange(other.Messages);
         FailedMeasurements.AddRange(other.FailedMeasurements);
         FirstFailureValue ??= other.FirstFailureValue;
       }

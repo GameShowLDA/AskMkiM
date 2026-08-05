@@ -232,6 +232,33 @@ public static class MeasurementMessages
   }
 
   /// <summary>
+  /// Формирует модель результата измерения с заданным состоянием и уровнем отступа.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
+  /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
+  /// <param name="chains">Обозначение измеряемой цепи.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <returns>Модель результата измерения.</returns>
+  public static ShowMessageModel BuildMeasurementResultMessage(
+    MeasurementTypeCommand measurementTypeCommand,
+    MeasurementRange measurementRange,
+    bool isSuccessful,
+    string? chains,
+    int indentLevel)
+  {
+    var message = MeasurementMessageBuilder.BuildResult(
+      measurementTypeCommand,
+      measurementRange,
+      chains);
+    message.Status = isSuccessful
+      ? ShowMessageModel.MessageType.Success
+      : ShowMessageModel.MessageType.Error;
+    message.IndentLevel = indentLevel;
+    return message;
+  }
+
+  /// <summary>
   /// Публикует итоговый результат измерения цепи.
   /// </summary>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>

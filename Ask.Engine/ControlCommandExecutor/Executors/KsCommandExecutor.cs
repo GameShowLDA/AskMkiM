@@ -96,8 +96,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
+      errorMessage.AddRange(messageResult.Errors);
+      infoMessage.AddRange(messageResult.Info);
 
       if (errorMessage.Count > 0)
       {

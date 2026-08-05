@@ -121,6 +121,20 @@ internal static class CommandMessageBuilder
     };
   }
 
+  internal static ShowMessageModel BuildDiodeDirectionMessage(bool isDirectDirection)
+  {
+    return new ShowMessageModel(
+      isDirectDirection
+        ? "Проверка диода в прямом направлении:"
+        : "Проверка диода в обратном направлении:")
+    {
+      IndentLevel = 1,
+    };
+  }
+
+  internal static ShowMessageModel BuildPointsConnectionMessage(int indentLevel)
+    => new("Подлючение точек") { IndentLevel = indentLevel };
+
   private static void ApplyCommandBlockBackground(ShowMessageModel model)
   {
     if (!UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting())

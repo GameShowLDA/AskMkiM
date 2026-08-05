@@ -86,8 +86,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         connectedPointContext.PerformMeasurementAsync = measurePointConnected;
 
         var messageResult = await ConnectedPointChecker.CheckSequenceAsync(connectedPointContext);
-        errorMessage.AddRange(messageResult.errorMessage);
-        infoMessage.AddRange(messageResult.infoMessage);
+        errorMessage.AddRange(messageResult.Errors);
+        infoMessage.AddRange(messageResult.Info);
       }
       if (!command.AlgorithmKey.Contains("ЗР"))
       {
