@@ -14,6 +14,18 @@ namespace Ask.Protocol.Messages.Builders;
 /// </summary>
 internal static class MeasurementMessageBuilder
 {
+  internal static ShowMessageModel BuildPointConnectionError(
+    string measurementTarget,
+    string details)
+  {
+    return new ShowMessageModel(
+      measurementTarget,
+      message: details,
+      type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 1,
+    };
+  }
   private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
 
   /// <summary>

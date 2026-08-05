@@ -168,11 +168,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (request.PairwiseFirstPointAltContext == null)
         throw new ArgumentNullException(nameof(request.PairwiseFirstPointAltContext));
 
-      var result =
-        await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(
-          request.PairwiseFirstPointAltContext);
-
-      return new AlgorithmExecutionResult(result.errorMessage, result.infoMessage);
+      return await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(
+        request.PairwiseFirstPointAltContext);
     }
 
     /// <summary>

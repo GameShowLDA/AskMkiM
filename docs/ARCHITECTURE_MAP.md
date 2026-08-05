@@ -623,7 +623,8 @@ executor throws
   создание и публикацию этапов и результатов в `CommandMessages`/`MeasurementMessages`;
 - `DisconnectionCheckExecutor` выбирает `MethodExecutor`,
   `NodeAccumulationChecker`, `NodeFullChecker` или pairwise strategy;
-- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка;
+- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; возвращает `AlgorithmExecutionResult`, а создание
+  и публикацию измерений, ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
 - `FaultChainMeasurementService` — повторное измерение проблемных цепей;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
@@ -1615,14 +1616,14 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
-| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, выдачу испытательного напряжения PI ACW/DCW, итоговые и промежуточные результаты и погрешности | [Protocols](#protocols-and-file-formats) |
-| `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, итоговые и промежуточные результаты и погрешности | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает опубликованные измерения в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности метрологического режима | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
-| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует ошибки, задержки, границы и результаты этапов, инициализацию, настройку оборудования, подключение шин/точек, сброс точек, запуск теста и проверку отдельных точек; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует ошибки, debug-сообщения, задержки, границы и результаты этапов, инициализацию, настройку оборудования, подключение шин/точек, сброс точек, запуск теста и проверку отдельных точек; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, сброса точек, этапов и результатов тестов, границ инициализации оборудования и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `ValidationMessages` | static facade | Ask.Protocol.Messages | публикует ошибки полей ввода, поиска оборудования и зависимостей самоконтроля, а также заголовок запуска и введённые параметры проверки | [Protocols](#protocols-and-file-formats) |

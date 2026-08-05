@@ -406,4 +406,28 @@ public static class ExecutionMessages
       callerFile,
       callerLine);
   }
+
+  /// <summary>
+  /// Выводит отладочное сообщение выполнения.
+  /// </summary>
+  /// <param name="details">Текст отладочного сообщения.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishDebugAsync(
+    string details,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildDebugMessage(details),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
 }

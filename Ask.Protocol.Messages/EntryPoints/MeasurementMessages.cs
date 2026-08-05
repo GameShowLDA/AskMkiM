@@ -232,6 +232,70 @@ public static class MeasurementMessages
   }
 
   /// <summary>
+  /// Формирует сообщение об отсутствии подключения проверяемой точки.
+  /// </summary>
+  /// <param name="measurementTarget">Обозначение проверяемой точки.</param>
+  /// <param name="details">Описание ошибки подключения.</param>
+  /// <returns>Модель ошибки подключения точки.</returns>
+  public static ShowMessageModel BuildPointConnectionError(
+    string measurementTarget,
+    string details = "Rизм = Нет подлючения точки")
+    => MeasurementMessageBuilder.BuildPointConnectionError(measurementTarget, details);
+
+  /// <summary>
+  /// Публикует сообщение об отсутствии подключения проверяемой точки.
+  /// </summary>
+  /// <param name="measurementTarget">Обозначение проверяемой точки.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="details">Описание ошибки подключения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishPointConnectionErrorAsync(
+    string measurementTarget,
+    IMessageOutputService outputService,
+    string details = "Rизм = Нет подлючения точки",
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return MeasurementMessagePublisher.PublishAsync(
+      MeasurementMessageBuilder.BuildPointConnectionError(measurementTarget, details),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
+  /// Формирует результат измерения с явно заданной единицей, состоянием и отступом.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и допустимые границы.</param>
+  /// <param name="isSuccessful">Признак соответствия допустимому диапазону.</param>
+  /// <param name="measurementTarget">Обозначение измеряемой цепи или точки.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <returns>Модель результата измерения.</returns>
+  public static ShowMessageModel BuildMeasurementResultMessage(
+    Enum measurementUnit,
+    MeasurementRange measurementRange,
+    bool isSuccessful,
+    string? measurementTarget,
+    int indentLevel = 0)
+  {
+    var message = MeasurementMessageBuilder.BuildResult(
+      measurementUnit,
+      measurementRange,
+      measurementTarget);
+    message.Status = isSuccessful
+      ? ShowMessageModel.MessageType.Success
+      : ShowMessageModel.MessageType.Error;
+    message.IndentLevel = indentLevel;
+    return message;
+  }
+
+  /// <summary>
   /// Формирует модель результата измерения с заданным состоянием и уровнем отступа.
   /// </summary>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
@@ -326,6 +390,7 @@ public static class MeasurementMessages
     IMessageOutputService? outputService = null,
     bool executionError = false,
     bool canBeDeleted = false,
+    int indentLevel = 2,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
@@ -345,7 +410,7 @@ public static class MeasurementMessages
     message.Status = isSuccessful
       ? ShowMessageModel.MessageType.Success
       : ShowMessageModel.MessageType.Error;
-    message.IndentLevel = 2;
+    message.IndentLevel = indentLevel;
     message.ExecutionErrorMessage = executionErrorMessage;
     message.ExecutionError = executionError;
     message.CanBeDeleted = canBeDeleted;

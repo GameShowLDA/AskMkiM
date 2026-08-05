@@ -76,4 +76,7 @@ internal static class ExecutionMessageBuilder
       IndentLevel = 2,
     };
   }
+
+  internal static ShowMessageModel BuildDebugMessage(string details)
+    => new(debug: details);
 }
