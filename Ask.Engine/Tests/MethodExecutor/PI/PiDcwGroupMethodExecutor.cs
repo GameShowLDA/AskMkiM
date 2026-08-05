@@ -1,7 +1,6 @@
 ﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -48,7 +47,10 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
         if (!connect.Connect)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
+          await ExecutionMessages.PublishErrorAsync(
+            connect.Message,
+            _messageService,
+            skipStepModeCheck: true);
           return;
         }
 
@@ -95,16 +97,11 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
           var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
 
-          var type = ShowMessageModel.MessageType.Success;
-
-          if (answer.value >= dataModel.Param)
-          {
-            type = ShowMessageModel.MessageType.Error;
-          }
+          bool isSuccessful = answer.value < dataModel.Param;
 
           var dischargeIndex = CurrentDischargeNumber - 1;
           var bitString = GetBitString();
-          string? executionErrorMessage = type == ShowMessageModel.MessageType.Error
+          string? executionErrorMessage = !isSuccessful
             ? GroupMethodProtocolBuilder.BuildFailure(
               dischargeIndex,
               bitString,
@@ -116,12 +113,12 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
           await MeasurementMessages.PublishResultAsync(
             CurrentUnit.MilliAmpere,
             new MeasurementRange(answer.value, 0, dataModel.Param),
-            type == ShowMessageModel.MessageType.Success,
+            isSuccessful,
             $"Разряд {dischargeIndex} ({bitString})",
             executionErrorMessage,
             messageService);
 
-          return type == ShowMessageModel.MessageType.Success;
+          return isSuccessful;
 
         }, messageService);
       }

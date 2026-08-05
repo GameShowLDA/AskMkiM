@@ -235,6 +235,7 @@ public static class ExecutionMessages
   public static Task PublishErrorAsync(
     string details,
     IMessageOutputService? outputService,
+    bool skipStepModeCheck = false,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
@@ -244,7 +245,8 @@ public static class ExecutionMessages
       outputService,
       callerName,
       callerFile,
-      callerLine);
+      callerLine,
+      skipStepModeCheck: skipStepModeCheck);
   }
 
   /// <summary>
