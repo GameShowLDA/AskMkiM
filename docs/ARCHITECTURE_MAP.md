@@ -686,6 +686,7 @@ RmCommandExecutor
 → ChassisManagers.GetByNumberAsync
 → SwitchingDevices.GetDevicesByNumberChassisAsync
 → RelaySwitchModules.GetDevicesByNumberChassisAsync
+→ ValidationMessages.PublishEquipmentConfigurationErrorAsync при ошибке конфигурации
 → validate module point bounds
 → module.ConnectableManager.InitializeAsync + ResetAsync
 → switchingDevice.ConnectableManager.InitializeAsync + ResetAsync
@@ -1626,9 +1627,9 @@ ErrorItem → translator/runner ErrorList
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует ошибки, debug-сообщения, задержки, границы и результаты этапов, инициализацию, настройку оборудования, подключение шин и подключение/отключение точек, сброс точек, запуск теста и проверку отдельных точек; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, подключения/отключения точек, сброса точек, этапов и результатов тестов, границ инициализации оборудования и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
-| `ValidationMessages` | static facade | Ask.Protocol.Messages | публикует ошибки полей ввода, поиска оборудования и зависимостей самоконтроля, а также заголовок запуска и введённые параметры проверки | [Protocols](#protocols-and-file-formats) |
-| `ValidationMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует ошибки данных и поиска оборудования, сообщения о зависимостях самоконтроля и представление введённых параметров запуска | [Protocols](#protocols-and-file-formats) |
-| `ValidationMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт ошибки UI-валидации в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessages` | static facade | Ask.Protocol.Messages | публикует ошибки полей ввода, поиска и конфигурации оборудования, зависимости самоконтроля, а также заголовок запуска и введённые параметры проверки | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует ошибки данных, поиска и конфигурации оборудования, сообщения о зависимостях самоконтроля и представление введённых параметров запуска | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт ошибки в `IMessageOutputService`, поддерживает обход паузы/пошагового режима и добавляет метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `RangeMessages` | static facade | Ask.Protocol.Messages | принимает `MeasurementRange` и типизированную единицу, публикует допустимый диапазон независимо от вызывающей подсистемы | [Protocols](#protocols-and-file-formats) |
 | `RangeMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует единый текст допустимого диапазона значений | [Protocols](#protocols-and-file-formats) |
 | `RangeMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения о диапазонах в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |

@@ -78,6 +78,19 @@ internal static class ValidationMessageBuilder
       ShowMessageModel.ErrorMessage.TitleColor);
   }
 
+  internal static ShowMessageModel BuildEquipmentConfigurationError(
+    string header,
+    string details)
+  {
+    return new ShowMessageModel(
+      header,
+      message: details,
+      type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 1,
+    };
+  }
+
   /// <summary>
   /// Формирует сообщение об ошибке введённых данных.
   /// </summary>

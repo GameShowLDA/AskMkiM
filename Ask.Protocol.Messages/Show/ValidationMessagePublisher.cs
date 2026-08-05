@@ -20,6 +20,7 @@ internal static class ValidationMessagePublisher
   /// <param name="callerLine">Номер строки исходного вызова.</param>
   /// <param name="isBlockStart">Признак начала логического блока.</param>
   /// <param name="skipStepModeCheck">Признак вывода без проверки пошагового режима.</param>
+  /// <param name="skipPause">Признак вывода без ожидания снятия паузы.</param>
   /// <param name="publisherFile">Путь к файлу издателя.</param>
   /// <param name="publisherLine">Номер строки вызова внутри издателя.</param>
   /// <returns>Задача, представляющая вывод сообщения.</returns>
@@ -31,6 +32,7 @@ internal static class ValidationMessagePublisher
     int callerLine,
     bool isBlockStart = false,
     bool skipStepModeCheck = false,
+    bool skipPause = false,
     [CallerFilePath] string publisherFile = "",
     [CallerLineNumber] int publisherLine = 0)
   {
@@ -44,6 +46,7 @@ internal static class ValidationMessagePublisher
       message,
       IsBlockStart: isBlockStart,
       SkipStepModeCheck: skipStepModeCheck,
+      skipPause: skipPause,
       callerName: displayCallerName,
       callerFile: publisherFile,
       callerLine: publisherLine);

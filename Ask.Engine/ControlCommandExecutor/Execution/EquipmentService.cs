@@ -1,6 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Services.Devices;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -108,9 +107,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         if (await ChassisManagers.GetByNumberAsync(chassisNumber) == null)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Менеджер шасси {chassisNumber}",
-            message: "Устройство не найдено в конфигурации.", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"Менеджер шасси {chassisNumber}",
+            "Устройство не найдено в конфигурации.",
+            messageService);
           error = true;
         }
         else
@@ -146,9 +146,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (allModules == null || allModules.Count == 0)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
-            message: "Устройство не найдено в конфигурации.", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
+            "Устройство не найдено в конфигурации.",
+            messageService);
           error = true;
           continue;
         }
@@ -156,9 +157,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         var module = allModules.FirstOrDefault(m => m.Number == item.ModuleNumber);
         if (module == null)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
-            message: "Модуль не найден в конфигурации.", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
+            "Модуль не найден в конфигурации.",
+            messageService);
           error = true;
           continue;
         }
@@ -168,9 +170,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (invalidPoint != null)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"{module.Name}[{item.DeviceNumber}.{item.ModuleNumber}]",
-            message: $"Указана несуществующая точка: {invalidPoint.PointNumber} (максимум {module.PointCount}).", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"{module.Name}[{item.DeviceNumber}.{item.ModuleNumber}]",
+            $"Указана несуществующая точка: {invalidPoint.PointNumber} (максимум {module.PointCount}).",
+            messageService);
           error = true;
           continue;
         }
@@ -204,9 +207,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel("Устройство коммутации",
-        message: "Не найдено ни одно устройство коммутации для переданных шасси.", type: ShowMessageModel.MessageType.Error)
-      { IndentLevel = 1 }, skipPause: true);
+      await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+        "Устройство коммутации",
+        "Не найдено ни одно устройство коммутации для переданных шасси.",
+        messageService);
 
       return false;
     }
@@ -344,10 +348,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
       if (messageService != null)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Пробойная установка",
-          message: "Не найдено устройство пробойной установки (BreakdownTester) для используемых шасси.",
-          type: ShowMessageModel.MessageType.Error)
-        { IndentLevel = 1 }, skipPause: true);
+        await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+          "Пробойная установка",
+          "Не найдено устройство пробойной установки (BreakdownTester) для используемых шасси.",
+          messageService);
       }
 
       throw new Exception("Ошибка конфигурации: не найдено устройство пробойной установки.");
@@ -387,10 +391,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel("Быстрый измеритель",
-        message: "Не найдено устройство быстрого измерителя (FastMeter) для используемых шасси.",
-        type: ShowMessageModel.MessageType.Error)
-      { IndentLevel = 1 }, skipPause: true);
+      await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+        "Быстрый измеритель",
+        "Не найдено устройство быстрого измерителя (FastMeter) для используемых шасси.",
+        messageService);
 
       throw new Exception("Ошибка конфигурации: не найдено устройство быстрого измерителя.");
     }
@@ -437,11 +441,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (!pointExists)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel(
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
             $"Системная ошибка при трансляции: [{point.DeviceNumber}.{point.ModuleNumber}.{point.PointNumber}]",
-            message: "Точка такая-то не существует.",
-            type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+            "Точка такая-то не существует.",
+            messageService);
 
           throw new Exception($"Системная ошибка при трансляции: [{point.DeviceNumber}.{point.ModuleNumber}.{point.PointNumber}]");
         }

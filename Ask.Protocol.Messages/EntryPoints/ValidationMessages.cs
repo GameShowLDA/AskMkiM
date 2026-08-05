@@ -192,6 +192,33 @@ public static class ValidationMessages
   }
 
   /// <summary>
+  /// Публикует ошибку конфигурации оборудования без ожидания снятия паузы.
+  /// </summary>
+  /// <param name="header">Наименование проверяемого оборудования или системной проверки.</param>
+  /// <param name="details">Описание ошибки конфигурации.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishEquipmentConfigurationErrorAsync(
+    string header,
+    string details,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ValidationMessagePublisher.PublishAsync(
+      ValidationMessageBuilder.BuildEquipmentConfigurationError(header, details),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      skipPause: true);
+  }
+
+  /// <summary>
   /// Публикует сообщение об ошибке введённых данных.
   /// </summary>
   /// <param name="details">Описание ошибки введённых данных.</param>
