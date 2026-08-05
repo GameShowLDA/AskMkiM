@@ -2,6 +2,7 @@
 using Ask.Core.Shared.Interfaces.ParserInterfaces;
 using Ask.Core.Shared.ParserContext;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using static Ask.LogLib.LoggerUtility;
@@ -38,7 +39,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Ks
       }
 
       var meter = ctx.Fastmeter;
-      if (meter == null)
+      if (meter == null && !CommandAnalysisContext.IsTextDiagnostics)
       {
         LogError("Не найден быстрый измеритель.");
         model.Errors.Add(GeneralErrors.FastMeterNotFound(ctx.LineNumber, $"{ctx.CommandNumber} {ctx.Mnemonic}"));

@@ -1,6 +1,7 @@
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using ICSharpCode.AvalonEdit.Document;
 using System.Text.RegularExpressions;
 
@@ -12,8 +13,6 @@ namespace UI.Controls.TextEditorControl.Syntax
   /// </summary>
   public sealed class CommandTranslationSyntaxAnalyzer
   {
-    private const string AnalyzerFailureCode = "CMD900";
-
     private static readonly Regex InternalIdentifierPattern = new Regex(
       @"\b[A-Za-z_]*[a-z][A-Za-z0-9_]*\b|\b[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+\b|\.cs\b",
       RegexOptions.Compiled | RegexOptions.CultureInvariant);
@@ -50,10 +49,9 @@ namespace UI.Controls.TextEditorControl.Syntax
       }
       catch (Exception)
       {
-        return new[]
-        {
-          CreateAnalyzerFailureDiagnostic(document)
-        };
+        // Сбой инфраструктуры анализатора не является ошибкой текста и не
+        // должен создавать ложное подчёркивание в документе.
+        return Array.Empty<TextSyntaxDiagnostic>();
       }
     }
 
@@ -103,7 +101,10 @@ namespace UI.Controls.TextEditorControl.Syntax
     /// <returns>Последовательность диагностик команды.</returns>
     private static IEnumerable<IDisplayIssue> GetIssues(BaseCommandModel model)
     {
-      return model.Errors.Cast<IDisplayIssue>().Concat(model.Warnings);
+      return model.Errors
+        .Cast<IDisplayIssue>()
+        .Concat(model.Warnings)
+        .Where(issue => !TranslationDiagnosticClassifier.IsEquipmentRelated(issue));
     }
 
     /// <summary>
@@ -221,25 +222,5 @@ namespace UI.Controls.TextEditorControl.Syntax
       return ch is >= 'А' and <= 'я' or 'Ё' or 'ё';
     }
 
-    /// <summary>
-    /// Создаёт запасную диагностику на случай сбоя самого анализатора.
-    /// </summary>
-    /// <param name="document">Документ AvalonEdit.</param>
-    /// <returns>Предупреждение, указывающее на невозможность выполнить проверку команд.</returns>
-    private static TextSyntaxDiagnostic CreateAnalyzerFailureDiagnostic(TextDocument document)
-    {
-      var firstLine = document.GetLineByNumber(1);
-
-      return new TextSyntaxDiagnostic
-      {
-        Code = AnalyzerFailureCode,
-        Message = "Не удалось выполнить проверку команд. Проверьте общий формат программы контроля.",
-        Severity = TextSyntaxSeverity.Warning,
-        StartOffset = firstLine.Offset,
-        Length = Math.Max(1, firstLine.Length),
-        LineNumber = 1,
-        ColumnNumber = 1
-      };
-    }
   }
 }

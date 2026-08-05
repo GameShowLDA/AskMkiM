@@ -4,6 +4,7 @@ using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
@@ -34,6 +35,40 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
 
       var matches = regex.Matches(input);
       var busDictionary = new Dictionary<BusStructureEnum.Type, List<int?>>();
+
+      if (CommandAnalysisContext.IsTextDiagnostics)
+      {
+        foreach (Match match in matches)
+        {
+          var busType = match.Groups["prefix"].Value.ToUpperInvariant() switch
+          {
+            "2" => BusStructureEnum.Type.Bus2,
+            "4" => BusStructureEnum.Type.Bus4,
+            "6" => BusStructureEnum.Type.Bus6,
+            "8" => BusStructureEnum.Type.Bus8,
+            "К" => BusStructureEnum.Type.BusCombined,
+            _ => BusStructureEnum.Type.None
+          };
+
+          if (busType == BusStructureEnum.Type.None)
+            continue;
+
+          int? standNumber = match.Groups["value"].Success
+            ? int.Parse(match.Groups["value"].Value)
+            : null;
+
+          if (!busDictionary.TryGetValue(busType, out var stands))
+          {
+            stands = new List<int?>();
+            busDictionary[busType] = stands;
+          }
+
+          stands.Add(standNumber);
+        }
+
+        model.BusStructure = busDictionary;
+        return model;
+      }
 
       foreach (Match match in matches)
       {

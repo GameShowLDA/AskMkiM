@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
@@ -70,10 +71,14 @@ namespace Ask.Engine.ControlCommandAnalyser
       lock (ParseLock)
       {
         var previousCommands = CommandsModel.CommandModels.ToList();
+        using var diagnosticsScope = CommandAnalysisContext.EnterTextDiagnostics();
 
         try
         {
-          var models = ParseAllCore(text, emitMessages: false);
+          var models = ParseAllCore(
+            text,
+            emitMessages: false,
+            stopOnCriticalStructuralErrors: false);
 
           CommandPostAnalyzer.Analyze(models);
           CkCommandValidator.ValidateVshCompatibility(models);
@@ -511,7 +516,10 @@ namespace Ask.Engine.ControlCommandAnalyser
       }
     }
 
-    private List<BaseCommandModel> ParseAllCore(string text, bool emitMessages)
+    private List<BaseCommandModel> ParseAllCore(
+      string text,
+      bool emitMessages,
+      bool stopOnCriticalStructuralErrors = true)
     {
       if (emitMessages)
       {
@@ -562,7 +570,7 @@ namespace Ask.Engine.ControlCommandAnalyser
             commands.Add(model);
             CommandsModel.CommandModels.Add(model);
 
-            if (HasCriticalStructuralErrors(model))
+            if (stopOnCriticalStructuralErrors && HasCriticalStructuralErrors(model))
               return commands;
           }
 

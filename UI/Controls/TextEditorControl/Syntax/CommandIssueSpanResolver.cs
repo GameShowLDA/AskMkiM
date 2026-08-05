@@ -36,6 +36,10 @@ namespace UI.Controls.TextEditorControl.Syntax
       @"'([^']+)'|""([^""]+)""",
       RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    private static readonly Regex ParenthesizedValueRegex = new Regex(
+      @"\(([^()]+)\)",
+      RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private static readonly string[] DirectPrefixes =
     {
       "Не удалось распознать параметры:",
@@ -105,22 +109,36 @@ namespace UI.Controls.TextEditorControl.Syntax
         commentSpans,
         out var bodyMap);
 
+      if (IsNonLocatableIssue(issue))
+      {
+        span = default;
+        return false;
+      }
+
+      if (hasBodyMap && bodyMap.HasPointContent && IsMisleadingEmptyPointsIssue(issue))
+      {
+        span = default;
+        return false;
+      }
+
       if (TryResolveLineHint(line, lineNumber, lineText, issue, out span))
         return true;
 
       if (hasBodyMap &&
           (TryResolveRmDiagnostic(model, issue, bodyMap, out span) ||
+           TryResolveKnownSyntax(bodyMap, issue, out span) ||
            TryResolveIssueText(bodyMap, issue, out span) ||
-           TryResolveSemantic(bodyMap, issue, out span) ||
-           TryResolveIssueSourceLine(bodyMap, issue, out span)))
+           TryResolveSemantic(bodyMap, issue, out span)))
       {
         return true;
       }
 
-      if (TryResolveHeader(line, lineText, model, issue, out span))
+      if (ShouldResolveHeader(issue) &&
+          TryResolveHeader(line, lineText, model, issue, out span))
         return true;
 
-      return TryResolveNonWhiteSpaceLine(line, lineText, out span);
+      span = default;
+      return false;
     }
 
     /// <summary>
@@ -177,7 +195,31 @@ namespace UI.Controls.TextEditorControl.Syntax
           return true;
       }
 
-      return bodyMap.TryResolveFirstSegment(out span);
+      span = default;
+      return false;
+    }
+
+    /// <summary>
+    /// Разрешает знаки и конструкции, прямо названные диагностикой, но не
+    /// представленные в ней отдельным значением.
+    /// </summary>
+    private static bool TryResolveKnownSyntax(
+      CommandBodyMap bodyMap,
+      IDisplayIssue issue,
+      out CommandIssueSpan span)
+    {
+      string code = issue.CodeString ?? string.Empty;
+      string description = issue.Description ?? string.Empty;
+
+      if ((code.Equals("Gen_ExpectedConditionalJumpAfterCu", StringComparison.OrdinalIgnoreCase) ||
+           description.Contains("Вопросительный знак", StringComparison.OrdinalIgnoreCase)) &&
+          bodyMap.TryResolveText("?", out span))
+      {
+        return true;
+      }
+
+      span = default;
+      return false;
     }
 
     /// <summary>
@@ -233,9 +275,6 @@ namespace UI.Controls.TextEditorControl.Syntax
       if (kind.HasFlag(IssueKind.Parameters) && bodyMap.TryResolveRegion(bodyMap.ParameterText, out span))
         return true;
 
-      if (kind.HasFlag(IssueKind.RequiredContent) && bodyMap.TryResolveFirstSegment(out span))
-        return true;
-
       span = default;
       return false;
     }
@@ -263,20 +302,6 @@ namespace UI.Controls.TextEditorControl.Syntax
 
       var match = SelectMatchByDescription(matches, issue.Description);
       return bodyMap.TryResolve(match.Index, match.Length, out span);
-    }
-
-    /// <summary>
-    /// Возвращает диапазон строки, указанной самой диагностикой, если она попадает в тело команды.
-    /// </summary>
-    private static bool TryResolveIssueSourceLine(
-      CommandBodyMap bodyMap,
-      IDisplayIssue issue,
-      out CommandIssueSpan span)
-    {
-      span = default;
-
-      return issue.SourceLineNumber > 0
-             && bodyMap.TryResolveLine(issue.SourceLineNumber, out span);
     }
 
     /// <summary>
@@ -308,33 +333,6 @@ namespace UI.Controls.TextEditorControl.Syntax
     }
 
     /// <summary>
-    /// Возвращает диапазон всей непустой части строки как последний запасной вариант.
-    /// </summary>
-    private static bool TryResolveNonWhiteSpaceLine(
-      DocumentLine line,
-      string lineText,
-      out CommandIssueSpan span)
-    {
-      int start = 0;
-      int end = lineText.Length;
-
-      while (start < end && char.IsWhiteSpace(lineText[start]))
-        start++;
-
-      while (end > start && char.IsWhiteSpace(lineText[end - 1]))
-        end--;
-
-      if (end <= start)
-      {
-        span = default;
-        return false;
-      }
-
-      span = new CommandIssueSpan(line.Offset + start, end - start, line.LineNumber, start + 1);
-      return true;
-    }
-
-    /// <summary>
     /// Выбирает первое или последнее найденное значение по словам в описании диагностики.
     /// </summary>
     private static Match SelectMatchByDescription(IReadOnlyList<Match> matches, string? description)
@@ -356,6 +354,13 @@ namespace UI.Controls.TextEditorControl.Syntax
         var value = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value;
         if (!string.IsNullOrWhiteSpace(value))
           yield return TrimCandidate(value);
+      }
+
+      foreach (Match match in ParenthesizedValueRegex.Matches(issue.Description ?? string.Empty))
+      {
+        var value = TrimCandidate(match.Groups[1].Value);
+        if (!string.IsNullOrWhiteSpace(value))
+          yield return value;
       }
 
       foreach (var candidate in GetPrefixedCandidates(issue.Description, DirectPrefixes))
@@ -463,17 +468,56 @@ namespace UI.Controls.TextEditorControl.Syntax
     /// </summary>
     private static IEnumerable<string> GetHeaderCandidates(BaseCommandModel model, IDisplayIssue issue)
     {
-      if (!string.IsNullOrWhiteSpace(issue.Command))
-        yield return issue.Command;
-
-      if (!string.IsNullOrWhiteSpace(model.CommandNumber) && !string.IsNullOrWhiteSpace(model.Mnemonic))
-        yield return $"{model.CommandNumber} {model.Mnemonic}";
+      if (string.Equals(issue.CodeString, "Gen_CommandAlreadyExists", StringComparison.OrdinalIgnoreCase) &&
+          !string.IsNullOrWhiteSpace(model.CommandNumber))
+      {
+        yield return model.CommandNumber;
+      }
 
       if (!string.IsNullOrWhiteSpace(model.Mnemonic))
         yield return model.Mnemonic;
 
+      if (!string.IsNullOrWhiteSpace(model.CommandNumber) && !string.IsNullOrWhiteSpace(model.Mnemonic))
+        yield return $"{model.CommandNumber} {model.Mnemonic}";
+
+      if (!string.IsNullOrWhiteSpace(issue.Command))
+        yield return issue.Command;
+
       if (!string.IsNullOrWhiteSpace(model.CommandNumber))
         yield return model.CommandNumber;
+    }
+
+    private static bool IsNonLocatableIssue(IDisplayIssue issue)
+    {
+      string code = issue.CodeString ?? string.Empty;
+
+      return code.Equals("Gen_MissingRequiredCommand", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_MissingPointsMap", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_DefaultTime", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_DefaultVoltage", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_DefaultResistaince", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_DefaultResistainceLowLimit", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_DefaultResistainceHighLimit", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_KeyZR", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_VshCommandAddedAutomatically", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool ShouldResolveHeader(IDisplayIssue issue)
+    {
+      if (!issue.IsWarning)
+        return true;
+
+      return string.Equals(
+        issue.CodeString,
+        "Gen_EmptyMessage",
+        StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsMisleadingEmptyPointsIssue(IDisplayIssue issue)
+    {
+      string code = issue.CodeString ?? string.Empty;
+      return code.Contains("EmptyPoints", StringComparison.OrdinalIgnoreCase)
+             || code.Equals("Gen_NoPointsBody", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

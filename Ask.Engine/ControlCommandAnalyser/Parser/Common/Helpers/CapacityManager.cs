@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
 using static Ask.LogLib.LoggerUtility;
 
@@ -37,9 +38,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           ? CommonParameterParser.ParseToDouble(higherLimitCapacity)
           : null;
 
-      var meter = GetFastMeter(model, numberLine, commandNumber, mnemonic);
-      if (meter == null)
-        return model;
+      if (!CommandAnalysisContext.IsTextDiagnostics)
+      {
+        var meter = GetFastMeter(model, numberLine, commandNumber, mnemonic);
+        if (meter == null)
+          return model;
+      }
 
       var commandInfo = EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.IE);
 

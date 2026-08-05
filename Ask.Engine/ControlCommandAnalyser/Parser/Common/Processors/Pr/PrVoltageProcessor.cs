@@ -19,8 +19,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pr
     /// <returns>Строка без обработанного параметра.</returns>
     public string Process(PrCommandModel model, string remainder, ParameterContext ctx)
     {
-      var breakdown = ctx.Breakdown!;
-
       var (voltageRaw, unit, rest) =
           CommonParameterParser.VoltageParser.ParseVoltage(remainder);
 

@@ -83,7 +83,7 @@ namespace UI.Controls.TextEditorControl.Syntax
         }
       }
 
-      if (_translationSyntaxAnalyzer != null && !HasBlockingHeaderDiagnostics(diagnostics))
+      if (_translationSyntaxAnalyzer != null)
       {
         AddTranslationDiagnostics(document, diagnostics);
       }
@@ -115,14 +115,6 @@ namespace UI.Controls.TextEditorControl.Syntax
       return existingDiagnostics.Any(existing =>
         IsSameDiagnostic(existing, candidate)
         || IsUnknownCommandDuplicate(existing, candidate));
-    }
-
-    private static bool HasBlockingHeaderDiagnostics(
-      IReadOnlyList<TextSyntaxDiagnostic> diagnostics)
-    {
-      return diagnostics.Any(diagnostic =>
-        diagnostic.Severity == TextSyntaxSeverity.Error &&
-        diagnostic.Code.StartsWith("CMD", StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsSameDiagnostic(

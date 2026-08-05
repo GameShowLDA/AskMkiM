@@ -26,7 +26,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
     /// <returns>Строка без обработанного параметра напряжения.</returns>
     public string Process(PiCommandModel model, string remainder, ParameterContext ctx)
     {
-      var breakdown = ctx.Breakdown!;
       var (voltage, unit, rest) =
           CommonParameterParser.VoltageParser.ParseVoltage(remainder);
 
@@ -69,10 +68,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
 
         voltageType = model.VoltageType == VoltageEnum.Type.DCW ? "постоянного" : "переменного";
         var voltageValue = UnitsConvertor.TryConvertBack(model.Voltage.Value, unit);
-        var voltageTemp = model.VoltageType == VoltageEnum.Type.DCW ? breakdown.DcwMaxVoltage : breakdown.AcwMaxVoltage;
-
-        if (value > maxVoltage)
+        var breakdown = ctx.Breakdown;
+        if (breakdown != null && value > maxVoltage)
         {
+          var voltageTemp = model.VoltageType == VoltageEnum.Type.DCW ? breakdown.DcwMaxVoltage : breakdown.AcwMaxVoltage;
           var maxValue = UnitsConvertor.TryConvertBack(voltageTemp, "В");
           LogError($"В команде ПИ указано напряжение, превышающее максимально допустимое напряжение пробойной установки.");
           var description = $"В команде {model.CommandNumber} {model.Mnemonic} указано напряжение ({voltageValue.Item1} {voltageValue.Item2}), " +
@@ -80,7 +79,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
             $"для {voltageType} тока).";
           model.Errors.Add(GeneralErrors.VoltageConflict(ctx.LineNumber, $"{model.CommandNumber} {model.Mnemonic}", description));
         }
-        else if (value < minVoltage)
+        else if (breakdown != null && value < minVoltage)
         {
           var minValue = UnitsConvertor.TryConvertBack(minVoltage, "В");
           LogError($"В команде ПИ указано напряжение, меньше минимально допустимого напряжения пробойной установки.");

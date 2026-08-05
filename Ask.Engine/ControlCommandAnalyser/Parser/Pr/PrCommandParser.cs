@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
@@ -79,7 +80,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pr
       remainder = TextRemoveManager.RemoveCommandPrefix(remainder);
 
       var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
-      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      var meter = CommandAnalysisContext.IsTextDiagnostics
+        ? null
+        : FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       remainder = PrParameterPipeline.Execute(model, remainder, ctx, meter);
       model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
       UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);

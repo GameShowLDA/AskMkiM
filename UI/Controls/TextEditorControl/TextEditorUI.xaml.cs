@@ -651,6 +651,13 @@ namespace UI.Controls.TextEditorControl
       if (textEditor.Document == null)
         return;
 
+      if (!SupportsCommandSyntaxDiagnostics(FileType))
+      {
+        _syntaxDiagnosticTimer.Stop();
+        ClearSyntaxDiagnostics();
+        return;
+      }
+
       _syntaxDiagnosticTimer.Stop();
       _syntaxDiagnosticTimer.Start();
     }
@@ -660,11 +667,10 @@ namespace UI.Controls.TextEditorControl
       if (textEditor.Document == null || _markerService == null)
         return;
 
-      if (!HasEnabledSyntaxDiagnosticUnderlines())
+      if (!SupportsCommandSyntaxDiagnostics(FileType) ||
+          !HasEnabledSyntaxDiagnosticUnderlines())
       {
-        _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
-        _syntaxDiagnostics = Array.Empty<TextSyntaxDiagnostic>();
-        CloseSyntaxDiagnosticToolTip();
+        ClearSyntaxDiagnostics();
         return;
       }
 
@@ -698,7 +704,15 @@ namespace UI.Controls.TextEditorControl
       if (_syntaxDiagnostics.Count == 0)
         CloseSyntaxDiagnosticToolTip();
 
-      foreach (var diagnostic in _syntaxDiagnostics)
+      foreach (var diagnostic in _syntaxDiagnostics
+                 .GroupBy(diagnostic => new
+                 {
+                   diagnostic.StartOffset,
+                   Length = Math.Max(1, diagnostic.Length)
+                 })
+                 .Select(group => group
+                   .OrderBy(diagnostic => diagnostic.Severity == TextSyntaxSeverity.Error ? 0 : 1)
+                   .First()))
       {
         _markerService.AddSquigglyUnderlineMarker(
           diagnostic.StartOffset,
@@ -711,6 +725,16 @@ namespace UI.Controls.TextEditorControl
     private static bool HasEnabledSyntaxDiagnosticUnderlines() =>
       UserInterfaceConfig.GetWarningUnderlineHighlighting()
       || UserInterfaceConfig.GetErrorUnderlineHighlighting();
+
+    private static bool SupportsCommandSyntaxDiagnostics(FileType fileType) =>
+      fileType is FileType.PK or FileType.PKW;
+
+    private void ClearSyntaxDiagnostics()
+    {
+      _markerService?.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+      _syntaxDiagnostics = Array.Empty<TextSyntaxDiagnostic>();
+      CloseSyntaxDiagnosticToolTip();
+    }
 
     private static bool IsSyntaxDiagnosticUnderlineEnabled(TextSyntaxDiagnostic diagnostic) =>
       diagnostic.Severity == TextSyntaxSeverity.Warning

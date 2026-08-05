@@ -436,21 +436,42 @@ TranslationViewModel command
 → ErrorList + left/right AvalonEdit editors
 ```
 
+Интерактивная проверка исходного текста использует отдельный диагностический
+путь, не изменяющий обычную трансляцию:
+
+```text
+TextEditorUI (.pk/.pkw, debounce 120 ms)
+→ EditorSyntaxAnalyzer (заголовки и комментарии)
+→ CommandTranslationManager.ParseForDiagnostics
+→ полный разбор всех блоков без ранней остановки
+→ парсеры в equipment-independent контексте
+→ TranslationDiagnosticClassifier исключает аппаратные diagnostics
+→ CommandIssueSpanResolver сопоставляет diagnostics с точными spans
+→ AvalonEdit squiggly underline (один marker максимальной severity на span)
+```
+
 #### Error flow
 
 Parser/validators add `ErrorItem`/`WarningItem` from
 `Ask.Core/Services/Errors/Translation`. `CriticalTranslationErrorClassifier`
 определяет блокирующие ошибки. UI отображает snapshot через `TranslatorItem` и
-error-list controls.
+error-list controls. Обычная трансляция сохраняет проверки конфигурации и
+возможностей оборудования. Только интерактивная диагностика редактора работает
+без запросов к оборудованию/БД и не показывает связанные с ним ошибки и warnings;
+диагностика, которой нельзя достоверно сопоставить участок исходного текста, не
+создаёт подчёркивание.
 
 #### Files
 
 - `MainWindow/Services/TranslationServices.cs`
 - `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`
+- `Ask.Engine/ControlCommandAnalyser/Diagnostics/`
 - `Ask.Engine/ControlCommandAnalyser/Parser/CommandPostAnalyzer.cs`
 - `Ask.Engine/ControlCommandAnalyser/Parser/`
 - `Ask.Engine/ControlCommandAnalyser/Formatter/`
 - `Ask.Engine/ControlCommandAnalyser/RmTranslation/`
+- `UI/Controls/TextEditorControl/Syntax/`
+- `UI/Controls/TextEditorControl/TextEditorUI.xaml.cs`
 
 ### Execution Engine
 

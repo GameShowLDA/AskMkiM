@@ -7,6 +7,7 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.RmTranslation.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.RmTranslation.Translation;
 using System.Text;
@@ -129,6 +130,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
 
     private RmTranslationOptions CreateTranslationOptions()
     {
+      if (CommandAnalysisContext.IsTextDiagnostics)
+        return RmTranslationOptions.Default;
+
       var modules = relaySwitchModuleInfoProvider().ToArray();
 
       if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())

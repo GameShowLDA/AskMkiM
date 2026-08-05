@@ -44,6 +44,20 @@ namespace UI.Controls.TextEditorControl.Syntax
     public int PointIndex => Text.IndexOf('*');
 
     /// <summary>
+    /// Признак наличия непустого блока точек между первой и последней звёздочками.
+    /// </summary>
+    public bool HasPointContent
+    {
+      get
+      {
+        int start = PointIndex;
+        int end = Text.LastIndexOf('*');
+        return start >= 0 && end > start + 1 &&
+               Text[(start + 1)..end].Any(ch => !char.IsWhiteSpace(ch));
+      }
+    }
+
+    /// <summary>
     /// Часть тела команды до блока точек. Обычно содержит параметры команды.
     /// </summary>
     public string ParameterText => PointIndex >= 0 ? Text[..PointIndex] : Text;
@@ -183,7 +197,10 @@ namespace UI.Controls.TextEditorControl.Syntax
     public bool TryResolvePointRegion(out CommandIssueSpan span)
     {
       if (PointIndex < 0)
-        return TryResolveFirstSegment(out span);
+      {
+        span = default;
+        return false;
+      }
 
       int end = Text.IndexOf('\n', PointIndex);
       int length = (end >= 0 ? end : Text.Length) - PointIndex;

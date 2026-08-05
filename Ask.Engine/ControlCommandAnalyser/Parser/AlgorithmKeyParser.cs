@@ -83,10 +83,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     /// <param name="line">Строка для разбиения.</param>
     /// <returns>Список токенов без пустых значений.</returns>
-    private static List<string> SplitTokens(string line) =>
-  line.Split(new[] { ' ', '\t', ',', ';', '|' },
-             StringSplitOptions.RemoveEmptyEntries)
-      .ToList();
+    private static List<string> SplitTokens(string line)
+    {
+      // Звёздочка открывает или разделяет блоки точек и тем самым завершает
+      // предыдущий параметр. После склейки многострочной команды пробел перед
+      // ней может отсутствовать (например, "ЗС*К1/31-35*"). Добавляем границу
+      // только перед '*', сохраняя сам символ внутри токена блока точек, чтобы
+      // обозначения точек не принимались за алгоритмические ключи.
+      string lineWithPointBoundaries = line.Replace("*", " *");
+
+      return lineWithPointBoundaries
+        .Split(new[] { ' ', '\t', ',', ';', '|' },
+          StringSplitOptions.RemoveEmptyEntries)
+        .ToList();
+    }
 
     /// <summary>
     /// Получает множество разрешённых ключей алгоритма для указанной модели команды.

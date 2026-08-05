@@ -1,72 +1,89 @@
-﻿using System;
+using System;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace UI.Controls.TextEditorControl.Syntax
 {
+  /// <summary>
+  /// Находит все виды комментариев, поддерживаемые командным транслятором.
+  /// </summary>
   public static class SyntaxCommentScanner
   {
     public static IReadOnlyList<TextSpan> Scan(TextDocument document)
     {
       var result = new List<TextSpan>();
-
+      var stack = new Stack<CommentKind>();
       string text = document.Text;
+      int commentStart = -1;
+      int index = 0;
 
-      bool isBlockComment = false;
-      int blockCommentStart = -1;
-
-      int i = 0;
-
-      while (i < text.Length)
+      while (index < text.Length)
       {
-        if (isBlockComment)
+        if (stack.Count == 0)
         {
-          if (text[i] == '}')
+          if (StartsWith(text, index, "//"))
           {
-            int length = i - blockCommentStart + 1;
-            result.Add(new TextSpan(blockCommentStart, length));
-
-            isBlockComment = false;
-            blockCommentStart = -1;
+            var line = document.GetLineByOffset(index);
+            result.Add(new TextSpan(index, line.EndOffset - index));
+            index = line.EndOffset;
+            continue;
           }
 
-          i++;
+          if (StartsWith(text, index, "/*"))
+          {
+            commentStart = index;
+            stack.Push(CommentKind.Slash);
+            index += 2;
+            continue;
+          }
+
+          if (text[index] == '{')
+          {
+            commentStart = index;
+            stack.Push(CommentKind.Brace);
+            index++;
+            continue;
+          }
+
+          index++;
           continue;
         }
 
-        // Однострочный комментарий //
-        if (i + 1 < text.Length && text[i] == '/' && text[i + 1] == '/')
+        if (StartsWith(text, index, "/*"))
         {
-          var line = document.GetLineByOffset(i);
-
-          int start = i;
-          int end = line.EndOffset;
-
-          result.Add(new TextSpan(start, end - start));
-
-          i = end;
+          stack.Push(CommentKind.Slash);
+          index += 2;
           continue;
         }
 
-        // Многострочный комментарий { ... }
-        if (text[i] == '{')
+        if (text[index] == '{')
         {
-          isBlockComment = true;
-          blockCommentStart = i;
-
-          i++;
+          stack.Push(CommentKind.Brace);
+          index++;
           continue;
         }
 
-        i++;
+        if (StartsWith(text, index, "*/") && stack.Peek() == CommentKind.Slash)
+        {
+          stack.Pop();
+          index += 2;
+          AddCompletedSpan(result, commentStart, index, stack);
+          continue;
+        }
+
+        if (text[index] == '}' && stack.Peek() == CommentKind.Brace)
+        {
+          stack.Pop();
+          index++;
+          AddCompletedSpan(result, commentStart, index, stack);
+          continue;
+        }
+
+        index++;
       }
 
-      // Если открыли {, но не закрыли до конца файла,
-      // считаем всё до конца файла комментарием.
-      if (isBlockComment && blockCommentStart >= 0)
+      if (stack.Count > 0 && commentStart >= 0)
       {
-        result.Add(new TextSpan(
-          blockCommentStart,
-          text.Length - blockCommentStart));
+        result.Add(new TextSpan(commentStart, text.Length - commentStart));
       }
 
       return result;
@@ -81,28 +98,49 @@ namespace UI.Controls.TextEditorControl.Syntax
         return lineText;
 
       char[] chars = lineText.ToCharArray();
-
-      int lineStart = lineOffset;
       int lineEnd = lineOffset + lineText.Length;
 
       foreach (var span in commentSpans)
       {
-        int overlapStart = Math.Max(lineStart, span.StartOffset);
+        int overlapStart = Math.Max(lineOffset, span.StartOffset);
         int overlapEnd = Math.Min(lineEnd, span.EndOffset);
 
         if (overlapStart >= overlapEnd)
           continue;
 
-        int startIndex = overlapStart - lineOffset;
-        int endIndex = overlapEnd - lineOffset;
-
-        for (int i = startIndex; i < endIndex; i++)
+        for (int index = overlapStart - lineOffset;
+             index < overlapEnd - lineOffset;
+             index++)
         {
-          chars[i] = ' ';
+          chars[index] = ' ';
         }
       }
 
       return new string(chars);
+    }
+
+    private static void AddCompletedSpan(
+      ICollection<TextSpan> result,
+      int start,
+      int end,
+      IReadOnlyCollection<CommentKind> stack)
+    {
+      if (stack.Count == 0 && start >= 0 && end > start)
+      {
+        result.Add(new TextSpan(start, end - start));
+      }
+    }
+
+    private static bool StartsWith(string text, int index, string value)
+    {
+      return index + value.Length <= text.Length &&
+             text.AsSpan(index, value.Length).SequenceEqual(value);
+    }
+
+    private enum CommentKind
+    {
+      Brace,
+      Slash
     }
   }
 }
