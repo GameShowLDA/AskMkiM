@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -20,9 +20,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       SetActiveLine(context, command);
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
-      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       foreach (var item in command.BusPointsDictionary.Keys)
       {

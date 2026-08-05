@@ -80,7 +80,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       ArgumentNullException.ThrowIfNull(meter);
 
       cancellationToken.ThrowIfCancellationRequested();
-      await ExecutionMessages.ShowMultimeterSetupAsync(userMessageService);
+      await ExecutionMessages.PublishMultimeterSetupAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await ShowActionHeaderAsync("Инициализация коммутационного устройства", userMessageService);

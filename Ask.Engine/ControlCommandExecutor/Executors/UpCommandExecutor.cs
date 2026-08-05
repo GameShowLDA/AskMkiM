@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -19,9 +19,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       SetActiveLine(context, command);
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
-      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       if (CommandExecutionState.LastRejectFlag)
       {

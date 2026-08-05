@@ -141,8 +141,8 @@ Ask.Protocol.Messages
 `Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека.
 `EntryPoints/EquipmentMessages` является публичным фасадом, внутренний
 `Builders/EquipmentMessageBuilder` формирует результаты операций, а
-`Show/EquipmentMessagePublisher` записывает их в device log и передаёт `IMessageOutputService`.
-Фасад сохраняет метаданные исходного места вызова, а publisher передаёт в экранный протокол
+`Show/EquipmentMessagePublisher` задаёт политику device log и делегирует вывод общему
+`Show/MessagePublisher`. Фасад сохраняет метаданные исходного места вызова, а общий publisher передаёт в экранный протокол
 собственный источник и исходный метод в формате `PublishAsync (вызван из File.cs → Method, строка N)`.
 `Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
 отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
@@ -188,9 +188,11 @@ AskMkiM/
 │  ├─ Services/FileFormats/    PK/OPK/APK/APKW and format helpers
 │  └─ Services/Protocols/      history protocol persistence
 ├─ Ask.Protocol.Messages/      унифицированное формирование, логирование и отображение сообщений
-│  ├─ EntryPoints/             публичные фасады групп сообщений и контейнер `AlgorithmExecutionResult`
+│  ├─ EntryPoints/             публичные фасады групп сообщений
 │  ├─ Builders/                внутреннее формирование `ShowMessageModel`
-│  └─ Show/                    внутреннее логирование и передача в экранный протокол
+│  ├─ Models/                  контракты накопленных результатов и пределов измерений
+│  ├─ Extensions/              интеграция результатов сообщений с `ProtocolModel`
+│  └─ Show/                    категорийная политика и общий вывод в экранный протокол
 ├─ Ask.Device.Application/     adapters and application composition
 ├─ Ask.Device.Runtime/         device classes and raw function managers
 ├─ Ask.Device.Emulator/        stateful chassis and МКР protocol emulation for Idle mode
@@ -639,6 +641,11 @@ executor throws
 - `ParallelTestRunner` публикует этап общего сброса через `ExecutionMessages`, а
   `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
   `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
+- `MeasurementMessages` формирует тексты брака узлового и группового методов через
+  `MeasurementFailureMessageBuilder`; `MeasurementLimitKind`, старые
+  `GroupMethodProtocolBuilder` и `NodeMethodProtocolBuilder` удалены из `Ask.Engine`;
+- исполнители команд передают `SourceLines` в `CommandMessages.FormatSourceLines`;
+  `CommandExecutorBase` больше не содержит форматирование текста протокола;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
 `ПИ` вызывает `СИ` как вложенный executor до и после основной ACW/DCW-проверки.
@@ -1633,18 +1640,21 @@ ErrorItem → translator/runner ErrorList
 | `CommandMessages` | static facade | Ask.Protocol.Messages | проверяет настройки видимости этапов, формирует и выводит начало программы контроля, сообщения команд, точек останова, блоков проверки, цепей, точек, подключения точек, направления диода и разрядов; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
 | `CommandMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит перенесённую из `ExecutorMessageBuilder` логику начала программы контроля, сообщений команд, точек останова и блоков проверки | [Protocols](#protocols-and-file-formats) |
 | `CommandMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сформированные сообщения команд в `IMessageOutputService` с настройками блока, паузы, пошагового режима и метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `MessagePublisher` | internal static publisher | Ask.Protocol.Messages | единообразно добавляет метаданные исходного вызова, при необходимости пишет сообщение в device log и передаёт его `IMessageOutputService`; категорийные publishers задают только свою политику | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |
+| `MeasurementLimitKind` | enum | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, задающий минимальный или максимальный предел при формировании описания брака | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает опубликованные измерения в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности метрологического режима | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
-| `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | хранит накопленные ошибки и информационные `ShowMessageModel` алгоритма, не раскрывая эту зависимость внутри Ask.Engine | [Execution Engine](#execution-engine) |
-| `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | добавляет единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
+| `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
+| `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
@@ -1654,7 +1664,6 @@ ErrorItem → translator/runner ErrorList
 | `RangeMessages` | static facade | Ask.Protocol.Messages | принимает `MeasurementRange` и типизированную единицу, публикует допустимый диапазон независимо от вызывающей подсистемы | [Protocols](#protocols-and-file-formats) |
 | `RangeMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует единый текст допустимого диапазона значений | [Protocols](#protocols-and-file-formats) |
 | `RangeMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения о диапазонах в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
-| `MetrologyMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие специфичные сообщения метрологических режимов; методов пока нет | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
 | `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |

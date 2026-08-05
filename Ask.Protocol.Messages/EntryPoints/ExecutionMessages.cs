@@ -16,7 +16,7 @@ public static class ExecutionMessages
   /// <summary>
   /// Выводит сообщение о подготовке устройств, если включён вывод параметров выполнения.
   /// </summary>
-  public static Task ShowDevicesPreparationAsync(
+  public static Task PublishDevicesPreparationAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -35,7 +35,7 @@ public static class ExecutionMessages
   /// <summary>
   /// Выводит сообщение о настройке мультиметра, если включён вывод параметров выполнения.
   /// </summary>
-  public static Task ShowMultimeterSetupAsync(
+  public static Task PublishMultimeterSetupAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -54,7 +54,7 @@ public static class ExecutionMessages
   /// <summary>
   /// Выводит сообщение о настройке пробойной установки, если включён вывод параметров выполнения.
   /// </summary>
-  public static Task ShowBreakdownTesterSetupAsync(
+  public static Task PublishBreakdownTesterSetupAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -259,7 +259,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowDevicesInitializationAsync(
+  public static Task PublishDevicesInitializationAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -287,7 +287,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowMeasurementDeviceSetupAsync(
+  public static Task PublishMeasurementDeviceSetupAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -315,7 +315,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowBusConnectionAsync(
+  public static Task PublishBusConnectionAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -343,7 +343,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowPointConnectionAsync(
+  public static Task PublishPointConnectionAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -372,7 +372,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowPointConnectionAsync(
+  public static Task PublishPointConnectionAsync(
     PointModel point,
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
@@ -402,7 +402,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowPointDisconnectionAsync(
+  public static Task PublishPointDisconnectionAsync(
     PointModel point,
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
@@ -431,7 +431,7 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowPointsDisconnectionAsync(
+  public static Task PublishPointsDisconnectionAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -842,12 +842,12 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowEquipmentInitializationAsync(
+  public static Task PublishEquipmentInitializationStatusAsync(
     IMessageOutputService? outputService,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
     => ExecutionMessagePublisher.PublishAsync(
-      ExecutionMessageBuilder.BuildEquipmentInitializationStatusMessage(),
+      ExecutionMessageBuilder.BuildEquipmentInitializationMessage(),
       outputService, callerName, callerFile, callerLine);
 }

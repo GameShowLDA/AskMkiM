@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}/{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       message = message.Replace("ПИ", "ПИ/ПИ");
 
       SetActiveLine(context, command);
@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
-      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
@@ -143,7 +143,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      await ExecutionMessages.ShowBreakdownTesterSetupAsync(userMessageService);
+      await ExecutionMessages.PublishBreakdownTesterSetupAsync(userMessageService);
 
       if (voltageType == VoltageEnum.Type.ACW)
       {

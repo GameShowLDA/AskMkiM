@@ -41,7 +41,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         return;
       }
 
-      await messageService.ShowMessageAsync(EquipmentMessages.BuildDeviceHealthCheckTitle(device));
+      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(device, messageService);
       await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
 
       if (!await SelfTestConnectionHelper.SettingsMeter(meter, messageService))

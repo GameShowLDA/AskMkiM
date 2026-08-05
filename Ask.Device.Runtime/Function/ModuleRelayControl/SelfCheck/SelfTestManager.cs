@@ -38,7 +38,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
-      await userMessageService.ShowMessageAsync(EquipmentMessages.BuildDeviceHealthCheckTitle(_moduleRelay));
+      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(_moduleRelay, userMessageService);
 
       switch (typeConnector)
       {

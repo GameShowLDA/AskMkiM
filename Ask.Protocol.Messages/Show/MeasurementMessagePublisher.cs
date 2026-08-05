@@ -1,8 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System.IO;
-using System.Runtime.CompilerServices;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Protocol.Messages.Show;
 
@@ -22,7 +19,7 @@ internal static class MeasurementMessagePublisher
   /// <param name="isBlockStart">Признак начала логического блока.</param>
   /// <param name="skipPause">Признак пропуска автоматической паузы перед выводом.</param>
   /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
-  internal static async Task PublishAsync(
+  internal static Task PublishAsync(
     ShowMessageModel message,
     IMessageOutputService? outputService,
     string callerName,
@@ -31,63 +28,14 @@ internal static class MeasurementMessagePublisher
     bool isBlockStart = false,
     bool skipPause = true)
   {
-    ArgumentNullException.ThrowIfNull(message);
-
-    if (message.Status == ShowMessageModel.MessageType.Error)
-    {
-      LogError(message.ToString(), isDeviceLog: true);
-    }
-    else
-    {
-      LogInformation(message.ToString(), isDeviceLog: true);
-    }
-
-    if (outputService != null)
-    {
-      await ShowAsync(
-        message,
-        outputService,
-        callerName,
-        callerFile,
-        callerLine,
-        isBlockStart,
-        skipPause);
-    }
-  }
-
-  /// <summary>
-  /// Передаёт сообщение в экранный протокол с указанием publisher и исходного места вызова.
-  /// </summary>
-  /// <param name="message">Сообщение об измерении.</param>
-  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
-  /// <param name="originCallerName">Имя исходного метода.</param>
-  /// <param name="originCallerFile">Путь к исходному файлу.</param>
-  /// <param name="originCallerLine">Номер исходной строки.</param>
-  /// <param name="isBlockStart">Признак начала логического блока.</param>
-  /// <param name="skipPause">Признак пропуска автоматической паузы перед выводом.</param>
-  /// <param name="publisherFile">Путь к файлу publisher.</param>
-  /// <param name="publisherLine">Номер строки вызова внутри publisher.</param>
-  /// <returns>Задача, представляющая операцию вывода сообщения.</returns>
-  private static Task ShowAsync(
-    ShowMessageModel message,
-    IMessageOutputService outputService,
-    string originCallerName,
-    string originCallerFile,
-    int originCallerLine,
-    bool isBlockStart,
-    bool skipPause,
-    [CallerFilePath] string publisherFile = "",
-    [CallerLineNumber] int publisherLine = 0)
-  {
-    string origin = $"{Path.GetFileName(originCallerFile)} → {originCallerName}, строка {originCallerLine}";
-    string displayCallerName = $"{nameof(PublishAsync)} (вызван из {origin})";
-
-    return outputService.ShowMessageAsync(
+    return MessagePublisher.PublishAsync(
       message,
-      IsBlockStart: isBlockStart,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: isBlockStart,
       skipPause: skipPause,
-      callerName: displayCallerName,
-      callerFile: publisherFile,
-      callerLine: publisherLine);
+      logToDeviceJournal: true);
   }
 }

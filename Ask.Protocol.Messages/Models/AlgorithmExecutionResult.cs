@@ -1,6 +1,6 @@
 using Ask.Core.Shared.DTO.Protocol;
 
-namespace Ask.Protocol.Messages.EntryPoints;
+namespace Ask.Protocol.Messages.Models;
 
 /// <summary>
 /// Содержит накопленные сообщения об ошибках и информационные сообщения алгоритма проверки.

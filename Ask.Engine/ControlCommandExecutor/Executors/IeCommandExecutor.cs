@@ -23,11 +23,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<IeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
       SetActiveLine(context, command);
 
-      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);

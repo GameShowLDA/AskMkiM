@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -48,7 +48,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return messages;
       }
 
-      await ShowCheckBlockHeaderAsync(context);
+      await PublishCheckBlockHeaderAsync(context);
 
       var newGroups = await BuildCheckedGroupsAsync(sourceGroups, context, preMeasurementDelegate, messages);
       context.NewScheme = new SchemeModel(newGroups);
@@ -70,13 +70,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <summary>
     /// Показывает заголовок общего блока проверки в зависимости от типа команды.
     /// </summary>
-    private static Task ShowCheckBlockHeaderAsync(ConnectedPointContext context)
+    private static Task PublishCheckBlockHeaderAsync(ConnectedPointContext context)
     {
       var algorithm = context.TypeCommand == MeasurementTypeCommand.KC
         ? ControlCheckAlgorithm.ResistanceRelativeToFirstPoint
         : ControlCheckAlgorithm.MessageRelativeToFirstPoint;
 
-      return CommandMessages.ShowCheckBlockHeaderAsync(
+      return CommandMessages.PublishCheckBlockHeaderAsync(
         context.MessageService,
         algorithm,
         context.IsPolarityReversed);
@@ -195,7 +195,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await context.MessageService.AppendEmptyLineAsync();
       }
 
-      await CommandMessages.ShowChainCheckBlockAsync(context.MessageService, chainDisplay);
+      await CommandMessages.PublishChainCheckBlockAsync(context.MessageService, chainDisplay);
     }
 
     /// <summary>
@@ -287,7 +287,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return Task.CompletedTask;
       }
 
-      return CommandMessages.ShowDiodeDirectionAsync(context.MessageService, isDirectDirection);
+      return CommandMessages.PublishDiodeDirectionAsync(context.MessageService, isDirectDirection);
     }
 
     /// <summary>
@@ -464,7 +464,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       bool revers,
       PreMeasurementDelegate preMeasurementDelegate)
     {
-      await CommandMessages.ShowPointsConnectionAsync(messageService, indentLevel);
+      await CommandMessages.PublishPointsConnectionAsync(messageService, indentLevel);
       await DeviceManager.RelayModule.PointManager.ConnectPointToBusBAsync(basePoint, messageService, revers);
 
       if (preMeasurementDelegate != null)
@@ -531,7 +531,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </summary>
     private static async Task ShowPointCheckHeaderAsync(PointModel basePoint, PointModel point, IUserInteractionService messageService)
     {
-      await CommandMessages.ShowPointsCheckHeaderAsync(
+      await CommandMessages.PublishPointsCheckHeaderAsync(
         messageService,
         basePoint,
         point,

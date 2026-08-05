@@ -26,11 +26,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<PrCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
       SetActiveLine(context, command);
 
-      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
@@ -141,7 +141,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = meter.NumberChassis;
       int number = meter.Number;
 
-      await ExecutionMessages.ShowMultimeterSetupAsync(userMessageService);
+      await ExecutionMessages.PublishMultimeterSetupAsync(userMessageService);
 
       if (continuityManager)
       {

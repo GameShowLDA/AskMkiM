@@ -1,6 +1,7 @@
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Protocol.Messages.Models;
 
-namespace Ask.Protocol.Messages.EntryPoints;
+namespace Ask.Protocol.Messages.Extensions;
 
 /// <summary>
 /// Добавляет результаты выполнения алгоритмов в модель протокола.

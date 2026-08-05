@@ -24,7 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       command.ProtocolModel = new ProtocolModel();
       command.ProtocolModel.ProgramPath = command.ObjectName;
 
-      await CommandMessages.ShowControlProgramStartAsync(context.Console, command.ObjectName, command.ObjectCode);
+      await CommandMessages.PublishControlProgramStartAsync(context.Console, command.ObjectName, command.ObjectCode);
     }
   }
 }

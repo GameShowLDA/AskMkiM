@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -106,7 +106,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     {
       string bitString = GetBitString();
       await _protocolUI.AppendEmptyLineAsync();
-      await CommandMessages.ShowDischargeCheckBlockAsync(
+      await CommandMessages.PublishDischargeCheckBlockAsync(
         _protocolUI,
         step + 1,
         bitString);

@@ -202,7 +202,7 @@ namespace Ask.Engine.Tests.NodeMethod
     /// <returns>Задача, представляющая операцию подключения.</returns>
     public virtual async Task<(bool Connect, string Message)> ConnectDevicesAsync(IUserInteractionService messageService)
     {
-      await ExecutionMessages.ShowEquipmentInitializationAsync(messageService);
+      await ExecutionMessages.PublishEquipmentInitializationStatusAsync(messageService);
 
       foreach (var device in Devices)
       {

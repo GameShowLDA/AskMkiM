@@ -66,7 +66,7 @@ internal static class CommandJumpService
     BaseCommandModel targetCommand,
     IUserInteractionService interactionService)
   {
-    await CommandMessages.ShowCommandJumpAsync(
+    await CommandMessages.PublishCommandJumpAsync(
       interactionService,
       targetCommand.CommandNumber,
       targetCommand.Mnemonic,

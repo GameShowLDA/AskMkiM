@@ -9,7 +9,6 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
-using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.PI
@@ -102,7 +101,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
           var dischargeIndex = CurrentDischargeNumber - 1;
           var bitString = GetBitString();
           string? executionErrorMessage = !isSuccessful
-            ? GroupMethodProtocolBuilder.BuildFailure(
+            ? MeasurementMessages.BuildGroupFailure(
               dischargeIndex,
               bitString,
               dataModel.Param,

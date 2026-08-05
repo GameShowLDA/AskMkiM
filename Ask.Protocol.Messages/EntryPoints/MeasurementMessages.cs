@@ -1,9 +1,11 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Protocol.Messages.Builders;
+using Ask.Protocol.Messages.Models;
 using Ask.Protocol.Messages.Show;
 using System.Runtime.CompilerServices;
 
@@ -14,6 +16,61 @@ namespace Ask.Protocol.Messages.EntryPoints;
 /// </summary>
 public static class MeasurementMessages
 {
+  /// <summary>
+  /// Формирует описание брака для разряда группового метода.
+  /// </summary>
+  /// <param name="dischargeIndex">Индекс проверяемого разряда.</param>
+  /// <param name="bitString">Двоичная маска проверяемого разряда.</param>
+  /// <param name="limit">Допустимый предел измеряемой величины.</param>
+  /// <param name="result">Измеренное значение.</param>
+  /// <param name="unit">Единица измерения.</param>
+  /// <param name="limitKind">Положение допустимого предела относительно измеряемого значения.</param>
+  /// <returns>Описание результата проверки для итогового заключения.</returns>
+  public static string BuildGroupFailure(
+    int dischargeIndex,
+    string bitString,
+    double limit,
+    double result,
+    Enum unit,
+    MeasurementLimitKind limitKind)
+    => MeasurementFailureMessageBuilder.BuildGroupFailure(
+      dischargeIndex, bitString, limit, result, unit, limitKind);
+
+  /// <summary>
+  /// Формирует описание брака для точки узлового метода.
+  /// </summary>
+  /// <param name="point">Проверяемая точка.</param>
+  /// <param name="limit">Допустимый предел измеряемой величины.</param>
+  /// <param name="result">Измеренное значение.</param>
+  /// <param name="unit">Единица измерения.</param>
+  /// <param name="limitKind">Положение допустимого предела относительно измеряемого значения.</param>
+  /// <returns>Описание результата проверки для итогового заключения.</returns>
+  public static string BuildNodeFailure(
+    PointModel point,
+    double limit,
+    double result,
+    Enum unit,
+    MeasurementLimitKind limitKind)
+    => MeasurementFailureMessageBuilder.BuildNodeFailure(
+      point, limit, result, unit, limitKind);
+
+  /// <summary>
+  /// Формирует описание брака точки при проверке допустимого диапазона.
+  /// </summary>
+  /// <param name="point">Проверяемая точка.</param>
+  /// <param name="lowerLimit">Нижняя граница допустимого диапазона.</param>
+  /// <param name="upperLimit">Верхняя граница допустимого диапазона.</param>
+  /// <param name="result">Измеренное значение.</param>
+  /// <param name="unit">Единица измерения.</param>
+  /// <returns>Описание результата проверки для итогового заключения.</returns>
+  public static string BuildNodeRangeFailure(
+    PointModel point,
+    double lowerLimit,
+    double upperLimit,
+    double result,
+    Enum unit)
+    => MeasurementFailureMessageBuilder.BuildNodeRangeFailure(
+      point, lowerLimit, upperLimit, result, unit);
   /// <summary>
   /// Выводит ранее сформированное сообщение с результатом измерения.
   /// </summary>

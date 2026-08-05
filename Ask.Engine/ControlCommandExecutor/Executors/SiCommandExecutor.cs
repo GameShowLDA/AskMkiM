@@ -58,9 +58,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         message = nameCommand;
       }
 
-      message += BuildSourceLinesMessage(command);
+      message += CommandMessages.FormatSourceLines(command.SourceLines);
       var total = Stopwatch.StartNew();
-      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
@@ -121,7 +121,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      await ExecutionMessages.ShowBreakdownTesterSetupAsync(userMessageService);
+      await ExecutionMessages.PublishBreakdownTesterSetupAsync(userMessageService);
 
       await breakDown.IrManger.Mode.SetModeAsync(userMessageService);
       await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService);

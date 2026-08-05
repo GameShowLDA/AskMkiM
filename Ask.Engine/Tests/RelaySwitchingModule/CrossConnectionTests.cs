@@ -464,7 +464,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await RelayModuleHelper.BusConnectAsync(switchingBus1, verificat_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus2, verificat_module, _userInteractionService, cancellationToken);
 
-      await CommandMessages.ShowPointsConnectionAsync(
+      await CommandMessages.PublishPointsConnectionAsync(
         _userInteractionService,
         indentLevel: 0,
         isBlockStart: false);

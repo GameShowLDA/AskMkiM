@@ -14,9 +14,23 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class CommandMessages
 {
   /// <summary>
+  /// Форматирует исходные строки команды для экранного протокола.
+  /// </summary>
+  /// <param name="sourceLines">Исходные строки команды программы контроля.</param>
+  /// <returns>Строки команды с протокольными отступами или пустая строка.</returns>
+  public static string FormatSourceLines(IEnumerable<string> sourceLines)
+  {
+    ArgumentNullException.ThrowIfNull(sourceLines);
+    var lines = sourceLines.Where(line => !string.IsNullOrWhiteSpace(line)).ToList();
+    return lines.Count == 0
+      ? string.Empty
+      : "  " + string.Join("\r\n  ", lines);
+  }
+
+  /// <summary>
   /// Выводит заголовок выполняемой команды программы контроля.
   /// </summary>
-  public static Task ShowCommandExecutionAsync(
+  public static Task PublishCommandExecutionAsync(
     IMessageOutputService outputService,
     string commandName,
     string? message = null,
@@ -33,7 +47,7 @@ public static class CommandMessages
   /// <summary>
   /// Выводит заголовок блока проверки, если включён вывод этапов проверки в протокол.
   /// </summary>
-  public static Task ShowCheckBlockHeaderAsync(
+  public static Task PublishCheckBlockHeaderAsync(
     IMessageOutputService outputService,
     ControlCheckAlgorithm algorithm,
     bool inversion,
@@ -54,7 +68,7 @@ public static class CommandMessages
   /// <summary>
   /// Выводит заголовок проверки цепи, если включён вывод этапов проверки в протокол.
   /// </summary>
-  public static Task ShowChainCheckBlockAsync(
+  public static Task PublishChainCheckBlockAsync(
     IMessageOutputService outputService,
     string chains,
     bool isBlockStart = true,
@@ -75,7 +89,7 @@ public static class CommandMessages
   /// <summary>
   /// Выводит заголовок проверки точек, если включён вывод этапов проверки в протокол.
   /// </summary>
-  public static Task ShowPointsCheckHeaderAsync(
+  public static Task PublishPointsCheckHeaderAsync(
     IMessageOutputService outputService,
     PointModel firstPoint,
     PointModel secondPoint,
@@ -98,7 +112,7 @@ public static class CommandMessages
   /// <summary>
   /// Выводит заголовок проверки разряда, если включён вывод этапов проверки в протокол.
   /// </summary>
-  public static Task ShowDischargeCheckBlockAsync(
+  public static Task PublishDischargeCheckBlockAsync(
     IMessageOutputService outputService,
     int dischargeNumber,
     string dischargeView,
@@ -119,7 +133,7 @@ public static class CommandMessages
   /// <summary>
   /// Выводит сообщение об ошибке проверки разряда.
   /// </summary>
-  public static Task ShowDischargeCheckErrorAsync(
+  public static Task PublishDischargeCheckErrorAsync(
     IMessageOutputService outputService,
     int dischargeNumber,
     string dischargeView,
@@ -141,7 +155,7 @@ public static class CommandMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowDiodeDirectionAsync(
+  public static Task PublishDiodeDirectionAsync(
     IMessageOutputService outputService,
     bool isDirectDirection,
     [CallerMemberName] string callerName = "",
@@ -162,7 +176,7 @@ public static class CommandMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowPointsConnectionAsync(
+  public static Task PublishPointsConnectionAsync(
     IMessageOutputService outputService,
     int indentLevel,
     bool isBlockStart = true,
@@ -186,7 +200,7 @@ public static class CommandMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowBreakpointHitAsync(
+  public static Task PublishBreakpointHitAsync(
     IMessageOutputService outputService,
     string commandNumber,
     string mnemonic,
@@ -221,7 +235,7 @@ public static class CommandMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowCommandJumpAsync(
+  public static Task PublishCommandJumpAsync(
     IMessageOutputService outputService,
     string commandNumber,
     string mnemonic,
@@ -248,7 +262,7 @@ public static class CommandMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
-  public static Task ShowControlProgramStartAsync(
+  public static Task PublishControlProgramStartAsync(
     IMessageOutputService outputService,
     string objectName,
     string objectCode,

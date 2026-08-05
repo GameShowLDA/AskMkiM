@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -29,7 +29,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       if (!command.IsBreakpointEnabled)
         return command;
 
-      await CommandMessages.ShowBreakpointHitAsync(
+      await CommandMessages.PublishBreakpointHitAsync(
         userInteractionService,
         command.CommandNumber,
         command.Mnemonic,

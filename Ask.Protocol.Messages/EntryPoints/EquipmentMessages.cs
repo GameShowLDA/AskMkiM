@@ -14,16 +14,31 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class EquipmentMessages
 {
   /// <summary>
-  /// Формирует заголовок проверки работоспособности устройства.
+  /// Публикует заголовок проверки работоспособности устройства.
   /// </summary>
   /// <param name="device">Проверяемое устройство.</param>
-  /// <returns>Заголовок проверки работоспособности устройства.</returns>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
   /// <exception cref="ArgumentNullException">
   /// Выбрасывается, если <paramref name="device"/> равен <see langword="null"/>.
   /// </exception>
-  public static ShowMessageModel BuildDeviceHealthCheckTitle(IAttachableDevice device)
+  public static Task PublishDeviceHealthCheckTitleAsync(
+    IAttachableDevice device,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
   {
-    return EquipmentMessageBuilder.BuildHealthCheckTitle(device);
+    return EquipmentMessagePublisher.PublishAsync(
+      EquipmentMessageBuilder.BuildHealthCheckTitle(device),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      logToDeviceJournal: false);
   }
 
   /// <summary>

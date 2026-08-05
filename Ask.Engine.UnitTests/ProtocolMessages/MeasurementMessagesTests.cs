@@ -1,6 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Protocol.Messages.EntryPoints;
+using Ask.Protocol.Messages.Models;
 
 namespace Ask.Engine.UnitTests.ProtocolMessages;
 

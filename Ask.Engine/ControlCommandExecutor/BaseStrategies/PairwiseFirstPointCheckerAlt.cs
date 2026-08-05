@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -34,7 +34,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return messages;
       }
 
-      await CommandMessages.ShowCheckBlockHeaderAsync(
+      await CommandMessages.PublishCheckBlockHeaderAsync(
         context.MessageService,
         ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint,
         context.IsPolarityReversed);
@@ -53,7 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
           str = str.Remove(str.Length - 1);
 
-          await CommandMessages.ShowChainCheckBlockAsync(context.MessageService, str, isBlockStart: false);
+          await CommandMessages.PublishChainCheckBlockAsync(context.MessageService, str, isBlockStart: false);
 
           var _basePoint = chains.PointModels.First();
           await ConnectToBusAAndBAsync(context.MessageService, _basePoint);

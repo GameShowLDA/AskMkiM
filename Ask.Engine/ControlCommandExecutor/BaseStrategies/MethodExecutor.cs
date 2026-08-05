@@ -32,7 +32,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         return executionResult;
       }
 
-      await CommandMessages.ShowCheckBlockHeaderAsync(
+      await CommandMessages.PublishCheckBlockHeaderAsync(
         methodExecutionContext.MessageService,
         ControlCheckAlgorithm.Group,
         methodExecutionContext.IsPolarityReversed);
@@ -45,7 +45,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         string stepStr = GetBitString(step);
         int dischargeNumber = GetDischargeNumber(step);
 
-        await CommandMessages.ShowDischargeCheckBlockAsync(
+        await CommandMessages.PublishDischargeCheckBlockAsync(
           methodExecutionContext.MessageService,
           dischargeNumber,
           stepStr);
@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
-          await CommandMessages.ShowDischargeCheckErrorAsync(
+          await CommandMessages.PublishDischargeCheckErrorAsync(
             methodExecutionContext.MessageService,
             dischargeNumber,
             stepStr);

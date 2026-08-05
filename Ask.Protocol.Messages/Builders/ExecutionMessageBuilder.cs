@@ -180,6 +180,4 @@ internal static class ExecutionMessageBuilder
       message: "Подключение точек к шинам",
       type: ShowMessageModel.MessageType.Info);
 
-  internal static ShowMessageModel BuildEquipmentInitializationStatusMessage()
-    => new("Инициализация оборудования", type: ShowMessageModel.MessageType.Info);
 }

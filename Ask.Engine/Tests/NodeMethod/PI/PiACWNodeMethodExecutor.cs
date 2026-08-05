@@ -8,7 +8,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
-using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.PI
@@ -105,7 +104,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
               bool isSuccessful = answer.value < dataModel.Param;
 
               string? executionErrorMessage = !isSuccessful
-                ? NodeMethodProtocolBuilder.BuildFailure(
+                ? MeasurementMessages.BuildNodeFailure(
                   connectResult.PointModel,
                   dataModel.Param,
                   answer.value,

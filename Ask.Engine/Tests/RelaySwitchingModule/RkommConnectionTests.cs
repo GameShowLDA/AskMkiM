@@ -209,7 +209,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         };
         string? executionErrorMessage = success
           ? null
-          : NodeMethodProtocolBuilder.BuildRangeFailure(
+          : MeasurementMessages.BuildNodeRangeFailure(
             point,
             0d,
             expectedResistance,

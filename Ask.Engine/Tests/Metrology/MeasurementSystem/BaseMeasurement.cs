@@ -134,7 +134,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         throw MetrologyValidationErrors.DeviceCollectFailed(ex);
       }
 
-      await ExecutionMessages.ShowDevicesInitializationAsync(messageService);
+      await ExecutionMessages.PublishDevicesInitializationAsync(messageService);
 
       try
       {
@@ -208,7 +208,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public virtual async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
     {
-      await ExecutionMessages.ShowMeasurementDeviceSetupAsync(messageService);
+      await ExecutionMessages.PublishMeasurementDeviceSetupAsync(messageService);
     }
 
     /// <summary>
@@ -519,7 +519,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="modeDevice">Тип метрологического устройства.</param>
     private async Task ConnectBusesAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice, IUserInteractionService protocolUI)
     {
-      await ExecutionMessages.ShowBusConnectionAsync(protocolUI);
+      await ExecutionMessages.PublishBusConnectionAsync(protocolUI);
 
       foreach (var relayModule in relayModules)
       {
@@ -551,7 +551,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="point2">Вторая точка коммутации.</param>
     public virtual async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, IUserInteractionService protocolUI)
     {
-      await ExecutionMessages.ShowPointConnectionAsync(protocolUI);
+      await ExecutionMessages.PublishPointConnectionAsync(protocolUI);
 
       await relayModules[0].PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, protocolUI);
       await relayModules.Last().PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, protocolUI);

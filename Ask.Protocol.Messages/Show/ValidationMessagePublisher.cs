@@ -1,7 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace Ask.Protocol.Messages.Show;
 
@@ -32,23 +30,16 @@ internal static class ValidationMessagePublisher
     int callerLine,
     bool isBlockStart = false,
     bool skipStepModeCheck = false,
-    bool skipPause = false,
-    [CallerFilePath] string publisherFile = "",
-    [CallerLineNumber] int publisherLine = 0)
+    bool skipPause = false)
   {
-    ArgumentNullException.ThrowIfNull(message);
-    ArgumentNullException.ThrowIfNull(outputService);
-
-    string origin = $"{Path.GetFileName(callerFile)} → {callerName}, строка {callerLine}";
-    string displayCallerName = $"{nameof(PublishAsync)} (вызван из {origin})";
-
-    return outputService.ShowMessageAsync(
+    return MessagePublisher.PublishAsync(
       message,
-      IsBlockStart: isBlockStart,
-      SkipStepModeCheck: skipStepModeCheck,
-      skipPause: skipPause,
-      callerName: displayCallerName,
-      callerFile: publisherFile,
-      callerLine: publisherLine);
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart,
+      skipStepModeCheck,
+      skipPause);
   }
 }

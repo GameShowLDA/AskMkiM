@@ -33,12 +33,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       _basePoint = groupChains.ChainModels.FirstOrDefault();
       var messageService = context.MessageService;
 
-      await CommandMessages.ShowCheckBlockHeaderAsync(
+      await CommandMessages.PublishCheckBlockHeaderAsync(
         messageService,
         ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint,
         context.IsPolarityReversed);
 
-      await CommandMessages.ShowPointsConnectionAsync(messageService, indentLevel: 0);
+      await CommandMessages.PublishPointsConnectionAsync(messageService, indentLevel: 0);
 
       await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
       groupChains.ChainModels.Remove(_basePoint);
@@ -58,7 +58,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         str = str.Remove(str.Length - 1);
         str += "*";
 
-        await CommandMessages.ShowChainCheckBlockAsync(messageService, str);
+        await CommandMessages.PublishChainCheckBlockAsync(messageService, str);
 
         await DeviceManager.RelayModule.ChainManager.ConnectChainToBusAAsync(chain, messageService, context.IsPolarityReversed);
         chainConnectedToBusA = true;

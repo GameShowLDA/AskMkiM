@@ -1,8 +1,5 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System.IO;
-using System.Runtime.CompilerServices;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Protocol.Messages.Show;
 
@@ -20,37 +17,20 @@ internal static class RangeMessagePublisher
   /// <param name="callerFile">Путь к исходному файлу, запросившему публикацию.</param>
   /// <param name="callerLine">Номер строки, запросившей публикацию.</param>
   /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
-  internal static async Task PublishAsync(
+  internal static Task PublishAsync(
     ShowMessageModel message,
     IMessageOutputService outputService,
     string callerName,
     string callerFile,
     int callerLine)
   {
-    ArgumentNullException.ThrowIfNull(message);
-    ArgumentNullException.ThrowIfNull(outputService);
-
-    LogInformation(message.ToString(), isDeviceLog: true);
-    await ShowAsync(message, outputService, callerName, callerFile, callerLine);
-  }
-
-  private static Task ShowAsync(
-    ShowMessageModel message,
-    IMessageOutputService outputService,
-    string originCallerName,
-    string originCallerFile,
-    int originCallerLine,
-    [CallerFilePath] string publisherFile = "",
-    [CallerLineNumber] int publisherLine = 0)
-  {
-    string origin = $"{Path.GetFileName(originCallerFile)} → {originCallerName}, строка {originCallerLine}";
-    string displayCallerName = $"{nameof(PublishAsync)} (вызван из {origin})";
-
-    return outputService.ShowMessageAsync(
+    return MessagePublisher.PublishAsync(
       message,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
       skipPause: true,
-      callerName: displayCallerName,
-      callerFile: publisherFile,
-      callerLine: publisherLine);
+      logToDeviceJournal: true);
   }
 }

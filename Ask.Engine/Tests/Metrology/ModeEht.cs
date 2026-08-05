@@ -178,7 +178,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> StepFirst(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, MeasurementRange measurementRange)
       {
-        await ExecutionMessages.ShowPointConnectionAsync(point1, userMessageService);
+        await ExecutionMessages.PublishPointConnectionAsync(point1, userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
@@ -193,14 +193,14 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> StepSecond(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, MeasurementRange measurementRange)
       {
-        await ExecutionMessages.ShowPointDisconnectionAsync(point1, userMessageService);
+        await ExecutionMessages.PublishPointDisconnectionAsync(point1, userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
 
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.B, point1.PointNumber, userMessageService);
         relayModule = GetRelayModules(metrologicalModeRole).Last();
 
-        await ExecutionMessages.ShowPointConnectionAsync(point2, userMessageService);
+        await ExecutionMessages.PublishPointConnectionAsync(point2, userMessageService);
 
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
         await relayModule.PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, userMessageService);
@@ -213,7 +213,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task<double> StepThird(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2, MeasurementRange measurementRange)
       {
-        await ExecutionMessages.ShowPointDisconnectionAsync(point2, userMessageService);
+        await ExecutionMessages.PublishPointDisconnectionAsync(point2, userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).Last();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point2.PointNumber, userMessageService);
@@ -225,7 +225,7 @@ namespace Ask.Engine.Tests.Metrology
 
       private async Task StepReset(IUserInteractionService userMessageService, MeasurementTypeCommand metrologicalModeRole, PointModel point1, PointModel point2)
       {
-        await ExecutionMessages.ShowPointsDisconnectionAsync(userMessageService);
+        await ExecutionMessages.PublishPointsDisconnectionAsync(userMessageService);
 
         var relayModule = GetRelayModules(metrologicalModeRole).First();
         await relayModule.PointManager.DisconnectRelayAsync(BusPoint.A, point1.PointNumber, userMessageService);

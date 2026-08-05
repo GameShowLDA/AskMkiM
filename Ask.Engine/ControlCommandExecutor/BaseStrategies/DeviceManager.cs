@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -528,7 +528,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </param>
     internal static async Task ShowDevicesPreparationMessageIfNeededAsync(CommandExecutionContext context)
     {
-      await ExecutionMessages.ShowDevicesPreparationAsync(context.Console);
+      await ExecutionMessages.PublishDevicesPreparationAsync(context.Console);
     }
   }
 }
