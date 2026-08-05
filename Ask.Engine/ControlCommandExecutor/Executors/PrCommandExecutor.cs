@@ -6,7 +6,6 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Pr;
@@ -54,8 +53,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       PairwiseFirstPointContext pairwiseFirstPointContext = methodExecutionContext.CreateChild<PairwiseFirstPointContext>();
 
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
+      var executionResult = new AlgorithmExecutionResult(new(), new());
 
       if (!command.AlgorithmKey.Contains("ЗС"))
       {
@@ -86,8 +84,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         connectedPointContext.PerformMeasurementAsync = measurePointConnected;
 
         var messageResult = await ConnectedPointChecker.CheckSequenceAsync(connectedPointContext);
-        errorMessage.AddRange(messageResult.Errors);
-        infoMessage.AddRange(messageResult.Info);
+        executionResult.AddRange(messageResult);
       }
       if (!command.AlgorithmKey.Contains("ЗР"))
       {
@@ -131,19 +128,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         };
 
         var messageResult = await DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest);
-        errorMessage.AddRange(messageResult.Errors);
-        infoMessage.AddRange(messageResult.Info);
+        executionResult.AddRange(messageResult);
       }
 
-      await PointFormater.MessageResult(errorMessage, context.Console);
+      await PointFormater.MessageResult(executionResult.Errors, context.Console);
 
-      if (errorMessage.Count > 0)
+      if (executionResult.Errors.Count > 0)
       {
-        protocolModel.AddErrors(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, executionResult.Errors);
       }
-      if (infoMessage.Count > 0)
+      if (executionResult.Info.Count > 0)
       {
-        protocolModel.AddInfo(nameCommand, infoMessage);
+        protocolModel.AddInfo(nameCommand, executionResult.Info);
       }
     }
     private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)

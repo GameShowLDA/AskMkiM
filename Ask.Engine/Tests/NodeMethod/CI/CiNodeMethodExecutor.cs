@@ -1,7 +1,6 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -46,7 +45,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
         var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
         if (!connect.Connect)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
+          await ExecutionMessages.PublishErrorAsync(connect.Message, _messageService);
           return;
         }
 
@@ -102,13 +101,9 @@ namespace Ask.Engine.Tests.NodeMethod.CI
               MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, 1000, 60000);
               var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
 
-              var type = ShowMessageModel.MessageType.Success;
-              if (answer.value < dataModel.Param)
-              {
-                type = ShowMessageModel.MessageType.Error;
-              }
+              bool isSuccessful = answer.value >= dataModel.Param;
 
-              string? executionErrorMessage = type == ShowMessageModel.MessageType.Error
+              string? executionErrorMessage = !isSuccessful
                 ? NodeMethodProtocolBuilder.BuildFailure(
                   connectResult.PointModel,
                   dataModel.Param,
@@ -119,11 +114,11 @@ namespace Ask.Engine.Tests.NodeMethod.CI
               await MeasurementMessages.PublishResultAsync(
                 ResistanceUnit.MegaOhm,
                 new MeasurementRange(answer.value, dataModel.Param, -1),
-                type == ShowMessageModel.MessageType.Success,
+                isSuccessful,
                 connectResult.PointModel.ToString(),
                 executionErrorMessage,
                 protocolUI);
-              return type == ShowMessageModel.MessageType.Success;
+              return isSuccessful;
 
             }, protocolUI);
           }
