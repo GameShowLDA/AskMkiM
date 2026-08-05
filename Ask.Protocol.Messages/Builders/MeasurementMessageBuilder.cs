@@ -66,6 +66,38 @@ internal static class MeasurementMessageBuilder
     return new ShowMessageModel(header, message: message);
   }
 
+  /// <summary>
+  /// Формирует сообщение о погрешности измерения.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения.</param>
+  /// <param name="measurementRange">Погрешность и допустимые границы измерения.</param>
+  /// <param name="showAllowedRange">Признак включения допустимого диапазона в заголовок.</param>
+  /// <returns>Сообщение о погрешности измерения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="measurementUnit"/> или
+  /// <paramref name="measurementRange"/> равен <see langword="null"/>.
+  /// </exception>
+  internal static ShowMessageModel BuildError(
+    Enum measurementUnit,
+    MeasurementRange measurementRange,
+    bool showAllowedRange)
+  {
+    ArgumentNullException.ThrowIfNull(measurementUnit);
+    ArgumentNullException.ThrowIfNull(measurementRange);
+
+    string unit = measurementUnit.GetUnit();
+    string header = "Погрешность измерения";
+
+    if (showAllowedRange)
+    {
+      header += $" ({FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}<" +
+        $"{FormatMeasurementLimit(measurementRange.UpperBound)})";
+    }
+
+    string message = $"{MeasurementValueFormatter.Format(measurementRange.TargetValue)} {unit}";
+    return new ShowMessageModel(header, message: message);
+  }
+
   private static string BuildMeasuredValue(
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,

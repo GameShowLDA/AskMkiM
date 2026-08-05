@@ -126,7 +126,11 @@ namespace Ask.Engine.Tests.Metrology
           new MeasurementRange(LowerBound, LowerBound, UpperBound),
           protocolUI,
           indentLevel: 2);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        await MeasurementMessages.PublishErrorAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(err, LowerBound, UpperBound),
+          result,
+          protocolUI);
 
         return true;
       }

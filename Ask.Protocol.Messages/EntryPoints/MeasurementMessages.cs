@@ -139,6 +139,59 @@ public static class MeasurementMessages
   }
 
   /// <summary>
+  /// Публикует погрешность измерения.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения.</param>
+  /// <param name="measurementRange">Погрешность и допустимые границы измерения.</param>
+  /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="showAllowedRange">Признак включения допустимого диапазона в заголовок.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="executionErrorMessage">Описание брака для итогового заключения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="measurementUnit"/>,
+  /// <paramref name="measurementRange"/> или <paramref name="outputService"/>
+  /// равен <see langword="null"/>.
+  /// </exception>
+  public static Task PublishErrorAsync(
+    Enum measurementUnit,
+    MeasurementRange measurementRange,
+    bool isSuccessful,
+    IMessageOutputService outputService,
+    bool showAllowedRange = false,
+    int indentLevel = 2,
+    string? executionErrorMessage = null,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(measurementUnit);
+    ArgumentNullException.ThrowIfNull(measurementRange);
+    ArgumentNullException.ThrowIfNull(outputService);
+
+    ShowMessageModel message = MeasurementMessageBuilder.BuildError(
+      measurementUnit,
+      measurementRange,
+      showAllowedRange);
+    message.Status = isSuccessful
+      ? ShowMessageModel.MessageType.Success
+      : ShowMessageModel.MessageType.Error;
+    message.IndentLevel = indentLevel;
+    message.ExecutionErrorMessage = executionErrorMessage;
+
+    return MeasurementMessagePublisher.PublishAsync(
+      message,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
   /// Публикует промежуточный результат измерения цепи.
   /// </summary>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>

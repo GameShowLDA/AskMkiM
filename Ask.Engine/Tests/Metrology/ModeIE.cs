@@ -127,7 +127,11 @@ namespace Ask.Engine.Tests.Metrology
           }
 
           await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.IE, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: protocolUI);
-          await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "нФ"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+          await MeasurementMessages.PublishErrorAsync(
+            CapacitanceUnit.NanoFarad,
+            new MeasurementRange(err, LowerBound, UpperBound),
+            result >= LowerBound && result <= UpperBound,
+            protocolUI);
         }
         else
         {

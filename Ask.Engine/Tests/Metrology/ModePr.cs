@@ -126,7 +126,11 @@ namespace Ask.Engine.Tests.Metrology
         }
 
         await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.PR, new MeasurementRange(result, firstNorm, lastNorm), result >= firstNorm && result <= lastNorm, outputService: protocolUI);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "Ом"), type: result >= firstNorm && result <= lastNorm ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        await MeasurementMessages.PublishErrorAsync(
+          ResistanceUnit.Ohm,
+          new MeasurementRange(err, firstNorm, lastNorm),
+          result >= firstNorm && result <= lastNorm,
+          protocolUI);
 
         return true;
       }

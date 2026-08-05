@@ -137,15 +137,13 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage,
             outputService: userMessageService);
 
-          var errorMessage = new ShowMessageModel(
-            $"Погрешность измерения ({lowerBound} - {upperBound} МОм)",
-            message: MeasurementValueFormatter.FormatWithUnit(err, "МОм"),
-            type: status)
-          {
-            IndentLevel = 2,
-            ExecutionErrorMessage = string.Empty,
-          };
-          await userMessageService.ShowMessageAsync(errorMessage, skipPause: true);
+          await MeasurementMessages.PublishErrorAsync(
+            ResistanceUnit.MegaOhm,
+            new MeasurementRange(err, lowerBound, upperBound),
+            status == ShowMessageModel.MessageType.Success,
+            userMessageService,
+            showAllowedRange: true,
+            executionErrorMessage: string.Empty);
 
         }
       }
@@ -222,15 +220,13 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           };
           await userMessageService.ShowMessageAsync(resultMessage, skipPause: true);
 
-          var errorMessage = new ShowMessageModel(
-            $"Погрешность измерения ({lowerBound} - {upperBound} В)",
-            message: MeasurementValueFormatter.FormatWithUnit(err, "В"),
-            type: status)
-          {
-            IndentLevel = 2,
-            ExecutionErrorMessage = string.Empty,
-          };
-          await userMessageService.ShowMessageAsync(errorMessage, skipPause: true);
+          await MeasurementMessages.PublishErrorAsync(
+            VoltageUnit.Volt,
+            new MeasurementRange(err, lowerBound, upperBound),
+            status == ShowMessageModel.MessageType.Success,
+            userMessageService,
+            showAllowedRange: true,
+            executionErrorMessage: string.Empty);
 
         }
       }
@@ -306,15 +302,13 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           };
           await userMessageService.ShowMessageAsync(resultMessage, skipPause: true);
 
-          var errorMessage = new ShowMessageModel(
-            $"Погрешность измерения ({lowerBound} - {upperBound} В)",
-            message: MeasurementValueFormatter.FormatWithUnit(err, "В"),
-            type: status)
-          {
-            IndentLevel = 2,
-            ExecutionErrorMessage = string.Empty,
-          };
-          await userMessageService.ShowMessageAsync(errorMessage, skipPause: true);
+          await MeasurementMessages.PublishErrorAsync(
+            VoltageUnit.Volt,
+            new MeasurementRange(err, lowerBound, upperBound),
+            status == ShowMessageModel.MessageType.Success,
+            userMessageService,
+            showAllowedRange: true,
+            executionErrorMessage: string.Empty);
 
         }
       }

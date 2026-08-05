@@ -138,7 +138,11 @@ namespace Ask.Engine.Tests.Metrology
         }
 
         await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KN_DCW, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: messageService);
-        await messageService.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result >= LowerBound && result <= UpperBound ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        await MeasurementMessages.PublishErrorAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(err, LowerBound, UpperBound),
+          result >= LowerBound && result <= UpperBound,
+          messageService);
 
         return true;
       }
