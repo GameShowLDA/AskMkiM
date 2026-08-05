@@ -63,7 +63,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             methodExecutionContext.MessageService,
             dischargeNumber,
             stepStr);
-          showMessageModels.Add(new ShowMessageModel($"Разряд {dischargeNumber} ({stepStr})({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
+          showMessageModels.Add(MeasurementMessages.BuildFullNodeFallbackResult(
+            methodExecutionContext.TypeCommand,
+            new Ask.Core.Shared.DTO.Devices.Measurements.MeasurementRange(
+              result.Value,
+              methodExecutionContext.LowerLimit,
+              methodExecutionContext.HigherLimit),
+            dischargeNumber,
+            stepStr));
 
           NodeFullContext contextNodeFull = methodExecutionContext.CreateChild<NodeFullContext>();
           contextNodeFull.PerformMeasurementAsync = methodExecutionContext.PerformMeasurementAsync;

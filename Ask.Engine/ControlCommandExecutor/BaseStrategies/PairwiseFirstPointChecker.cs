@@ -43,7 +43,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
       groupChains.ChainModels.Remove(_basePoint);
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение измерений"), IsBlockStart: true);
+      await MeasurementMessages.PublishMeasurementStageAsync(messageService);
 
       foreach (var chain in groupChains.ChainModels)
       {

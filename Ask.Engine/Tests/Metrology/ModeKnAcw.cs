@@ -107,8 +107,6 @@ namespace Ask.Engine.Tests.Metrology
         MeasurementRange measurementRangeAc = new MeasurementRange(param, LowerBound, UpperBound);
         var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, measurementRangeAc);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Результат проверки"));
-
         var result = resultFastMeterMeasured >= LowerBound && resultFastMeterMeasured <= UpperBound;
 
         var err = resultFastMeterMeasured - resultReferenceMeterMeasured;
@@ -119,7 +117,10 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, resultFastMeterMeasured, LowerBound, UpperBound, "В");
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"Значение эталоного напряжения ", null, MeasurementValueFormatter.FormatWithUnit(resultReferenceMeterMeasured, "В")) { IndentLevel = 1 });
+        await MeasurementMessages.PublishReferenceValueAsync(
+          VoltageUnit.Volt,
+          resultReferenceMeterMeasured,
+          protocolUI);
         await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KN_ACW, new MeasurementRange(resultFastMeterMeasured, LowerBound, UpperBound), result, outputService: protocolUI);
         await RangeMessages.PublishAllowedRangeAsync(
           VoltageUnit.Volt,

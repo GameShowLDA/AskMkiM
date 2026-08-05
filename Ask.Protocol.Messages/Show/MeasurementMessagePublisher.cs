@@ -19,13 +19,17 @@ internal static class MeasurementMessagePublisher
   /// <param name="callerName">Имя исходного метода, запросившего публикацию.</param>
   /// <param name="callerFile">Путь к исходному файлу, запросившему публикацию.</param>
   /// <param name="callerLine">Номер строки, запросившей публикацию.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="skipPause">Признак пропуска автоматической паузы перед выводом.</param>
   /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
   internal static async Task PublishAsync(
     ShowMessageModel message,
     IMessageOutputService? outputService,
     string callerName,
     string callerFile,
-    int callerLine)
+    int callerLine,
+    bool isBlockStart = false,
+    bool skipPause = true)
   {
     ArgumentNullException.ThrowIfNull(message);
 
@@ -40,7 +44,14 @@ internal static class MeasurementMessagePublisher
 
     if (outputService != null)
     {
-      await ShowAsync(message, outputService, callerName, callerFile, callerLine);
+      await ShowAsync(
+        message,
+        outputService,
+        callerName,
+        callerFile,
+        callerLine,
+        isBlockStart,
+        skipPause);
     }
   }
 
@@ -52,6 +63,8 @@ internal static class MeasurementMessagePublisher
   /// <param name="originCallerName">Имя исходного метода.</param>
   /// <param name="originCallerFile">Путь к исходному файлу.</param>
   /// <param name="originCallerLine">Номер исходной строки.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="skipPause">Признак пропуска автоматической паузы перед выводом.</param>
   /// <param name="publisherFile">Путь к файлу publisher.</param>
   /// <param name="publisherLine">Номер строки вызова внутри publisher.</param>
   /// <returns>Задача, представляющая операцию вывода сообщения.</returns>
@@ -61,6 +74,8 @@ internal static class MeasurementMessagePublisher
     string originCallerName,
     string originCallerFile,
     int originCallerLine,
+    bool isBlockStart,
+    bool skipPause,
     [CallerFilePath] string publisherFile = "",
     [CallerLineNumber] int publisherLine = 0)
   {
@@ -69,7 +84,8 @@ internal static class MeasurementMessagePublisher
 
     return outputService.ShowMessageAsync(
       message,
-      skipPause: true,
+      IsBlockStart: isBlockStart,
+      skipPause: skipPause,
       callerName: displayCallerName,
       callerFile: publisherFile,
       callerLine: publisherLine);

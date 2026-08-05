@@ -92,7 +92,9 @@ namespace Ask.Engine.Tests.NodeMethod.PI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(ACW)"));
+            await MeasurementMessages.PublishLeakageCurrentStartAsync(
+              MeasurementTypeCommand.PI_ACW,
+              protocolUI);
 
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {

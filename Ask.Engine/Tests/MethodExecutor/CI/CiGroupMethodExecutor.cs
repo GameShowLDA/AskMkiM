@@ -87,7 +87,10 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
 
           var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-          await messageService.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
+          await MeasurementMessages.PublishStartAsync(
+            MeasurementTypeCommand.SI,
+            messageService,
+            indentLevel: 1);
 
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, dataModel.Param, 60000);
           var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange, userMessageService: messageService);

@@ -15,6 +15,199 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class MeasurementMessages
 {
   /// <summary>
+  /// Публикует заголовок начала измерения.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип выполняемого измерения.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
+  public static Task PublishStartAsync(
+    MeasurementTypeCommand measurementTypeCommand,
+    IMessageOutputService? outputService,
+    bool isBlockStart = false,
+    int indentLevel = 0,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (outputService == null)
+    {
+      return Task.CompletedTask;
+    }
+
+    ShowMessageModel message = MeasurementMessageBuilder.BuildStart(measurementTypeCommand);
+    message.IndentLevel = indentLevel;
+
+    return MeasurementMessagePublisher.PublishAsync(
+      message,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart,
+      skipPause: false);
+  }
+
+  /// <summary>
+  /// Публикует заголовок измерения тока утечки в режиме проверки прочности изоляции.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Режим проверки прочности изоляции.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishLeakageCurrentStartAsync(
+    MeasurementTypeCommand measurementTypeCommand,
+    IMessageOutputService? outputService,
+    int indentLevel = 0,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (outputService == null)
+    {
+      return Task.CompletedTask;
+    }
+
+    ShowMessageModel message = MeasurementMessageBuilder.BuildLeakageCurrentStart(measurementTypeCommand);
+    message.IndentLevel = indentLevel;
+    return MeasurementMessagePublisher.PublishAsync(
+      message, outputService, callerName, callerFile, callerLine, skipPause: false);
+  }
+
+  /// <summary>
+  /// Публикует заголовок этапа выполнения измерений.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishMeasurementStageAsync(
+    IMessageOutputService? outputService,
+    bool isBlockStart = true,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (outputService == null)
+    {
+      return Task.CompletedTask;
+    }
+
+    return MeasurementMessagePublisher.PublishAsync(
+      MeasurementMessageBuilder.BuildMeasurementStage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart,
+      skipPause: false);
+  }
+
+  /// <summary>
+  /// Публикует эталонное измеренное значение.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения эталонного значения.</param>
+  /// <param name="value">Измеренное эталонное значение.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishReferenceValueAsync(
+    Enum measurementUnit,
+    double value,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (outputService == null)
+    {
+      return Task.CompletedTask;
+    }
+
+    return MeasurementMessagePublisher.PublishAsync(
+      MeasurementMessageBuilder.BuildReferenceValue(measurementUnit, value),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
+  /// Формирует сообщение о неуспешном измерении разряда и переходе к методу полного узла.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
+  /// <param name="dischargeNumber">Порядковый номер проверяемого разряда.</param>
+  /// <param name="dischargeView">Двоичное представление проверяемого разряда.</param>
+  /// <returns>Сообщение о неуспешном измерении и смене алгоритма проверки.</returns>
+  public static ShowMessageModel BuildFullNodeFallbackResult(
+    MeasurementTypeCommand measurementTypeCommand,
+    MeasurementRange measurementRange,
+    int dischargeNumber,
+    string dischargeView)
+  {
+    return MeasurementMessageBuilder.BuildFullNodeFallbackResult(
+      measurementTypeCommand,
+      measurementRange,
+      dischargeNumber,
+      dischargeView);
+  }
+
+  /// <summary>
+  /// Публикует заданное испытательное напряжение режима проверки прочности изоляции.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Режим испытательного напряжения.</param>
+  /// <param name="voltage">Заданное испытательное напряжение.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
+  /// <exception cref="ArgumentOutOfRangeException">
+  /// Выбрасывается, если <paramref name="measurementTypeCommand"/> не относится
+  /// к режиму прочности изоляции ACW или DCW.
+  /// </exception>
+  public static Task PublishTestVoltageOutputAsync(
+    MeasurementTypeCommand measurementTypeCommand,
+    double voltage,
+    IMessageOutputService? outputService,
+    int indentLevel = 0,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (outputService == null)
+    {
+      return Task.CompletedTask;
+    }
+
+    ShowMessageModel message = MeasurementMessageBuilder.BuildTestVoltageOutput(
+      measurementTypeCommand,
+      voltage);
+    message.IndentLevel = indentLevel;
+
+    return MeasurementMessagePublisher.PublishAsync(
+      message,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      skipPause: false);
+  }
+
+  /// <summary>
   /// Формирует сообщение о результате измерения цепи.
   /// </summary>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>

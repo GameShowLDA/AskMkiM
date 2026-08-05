@@ -7,6 +7,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -144,7 +145,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               var errorMessageModels = new ShowMessageModel($"{point.Mnemonic}{machineAdress}", message: $"Нет подлючения точки", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 };
               errorPoint = true;
 
-              await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"));
+              await MeasurementMessages.PublishStartAsync(
+                MeasurementTypeCommand.KC,
+                context.MessageService);
               await context.MessageService.ShowMessageAsync(errorMessageModels);
               errorsMessgae.Add(errorMessageModels);
               context.CommandManager.AddErrorMethod(
@@ -224,7 +227,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 errorMessageModels.IndentLevel = 1;
                 errorPoint = true;
 
-                await context.MessageService.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"));
+                await MeasurementMessages.PublishStartAsync(
+                  MeasurementTypeCommand.KC,
+                  context.MessageService);
                 await context.MessageService.ShowMessageAsync(errorMessageModels);
                 context.CommandManager.AddErrorMethod(
                   EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",

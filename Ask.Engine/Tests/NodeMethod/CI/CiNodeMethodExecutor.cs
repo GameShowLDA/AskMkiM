@@ -91,7 +91,9 @@ namespace Ask.Engine.Tests.NodeMethod.CI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
+            await MeasurementMessages.PublishStartAsync(
+              MeasurementTypeCommand.SI,
+              protocolUI);
 
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {

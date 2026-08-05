@@ -106,7 +106,10 @@ namespace Ask.Engine.Tests.Metrology
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Выполнение измерения сопротивления"), IsBlockStart: true);
+        await MeasurementMessages.PublishStartAsync(
+          MeasurementTypeCommand.PR,
+          protocolUI,
+          isBlockStart: true);
         var (firstNorm, lastNorm, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PR, param);
 
         MeasurementRange measurementRange = new MeasurementRange(param, firstNorm, lastNorm);

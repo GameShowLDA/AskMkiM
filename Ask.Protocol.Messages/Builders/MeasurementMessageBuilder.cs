@@ -16,6 +16,103 @@ internal static class MeasurementMessageBuilder
 {
   private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
 
+  /// <summary>
+  /// Формирует заголовок начала измерения.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип выполняемого измерения.</param>
+  /// <returns>Сообщение о начале измерения.</returns>
+  internal static ShowMessageModel BuildStart(MeasurementTypeCommand measurementTypeCommand)
+  {
+    CommandDisplayInfoAttribute displayInfo = measurementTypeCommand.GetCommandDisplayInfo();
+    return new ShowMessageModel(
+      $"Измерение {displayInfo.MeasurementDescription.ToLowerInvariant()}");
+  }
+
+  /// <summary>
+  /// Формирует заголовок измерения тока утечки в режиме проверки прочности изоляции.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Режим проверки прочности изоляции.</param>
+  /// <returns>Сообщение о начале измерения тока утечки.</returns>
+  /// <exception cref="ArgumentOutOfRangeException">
+  /// Выбрасывается, если <paramref name="measurementTypeCommand"/> не соответствует режиму ACW или DCW.
+  /// </exception>
+  internal static ShowMessageModel BuildLeakageCurrentStart(MeasurementTypeCommand measurementTypeCommand)
+  {
+    string mode = GetInsulationStrengthMode(measurementTypeCommand);
+    return new ShowMessageModel($"Измерение тока утечки {mode}");
+  }
+
+  /// <summary>
+  /// Формирует заголовок этапа выполнения измерений.
+  /// </summary>
+  /// <returns>Сообщение о начале этапа измерений.</returns>
+  internal static ShowMessageModel BuildMeasurementStage()
+  {
+    return new ShowMessageModel("Выполнение измерений");
+  }
+
+  /// <summary>
+  /// Формирует сообщение об эталонном измеренном значении.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения эталонного значения.</param>
+  /// <param name="value">Измеренное эталонное значение.</param>
+  /// <returns>Сообщение об эталонном значении.</returns>
+  internal static ShowMessageModel BuildReferenceValue(Enum measurementUnit, double value)
+  {
+    ArgumentNullException.ThrowIfNull(measurementUnit);
+
+    return new ShowMessageModel(
+      "Эталонное значение",
+      message: MeasurementValueFormatter.FormatWithUnit(value, measurementUnit.GetUnit()))
+    {
+      IndentLevel = 1,
+    };
+  }
+
+  /// <summary>
+  /// Формирует сообщение о выдаче испытательного напряжения.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Режим испытательного напряжения.</param>
+  /// <param name="voltage">Заданное испытательное напряжение.</param>
+  /// <returns>Сообщение о выдаче испытательного напряжения.</returns>
+  /// <exception cref="ArgumentOutOfRangeException">
+  /// Выбрасывается, если <paramref name="measurementTypeCommand"/> не относится
+  /// к режиму прочности изоляции ACW или DCW.
+  /// </exception>
+  internal static ShowMessageModel BuildTestVoltageOutput(
+    MeasurementTypeCommand measurementTypeCommand,
+    double voltage)
+  {
+    string mode = GetInsulationStrengthMode(measurementTypeCommand);
+
+    return new ShowMessageModel(
+      $"Выдача испытательного напряжения {mode}",
+      message: MeasurementValueFormatter.FormatWithUnit(voltage, "В"));
+  }
+
+  /// <summary>
+  /// Формирует сообщение о неуспешном измерении разряда и переходе к методу полного узла.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
+  /// <param name="dischargeNumber">Порядковый номер проверяемого разряда.</param>
+  /// <param name="dischargeView">Двоичное представление проверяемого разряда.</param>
+  /// <returns>Сообщение о неуспешном измерении и смене алгоритма проверки.</returns>
+  internal static ShowMessageModel BuildFullNodeFallbackResult(
+    MeasurementTypeCommand measurementTypeCommand,
+    MeasurementRange measurementRange,
+    int dischargeNumber,
+    string dischargeView)
+  {
+    ShowMessageModel message = BuildResult(
+      measurementTypeCommand,
+      measurementRange,
+      $"Разряд {dischargeNumber} ({dischargeView})");
+    message.Message = $"{message.Message}. Переход к методу полного узла";
+    message.Status = ShowMessageModel.MessageType.Error;
+    return message;
+  }
+
   internal static ShowMessageModel BuildResult(
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
@@ -151,5 +248,18 @@ internal static class MeasurementMessageBuilder
   private static string FormatMeasurementLimit(double value)
   {
     return value.ToString("G", RussianDisplayCulture);
+  }
+
+  private static string GetInsulationStrengthMode(MeasurementTypeCommand measurementTypeCommand)
+  {
+    return measurementTypeCommand switch
+    {
+      MeasurementTypeCommand.PI_ACW => "ACW",
+      MeasurementTypeCommand.PI_DCW => "DCW",
+      _ => throw new ArgumentOutOfRangeException(
+        nameof(measurementTypeCommand),
+        measurementTypeCommand,
+        "Режим не относится к проверке прочности изоляции ACW или DCW."),
+    };
   }
 }

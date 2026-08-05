@@ -113,21 +113,30 @@ namespace Ask.Engine.Tests.Metrology
         var Rt1 = await StepFirst(protocolUI, metrologicalModeRole, points.Point1, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt1 > 100)
         {
-          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
+          await MeasurementMessages.PublishStartAsync(
+            MeasurementTypeCommand.EHT,
+            protocolUI,
+            isBlockStart: true);
           await MeasurementMessages.PublishIntermediateResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(Rt1, LowerBound, UpperBound), true, outputService: protocolUI);
         }
 
         var Rt2 = await StepSecond(protocolUI, metrologicalModeRole, points.Point1, points.Point2, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt2 > 100)
         {
-          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
+          await MeasurementMessages.PublishStartAsync(
+            MeasurementTypeCommand.EHT,
+            protocolUI,
+            isBlockStart: true);
           await MeasurementMessages.PublishIntermediateResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(Rt2, LowerBound, UpperBound), true, outputService: protocolUI);
         }
 
         var Rt = await StepThird(protocolUI, metrologicalModeRole, points.Point1, points.Point2, measurementRange);
         if (DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility() || Rt > 100)
         {
-          await protocolUI.ShowMessageAsync(new ShowMessageModel(header: $"Измерение сопротивления"), IsBlockStart: true);
+          await MeasurementMessages.PublishStartAsync(
+            MeasurementTypeCommand.EHT,
+            protocolUI,
+            isBlockStart: true);
           await MeasurementMessages.PublishIntermediateResultAsync(MeasurementTypeCommand.EHT, new MeasurementRange(Rt, LowerBound, UpperBound), true, outputService: protocolUI);
         }
 

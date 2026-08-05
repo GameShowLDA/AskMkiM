@@ -415,13 +415,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         max = 0;
       }
 
-      var info = command.GetCommandDisplayInfo();
-      string displayName = info?.DisplayName ?? command.ToString();
-      string unit = info?.Unit ?? "";
-
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Результаты режима {displayName}"), skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: MeasurementValueFormatter.FormatWithUnit(min, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: MeasurementValueFormatter.FormatWithUnit(max, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await MetrologyMessages.PublishResultSummaryAsync(command, min, max, messageService);
 
       Measurements = new();
     }

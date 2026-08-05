@@ -107,7 +107,10 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     {
       string bitString = GetBitString();
       await _protocolUI.AppendEmptyLineAsync();
-      await _protocolUI.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step + 1} ({bitString})"));
+      await CommandMessages.ShowDischargeCheckBlockAsync(
+        _protocolUI,
+        step + 1,
+        bitString);
     }
 
     /// <summary>

@@ -87,7 +87,9 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-        await messageService.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
+        await MeasurementMessages.PublishLeakageCurrentStartAsync(
+          MeasurementTypeCommand.PI_DCW,
+          messageService);
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
