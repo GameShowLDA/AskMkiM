@@ -136,4 +136,90 @@ public static class ExecutionMessages
       callerLine,
       isBlockStart: true);
   }
+
+  /// <summary>
+  /// Выводит заголовок этапа теста.
+  /// </summary>
+  /// <param name="title">Заголовок выполняемого этапа.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishTestStageAsync(
+    string title,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildTestStageMessage(title),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок проверки точки.
+  /// </summary>
+  /// <param name="pointNumber">Номер проверяемой точки.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishTestPointAsync(
+    int pointNumber,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildTestPointMessage(pointNumber),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
+  /// Выводит результат операции с выбранным текстом для успешного и ошибочного исхода.
+  /// </summary>
+  /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
+  /// <param name="successHeader">Заголовок успешного результата.</param>
+  /// <param name="successMessage">Описание успешного результата.</param>
+  /// <param name="errorHeader">Заголовок ошибочного результата.</param>
+  /// <param name="errorMessage">Описание ошибочного результата.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishOperationResultAsync(
+    bool isSuccessful,
+    string successHeader,
+    string successMessage,
+    string errorHeader,
+    string errorMessage,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildOperationResultMessage(
+        isSuccessful,
+        successHeader,
+        successMessage,
+        errorHeader,
+        errorMessage),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
 }

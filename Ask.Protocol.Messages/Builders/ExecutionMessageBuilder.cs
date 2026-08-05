@@ -24,4 +24,28 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildTestStartedMessage()
     => new(header: "Инициализация завершена, тест начат!");
+
+  internal static ShowMessageModel BuildTestStageMessage(string title)
+    => new(header: title);
+
+  internal static ShowMessageModel BuildTestPointMessage(int pointNumber)
+    => new(header: $"Тест точки {pointNumber}");
+
+  internal static ShowMessageModel BuildOperationResultMessage(
+    bool isSuccessful,
+    string successHeader,
+    string successMessage,
+    string errorHeader,
+    string errorMessage)
+  {
+    return new ShowMessageModel(
+      isSuccessful ? successHeader : errorHeader,
+      message: isSuccessful ? successMessage : errorMessage,
+      type: isSuccessful
+        ? ShowMessageModel.MessageType.Success
+        : ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 2,
+    };
+  }
 }

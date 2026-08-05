@@ -71,6 +71,13 @@ internal static class ValidationMessageBuilder
     return BuildSelectionError("Не удалось получить устройство.");
   }
 
+  internal static ShowMessageModel BuildEquipmentLookupError(string message)
+  {
+    return new ShowMessageModel(
+      message,
+      ShowMessageModel.ErrorMessage.TitleColor);
+  }
+
   /// <summary>
   /// Формирует сообщение об ошибке введённых данных.
   /// </summary>

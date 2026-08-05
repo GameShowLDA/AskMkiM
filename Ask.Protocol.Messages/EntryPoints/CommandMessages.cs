@@ -165,12 +165,13 @@ public static class CommandMessages
   public static Task ShowPointsConnectionAsync(
     IMessageOutputService outputService,
     int indentLevel,
+    bool isBlockStart = true,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
     var model = CommandMessageBuilder.BuildPointsConnectionMessage(indentLevel);
     return CommandMessagePublisher.PublishAsync(
-      model, outputService, true, callerName, callerFile, callerLine);
+      model, outputService, isBlockStart, callerName, callerFile, callerLine);
   }
 }

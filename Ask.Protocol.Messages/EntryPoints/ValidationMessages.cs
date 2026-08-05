@@ -168,6 +168,30 @@ public static class ValidationMessages
   }
 
   /// <summary>
+  /// Публикует сообщение об ошибке поиска оборудования для проверки.
+  /// </summary>
+  /// <param name="message">Описание отсутствующего оборудования.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishEquipmentLookupErrorAsync(
+    string message,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return PublishAsync(
+      ValidationMessageBuilder.BuildEquipmentLookupError(message),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
   /// Публикует сообщение об ошибке введённых данных.
   /// </summary>
   /// <param name="details">Описание ошибки введённых данных.</param>
