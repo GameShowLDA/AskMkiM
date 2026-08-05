@@ -3,6 +3,7 @@ using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace UI.Controls.Settings.Protocol
@@ -89,6 +90,61 @@ namespace UI.Controls.Settings.Protocol
     }
 
     /// <summary>
+    /// Передаёт прокрутку родительскому экрану настроек при достижении границы редактора.
+    /// </summary>
+    /// <param name="sender">Редактор шаблона протокола.</param>
+    /// <param name="e">Аргументы события колеса мыши.</param>
+    private void ProtocolEditor_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+      if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+      {
+        return;
+      }
+
+      var editor = ProtocolEditor.TextEditor;
+      bool reachedTop = e.Delta > 0 && editor.VerticalOffset <= 0;
+      bool reachedBottom = e.Delta < 0 &&
+        editor.VerticalOffset >= editor.ExtentHeight - editor.ViewportHeight;
+
+      if (!reachedTop && !reachedBottom)
+      {
+        return;
+      }
+
+      var parentScrollViewer = FindVisualParent<ScrollViewer>(this);
+      if (parentScrollViewer == null)
+      {
+        return;
+      }
+
+      parentScrollViewer.ScrollToVerticalOffset(parentScrollViewer.VerticalOffset - e.Delta);
+      e.Handled = true;
+    }
+
+    /// <summary>
+    /// Находит ближайший родительский элемент заданного типа в визуальном дереве.
+    /// </summary>
+    /// <typeparam name="T">Тип родительского элемента.</typeparam>
+    /// <param name="element">Начальный элемент поиска.</param>
+    /// <returns>Найденный родительский элемент или <see langword="null"/>.</returns>
+    private T? FindVisualParent<T>(System.Windows.DependencyObject element)
+      where T : System.Windows.DependencyObject
+    {
+      System.Windows.DependencyObject? current = VisualTreeHelper.GetParent(element);
+      while (current != null)
+      {
+        if (current is T parent)
+        {
+          return parent;
+        }
+
+        current = VisualTreeHelper.GetParent(current);
+      }
+
+      return null;
+    }
+
+    /// <summary>
     /// Загружает текст в редактор и гарантирует наличие обязательных строк.
     /// </summary>
     private void LoadTemplateWithRequiredLines(string templateText)
@@ -118,7 +174,7 @@ namespace UI.Controls.Settings.Protocol
   /// </summary>
   public sealed class ProtectedReadOnlySectionProvider : IReadOnlySectionProvider
   {
-    private readonly List<ITextSegment> _protected = new();
+    private readonly List<ITextSegment> _protected = new List<ITextSegment>();
     private ITextDocumentView _document;
 
     /// <summary>Переиндексация защищённых участков по документу.</summary>

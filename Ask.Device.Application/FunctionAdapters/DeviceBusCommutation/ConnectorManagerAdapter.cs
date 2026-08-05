@@ -241,8 +241,8 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     public async Task<bool> DisconnectAllBuses(IUserInteractionService? userMessageService = null)
     {
       var description = $"(AB1, AB2, AB3, AB4)";
-      
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _connectorManager.DisconnectAllBuses();
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())

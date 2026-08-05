@@ -18,27 +18,32 @@ namespace Ask.Device.Runtime.Function.ManagerChassis
     /// Интерфейс управления шасси.
     /// </summary>
     private IChassisManager ChassisModel { get; set; }
+    private readonly ChassisQueryExecutor _queryExecutor;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="PowerManager"/>.
     /// </summary>
     /// <param name="managerChassis">Экземпляр менеджера шасси.</param>
-    public PowerManager(IChassisManager managerChassis) => ChassisModel = managerChassis;
+    public PowerManager(IChassisManager managerChassis)
+    {
+      ChassisModel = managerChassis;
+      _queryExecutor = new ChassisQueryExecutor(managerChassis);
+    }
 
     /// <inheritdoc />
     public async Task StartPowerAsync(IUserInteractionService? userMessageService = null)
     {
       bool success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        var cmd = new DeviceCommand(2, 1, 1);
+        string response = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 0);
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          bool result = !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+          bool result = string.Equals(response.Trim(), "1", StringComparison.Ordinal);
           await ShowIdleResultAsync("Включение питания шасси", result, userMessageService);
           return result;
         }
 
-        var cmd = new DeviceCommand(2, 1, 1);
-        await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
         return true;
       }, ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null, deviceTask: true);
 
@@ -50,15 +55,15 @@ namespace Ask.Device.Runtime.Function.ManagerChassis
     {
       bool success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        var cmd = new DeviceCommand(2, 2, 1);
+        string response = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 0);
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          bool result = !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+          bool result = string.Equals(response.Trim(), "1", StringComparison.Ordinal);
           await ShowIdleResultAsync("Отключение питания шасси", result, userMessageService);
           return result;
         }
 
-        var cmd = new DeviceCommand(2, 2, 1);
-        await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString());
         return true;
       }, ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null, deviceTask: true);
 
@@ -70,17 +75,12 @@ namespace Ask.Device.Runtime.Function.ManagerChassis
     {
       return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          bool attemptSuccess = !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-          await ShowIdleResultAsync("Проверка питания шасси", attemptSuccess, userMessageService);
-          return attemptSuccess;
-        }
-
         var cmd = new DeviceCommand(7);
-        var result = await ChassisModel.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
+        string response = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 2000);
+        bool result = response.Contains("1", StringComparison.Ordinal);
+        await ShowIdleResultAsync("Проверка питания шасси", result, userMessageService);
 
-        return result.Contains("1");
+        return result;
       }, ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null, deviceTask: true);
     }
 

@@ -1,0 +1,148 @@
+<UserControl x:Class="Ask.UI.Features.ServiceTools.Chassis.ChassisControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="760"
+             d:DesignWidth="900"
+             Foreground="{DynamicResource ForegrounfBrushes}">
+    <UserControl.Resources>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingCardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+        </Style>
+        <Style x:Key="Title" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,4,0,16"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Opacity" Value="0.65"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="Action" TargetType="Button" BasedOn="{StaticResource ButtonStyleV11}">
+            <Setter Property="MinWidth" Value="130"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="On" TargetType="Button" BasedOn="{StaticResource Action}">
+            <Setter Property="Background" Value="{DynamicResource GreenColorSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource GreenColorSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style x:Key="Off" TargetType="Button" BasedOn="{StaticResource Action}">
+            <Setter Property="Background" Value="{DynamicResource RedColorSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource RedColorSolidColorBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer Padding="18"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid MaxWidth="1180" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="DeviceStatusIndicator"
+                                    Width="10"
+                                    Height="10"
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center"
+                                    Background="IndianRed"
+                                    CornerRadius="5"/>
+                            <TextBlock Text="Контроллер шасси"
+                                       Style="{StaticResource Title}"/>
+                        </StackPanel>
+                        <TextBlock x:Name="DeviceStatusText"
+                                   Margin="0,5,0,0"
+                                   Text="Загрузка контроллера…"
+                                   FontSize="15"
+                                   Opacity="0.7"/>
+                    </StackPanel>
+                    <WrapPanel Grid.Column="1">
+                        <Button Content="Инициализировать"
+                                MinWidth="160"
+                                Style="{StaticResource Action}"
+                                Click="InitializeButton_Click"/>
+                        <Button Content="Полный сброс"
+                                MinWidth="150"
+                                Style="{StaticResource Off}"
+                                Click="ResetButton_Click"/>
+                        <Button Content="Обновить"
+                                Style="{StaticResource Action}"
+                                Click="RefreshButton_Click"/>
+                    </WrapPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.08*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="0.92*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Управление питанием"
+                                   Style="{StaticResource Title}"/>
+                        <TextBlock Text="Включение, выключение и проверка фактического состояния питания шасси."
+                                   Style="{StaticResource Hint}"/>
+                        <WrapPanel>
+                            <Button Content="Включить питание"
+                                    MinWidth="170"
+                                    Style="{StaticResource On}"
+                                    Click="StartPowerButton_Click"/>
+                            <Button Content="Выключить питание"
+                                    MinWidth="170"
+                                    Style="{StaticResource Off}"
+                                    Click="StopPowerButton_Click"/>
+                            <Button Content="Проверить питание"
+                                    MinWidth="170"
+                                    Style="{StaticResource Action}"
+                                    Click="VerifyPowerButton_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Результат операции"
+                                   Style="{StaticResource Title}"/>
+                        <TextBlock Text="Здесь отображается ответ контроллера после выполнения команды."
+                                   Style="{StaticResource Hint}"/>
+                        <Border Padding="14,12"
+                                Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                BorderBrush="{DynamicResource SettingCardBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="9">
+                            <TextBlock x:Name="OperationResultText"
+                                       Text="Операция ещё не выполнялась."
+                                       FontSize="15"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
