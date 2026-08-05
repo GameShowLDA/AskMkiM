@@ -1,15 +1,10 @@
 using System;
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Static.Messages;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
   public static class SelfTestHelper
   {
-    private const double RelativeErrorMarker = -1;
-
     /// <summary>
     /// Метод для вывода сообщения пользователю о результатах измерения.
     /// </summary>
@@ -24,23 +19,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     {
       ArgumentNullException.ThrowIfNull(userMessageService);
 
-      var resultType = status
-        ? ShowMessageModel.MessageType.Success
-        : ShowMessageModel.MessageType.Error;
-      var resultMessage = !status || DeviceDisplayConfig.GetMeasurementResultsVisibility()
-        ? $"{FormatResult(result)}{unit}"
-        : string.Empty;
-
-      var model = new ShowMessageModel(
-          header: $"Тест {param}{unit} {FormatFallibility(idealResult, percentageError)}",
-          message: resultMessage,
-          type: resultType)
-      {
-        IndentLevel = 1,
-        IsStepModeCheckpoint = true,
-      };
-
-      return userMessageService.ShowMessageAsync(model, IsBlockStart: true);
+      return SelfTestMessages.PublishMultimeterMeasurementResultAsync(
+        status,
+        result,
+        param,
+        unit,
+        idealResult,
+        percentageError,
+        userMessageService);
     }
 
     /// <summary>
@@ -59,18 +45,5 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       return Math.Abs(result - idealResult) <= Math.Abs(range);
     }
 
-    private static string FormatResult(double result)
-    {
-      return MeasurementValueFormatter.IsOverloadValue(result)
-        ? "Overload"
-        : MeasurementValueFormatter.Format(result);
-    }
-
-    private static string FormatFallibility(double idealResult, int percentageError)
-    {
-      return idealResult == RelativeErrorMarker
-        ? $"(± {percentageError}%)"
-        : $"({idealResult} ± {percentageError}%)";
-    }
   }
 }

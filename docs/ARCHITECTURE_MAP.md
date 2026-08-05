@@ -38,7 +38,7 @@
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
-| Самоконтроль и инженерные тесты | `MainWindow/Services/TestService.cs`, `MainWindow/Services/SelfTestServices.cs` | `Ask.UI/Controls/ExecutorControls/TestsControls/`, `Ask.Engine/Tests/` |
+| Самоконтроль и инженерные тесты | `MainWindow/Services/TestService.cs`, `MainWindow/Services/SelfTestServices.cs` | `Ask.Device.Runtime/Function/*/SelfCheck/`, `Ask.Protocol.Messages/EntryPoints/SelfTestMessages.cs`, `Ask.UI/Controls/ExecutorControls/TestsControls/`, `Ask.Engine/Tests/` |
 | Ошибки трансляции | `Ask.Core/Services/Errors/Translation/` | целевой parser/validator, `Ask.UI/Controls/ErrorList/`, `UI/Controls/ErrorList/` |
 | Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `MainWindow/Services/TranslationServices.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Services/ExceptionDiagnosticReporter.cs`, `Ask.Diagnostics/Collectors/` |
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
@@ -146,9 +146,14 @@ Ask.Protocol.Messages
 собственный источник и исходный метод в формате `PublishAsync (вызван из File.cs → Method, строка N)`.
 `Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
 отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
-`CommandMessages`, `ExecutionMessages`, `EquipmentMessages` и `MeasurementMessages`. Допустимые диапазоны
+`CommandMessages`, `ExecutionMessages`, `EquipmentMessages`, `MeasurementMessages` и `SelfTestMessages`. Допустимые диапазоны
 значений независимо от вызывающей подсистемы публикуются через `RangeMessages`. Остальные runtime-потоки
 пока продолжают использовать `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
+
+Все реализации в `Ask.Device.Runtime/Function/*/SelfCheck/` публикуют экранные сообщения через
+`SelfTestMessages → SelfTestMessageBuilder → SelfTestMessagePublisher → MessagePublisher → IMessageOutputService`.
+В самих SelfCheck-классах остаются управление оборудованием, вычисление результата и регистрация аппаратных ошибок;
+`ShowMessageModel` и прямые вызовы `ShowMessageAsync` в этом потоке отсутствуют.
 
 `Directory.Build.props` направляет обычные результаты сборки в
 `Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path
@@ -1644,6 +1649,9 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
+| `SelfTestMessages` | static facade | Ask.Protocol.Messages | публикует этапы, команды пошагового режима, ошибки и результаты самоконтроля мультиметра, GPT, МКР, УКШ и модуля напряжения/тока; runtime SelfCheck-классы моделей экранного протокола не создают | [Equipment](#equipment-architecture) |
+| `SelfTestMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует информационные, командные и результирующие сообщения самоконтроля, включая видимость измерений, Overload, погрешность и свойства итогового протокола | [Equipment](#equipment-architecture) |
+| `SelfTestMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения самоконтроля общему `MessagePublisher` с признаками блока, паузы и проверки доступности вывода | [Equipment](#equipment-architecture) |
 | `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |

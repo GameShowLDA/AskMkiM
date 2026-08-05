@@ -21,6 +21,7 @@ internal static class MessagePublisher
     bool skipStepModeCheck = false,
     bool skipPause = false,
     bool logToDeviceJournal = false,
+    bool ignoreOutputValidation = false,
     [CallerFilePath] string publisherFile = "",
     [CallerLineNumber] int publisherLine = 0)
   {
@@ -44,6 +45,7 @@ internal static class MessagePublisher
       IsBlockStart: isBlockStart,
       SkipStepModeCheck: skipStepModeCheck,
       skipPause: skipPause,
+      ignoreOutputValidation: ignoreOutputValidation,
       callerName: displayCallerName,
       callerFile: publisherFile,
       callerLine: publisherLine);

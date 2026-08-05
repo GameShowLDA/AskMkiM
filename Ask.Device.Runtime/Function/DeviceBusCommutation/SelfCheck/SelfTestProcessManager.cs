@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
@@ -34,15 +33,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       if (selectedType is not SwitchingDeviceTypeConnector type)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel(
-          "Ошибка",
-          message: "Неверный тип проверки: требуется TypeConnector",
-          type: ShowMessageModel.MessageType.Error));
+        await SelfTestMessages.PublishErrorAsync(
+          "Неверный тип проверки: требуется TypeConnector",
+          messageService);
         return;
       }
 
       await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(device, messageService);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
+      await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
 
       if (!await SelfTestConnectionHelper.SettingsMeter(meter, messageService))
       {
@@ -93,10 +91,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           break;
 
         default:
-          await messageService.ShowMessageAsync(new ShowMessageModel(
-            "Ошибка",
-            message: $"Тип проверки {type} не распознан.",
-            type: ShowMessageModel.MessageType.Error));
+          await SelfTestMessages.PublishErrorAsync(
+            $"Тип проверки {type} не распознан.",
+            messageService);
           break;
 
       }
@@ -135,7 +132,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       if (selfTestChecker == null)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Устройство не поддерживает самоконтроль.", type: ShowMessageModel.MessageType.Error));
+        await SelfTestMessages.PublishErrorAsync(
+          "Устройство не поддерживает самоконтроль.",
+          messageService);
         LogError("Ошибка: Устройство не поддерживает самоконтроль.", isDeviceLog: true);
         return false;
       }
@@ -150,9 +149,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool allTestsPassed = true;
       string testName = GetTestName(testType);
 
-      await messageService.ShowMessageAsync(
-        new ShowMessageModel($"\n{getNextTestNumber()}. Тест \"{testName}\""),
-        IsBlockStart: true,
+      await SelfTestMessages.PublishInformationAsync(
+        $"\n{getNextTestNumber()}. Тест \"{testName}\"",
+        messageService,
+        isBlockStart: true,
         ignoreOutputValidation: true);
 
       foreach (int busContact in contacts)
@@ -258,7 +258,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       }
       else
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Прибор не поддерживает самоконтроль для {circuitName}. Пропуск теста."));
+        await SelfTestMessages.PublishInformationAsync(
+          $"Прибор не поддерживает самоконтроль для {circuitName}. Пропуск теста.",
+          messageService);
       }
 
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
@@ -330,16 +332,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool result,
       bool skipPause = false)
     {
-      return messageService.ShowMessageAsync(
-        new ShowMessageModel(
-          testName,
-          message: operationName,
-          type: result
-            ? ShowMessageModel.MessageType.Success
-            : ShowMessageModel.MessageType.Error)
-        {
-          IndentLevel = 1,
-        },
+      return SelfTestMessages.PublishResultAsync(
+        testName,
+        result,
+        messageService,
+        message: operationName,
+        indentLevel: 1,
+        executionError: false,
         skipPause: skipPause);
     }
 
@@ -452,12 +451,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       string circuitName,
       bool skipPause = false)
     {
-      return messageService.ShowMessageAsync(
-        new ShowMessageModel(
-          "Ошибка",
-          message: $"Невозможно получить количество реле для {circuitName}.",
-          type: ShowMessageModel.MessageType.Error),
-        skipPause);
+      return SelfTestMessages.PublishErrorAsync(
+        $"Невозможно получить количество реле для {circuitName}.",
+        messageService,
+        skipPause: skipPause);
     }
 
     /// <summary>
@@ -489,8 +486,10 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       int relay)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      await messageService.ShowMessageAsync(
-        new ShowMessageModel($"Проверка реле {relay} в цепи {circuitName}") { IndentLevel = 1 });
+      await SelfTestMessages.PublishInformationAsync(
+        $"Проверка реле {relay} в цепи {circuitName}",
+        messageService,
+        indentLevel: 1);
 
       if (!await SetRelayStateAsync(
         cancellationToken,
@@ -504,10 +503,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       {
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
-          await messageService.ShowMessageAsync(
-            new ShowMessageModel(
-              $"Включении реле {relay} в цепи {circuitName}",
-              type: ShowMessageModel.MessageType.Error));
+          await SelfTestMessages.PublishResultAsync(
+            $"Включении реле {relay} в цепи {circuitName}",
+            false,
+            messageService,
+            skipPause: false);
         }
 
         return false;

@@ -1,11 +1,8 @@
 using System;
 using System.Globalization;
 using System.Windows.Controls;
-using System.Windows.Media;
-using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -26,10 +23,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     private const string ResistanceUnit = " Ом";
     private const string CapacitanceUnit = " нФ";
     private const double RelativeErrorMarker = -1;
-
-    private static readonly Color? HeaderColor = new ShowMessageModel(
-        type: ShowMessageModel.MessageType.CommandBlock)
-        .GetColorMessage();
 
     private static readonly double[] DcVoltageRanges = { 0.1, 1, 10, 100, 1000 };
     private static readonly double[] AcVoltageRanges = { 0.1, 1, 10, 100, 750 };
@@ -494,12 +487,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача вывода сообщения.</returns>
     private static Task ShowSectionHeaderAsync(string header, IUserInteractionService userMessageService)
     {
-      return ShowStepHeaderAsync(
-        new ShowMessageModel(
-          header: header,
-          headerColor: HeaderColor,
-          type: ShowMessageModel.MessageType.Command),
-        userMessageService);
+      return SelfTestMessages.PublishCommandAsync(header, userMessageService);
     }
 
     /// <summary>
@@ -507,11 +495,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// </summary>
     private static Task ShowActionHeaderAsync(string header, IUserInteractionService userMessageService)
     {
-      return ShowStepHeaderAsync(
-        new ShowMessageModel(
-          header: header,
-          headerColor: HeaderColor,
-          type: ShowMessageModel.MessageType.Command),
+      return SelfTestMessages.PublishCommandAsync(
+        header,
         userMessageService,
         onlyWhenStepMode: true);
     }
@@ -536,37 +521,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       IUserInteractionService userMessageService,
       int indentLevel = 1)
     {
-      return ShowStepHeaderAsync(
-        new ShowMessageModel(
-          header: header,
-          headerColor: HeaderColor,
-          message: message,
-          type: ShowMessageModel.MessageType.Command)
-        {
-          IndentLevel = indentLevel,
-        },
+      return SelfTestMessages.PublishCommandAsync(
+        header,
         userMessageService,
+        message,
+        indentLevel,
         onlyWhenStepMode: true);
-    }
-
-    /// <summary>
-    /// Помечает сообщение как контрольную точку пошагового режима и выводит его.
-    /// </summary>
-    private static Task ShowStepHeaderAsync(
-      ShowMessageModel message,
-      IUserInteractionService userMessageService,
-      bool onlyWhenStepMode = false)
-    {
-      if (onlyWhenStepMode && !StepControlManager.StepMode)
-      {
-        return Task.CompletedTask;
-      }
-
-      message.Status = ShowMessageModel.MessageType.Command;
-      message.IsStepModeCheckpoint = true;
-      message.IsControlProgramCommandHeader = true;
-
-      return userMessageService.ShowMessageAsync(message, IsBlockStart: true);
     }
 
     /// <summary>
@@ -579,28 +539,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача вывода сообщения.</returns>
     private static Task ShowActiveResistanceResultAsync(double result, bool isCorrect, string capacitanceValue, IUserInteractionService userMessageService)
     {
-      if (isCorrect && !DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility())
-      {
-        return Task.CompletedTask;
-      }
-
-      var resultType = isCorrect
-        ? ShowMessageModel.MessageType.Success
-        : ShowMessageModel.MessageType.Error;
-      var meaning = MeasurementValueFormatter.IsOverloadValue(result)
-        ? "Overload"
-        : MeasurementValueFormatter.Format(result);
-
-      return userMessageService.ShowMessageAsync(
-        new ShowMessageModel(
-          header: $"Тест активного сопротивления конденсатора {capacitanceValue} (>{MinimumActiveResistance:N0}{ResistanceUnit})",
-          message: $"{meaning}{ResistanceUnit}",
-          type: resultType)
-        {
-          IndentLevel = 1,
-          IsStepModeCheckpoint = true,
-        },
-        IsBlockStart: true);
+      return SelfTestMessages.PublishActiveResistanceResultAsync(
+        result,
+        isCorrect,
+        capacitanceValue,
+        MinimumActiveResistance,
+        ResistanceUnit,
+        userMessageService);
     }
 
     private static string FormatReferenceValue(double value, string unit)

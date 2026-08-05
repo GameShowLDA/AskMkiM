@@ -25,8 +25,8 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <returns>Асинхронная задача выполнения проверки коммутации.</returns>
     static internal async Task CheckSwitching(CancellationToken cancellationToken, IUserInteractionService messageService, IMultimeter fastMeter, IPowerSourceModule powerSourceModule, ISwitchingDevice switchingDevice)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel("Начало проверки коммутации"));
-      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
+      await SelfTestMessages.PublishInformationAsync("Начало проверки коммутации", messageService);
+      await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
       await powerSourceModule.VoltageManager.SetSourceVoltageAsync(VoltageSources.Supply12V, messageService);
       await powerSourceModule.VoltageManager.SetVoltageLevelAsync(5, 0, messageService);
       await Task.Delay(1000);
@@ -57,7 +57,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         await CheckBus(messageService, bus, switchingDevice, powerSourceModule, fastMeter);
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
+      await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
       foreach (var item in busesB)
       {
         cancellationToken.ThrowIfCancellationRequested();
@@ -96,11 +96,13 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       var busSwitch = GetAbPair(switchingBus);
       if (busSwitch == null)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Не удалось определить шину AB для {switchingBus}"));
+        await SelfTestMessages.PublishInformationAsync(
+          $"Не удалось определить шину AB для {switchingBus}",
+          messageService);
         return;
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка шины {switchingBus}"));
+      await SelfTestMessages.PublishInformationAsync($"Проверка шины {switchingBus}", messageService);
 
       var connectBus = await switchingDevice.ConnectorManager.ConnectMultimeter(busSwitch, messageService);
 
@@ -112,14 +114,13 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 
         var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, userMessageService: messageService);
 
-        if (Math.Abs(result - 5.0) < 0.15)
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 2 });
-        }
-        else
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 2 });
-        }
+        await SelfTestMessages.PublishResultAsync(
+          $"Напряжение {result}",
+          Math.Abs(result - 5.0) < 0.15,
+          messageService,
+          indentLevel: 2,
+          executionError: false,
+          skipPause: false);
         await powerSource.BusManager.DisconnectBusToPositiveAsync(switchingBus, messageService);
       }
       else if (switchingBus.ToString().StartsWith("B"))
@@ -127,14 +128,13 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         await powerSource.BusManager.ConnectBusToNegativeAsync(switchingBus, messageService);
         var result = await fastMeter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, userMessageService: messageService);
 
-        if (Math.Abs(result - 5.0) < 0.15)
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 2 });
-        }
-        else
-        {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Напряжение {result}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 2 });
-        }
+        await SelfTestMessages.PublishResultAsync(
+          $"Напряжение {result}",
+          Math.Abs(result - 5.0) < 0.15,
+          messageService,
+          indentLevel: 2,
+          executionError: false,
+          skipPause: false);
         await powerSource.BusManager.DisconnectBusToNegativeAsync(switchingBus, messageService);
       }
 
