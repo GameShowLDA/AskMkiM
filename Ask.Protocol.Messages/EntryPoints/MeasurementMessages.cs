@@ -15,6 +15,27 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class MeasurementMessages
 {
   /// <summary>
+  /// Выводит ранее сформированное сообщение с результатом измерения.
+  /// </summary>
+  /// <param name="message">Сформированное сообщение с результатом измерения.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishBuiltMessageAsync(
+    ShowMessageModel message,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(message);
+    ArgumentNullException.ThrowIfNull(outputService);
+    return MeasurementMessagePublisher.PublishAsync(
+      message, outputService, callerName, callerFile, callerLine);
+  }
+  /// <summary>
   /// Публикует заголовок начала измерения.
   /// </summary>
   /// <param name="measurementTypeCommand">Тип выполняемого измерения.</param>

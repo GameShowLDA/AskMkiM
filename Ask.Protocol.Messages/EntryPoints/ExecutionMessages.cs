@@ -578,6 +578,140 @@ public static class ExecutionMessages
   }
 
   /// <summary>
+  /// Выводит заголовок проверки заданной цепи.
+  /// </summary>
+  /// <param name="chain">Обозначение проверяемой цепи.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishChainInspectionAsync(
+    string chain,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildChainInspectionMessage(chain),
+      outputService, callerName, callerFile, callerLine, isBlockStart: true);
+
+  /// <summary>
+  /// Выводит заголовок списка бракованных точек.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishDefectivePointsAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildDefectivePointsMessage(),
+      outputService, callerName, callerFile, callerLine, isBlockStart: true);
+
+  /// <summary>
+  /// Выводит сообщение о браке, обнаруженном при проверке цепи.
+  /// </summary>
+  /// <param name="chain">Обозначение бракованной цепи.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishDefectiveChainAsync(
+    string chain,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildDefectiveChainMessage(chain),
+      outputService, callerName, callerFile, callerLine, isBlockStart: true);
+
+  /// <summary>
+  /// Выводит заголовок анализа короткого замыкания между точками.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishShortCircuitAnalysisAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildShortCircuitAnalysisMessage(),
+      outputService, callerName, callerFile, callerLine, isBlockStart: true);
+
+  /// <summary>
+  /// Выводит номер выполняемого шага локализации.
+  /// </summary>
+  /// <param name="step">Номер шага локализации.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishLocalizationStepAsync(
+    int step,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildLocalizationStepMessage(step),
+      outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
+  /// Выводит операцию переключения части группы точек.
+  /// </summary>
+  /// <param name="operation">Описание операции переключения.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishGroupPartOperationAsync(
+    string operation,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildGroupPartOperationMessage(operation),
+      outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
+  /// Выводит сообщение о неудачной локализации неисправной цепи.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishLocalizationFailureAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildLocalizationFailureMessage(),
+      outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
+  /// Формирует ошибку локализации для результата выполнения алгоритма.
+  /// </summary>
+  /// <returns>Сообщение об ошибке локализации.</returns>
+  public static ShowMessageModel BuildLocalizationError()
+    => ExecutionMessageBuilder.BuildLocalizationErrorMessage();
+
+  /// <summary>
   /// Выводит сообщение о подключении модуля к шинам A1 и B1.
   /// </summary>
   /// <param name="moduleName">Наименование модуля.</param>

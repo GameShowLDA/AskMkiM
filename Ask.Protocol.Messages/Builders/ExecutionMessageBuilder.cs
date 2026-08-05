@@ -103,6 +103,45 @@ internal static class ExecutionMessageBuilder
   internal static ShowMessageModel BuildCheckResultsHeader()
     => new("Результаты проверки") { IndentLevel = 1 };
 
+  internal static ShowMessageModel BuildChainInspectionMessage(string chain)
+    => new($"Проверка {chain}");
+
+  internal static ShowMessageModel BuildDefectivePointsMessage()
+    => new("Бракованные точки");
+
+  internal static ShowMessageModel BuildDefectiveChainMessage(string chain)
+    => new("Найден брак при проверке цепи", message: chain, type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 1,
+    };
+
+  internal static ShowMessageModel BuildShortCircuitAnalysisMessage()
+    => new("Анализ на наличие короткого замыкания между точками");
+
+  internal static ShowMessageModel BuildLocalizationStepMessage(int step)
+    => new($"Выполнение шага {step}");
+
+  internal static ShowMessageModel BuildGroupPartOperationMessage(string operation)
+    => new(operation);
+
+  internal static ShowMessageModel BuildLocalizationFailureMessage()
+    => new(
+      "Локализация не удалась",
+      message: "Не удалось точно определить неисправную цепь",
+      type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 3,
+    };
+
+  internal static ShowMessageModel BuildLocalizationErrorMessage()
+    => new(
+      "Ошибка локализации",
+      message: "Не удалось точно определить замыкание цепей",
+      type: ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 3,
+    };
+
   internal static ShowMessageModel BuildModuleBusConnectionMessage(string moduleName, int moduleNumber)
     => new($"{moduleName}({moduleNumber})", message: "Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info);
 
