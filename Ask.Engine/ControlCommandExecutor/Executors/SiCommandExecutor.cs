@@ -1,4 +1,3 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -7,7 +6,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
@@ -62,26 +60,20 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       message += BuildSourceLinesMessage(command);
       var total = Stopwatch.StartNew();
-      await TimedAsync("show command message", () => CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message));
-      await TimedAsync("show devices preparation message", () => DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context));
+      await CommandMessages.ShowCommandExecutionAsync(context.Console, nameCommand, message);
+      await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
-      var stage = Stopwatch.StartNew();
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
-      LogPerformance("collect points", stage);
-      await TimedAsync("validate points", () => EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console));
+      await EquipmentService.ValidatePointsExistInAnalyzedPointsAsync(points, context.Console);
 
-      stage.Restart();
       var relayModules = DeviceManager.RelayModule.PrepareRelayModules(points, context);
-      LogPerformance("prepare relay modules", stage);
-      await TimedAsync("connect all bus lines", () => DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console));
+      await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(relayModules, context.Console);
 
       var dbc = EquipmentService.GetSwitchingDevice();
-      await TimedAsync("connect breakdown tester to switching device", () => DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console));
+      await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectBreakdownTester(dbc, context.Console);
 
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
-      await TimedAsync("setup breakdown tester", () => SettingBreakdown(breakDown, context.Console, command.Time.Value, command.Resistance.Value, command.Voltage.Value));
-
-      List<ShowMessageModel> errorMessage = new();
+      await SettingBreakdown(breakDown, context.Console, command.Time.Value, command.Resistance.Value, command.Voltage.Value);
 
       NodeFullContext nodeFullContext = new NodeFullContext(context, command, command, command.Resistance.Value + 1, command.Resistance.Value, -1);
       nodeFullContext.IsInvokedByAnotherCommand = context.IsInvokedByAnotherCommand;
@@ -104,17 +96,16 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         NodeAccumulationContext = nodeAccumulationContext
       };
 
-      var messageResult = await TimedAsync("execute disconnection check", () => DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest));
-      errorMessage.AddRange(messageResult.Errors);
+      var messageResult = await DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest);
 
-      await TimedAsync("format result messages", () => PointFormater.MessageResult(errorMessage, context.Console));
+      await PointFormater.MessageResult(messageResult.Errors, context.Console);
 
-      if (errorMessage.Count > 0)
+      if (messageResult.Errors.Count > 0)
       {
-        protocolModel.AddErrors(nameCommand, errorMessage);
+        protocolModel.AddErrors(nameCommand, messageResult.Errors);
       }
 
-      await TimedAsync("complete protocol command", () => CompleteProtocolCommandAsync(context, protocolModel, nameCommand));
+      await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
       LogInformation($"[PERF][SI] total: {total.ElapsedMilliseconds} ms", isDeviceLog: true);
     }
 
@@ -161,7 +152,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         var measurement = Stopwatch.StartNew();
         var answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
-        LogPerformance("node accumulation measurement device call", measurement);
         measurement.Restart();
 
         measurementRange.TargetValue = answer.value;
@@ -171,7 +161,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
           outputService: messageService);
-        LogPerformance("node accumulation measurement message", measurement);
 
         return result;
       }, messageService);
@@ -201,8 +190,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var measurement = Stopwatch.StartNew();
         answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
 
-        LogPerformance("node full measurement device call", measurement);
-
         measurement.Restart();
         measurementRange.TargetValue = answer.Value;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
@@ -211,62 +198,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
           outputService: messageService);
-        LogPerformance("node full measurement message", measurement);
         return result;
 
       }, messageService);
 
       return result;
-    }
-
-    /// <summary>
-    /// Выполняет асинхронный этап и записывает его продолжительность в журнал производительности.
-    /// </summary>
-    /// <param name="stageName">Имя измеряемого этапа.</param>
-    /// <param name="action">Асинхронная операция этапа.</param>
-    /// <returns>Задача, представляющая выполнение этапа.</returns>
-    private static async Task TimedAsync(string stageName, Func<Task> action)
-    {
-      var stopwatch = Stopwatch.StartNew();
-      try
-      {
-        await action();
-      }
-      finally
-      {
-        LogPerformance(stageName, stopwatch);
-      }
-    }
-
-    /// <summary>
-    /// Выполняет асинхронный этап с результатом и записывает его продолжительность в журнал производительности.
-    /// </summary>
-    /// <typeparam name="T">Тип результата операции.</typeparam>
-    /// <param name="stageName">Имя измеряемого этапа.</param>
-    /// <param name="action">Асинхронная операция этапа.</param>
-    /// <returns>Результат выполненной операции.</returns>
-    private static async Task<T> TimedAsync<T>(string stageName, Func<Task<T>> action)
-    {
-      var stopwatch = Stopwatch.StartNew();
-      try
-      {
-        return await action();
-      }
-      finally
-      {
-        LogPerformance(stageName, stopwatch);
-      }
-    }
-
-    /// <summary>
-    /// Останавливает таймер этапа и записывает его продолжительность в журнал оборудования.
-    /// </summary>
-    /// <param name="stageName">Имя измеряемого этапа.</param>
-    /// <param name="stopwatch">Таймер измеряемого этапа.</param>
-    private static void LogPerformance(string stageName, Stopwatch stopwatch)
-    {
-      stopwatch.Stop();
-      LogInformation($"[PERF][SI] {stageName}: {stopwatch.ElapsedMilliseconds} ms", isDeviceLog: true);
     }
   }
 }

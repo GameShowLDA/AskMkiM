@@ -4,7 +4,6 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Base.GroupMethod;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -89,7 +88,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task DelayAsync(double? time, IUserInteractionService interactionService)
     {
-      await interactionService.ShowMessageAsync(new ShowMessageModel("Задержка перед включением", message: $"{time}сек.") { IndentLevel = 2 });
+      await ExecutionMessages.PublishDelayBeforeEnablingAsync(time, interactionService);
       var delay = Convert.ToInt32(time * 1000);
       await interactionService.DelayWithPauseAsync(TimeSpan.FromMilliseconds(delay));
     }

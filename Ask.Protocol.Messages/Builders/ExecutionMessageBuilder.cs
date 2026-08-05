@@ -66,4 +66,14 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildPointsResetMessage()
     => new("Сброс точек") { IndentLevel = 1 };
+
+  internal static ShowMessageModel BuildDelayBeforeEnablingMessage(double? seconds)
+  {
+    return new ShowMessageModel(
+      "Задержка перед включением",
+      message: $"{seconds}сек.")
+    {
+      IndentLevel = 2,
+    };
+  }
 }
