@@ -222,4 +222,140 @@ public static class ExecutionMessages
       callerFile,
       callerLine);
   }
+
+  /// <summary>
+  /// Выводит сообщение об ошибке выполнения.
+  /// </summary>
+  /// <param name="details">Описание ошибки.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishErrorAsync(
+    string details,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildErrorMessage(details),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
+  /// Выводит заголовок инициализации устройств, если включён вывод параметров выполнения.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowDevicesInitializationAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetExecutionParametersVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildDevicesInitializationMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок настройки измерителя, если включён вывод параметров выполнения.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowMeasurementDeviceSetupAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetExecutionParametersVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildMeasurementDeviceSetupMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок подключения шин, если включён вывод сведений о коммутации.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowBusConnectionAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildBusConnectionMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
+
+  /// <summary>
+  /// Выводит заголовок подключения точек, если включён вывод сведений о коммутации.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowPointConnectionAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
+    return ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildPointConnectionMessage(),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isBlockStart: true);
+  }
 }

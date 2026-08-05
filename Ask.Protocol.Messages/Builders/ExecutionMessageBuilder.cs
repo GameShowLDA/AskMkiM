@@ -48,4 +48,19 @@ internal static class ExecutionMessageBuilder
       IndentLevel = 2,
     };
   }
+
+  internal static ShowMessageModel BuildErrorMessage(string details)
+    => new("Ошибка", message: details, type: ShowMessageModel.MessageType.Error);
+
+  internal static ShowMessageModel BuildDevicesInitializationMessage()
+    => new("Инициализация устройств", type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildMeasurementDeviceSetupMessage()
+    => new("Настройка измерителя", type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildBusConnectionMessage()
+    => new("Подключение шин");
+
+  internal static ShowMessageModel BuildPointConnectionMessage()
+    => new("Подключение точек");
 }
