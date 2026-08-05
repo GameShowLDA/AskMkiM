@@ -131,7 +131,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         executionResult.AddRange(messageResult);
       }
 
-      await PointFormater.MessageResult(executionResult.Errors, context.Console);
+      await ExecutionMessages.PublishCheckResultsAsync(executionResult.Errors, context.Console);
 
       if (executionResult.Errors.Count > 0)
       {

@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Protocol.Messages.Builders;
 using Ask.Protocol.Messages.Show;
@@ -543,4 +544,100 @@ public static class ExecutionMessages
       callerFile,
       callerLine);
   }
+
+  /// <summary>
+  /// Выводит заголовок и накопленные сообщения результатов проверки.
+  /// </summary>
+  /// <param name="messages">Сообщения результатов проверки.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщений.</returns>
+  public static async Task PublishCheckResultsAsync(
+    IReadOnlyCollection<ShowMessageModel> messages,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(messages);
+    if (messages.Count == 0)
+    {
+      return;
+    }
+
+    await ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildCheckResultsHeader(), outputService, callerName, callerFile, callerLine);
+
+    foreach (var message in messages)
+    {
+      await ExecutionMessagePublisher.PublishAsync(
+        message, outputService, callerName, callerFile, callerLine);
+    }
+  }
+
+  /// <summary>
+  /// Выводит сообщение о подключении модуля к шинам A1 и B1.
+  /// </summary>
+  /// <param name="moduleName">Наименование модуля.</param>
+  /// <param name="moduleNumber">Номер модуля.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishModuleBusConnectionAsync(
+    string moduleName,
+    int moduleNumber,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildModuleBusConnectionMessage(moduleName, moduleNumber),
+      outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
+  /// Выводит сообщение о подключении диапазона точек к шинам.
+  /// </summary>
+  /// <param name="chassisNumber">Номер шасси.</param>
+  /// <param name="moduleNumber">Номер модуля.</param>
+  /// <param name="startPoint">Начальная точка диапазона.</param>
+  /// <param name="endPoint">Конечная точка диапазона.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishPointRangeConnectionAsync(
+    int chassisNumber,
+    int moduleNumber,
+    int startPoint,
+    int endPoint,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildPointRangeConnectionMessage(
+        chassisNumber, moduleNumber, startPoint, endPoint),
+      outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
+  /// Выводит информационное сообщение об инициализации оборудования.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowEquipmentInitializationAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildEquipmentInitializationStatusMessage(),
+      outputService, callerName, callerFile, callerLine);
 }

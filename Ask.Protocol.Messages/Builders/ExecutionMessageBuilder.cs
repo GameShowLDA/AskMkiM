@@ -99,4 +99,23 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildDebugMessage(string details)
     => new(debug: details);
+
+  internal static ShowMessageModel BuildCheckResultsHeader()
+    => new("Результаты проверки") { IndentLevel = 1 };
+
+  internal static ShowMessageModel BuildModuleBusConnectionMessage(string moduleName, int moduleNumber)
+    => new($"{moduleName}({moduleNumber})", message: "Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildPointRangeConnectionMessage(
+    int chassisNumber,
+    int moduleNumber,
+    int startPoint,
+    int endPoint)
+    => new(
+      $"{chassisNumber}.{moduleNumber}.{startPoint} - {endPoint}",
+      message: "Подключение точек к шинам",
+      type: ShowMessageModel.MessageType.Info);
+
+  internal static ShowMessageModel BuildEquipmentInitializationStatusMessage()
+    => new("Инициализация оборудования", type: ShowMessageModel.MessageType.Info);
 }

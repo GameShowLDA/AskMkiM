@@ -98,7 +98,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var messageResult = await DisconnectionCheckExecutor.ExecuteAsync(disconnectionCheckRequest);
 
-      await PointFormater.MessageResult(messageResult.Errors, context.Console);
+      await ExecutionMessages.PublishCheckResultsAsync(messageResult.Errors, context.Console);
 
       if (messageResult.Errors.Count > 0)
       {

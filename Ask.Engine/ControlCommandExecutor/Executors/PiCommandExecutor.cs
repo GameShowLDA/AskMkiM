@@ -126,7 +126,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         executionResult.Errors.AddRange(errMes);
       }
 
-      await PointFormater.MessageResult(executionResult.Errors, context.Console);
+      await ExecutionMessages.PublishCheckResultsAsync(executionResult.Errors, context.Console);
       if (executionResult.Errors.Count > 0)
       {
         protocolModel.AddErrors(nameCommand, executionResult.Errors);

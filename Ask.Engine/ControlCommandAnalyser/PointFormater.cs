@@ -1,15 +1,13 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
   /// <summary>
   /// Утилитарный класс для форматирования строк представления точек цепей
-  /// и вывода сообщений результатов проверки.
+  /// и представления цепей в протоколе.
   /// </summary>
   /// <remarks>
   /// Используется для формирования текстовых представлений цепей в протоколах
@@ -150,27 +148,5 @@ namespace Ask.Engine.ControlCommandAnalyser
       return result;
     }
 
-    /// <summary>
-    /// Выводит список сообщений результатов проверки через сервис сообщений.
-    /// </summary>
-    /// <param name="showMessageModels">Список сообщений для отображения.</param>
-    /// <param name="messageService">Сервис вывода сообщений в интерфейс.</param>
-    /// <returns>Асинхронная задача завершения операции.</returns>
-    /// <remarks>
-    /// Если список сообщений не пустой, сначала выводится заголовок
-    /// «Результаты проверки», затем все сообщения по порядку.
-    /// </remarks>
-    public static async Task MessageResult(List<ShowMessageModel> showMessageModels, IMessageOutputService messageService)
-    {
-      if (showMessageModels.Count > 0)
-      {
-
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Результаты проверки") { IndentLevel = 1 });
-        foreach (var item in showMessageModels)
-        {
-          await messageService.ShowMessageAsync(item);
-        }
-      }
-    }
   }
 }
