@@ -133,14 +133,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await ExecutionMessages.PublishCheckResultsAsync(executionResult.Errors, context.Console);
 
-      if (executionResult.Errors.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, executionResult.Errors);
-      }
-      if (executionResult.Info.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, executionResult.Info);
-      }
+      protocolModel.AddResult(nameCommand, executionResult);
     }
     private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {

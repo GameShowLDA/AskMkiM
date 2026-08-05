@@ -123,10 +123,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       await ExecutionMessages.PublishCheckResultsAsync(executionResult.Errors, context.Console);
-      if (executionResult.Errors.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, executionResult.Errors);
-      }
+      protocolModel.AddResult(nameCommand, executionResult);
 
       await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
 

@@ -100,10 +100,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       await ExecutionMessages.PublishCheckResultsAsync(messageResult.Errors, context.Console);
 
-      if (messageResult.Errors.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, messageResult.Errors);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
 
       await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
       LogInformation($"[PERF][SI] total: {total.ElapsedMilliseconds} ms", isDeviceLog: true);

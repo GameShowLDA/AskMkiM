@@ -69,14 +69,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var messageResult = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(pairwiseFirstPointCheckerAlt);
 
-      if (messageResult.Errors.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, messageResult.Errors);
-      }
-      if (messageResult.Info.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, messageResult.Info);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
 
     /// <summary>

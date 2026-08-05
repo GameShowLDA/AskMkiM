@@ -631,9 +631,11 @@ executor throws
   и публикацию измерений, ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
 - `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
   `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
-- `IeCommandExecutor` и `KsCommandExecutor` передают `Errors`/`Info` из
-  `AlgorithmExecutionResult` напрямую в `ProtocolModel`, не создавая собственные коллекции
-  моделей сообщений;
+- `EhtCommandExecutor`, `IeCommandExecutor`, `KsCommandExecutor`, `NeCommandExecutor`,
+  `PiCommandExecutor`, `PrCommandExecutor` и `SiCommandExecutor` передают единый
+  `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
+  в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
+  ошибки и информационные сообщения по коллекциям `ProtocolModel`;
 - `ParallelTestRunner` публикует этап общего сброса через `ExecutionMessages`, а
   `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
   `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
@@ -1642,6 +1644,7 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | хранит накопленные ошибки и информационные `ShowMessageModel` алгоритма, не раскрывая эту зависимость внутри Ask.Engine | [Execution Engine](#execution-engine) |
+| `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | добавляет единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
