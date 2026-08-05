@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
@@ -20,15 +19,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(PairwiseFirstPointContext context)
+    static public async Task<AlgorithmExecutionResult> CheckSequenceAsync(PairwiseFirstPointContext context)
     {
-      List<ShowMessageModel> errorsMessage = new List<ShowMessageModel>();
+      var executionResult = new AlgorithmExecutionResult();
       List<(ChainModel, ChainModel)> errorChains = new List<(ChainModel, ChainModel)>();
 
       var groupChains = context.SchemeModel.GetPointsDisconnected();
       if (groupChains.ChainModels.Count <= 1)
       {
-        return errorsMessage;
+        return executionResult;
       }
 
       _basePoint = groupChains.ChainModels.FirstOrDefault();
@@ -39,7 +38,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         ControlCheckAlgorithm.DisconnectionRelativeToFirstPoint,
         context.IsPolarityReversed);
 
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Подлючение точек"), IsBlockStart: true);
+      await CommandMessages.ShowPointsConnectionAsync(messageService, indentLevel: 0);
 
       await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
       groupChains.ChainModels.Remove(_basePoint);
@@ -84,9 +83,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             context.VoltageType);
 
           await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
-          await messageService.ShowMessageAsync(err);
+          await MeasurementMessages.PublishBuiltMessageAsync(err, messageService);
 
-          errorsMessage.Add(err);
+          executionResult.Errors.Add(err);
           context.CommandManager.AddErrorMethod(
             context.CommandModel.PointErrors.ChainError($"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
             chainStr,
@@ -110,7 +109,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
       }
-      return errorsMessage;
+      return executionResult;
     }
   }
 }

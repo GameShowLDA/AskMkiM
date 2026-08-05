@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -32,15 +31,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(NodeAccumulationContext context)
+    static public async Task<AlgorithmExecutionResult> CheckSequenceAsync(NodeAccumulationContext context)
     {
-      List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
+      var executionResult = new AlgorithmExecutionResult();
       List<(ChainModel, ChainModel)> errorChains = new List<(ChainModel, ChainModel)>();
 
       var groupChains = context.SchemeModel.GetPointsDisconnected();
       if (groupChains.ChainModels.Count == 0)
       {
-        return ErrorMessage;
+        return executionResult;
       }
 
       var messageService = context.MessageService;
@@ -88,7 +87,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
               context.VoltageType);
 
-            await messageService.ShowMessageAsync(err);
+            await MeasurementMessages.PublishBuiltMessageAsync(err, messageService);
 
             if (context.CommandModel.PointErrors != null)
             {
@@ -101,14 +100,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 context.CommandModel.FormattedStartLineNumber));
             }
 
-            ErrorMessage.Add(err);
-            await messageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {err.ToString()}"));
+            executionResult.Errors.Add(err);
+            await ExecutionMessages.PublishDebugAsync($"Добавлена ошибка: {err}", messageService);
 
           }
           else
           {
-            await messageService.ShowMessageAsync(new ShowMessageModel("Локализация не удалась", message: "Не удалось точно определить неисправную цепь", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-            ErrorMessage.Add(new ShowMessageModel($"Ошибка локализации", message: $"Не удалось точно определить замыкание цепей", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
+            await ExecutionMessages.PublishLocalizationFailureAsync(messageService);
+            executionResult.Errors.Add(ExecutionMessages.BuildLocalizationError());
           }
         }
 
@@ -131,7 +130,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
       }
 
-      return ErrorMessage;
+      return executionResult;
     }
 
     /// <summary>
@@ -164,14 +163,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
 
       step++;
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Выполнение шага {step}"));
+      await ExecutionMessages.PublishLocalizationStepAsync(step, messageService);
 
       var (leftPart, rightPart) = SplitInHalf(candidates);
       var switchResistance = GetSwitchResistance(candidates);
 
       try
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Отключение левой части группы точек"));
+        await ExecutionMessages.PublishGroupPartOperationAsync(
+          "Отключение левой части группы точек", messageService);
         await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
 
         var measuredWithoutLeft = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type);
@@ -182,10 +182,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             : await LocalizeFaultyPointAsync(performMeasurementAsync, rightPart, resistance, messageService, cancellationToken, type, revers);
         }
 
-        await messageService.ShowMessageAsync(new ShowMessageModel("Отключение правой части группы точек"));
+        await ExecutionMessages.PublishGroupPartOperationAsync(
+          "Отключение правой части группы точек", messageService);
         await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(rightPart, messageService, revers);
 
-        await messageService.ShowMessageAsync(new ShowMessageModel("Подключение левой части группы точек"));
+        await ExecutionMessages.PublishGroupPartOperationAsync(
+          "Подключение левой части группы точек", messageService);
         await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
 
         var measuredWithoutRight = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type);

@@ -104,26 +104,22 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (command.AlgorithmKey.Contains("К"))
       {
         nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
-        var errMes = await NodeFullChecker.CheckSequenceAsync(nodeFullContext);
-        executionResult.Errors.AddRange(errMes);
+        executionResult.AddRange(await NodeFullChecker.CheckSequenceAsync(nodeFullContext));
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
         methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
-        var errMes = await MethodExecutor.CheckSequenceAsync(methodExecutionContext);
-        executionResult.Errors.AddRange(errMes);
+        executionResult.AddRange(await MethodExecutor.CheckSequenceAsync(methodExecutionContext));
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
-        executionResult.Errors.AddRange(errMes);
+        executionResult.AddRange(await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext));
       }
       else
       {
         nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
-        executionResult.Errors.AddRange(errMes);
+        executionResult.AddRange(await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext));
       }
 
       await ExecutionMessages.PublishCheckResultsAsync(executionResult.Errors, context.Console);

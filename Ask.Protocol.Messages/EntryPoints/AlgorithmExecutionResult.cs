@@ -8,6 +8,14 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public sealed class AlgorithmExecutionResult
 {
   /// <summary>
+  /// Создаёт пустой результат выполнения алгоритма.
+  /// </summary>
+  public AlgorithmExecutionResult()
+    : this(new List<ShowMessageModel>(), new List<ShowMessageModel>())
+  {
+  }
+
+  /// <summary>
   /// Сообщения об ошибках алгоритма.
   /// </summary>
   public List<ShowMessageModel> Errors { get; }
