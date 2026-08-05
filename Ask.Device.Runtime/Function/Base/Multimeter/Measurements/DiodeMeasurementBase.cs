@@ -25,7 +25,15 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
 
 
     /// <inheritdoc />
-    public async Task<double> CheckDiodeAsync(MeasurementRange measurementRange, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.DiodeCommands, measurementRange, userMessageService);
+    public async Task<double> CheckDiodeAsync(
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
+        => await MeasurementBase.MeasureAsync(
+          _device,
+          _device.DiodeCommands,
+          measurementRange,
+          userMessageService,
+          responseDelay: responseDelay);
   }
 }

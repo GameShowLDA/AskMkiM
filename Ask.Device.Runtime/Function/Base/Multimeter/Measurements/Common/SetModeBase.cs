@@ -4,6 +4,7 @@ using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 
@@ -14,7 +15,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <inheritdoc />
     static public async Task<bool> SetModeAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
     {
-      var header = EnumExtensions.GetDescription(profile.TypeMode);
+      var header = GetModeHeader(profile.TypeMode);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -22,7 +23,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(device, $"Установка режима \"{header}\"", succes, 1, userMessageService);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(device, header, succes, 1, userMessageService);
         }
 
         return succes;
@@ -50,7 +51,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty);
       var answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         profile.GetMode,
@@ -63,6 +64,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       return false;
+    }
+
+    static private string GetModeHeader(MultimeterTypeMode typeMode)
+    {
+      return typeMode switch
+      {
+        MultimeterTypeMode.DcVoltage => "Режим измерения постоянного напряжения",
+        MultimeterTypeMode.AcVoltage => "Режим измерения переменного напряжения",
+        MultimeterTypeMode.Resistance => "Режим измерения сопротивления",
+        MultimeterTypeMode.Capacitance => "Режим измерения ёмкости",
+        _ => $"Режим \"{EnumExtensions.GetDescription(typeMode)}\"",
+      };
     }
 
   }

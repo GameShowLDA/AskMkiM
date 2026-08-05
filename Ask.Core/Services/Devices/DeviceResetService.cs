@@ -39,7 +39,7 @@ public static class DeviceResetService
         await messageService.ShowMessageAsync(
           new ShowMessageModel(
             header: "Завершение теста",
-            type: ShowMessageModel.MessageType.Info),
+            type: ShowMessageModel.MessageType.Command),
           IsBlockStart: true,
           skipPause: true,
           ignoreOutputValidation: true);
