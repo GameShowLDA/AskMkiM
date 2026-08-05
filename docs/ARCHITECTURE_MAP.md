@@ -492,6 +492,7 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 → IUserInteractionService.WaitIfPausedAsync
 → editor.SetActiveLine
 → BreakpointHandler.OnBreakpointHitAsync
+→ CommandMessages.ShowBreakpointHitAsync (публикация заголовка без ожидания паузы и проверки пошагового режима)
 → new CommandExecutionContext
 → CommandExecutorRegistry.TryGet(mnemonic)
 → ICommandExecutor.ExecuteAsync(context, ProtocolModel)
@@ -1608,9 +1609,9 @@ ErrorItem → translator/runner ErrorList
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
-| `CommandMessages` | static facade | Ask.Protocol.Messages | проверяет настройки видимости этапов, формирует и выводит сообщения команд, блоков проверки, цепей, точек, подключения точек, направления диода и разрядов; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
-| `CommandMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит перенесённую из `ExecutorMessageBuilder` логику сообщений команд и блоков проверки | [Protocols](#protocols-and-file-formats) |
-| `CommandMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сформированные сообщения команд в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `CommandMessages` | static facade | Ask.Protocol.Messages | проверяет настройки видимости этапов, формирует и выводит сообщения команд, точек останова, блоков проверки, цепей, точек, подключения точек, направления диода и разрядов; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
+| `CommandMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит перенесённую из `ExecutorMessageBuilder` логику сообщений команд, точек останова и блоков проверки | [Protocols](#protocols-and-file-formats) |
+| `CommandMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сформированные сообщения команд в `IMessageOutputService` с настройками блока, паузы, пошагового режима и метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |

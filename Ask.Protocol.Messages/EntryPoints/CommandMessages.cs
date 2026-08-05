@@ -174,4 +174,39 @@ public static class CommandMessages
     return CommandMessagePublisher.PublishAsync(
       model, outputService, isBlockStart, callerName, callerFile, callerLine);
   }
+
+  /// <summary>
+  /// Выводит заголовок команды, на которой сработала точка останова.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="commandNumber">Номер команды программы контроля.</param>
+  /// <param name="mnemonic">Мнемоника команды.</param>
+  /// <param name="commandBody">Тело команды.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task ShowBreakpointHitAsync(
+    IMessageOutputService outputService,
+    string commandNumber,
+    string mnemonic,
+    string? commandBody,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    string commandName = $"{commandNumber} {mnemonic}".Trim();
+    string displayedBody = string.IsNullOrWhiteSpace(commandBody) ? "<пусто>" : commandBody;
+    var model = CommandMessageBuilder.BuildBreakpointHitMessage(commandName, displayedBody);
+
+    return CommandMessagePublisher.PublishAsync(
+      model,
+      outputService,
+      isBlockStart: true,
+      callerName,
+      callerFile,
+      callerLine,
+      skipStepModeCheck: true,
+      skipPause: true);
+  }
 }

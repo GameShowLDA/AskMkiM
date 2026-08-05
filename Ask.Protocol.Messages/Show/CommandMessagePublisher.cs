@@ -17,6 +17,8 @@ internal static class CommandMessagePublisher
     string callerName,
     string callerFile,
     int callerLine,
+    bool skipStepModeCheck = false,
+    bool skipPause = false,
     [CallerFilePath] string publisherFile = "",
     [CallerLineNumber] int publisherLine = 0)
   {
@@ -29,6 +31,8 @@ internal static class CommandMessagePublisher
     return outputService.ShowMessageAsync(
       message,
       IsBlockStart: isBlockStart,
+      SkipStepModeCheck: skipStepModeCheck,
+      skipPause: skipPause,
       callerName: displayCallerName,
       callerFile: publisherFile,
       callerLine: publisherLine);

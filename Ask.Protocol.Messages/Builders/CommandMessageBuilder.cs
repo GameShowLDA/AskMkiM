@@ -135,6 +135,20 @@ internal static class CommandMessageBuilder
   internal static ShowMessageModel BuildPointsConnectionMessage(int indentLevel)
     => new("Подлючение точек") { IndentLevel = indentLevel };
 
+  internal static ShowMessageModel BuildBreakpointHitMessage(
+    string commandName,
+    string commandBody)
+  {
+    return new ShowMessageModel(
+      header: $"\r\nСработала точка останова на команде {commandName}",
+      headerColor: ShowMessageModel.SuccessMessage.TitleColor,
+      message: commandBody,
+      type: ShowMessageModel.MessageType.Command)
+    {
+      IndentLevel = 1,
+    };
+  }
+
   private static void ApplyCommandBlockBackground(ShowMessageModel model)
   {
     if (!UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting())
