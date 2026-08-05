@@ -223,13 +223,8 @@
             </Grid.RowDefinitions>
 
             <Grid 
-            x:Name="TopPanel" Background="{DynamicResource BackgroundBrushes}" Cursor="SizeAll">
-
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseLeftButtonDown">
-                        <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+            x:Name="TopPanel" Background="{DynamicResource BackgroundBrushes}" Cursor="SizeAll"
+            PreviewMouseLeftButtonDown="TopPanel_PreviewMouseLeftButtonDown">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -386,11 +381,6 @@
                 <StackPanel  
                 Background="Transparent" 
                 Grid.Column="2">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseLeftButtonDown">
-                            <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
                 </StackPanel>
 
                 <StackPanel Name="ButtonsPanel"
