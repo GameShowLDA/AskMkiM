@@ -563,7 +563,6 @@ namespace MainWindowProgram
       for (var current = source; current != null && current != TopPanel; current = GetParent(current))
       {
         if (current is ButtonBase
-            || current is Menu
             || current is MenuItem
             || current is TextBoxBase
             || current is PasswordBox
