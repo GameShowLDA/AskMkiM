@@ -115,11 +115,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       IUserInteractionService? userMessageService)
       where TProfile : IMeasurementProfile
     {
-      var header = EnumExtensions.GetDescription(profile.TypeMode);
+      var header = GetRangeHeader(profile.TypeMode);
       var effectiveRange = range <= 0 ? 0 : ResolveRange(range, getSupportedRanges(profile));
       var rangeText = range <= 0
         ? "Авто"
         : $"{effectiveRange.ToString("G", CultureInfo.InvariantCulture)} {profile.Unit.GetUnit()}";
+      var rangeKey = BuildRangeKey(device, profile.TypeMode);
+
+      if (SelectedRanges.TryGetValue(rangeKey, out var selectedRange)
+        && selectedRange.Equals(effectiveRange))
+      {
+        return true;
+      }
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -137,7 +144,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
-            $"Установка диапазона \"{header}\"",
+            header,
             rangeText,
             success,
             1,
@@ -152,8 +159,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException($"Ошибка установки диапазона \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}).");
       }
 
-      SelectedRanges[BuildRangeKey(device, profile.TypeMode)] = effectiveRange;
+      SelectedRanges[rangeKey] = effectiveRange;
       return true;
+    }
+
+    private static string GetRangeHeader(MultimeterTypeMode typeMode)
+    {
+      return typeMode switch
+      {
+        MultimeterTypeMode.DcVoltage => "Установка диапазона постоянного напряжения",
+        MultimeterTypeMode.AcVoltage => "Установка диапазона переменного напряжения",
+        MultimeterTypeMode.Resistance => "Установка диапазона сопротивления",
+        MultimeterTypeMode.Capacitance => "Установка диапазона ёмкости",
+        _ => $"Установка диапазона \"{EnumExtensions.GetDescription(typeMode)}\"",
+      };
     }
 
     private static async Task<bool> SetMeasurementRangeCoreAsync(
@@ -180,7 +199,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ? setAutoRangeCommand
         : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
-      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
 
       return true;

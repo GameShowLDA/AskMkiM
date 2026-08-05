@@ -58,6 +58,18 @@ public class ResistanceMeasurementTests
     Assert.Equal(4, protocol.MeasurementCount);
   }
 
+  [Fact]
+  public async Task MeasureResistanceAsync_ResponseDelay_AppliesToEveryMeasurement()
+  {
+    var (meter, protocol) = CreateMeter(95d, 100d, 105d);
+
+    await meter.ResistanceManager.MeasureResistanceAsync(
+      new MeasurementRange(100d, 90d, 110d),
+      responseDelay: 2_000d);
+
+    Assert.Equal(new[] { 2_000d, 2_000d, 2_000d }, protocol.MeasurementResponseDelays);
+  }
+
   [Theory]
   [InlineData(0, 1, "correctMeasurementCount")]
   [InlineData(2, -1, "falseMeasurementCount")]
@@ -103,6 +115,8 @@ public class ResistanceMeasurementTests
 
     public int MeasurementCount { get; private set; }
 
+    public List<double> MeasurementResponseDelays { get; } = new();
+
     public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
 
     public Task<string> QueryAsync(
@@ -116,6 +130,7 @@ public class ResistanceMeasurementTests
       if (command == "MEAS:RES?")
       {
         MeasurementCount++;
+        MeasurementResponseDelays.Add(responseDelay);
         return Task.FromResult(_measurements.Dequeue());
       }
 

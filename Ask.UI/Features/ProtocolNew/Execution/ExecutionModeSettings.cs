@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Execution
@@ -22,6 +23,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Возвращает признак автоматического накопления ошибочных сообщений в итоговом заключении.
     /// </summary>
     public bool AccumulateErrorMessages => _current?.AccumulateErrorMessages == true;
+
+    /// <summary>
+    /// Возвращает тип текущей проверки.
+    /// </summary>
+    public CheckType CheckType => _current?.CheckType ?? CheckType.None;
 
     /// <summary>
     /// Сохраняет и нормализует настройки выбранного режима выполнения.
