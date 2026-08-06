@@ -12,6 +12,11 @@ namespace Ask.Core.Shared.DTO.Devices.FastMeter;
 public class FastMeterDto : AttachableDeviceDto
 {
   /// <summary>
+  /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+  /// </summary>
+  public bool IsHardwareFailureSimulationEnabled { get; set; }
+
+  /// <summary>
   /// Текущий режим работы мультиметра.
   /// </summary>
   public MultimeterTypeMode TypeMode { get; set; }

@@ -496,10 +496,10 @@
     <value>Добавляет существующие случайные отклонения результатов измерений от заданных норм.</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Симуляция ошибок оборудования</value>
+    <value>Симуляция сбоев оборудования</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%.</value>
+    <value>Для каждого выбранного устройства всегда имитирует сбой выполнения неизмерительной команды.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>

@@ -493,10 +493,10 @@
     <value>Adds the existing random deviations of measurement results from their specified limits.</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Hardware error simulation</value>
+    <value>Hardware failure simulation</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Simulates a non-measurement hardware command failure with a 50% probability.</value>
+    <value>Always simulates a non-measurement command failure for each selected device.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Operation time output</value>

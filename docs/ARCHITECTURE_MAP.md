@@ -19,7 +19,7 @@
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
-| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
+| Холостой режим и симуляция сбоев | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs`, `IDevice.IsHardwareFailureSimulationEnabled` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, DTO шести типов оборудования, целевой manager/adapter в `Ask.Device.*` |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
@@ -752,6 +752,13 @@ Static facade (RelaySwitchModules/FastMeters/etc.)
 потом грузит known assembly `Ask.Device.Runtime`. `DeviceClass` — persisted CLR
 type name и compatibility-sensitive contract.
 
+Персональный флаг `IDevice.IsHardwareFailureSimulationEnabled` маппится в
+одноимённое bool-поле DTO и SQLite-таблиц `ChassisManagers`, `BreakdownTesters`,
+`FastMeters`, `RelaySwitchModules`, `PowerSourceModules`, `SwitchingDevices`.
+`ExecutionControl` загружает экземпляры через статические фасады, показывает для
+каждого отдельную `SettingsCard` и сохраняет изменённые экземпляры через
+соответствующий `UpdateAsync`; обновление пересобирает запись runtime-cache.
+
 #### Files
 
 - `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs`
@@ -959,7 +966,8 @@ protocols to bounded `CommandHistoryService`.
 
 `Ask.Core.Shared.Interfaces.DeviceInterfaces.IDevice` is the root contract.
 `DeviceWithIP`, `DeviceWithCOM`, `DeviceWithUSB` implement common state and expose
-`IConnectable`, `IDeviceProtocol`, `IConnectionInfo`, `ConnectionDetails`.
+`IConnectable`, `IDeviceProtocol`, `IConnectionInfo`, `ConnectionDetails` and the
+per-device `IsHardwareFailureSimulationEnabled` flag.
 
 There are no separate concrete “Idle device” classes. Real and idle are branches
 inside application adapters, runtime managers and transports, all controlled by
@@ -1113,7 +1121,7 @@ Selection is distributed, not DI-based:
 - GPT helpers/managers skip commands or return configured/simulated values;
 - specific Engine strategies may suppress physical validation.
 
-Idle error simulation has two independent persisted settings:
+Idle measurement-error and equipment-failure simulation are configured independently:
 
 ```text
 ExecutionControl
@@ -1121,22 +1129,27 @@ ExecutionControl
 → existing measurement simulation algorithms
 
 ExecutionControl
-→ SettingsExecutionDto.IsHardwareErrorSimulationMode
-→ ExecutionConfig
-→ IdleHardwareErrorSimulator.ShouldSimulateHardwareError
-→ Random.Shared.Next(2) == 0
+→ nested Border «Симуляция сбоев оборудования»
+→ one SettingsCard per configured device
+→ IDevice.IsHardwareFailureSimulationEnabled
+→ matching device DTO / SQLite table
+→ IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)
+→ ExecutionConfig idle && device flag
 → non-measurement Idle manager/transport contract
 → existing adapter/UserActionHelper equipment-error flow
 ```
 
 The nested `Выполнение с ошибками` settings group is visible only while Idle is
 enabled. Measurement simulation retains its existing generators, probabilities
-and tolerance semantics. Hardware simulation is disabled by default and affects
-only Idle initialization/reset, connection, mode/configuration, range,
-switching, source and power operations. Every equipment call, including a
-`Retry`, makes a new independent `1/2` decision. The simulated failure preserves
-the corresponding real contract: `false`, a failed tuple/status, or the
-operation-specific exception path. Real execution never enters this mechanism.
+and tolerance semantics. Equipment-failure simulation is disabled by default,
+selected independently for every configured device and affects only Idle
+initialization/reset, connection, mode/configuration, range, switching, source
+and power operations. Every applicable call of a selected device, including a
+`Retry`, fails (100% probability). The simulated failure preserves the
+corresponding real contract: `false`, a failed tuple/status, an empty emulator
+response or the operation-specific exception path. Real execution never enters
+this mechanism. The migration copies the former global flag to all six device
+tables once, preserving the old effective selection during the transition.
 
 Chassis and МКР Idle flows preserve their device command contracts without a
 separate response processor:
@@ -1467,7 +1480,7 @@ and are displayed in translator/runner error lists.
 ```text
 raw manager/protocol failure
 → false/empty response or exception
-→ or IdleHardwareErrorSimulator failure with the same method contract
+→ or selected-device IdleHardwareErrorSimulator failure with the same method contract
 → application adapter / MeasurementBase
 → UserActionHelper.GetRunWithUserRepeatAsync
 → IUserInteractionService.WaitUserActionAsync
@@ -1725,7 +1738,7 @@ ErrorItem → translator/runner ErrorList
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
 | `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
-| `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
+| `IdleHardwareErrorSimulator` | static decision service | Ask.Core | 100% failure decision for non-measurement Idle calls of an individually selected device | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
 | `DeviceProtocolEmulator` | public static factory | Ask.Device.Emulator | returns Real/Idle-selecting protocols for chassis and МКР | [Equipment](#real--idle) |

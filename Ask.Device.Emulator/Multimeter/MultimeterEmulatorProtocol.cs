@@ -9,10 +9,12 @@ namespace Ask.Device.Emulator.Multimeter;
 internal sealed class MultimeterEmulatorProtocol : IDeviceProtocol
 {
   private readonly string _response;
+  private readonly Func<bool> _hardwareErrorProvider;
 
-  public MultimeterEmulatorProtocol(string response)
+  public MultimeterEmulatorProtocol(string response, Func<bool>? hardwareErrorProvider = null)
   {
     _response = response;
+    _hardwareErrorProvider = hardwareErrorProvider ?? (() => false);
   }
 
   /// <inheritdoc />
@@ -28,7 +30,7 @@ internal sealed class MultimeterEmulatorProtocol : IDeviceProtocol
     CancellationToken cancellationToken = default)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    string response = IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+    string response = _hardwareErrorProvider()
       ? string.Empty
       : _response;
     return Task.FromResult(response);

@@ -54,18 +54,10 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetIsErrorSimulationMode(bool enable) => SettingsExecutionModel.IsErrorSimulationMode = enable;
 
-    /// <summary>
-    /// Включает или выключает симуляцию аппаратных ошибок оборудования.
-    /// </summary>
-    /// <param name="enable">Состояние симуляции аппаратных ошибок.</param>
-    public static void SetIsHardwareErrorSimulationMode(bool enable) =>
-      SettingsExecutionModel.IsHardwareErrorSimulationMode = enable;
-
     public static Task SetExecutionModel(SettingsExecutionDto protocolModel)
     {
       SetIdleMode(protocolModel.IdleModeExecution);
       SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
-      SetIsHardwareErrorSimulationMode(protocolModel.IsHardwareErrorSimulationMode);
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
       SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
@@ -90,20 +82,10 @@ namespace Ask.Core.Services.Config.AppSettings
     public static Task<bool> GetIsStopOnErrorEnabled() => Task.FromResult(SettingsExecutionModel?.StopOnError ?? false);
 
     /// <summary>
-    /// Возвращает, включена ли симуляция ошибок в холостом режиме.
+    /// Возвращает, включена ли симуляция ошибок измерения в холостом режиме.
     /// </summary>
     /// <returns>true, если включена; false, если выключена.</returns>
     public static bool GetIsErrorSimulationEnabled() => SettingsExecutionModel?.IsErrorSimulationMode ?? false;
-
-    /// <summary>
-    /// Проверяет, включена ли симуляция аппаратных ошибок оборудования.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/>, если симуляция включена.
-    /// В противном случае — <see langword="false"/>.
-    /// </returns>
-    public static bool GetIsHardwareErrorSimulationEnabled() =>
-      SettingsExecutionModel?.IsHardwareErrorSimulationMode ?? false;
 
     /// <summary>
     /// Возвращает, включен ли пошаговый режим.
@@ -118,7 +100,6 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
         IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
-        IsHardwareErrorSimulationMode = SettingsExecutionModel.IsHardwareErrorSimulationMode,
         StepByStepMode = SettingsExecutionModel.StepByStepMode,
         StopOnError = SettingsExecutionModel.StopOnError,
         LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode
@@ -132,7 +113,6 @@ namespace Ask.Core.Services.Config.AppSettings
     {
       SetIdleMode(execution.IdleModeExecution);
       SetIsErrorSimulationMode(execution.IsErrorSimulationMode);
-      SetIsHardwareErrorSimulationMode(execution.IsHardwareErrorSimulationMode);
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);
       SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);

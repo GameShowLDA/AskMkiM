@@ -54,7 +54,7 @@ namespace Ask.Device.Runtime.Function.Connected
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
           ? (false, IdleHardwareErrorSimulator.ErrorMessage)
           : (true, "Холостой режим");
       }
@@ -76,7 +76,7 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
           ? (false, IdleHardwareErrorSimulator.ErrorMessage)
           : (true, string.Empty);
       }
@@ -120,7 +120,7 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device);
       }
 
       await _device.DeviceProtocol.OperationLock.WaitAsync();

@@ -12,6 +12,11 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 public class RelaySwitchModuleDto : AttachableDeviceDto
 {
   /// <summary>
+  /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+  /// </summary>
+  public bool IsHardwareFailureSimulationEnabled { get; set; }
+
+  /// <summary>
   /// Номер стойки, в которой установлен модуль.
   /// </summary>
   public int NumberRack { get; set; }

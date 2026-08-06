@@ -45,6 +45,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
     string DeviceClass { get; set; }
 
     /// <summary>
+    /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+    /// </summary>
+    bool IsHardwareFailureSimulationEnabled { get; set; }
+
+    /// <summary>
     /// Управление состоянием устройства.
     /// </summary>
     IConnectable ConnectableManager { get; set; }

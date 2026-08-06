@@ -33,7 +33,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_moduleVoltageCurrentSource))
         {
           throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
         }
@@ -57,7 +57,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_moduleVoltageCurrentSource))
         {
           throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
         }

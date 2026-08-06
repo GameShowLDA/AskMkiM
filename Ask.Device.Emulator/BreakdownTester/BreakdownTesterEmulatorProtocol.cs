@@ -9,7 +9,13 @@ namespace Ask.Device.Emulator.BreakdownTester;
 /// </summary>
 internal sealed class BreakdownTesterEmulatorProtocol : IDeviceProtocol
 {
+  private readonly Func<bool> _hardwareErrorProvider;
   private readonly ConcurrentDictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
+
+  public BreakdownTesterEmulatorProtocol(Func<bool>? hardwareErrorProvider = null)
+  {
+    _hardwareErrorProvider = hardwareErrorProvider ?? (() => false);
+  }
 
   /// <inheritdoc />
   public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
@@ -24,7 +30,7 @@ internal sealed class BreakdownTesterEmulatorProtocol : IDeviceProtocol
     CancellationToken cancellationToken = default)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+    if (_hardwareErrorProvider())
     {
       return Task.FromResult(string.Empty);
     }

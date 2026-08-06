@@ -11,6 +11,11 @@ namespace Ask.Core.Shared.DTO.Devices.PowerSourceModule
   public class PowerSourceModuleDto : AttachableDeviceDto
   {
     /// <summary>
+    /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+    /// </summary>
+    public bool IsHardwareFailureSimulationEnabled { get; set; }
+
+    /// <summary>
     /// JSON-строка с калибровочными коэффициентами по диапазонам сопротивления.
     /// </summary>
     public string? ResistanceCalibrationJson { get; set; }

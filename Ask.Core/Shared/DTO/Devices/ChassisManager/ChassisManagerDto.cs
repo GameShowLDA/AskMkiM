@@ -13,6 +13,11 @@ namespace Ask.Core.Shared.DTO.Devices.ChassisManager;
 public class ChassisManagerDto : DeviceDto
 {
   /// <summary>
+  /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+  /// </summary>
+  public bool IsHardwareFailureSimulationEnabled { get; set; }
+
+  /// <summary>
   /// Тип структурной шины тестера.
   /// </summary>
   public BusStructureEnum.Type BusType { get; set; }

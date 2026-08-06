@@ -65,7 +65,8 @@ namespace Ask.Device.Runtime.Device
         Number = Number,
         ConnectionDetails = ConnectionDetails ?? string.Empty,
         DeviceType = DeviceType,
-        DeviceClass = DeviceClass ?? string.Empty
+        DeviceClass = DeviceClass ?? string.Empty,
+        IsHardwareFailureSimulationEnabled = IsHardwareFailureSimulationEnabled
       };
     }
   }

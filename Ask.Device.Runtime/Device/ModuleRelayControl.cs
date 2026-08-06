@@ -96,6 +96,7 @@ namespace Ask.Device.Runtime.Device
         ConnectionDetails = ConnectionDetails ?? string.Empty,
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
+        IsHardwareFailureSimulationEnabled = IsHardwareFailureSimulationEnabled,
         BusType = BusType,
         SwitchResistance = SwitchResistance,
         SwitchCapacitance = SwitchCapacitance

@@ -9,4 +9,9 @@ namespace Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 /// </summary>
 [Table("SwitchingDevices")]
 public class SwitchingDeviceDto : AttachableDeviceDto
-{ }
+{
+  /// <summary>
+  /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+  /// </summary>
+  public bool IsHardwareFailureSimulationEnabled { get; set; }
+}

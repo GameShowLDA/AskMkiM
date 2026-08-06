@@ -27,11 +27,6 @@ public class SettingsExecutionDto
   public bool IsErrorSimulationMode { get; set; }
 
   /// <summary>
-  /// Включает симуляцию аппаратных ошибок оборудования.
-  /// </summary>
-  public bool IsHardwareErrorSimulationMode { get; set; }
-
-  /// <summary>
   /// Включает пошаговый режим выполнения.
   /// </summary>
   public bool StepByStepMode { get; set; }

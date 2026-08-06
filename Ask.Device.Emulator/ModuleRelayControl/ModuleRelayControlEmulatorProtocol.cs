@@ -17,22 +17,14 @@ namespace Ask.Device.Emulator.ModuleRelayControl
 
     public ModuleRelayControlEmulatorProtocol(
       Func<int> moduleNumberProvider,
-      Func<int> chassisNumberProvider)
-      : this(moduleNumberProvider, chassisNumberProvider, IdleHardwareErrorSimulator.ShouldSimulateHardwareError)
-    {
-    }
-
-    internal ModuleRelayControlEmulatorProtocol(
-      Func<int> moduleNumberProvider,
       Func<int> chassisNumberProvider,
-      Func<bool> hardwareErrorProvider)
+      Func<bool>? hardwareErrorProvider = null)
     {
       _moduleNumberProvider = moduleNumberProvider
         ?? throw new ArgumentNullException(nameof(moduleNumberProvider));
       _chassisNumberProvider = chassisNumberProvider
         ?? throw new ArgumentNullException(nameof(chassisNumberProvider));
-      _hardwareErrorProvider = hardwareErrorProvider
-        ?? throw new ArgumentNullException(nameof(hardwareErrorProvider));
+      _hardwareErrorProvider = hardwareErrorProvider ?? (() => false);
     }
 
     /// <inheritdoc />

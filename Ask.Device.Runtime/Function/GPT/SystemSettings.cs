@@ -100,7 +100,7 @@ namespace Ask.Device.Runtime.Function.GPT
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? new SystemDataModel() : systemData;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel) ? new SystemDataModel() : systemData;
       }
 
       try
@@ -157,7 +157,7 @@ namespace Ask.Device.Runtime.Function.GPT
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel);
       }
 
       return ComPortResetNative.RestartDevice(_gptModel.COMPort.PortName);
@@ -169,9 +169,9 @@ namespace Ask.Device.Runtime.Function.GPT
     /// <exception cref="DeviceException">
     /// Выбрасывается, если для текущего вызова выбрана аппаратная ошибка.
     /// </exception>
-    private static void ThrowIfHardwareErrorSimulated()
+    private void ThrowIfHardwareErrorSimulated()
     {
-      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel))
       {
         throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
       }

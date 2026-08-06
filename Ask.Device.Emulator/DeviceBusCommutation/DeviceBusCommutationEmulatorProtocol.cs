@@ -11,13 +11,16 @@ namespace Ask.Device.Emulator.DeviceBusCommutation
   {
     private readonly Func<int> deviceNumberProvider;
     private readonly Func<int> chassisNumberProvider;
+    private readonly Func<bool> hardwareErrorProvider;
 
     public DeviceBusCommutationEmulatorProtocol(
       Func<int> deviceNumberProvider,
-      Func<int> chassisNumberProvider)
+      Func<int> chassisNumberProvider,
+      Func<bool>? hardwareErrorProvider = null)
     {
       this.deviceNumberProvider = deviceNumberProvider;
       this.chassisNumberProvider = chassisNumberProvider;
+      this.hardwareErrorProvider = hardwareErrorProvider ?? (() => false);
     }
 
     public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
@@ -30,7 +33,7 @@ namespace Ask.Device.Emulator.DeviceBusCommutation
       int delayBeforeCall = 0,
       CancellationToken cancellationToken = default)
     {
-      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      if (hardwareErrorProvider())
       {
         return Task.FromResult(string.Empty);
       }

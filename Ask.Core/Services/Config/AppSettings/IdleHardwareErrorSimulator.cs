@@ -1,17 +1,16 @@
 namespace Ask.Core.Services.Config.AppSettings;
 
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+
 /// <summary>
 /// Определяет необходимость имитации аппаратной ошибки в холостом режиме.
 /// </summary>
 public static class IdleHardwareErrorSimulator
 {
-  private const int ProbabilityDenominator = 2;
-  private const int FailureRoll = 0;
-
   /// <summary>
   /// Текст ответа для имитированной ошибки выполнения команды оборудования.
   /// </summary>
-  public const string ErrorMessage = "Оборудование не выполнило команду в холостом режиме.";
+  public const string ErrorMessage = "Симуляция сбоя: оборудование не выполнило команду в холостом режиме.";
 
   /// <summary>
   /// Проверяет, должна ли текущая аппаратная операция завершиться имитированной ошибкой.
@@ -20,33 +19,23 @@ public static class IdleHardwareErrorSimulator
   /// <see langword="true"/>, если для текущего вызова выбрана аппаратная ошибка.
   /// В противном случае — <see langword="false"/>.
   /// </returns>
-  public static bool ShouldSimulateHardwareError()
+  public static bool ShouldSimulateHardwareError(IDevice device)
   {
-    return ShouldSimulateHardwareError(Random.Shared.Next(ProbabilityDenominator));
+    ArgumentNullException.ThrowIfNull(device);
+    return ShouldSimulateHardwareError(device.IsHardwareFailureSimulationEnabled);
   }
 
   /// <summary>
-  /// Проверяет результат попытки с заданным случайным выбором.
+  /// Проверяет настройку отдельного устройства с учётом текущего режима выполнения.
   /// </summary>
-  /// <param name="roll">Случайное целое число: ноль или один.</param>
+  /// <param name="isEnabledForDevice">Включена ли симуляция для выбранного устройства.</param>
   /// <returns>
   /// <see langword="true"/>, если настройки разрешают симуляцию и выбрана аппаратная ошибка.
   /// В противном случае — <see langword="false"/>.
   /// </returns>
-  internal static bool ShouldSimulateHardwareError(int roll)
+  internal static bool ShouldSimulateHardwareError(bool isEnabledForDevice)
   {
     return ExecutionConfig.GetIsIdleModeEnabled()
-      && ExecutionConfig.GetIsHardwareErrorSimulationEnabled()
-      && IsFailureRoll(roll);
+      && isEnabledForDevice;
   }
-
-  /// <summary>
-  /// Проверяет результат случайного выбора для вероятности один к двум.
-  /// </summary>
-  /// <param name="roll">Случайное целое число: ноль или один.</param>
-  /// <returns>
-  /// <see langword="true"/>, если число соответствует аппаратной ошибке.
-  /// В противном случае — <see langword="false"/>.
-  /// </returns>
-  internal static bool IsFailureRoll(int roll) => roll == FailureRoll;
 }

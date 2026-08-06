@@ -12,6 +12,11 @@ namespace Ask.Core.Shared.DTO.Devices.Breakdown;
 public class BreakdownTesterDto : AttachableDeviceDto
 {
   /// <summary>
+  /// Включает симуляцию сбоя неизмерительных команд этого устройства в холостом режиме.
+  /// </summary>
+  public bool IsHardwareFailureSimulationEnabled { get; set; }
+
+  /// <summary>
   /// Текущий режим работы пробойной установки.
   /// </summary>
   public BreakdownTypeMode Mode { get; set; }

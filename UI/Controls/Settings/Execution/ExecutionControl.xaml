@@ -154,19 +154,73 @@
                         </Style>
                     </WrapPanel.Style>
 
-                                <SharedComponents:SettingsCard
-                                    Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
-                                    Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
-                                    Margin="0,10,10,0"
-                                    VerticalAlignment="Top"
-                                    x:Name="MeasurementErrorSimulation"/>
+                    <SharedComponents:SettingsCard
+                        Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
+                        Margin="0,10,10,0"
+                        VerticalAlignment="Top"
+                        x:Name="MeasurementErrorSimulation"/>
 
-                                <SharedComponents:SettingsCard
-                                    Title="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
-                                    Description="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
-                                    Margin="0,10,0,0"
-                                    VerticalAlignment="Top"
-                                    x:Name="HardwareErrorSimulation"/>
+                    <Border Margin="0,10,0,0"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left"
+                            MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Padding="10"
+                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                            Style="{DynamicResource SettingCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
+                                           Style="{DynamicResource SettingsTitleStyle}"
+                                           Padding="0,4,0,4"
+                                           Margin="0,0,6,0"/>
+
+                                <Icons:ArrowButton x:Name="ToggleHardwareFailureSimulationButton"
+                                                   Grid.Column="1"
+                                                   HorizontalAlignment="Left"
+                                                   Width="30"
+                                                   Height="30"
+                                                   Margin="0"
+                                                   ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                                   ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                   ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                   ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
+                                                   VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <StackPanel Grid.Row="1">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=ToggleHardwareFailureSimulationButton, Path=IsArrowUp}"
+                                                         Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
+                                           Style="{DynamicResource SettingsDescriptionStyle}"
+                                           Margin="0,0,0,8"/>
+
+                                <WrapPanel x:Name="HardwareFailureSimulationCards"
+                                           Orientation="Horizontal"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </WrapPanel>
             </StackPanel>
 

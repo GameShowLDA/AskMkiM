@@ -135,6 +135,7 @@ namespace Ask.Device.Runtime.Device
         ConnectionDetails = ConnectionDetails ?? string.Empty,
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
+        IsHardwareFailureSimulationEnabled = IsHardwareFailureSimulationEnabled,
         Mode = Mode,
         AcwMaxVoltage = AcwMaxVoltage,
         DcwMaxVoltage = DcwMaxVoltage,

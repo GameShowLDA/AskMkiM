@@ -69,7 +69,7 @@ public static class DatabaseInitializationService
 
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
-    await EnsureHardwareErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureHardwareFailureSimulationColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
@@ -348,13 +348,13 @@ public static class DatabaseInitializationService
   }
 
   /// <summary>
-  /// Добавляет настройку симуляции аппаратных ошибок в совместимую старую схему.
+  /// Добавляет персональную настройку симуляции сбоев в таблицы оборудования старой схемы.
   /// </summary>
   /// <param name="databasePath">Путь к файлу базы данных.</param>
   /// <param name="report">Отчёт об инициализации базы данных.</param>
   /// <param name="progress">Обработчик сообщений о ходе инициализации.</param>
   /// <param name="cancellationToken">Токен отмены операции.</param>
-  private static async Task EnsureHardwareErrorSimulationModeColumnAsync(
+  private static async Task EnsureHardwareFailureSimulationColumnsAsync(
     string databasePath,
     DatabaseInitializationReport report,
     Action<string>? progress,
@@ -363,28 +363,73 @@ public static class DatabaseInitializationService
     await using var connection = new SqliteConnection($"Data Source={databasePath}");
     await connection.OpenAsync(cancellationToken);
 
-    if (!await TableExistsAsync(connection, "Execution", cancellationToken)
-      || await ColumnExistsAsync(
-        connection,
-        "Execution",
-        "IsHardwareErrorSimulationMode",
-        cancellationToken))
+    string[] deviceTables =
+    [
+      "ChassisManagers",
+      "BreakdownTesters",
+      "FastMeters",
+      "RelaySwitchModules",
+      "PowerSourceModules",
+      "SwitchingDevices",
+    ];
+
+    var updatedTables = new List<string>();
+    foreach (string table in deviceTables)
+    {
+      if (!await TableExistsAsync(connection, table, cancellationToken)
+        || await ColumnExistsAsync(
+          connection,
+          table,
+          "IsHardwareFailureSimulationEnabled",
+          cancellationToken))
+      {
+        continue;
+      }
+
+      await using var addColumnCommand = connection.CreateCommand();
+      addColumnCommand.CommandText =
+        $"""
+        ALTER TABLE "{table}"
+        ADD COLUMN "IsHardwareFailureSimulationEnabled" INTEGER NOT NULL DEFAULT 0;
+        """;
+
+      await addColumnCommand.ExecuteNonQueryAsync(cancellationToken);
+      updatedTables.Add(table);
+    }
+
+    if (updatedTables.Count == 0)
     {
       return;
     }
 
-    await using var command = connection.CreateCommand();
-    command.CommandText =
-      """
-      ALTER TABLE "Execution"
-      ADD COLUMN "IsHardwareErrorSimulationMode" INTEGER NOT NULL DEFAULT 0;
-      """;
+    bool hasLegacyGlobalSetting = await TableExistsAsync(connection, "Execution", cancellationToken)
+      && await ColumnExistsAsync(
+        connection,
+        "Execution",
+        "IsHardwareErrorSimulationMode",
+        cancellationToken);
 
-    await command.ExecuteNonQueryAsync(cancellationToken);
+    if (hasLegacyGlobalSetting)
+    {
+      foreach (string table in updatedTables)
+      {
+        await using var migrateValueCommand = connection.CreateCommand();
+        migrateValueCommand.CommandText =
+          $"""
+          UPDATE "{table}"
+          SET "IsHardwareFailureSimulationEnabled" = COALESCE(
+            (SELECT "IsHardwareErrorSimulationMode" FROM "Execution" LIMIT 1),
+            0);
+          """;
+
+        await migrateValueCommand.ExecuteNonQueryAsync(cancellationToken);
+      }
+    }
+
     TraceWarning(
       report,
       progress,
-      "[DB] В старой схеме Execution добавлена колонка IsHardwareErrorSimulationMode.");
+      $"[DB] В старой схеме добавлены персональные колонки симуляции сбоев: {string.Join(", ", updatedTables)}.");
   }
 
   private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(

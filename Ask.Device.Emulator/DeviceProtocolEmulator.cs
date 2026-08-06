@@ -57,7 +57,9 @@ namespace Ask.Device.Emulator
 
       var protocol = new ModeSelectingDeviceProtocol(
         () => device.DeviceProtocol,
-        new MultimeterEmulatorProtocol(idleResponse));
+        new MultimeterEmulatorProtocol(
+          idleResponse,
+          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)));
       bool expectsResponse = command.Contains('?');
       string response = await protocol.QueryAsync(
         command,
@@ -84,7 +86,8 @@ namespace Ask.Device.Emulator
           () => item.DeviceProtocol,
           new DeviceBusCommutationEmulatorProtocol(
             () => item.Number,
-            () => item.NumberChassis)));
+            () => item.NumberChassis,
+            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(item))));
     }
 
     /// <summary>
@@ -98,7 +101,8 @@ namespace Ask.Device.Emulator
         device => CreateModuleRelayControl(
           () => device.DeviceProtocol,
           () => device.Number,
-          () => device.NumberChassis));
+          () => device.NumberChassis,
+          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)));
     }
 
     /// <summary>
@@ -107,13 +111,15 @@ namespace Ask.Device.Emulator
     public static IDeviceProtocol CreateModuleRelayControl(
       Func<IDeviceProtocol?> realProtocolProvider,
       Func<int> moduleNumberProvider,
-      Func<int> chassisNumberProvider)
+      Func<int> chassisNumberProvider,
+      Func<bool>? hardwareErrorProvider = null)
     {
       return new ModeSelectingDeviceProtocol(
         realProtocolProvider,
         new ModuleRelayControlEmulatorProtocol(
           moduleNumberProvider,
-          chassisNumberProvider));
+          chassisNumberProvider,
+          hardwareErrorProvider));
     }
 
     /// <summary>
@@ -126,7 +132,8 @@ namespace Ask.Device.Emulator
         chassis,
         device => new ModeSelectingDeviceProtocol(
           () => device.DeviceProtocol,
-          new ChassisEmulatorProtocol()));
+          new ChassisEmulatorProtocol(
+            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device))));
     }
   }
 }

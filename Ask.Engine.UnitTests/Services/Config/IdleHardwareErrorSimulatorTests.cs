@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Settings;
 
 namespace Ask.Engine.UnitTests.Services.Config;
@@ -7,51 +8,9 @@ namespace Ask.Engine.UnitTests.Services.Config;
 public sealed class IdleHardwareErrorSimulatorTests
 {
   [Fact]
-  public void HardwareSimulationIsOffByDefault()
+  public void DeviceSimulationIsOffByDefault()
   {
-    Assert.False(new SettingsExecutionDto().IsHardwareErrorSimulationMode);
-  }
-
-  [Fact]
-  public void FailureRollMatchesExactlyOneOutcomeOfTwo()
-  {
-    Assert.True(IdleHardwareErrorSimulator.IsFailureRoll(0));
-    Assert.False(IdleHardwareErrorSimulator.IsFailureRoll(1));
-  }
-
-  [Fact]
-  public async Task SettingsRemainIndependentDuringRoundTrip()
-  {
-    SettingsExecutionDto original = await ExecutionConfig.GetExecitonModel();
-
-    try
-    {
-      await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
-      {
-        IdleModeExecution = true,
-        IsErrorSimulationMode = true,
-        IsHardwareErrorSimulationMode = false,
-      });
-
-      SettingsExecutionDto measurementOnly = await ExecutionConfig.GetExecitonModel();
-      Assert.True(measurementOnly.IsErrorSimulationMode);
-      Assert.False(measurementOnly.IsHardwareErrorSimulationMode);
-
-      await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
-      {
-        IdleModeExecution = true,
-        IsErrorSimulationMode = false,
-        IsHardwareErrorSimulationMode = true,
-      });
-
-      SettingsExecutionDto hardwareOnly = await ExecutionConfig.GetExecitonModel();
-      Assert.False(hardwareOnly.IsErrorSimulationMode);
-      Assert.True(hardwareOnly.IsHardwareErrorSimulationMode);
-    }
-    finally
-    {
-      await ExecutionConfig.SetExecutionModel(original);
-    }
+    Assert.False(new ChassisManagerDto().IsHardwareFailureSimulationEnabled);
   }
 
   [Fact]
@@ -64,10 +23,9 @@ public sealed class IdleHardwareErrorSimulatorTests
       await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
       {
         IdleModeExecution = false,
-        IsHardwareErrorSimulationMode = true,
       });
 
-      Assert.False(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(0));
+      Assert.False(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(true));
     }
     finally
     {
@@ -76,7 +34,7 @@ public sealed class IdleHardwareErrorSimulatorTests
   }
 
   [Fact]
-  public async Task HardwareSimulationIsDisabledWhenSettingIsOff()
+  public async Task HardwareSimulationIsDisabledForUnselectedDevice()
   {
     SettingsExecutionDto original = await ExecutionConfig.GetExecitonModel();
 
@@ -85,10 +43,9 @@ public sealed class IdleHardwareErrorSimulatorTests
       await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
       {
         IdleModeExecution = true,
-        IsHardwareErrorSimulationMode = false,
       });
 
-      Assert.False(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(0));
+      Assert.False(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(false));
     }
     finally
     {
@@ -97,7 +54,7 @@ public sealed class IdleHardwareErrorSimulatorTests
   }
 
   [Fact]
-  public async Task HardwareSimulationUsesRollWhenIdleAndSettingAreEnabled()
+  public async Task HardwareSimulationAlwaysFailsForSelectedDeviceInIdleMode()
   {
     SettingsExecutionDto original = await ExecutionConfig.GetExecitonModel();
 
@@ -107,11 +64,11 @@ public sealed class IdleHardwareErrorSimulatorTests
       {
         IdleModeExecution = true,
         IsErrorSimulationMode = false,
-        IsHardwareErrorSimulationMode = true,
       });
 
-      Assert.True(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(0));
-      Assert.False(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(1));
+      Assert.True(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(true));
+      Assert.True(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(true));
+      Assert.False(IdleHardwareErrorSimulator.ShouldSimulateHardwareError(false));
     }
     finally
     {

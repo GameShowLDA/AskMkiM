@@ -59,7 +59,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? -1 : 0;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_deviceBusCommutation) ? -1 : 0;
       }
 
       DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10, busContact, 0);
