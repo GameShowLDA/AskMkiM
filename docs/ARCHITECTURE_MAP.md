@@ -986,11 +986,19 @@ executor/strategy
 → UserActionHelper.GetRunWithUserRepeatAsync
 → runtime PointManager.ConnectRelayAsync
 → DeviceCommand(8, point, bus, action).ToString
+→ ModuleRelayControlQueryExecutor.QueryAsync
 → IDeviceProtocol.QueryAsync
 → UdpProtocol.QueryAsync
 → UdpClient.SendAsync/ReceiveAsync
-→ BaseResponse.FromJson validation
-→ adapter DeviceMessageBuilder or RelayExceptionFactory
+→ ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
+  ├─ Status absent/success → BaseResponse.FromJson validation
+  → adapter DeviceMessageBuilder or RelayExceptionFactory
+  └─ Status = UnknownCommand / InvalidParametr / InvalidParameter
+    → ModuleRelayControlProtocolException(device, operation, localized error, firmware status)
+    → UserActionHelper catches hardware exception
+    → IUserInteractionService.ShowMessageAsync(MessageType.Error, skipPause: true)
+    → protocol line "МКР chassis.number: operation. Системная ошибка. reason [БРАК]"
+    → existing Retry / Continue / Abort equipment flow
 ```
 
 Representative Keysight measurement:
@@ -1071,6 +1079,8 @@ factories and typed result handling. `Transport`, source/current adapters and
 active measurement paths также входят в общий интерактивный контур. Аппаратный
 `false`/exception передаётся с `deviceTask: true`; корректный измерительный ответ
 проверяется на норму внешним Engine-слоем и не смешивается с ошибкой оборудования.
+Отклонение команды прошивкой МКР — отдельная типизированная ветка: она всегда публикует
+ошибку в экранный протокол до интерактивного выбора оператора.
 
 ### Real / Idle
 
