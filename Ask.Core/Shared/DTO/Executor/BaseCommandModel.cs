@@ -93,7 +93,7 @@ namespace Ask.Core.Shared.DTO.Executor
     public bool IsCommandMnemonic(string mnemonic)
     {
       return !string.IsNullOrWhiteSpace(mnemonic)
-        && string.Equals(Mnemonic, mnemonic.Trim(), StringComparison.OrdinalIgnoreCase);
+        && string.Equals(Mnemonic, mnemonic, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
