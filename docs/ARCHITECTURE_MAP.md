@@ -1561,7 +1561,10 @@ UI/Engine
 Migrations live in `Ask.DataBase.Provider/Migrations/`.
 `DatabaseInitializationService` also contains explicit compatibility DDL for old
 schemas; a migration change must account for both normal migration and supported
-legacy adoption behavior.
+legacy adoption behavior. The syntax-diagnostic underline columns
+`UseWarningUnderlineHighlighting` and `UseErrorUnderlineHighlighting` are owned
+exclusively by the `AddSyntaxDiagnosticUnderlineSettings` EF migration and are not
+duplicated in the initialization service.
 
 Runtime device cache uses `(requested interface, Id)` and query caches for
 GetAll/chassis lists. Create/update/delete invalidate relevant caches; startup
