@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -16,9 +16,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<VshCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       var rsm = EquipmentService.ValidRelayModules;
       await DeviceManager.RelayModule.BusManager.ConnectAllBusLinesAsync(rsm, context.Console);

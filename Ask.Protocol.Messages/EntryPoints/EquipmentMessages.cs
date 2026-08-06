@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Protocol.Messages.Builders;
@@ -12,6 +13,34 @@ namespace Ask.Protocol.Messages.EntryPoints;
 /// </summary>
 public static class EquipmentMessages
 {
+  /// <summary>
+  /// Публикует заголовок проверки работоспособности устройства.
+  /// </summary>
+  /// <param name="device">Проверяемое устройство.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="device"/> равен <see langword="null"/>.
+  /// </exception>
+  public static Task PublishDeviceHealthCheckTitleAsync(
+    IAttachableDevice device,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return EquipmentMessagePublisher.PublishAsync(
+      EquipmentMessageBuilder.BuildHealthCheckTitle(device),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      logToDeviceJournal: false);
+  }
+
   /// <summary>
   /// Публикует результат подключения устройства.
   /// </summary>

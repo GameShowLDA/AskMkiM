@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 
 namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
 {
@@ -47,8 +48,8 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         IPowerSourceModule powerSource,
         ISwitchingDevice relayModule)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel("Начало проверки резисторов по таблице"));
-      await messageService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"));
+      await SelfTestMessages.PublishInformationAsync("Начало проверки резисторов по таблице", messageService);
+      await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
 
       await powerSource.VoltageManager.SetSourceVoltageAsync(VoltageSources.Supply5V, messageService);
       // Подключить шины A1, B1 и питание
@@ -61,8 +62,9 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       {
         cancellationToken.ThrowIfCancellationRequested();
 
-        await messageService.ShowMessageAsync(new ShowMessageModel(
-            $"Проверка сопротивления {resistance}Ом при токе {integerPart},{decimalPart}мА"));
+        await SelfTestMessages.PublishInformationAsync(
+          $"Проверка сопротивления {resistance}Ом при токе {integerPart},{decimalPart}мА",
+          messageService);
 
         double currentAmps = ConvertToAmperes(integerPart, decimalPart);
 
@@ -89,14 +91,14 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
           result = voltage / currentAmps;
         }
 
-        ShowMessageModel showMessageModel = new ShowMessageModel($"\tРезультат измерения сопротивления ({firstNorm:F2}-{lastNorm:F2})",
-          message: $"{result:F2}",
-          type: (result >= firstNorm && result <= lastNorm) ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error
-          );
-
-        showMessageModel.ExecutionError = (result >= firstNorm && result <= lastNorm) ? false : true;
-        showMessageModel.CanBeDeleted = showMessageModel.ExecutionError;
-        await messageService.ShowMessageAsync(showMessageModel);
+        bool isSuccessful = result >= firstNorm && result <= lastNorm;
+        await MeasurementMessages.PublishResultAsync(
+          ResistanceUnit.Ohm,
+          new MeasurementRange(result, firstNorm, lastNorm),
+          isSuccessful,
+          outputService: messageService,
+          executionError: !isSuccessful,
+          canBeDeleted: !isSuccessful);
 
         await DisconnectResistorByNumberAsync(relayModule, resistorNumber, messageService);
       }
@@ -120,7 +122,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
     static private async Task ConnectBlockingRelaysAsync(ISwitchingDevice relayModule, IUserInteractionService messageService)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel("Подключение блокировочных реле на УКШ."));
+      await SelfTestMessages.PublishInformationAsync("Подключение блокировочных реле на УКШ.", messageService);
       var relays = relayModule.SelfTestManager.GetValidBusContacts(SwitchingDeviceTypeConnector.BlockingRelay, messageService);
       foreach (var item in relays)
       {

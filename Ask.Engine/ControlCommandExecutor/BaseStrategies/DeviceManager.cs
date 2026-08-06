@@ -1,7 +1,6 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -193,7 +192,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         /// </param>
         public static async Task ResetAllPointsAsync(IEnumerable<IRelaySwitchModule> relaySwitchModules, IUserInteractionService userMessageService)
         {
-          await userMessageService.ShowMessageAsync(new ShowMessageModel("Сброс точек") { IndentLevel = 1 });
+          await ExecutionMessages.PublishPointsResetAsync(userMessageService);
 
           foreach (var module in relaySwitchModules)
           {
@@ -529,10 +528,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </param>
     internal static async Task ShowDevicesPreparationMessageIfNeededAsync(CommandExecutionContext context)
     {
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildDevicesPreparationMessage());
-      }
+      await ExecutionMessages.PublishDevicesPreparationAsync(context.Console);
     }
   }
 }

@@ -9,6 +9,21 @@ namespace Ask.Protocol.Messages.Builders;
 internal static class EquipmentMessageBuilder
 {
   /// <summary>
+  /// Формирует заголовок проверки работоспособности устройства.
+  /// </summary>
+  /// <param name="device">Проверяемое устройство.</param>
+  /// <returns>Заголовок проверки работоспособности устройства.</returns>
+  internal static ShowMessageModel BuildHealthCheckTitle(IAttachableDevice device)
+  {
+    ArgumentNullException.ThrowIfNull(device);
+
+    return new ShowMessageModel(
+      header: "Тест контроля работоспособности",
+      message: $"{device.Name} {device.NumberChassis}.{device.Number}",
+      type: ShowMessageModel.MessageType.CommandBlock);
+  }
+
+  /// <summary>
   /// Формирует сообщение о результате подключения устройства.
   /// </summary>
   /// <param name="device">Подключаемое устройство.</param>

@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -24,22 +23,22 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(NodeFullContext context)
+    static public async Task<AlgorithmExecutionResult> CheckSequenceAsync(NodeFullContext context)
     {
-      List<ShowMessageModel> ErrorMessage = new List<ShowMessageModel>();
+      var executionResult = new AlgorithmExecutionResult();
       List<ChainModel> errorChains = new();
 
       var groupChains = context.SchemeModel.GetPointsDisconnected();
       if (groupChains.ChainModels.Count == 0)
       {
-        return ErrorMessage;
+        return executionResult;
       }
       ErrorsPoints = new List<ChainModel>();
 
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      { 
-        await context.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.FullNode, context.IsPolarityReversed));
-      }
+      await CommandMessages.PublishCheckBlockHeaderAsync(
+        context.MessageService,
+        ControlCheckAlgorithm.FullNode,
+        context.IsPolarityReversed);
 
       foreach (var chainModels in groupChains.ChainModels)
       {
@@ -51,7 +50,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
 
-        await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Проверка {chainModels.ToString()}"), IsBlockStart: true);
+        await ExecutionMessages.PublishChainInspectionAsync(chainModels.ToString(), context.MessageService);
 
         await DeviceManager.RelayModule.ChainManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService, context.IsPolarityReversed);
 
@@ -73,13 +72,13 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ErrorsPoints.Count > 0)
       {
-        await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Бракованные точки"), IsBlockStart: true);
+        await ExecutionMessages.PublishDefectivePointsAsync(context.MessageService);
         foreach (var point in ErrorsPoints)
         {
-          await context.MessageService.ShowMessageAsync(new ShowMessageModel($"Найден брак при проверке цепи", message: point.ToString(), type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, IsBlockStart: true);
+          await ExecutionMessages.PublishDefectiveChainAsync(point.ToString(), context.MessageService);
         }
 
-        await context.MessageService.ShowMessageAsync(new ShowMessageModel("Анализ на наличие короткого замыкания между точками"), IsBlockStart: true);
+        await ExecutionMessages.PublishShortCircuitAnalysisAsync(context.MessageService);
         var chains = await FindAllShortCircuitChainsAsync(context.PerformMeasurementAsync, ErrorsPoints, context.Value, context.MessageService, context.VoltageType, context.IsPolarityReversed);
 
         foreach (var chain in chains)
@@ -93,15 +92,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.CommandModel.FormattedStartLineNumber));
           errorChains.AddRange(chain.Chain);
 
-          var err = await FaultChainMeasurementService.MeasureAsync(
+          var faultResult = await FaultChainMeasurementService.MeasureAsync(
             context,
             chain.Chain,
             chainStr,
             (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
             context.VoltageType);
 
-          ErrorMessage.Add(err);
-          await context.MessageService.ShowMessageAsync(new ShowMessageModel(debug: $"Добавлена ошибка: {err.ToString()}"));
+          var err = faultResult.Errors.Single();
+          executionResult.AddRange(faultResult);
+          await ExecutionMessages.PublishDebugAsync($"Добавлена ошибка: {err}", context.MessageService);
         }
       }
 
@@ -110,7 +110,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
       }
 
-      return ErrorMessage;
+      return executionResult;
     }
 
     /// <summary>

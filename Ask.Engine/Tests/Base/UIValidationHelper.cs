@@ -5,7 +5,6 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -59,12 +58,9 @@ namespace Ask.Engine.Tests.Base
         {
           foreach (var error in validationErrors)
           {
-            await messageOutputService.ShowMessageAsync(
-              new ShowMessageModel(
-                "Ошибка данных",
-                message: error.Description,
-                type: ShowMessageModel.MessageType.Error),
-              SkipStepModeCheck: true);
+            await ValidationMessages.PublishDataErrorAsync(
+              error.Description,
+              messageOutputService);
           }
 
           throw new InputValidationException(new ErrorItem
@@ -105,7 +101,7 @@ namespace Ask.Engine.Tests.Base
       }
       catch (SystemExceptionBase ex)
       {
-        await messageOutputService.ShowMessageAsync(new ShowMessageModel("Ошибка данных", message: ex.Description, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
+        await ValidationMessages.PublishDataErrorAsync(ex.Description, messageOutputService);
         throw;
       }
     }
@@ -121,8 +117,7 @@ namespace Ask.Engine.Tests.Base
       bool busCheck,
       bool pairBusCheck)
     {
-      var messages = BuildMetrologyInputMessages(
-        inputFieldProvider.GetExecutionTitle(),
+      var parameters = BuildMetrologyInputParameters(
         metrologyMode,
         data,
         timeCheck,
@@ -132,12 +127,16 @@ namespace Ask.Engine.Tests.Base
         pairBusCheck);
 
       inputFieldProvider.SetExecutionInputParameters(
-        messages
-          .Skip(1)
-          .Select(message => message.ToString())
+        parameters
+          .Select(parameter => $"{parameter.Header}: {parameter.Value}")
           .ToArray());
 
-      await ShowInputMessagesAsync(messageOutputService, messages);
+      await ValidationMessages.PublishInputParametersAsync(
+        inputFieldProvider.GetExecutionTitle(),
+        parameters,
+        messageOutputService,
+        isCommandHeader: false,
+        isBlockStart: false);
     }
 
     internal static async Task ShowTestInputAsync(
@@ -145,43 +144,19 @@ namespace Ask.Engine.Tests.Base
       IInputFieldProvider inputFieldProvider,
       IReadOnlyList<(string Header, string Value)> parameters)
     {
-      var messages = new List<ShowMessageModel>
-      {
-        new(
-          $"Запуск \"{inputFieldProvider.GetExecutionTitle()}\"",
-          type: ShowMessageModel.MessageType.Command)
-      };
-      messages.AddRange(parameters.Select(parameter =>
-        CreateInputMessage(parameter.Header, parameter.Value)));
-
       inputFieldProvider.SetExecutionInputParameters(
-        messages
-          .Skip(1)
-          .Select(message => message.ToString())
+        parameters
+          .Select(parameter => $"{parameter.Header}: {parameter.Value}")
           .ToArray());
 
-      await ShowInputMessagesAsync(messageOutputService, messages);
+      await ValidationMessages.PublishInputParametersAsync(
+        inputFieldProvider.GetExecutionTitle(),
+        parameters,
+        messageOutputService,
+        isCommandHeader: true);
     }
 
-    private static async Task ShowInputMessagesAsync(
-      IMessageOutputService messageOutputService,
-      IReadOnlyList<ShowMessageModel> messages)
-    {
-      await messageOutputService.ShowMessageAsync(
-        messages[0],
-        IsBlockStart: true,
-        SkipStepModeCheck: true);
-
-      foreach (var message in messages.Skip(1))
-      {
-        await messageOutputService.ShowMessageAsync(
-          message,
-          SkipStepModeCheck: true);
-      }
-    }
-
-    internal static IReadOnlyList<ShowMessageModel> BuildMetrologyInputMessages(
-      string executionTitle,
+    internal static IReadOnlyList<(string Header, string Value)> BuildMetrologyInputParameters(
       MeasurementTypeCommand metrologyMode,
       DataModel data,
       bool timeCheck,
@@ -191,53 +166,44 @@ namespace Ask.Engine.Tests.Base
       bool pairBusCheck)
     {
       var displayInfo = metrologyMode.GetCommandDisplayInfo();
-      var messages = new List<ShowMessageModel>
+      var parameters = new List<(string Header, string Value)>
       {
-        new(
-          $"Запуск \"{executionTitle}\"",
-          type: ShowMessageModel.MessageType.Command),
-        CreateInputMessage("Первая точка", data.FirstPoint.ToString()),
-        CreateInputMessage("Вторая точка", data.SecondPoint.ToString()),
-        CreateInputMessage(
+        ("Первая точка", data.FirstPoint.ToString()),
+        ("Вторая точка", data.SecondPoint.ToString()),
+        (
           $"Заданное значение {displayInfo.MeasurementDescription.ToLowerInvariant()}",
-          MeasurementValueFormatter.FormatWithUnit(data.Param, displayInfo.Unit))
+          MeasurementValueFormatter.FormatWithUnit(data.Param, displayInfo.Unit)),
       };
 
       if (timeCheck)
       {
-        messages.Add(CreateInputMessage(
+        parameters.Add((
           "Время выполнения",
           MeasurementValueFormatter.FormatWithUnit(data.Time, "с")));
       }
 
       if (timeRampCheck)
       {
-        messages.Add(CreateInputMessage(
+        parameters.Add((
           "Время нарастания",
           MeasurementValueFormatter.FormatWithUnit(data.RampTime, "с")));
       }
 
       if (voltageCheck)
       {
-        messages.Add(CreateInputMessage(
+        parameters.Add((
           "Напряжение",
           MeasurementValueFormatter.FormatWithUnit(data.Voltage, "В")));
       }
 
       if (busCheck)
-        messages.Add(CreateInputMessage("Шина", data.ActiveBus.GetDescription()));
+        parameters.Add(("Шина", data.ActiveBus.GetDescription()));
 
       if (pairBusCheck)
-        messages.Add(CreateInputMessage("Группа шин", data.ActivePairBus.GetDescription()));
+        parameters.Add(("Группа шин", data.ActivePairBus.GetDescription()));
 
-      return messages;
+      return parameters;
     }
-
-    private static ShowMessageModel CreateInputMessage(string header, string value) =>
-      new(header, message: value)
-      {
-        IndentLevel = 1
-      };
 
     /// <summary>
     /// Выполняет полную валидацию пользовательского ввода из элемента <see cref="InputField"/>,

@@ -1,6 +1,5 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -8,7 +7,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.Tests.Base;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
@@ -61,10 +59,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       if (chassis == null)
       {
-        await _userInteractionService
-            .ShowMessageAsync(new ShowMessageModel(
-                "Шасси тестируемого модуля не найдено!",
-                ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishEquipmentLookupErrorAsync(
+          "Шасси тестируемого модуля не найдено!",
+          _userInteractionService);
         return false;
       }
 
@@ -73,20 +70,18 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       testedModuleRelayControl = list.FirstOrDefault(m => m.Number == testedCoords[1]);
       if (testedModuleRelayControl == null)
       {
-        await _userInteractionService
-            .ShowMessageAsync(new ShowMessageModel(
-                "Тестируемый модуль не найден!",
-                ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishEquipmentLookupErrorAsync(
+          "Тестируемый модуль не найден!",
+          _userInteractionService);
         return false;
       }
 
       list = await RelaySwitchModules.GetDevicesByNumberChassisAsync(verificatCoords[0]);
       if (list == null || list.Count == 0)
       {
-        await _userInteractionService
-            .ShowMessageAsync(new ShowMessageModel(
-                "Шасси проверяющего модуля не найдено!",
-                ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishEquipmentLookupErrorAsync(
+          "Шасси проверяющего модуля не найдено!",
+          _userInteractionService);
         return false;
       }
 
@@ -94,10 +89,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           .FirstOrDefault(m => m.Number == verificatCoords[1]);
       if (verificatModuleRelayControl == null)
       {
-        await _userInteractionService
-            .ShowMessageAsync(new ShowMessageModel(
-                "Проверяющий модуль не найден!",
-                ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishEquipmentLookupErrorAsync(
+          "Проверяющий модуль не найден!",
+          _userInteractionService);
         return false;
       }
 
@@ -111,7 +105,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var (ok, message, tested, tester, range) = UIValidationHelperLightweight.TryValidateAndParseInput(_messageService, inputFieldProvider, inputHighlightService);
+      var (ok, message, tested, tester, range) = await UIValidationHelperLightweight.TryValidateAndParseInputAsync(
+        _messageService,
+        inputFieldProvider,
+        inputHighlightService);
       if (!ok)
       {
         LogError($"Валидация не пройдена: {message}");
@@ -138,11 +135,11 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       List<int> points = ParseRange(range);
 
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования"), IsBlockStart: true);
+      await ExecutionMessages.PublishEquipmentInitializationAsync(_userInteractionService);
       await RelayModuleHelper.InitializeModule(_userInteractionService, testedModuleRelayControl, _userInteractionService, cancellationToken, "тестируемый");
       await RelayModuleHelper.InitializeModule(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken, "проверяющий");
 
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Настройка оборудования"), IsBlockStart: true);
+      await ExecutionMessages.PublishEquipmentSetupAsync(_userInteractionService);
       await RelayModuleHelper.MeterEnableAsync(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken);
 
       await RunPart1(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
@@ -184,7 +181,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       CancellationToken cancellationToken,
       bool needRestartModuleAfter = true)
     {
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"ТЕСТ 1: проверка замыкания точек при подключении к A1"), IsBlockStart: true);
+      await ExecutionMessages.PublishTestStageAsync(
+        "ТЕСТ 1: проверка замыкания точек при подключении к A1",
+        _userInteractionService);
       bool result = await RunPointTest(messageService, tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
       return result;
     }
@@ -220,7 +219,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       CancellationToken cancellationToken,
       bool needRestartModuleAfter = true)
     {
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 2: проверка замыкания точек при подключении к B1\n"), IsBlockStart: true);
+      await ExecutionMessages.PublishTestStageAsync(
+        "\nТЕСТ 2: проверка замыкания точек при подключении к B1\n",
+        _userInteractionService);
       bool result = await RunPointTest(messageService, tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
       return result;
     }
@@ -247,7 +248,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     bool needRestartModuleAfter = true)
     {
 
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"\nТЕСТ 3: проверка замыканий между всеми шинами\n"), IsBlockStart: true);
+      await ExecutionMessages.PublishTestStageAsync(
+        "\nТЕСТ 3: проверка замыканий между всеми шинами\n",
+        _userInteractionService);
 
       var allVerifBuses = new[] {
         SwitchingBus.A1, SwitchingBus.B1,
@@ -347,14 +350,13 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           success = false;
         }
 
-        await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel(
-            success ? successHeader : errorHeader,
-            message: success ? successMessage : errorMessage,
-            type: success ? MessageType.Success : MessageType.Error)
-          {
-            IndentLevel = 2,
-          });
+        await ExecutionMessages.PublishOperationResultAsync(
+          success,
+          successHeader,
+          successMessage,
+          errorHeader,
+          errorMessage,
+          _userInteractionService);
 
         return success;
       }, _userInteractionService);
@@ -462,7 +464,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await RelayModuleHelper.BusConnectAsync(switchingBus1, verificat_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus2, verificat_module, _userInteractionService, cancellationToken);
 
-      await _userInteractionService.ShowMessageAsync(new ShowMessageModel("Подлючение точек"));
+      await CommandMessages.PublishPointsConnectionAsync(
+        _userInteractionService,
+        indentLevel: 0,
+        isBlockStart: false);
       await verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last(), _userInteractionService);
     }
 
@@ -486,7 +491,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     {
       foreach (int point in rangePoints)
       {
-        await _userInteractionService.ShowMessageAsync(new ShowMessageModel($"Тест точки {point}"));
+        await ExecutionMessages.PublishTestPointAsync(point, _userInteractionService);
         await VerifyPointConnectionAsync(tested_module, verificat_module, bus1, point, cancellationToken);
         await VerifyPointDisconnectionAsync(verificat_module, bus2, point, cancellationToken);
         await RestorePointStateAsync(tested_module, verificat_module, bus1, bus2, point, cancellationToken);

@@ -1,7 +1,6 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -9,7 +8,6 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
-using Ask.Engine.Tests.Protocol;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.CI
@@ -46,7 +44,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
         var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
         if (!connect.Connect)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
+          await ExecutionMessages.PublishErrorAsync(connect.Message, _messageService);
           return;
         }
 
@@ -91,7 +89,9 @@ namespace Ask.Engine.Tests.NodeMethod.CI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
+            await MeasurementMessages.PublishStartAsync(
+              MeasurementTypeCommand.SI,
+              protocolUI);
 
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
@@ -100,30 +100,24 @@ namespace Ask.Engine.Tests.NodeMethod.CI
               MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, 1000, 60000);
               var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
 
-              var type = ShowMessageModel.MessageType.Success;
-              if (answer.value < dataModel.Param)
-              {
-                type = ShowMessageModel.MessageType.Error;
-              }
+              bool isSuccessful = answer.value >= dataModel.Param;
 
-              var formattedResult = NodeMethodProtocolBuilder.FormatValue(answer.value, ResistanceUnit.MegaOhm);
-              var resultMessage = new ShowMessageModel(
-                $"Результат измерения точки {connectResult.PointModel}",
-                message: formattedResult,
-                type: type)
-              {
-                IndentLevel = 2,
-                ExecutionErrorMessage = type == ShowMessageModel.MessageType.Error
-                  ? NodeMethodProtocolBuilder.BuildFailure(
-                    connectResult.PointModel,
-                    dataModel.Param,
-                    answer.value,
-                    ResistanceUnit.MegaOhm,
-                    MeasurementLimitKind.Minimum)
-                  : null,
-              };
-              await protocolUI.ShowMessageAsync(resultMessage, skipPause: true);
-              return type == ShowMessageModel.MessageType.Success;
+              string? executionErrorMessage = !isSuccessful
+                ? MeasurementMessages.BuildNodeFailure(
+                  connectResult.PointModel,
+                  dataModel.Param,
+                  answer.value,
+                  ResistanceUnit.MegaOhm,
+                  MeasurementLimitKind.Minimum)
+                : null;
+              await MeasurementMessages.PublishResultAsync(
+                ResistanceUnit.MegaOhm,
+                new MeasurementRange(answer.value, dataModel.Param, -1),
+                isSuccessful,
+                connectResult.PointModel.ToString(),
+                executionErrorMessage,
+                protocolUI);
+              return isSuccessful;
 
             }, protocolUI);
           }

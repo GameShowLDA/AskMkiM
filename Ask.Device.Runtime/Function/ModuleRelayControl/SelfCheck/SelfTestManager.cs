@@ -1,7 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -9,7 +8,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Commands;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 {
@@ -38,7 +36,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
-      await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(_moduleRelay));
+      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(_moduleRelay, userMessageService);
 
       switch (typeConnector)
       {
@@ -66,7 +64,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <param name="token">Токен отмены операции.</param>
     private async Task PerformClosureCycle(CancellationToken token, IRelaySwitchModule relaySwitchModule, IUserInteractionService? userMessageService = null)
     {
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
+      await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
       if (!(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
         return;
@@ -76,7 +74,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       await _moduleRelay.MeterManager.ConnectMeterAsync(
         ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка подключения точек"));
+      await SelfTestMessages.PublishInformationAsync("Проверка подключения точек", userMessageService);
       for (int point = 1; point <= _moduleRelay.PointCount; point++)
       {
         await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, userMessageService), userMessageService);
@@ -88,11 +86,15 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       if (switchingDevice == null)
       {
-        await userMessageService.ShowMessageAsync(new ShowMessageModel("Устройство коммутации шин не задана в конфигурации!", type: MessageType.Error));
+        await SelfTestMessages.PublishResultAsync(
+          "Устройство коммутации шин не задана в конфигурации!",
+          false,
+          userMessageService,
+          skipPause: false);
         return;
       }
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Настройка устройств"));
+      await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
 
       if (!(await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
@@ -107,7 +109,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await userMessageService.ShowMessageAsync(new ShowMessageModel("Проверка коммутации шин"));
+      await SelfTestMessages.PublishInformationAsync("Проверка коммутации шин", userMessageService);
 
       for (int busNumber = 1; busNumber <= 4; busNumber++)
       {
@@ -145,72 +147,54 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       string answer = await relaySwitchModule.PointManager.CheckPoint(point, userMessageService);
       SelfPointModel model = SelfPointModel.FromJson(answer);
 
-      ShowMessageModel showMessageModel;
       if (model != null)
       {
         model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
-
-        showMessageModel = new ShowMessageModel()
-        {
-          Header = $"Точка {point}",
-          Status = model.SelfControl ? ShowMessageModel.MessageType.Success : MessageType.Error,
-          ExecutionError = !model.SelfControl,
-          ExecutionErrorMessage = model.SelfControl
-            ? null
-            : string.Empty,
-          IndentLevel = 1,
-        };
-        showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
-
-        await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
+        await SelfTestMessages.PublishResultAsync(
+          $"Точка {point}",
+          model.SelfControl,
+          userMessageService,
+          indentLevel: 1,
+          executionErrorMessage: model.SelfControl ? null : string.Empty,
+          executionError: !model.SelfControl,
+          canBeDeleted: model.SelfControl);
 
         if (!model.SelfControl)
         {
           var lastLine = userMessageService.GetLastLineNumber();
           userMessageService.AddError(ModuleRelayControlError.PointError(lastLine, $"{relaySwitchModule.NumberChassis}.{model.NumberDevice}.{model.NumberPoint}"));
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"Подключение точки",
-            Status = model.ConnectPoint ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = model.ConnectPoint,
-            ExecutionErrorMessage = model.ConnectPoint ? string.Empty : $"Точка[{point}] - Подключение точки",
-            IndentLevel = 2,
-          };
-          await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
-
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"\t\tОтключение с шины А",
-            Status = model.DisconnectBusA ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = model.DisconnectBusA,
-            ExecutionErrorMessage = model.DisconnectBusA ? string.Empty : $"Точка[{point}] - Отключение с шины A",
-            IndentLevel = 2,
-          };
-          await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
-
-          showMessageModel = new ShowMessageModel()
-          {
-            Header = $"\t\tОтключение с шины B",
-            Status = model.DisconnectBusB ? MessageType.Success : MessageType.Error,
-            CanBeDeleted = model.DisconnectBusB,
-            ExecutionErrorMessage = model.DisconnectBusB ? string.Empty : $"Точка[{point}] - Отключение с шины B",
-            IndentLevel = 2,
-
-          };
-          await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
+          await SelfTestMessages.PublishResultAsync(
+            "Подключение точки",
+            model.ConnectPoint,
+            userMessageService,
+            indentLevel: 2,
+            executionErrorMessage: model.ConnectPoint ? string.Empty : $"Точка[{point}] - Подключение точки",
+            canBeDeleted: model.ConnectPoint);
+          await SelfTestMessages.PublishResultAsync(
+            "\t\tОтключение с шины А",
+            model.DisconnectBusA,
+            userMessageService,
+            indentLevel: 2,
+            executionErrorMessage: model.DisconnectBusA ? string.Empty : $"Точка[{point}] - Отключение с шины A",
+            canBeDeleted: model.DisconnectBusA);
+          await SelfTestMessages.PublishResultAsync(
+            "\t\tОтключение с шины B",
+            model.DisconnectBusB,
+            userMessageService,
+            indentLevel: 2,
+            executionErrorMessage: model.DisconnectBusB ? string.Empty : $"Точка[{point}] - Отключение с шины B",
+            canBeDeleted: model.DisconnectBusB);
 
           return false;
         }
       }
       else
       {
-        showMessageModel = new ShowMessageModel()
-        {
-          Header = $"\tОшибка данных!",
-          Status = MessageType.Error,
-          Message = answer,
-        };
-        await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
+        await SelfTestMessages.PublishResultAsync(
+          "\tОшибка данных!",
+          false,
+          userMessageService,
+          message: answer);
         return false;
       }
       return true;
@@ -220,37 +204,29 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     {
       (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
 
-      ShowMessageModel showMessageModel;
-      showMessageModel = new ShowMessageModel()
-      {
-        Header = $"Шины AB{busNumber}",
-        Status = answer.Item1 ? ShowMessageModel.MessageType.Success : MessageType.Error,
-        ExecutionError = !answer.Item1,
-        IndentLevel = 2,
-      };
-      showMessageModel.CanBeDeleted = !showMessageModel.ExecutionError;
-      await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
+      await SelfTestMessages.PublishResultAsync(
+        $"Шины AB{busNumber}",
+        answer.Item1,
+        userMessageService,
+        indentLevel: 2,
+        executionError: !answer.Item1,
+        canBeDeleted: answer.Item1);
 
       if (!answer.Item1)
       {
         SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
-        showMessageModel = new ShowMessageModel()
-        {
-          Header = $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
-          Status = selfBusModel.ConnectProtect ? MessageType.Success : MessageType.Error,
-          CanBeDeleted = selfBusModel.ConnectProtect,
-          IndentLevel = 3,
-        };
-        await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
-
-        showMessageModel = new ShowMessageModel()
-        {
-          Header = $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
-          Status = selfBusModel.ConnectMain ? MessageType.Success : MessageType.Error,
-          CanBeDeleted = selfBusModel.ConnectMain,
-          IndentLevel = 3,
-        };
-        await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
+        await SelfTestMessages.PublishResultAsync(
+          $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
+          selfBusModel.ConnectProtect,
+          userMessageService,
+          indentLevel: 3,
+          canBeDeleted: selfBusModel.ConnectProtect);
+        await SelfTestMessages.PublishResultAsync(
+          $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
+          selfBusModel.ConnectMain,
+          userMessageService,
+          indentLevel: 3,
+          canBeDeleted: selfBusModel.ConnectMain);
 
         return false;
       }

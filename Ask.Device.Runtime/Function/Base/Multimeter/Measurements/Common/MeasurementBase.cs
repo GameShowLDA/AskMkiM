@@ -284,7 +284,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       await ShowMeasurementResultAsync(
         header,
-        $"{MeasurementValueFormatter.FormatWithUnit(result, unit)} (правильных: {correctMeasurements.Count}/{totalMeasurementCount})",
+        MeasurementValueFormatter.FormatWithUnit(result, unit),
         isSuccessful,
         userMessageService);
 

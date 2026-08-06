@@ -1,5 +1,4 @@
 using Ask.Core.Services.Devices;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
@@ -19,10 +18,9 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     {
       if (selectedType is not PowerSourceModuleTypeConnector type)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel(
-          "Ошибка",
-          message: "Неверный тип проверки: требуется TypeConnector",
-          type: ShowMessageModel.MessageType.Error));
+        await SelfTestMessages.PublishErrorAsync(
+          "Неверный тип проверки: требуется TypeConnector",
+          messageService);
 
         return;
       }
@@ -32,7 +30,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         return;
       }
 
-      await messageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice));
+      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(powerDevice, messageService);
 
       switch (type)
       {
