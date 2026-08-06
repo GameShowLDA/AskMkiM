@@ -443,14 +443,25 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// Определяет, входит ли результат измерения в допустимый диапазон.
     /// </summary>
     /// <param name="value">Результат измерения.</param>
-    /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
-    /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
+    /// <param name="rangeFrom">
+    /// Нижняя граница допустимого диапазона.
+    /// Значение <c>-1</c> означает отсутствие нижней границы.
+    /// </param>
+    /// <param name="rangeTo">
+    /// Верхняя граница допустимого диапазона.
+    /// Значение <c>-1</c> означает отсутствие верхней границы.
+    /// </param>
     /// <returns>
     /// <see langword="true"/>, если результат входит в допустимый диапазон.
     /// В противном случае — <see langword="false"/>.
     /// </returns>
     static private bool IsWithinRange(double value, double rangeFrom, double rangeTo)
-      => value >= rangeFrom && value <= rangeTo;
+    {
+      bool isLowerValid = rangeFrom == -1 || value >= rangeFrom;
+      bool isUpperValid = rangeTo == -1 || value <= rangeTo;
+
+      return isLowerValid && isUpperValid;
+    }
 
     /// <summary>
     /// Возвращает короткое имя операции для вывода промежуточного результата измерения.
