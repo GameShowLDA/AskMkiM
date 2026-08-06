@@ -668,7 +668,7 @@ namespace UI.Controls.TextEditorControl
         return;
 
       if (!SupportsCommandSyntaxDiagnostics(FileType) ||
-          !HasEnabledSyntaxDiagnosticUnderlines())
+          !SyntaxDiagnosticUnderlinePolicy.HasEnabledUnderlines())
       {
         ClearSyntaxDiagnostics();
         return;
@@ -698,7 +698,7 @@ namespace UI.Controls.TextEditorControl
 
       _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
       _syntaxDiagnostics = diagnostics
-        .Where(IsSyntaxDiagnosticUnderlineEnabled)
+        .Where(SyntaxDiagnosticUnderlinePolicy.IsEnabled)
         .ToList();
 
       if (_syntaxDiagnostics.Count == 0)
@@ -722,10 +722,6 @@ namespace UI.Controls.TextEditorControl
       }
     }
 
-    private static bool HasEnabledSyntaxDiagnosticUnderlines() =>
-      UserInterfaceConfig.GetWarningUnderlineHighlighting()
-      || UserInterfaceConfig.GetErrorUnderlineHighlighting();
-
     private static bool SupportsCommandSyntaxDiagnostics(FileType fileType) =>
       fileType is FileType.PK or FileType.PKW;
 
@@ -735,11 +731,6 @@ namespace UI.Controls.TextEditorControl
       _syntaxDiagnostics = Array.Empty<TextSyntaxDiagnostic>();
       CloseSyntaxDiagnosticToolTip();
     }
-
-    private static bool IsSyntaxDiagnosticUnderlineEnabled(TextSyntaxDiagnostic diagnostic) =>
-      diagnostic.Severity == TextSyntaxSeverity.Warning
-        ? UserInterfaceConfig.GetWarningUnderlineHighlighting()
-        : UserInterfaceConfig.GetErrorUnderlineHighlighting();
 
     private Color GetSyntaxDiagnosticUnderlineColor(TextSyntaxDiagnostic diagnostic) =>
       diagnostic.Severity == TextSyntaxSeverity.Warning

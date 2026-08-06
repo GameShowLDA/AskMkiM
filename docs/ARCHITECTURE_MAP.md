@@ -447,6 +447,7 @@ TextEditorUI (.pk/.pkw, debounce 120 ms)
 → парсеры в equipment-independent контексте
 → TranslationDiagnosticClassifier исключает аппаратные diagnostics
 → CommandIssueSpanResolver сопоставляет diagnostics с точными spans
+→ SyntaxDiagnosticUnderlinePolicy фильтрует warnings/errors по UserInterfaceConfig
 → AvalonEdit squiggly underline (один marker максимальной severity на span)
 ```
 
