@@ -526,10 +526,10 @@
     <value>По завершении выполнения отображает диалог выбора принтера для печати итогового протокола.</value>
   </data>
   <data name="settings.protocol.showInSoftware.title" xml:space="preserve">
-    <value>Вывод протокола в ПО</value>
+    <value>Формирование протокола программы контроля</value>
   </data>
   <data name="settings.protocol.showInSoftware.description" xml:space="preserve">
-    <value>По завершении выполнения протокол отображается в программном обеспечении, по умолчанию открывается как PDF-файл.</value>
+    <value>По завершении программы контроля формируется итоговый протокол. Протоколы метрологии, тестов и самоконтроля формируются независимо от этой настройки.</value>
   </data>
   <data name="settings.protocol.generate.title" xml:space="preserve">
     <value>Формирование протокола</value>
