@@ -850,9 +850,29 @@ ExecutionFinalizer
 → PrintUtility.PrintProtocol(messages)
 ```
 
-Для программы контроля итоговый протокол показывается/сохраняется как report, но
-автоматическая печать в `ProtocolCompletionService` исключена; ручные print buttons
-в `Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml.cs` печатают execution или inspection text.
+Для программы контроля `KscCommandExecutor.GetProtocol` заполняет базовые поля `ProtocolModel` и
+при включенной печати или формировании протокола программы контроля запрашивает дополнительные данные:
+
+```text
+KscCommandExecutor.GetProtocol
+→ ProtocolConfig.ShouldShowProtocolInfoDialog()
+→ AutoPrintProtocol || ShowProtocolInSoftware
+├─ false → ветка итогового report не запускается
+└─ true → FileInteractionEventAdapter.RaiseGetProtocolInfo
+   → MainWindow.Services.FileService.OnGetProtocolInfo
+   → ProtocolInfoWindow.ShowDialog
+   → FileInteractionEventAdapter.RaiseProtocolInfoClose
+   → KscCommandExecutor.OnProtocolInfoClosing
+   → FileInteractionEventAdapter.RaiseViewProtocol
+   → MainWindow.Services.FileService.ViewProtocol
+   → UI.Services.ProtocolManager.ProtocolService.ViewProtocol
+      ├─ !ShowProtocolInSoftware → ExportProtocolAsPdf
+      └─ AutoPrintProtocol → PrintUtility.PrintProtocol(protocol, protocolText)
+```
+
+`ProtocolConfig.ShouldShowProtocolInfoDialog()` — единая точка решения для окна ввода данных. При отключенных
+настройках не запускаются ни окно, ни последующая цепочка итогового report. Ручные print
+buttons в `Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml.cs` печатают execution или inspection text без этой проверки.
 
 #### Files
 

@@ -6,7 +6,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -63,7 +62,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       if (ProtocolConfig.GetGenerateProtocol())
       {
-        FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
+        if (ProtocolConfig.ShouldShowProtocolInfoDialog())
+        {
+          FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
+        }
       }
     }
 
