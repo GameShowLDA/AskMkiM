@@ -85,7 +85,7 @@ namespace UI.Controls.TextEditorControl.Syntax
     private static IReadOnlyList<TextSyntaxDiagnostic> AnalyzeCuKeys(
       TextDocument document,
       BaseCommandModel model,
-      IReadOnlyList<AlgorithmKey> allowedKeys,
+      IReadOnlyCollection<AlgorithmKey> allowedKeys,
       IReadOnlyList<TextSpan> commentSpans)
     {
       var lineNumber = Math.Clamp(model.StartLineNumber, 1, document.LineCount);
@@ -168,7 +168,7 @@ namespace UI.Controls.TextEditorControl.Syntax
           issue.CodeString?.Contains("Key", StringComparison.OrdinalIgnoreCase) == true);
     }
 
-    private static IReadOnlyList<AlgorithmKey> GetAllowedKeys(BaseCommandModel model)
+    private static IReadOnlyCollection<AlgorithmKey> GetAllowedKeys(BaseCommandModel model)
     {
       return model.AllowedAlgorithmKeys.Count > 0
         ? model.AllowedAlgorithmKeys

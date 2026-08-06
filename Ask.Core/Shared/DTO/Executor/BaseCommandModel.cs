@@ -1,13 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.Interfaces.ErrorInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Core.Shared.DTO.Executor
 {
@@ -52,7 +53,7 @@ namespace Ask.Core.Shared.DTO.Executor
     /// Ключи алгоритма проверки, допустимые для текущего типа команды.
     /// Заполняется анализатором после определения конкретной модели команды.
     /// </summary>
-    public IReadOnlyList<AlgorithmKey> AllowedAlgorithmKeys { get; set; } = Array.Empty<AlgorithmKey>();
+    public IReadOnlySet<AlgorithmKey> AllowedAlgorithmKeys { get; set; } = ImmutableHashSet<AlgorithmKey>.Empty;
 
     /// <summary>
     /// Комментарии, указанные в команде.

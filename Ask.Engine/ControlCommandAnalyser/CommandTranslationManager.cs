@@ -13,6 +13,7 @@ using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
 using Ask.Engine.ControlCommandAnalyser.Validation;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -678,7 +679,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         model.Mnemonic = mnemonic;
       }
 
-      model.AllowedAlgorithmKeys = KeysHelper.GetAllowedKeysForModel(model);
+      model.AllowedAlgorithmKeys = KeysHelper.GetAllowedKeysForModel(model).ToImmutableHashSet();
 
       return model;
     }
