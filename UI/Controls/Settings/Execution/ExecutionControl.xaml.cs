@@ -227,7 +227,7 @@ namespace UI.Controls.Settings.Execution
       {
         var card = new SettingsCard
         {
-          Title = string.IsNullOrWhiteSpace(device.Name) ? deviceKind : device.Name,
+          Title = BuildDeviceTitle(device, deviceKind),
           Description = BuildDeviceDescription(device, deviceKind),
           IsChecked = device.IsHardwareFailureSimulationEnabled,
           Margin = new Thickness(0, 6, 10, 0),
@@ -247,6 +247,12 @@ namespace UI.Controls.Settings.Execution
         _hardwareFailureSimulationEntries.Add(entry);
         HardwareFailureSimulationCards.Children.Add(card);
       }
+    }
+
+    private static string BuildDeviceTitle(IDevice device, string deviceKind)
+    {
+      string deviceName = string.IsNullOrWhiteSpace(device.Name) ? deviceKind : device.Name;
+      return device is IChassisManager ? deviceName : $"{deviceName} ({device.Number})";
     }
 
     private static string BuildDeviceDescription(IDevice device, string deviceKind)
