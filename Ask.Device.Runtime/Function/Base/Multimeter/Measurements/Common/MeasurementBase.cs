@@ -1,11 +1,15 @@
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -28,6 +32,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="measurementCount">Количество положительных результатов измерения ёмкости для усреднения.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Выбрасывается, если для измерения ёмкости <paramref name="measurementCount"/> меньше единицы.
@@ -37,7 +42,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       IMeasurementProfile profile,
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
-      int measurementCount = 1)
+      int measurementCount = 1,
+      double responseDelay = 0)
     {
       if (profile.Unit is CapacitanceUnit)
       {
@@ -46,14 +52,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           profile,
           measurementRange,
           userMessageService,
-          measurementCount);
+          measurementCount,
+          responseDelay);
       }
 
       return await MeasureOtherAsync(
         device,
         profile,
         measurementRange,
-        userMessageService);
+        userMessageService,
+        responseDelay);
     }
 
     /// <summary>
@@ -65,12 +73,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
     static private async Task<double> MeasureOtherAsync(
       IMultimeter device,
       IMeasurementProfile profile,
       MeasurementRange measurementRange,
-      IUserInteractionService? userMessageService = null)
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
     {
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
       var unit = profile.Unit.GetUnit();
@@ -80,23 +90,27 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         await SetModeBase.SetModeAsync(device, profile, userMessageService);
       }
 
-      var random = Simulated.GetSimulatedValue(measurementRange.LowerBound, measurementRange.UpperBound, profile.ElectricalTest);
-      if (random != -1)
-      {
-        return random;
-      }
-
       if (profile.ElectricalTest == ElectricalTestFunction.DCVoltage
       || profile.ElectricalTest == ElectricalTestFunction.ACVoltage
       || profile.ElectricalTest == ElectricalTestFunction.Resistance
       || profile.ElectricalTest == ElectricalTestFunction.Diode
       || profile.ElectricalTest == ElectricalTestFunction.Capacitance)
+      {
         await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
+      }
 
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         device,
         header,
-        () => MeasureCoreAsync(device, profile, header, measurementRange.TargetValue, measurementRange.LowerBound, measurementRange.UpperBound),
+        () => MeasureCoreAsync(
+          device,
+          profile,
+          header,
+          measurementRange.TargetValue,
+          measurementRange.LowerBound,
+          measurementRange.UpperBound,
+          userMessageService: userMessageService,
+          responseDelay: responseDelay),
         maxAttempts: userMessageService == null ? 2 : 1);
 
       if (!execution.Success)
@@ -107,7 +121,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           execution.ErrorMessage,
           false,
           2,
-          userMessageService);
+          userMessageService,
+          isStepCheckpoint: true);
 
         if (userMessageService != null)
         {
@@ -119,13 +134,158 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return -1;
       }
 
-      double result = execution.Value;
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        device,
-        $"Результат \"{header}\"",
-        $"{result} {unit}",
+      await ShowMeasurementResultAsync(
+        header,
+        MeasurementValueFormatter.FormatWithUnit(execution.Value, unit),
         true,
-        2,
+        userMessageService);
+
+      return execution.Value;
+    }
+
+    /// <summary>
+    /// Выполняет серию измерений сопротивления и применяет правило допустимого
+    /// количества ложных результатов.
+    /// </summary>
+    /// <param name="device">Мультиметр.</param>
+    /// <param name="profile">Профиль измерения сопротивления.</param>
+    /// <param name="measurementRange">Ожидаемое значение и допустимые границы результата.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="correctMeasurementCount">Обязательное количество результатов в допустимых границах.</param>
+    /// <param name="falseMeasurementCount">Допустимое количество результатов вне допустимых границ.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
+    /// <returns>
+    /// Среднее правильных результатов, если серия прошла проверку; иначе один
+    /// из результатов вне допустимых границ.
+    /// </returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Выбрасывается, если <paramref name="correctMeasurementCount"/> меньше единицы,
+    /// <paramref name="falseMeasurementCount"/> меньше нуля или их сумма превышает
+    /// <see cref="int.MaxValue"/>.
+    /// </exception>
+    static public async Task<double> MeasureResistanceAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      int correctMeasurementCount = 2,
+      int falseMeasurementCount = 1,
+      double responseDelay = 0)
+    {
+      if (correctMeasurementCount < 1)
+      {
+        throw new ArgumentOutOfRangeException(
+          nameof(correctMeasurementCount),
+          correctMeasurementCount,
+          "Количество правильных измерений должно быть больше нуля.");
+      }
+
+      if (falseMeasurementCount < 0)
+      {
+        throw new ArgumentOutOfRangeException(
+          nameof(falseMeasurementCount),
+          falseMeasurementCount,
+          "Количество ложных измерений не может быть отрицательным.");
+      }
+
+      if (correctMeasurementCount > int.MaxValue - falseMeasurementCount)
+      {
+        throw new ArgumentOutOfRangeException(
+          nameof(falseMeasurementCount),
+          falseMeasurementCount,
+          "Суммарное количество измерений превышает допустимое значение.");
+      }
+
+      int totalMeasurementCount = correctMeasurementCount + falseMeasurementCount;
+
+      var header = EnumExtensions.GetDescription(profile.ElectricalTest);
+      var unit = profile.Unit.GetUnit();
+
+      if (device.TypeMode != profile.TypeMode)
+      {
+        await SetModeBase.SetModeAsync(device, profile, userMessageService);
+      }
+
+      await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
+
+      var correctMeasurements = new List<double>(totalMeasurementCount);
+      var falseMeasurements = new List<double>(totalMeasurementCount);
+      bool showIntermediateResults = DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility();
+
+      for (int measurementNumber = 1; measurementNumber <= totalMeasurementCount; measurementNumber++)
+      {
+        var execution = await AdapterMeasurementExecutor.ExecuteAsync(
+          device,
+          header,
+          () => MeasureCoreAsync(
+            device,
+            profile,
+            header,
+            measurementRange.TargetValue,
+            measurementRange.LowerBound,
+            measurementRange.UpperBound,
+            userMessageService: userMessageService,
+            responseDelay: responseDelay),
+          maxAttempts: userMessageService == null ? 2 : 1);
+
+        if (!execution.Success)
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            device,
+            $"Ошибка при \"{header}\"",
+            execution.ErrorMessage,
+            false,
+            2,
+            userMessageService,
+            isStepCheckpoint: true);
+
+          if (userMessageService != null)
+          {
+            throw new DeviceException(
+              $"Ошибка при \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}): " +
+              execution.ErrorMessage);
+          }
+
+          return -1;
+        }
+
+        double measurement = execution.Value;
+        bool isCorrect = IsWithinRange(
+          measurement,
+          measurementRange.LowerBound,
+          measurementRange.UpperBound);
+
+        if (isCorrect)
+        {
+          correctMeasurements.Add(measurement);
+        }
+        else
+        {
+          falseMeasurements.Add(measurement);
+        }
+
+        if (showIntermediateResults)
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            device,
+            GetIntermediateMeasurementHeader(profile.ElectricalTest),
+            MeasurementValueFormatter.FormatWithUnit(measurement, unit),
+            isCorrect,
+            2,
+            userMessageService,
+            isStepCheckpoint: true);
+        }
+      }
+
+      bool isSuccessful = correctMeasurements.Count >= correctMeasurementCount;
+      double result = isSuccessful
+        ? correctMeasurements.Average()
+        : falseMeasurements[0];
+
+      await ShowMeasurementResultAsync(
+        header,
+        MeasurementValueFormatter.FormatWithUnit(result, unit),
+        isSuccessful,
         userMessageService);
 
       return result;
@@ -141,6 +301,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="measurementCount">Количество положительных результатов для усреднения.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Выбрасывается, если <paramref name="measurementCount"/> меньше единицы.
@@ -150,7 +311,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       IMeasurementProfile profile,
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
-      int measurementCount = 1)
+      int measurementCount = 1,
+      double responseDelay = 0)
     {
       if (measurementCount < 1)
       {
@@ -161,6 +323,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
+      var intermediateResultHeader = GetIntermediateMeasurementHeader(profile.ElectricalTest);
       var unit = profile.Unit.GetUnit();
 
       if (device.TypeMode != profile.TypeMode)
@@ -177,10 +340,27 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       for (int attempt = 1; attempt <= maxMeasurementAttempts && measurements.Count < measurementCount; attempt++)
       {
+        await ShowMeasurementAttemptStepAsync(
+          device,
+          header,
+          attempt,
+          maxMeasurementAttempts,
+          measurements.Count + 1,
+          measurementCount,
+          userMessageService);
+
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           device,
           header,
-          () => MeasureCoreAsync(device, profile, header, measurementRange.TargetValue, measurementRange.LowerBound, measurementRange.UpperBound),
+          () => MeasureCoreAsync(
+            device,
+            profile,
+            header,
+            measurementRange.TargetValue,
+            measurementRange.LowerBound,
+            measurementRange.UpperBound,
+            userMessageService: userMessageService,
+            responseDelay: responseDelay),
           maxAttempts: 1);
 
         if (!execution.Success)
@@ -195,7 +375,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
               $"{execution.ErrorMessage}",
               false,
               2,
-              userMessageService);
+              userMessageService,
+              isStepCheckpoint: true);
           }
 
           if (userMessageService != null)
@@ -216,11 +397,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
-            $"Промежуточный результат \"{header}\"",
-            $"{measurement} {unit}",
+            intermediateResultHeader,
+            MeasurementValueFormatter.FormatWithUnit(measurement, unit),
             isPositive && isWithinRange,
             2,
-            userMessageService);
+            userMessageService,
+            isStepCheckpoint: true);
         }
 
         if (isPositive)
@@ -241,19 +423,19 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           errorMessage,
           false,
           2,
-          userMessageService);
+          userMessageService,
+          isStepCheckpoint: true);
 
         return -1;
       }
 
       double result = measurements.Average();
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
-        device,
-        $"Результат \"{header}\"",
-        $"{result} {unit}",
+      await ShowMeasurementResultAsync(
+        header,
+        MeasurementValueFormatter.FormatWithUnit(result, unit),
         IsWithinRange(result, measurementRange.LowerBound, measurementRange.UpperBound),
-        2,
         userMessageService);
+
       return result;
     }
 
@@ -271,6 +453,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       => value >= rangeFrom && value <= rangeTo;
 
     /// <summary>
+    /// Возвращает короткое имя операции для вывода промежуточного результата измерения.
+    /// </summary>
+    static private string GetIntermediateMeasurementHeader(ElectricalTestFunction electricalTest)
+    {
+      return electricalTest switch
+      {
+        ElectricalTestFunction.Capacitance => "Измерение ёмкости",
+        ElectricalTestFunction.Resistance => "Измерение сопротивления",
+        ElectricalTestFunction.ACVoltage or ElectricalTestFunction.DCVoltage => "Измерение напряжения",
+        _ => EnumExtensions.GetDescription(electricalTest),
+      };
+    }
+
+    /// <summary>
     /// Выполняет непосредственное измерение и преобразование ответа устройства.
     /// </summary>
     /// <param name="device">Мультиметр.</param>
@@ -280,21 +476,40 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="rangeFrom">Нижняя граница допустимого диапазона.</param>
     /// <param name="rangeTo">Верхняя граница допустимого диапазона.</param>
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
     /// <returns>Измеренное значение.</returns>
-    static private async Task<double> MeasureCoreAsync(IMultimeter device, IMeasurementProfile profile, string header, double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
+    static private async Task<double> MeasureCoreAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      string header,
+      double param = 0,
+      double rangeFrom = -1,
+      double rangeTo = -1,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
     {
-      var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, profile.ElectricalTest);
-      if (random != -1)
-      {
-        return random;
-      }
-
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      string response = await device.DeviceProtocol.QueryAsync(profile.Measure, responseDelay: 1500, timeout: profile.Timeout);
+      await ShowMeasurementCommandStepAsync(device, header, profile.Measure, userMessageService);
+
+      double simulatedValue = Simulated.GetSimulatedValue(rangeFrom, rangeTo, profile.ElectricalTest);
+      if (profile.Unit is CapacitanceUnit && simulatedValue != -1)
+      {
+        simulatedValue /= 1e9;
+      }
+
+      string idleResponse = simulatedValue == -1
+        ? string.Empty
+        : simulatedValue.ToString("+0.00000000E+00;-0.00000000E+00", CultureInfo.InvariantCulture);
+      string response = await DeviceProtocolEmulator.QueryMultimeterAsync(
+        device,
+        profile.Measure,
+        idleResponse,
+        responseDelay: responseDelay,
+        timeout: profile.Timeout);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       response = response.Trim().Replace("+", "");
@@ -330,6 +545,101 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
 
       return match.Value.Replace(',', '.');
+    }
+
+    /// <summary>
+    /// Выводит итоговый результат измерения с учетом настроек отображения параметров устройства.
+    /// </summary>
+    static private async Task ShowMeasurementResultAsync(
+      string header,
+      string message,
+      bool result,
+      IUserInteractionService? userMessageService)
+    {
+      if (userMessageService == null || (result && !DeviceDisplayConfig.GetExecutionParametersVisibility()))
+      {
+        return;
+      }
+
+      var resultType = result
+        ? ShowMessageModel.MessageType.Success
+        : ShowMessageModel.MessageType.Error;
+      var resultMessage = !result || DeviceDisplayConfig.GetMeasurementResultsVisibility()
+        ? message
+        : string.Empty;
+
+      await userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"Результат \"{header}\"",
+          message: resultMessage,
+          type: resultType)
+        {
+          IndentLevel = 2,
+          IsStepModeCheckpoint = true,
+        },
+        IsBlockStart: true,
+        skipPause: true);
+    }
+
+    /// <summary>
+    /// Выводит шаг отправки измерительной команды только при активном пошаговом режиме.
+    /// </summary>
+    static private Task ShowMeasurementCommandStepAsync(
+      IMultimeter device,
+      string header,
+      string command,
+      IUserInteractionService? userMessageService)
+    {
+      if (userMessageService == null || !StepControlManager.StepMode)
+      {
+        return Task.CompletedTask;
+      }
+
+      return userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"{device.Name}({device.NumberChassis}.{device.Number}) - Команда измерения \"{header}\"",
+          message: command,
+          type: ShowMessageModel.MessageType.Command)
+        {
+          IndentLevel = 2,
+          IsDeviceMessage = true,
+          IsStepModeCheckpoint = true,
+          IsControlProgramCommandHeader = true,
+        },
+        IsBlockStart: true,
+        skipPause: true);
+    }
+
+    /// <summary>
+    /// Выводит шаг очередной попытки измерения ёмкости только при активном пошаговом режиме.
+    /// </summary>
+    static private Task ShowMeasurementAttemptStepAsync(
+      IMultimeter device,
+      string header,
+      int attempt,
+      int maxAttempts,
+      int acceptedMeasurementNumber,
+      int requiredMeasurements,
+      IUserInteractionService? userMessageService)
+    {
+      if (userMessageService == null || !StepControlManager.StepMode)
+      {
+        return Task.CompletedTask;
+      }
+
+      return userMessageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: $"{device.Name}({device.NumberChassis}.{device.Number}) - Попытка измерения \"{header}\"",
+          message: $"{attempt}/{maxAttempts}; принято {acceptedMeasurementNumber - 1}/{requiredMeasurements}",
+          type: ShowMessageModel.MessageType.Command)
+        {
+          IndentLevel = 2,
+          IsDeviceMessage = true,
+          IsStepModeCheckpoint = true,
+          IsControlProgramCommandHeader = true,
+        },
+        IsBlockStart: true,
+        skipPause: true);
     }
   }
 }

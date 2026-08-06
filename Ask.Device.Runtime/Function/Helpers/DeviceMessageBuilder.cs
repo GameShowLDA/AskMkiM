@@ -51,7 +51,10 @@ namespace Ask.Device.Runtime.Function.Helpers
     {
       if (userMessageService != null)
       {
-        await userMessageService.ShowMessageAsync(showMessageModel, skipPause: true);
+        await userMessageService.ShowMessageAsync(
+          showMessageModel,
+          IsBlockStart: showMessageModel.IsStepModeCheckpoint,
+          skipPause: true);
       }
       else
       {
@@ -69,7 +72,7 @@ namespace Ask.Device.Runtime.Function.Helpers
     /// <param name="result">Результат операции: <c>true</c> — успешно, <c>false</c> — ошибка.</param>
     /// <param name="indentLevel">Уровень отступа, используемый при отображении сообщения (визуальная иерархия).</param>
     /// <returns>Задача асинхронного показа сообщения.</returns>
-    public static async Task ShowConnectionMessageAsync(IAttachableDevice device, string headerSuffix, bool result, int indentLevel, IUserInteractionService? userMessageService = null)
+    public static async Task ShowConnectionMessageAsync(IAttachableDevice device, string headerSuffix, bool result, int indentLevel, IUserInteractionService? userMessageService = null, bool isStepCheckpoint = false)
     {
       if (userMessageService == null)
       {
@@ -78,6 +81,7 @@ namespace Ask.Device.Runtime.Function.Helpers
       var showMessageModel = GetDefaultSettings(device);
       showMessageModel.Header += $" - {headerSuffix}";
       showMessageModel.IndentLevel = indentLevel;
+      showMessageModel.IsStepModeCheckpoint = isStepCheckpoint;
 
       if (result)
       {
@@ -102,7 +106,7 @@ namespace Ask.Device.Runtime.Function.Helpers
     /// <param name="result">Результат операции (true — успех, false — ошибка).</param>
     /// <param name="indentLevel">Уровень отступа, используемый при отображении сообщения (визуальная иерархия).</param>
     /// <returns>Задача выполнения показа сообщения.</returns>
-    public static async Task ShowConnectionMessageAsync(IAttachableDevice device, string headerSuffix, string baseMessage, bool result, int indentLevel, IUserInteractionService? userMessageService = null)
+    public static async Task ShowConnectionMessageAsync(IAttachableDevice device, string headerSuffix, string baseMessage, bool result, int indentLevel, IUserInteractionService? userMessageService = null, bool isStepCheckpoint = false)
     {
       if (userMessageService == null)
       {
@@ -112,6 +116,7 @@ namespace Ask.Device.Runtime.Function.Helpers
       showMessageModel.Header += $" - {headerSuffix}";
       showMessageModel.IndentLevel = indentLevel;
       showMessageModel.Message = baseMessage;
+      showMessageModel.IsStepModeCheckpoint = isStepCheckpoint;
 
       if (result)
       {

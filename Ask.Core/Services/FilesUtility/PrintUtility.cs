@@ -22,7 +22,11 @@ namespace Ask.Core.Services.FilesUtility
 
       foreach (var model in messages)
       {
-        var paragraph = new Paragraph();
+        var paragraph = new Paragraph
+        {
+          LineHeight = 1,
+          Margin = new Thickness(0),
+        };
         string line = Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format(model);
 
         if (!string.IsNullOrWhiteSpace(line))
@@ -69,7 +73,11 @@ namespace Ask.Core.Services.FilesUtility
 
         foreach (var str in protocolArray)
         {
-          var paragraph = new Paragraph();
+          var paragraph = new Paragraph
+          { 
+            LineHeight = 1,
+            Margin = new Thickness(0),
+          };
           if (!string.IsNullOrWhiteSpace(str))
           {
             paragraph.Inlines.Add(new Run(str)

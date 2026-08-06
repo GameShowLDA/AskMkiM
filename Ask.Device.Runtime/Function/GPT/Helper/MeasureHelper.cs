@@ -42,8 +42,20 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         var random = Simulated.GetSimulatedValue(measurementRange.LowerBound, measurementRange.UpperBound, electricalTestFunction);
+        await breakDown.DeviceProtocol.QueryAsync(
+          $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON",
+          delayBeforeCall: delayBeforeCall);
+        await breakDown.DeviceProtocol.QueryAsync(
+          $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?",
+          timeout: 500,
+          delayBeforeCall: delayBeforeCall);
+        await breakDown.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF");
+        await breakDown.DeviceProtocol.QueryAsync(
+          $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ?",
+          responseDelay: StopPollIntervalMs,
+          timeout: 1000);
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
-        return (random, "");
+        return (random, string.Empty);
       }
 
       try

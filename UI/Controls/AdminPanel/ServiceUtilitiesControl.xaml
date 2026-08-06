@@ -93,6 +93,10 @@
                                      Style="{StaticResource MacSegmentStyle}"
                                      Checked="GptTab_Checked"/>
                         <RadioButton GroupName="UtilityNavigation"
+                                     Content="Шасси"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="ChassisTab_Checked"/>
+                        <RadioButton GroupName="UtilityNavigation"
                                      Content="УКШ"
                                      Style="{StaticResource MacSegmentStyle}"
                                      Checked="SwitchingDeviceTab_Checked"/>

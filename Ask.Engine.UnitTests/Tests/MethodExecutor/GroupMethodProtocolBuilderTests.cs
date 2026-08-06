@@ -1,7 +1,7 @@
 using System.Globalization;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
-using Ask.Engine.Tests.MethodExecutor;
-using Ask.Engine.Tests.Protocol;
+using Ask.Protocol.Messages.EntryPoints;
+using Ask.Protocol.Messages.Models;
 
 namespace Ask.Engine.UnitTests.Tests.MethodExecutor;
 
@@ -16,7 +16,7 @@ public class GroupMethodProtocolBuilderTests
     {
       CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
 
-      var result = GroupMethodProtocolBuilder.BuildFailure(
+      var result = MeasurementMessages.BuildGroupFailure(
         0,
         "0000001",
         10,
@@ -41,7 +41,7 @@ public class GroupMethodProtocolBuilderTests
     {
       CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
 
-      var result = GroupMethodProtocolBuilder.BuildFailure(
+      var result = MeasurementMessages.BuildGroupFailure(
         2,
         "0000100",
         10,

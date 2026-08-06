@@ -16,12 +16,16 @@ using MainWindowProgram.ViewModels;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using UI.Components;
 using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
+using System.Windows.Media.Media3D;
 
 namespace MainWindowProgram
 {
@@ -529,6 +533,65 @@ namespace MainWindowProgram
 
       ConsoleVisibilityController.ToggleConsole();
       e.Handled = true;
+    }
+
+    private void TopPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.ChangedButton != MouseButton.Left || e.ClickCount != 1)
+      {
+        return;
+      }
+
+      if (IsInteractiveTitleBarElement(e.OriginalSource as DependencyObject))
+      {
+        return;
+      }
+
+      try
+      {
+        DragMove();
+        e.Handled = true;
+      }
+      catch (InvalidOperationException)
+      {
+        // Ignore failed drag initiation and let the click complete normally.
+      }
+    }
+
+    private bool IsInteractiveTitleBarElement(DependencyObject? source)
+    {
+      for (var current = source; current != null && current != TopPanel; current = GetParent(current))
+      {
+        if (current is ButtonBase
+            || current is MenuItem
+            || current is TextBoxBase
+            || current is PasswordBox
+            || current is Selector
+            || current is ScrollBar
+            || current is Slider
+            || current is Thumb
+            || current is Hyperlink)
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private static DependencyObject? GetParent(DependencyObject current)
+    {
+      if (current is Visual || current is Visual3D)
+      {
+        return VisualTreeHelper.GetParent(current);
+      }
+
+      return current switch
+      {
+        FrameworkContentElement frameworkContentElement => frameworkContentElement.Parent,
+        ContentElement contentElement => ContentOperations.GetParent(contentElement),
+        _ => null,
+      };
     }
 
     private async void CurrentUserButton_Click(object sender, RoutedEventArgs e)

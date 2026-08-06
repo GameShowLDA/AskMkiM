@@ -2,7 +2,9 @@ using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Device.Communication.Com.Configuration;
 using System.IO.Ports;
 using System.Management;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Ask.UI.Components
 {
@@ -17,8 +19,16 @@ namespace Ask.UI.Components
     public ComSettingsComponent()
     {
       InitializeComponent();
+      AddHandler(
+        ComboBox.SelectionChangedEvent,
+        new SelectionChangedEventHandler(OnSettingsSelectionChanged));
       Reset();
     }
+
+    /// <summary>
+    /// Возникает при изменении одного из параметров COM-порта.
+    /// </summary>
+    public event EventHandler? SettingsChanged;
 
     /// <summary>
     /// Получает имя выбранного COM-порта.
@@ -201,6 +211,33 @@ namespace Ask.UI.Components
       DataBitsSelectionBox.SelectedIndex = 4;
       ParitySelectionBox.SelectedIndex = 2;
       FlowControlSelectionBox.SelectedIndex = 2;
+    }
+
+    /// <summary>
+    /// Показывает или удаляет подсветку ошибки для секции параметров COM-порта.
+    /// </summary>
+    /// <param name="isInvalid">Признак наличия ошибки в параметрах COM-порта.</param>
+    public void SetValidationHighlight(bool isInvalid)
+    {
+      if (isInvalid)
+      {
+        COMContainer.BorderBrush = TryFindResource("RedColorSolidColorBrush") as Brush ?? Brushes.IndianRed;
+        COMContainer.BorderThickness = new Thickness(2);
+        return;
+      }
+
+      COMContainer.ClearValue(Border.BorderBrushProperty);
+      COMContainer.ClearValue(Border.BorderThicknessProperty);
+    }
+
+    /// <summary>
+    /// Оповещает подписчиков об изменении параметров COM-порта.
+    /// </summary>
+    /// <param name="sender">Источник события.</param>
+    /// <param name="e">Аргументы изменения выбранного значения.</param>
+    private void OnSettingsSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      SettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>

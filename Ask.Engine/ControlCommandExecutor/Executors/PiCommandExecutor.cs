@@ -25,7 +25,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}/{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       message = message.Replace("ПИ", "ПИ/ПИ");
 
       SetActiveLine(context, command);
@@ -58,11 +58,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
       }
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       var breakDown = await EquipmentService.GetBreakdownTesterOrThrow(context.Console);
       await SettingBreakdown(breakDown, context.Console, time.Value, voltage.Value, command.VoltageType);
 
-      List<ShowMessageModel> errorMessage = new();
+      var executionResult = new AlgorithmExecutionResult(new(), new());
 
       NodeAccumulationContext nodeAccumulationContext = new NodeAccumulationContext(context, command, command);
       nodeAccumulationContext.LowerLimit = 0;
@@ -104,33 +104,26 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (command.AlgorithmKey.Contains("К"))
       {
         nodeFullContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
-        var errMes = await NodeFullChecker.CheckSequenceAsync(nodeFullContext);
-        errorMessage.AddRange(errMes);
+        executionResult.AddRange(await NodeFullChecker.CheckSequenceAsync(nodeFullContext));
       }
       else if (command.AlgorithmKey.Contains("Г"))
       {
         methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
-        var errMes = await MethodExecutor.CheckSequenceAsync(methodExecutionContext);
-        errorMessage.AddRange(errMes);
+        executionResult.AddRange(await MethodExecutor.CheckSequenceAsync(methodExecutionContext));
       }
       else if (command.AlgorithmKey.Contains("Т1"))
       {
         pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext);
-        errorMessage.AddRange(errMes);
+        executionResult.AddRange(await PairwiseFirstPointChecker.CheckSequenceAsync(pairwiseFirstPointContext));
       }
       else
       {
         nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-        var errMes = await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext);
-        errorMessage.AddRange(errMes);
+        executionResult.AddRange(await NodeAccumulationChecker.CheckSequenceAsync(nodeAccumulationContext));
       }
 
-      await PointFormater.MessageResult(errorMessage, context.Console);
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
+      await ExecutionMessages.PublishCheckResultsAsync(executionResult.Errors, context.Console);
+      protocolModel.AddResult(nameCommand, executionResult);
 
       await CompleteProtocolCommandAsync(context, protocolModel, nameCommand);
 
@@ -150,10 +143,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       int numberChassis = breakDown.NumberChassis;
       int number = breakDown.Number;
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await userMessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildBreakdownTesterSetupMessage());
-      }
+      await ExecutionMessages.PublishBreakdownTesterSetupAsync(userMessageService);
 
       if (voltageType == VoltageEnum.Type.ACW)
       {
@@ -208,7 +198,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
           measurementRange.TargetValue = answer.value;
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, measurementRange);
+          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+          await MeasurementMessages.PublishResultAsync(
+            MeasurementTypeCommand.PI_ACW,
+            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            result.IsSuccessful,
+            outputService: messageService);
           return result;
         }
         else
@@ -216,7 +211,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
           measurementRange.TargetValue = answer.value;
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, measurementRange);
+          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+          await MeasurementMessages.PublishResultAsync(
+            MeasurementTypeCommand.PI_DCW,
+            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            result.IsSuccessful,
+            outputService: messageService);
           return result;
         }
 
@@ -242,7 +242,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
           answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService)).value;
           measurementRange.TargetValue = answer;
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_ACW, measurementRange);
+          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+          await MeasurementMessages.PublishResultAsync(
+            MeasurementTypeCommand.PI_ACW,
+            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            result.IsSuccessful,
+            outputService: messageService);
           return result;
         }
         else
@@ -250,7 +255,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
           answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService)).value;
           measurementRange.TargetValue = answer;
-          var result = await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.PI_DCW, measurementRange);
+          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+          await MeasurementMessages.PublishResultAsync(
+            MeasurementTypeCommand.PI_DCW,
+            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            result.IsSuccessful,
+            outputService: messageService);
           return result;
         }
       }, messageService);
@@ -258,20 +268,5 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return result;
     }
 
-    public async Task<bool> ShowMeasurementResultAsync(IUserInteractionService messageService, double lowerLimit, double upperLimit, double value)
-    {
-      var result = !ExecutionConfig.GetIsIdleModeEnabled() ? value >= lowerLimit && value <= upperLimit : !ExecutionConfig.GetIsErrorSimulationEnabled();
-
-      if (!result || DeviceDisplayConfig.GetMeasurementResultsVisibility())
-      {
-        var message = ExecutorMessageBuilder.BuildMeasurementResultMessage(MeasurementTypeCommand.IE, lowerLimit, upperLimit, value);
-        message.Status = value >= lowerLimit && value <= upperLimit ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error;
-        message.IndentLevel = 2;
-
-        await messageService.ShowMessageAsync(message, skipPause: true);
-      }
-
-      return result;
-    }
   }
 }

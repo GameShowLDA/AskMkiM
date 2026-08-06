@@ -129,6 +129,12 @@ namespace Ask.Core.Shared.DTO.Protocol
     public bool IsControlProgramCommandHeader { get; set; }
 
     /// <summary>
+    /// Признак явной контрольной точки пошагового режима.
+    /// Используется сценариями без команд программы контроля, например самоконтролем.
+    /// </summary>
+    public bool IsStepModeCheckpoint { get; set; }
+
+    /// <summary>
     /// Итоговый результат выполнения команды протокола.
     /// <see langword="null"/> означает, что команда ещё не завершена
     /// или результат для неё не определён.
@@ -198,6 +204,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       CanBeDeleted = false;
       IsDeviceMessage = false;
       IsControlProgramCommandHeader = false;
+      IsStepModeCheckpoint = false;
       CommandExecutionHasErrors = null;
       IndentLevel = 0;
 

@@ -16,12 +16,17 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// Устройство коммутации шин.
     /// </summary>
     private readonly Device.DeviceBusCommutation _deviceBusCommutation;
+    private readonly DeviceBusCommutationQueryExecutor queryExecutor;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public ResistorManager(Device.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
+    public ResistorManager(Device.DeviceBusCommutation deviceBusCommutation)
+    {
+      _deviceBusCommutation = deviceBusCommutation;
+      queryExecutor = new DeviceBusCommutationQueryExecutor(deviceBusCommutation);
+    }
 
     /// <summary>
     /// Замыкание резистора.
@@ -32,15 +37,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-        }
-
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 1);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
-
-        return true;
+        string answer = await queryExecutor.QueryAsync(cmd.ToString());
+        return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
       }
 
       LogError("Неверный номер резистора!", isDeviceLog: true);
@@ -56,15 +55,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       if (int.TryParse(number, out int num))
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-        }
-
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 2);
-        await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
-
-        return true;
+        string answer = await queryExecutor.QueryAsync(cmd.ToString());
+        return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
       }
 
       LogError("Неверный номер резистора!", isDeviceLog: true);

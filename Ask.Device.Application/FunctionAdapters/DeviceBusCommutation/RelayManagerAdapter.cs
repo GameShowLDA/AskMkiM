@@ -109,5 +109,149 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
       return result;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectRCRelay(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.ConnectRCRelay();
+
+          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение RC реле", $"Общий", succes, 1, userMessageService);
+          }
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw RelayControlExceptionFactory.ConnectRCFailed();
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectRCRelay(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.DisconnectRCRelay();
+
+          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение RC реле", $"Общий", succes, 1, userMessageService);
+          }
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw RelayControlExceptionFactory.DisconnectRCFailed();
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectResistor(int numberResistor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.ConnectResistor(numberResistor);
+
+          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
+          }
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw ResistorExceptionFactory.ConnectFailed($"R{numberResistor}");
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectResistor(int numberResistor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.DisconnectResistor(numberResistor);
+
+          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
+          }
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw ResistorExceptionFactory.DisconnectFailed($"R{numberResistor}");
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectCapacitor(int numberCapacitor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.ConnectCapacitor(numberCapacitor);
+
+          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
+          }
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw CapacitorExceptionFactory.ConnectFailed($"C{numberCapacitor}");
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectCapacitor(int numberCapacitor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.DisconnectCapacitor(numberCapacitor);
+
+          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
+          }
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw CapacitorExceptionFactory.DisconnectFailed($"C{numberCapacitor}");
+
+      return result;
+    }
   }
 }

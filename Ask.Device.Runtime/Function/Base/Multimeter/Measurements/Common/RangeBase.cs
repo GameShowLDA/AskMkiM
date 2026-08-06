@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -114,11 +115,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       IUserInteractionService? userMessageService)
       where TProfile : IMeasurementProfile
     {
-      var header = EnumExtensions.GetDescription(profile.TypeMode);
+      var header = GetRangeHeader(profile.TypeMode);
       var effectiveRange = range <= 0 ? 0 : ResolveRange(range, getSupportedRanges(profile));
       var rangeText = range <= 0
         ? "Авто"
         : $"{effectiveRange.ToString("G", CultureInfo.InvariantCulture)} {profile.Unit.GetUnit()}";
+      var rangeKey = BuildRangeKey(device, profile.TypeMode);
+
+      if (SelectedRanges.TryGetValue(rangeKey, out var selectedRange)
+        && selectedRange.Equals(effectiveRange))
+      {
+        return true;
+      }
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -136,7 +144,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         {
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             device,
-            $"Установка диапазона \"{header}\"",
+            header,
             rangeText,
             success,
             1,
@@ -151,8 +159,20 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException($"Ошибка установки диапазона \"{header}\" для {device.Name}({device.NumberChassis}.{device.Number}).");
       }
 
-      SelectedRanges[BuildRangeKey(device, profile.TypeMode)] = effectiveRange;
+      SelectedRanges[rangeKey] = effectiveRange;
       return true;
+    }
+
+    private static string GetRangeHeader(MultimeterTypeMode typeMode)
+    {
+      return typeMode switch
+      {
+        MultimeterTypeMode.DcVoltage => "Установка диапазона постоянного напряжения",
+        MultimeterTypeMode.AcVoltage => "Установка диапазона переменного напряжения",
+        MultimeterTypeMode.Resistance => "Установка диапазона сопротивления",
+        MultimeterTypeMode.Capacitance => "Установка диапазона ёмкости",
+        _ => $"Установка диапазона \"{EnumExtensions.GetDescription(typeMode)}\"",
+      };
     }
 
     private static async Task<bool> SetMeasurementRangeCoreAsync(
@@ -165,12 +185,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double[] supportedRanges,
       double rangeCommandMultiplier)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
-      }
-
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
@@ -184,7 +199,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ? setAutoRangeCommand
         : BuildRangeCommand(setRangeCommand, profile, ResolveRange(range, supportedRanges), rangeCommandMultiplier);
 
-      await device.DeviceProtocol.QueryAsync(command, timeout: profile.Timeout);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, command, string.Empty);
       await EnsureNoInstrumentErrorAsync(device, getRangeErrorCommand, profile.Timeout);
 
       return true;
@@ -256,7 +271,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         return;
       }
 
-      var error = await device.DeviceProtocol.QueryAsync(getRangeErrorCommand, timeout: timeout);
+      var error = await DeviceProtocolEmulator.QueryMultimeterAsync(
+        device,
+        getRangeErrorCommand,
+        "+0,\"No error\"",
+        timeout: timeout);
       var normalizedError = error?.TrimStart();
       if (!string.IsNullOrWhiteSpace(normalizedError)
         && !normalizedError.StartsWith("+0", StringComparison.Ordinal)

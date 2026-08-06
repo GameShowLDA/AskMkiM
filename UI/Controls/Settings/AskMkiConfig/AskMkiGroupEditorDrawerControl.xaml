@@ -9,6 +9,8 @@
              d:DesignWidth="430">
 
     <UserControl.Resources>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource ConfigurationScrollBarStyle}" />
+
         <DropShadowEffect x:Key="ShadowEffect"
                           BlurRadius="20"
                           ShadowDepth="0"

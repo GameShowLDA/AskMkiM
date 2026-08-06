@@ -1,76 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
+using System;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Newtonsoft.Json.Linq;
-using YamlDotNet.Core.Tokens;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
   public static class SelfTestHelper
   {
-
     /// <summary>
     /// Метод для вывода сообщения пользователю о результатах измерения.
     /// </summary>
-    /// <param name="status">Статус измерения (true - в норме, false - брак)</param>
-    /// <param name="result">Полученный результат</param>
-    /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.)</param>
-    /// <param name="unit">Единица измерения результата</param>
-    /// <param name="userMessageService">Пользовательский интерфейс для вывода</param>
-    public static async Task IsCorrectRangeAsync(bool status, double result, string param, ActionSettings settings, string? unit = null, IUserInteractionService? userMessageService = null)
+    /// <param name="status">Статус измерения (<see langword="true"/> - в норме, <see langword="false"/> - брак).</param>
+    /// <param name="result">Полученный результат.</param>
+    /// <param name="param">Название параметра измерений (сопротивление, напряжение и т.п.).</param>
+    /// <param name="unit">Единица измерения результата.</param>
+    /// <param name="idealResult">Идеальный результат.</param>
+    /// <param name="percentageError">Процент погрешности от идеального результата.</param>
+    /// <param name="userMessageService">Пользовательский интерфейс для вывода.</param>
+    public static Task IsCorrectRangeAsync(bool status, double result, string param, string unit, double idealResult, int percentageError, IUserInteractionService? userMessageService = null)
     {
-      var formattedResult = string.IsNullOrWhiteSpace(unit)
-        ? $"{result.ToString("0.000###;-0.000###;0.000")}"
-        : $"{result.ToString("0.000###;-0.000###;0.000")} {unit}";
+      ArgumentNullException.ThrowIfNull(userMessageService);
 
-      if (status)
-      {
-        await userMessageService.ShowMessageAsync(
-          new ShowMessageModel(
-            header: $"Тест измерения {param}",
-            message: $"{formattedResult} [НОРМА]",
-            type: ShowMessageModel.MessageType.Success));
-        var testResult = new TestExecutionResult
-        {
-          TestName = $"Тест измерения {param}",
-        };
-        settings.DeviceResults[0].Tests.Add(testResult);
-      }
-      else
-      {
-        await userMessageService.ShowMessageAsync(
-          new ShowMessageModel(
-            header: $"Тест измерения {param}",
-            message: $"{formattedResult} [БРАК]",
-            type: ShowMessageModel.MessageType.Error));
-        var testResult = new TestExecutionResult
-        {
-          TestName = $"Тест измерения {param} {formattedResult}",
-        };
-        settings.DeviceResults[0].Tests.Add(testResult);
-      }
+      return SelfTestMessages.PublishMultimeterMeasurementResultAsync(
+        status,
+        result,
+        param,
+        unit,
+        idealResult,
+        percentageError,
+        userMessageService);
     }
 
     /// <summary>
     /// Метод для выявления правильности результата с учетом погрешности.
     /// </summary>
-    /// <param name="idealResult">Идеальный результат</param>
-    /// <param name="result">Получившийся результат</param>
-    /// <param name="range">Допустимый диапазон отклонений</param>
-    /// <returns><see langword="true"/> - результат находится в допустимом диапазоне</returns>
+    /// <param name="idealResult">Идеальный результат.</param>
+    /// <param name="result">Получившийся результат.</param>
+    /// <param name="range">Допустимый диапазон отклонений.</param>
+    /// <returns><see langword="true"/> - результат находится в допустимом диапазоне.</returns>
     /// <remarks>
-    /// Определение правилости результата работает по формуле:
-    /// <paramref name="result"/> +- <paramref name="range"/> ~ <paramref name="idealResult"/>
+    /// Определение правильности результата работает по формуле:
+    /// <paramref name="result"/> +- <paramref name="range"/> ~ <paramref name="idealResult"/>.
     /// </remarks>
     public static bool InRange(double idealResult, double result, double range = 0)
     {
-      if (result - range <= idealResult && result + range >= idealResult) return true;
-      return false;
+      return Math.Abs(result - idealResult) <= Math.Abs(range);
     }
+
   }
 }

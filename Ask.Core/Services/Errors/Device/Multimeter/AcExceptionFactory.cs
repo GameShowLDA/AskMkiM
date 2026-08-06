@@ -14,6 +14,12 @@
     public static DeviceException SetMeasureFailed(string name, int chassis, int number, string reason = null) =>
         new($"Ошибка измеренния при режиме измерения переменного напряжения {name}({chassis}.{number}){Format(reason)}");
 
+    /// <summary>
+    /// Исключение при ошибке установки диапазона измерения AC.
+    /// </summary>
+    public static DeviceException SetVoltageRangeFailed(string name, int chassis, int number, string reason = null) =>
+        new($"Ошибка установки диапазона измерения переменного напряжения {name}({chassis}.{number}){Format(reason)}");
+
     private static string Format(string reason) => string.IsNullOrWhiteSpace(reason) ? string.Empty : $": {reason}";
   }
 }

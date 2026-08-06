@@ -47,19 +47,21 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(10);
 
     var protocol = await harness.ExecuteAsync(command);
 
     Assert.Empty(protocol.Errors);
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
-    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5 - 15 Ом)", "Rизм= 10 Ом");
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5<Ом<15)", "Rизм= 10 Ом");
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ResistanceManagerMock.Verify(
       x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Once);
     harness.ContinuityManagerMock.Verify(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()), Times.Never);
     harness.ConnectorManagerMock.Verify(x => x.ConnectMultimeter(SwitchingBusNew.AB1, It.IsAny<IUserInteractionService>()), Times.Once);
@@ -77,7 +79,10 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var command = CreateCommand(5, 15, "\u0411", "\u0414");
 
     harness.ContinuityManagerMock
-      .Setup(x => x.CheckContinuityAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()))
+      .Setup(x => x.CheckContinuityAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(10);
     var protocol = await harness.ExecuteAsync(command);
 
@@ -85,11 +90,17 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
     harness.ContinuityManagerMock.Verify(x => x.SetContinuityModeAsync(It.IsAny<IUserInteractionService>()), Times.Once);
     harness.ContinuityManagerMock.Verify(
-      x => x.CheckContinuityAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.CheckContinuityAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Once);
     harness.ResistanceManagerMock.Verify(x => x.SetResistanceModeAsync(It.IsAny<IUserInteractionService>()), Times.Never);
     harness.ResistanceManagerMock.Verify(
-      x => x.MeasureResistanceAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.MeasureResistanceAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Never);
   }
 
@@ -105,7 +116,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(10);
 
     var protocol = await harness.ExecuteAsync(command);
@@ -127,13 +139,14 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(20);
 
     var protocol = await harness.ExecuteAsync(command);
 
     AssertProtocolMessages(protocol.Errors, command, expectedCount: 1);
-    AssertMessage(protocol.Errors[GetCommandKey(command)][0], "X1, X2 (5 - 15 Ом)", "Rизм= 20 Ом");
+    AssertMessage(protocol.Errors[GetCommandKey(command)][0], "X1, X2 (5<Ом<15)", "Rизм= 20 Ом");
     Assert.Empty(protocol.Info);
     Assert.Single(harness.PublishedErrors);
     Assert.Contains("X1", harness.PublishedErrors[0].Description);
@@ -154,7 +167,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(20);
 
     var protocol = await harness.ExecuteAsync(command);
@@ -177,7 +191,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(15);
 
     var protocol = await harness.ExecuteAsync(command);
@@ -187,7 +202,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock.Verify(
       x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Once);
   }
 
@@ -204,7 +220,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(1);
 
     var protocol = await harness.ExecuteAsync(command);
@@ -226,13 +243,14 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(5);
 
     var protocol = await harness.ExecuteAsync(command);
     var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
-    AssertMessage(error, "X1, X2 (0,5 - 5 Ом)", "Rизм= 0 Ом");
+    AssertMessage(error, "X1, X2 (0,5<Ом<5)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
     Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
   }
@@ -247,16 +265,22 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var command = CreateCommand(0.5, 5, "Б");
 
     harness.ContinuityManagerMock
-      .Setup(x => x.CheckContinuityAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()))
+      .Setup(x => x.CheckContinuityAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(5);
     var protocol = await harness.ExecuteAsync(command);
     var error = Assert.Single(protocol.Errors[GetCommandKey(command)]);
 
-    AssertMessage(error, "X1, X2 (0,5 - 5 Ом)", "Rизм= 0 Ом");
+    AssertMessage(error, "X1, X2 (0,5<Ом<5)", "Rизм= 0 Ом");
     Assert.Single(harness.PublishedErrors);
     Assert.Equal("Rизм= 0 Ом", harness.PublishedErrors[0].MeasureResult);
     harness.ContinuityManagerMock.Verify(
-      x => x.CheckContinuityAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.CheckContinuityAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Once);
   }
 
@@ -273,7 +297,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(1);
 
     var protocol = await harness.ExecuteAsync(command);
@@ -295,7 +320,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(3_000_000_010);
 
     var protocol = await harness.ExecuteAsync(command);
@@ -317,14 +343,15 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .Setup(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(10);
 
     var protocol = await harness.ExecuteAsync(command);
 
     Assert.Empty(protocol.Errors);
     AssertProtocolMessages(protocol.Info, command, expectedCount: 1);
-    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5 - 15 Ом)", "Rизм= 10 Ом");
+    AssertMessage(protocol.Info[GetCommandKey(command)][0], "X1, X2 (5<Ом<15)", "Rизм= 10 Ом");
   }
 
   /// <summary>
@@ -340,7 +367,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .SetupSequence(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(10)
       .ReturnsAsync(10);
 
@@ -349,8 +377,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     Assert.Empty(protocol.Errors);
     Assert.Equal(2, messages.Count);
-    Assert.Contains(messages, item => item.Header == "X1, X2 (5 - 15 Ом)" && item.Message == "Rизм= 10 Ом");
-    Assert.Contains(messages, item => item.Header == "X1, X3 (5 - 15 Ом)" && item.Message == "Rизм= 10 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X2 (5<Ом<15)" && item.Message == "Rизм= 10 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X3 (5<Ом<15)" && item.Message == "Rизм= 10 Ом");
   }
 
   /// <summary>
@@ -366,7 +394,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     harness.ResistanceManagerMock
       .SetupSequence(x => x.MeasureResistanceAsync(
         It.IsAny<MeasurementRange>(),
-        It.IsAny<IUserInteractionService>()))
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()))
       .ReturnsAsync(20)
       .ReturnsAsync(25);
 
@@ -374,8 +403,8 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     var messages = protocol.Errors[GetCommandKey(command)];
 
     Assert.Equal(2, messages.Count);
-    Assert.Contains(messages, item => item.Header == "X1, X2 (5 - 15 Ом)" && item.Message == "Rизм= 20 Ом");
-    Assert.Contains(messages, item => item.Header == "X1, X3 (5 - 15 Ом)" && item.Message == "Rизм= 25 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X2 (5<Ом<15)" && item.Message == "Rизм= 20 Ом");
+    Assert.Contains(messages, item => item.Header == "X1, X3 (5<Ом<15)" && item.Message == "Rизм= 25 Ом");
     Assert.Equal(2, harness.PublishedErrors.Count);
   }
 
@@ -394,10 +423,16 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     Assert.Empty(protocol.Errors);
     Assert.Empty(protocol.Info);
     harness.ResistanceManagerMock.Verify(
-      x => x.MeasureResistanceAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.MeasureResistanceAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Never);
     harness.ContinuityManagerMock.Verify(
-      x => x.CheckContinuityAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.CheckContinuityAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Never);
   }
 
@@ -414,7 +449,10 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     Assert.Contains("Устройство коммутации не инициализировано", exception.Message);
     harness.ResistanceManagerMock.Verify(
-      x => x.MeasureResistanceAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.MeasureResistanceAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Never);
   }
 
@@ -462,7 +500,10 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     Assert.Contains("1.1.2", exception.Message);
     harness.ResistanceManagerMock.Verify(
-      x => x.MeasureResistanceAsync(It.IsAny<MeasurementRange>(), It.IsAny<IUserInteractionService>()),
+      x => x.MeasureResistanceAsync(
+        It.IsAny<MeasurementRange>(),
+        It.IsAny<IUserInteractionService>(),
+        It.IsAny<double>()),
       Times.Never);
   }
 

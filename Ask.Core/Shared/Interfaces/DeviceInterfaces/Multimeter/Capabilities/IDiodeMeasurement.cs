@@ -16,7 +16,12 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <summary>
     /// Проверяет диод и возвращает измеренное падение напряжения.
     /// </summary>
-    /// <param name="param">Ожидаемое значение.</param>
-    Task<double> CheckDiodeAsync(MeasurementRange measurementRange, IUserInteractionService? userMessageService = null);
+    /// <param name="measurementRange">Заданное значение и допустимый диапазон измерения.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
+    Task<double> CheckDiodeAsync(
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0);
   }
 }

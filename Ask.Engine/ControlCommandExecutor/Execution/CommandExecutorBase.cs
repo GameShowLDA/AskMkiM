@@ -50,31 +50,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     }
 
     /// <summary>
-    /// Формирует строковое представление исходных строк команды для вывода в сообщениях и протоколе выполнения.
-    /// </summary>
-    /// <param name="command">
-    /// Команда, для которой требуется сформировать сообщение.
-    /// </param>
-    /// <returns>
-    /// Строка, содержащая исходные строки команды, либо пустая строка, если исходные строки отсутствуют.
-    /// </returns>
-    protected static string BuildSourceLinesMessage(BaseCommandModel command)
-    {
-      var sourceLines = new List<string>();
-      foreach (var sourceLine in command.SourceLines)
-      {
-        if (!string.IsNullOrWhiteSpace(sourceLine))
-        {
-          sourceLines.Add(sourceLine);
-        }
-      }
-
-      return sourceLines.Count == 0
-          ? string.Empty
-          : "  " + string.Join("\r\n  ", sourceLines);
-    }
-
-    /// <summary>
     /// Завершает текущий заголовок команды в протоколе
     /// по факту наличия ошибок у конкретной команды.
     /// </summary>

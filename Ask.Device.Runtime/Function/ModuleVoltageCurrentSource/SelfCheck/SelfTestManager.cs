@@ -21,10 +21,9 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     {
       if (selectedType is not PowerSourceModuleTypeConnector type)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel(
-          "Ошибка",
-          message: "Неверный тип проверки: требуется TypeConnector",
-          type: ShowMessageModel.MessageType.Error));
+        await SelfTestMessages.PublishErrorAsync(
+          "Неверный тип проверки: требуется TypeConnector",
+          messageService);
 
         return;
       }
@@ -38,7 +37,8 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       {
         DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
       });
-      await messageService.ShowMessageAsync(deviceTitle);
+
+      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(powerDevice, messageService);
 
       switch (type)
       {

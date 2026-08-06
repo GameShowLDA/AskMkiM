@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -106,8 +107,6 @@ namespace Ask.Engine.Tests.Metrology
         MeasurementRange measurementRangeAc = new MeasurementRange(param, LowerBound, UpperBound);
         var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, measurementRangeAc);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Результат проверки"));
-
         var result = resultFastMeterMeasured >= LowerBound && resultFastMeterMeasured <= UpperBound;
 
         var err = resultFastMeterMeasured - resultReferenceMeterMeasured;
@@ -118,10 +117,21 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, resultFastMeterMeasured, LowerBound, UpperBound, "В");
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"Значение эталоного напряжения ", null, MeasurementValueFormatter.FormatWithUnit(resultReferenceMeterMeasured, "В")) { IndentLevel = 1 });
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжение", message: MeasurementValueFormatter.FormatWithUnit(resultFastMeterMeasured, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {MeasurementValueFormatter.Format(LowerBound)} до {MeasurementValueFormatter.Format(UpperBound)} В") { IndentLevel = 2 }, skipPause: true);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        await MeasurementMessages.PublishReferenceValueAsync(
+          VoltageUnit.Volt,
+          resultReferenceMeterMeasured,
+          protocolUI);
+        await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KN_ACW, new MeasurementRange(resultFastMeterMeasured, LowerBound, UpperBound), result, outputService: protocolUI);
+        await RangeMessages.PublishAllowedRangeAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(LowerBound, LowerBound, UpperBound),
+          protocolUI,
+          indentLevel: 2);
+        await MeasurementMessages.PublishErrorAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(err, LowerBound, UpperBound),
+          result,
+          protocolUI);
 
         return true;
       }

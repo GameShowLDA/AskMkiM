@@ -1,5 +1,6 @@
 using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Configuration;
+using Ask.Diagnostics.Models;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
@@ -60,17 +61,39 @@ namespace Ask.Diagnostics.Services
       _ = Task.Run(() => CreatePackageAsync(exception, source, options.LoggedExceptionReportTimeout));
     }
 
+    public async Task<string?> ReportAsync(
+      Exception exception,
+      string source,
+      IReadOnlyList<CrashReportArtifact>? artifacts = null,
+      CancellationToken cancellationToken = default)
+    {
+      ArgumentNullException.ThrowIfNull(exception);
+      SetSource(exception, source);
+
+      try
+      {
+        var result = await _crashPackageService
+          .CreateAsync(exception, artifacts, cancellationToken)
+          .ConfigureAwait(false);
+        Suppress(exception);
+        return result;
+      }
+      catch (Exception reportException)
+      {
+        Suppress(reportException);
+        _logSink.Error(reportException, $"Crash package creation failed: {source}");
+        return null;
+      }
+    }
+
     private async Task CreatePackageAsync(Exception exception, string source, TimeSpan timeout)
     {
       try
       {
-        if (!exception.Data.Contains(CrashPackageExceptionDataKeys.CrashSource))
-        {
-          exception.Data[CrashPackageExceptionDataKeys.CrashSource] = source;
-        }
+        SetSource(exception, source);
 
         using var cts = new CancellationTokenSource(timeout <= TimeSpan.Zero ? TimeSpan.FromSeconds(30) : timeout);
-        await _crashPackageService.CreateAsync(exception, cts.Token).ConfigureAwait(false);
+        await _crashPackageService.CreateAsync(exception, cancellationToken: cts.Token).ConfigureAwait(false);
       }
       catch (Exception reportException)
       {
@@ -129,6 +152,14 @@ namespace Ask.Diagnostics.Services
     internal static void Suppress(Exception exception)
     {
       exception.Data[CrashPackageExceptionDataKeys.SuppressAutoReport] = true;
+    }
+
+    private static void SetSource(Exception exception, string source)
+    {
+      if (!exception.Data.Contains(CrashPackageExceptionDataKeys.CrashSource))
+      {
+        exception.Data[CrashPackageExceptionDataKeys.CrashSource] = source;
+      }
     }
   }
 }
