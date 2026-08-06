@@ -84,7 +84,7 @@
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
-| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Пустая библиотека, зарезервированная для обработки уже полученных ответов устройств; production-код и зависимости пока отсутствуют | нет |
+| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Контракты и последующая обработка ответов оборудования; сейчас содержит модели всех JSON-ответов прошивки МКР | нет |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
@@ -138,7 +138,7 @@ Ask.Protocol.Messages
 ├─ Ask.Core ── Ask.LogLib
 └─ Ask.LogLib
 
-Ask.Device.ResponseProcessor (project references отсутствуют)
+Ask.Device.ResponseProcessor (project references отсутствуют; модели ответов МКР используют только BCL `System.Text.Json`)
 ```
 
 `Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека.
@@ -201,7 +201,11 @@ AskMkiM/
 │  ├─ Models/                  контракты накопленных результатов и пределов измерений
 │  ├─ Extensions/              интеграция результатов сообщений с `ProtocolModel`
 │  └─ Show/                    категорийная политика и общий вывод в экранный протокол
-├─ Ask.Device.ResponseProcessor/ пустая библиотека для будущей обработки полученных ответов устройств
+├─ Ask.Device.ResponseProcessor/ контракты ответов оборудования
+│  └─ ModuleRelayControl/
+│     ├─ ResponseModels/        модели всех JSON-форм, возвращаемых прошивкой МКР
+│     └─ ResponseProcessing/    публичная статическая точка входа обработки ответов МКР
+│        └─ Checkers/           отдельные internal-проверки форм ответов
 ├─ Ask.Device.Application/     adapters and application composition
 ├─ Ask.Device.Runtime/         device classes and raw function managers
 ├─ Ask.Device.Emulator/        stateful chassis and МКР protocol emulation for Idle mode
@@ -1004,6 +1008,15 @@ executor/strategy
     → protocol line "МКР chassis.number: operation. Системная ошибка. reason [БРАК]"
     → existing Retry / Continue / Abort equipment flow
 ```
+
+`Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor`
+предоставляет новые проверки ответов подключения/отключения одной точки. Методы
+`CheckPointConnection` и `CheckPointDisconnection` принимают сырой JSON и ожидаемые
+номера шасси, модуля, точки и шины. `PointConnectionResponseChecker` проверяет
+`ModuleName == "MKR"`, `NumberChassis`, `NumberDevice`, точную строку `Answer`
+для команды `8` или `82`, а для команды с аппаратным контролем также `Checked == true`.
+Production `PointManager` пока продолжает собственную проверку `BaseResponse`/
+`RelayVerifiedAnswer`; подключение нового processor к runtime call chain ещё не выполнено.
 
 Representative Keysight measurement:
 
