@@ -84,6 +84,7 @@
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
+| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Пустая библиотека, зарезервированная для обработки уже полученных ответов устройств; production-код и зависимости пока отсутствуют | нет |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
@@ -136,6 +137,8 @@ MainWindowProgram
 Ask.Protocol.Messages
 ├─ Ask.Core ── Ask.LogLib
 └─ Ask.LogLib
+
+Ask.Device.ResponseProcessor (project references отсутствуют)
 ```
 
 `Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека.
@@ -198,6 +201,7 @@ AskMkiM/
 │  ├─ Models/                  контракты накопленных результатов и пределов измерений
 │  ├─ Extensions/              интеграция результатов сообщений с `ProtocolModel`
 │  └─ Show/                    категорийная политика и общий вывод в экранный протокол
+├─ Ask.Device.ResponseProcessor/ пустая библиотека для будущей обработки полученных ответов устройств
 ├─ Ask.Device.Application/     adapters and application composition
 ├─ Ask.Device.Runtime/         device classes and raw function managers
 ├─ Ask.Device.Emulator/        stateful chassis and МКР protocol emulation for Idle mode
