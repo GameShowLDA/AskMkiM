@@ -71,8 +71,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       }
 
       await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
-      await _moduleRelay.MeterManager.ConnectMeterAsync(
-        ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
+      await _moduleRelay.MeterManager.ConnectMeterAsync(userMessageService);
 
       await SelfTestMessages.PublishInformationAsync("Проверка подключения точек", userMessageService);
       for (int point = 1; point <= _moduleRelay.PointCount; point++)
