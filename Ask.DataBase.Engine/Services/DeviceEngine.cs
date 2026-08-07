@@ -548,7 +548,7 @@ public class DeviceEngine : IDeviceEngine
     var dto = mapper(device);
 
     var updated = await service.UpdateAsync(dto, cancellationToken);
-    _cache.Remove(typeof(TDevice), updated.Id);
+
     InvalidateQueryCaches(typeof(TDevice));
     return Build<TDevice>(updated);
   }

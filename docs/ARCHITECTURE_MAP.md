@@ -757,7 +757,9 @@ type name и compatibility-sensitive contract.
 `FastMeters`, `RelaySwitchModules`, `PowerSourceModules`, `SwitchingDevices`.
 `ExecutionControl` загружает экземпляры через статические фасады, показывает для
 каждого отдельную `SettingsCard` и сохраняет изменённые экземпляры через
-соответствующий `UpdateAsync`; обновление пересобирает запись runtime-cache.
+соответствующий `UpdateAsync`; при неизменном `DeviceClass` обновление применяет
+DTO к существующему runtime-экземпляру, сохраняя его identity для уже открытых
+тестов. При смене `DeviceClass` запись runtime-cache заменяется новым экземпляром.
 После успешных `CreateAsync` / `UpdateAsync` / `DeleteAsync` / `DeleteAllAsync`
 `DeviceRuntime` публикует `DeviceConfigurationEvents.Changed`. Полная замена
 конфигурации в `DeviceConfigurationService.ApplyConfigurationFileAsync` публикует
@@ -1642,8 +1644,10 @@ schemas; a migration change must account for both normal migration and supported
 legacy adoption behavior.
 
 Runtime device cache uses `(requested interface, Id)` and query caches for
-GetAll/chassis lists. Create/update/delete invalidate relevant caches; startup
-clears and warms them.
+GetAll/chassis lists. Create/update/delete invalidate relevant query caches;
+ordinary update preserves runtime object identity and applies DTO in-place,
+while a `DeviceClass` change replaces the runtime object. Startup clears and
+warms the caches.
 
 ## Configuration
 
