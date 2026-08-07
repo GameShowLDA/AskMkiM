@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
@@ -35,11 +36,11 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       var description = $"{number} к шине [{bus}]";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _pointManager.ConnectRelayAsync(bus, number);
+        var succes = await _pointManager.ConnectRelayAsync(bus, number, userMessageService);
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -61,7 +62,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -83,7 +84,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Подключение точки {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -105,7 +106,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение точки {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -127,7 +128,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var succes = await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение диапазона точек {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Подключение диапазона точек {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -150,7 +151,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение диапазона точек {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение диапазона точек {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -171,7 +172,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -191,7 +192,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -211,7 +212,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение {description}", succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -240,7 +241,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
           _moduleRelayControl,
           $"Переподключение точки {description}",
           succes,

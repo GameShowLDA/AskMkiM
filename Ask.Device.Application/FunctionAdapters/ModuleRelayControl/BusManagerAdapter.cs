@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
@@ -40,7 +41,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var succes = await _busManager.ConnectBusAsync(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение шины [{bus}]", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Подключение шины [{bus}]", succes, 1, userMessageService);
         }
 
         return succes;
@@ -57,7 +58,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var succes = await _busManager.DisconnectBusAsync(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение шины [{bus}]", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение шины [{bus}]", succes, 1, userMessageService);
         }
 
         return succes;

@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -142,7 +143,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (!success || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             device,
             header,
             rangeText,

@@ -1,4 +1,8 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
+using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 
@@ -11,67 +15,110 @@ public static class ModuleRelayControlResponseProcessor
   /// Проверяет ответ на подключение точки МКР.
   /// </summary>
   /// <param name="response">JSON-ответ МКР.</param>
-  /// <param name="chassisNumber">Ожидаемый номер шасси.</param>
-  /// <param name="moduleNumber">Ожидаемый номер МКР в шасси.</param>
+  /// <param name="module">Модуль, которому отправлена команда.</param>
   /// <param name="pointNumber">Номер подключаемой точки.</param>
   /// <param name="busNumber">Номер шины подключения.</param>
-  /// <param name="useHardwareVerification">
-  /// Признак использования команды подключения с аппаратным контролем.
-  /// </param>
-  /// <returns>
-  /// <see langword="true"/>, если ответ получен от ожидаемого МКР,
-  /// содержит параметры команды подключения и подтверждает требуемое состояние.
-  /// В противном случае — <see langword="false"/>.
-  /// </returns>
-  public static bool CheckPointConnection(
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <returns><see langword="true"/>, если ответ соответствует отправленной команде.</returns>
+  public static Task<bool> CheckPointConnectionAsync(
     string response,
-    int chassisNumber,
-    int moduleNumber,
+    IRelaySwitchModule module,
     int pointNumber,
     int busNumber,
-    bool useHardwareVerification = false)
+    IMessageOutputService? outputService = null)
   {
-    return PointConnectionResponseChecker.Check(
-      response,
-      chassisNumber,
-      moduleNumber,
-      pointNumber,
-      busNumber,
-      connect: true,
-      useHardwareVerification);
+    return CheckPointOperationAsync(response, module, pointNumber, busNumber, connect: true,
+      useHardwareVerification: false, outputService);
+  }
+
+  /// <summary>
+  /// Проверяет ответ на подключение точки МКР с аппаратным контролем.
+  /// </summary>
+  /// <param name="response">JSON-ответ МКР.</param>
+  /// <param name="module">Модуль, которому отправлена команда.</param>
+  /// <param name="pointNumber">Номер подключаемой точки.</param>
+  /// <param name="busNumber">Номер шины подключения.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <returns><see langword="true"/>, если ответ соответствует команде и состояние реле подтверждено.</returns>
+  public static Task<bool> CheckVerifiedPointConnectionAsync(
+    string response,
+    IRelaySwitchModule module,
+    int pointNumber,
+    int busNumber,
+    IMessageOutputService? outputService = null)
+  {
+    return CheckPointOperationAsync(response, module, pointNumber, busNumber, connect: true,
+      useHardwareVerification: true, outputService);
   }
 
   /// <summary>
   /// Проверяет ответ на отключение точки МКР.
   /// </summary>
   /// <param name="response">JSON-ответ МКР.</param>
-  /// <param name="chassisNumber">Ожидаемый номер шасси.</param>
-  /// <param name="moduleNumber">Ожидаемый номер МКР в шасси.</param>
+  /// <param name="module">Модуль, которому отправлена команда.</param>
   /// <param name="pointNumber">Номер отключаемой точки.</param>
   /// <param name="busNumber">Номер шины отключения.</param>
-  /// <param name="useHardwareVerification">
-  /// Признак использования команды отключения с аппаратным контролем.
-  /// </param>
-  /// <returns>
-  /// <see langword="true"/>, если ответ получен от ожидаемого МКР,
-  /// содержит параметры команды отключения и подтверждает требуемое состояние.
-  /// В противном случае — <see langword="false"/>.
-  /// </returns>
-  public static bool CheckPointDisconnection(
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <returns><see langword="true"/>, если ответ соответствует отправленной команде.</returns>
+  public static Task<bool> CheckPointDisconnectionAsync(
     string response,
-    int chassisNumber,
-    int moduleNumber,
+    IRelaySwitchModule module,
     int pointNumber,
     int busNumber,
-    bool useHardwareVerification = false)
+    IMessageOutputService? outputService = null)
   {
-    return PointConnectionResponseChecker.Check(
+    return CheckPointOperationAsync(response, module, pointNumber, busNumber, connect: false,
+      useHardwareVerification: false, outputService);
+  }
+
+  /// <summary>
+  /// Проверяет ответ на отключение точки МКР с аппаратным контролем.
+  /// </summary>
+  /// <param name="response">JSON-ответ МКР.</param>
+  /// <param name="module">Модуль, которому отправлена команда.</param>
+  /// <param name="pointNumber">Номер отключаемой точки.</param>
+  /// <param name="busNumber">Номер шины отключения.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <returns><see langword="true"/>, если ответ соответствует команде и состояние реле подтверждено.</returns>
+  public static Task<bool> CheckVerifiedPointDisconnectionAsync(
+    string response,
+    IRelaySwitchModule module,
+    int pointNumber,
+    int busNumber,
+    IMessageOutputService? outputService = null)
+  {
+    return CheckPointOperationAsync(response, module, pointNumber, busNumber, connect: false,
+      useHardwareVerification: true, outputService);
+  }
+
+  private static async Task<bool> CheckPointOperationAsync(
+    string response,
+    IRelaySwitchModule module,
+    int pointNumber,
+    int busNumber,
+    bool connect,
+    bool useHardwareVerification,
+    IMessageOutputService? outputService)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+
+    bool isValid = PointConnectionResponseChecker.Check(
       response,
-      chassisNumber,
-      moduleNumber,
+      module.NumberChassis,
+      module.Number,
       pointNumber,
       busNumber,
-      connect: false,
+      connect,
       useHardwareVerification);
+
+    await EquipmentMessages.PublishPointOperationResultAsync(
+      module,
+      pointNumber,
+      (BusPoint)busNumber,
+      connect,
+      isValid,
+      outputService);
+
+    return isValid;
   }
 }

@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
@@ -43,7 +44,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение измерителя {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Подключение измерителя {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -75,7 +76,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение измерителя {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_moduleRelayControl, $"Отключение измерителя {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -99,7 +100,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
        {
          var succes = await _meterManager.GetMeterResponseAsync();
-         await DeviceMessageBuilder.ShowConnectionMessageAsync(
+         await DeviceMessages.PublishOperationResultAsync(
            _moduleRelayControl,
            succes ? "Обнаружено подлючение шин/точек (МКР)" : "Подлючение шин/точек не обнаружено (МКР)",
            succes,

@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
@@ -115,7 +116,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       if (!execution.Success)
       {
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           device,
           $"Ошибка при \"{header}\"",
           execution.ErrorMessage,
@@ -230,7 +231,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (!execution.Success)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             device,
             $"Ошибка при \"{header}\"",
             execution.ErrorMessage,
@@ -266,7 +267,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (showIntermediateResults)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             device,
             GetIntermediateMeasurementHeader(profile.ElectricalTest),
             MeasurementValueFormatter.FormatWithUnit(measurement, unit),
@@ -369,7 +370,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
           if (showIntermediateResults)
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
               device,
               $"Ошибка при \"{header}\"",
               $"{execution.ErrorMessage}",
@@ -395,7 +396,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (showIntermediateResults)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             device,
             intermediateResultHeader,
             MeasurementValueFormatter.FormatWithUnit(measurement, unit),
@@ -417,7 +418,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           ? $"Не получено положительных результатов за {maxMeasurementAttempts} попыток."
           : lastErrorMessage;
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           device,
           $"Ошибка при \"{header}\"",
           errorMessage,

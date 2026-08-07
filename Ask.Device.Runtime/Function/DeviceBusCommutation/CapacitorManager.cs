@@ -47,8 +47,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> DisconnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
-
       DeviceCommand command = new DeviceCommand(6, 2, number, 2);
       string answer = await queryExecutor.QueryAsync(command.ToString());
       return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);

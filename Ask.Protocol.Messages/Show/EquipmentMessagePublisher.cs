@@ -16,6 +16,8 @@ internal static class EquipmentMessagePublisher
   /// <param name="callerName">Имя исходного метода, запросившего публикацию.</param>
   /// <param name="callerFile">Путь к исходному файлу, запросившему публикацию.</param>
   /// <param name="callerLine">Номер строки, запросившей публикацию.</param>
+  /// <param name="logToDeviceJournal">Признак записи сообщения в журнал оборудования.</param>
+  /// <param name="isBlockStart">Признак начала блока выполнения.</param>
   /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
   /// <exception cref="ArgumentNullException">
   /// Выбрасывается, если <paramref name="message"/> равен <see langword="null"/>.
@@ -26,7 +28,8 @@ internal static class EquipmentMessagePublisher
     string callerName,
     string callerFile,
     int callerLine,
-    bool logToDeviceJournal = true)
+    bool logToDeviceJournal = true,
+    bool isBlockStart = false)
   {
     ArgumentNullException.ThrowIfNull(message);
     message.IndentLevel = 1;
@@ -36,6 +39,7 @@ internal static class EquipmentMessagePublisher
       callerName,
       callerFile,
       callerLine,
+      isBlockStart: isBlockStart,
       skipPause: true,
       logToDeviceJournal: logToDeviceJournal);
   }

@@ -80,11 +80,11 @@
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Ask.Protocol.Messages`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
 | `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; содержит фасады и builders для executor-команд, блоков проверки, оборудования и измерений | `Ask.Core`, `Ask.LogLib`; потребители — `Ask.Device.Runtime`, `Ask.Engine` |
-| `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
-| `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Protocol.Messages` |
+| `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime`, `Ask.Protocol.Messages` |
+| `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
-| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Контракты и последующая обработка ответов оборудования; сейчас содержит модели всех JSON-ответов прошивки МКР | нет |
+| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Контракты и последующая обработка ответов оборудования; сейчас содержит модели всех JSON-ответов прошивки МКР | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций МКР) |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
@@ -117,7 +117,10 @@ MainWindowProgram
 │  │  │        ├─ Ask.Device.Communication
 │  │  │        │  ├─ Ask.Diagnostics
 │  │  │        │  └─ Ask.LogLib
-│  │  │        └─ Ask.Device.Emulator ── Ask.Core
+│  │  │        ├─ Ask.Device.Emulator ── Ask.Core
+│  │  │        └─ Ask.Device.ResponseProcessor
+│  │  │           ├─ Ask.Core
+│  │  │           └─ Ask.Protocol.Messages
 │  │  ├─ Ask.Core
 │  │  ├─ Ask.LogLib
 │  │  ├─ Ask.Protocol.Messages
@@ -138,7 +141,10 @@ Ask.Protocol.Messages
 ├─ Ask.Core ── Ask.LogLib
 └─ Ask.LogLib
 
-Ask.Device.ResponseProcessor (project references отсутствуют; модели ответов МКР используют только BCL `System.Text.Json`)
+Ask.Device.ResponseProcessor
+├─ Ask.Core (контракты `IRelaySwitchModule`, `IMessageOutputService`)
+└─ Ask.Protocol.Messages (централизованная публикация операций МКР;
+   JSON-модели используют BCL `System.Text.Json`)
 ```
 
 `Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека.
@@ -150,8 +156,12 @@ Ask.Device.ResponseProcessor (project references отсутствуют; мод�
 `Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
 отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
 `CommandMessages`, `ExecutionMessages`, `EquipmentMessages`, `MeasurementMessages` и `SelfTestMessages`. Допустимые диапазоны
-значений независимо от вызывающей подсистемы публикуются через `RangeMessages`. Остальные runtime-потоки
-пока продолжают использовать `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
+значений независимо от вызывающей подсистемы публикуются через `RangeMessages`.
+`DeviceMessageBuilder` удалён из `Ask.Device.Runtime`: 108 вызовов device-результатов из
+`Ask.Device.Runtime` и `Ask.Device.Application` переведены на
+`DeviceMessages.PublishOperationResultAsync`. Формат, статус, отступ, признак device-сообщения
+и step-checkpoint формируются внутри `Ask.Protocol.Messages`; условия видимости по
+`DeviceDisplayConfig` остаются в существующих adapters/managers.
 
 Все реализации в `Ask.Device.Runtime/Function/*/SelfCheck/` публикуют экранные сообщения через
 `SelfTestMessages → SelfTestMessageBuilder → SelfTestMessagePublisher → MessagePublisher → IMessageOutputService`.
@@ -999,8 +1009,8 @@ executor/strategy
 → UdpProtocol.QueryAsync
 → UdpClient.SendAsync/ReceiveAsync
 → ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
-  ├─ Status absent/success → BaseResponse.FromJson validation
-  → adapter DeviceMessageBuilder or RelayExceptionFactory
+  ├─ Status absent/success → ModuleRelayControlResponseProcessor validation
+  → adapter DeviceMessages or RelayExceptionFactory
   └─ Status = UnknownCommand / InvalidParametr / InvalidParameter
     → ModuleRelayControlProtocolException(device, operation, localized error, firmware status)
     → UserActionHelper catches hardware exception
@@ -1011,12 +1021,20 @@ executor/strategy
 
 `Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor`
 предоставляет новые проверки ответов подключения/отключения одной точки. Методы
-`CheckPointConnection` и `CheckPointDisconnection` принимают сырой JSON и ожидаемые
-номера шасси, модуля, точки и шины. `PointConnectionResponseChecker` проверяет
+`CheckPointConnectionAsync`, `CheckPointDisconnectionAsync`,
+`CheckVerifiedPointConnectionAsync` и `CheckVerifiedPointDisconnectionAsync` принимают
+сырой JSON, ожидаемый `IRelaySwitchModule`, номер точки, шины и необязательный
+`IMessageOutputService`. Публичный API не содержит булевого переключателя режима проверки.
+`PointConnectionResponseChecker` проверяет
 `ModuleName == "MKR"`, `NumberChassis`, `NumberDevice`, точную строку `Answer`
 для команды `8` или `82`, а для команды с аппаратным контролем также `Checked == true`.
-Production `PointManager` пока продолжает собственную проверку `BaseResponse`/
-`RelayVerifiedAnswer`; подключение нового processor к runtime call chain ещё не выполнено.
+После проверки processor напрямую вызывает
+`EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
+device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;
+решение об отображении принимает `Ask.Protocol.Messages` через общий `ShouldPublish`.
+Runtime `PointManager` ожидает эти методы для обычного и контролируемого
+подключения/отключения одной точки; остальные команды МКР пока продолжают собственную
+десериализацию моделей из `Ask.Device.Runtime`.
 
 Representative Keysight measurement:
 
@@ -1034,7 +1052,7 @@ executor/metrology
     → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
     → Idle: SCPI-compatible scientific-notation response from MeasurementRange
   → numeric parsing/rounding
-→ range verdict and DeviceMessageBuilder
+→ range verdict and DeviceMessages.PublishOperationResultAsync
 ```
 
 Для `MultimeterTypeMode.Continuity` общий `MeasurementBase` не вызывает
@@ -1517,7 +1535,8 @@ Once measurement interaction has opened, a valid retry stays interactive even
 when its value is now in range. `EquipmentExecutionContext` suppresses all
 Retry/Continue/Finish requests during emergency `КЦ` and `ExecutionFinalizer`;
 errors there are logged and the remaining mandatory actions continue.
-`DeviceMessageBuilder` controls device result output using `DeviceDisplayConfig`.
+Adapters/managers сохраняют существующие проверки `DeviceDisplayConfig`, после чего
+`DeviceMessages` централизованно формирует и публикует device-результат.
 Typed factories are grouped in `Ask.Core/Services/Errors/Device/`.
 
 ### Execution errors
@@ -1694,6 +1713,7 @@ ErrorItem → translator/runner ErrorList
 | `CommandMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сформированные сообщения команд в `IMessageOutputService` с настройками блока, паузы, пошагового режима и метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MessagePublisher` | internal static publisher | Ask.Protocol.Messages | единообразно добавляет метаданные исходного вызова, при необходимости пишет сообщение в device log и передаёт его `IMessageOutputService`; категорийные publishers задают только свою политику | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
+| `DeviceMessages` | static facade | Ask.Protocol.Messages | заменяет удалённый runtime `DeviceMessageBuilder`; формирует и публикует унифицированные результаты device-операций с деталями, статусом, отступом и step-checkpoint | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `SelfTestMessages` | static facade | Ask.Protocol.Messages | публикует этапы, команды пошагового режима, ошибки и результаты самоконтроля мультиметра, GPT, МКР, УКШ и модуля напряжения/тока; runtime SelfCheck-классы моделей экранного протокола не создают | [Equipment](#equipment-architecture) |

@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
@@ -55,9 +56,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"8.{number}.{(int)bus}.1")
+        if (await ModuleRelayControlResponseProcessor.CheckPointConnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, true);
           return true;
@@ -81,9 +85,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"8.{number}.{(int)bus}.2")
+        if (await ModuleRelayControlResponseProcessor.CheckPointDisconnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, false);
           return true;
@@ -107,9 +114,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
-        var parsed = RelayVerifiedAnswer.FromJson(response);
-
-        if (parsed != null && parsed.Checked)
+        if (await ModuleRelayControlResponseProcessor.CheckVerifiedPointConnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, true);
           return true;
@@ -133,9 +143,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
-        var parsed = RelayVerifiedAnswer.FromJson(response);
-
-        if (parsed != null && parsed.Checked)
+        if (await ModuleRelayControlResponseProcessor.CheckVerifiedPointDisconnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, false);
           return true;
