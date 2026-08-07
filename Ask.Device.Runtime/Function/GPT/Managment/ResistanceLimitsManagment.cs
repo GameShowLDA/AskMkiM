@@ -48,7 +48,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel))
         {
-          return (false, IdleHardwareErrorSimulator.ErrorMessage);
+          return (false, string.Empty);
         }
 
         _highLimit = value;
@@ -93,7 +93,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel))
         {
-          return (false, IdleHardwareErrorSimulator.ErrorMessage);
+          return (false, string.Empty);
         }
 
         _lowLimit = value;

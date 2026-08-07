@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -29,6 +30,19 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
 
       await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
+        {
+          var failure = VoltageExceptionFactory.SetSourceFailed(label);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка выбора источника напряжения",
+            failure.Message,
+            false,
+            1,
+            messageService);
+          throw failure;
+        }
+
         try
         {
           await _voltageManager.SetSourceVoltageAsync(voltageSources);
@@ -61,6 +75,19 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
 
       await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
+        {
+          var failure = VoltageExceptionFactory.SetLevelFailed(value);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Ошибка установки напряжения",
+            failure.Message,
+            false,
+            1,
+            messageService);
+          throw failure;
+        }
+
         try
         {
           await _voltageManager.SetVoltageLevelAsync(integerPart, decimalPart);

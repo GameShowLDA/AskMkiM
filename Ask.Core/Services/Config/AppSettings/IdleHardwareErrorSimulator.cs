@@ -8,11 +8,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 public static class IdleHardwareErrorSimulator
 {
   /// <summary>
-  /// Текст ответа для имитированной ошибки выполнения команды оборудования.
-  /// </summary>
-  public const string ErrorMessage = "Симуляция сбоя: оборудование не выполнило команду в холостом режиме.";
-
-  /// <summary>
   /// Проверяет, должна ли текущая аппаратная операция завершиться имитированной ошибкой.
   /// </summary>
   /// <returns>

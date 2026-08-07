@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -27,6 +28,19 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
       string value = $"{integerPart}.{decimalPart:D3}";
       await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_module))
+        {
+          var failure = CurrentExceptionFactory.SetLevelFailed(value);
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _module,
+            "Ошибка установки тока",
+            failure.Message,
+            false,
+            1,
+            messageService);
+          throw failure;
+        }
+
         try
         {
           await _currentManager.SetCurrentLevelAsync(integerPart, decimalPart);

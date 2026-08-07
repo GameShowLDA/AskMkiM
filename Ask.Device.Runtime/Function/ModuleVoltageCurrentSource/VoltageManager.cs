@@ -1,5 +1,4 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -33,11 +32,6 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_moduleVoltageCurrentSource))
-        {
-          throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
-        }
-
         return;
       }
 
@@ -57,11 +51,6 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_moduleVoltageCurrentSource))
-        {
-          throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
-        }
-
         return;
       }
 

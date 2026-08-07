@@ -27,6 +27,17 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
     {
       var success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Отключение питания ИБП",
+            false,
+            1,
+            userMessageService);
+          return false;
+        }
+
         try
         {
           await _manager.StopPowerAsync(userMessageService);
@@ -55,6 +66,17 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
     {
       var success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            "Включение питания ИБП",
+            false,
+            1,
+            userMessageService);
+          return false;
+        }
+
         try
         {
           await _manager.StartPowerAsync(userMessageService);

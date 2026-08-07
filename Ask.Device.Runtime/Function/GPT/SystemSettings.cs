@@ -1,5 +1,4 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -161,20 +160,6 @@ namespace Ask.Device.Runtime.Function.GPT
       }
 
       return ComPortResetNative.RestartDevice(_gptModel.COMPort.PortName);
-    }
-
-    /// <summary>
-    /// Выбрасывает ошибку оборудования для имитированной неудачной попытки.
-    /// </summary>
-    /// <exception cref="DeviceException">
-    /// Выбрасывается, если для текущего вызова выбрана аппаратная ошибка.
-    /// </exception>
-    private void ThrowIfHardwareErrorSimulated()
-    {
-      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel))
-      {
-        throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
-      }
     }
 
   }

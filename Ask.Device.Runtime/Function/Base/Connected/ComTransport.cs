@@ -56,7 +56,7 @@ namespace Ask.Device.Runtime.Function.Connected
         }
 
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
-          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          ? (false, string.Empty)
           : (true, string.Empty);
       }
 

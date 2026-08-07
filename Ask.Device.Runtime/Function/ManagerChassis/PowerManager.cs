@@ -103,7 +103,7 @@ namespace Ask.Device.Runtime.Function.ManagerChassis
       await userMessageService.ShowMessageAsync(
         new ShowMessageModel(
           header: $"{ChassisModel.Name} - {operationName}",
-          message: success ? "Операция выполнена успешно." : IdleHardwareErrorSimulator.ErrorMessage,
+          message: success ? "Операция выполнена успешно." : string.Empty,
           type: success
             ? ShowMessageModel.MessageType.Success
             : ShowMessageModel.MessageType.Error),
@@ -121,7 +121,7 @@ namespace Ask.Device.Runtime.Function.ManagerChassis
     {
       if (!success)
       {
-        throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
+        throw new DeviceException("Оборудование не выполнило операцию.");
       }
     }
   }

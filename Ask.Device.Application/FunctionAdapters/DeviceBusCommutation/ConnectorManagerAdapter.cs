@@ -269,7 +269,6 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _deviceBusCommutation,
             "Подключение пробойной установки и мультиметра",
-            success ? "Оборудование подключено" : IdleHardwareErrorSimulator.ErrorMessage,
             success,
             1,
             userMessageService);
@@ -296,7 +295,6 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
           await DeviceMessageBuilder.ShowConnectionMessageAsync(
             _deviceBusCommutation,
             "Отключение пробойной установки и мультиметра",
-            success ? "Оборудование отключено" : IdleHardwareErrorSimulator.ErrorMessage,
             success,
             1,
             userMessageService);

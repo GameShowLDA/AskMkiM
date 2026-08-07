@@ -1154,8 +1154,13 @@ and power operations. Every applicable call of a selected device, including a
 `Retry`, fails (100% probability). The simulated failure preserves the
 corresponding real contract: `false`, a failed tuple/status, an empty emulator
 response or the operation-specific exception path. Real execution never enters
-this mechanism. The migration copies the former global flag to all six device
-tables once, preserving the old effective selection during the transition.
+this mechanism. The simulator owns no user-facing/protocol error text: it returns
+only the normal failed contract, while existing operation adapters,
+`*ExceptionFactory` types and the `UserActionHelper` fallback build the same
+messages as for real equipment failures. Neither simulation state nor Idle mode
+is included in failure messages. The migration copies the former global flag to
+all six device tables once, preserving the old effective selection during the
+transition.
 
 Chassis and МКР Idle flows preserve their device command contracts without a
 separate response processor:

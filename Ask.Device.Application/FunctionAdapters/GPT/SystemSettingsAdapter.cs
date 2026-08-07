@@ -111,6 +111,17 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     {
       bool success = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
+        {
+          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            _device,
+            operationName,
+            false,
+            1,
+            userMessageService);
+          return false;
+        }
+
         try
         {
           await operation();
@@ -138,7 +149,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
       if (!success)
       {
-        throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
+        throw new DeviceException("Оборудование не выполнило операцию.");
       }
     }
   }

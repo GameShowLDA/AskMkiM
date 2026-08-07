@@ -28,7 +28,7 @@ namespace Ask.Device.Runtime.Function.Connected
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
-          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          ? (false, string.Empty)
           : (true, string.Empty);
       }
 
@@ -95,7 +95,7 @@ namespace Ask.Device.Runtime.Function.Connected
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
-          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          ? (false, string.Empty)
           : (true, "Холостой режим");
       }
 

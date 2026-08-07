@@ -44,7 +44,7 @@ namespace Ask.Device.Runtime.Function.MikUps1101rRm
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
         {
           _connected = false;
-          return (false, IdleHardwareErrorSimulator.ErrorMessage);
+          return (false, string.Empty);
         }
 
         _connected = true;
