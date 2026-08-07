@@ -73,11 +73,6 @@ namespace Ask.Engine.Tests.Metrology
 
       var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, data.Param);
       await _userInteractionService.AppendEmptyLineAsync();
-      await RangeMessages.PublishAllowedRangeAsync(
-        VoltageUnit.Volt,
-        new MeasurementRange(LowerBound, LowerBound, UpperBound),
-        _userInteractionService);
-
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
     }
 
@@ -117,7 +112,7 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService userMessageService, double intrinsicValue = 0)
       {
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await MeasurementMessages.PublishTestVoltageOutputAsync(
+        await MeasurementMessages.PublishTestVoltageOutputAsync(CheckType.Metrology,
           MeasurementTypeCommand.PI_ACW,
           param,
           userMessageService);
@@ -138,8 +133,8 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(userMessageService, metrologicalModeRole, result, LowerBound, UpperBound, "В");
         }
 
-        await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KN_ACW, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: userMessageService);
-        await MeasurementMessages.PublishErrorAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.Metrology, MeasurementTypeCommand.KN_ACW, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, chains: MeasurementPointsDisplay, outputService: userMessageService);
+        await PublishMetrologyMeasurementErrorAsync(
           VoltageUnit.Volt,
           new MeasurementRange(err, LowerBound, UpperBound),
           result >= LowerBound && result <= UpperBound,
@@ -150,10 +145,6 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
         await PrintResult(messageService, MeasurementTypeCommand.PI_ACW);
-        await RangeMessages.PublishAllowedRangeAsync(
-          VoltageUnit.Volt,
-          new MeasurementRange(LowerBound, LowerBound, UpperBound),
-          messageService);
         await base.FinalizeMeasurement(metrologicalModeRole, messageService);
 
         Measurements.Clear();

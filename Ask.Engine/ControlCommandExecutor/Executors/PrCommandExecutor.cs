@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -186,7 +187,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         measurementRange.TargetValue = answer;
 
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
@@ -227,7 +228,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
@@ -272,7 +273,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,

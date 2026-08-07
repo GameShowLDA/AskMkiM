@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
@@ -42,7 +43,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
       groupChains.ChainModels.Remove(_basePoint);
-      await MeasurementMessages.PublishMeasurementStageAsync(messageService);
+      await MeasurementMessages.PublishMeasurementStageAsync(CheckType.ControlProgram, messageService);
 
       foreach (var chain in groupChains.ChainModels)
       {
@@ -84,7 +85,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
           await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
           var err = faultResult.Errors.Single();
-          await MeasurementMessages.PublishBuiltMessageAsync(err, messageService);
+          await MeasurementMessages.PublishBuiltMessageAsync(CheckType.ControlProgram, err, messageService);
 
           executionResult.AddRange(faultResult);
           context.CommandManager.AddErrorMethod(

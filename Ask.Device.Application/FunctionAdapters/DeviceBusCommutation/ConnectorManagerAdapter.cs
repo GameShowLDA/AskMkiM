@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
@@ -45,7 +46,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.ConnectBreakdownTester();
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение пробойной установки", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение пробойной установки", succes, 1, userMessageService);
         }
 
         return succes;
@@ -67,7 +68,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.EnableDivider();
         if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Включение делителя ППУ", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Включение делителя ППУ", succes, 1, userMessageService);
         }
 
         return succes;
@@ -89,7 +90,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.DisableDivider();
         if (!succes || DeviceDisplayConfig.GetExecutionParametersVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение делителя ППУ", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение делителя ППУ", succes, 1, userMessageService);
         }
 
         return succes;
@@ -112,7 +113,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение пробойной установки", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение пробойной установки", succes, 1, userMessageService);
         }
 
         return succes;
@@ -136,7 +137,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.ConnectMultimeter(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -158,7 +159,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.DisconnectMultimeter(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -180,7 +181,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.ConnectPINT(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -203,7 +204,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -225,7 +226,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.ConnectAllBuses();
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, $"Подключение {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -247,7 +248,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         var succes = await _connectorManager.DisconnectAllBuses();
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, $"Отключение {description}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -266,7 +267,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         bool success = await _connectorManager.ConnectBreakdownTesterAndMultimeter(userMessageService);
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _deviceBusCommutation,
             "Подключение пробойной установки и мультиметра",
             success,
@@ -292,7 +293,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
         bool success = await _connectorManager.DisconnectBreakdownTesterAndMultimeter(userMessageService);
         if (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _deviceBusCommutation,
             "Отключение пробойной установки и мультиметра",
             success,

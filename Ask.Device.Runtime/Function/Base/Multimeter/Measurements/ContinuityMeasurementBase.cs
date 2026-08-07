@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Protocol.Messages.EntryPoints;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -51,7 +52,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       {
         if (execution.HasValue)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Ошибка при прозвонке",
             "Результат прозвонки не соответствует ожидаемому состоянию.",
@@ -62,7 +63,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
           return execution.Value;
         }
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Ошибка при прозвонке",
           execution.ErrorMessage,
@@ -80,7 +81,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         return false;
       }
 
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(
+      await DeviceMessages.PublishOperationResultAsync(
         _device,
         execution.Value ? "Результат прозвонки" : "Ошибка при прозвонке",
         execution.Value

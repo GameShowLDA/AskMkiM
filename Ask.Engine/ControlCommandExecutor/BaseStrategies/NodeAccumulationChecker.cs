@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -88,7 +89,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.VoltageType);
 
             var err = faultResult.Errors.Single();
-            await MeasurementMessages.PublishBuiltMessageAsync(err, messageService);
+            await MeasurementMessages.PublishBuiltMessageAsync(CheckType.ControlProgram, err, messageService);
 
             if (context.CommandModel.PointErrors != null)
             {

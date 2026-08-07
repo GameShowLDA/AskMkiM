@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
@@ -81,7 +82,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     public async Task<SystemDataModel> ReadConfigurationAsync()
     {
       var config = await _systemSettings.ReadConfigurationAsync();
-      await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Чтение конфигурации системных настроек", "Конфигурация считана", true, 1);
+      await DeviceMessages.PublishOperationResultAsync(_device, "Чтение конфигурации системных настроек", "Конфигурация считана", true, 1);
       return config;
     }
 
@@ -113,7 +114,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             operationName,
             false,
@@ -125,7 +126,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         try
         {
           await operation();
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             operationName,
             value,
@@ -136,7 +137,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         }
         catch (Exception ex) when (ExecutionConfig.GetIsIdleModeEnabled())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             operationName,
             ex.Message,

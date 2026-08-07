@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.UI;
@@ -29,7 +30,7 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Отключение питания ИБП",
             false,
@@ -43,14 +44,14 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
           await _manager.StopPowerAsync(userMessageService);
           if (DeviceDisplayConfig.GetExecutionParametersVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение питания ИБП", true, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_device, "Отключение питания ИБП", true, 1, userMessageService);
           }
 
           return true;
         }
         catch (Exception ex)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Отключение питания ИБП", ex.Message, false, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_device, "Отключение питания ИБП", ex.Message, false, 1, userMessageService);
           return false;
         }
       }, userMessageService, deviceTask: true);
@@ -68,7 +69,7 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Включение питания ИБП",
             false,
@@ -82,14 +83,14 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
           await _manager.StartPowerAsync(userMessageService);
           if (DeviceDisplayConfig.GetExecutionParametersVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Включение питания ИБП", true, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_device, "Включение питания ИБП", true, 1, userMessageService);
           }
 
           return true;
         }
         catch (Exception ex)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Включение питания ИБП", ex.Message, false, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_device, "Включение питания ИБП", ex.Message, false, 1, userMessageService);
           return false;
         }
       }, userMessageService, deviceTask: true);
@@ -107,14 +108,14 @@ namespace Ask.Device.Application.FunctionAdapters.MikUps1101rRm
           if (!powerOk || DeviceDisplayConfig.GetExecutionParametersVisibility())
           {
             string message = powerOk ? "Питание в норме" : "Питание отсутствует";
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Проверка питания ИБП", message, powerOk, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_device, "Проверка питания ИБП", message, powerOk, 1, userMessageService);
           }
 
           return powerOk;
         }
         catch (Exception ex)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_device, "Проверка питания ИБП", ex.Message, false, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_device, "Проверка питания ИБП", ex.Message, false, 1, userMessageService);
           return false;
         }
       }, userMessageService, deviceTask: true);

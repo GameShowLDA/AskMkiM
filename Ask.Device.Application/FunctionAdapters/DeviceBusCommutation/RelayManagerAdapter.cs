@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
@@ -35,7 +36,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -56,7 +57,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -77,7 +78,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Включение реле", $"Общий", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Включение реле", $"Общий", succes, 1, userMessageService);
         }
 
         return succes;
@@ -98,7 +99,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Выключение реле", $"Общий", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Выключение реле", $"Общий", succes, 1, userMessageService);
         }
 
         return succes;
@@ -120,7 +121,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
           if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение RC реле", $"Общий", succes, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение RC реле", $"Общий", succes, 1, userMessageService);
           }
 
           return succes;
@@ -144,7 +145,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
           if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение RC реле", $"Общий", succes, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение RC реле", $"Общий", succes, 1, userMessageService);
           }
 
           return succes;
@@ -168,7 +169,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
           if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
           }
 
           return succes;
@@ -192,7 +193,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
           if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
           }
 
           return succes;
@@ -216,7 +217,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
           if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
           }
 
           return succes;
@@ -240,7 +241,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
           if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
+            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
           }
 
           return succes;

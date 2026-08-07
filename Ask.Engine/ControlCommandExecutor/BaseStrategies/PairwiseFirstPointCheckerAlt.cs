@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
@@ -81,7 +82,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             var errorMessageModels = MeasurementMessages.BuildPointConnectionError(measurementTarget);
             errorPoint = true;
 
-            await MeasurementMessages.PublishPointConnectionErrorAsync(
+            await MeasurementMessages.PublishPointConnectionErrorAsync(CheckType.ControlProgram,
               measurementTarget,
               context.MessageService);
 
@@ -111,7 +112,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await MeasurementMessages.PublishIntermediateResultAsync(
+            await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
               context.TypeCommand,
               new MeasurementRange(Rt1, context.LowerLimit, context.HigherLimit),
               true,
@@ -152,10 +153,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 connectionError);
               errorPoint = true;
 
-              await MeasurementMessages.PublishStartAsync(
+              await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                 MeasurementTypeCommand.KC,
                 context.MessageService);
-              await MeasurementMessages.PublishPointConnectionErrorAsync(
+              await MeasurementMessages.PublishPointConnectionErrorAsync(CheckType.ControlProgram,
                 measurementTarget,
                 context.MessageService,
                 connectionError);
@@ -185,7 +186,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 }
               }
 
-              await MeasurementMessages.PublishIntermediateResultAsync(
+              await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
                 context.TypeCommand,
                 new MeasurementRange(Rt2, context.LowerLimit, context.HigherLimit),
                 true,
@@ -239,10 +240,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   indentLevel: 1);
                 errorPoint = true;
 
-                await MeasurementMessages.PublishStartAsync(
+                await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
                   context.MessageService);
-                await MeasurementMessages.PublishResultAsync(
+                await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
                   context.TypeCommand,
                   new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
                   false,
@@ -262,7 +263,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
               else
               {
-                await MeasurementMessages.PublishIntermediateResultAsync(
+                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
                   context.TypeCommand,
                   new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
                   true,
@@ -323,7 +324,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 measurementRange,
                 succes,
                 measurementTarget);
-              await MeasurementMessages.PublishResultAsync(
+              await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
                 ResistanceUnit.Ohm,
                 measurementRange,
                 succes,

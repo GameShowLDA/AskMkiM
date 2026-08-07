@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -31,7 +32,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_module))
         {
           var failure = CurrentExceptionFactory.SetLevelFailed(value);
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _module,
             "Ошибка установки тока",
             failure.Message,
@@ -44,7 +45,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         try
         {
           await _currentManager.SetCurrentLevelAsync(integerPart, decimalPart);
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _module,
             "Установка тока",
             $"{value} мА",
@@ -55,7 +56,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         }
         catch (Exception ex)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _module,
             "Ошибка установки тока",
             ex.Message,
@@ -72,7 +73,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
       bool result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         bool attemptResult = await _currentManager.LimitationOfTheOutputCurrent(current);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _module,
           "Ограничение тока",
           $"{current} мА",

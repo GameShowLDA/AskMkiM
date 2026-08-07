@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ask.Device.Emulator\Ask.Device.Emulator.csproj" />
+    <ProjectReference Include="..\Ask.Device.ResponseProcessor\Ask.Device.ResponseProcessor.csproj" />
+    <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>

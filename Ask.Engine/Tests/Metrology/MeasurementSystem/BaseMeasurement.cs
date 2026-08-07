@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -11,6 +12,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -235,6 +237,23 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         upperBound,
         unit);
     }
+
+    protected Task PublishMetrologyMeasurementErrorAsync(
+      Enum measurementUnit,
+      MeasurementRange measurementRange,
+      bool isSuccessful,
+      IMessageOutputService messageService)
+    {
+      return MeasurementMessages.PublishErrorAsync(
+        CheckType.Metrology,
+        measurementUnit,
+        measurementRange,
+        isSuccessful,
+        messageService);
+    }
+
+    protected string MeasurementPointsDisplay =>
+      $"{FormatPoint(Points.points1)}, {FormatPoint(Points.pointModel2)}";
 
     protected void AddMetrologyError(
       IUserInteractionService messageService,

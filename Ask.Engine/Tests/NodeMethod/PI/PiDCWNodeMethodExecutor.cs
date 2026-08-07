@@ -91,7 +91,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await MeasurementMessages.PublishLeakageCurrentStartAsync(
+            await MeasurementMessages.PublishLeakageCurrentStartAsync(CheckType.Test,
               MeasurementTypeCommand.PI_DCW,
               protocolUI);
 
@@ -112,7 +112,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
                   CurrentUnit.MilliAmpere,
                   MeasurementLimitKind.Maximum)
                 : null;
-              await MeasurementMessages.PublishResultAsync(
+              await MeasurementMessages.PublishResultAsync(CheckType.Test,
                 CurrentUnit.MilliAmpere,
                 new MeasurementRange(answer.value, 0, dataModel.Param),
                 isSuccessful,

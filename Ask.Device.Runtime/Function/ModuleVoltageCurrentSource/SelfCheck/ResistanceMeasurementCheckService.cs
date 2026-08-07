@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -92,7 +93,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         }
 
         bool isSuccessful = result >= firstNorm && result <= lastNorm;
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.SelfTest,
           ResistanceUnit.Ohm,
           new MeasurementRange(result, firstNorm, lastNorm),
           isSuccessful,
