@@ -1,6 +1,6 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Function.Helpers;
 
@@ -37,7 +37,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       DeviceCommand command = new DeviceCommand(6, 2, number, 1);
       string answer = await queryExecutor.QueryAsync(command.ToString());
-      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+      return await DeviceBusCommutationResponseProcessor.CheckChainOperationAsync(
+        answer, _deviceBusCommutation, true, "конденсатора", number.ToString(), userMessageService);
     }
 
     /// <summary>
@@ -49,7 +50,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       DeviceCommand command = new DeviceCommand(6, 2, number, 2);
       string answer = await queryExecutor.QueryAsync(command.ToString());
-      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+      return await DeviceBusCommutationResponseProcessor.CheckChainOperationAsync(
+        answer, _deviceBusCommutation, false, "конденсатора", number.ToString(), userMessageService);
     }
   }
 }

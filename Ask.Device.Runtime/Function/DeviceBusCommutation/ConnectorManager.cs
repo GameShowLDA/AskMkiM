@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation
@@ -56,11 +57,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       foreach (var connected in connectionState.GetConnected(DeviceBusConnectionType.Multimeter))
       {
-        var disconnectResult = await DisconnectMultimeter(connected.Bus);
+        var disconnectResult = await DisconnectMultimeter(connected.Bus, userMessageService);
         connectionState.Set(DeviceBusConnectionType.Multimeter, connected.Bus, false);
       }
 
-      var result = await SetMultimeterState(true, bus);
+      var result = await SetMultimeterState(true, bus, userMessageService);
 
       if (result)
       {
@@ -77,7 +78,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      var result = await SetMultimeterState(false, bus);
+      var result = await SetMultimeterState(false, bus, userMessageService);
       connectionState.Set(DeviceBusConnectionType.Multimeter, bus, false);
       return result;
     }
@@ -101,8 +102,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
         var answer = await queryExecutor.QueryAsync(command.ToString());
         await Task.Delay(10);
-        var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
-        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+        return await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+          answer,
+          _deviceBusCommutation,
+          numberConnector,
+          busNumber,
+          connect,
+          $"мультиметра {(connect ? "к" : "с")} шине [{bus}]",
+          userMessageService);
       }
 
       LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
@@ -254,7 +261,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      var result = await SetBreakdownTesterState(true);
+      var result = await SetBreakdownTesterState(true, userMessageService);
 
       if (result)
       {
@@ -271,7 +278,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      var result = await SetBreakdownTesterState(false);
+      var result = await SetBreakdownTesterState(false, userMessageService);
 
       connectionState.Set(DeviceBusConnectionType.BreakdownTester, BreakdownBus, false);
       return result;
@@ -294,9 +301,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
       var answer = await queryExecutor.QueryAsync(command.ToString());
-      var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
-
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      return await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+        answer,
+        _deviceBusCommutation,
+        numberConnector,
+        1,
+        connect,
+        "пробойной установки",
+        userMessageService);
     }
 
     #endregion
@@ -309,9 +321,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       var command = new DeviceCommand(9, 2, 0, 1);
       var answer = await queryExecutor.QueryAsync(command.ToString());
-      var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
-
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 2, 0, true, "Включение делителя ППУ",
+        executionParameter: true, outputService: userMessageService);
     }
 
     /// <inheritdoc />
@@ -320,9 +332,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
 
       var command = new DeviceCommand(9, 2, 0, 2);
       var answer = await queryExecutor.QueryAsync(command.ToString());
-      var expectingResult = (command.ToString()).Substring(0, command.ToString().Length - 1);
-
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 2, 0, false, "Отключение делителя ППУ",
+        executionParameter: true, outputService: userMessageService);
     }
 
     #endregion
@@ -332,13 +344,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectAllBuses(IUserInteractionService? userMessageService = null)
     {
-      return await SetAllBusesStatus(true);
+      return await SetAllBusesStatus(true, userMessageService);
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectAllBuses(IUserInteractionService? userMessageService = null)
     {
-      return await SetAllBusesStatus(false);
+      return await SetAllBusesStatus(false, userMessageService);
     }
 
     /// <summary>
@@ -355,7 +367,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       var command = new DeviceCommand(7, connect ? 1 : 2);
       var answer = await queryExecutor.QueryAsync(command.ToString());
-      return !string.IsNullOrWhiteSpace(answer) && (connect ? answer.Contains("7.1") : answer.Contains("7.2"));
+      return await DeviceBusCommutationResponseProcessor.CheckAllBusesOperationAsync(
+        answer, _deviceBusCommutation, connect, userMessageService);
     }
 
     #endregion
@@ -389,8 +402,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       var command = new DeviceCommand(5, 7, 0, 1);
       var answer = await queryExecutor.QueryAsync(command.ToString());
-      var expectingResult = command.ToString();
-      var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var result = await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+        answer,
+        _deviceBusCommutation,
+        7,
+        0,
+        true,
+        "пробойной установки и мультиметра",
+        userMessageService);
 
       if (result)
       {
@@ -409,8 +428,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       var command = new DeviceCommand(5, 7, 0, 2);
       var answer = await queryExecutor.QueryAsync(command.ToString());
-      var expectingResult = command.ToString();
-      var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var result = await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+        answer,
+        _deviceBusCommutation,
+        7,
+        0,
+        false,
+        "пробойной установки и мультиметра",
+        userMessageService);
 
       connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
       return result;

@@ -84,7 +84,7 @@
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
-| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Контракты и последующая обработка ответов оборудования; сейчас содержит модели всех JSON-ответов прошивки МКР | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций МКР) |
+| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Модели, строгая проверка протокольных ответов и централизованная публикация сообщений МКР и УКШ | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций и самоконтроля) |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
@@ -1191,6 +1191,16 @@ Selection is distributed, not DI-based:
   - УКШ runtime-команды `4`, `5`, `6`, `7`, `8`, `9`, `41` проходят через
     `DeviceBusCommutationQueryExecutor` и `DeviceBusCommutationEmulatorProtocol`, формируя журналируемый ответ
     в формате прошивки: JSON для `4/5/7/9`, строковое значение для `6/8/41`;
+    затем `DeviceBusCommutationResponseProcessor` выбирает специализированную проверку команды
+    (`EquipmentCommandResponseChecker`, `BusCommandResponseChecker`, `RelayCommandResponseChecker`,
+    `ChainCommandResponseChecker` или `SelfTestCommandResponseChecker`), проверяет `ModuleName`, адрес УКШ
+    и точное поле `Answer` либо ожидаемое числовое значение. Менеджеры `ConnectorManager`, `RelayManager`,
+    `ResistorManager`, `CapacitorManager` и UKSH SelfCheck не формируют ожидаемые ответы и не разбирают их
+    самостоятельно; сообщения операций и самоконтроля проходят через
+    `DeviceBusCommutationResponseProcessor`/`DeviceBusCommutationMessages`.
+    Команда `7` подтверждается сокращённым ответом `7.<action>` согласно `makeAnswer(..., 2)` прошивки;
+    команда `6` возвращает `0` при успехе и код несуществующей цепи при ошибке. Idle-эмулятор использует
+    те же форматы и при симуляции ошибок измерения случайно возвращает как успешный, так и ошибочный код;
   - остальные UDP/TCP/COM/USB connectable managers возвращают simulated success или обходят I/O;
 - relay/source/switch managers update in-memory state and return success;
 - `Simulated.GetSimulatedValue` supplies values to the Idle multimeter SCPI-response path;
@@ -1222,8 +1232,8 @@ switching, source and power operations. Every equipment call, including a
 the corresponding real contract: `false`, a failed tuple/status, or the
 operation-specific exception path. Real execution never enters this mechanism.
 
-Chassis and МКР Idle flows preserve their device command contracts without a
-separate response processor:
+Chassis, МКР and УКШ Idle flows preserve their device command contracts through
+the same response processors used for real devices:
 
 ```text
 Transport / target runtime manager
@@ -1821,6 +1831,8 @@ ErrorItem → translator/runner ErrorList
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
+| `DeviceBusCommutationResponseProcessor` | response facade | Ask.Device.ResponseProcessor | validates УКШ JSON/numeric firmware responses and publishes operation/connection/reset results | [Equipment](#real--idle) |
+| `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
 | `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |
 | `BreakdownTesterEmulatorProtocol` | stateful Idle protocol | Ask.Device.Emulator | emulates GPT79904 SCPI identification, configuration, test state and measurement responses | [Equipment](#device-matrix) |
