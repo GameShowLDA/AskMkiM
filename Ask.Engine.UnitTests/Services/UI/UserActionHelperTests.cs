@@ -3,9 +3,8 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Engine.UnitTests.TestInfrastructure;
 using Moq;
-using System.Windows;
-using System.Windows.Media;
 
 namespace Ask.Engine.UnitTests.Services.UI;
 
@@ -276,7 +275,7 @@ public sealed class UserActionHelperTests
   [Fact]
   public async Task ModuleRelayControlProtocolErrorIsAlwaysWrittenToProtocol()
   {
-    EnsureApplicationWithResources();
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
     var messages = new List<ShowMessageModel>();
     var interaction = CreateInteractionService(requests: null, UserAction.None);
     interaction
@@ -331,13 +330,6 @@ public sealed class UserActionHelperTests
       });
 
     return interaction;
-  }
-
-  private static void EnsureApplicationWithResources()
-  {
-    var application = Application.Current ?? new Application();
-    application.Resources["TestsProtocolMessageSuccesForeground"] = new SolidColorBrush(Colors.Green);
-    application.Resources["TestsProtocolMessageErrorForeground"] = new SolidColorBrush(Colors.Red);
   }
 
   private sealed record OperationResult(bool Success, int Value);
