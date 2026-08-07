@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
@@ -39,13 +40,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           messageService);
         return;
       }
-      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(device);
-      
-
-      settings.DeviceResults.Add(new DeviceExecutionResult
-      {
-        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
-      });
+      settings.DeviceResults.Add(new DeviceExecutionResult(device.Name, device.NumberChassis, device.Number));
       await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(device, messageService);
       await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
 
@@ -155,8 +150,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       bool allTestsPassed = true;
       string testName = GetTestName(testType);
-
-      var testDescription = $"\n{getNextTestNumber()}. Тест подключения \"{testName}\"";
+      var testNumber = getNextTestNumber();
+      var testDescription = $"\n{testNumber}. Тест подключения \"{testName}\"";
       var testResult = new TestExecutionResult
       {
         TestName = $"Тест \"{testName}\"",
@@ -165,7 +160,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       settings.DeviceResults.LastOrDefault()?.Tests.Add(testResult);
 
       await SelfTestMessages.PublishInformationAsync(
-        $"\n{getNextTestNumber()}. Тест \"{testName}\"",
+        $"\n{testNumber}. Тест \"{testName}\"",
         messageService,
         isBlockStart: true,
         ignoreOutputValidation: true);

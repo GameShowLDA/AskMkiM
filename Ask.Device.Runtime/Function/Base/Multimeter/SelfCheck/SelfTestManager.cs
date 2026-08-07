@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Controls;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -72,13 +73,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       ArgumentNullException.ThrowIfNull(device);
       ArgumentNullException.ThrowIfNull(meter);
 
-      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(meter);
-
-
-      settings.DeviceResults.Add(new DeviceExecutionResult
-      {
-        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
-      });
+      settings.DeviceResults.Add(new DeviceExecutionResult(meter.Name, meter.NumberChassis, meter.Number));        
 
       cancellationToken.ThrowIfCancellationRequested();
       await ExecutionMessages.PublishMultimeterSetupAsync(userMessageService);
@@ -138,7 +133,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="cancellationToken">Токен отмены выполнения проверки.</param>
     /// <param name="device">Устройство коммутации шин.</param>
     /// <param name="meter">Проверяемый мультиметр.</param>
-    /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
+    /// <param name="userMessageService">Сервис выводы сообщений пользователю.</param>
     /// <returns>Задача, представляющая выполнение проверки напряжения.</returns>
     private static async Task StartVoltageMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
     {

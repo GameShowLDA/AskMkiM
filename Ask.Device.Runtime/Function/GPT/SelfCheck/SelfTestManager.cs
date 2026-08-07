@@ -14,6 +14,7 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
+using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
 
 namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 {
@@ -44,11 +45,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, ActionSettings settings, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(breakdownTester);
-      settings.DeviceResults.Add(new DeviceExecutionResult
-      {
-        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
-      });
+      settings.DeviceResults.Add(new DeviceExecutionResult(breakdownTester.Name, breakdownTester.NumberChassis, breakdownTester.Number));
 
       await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(breakdownTester, userMessageService);
       await InitDevices(userMessageService, device, meter, breakdownTester);
@@ -147,11 +144,11 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
               $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
             : null;
 
-          if (executionErrorMessage != null && executionErrorMessage.Status.Value == MessageType.Error)
+          if (executionErrorMessage != null)
           {
             settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
             {
-              Message = resultMessage.ExecutionErrorMessage,
+              Message = executionErrorMessage,
             });
           }
 
@@ -245,22 +242,23 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           var err = result - item;
           bool isSuccessful = result >= lowerBound && result <= upperBound;
           var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "В");
+          string? executionErrorMessage = !isSuccessful
+            ? $"ПИ ACW. Проверка при напряжении {item}В " +
+              $"({lowerBound} - {upperBound} В) : {formattedResult}"
+            : null;
           await SelfTestMessages.PublishResultAsync(
             "Результат ACW",
             isSuccessful,
             userMessageService,
             message: formattedResult,
             indentLevel: 1,
-            executionErrorMessage: !isSuccessful
-              ? $"ПИ ACW. Проверка при напряжении {item}В " +
-                $"({lowerBound} - {upperBound} В) : {formattedResult}"
-              : null,
-          };
-          if (resultMessage.Status.Value == MessageType.Error)
+            executionErrorMessage);
+
+          if (executionErrorMessage != null)
           {
             settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
             {
-              Message = resultMessage.ExecutionErrorMessage,
+              Message = executionErrorMessage,
             });
           }
 
@@ -345,24 +343,25 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           var err = result - item;
           bool isSuccessful = result >= lowerBound && result <= upperBound;
           var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "В");
+          string? executionErrorMessage = !isSuccessful
+            ? $"ПИ DCW. Проверка при напряжении {item}В " +
+              $"({lowerBound} - {upperBound} В) : {formattedResult}"
+            : null;
+          if (executionErrorMessage != null)
+          {
+            settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
+            {
+              Message = executionErrorMessage,
+            });
+          }
           await SelfTestMessages.PublishResultAsync(
             "Результат DCW",
             isSuccessful,
             userMessageService,
             message: formattedResult,
             indentLevel: 1,
-            executionErrorMessage: !isSuccessful
-              ? $"ПИ DCW. Проверка при напряжении {item}В " +
-                $"({lowerBound} - {upperBound} В) : {formattedResult}"
-              : null,
-          };
-          if (resultMessage.Status.Value == MessageType.Error)
-          {
-            settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
-            {
-              Message = resultMessage.ExecutionErrorMessage,
-            });
-          }
+            executionErrorMessage);
+
 
           await MeasurementMessages.PublishErrorAsync(
             VoltageUnit.Volt,

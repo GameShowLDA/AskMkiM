@@ -39,11 +39,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, ActionSettings settings, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
-      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(_moduleRelay);
-      settings.DeviceResults.Add(new DeviceExecutionResult
-      {
-        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
-      });
+      settings.DeviceResults.Add(new DeviceExecutionResult(_moduleRelay.Name, _moduleRelay.NumberChassis, _moduleRelay.Number));
       await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(_moduleRelay, userMessageService);
 
       switch (typeConnector)
@@ -176,16 +172,16 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       if (model != null)
       {
         model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
-
+        string executionErrorMessage = model.SelfControl ? null : string.Empty;
         await SelfTestMessages.PublishResultAsync(
           $"Точка {point}",
           model.SelfControl,
           userMessageService,
           indentLevel: 1,
-          executionErrorMessage: model.SelfControl ? null : string.Empty,
+          executionErrorMessage: executionErrorMessage,
           executionError: !model.SelfControl,
           canBeDeleted: model.SelfControl);
-      if (showMessageModel.Status.Value == MessageType.Error)
+      if (executionErrorMessage != null)
         {
           settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
           {
@@ -236,19 +232,19 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, ActionSettings settings, IUserInteractionService? userMessageService = null)
     {
       (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
-
+      string name = $"Шины AB{busNumber}";
       await SelfTestMessages.PublishResultAsync(
-        $"Шины AB{busNumber}",
+        name,
         answer.Item1,
         userMessageService,
         indentLevel: 2,
         executionError: !answer.Item1,
         canBeDeleted: answer.Item1);
-      if (showMessageModel.Status.Value == MessageType.Error)
+      if (!answer.Item1)
       {
         settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
         {
-          Message = $"{showMessageModel.Header} - Ошибка коммутации шин",
+          Message = $"{name} - Ошибка коммутации шин",
         });
       }
 

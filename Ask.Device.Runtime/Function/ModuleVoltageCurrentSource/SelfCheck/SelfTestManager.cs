@@ -32,11 +32,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       {
         return;
       }
-      var deviceTitle = ExecutorMessageBuilder.BuildDeviceHealthCheckTitle(powerDevice);
-      settings.DeviceResults.Add(new DeviceExecutionResult
-      {
-        DeviceName = $"{deviceTitle.Header} \"{deviceTitle.Message}\""
-      });
+      settings.DeviceResults.Add(new DeviceExecutionResult(powerDevice.Name, powerDevice.NumberChassis, powerDevice.Number));
 
       await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(powerDevice, messageService);
 
