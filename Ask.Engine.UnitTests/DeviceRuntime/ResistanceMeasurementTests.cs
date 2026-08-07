@@ -8,86 +8,51 @@ namespace Ask.Engine.UnitTests.DeviceRuntime;
 public class ResistanceMeasurementTests
 {
   [Fact]
-  public async Task MeasureResistanceAsync_TwoCorrectAndOneFalse_ReturnsAverageOfCorrectMeasurements()
+  public async Task MeasureResistanceAsync_ReturnsSingleMeasurement()
   {
-    var (meter, protocol) = CreateMeter(100d, 1_000d, 110d);
-
-    double result = await meter.ResistanceManager.MeasureResistanceAsync(
-      new MeasurementRange(100d, 90d, 120d));
-
-    Assert.Equal(105d, result);
-    Assert.Equal(3, protocol.MeasurementCount);
-  }
-
-  [Fact]
-  public async Task MeasureResistanceAsync_AllThreeCorrect_UsesAllMeasurements()
-  {
-    var (meter, protocol) = CreateMeter(90d, 100d, 110d);
+    var (meter, protocol) = CreateMeter(100d, 200d, 300d);
 
     double result = await meter.ResistanceManager.MeasureResistanceAsync(
       new MeasurementRange(100d, 90d, 110d));
 
     Assert.Equal(100d, result);
-    Assert.Equal(3, protocol.MeasurementCount);
+    Assert.Equal(1, protocol.MeasurementCount);
   }
 
   [Fact]
-  public async Task MeasureResistanceAsync_OnlyOneCorrect_ReturnsValueOutsideRange()
+  public async Task MeasureResistanceAsync_FirstMeasurementOutsideRange_ReturnsSecondMeasurement()
   {
-    var (meter, protocol) = CreateMeter(100d, 1_000d, 2_000d);
-    var range = new MeasurementRange(100d, 90d, 110d);
-
-    double result = await meter.ResistanceManager.MeasureResistanceAsync(range);
-
-    Assert.False(result >= range.LowerBound && result <= range.UpperBound);
-    Assert.Equal(3, protocol.MeasurementCount);
-  }
-
-  [Fact]
-  public async Task MeasureResistanceAsync_CustomCounts_UsesTheirSumAndRequiredCorrectCount()
-  {
-    var (meter, protocol) = CreateMeter(95d, 100d, 1_000d, 105d);
+    var (meter, protocol) = CreateMeter(1_000d, 105d);
 
     double result = await meter.ResistanceManager.MeasureResistanceAsync(
-      new MeasurementRange(100d, 90d, 110d),
-      userMessageService: null,
-      correctMeasurementCount: 3,
-      falseMeasurementCount: 1);
+      new MeasurementRange(100d, 90d, 110d));
 
-    Assert.Equal(100d, result);
-    Assert.Equal(4, protocol.MeasurementCount);
+    Assert.Equal(105d, result);
+    Assert.Equal(2, protocol.MeasurementCount);
   }
 
   [Fact]
-  public async Task MeasureResistanceAsync_ResponseDelay_AppliesToEveryMeasurement()
+  public async Task MeasureResistanceAsync_BothMeasurementsOutsideRange_ReturnsSecondMeasurement()
   {
-    var (meter, protocol) = CreateMeter(95d, 100d, 105d);
+    var (meter, protocol) = CreateMeter(1_000d, 2_000d);
+
+    double result = await meter.ResistanceManager.MeasureResistanceAsync(
+      new MeasurementRange(100d, 90d, 110d));
+
+    Assert.Equal(2_000d, result);
+    Assert.Equal(2, protocol.MeasurementCount);
+  }
+
+  [Fact]
+  public async Task MeasureResistanceAsync_ResponseDelay_AppliesToMeasurement()
+  {
+    var (meter, protocol) = CreateMeter(100d);
 
     await meter.ResistanceManager.MeasureResistanceAsync(
       new MeasurementRange(100d, 90d, 110d),
       responseDelay: 2_000d);
 
-    Assert.Equal(new[] { 2_000d, 2_000d, 2_000d }, protocol.MeasurementResponseDelays);
-  }
-
-  [Theory]
-  [InlineData(0, 1, "correctMeasurementCount")]
-  [InlineData(2, -1, "falseMeasurementCount")]
-  public async Task MeasureResistanceAsync_InvalidCounts_Throws(
-    int correctMeasurementCount,
-    int falseMeasurementCount,
-    string parameterName)
-  {
-    var (meter, _) = CreateMeter();
-
-    var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-      meter.ResistanceManager.MeasureResistanceAsync(
-        new MeasurementRange(100d, 90d, 110d),
-        userMessageService: null,
-        correctMeasurementCount,
-        falseMeasurementCount));
-
-    Assert.Equal(parameterName, exception.ParamName);
+    Assert.Equal(new[] { 2_000d }, protocol.MeasurementResponseDelays);
   }
 
   private static (KeysightDevice Meter, ResistanceProtocolStub Protocol) CreateMeter(params double[] measurements)
@@ -96,7 +61,7 @@ public class ResistanceMeasurementTests
     var meter = new KeysightDevice
     {
       TypeMode = MultimeterTypeMode.Resistance,
-      DeviceProtocol = protocol
+      DeviceProtocol = protocol,
     };
     meter.ConnectionInfo.IsConnected = true;
 

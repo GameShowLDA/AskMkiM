@@ -1085,9 +1085,9 @@ device-строку вида `Модуль МКР-350(1.6) - Подключен�
 В `Ask.Device.Runtime/Function/ModuleRelayControl/` и соответствующих application adapters
 не осталось прямого разбора JSON или прямых вызовов `DeviceMessages`, `EquipmentMessages` и
 `SelfTestMessages`; решение о видимости остаётся внутри `Ask.Protocol.Messages`.
-Runtime `PointManager` ожидает эти методы для обычного и контролируемого
-подключения/отключения одной точки; остальные команды МКР пока продолжают собственную
-десериализацию моделей из `Ask.Device.Runtime`.
+Runtime-менеджеры МКР передают исходные ответы и параметры операции в
+`ModuleRelayControlResponseProcessor`; модели и проверки протокола находятся в
+`Ask.Device.ResponseProcessor/ModuleRelayControl/`.
 
 Representative Keysight measurement:
 
@@ -1095,32 +1095,52 @@ Representative Keysight measurement:
 executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
-→ MeasurementBase.MeasureResistanceAsync
+→ MeasurementBase.MeasureAsync → MeasureOtherAsync
 → SetModeBase / RangeBase → DeviceProtocolEmulator.QueryMultimeterAsync
-→ repeat correctMeasurementCount + falseMeasurementCount times
-  → AdapterMeasurementExecutor
-  → MeasurementBase.MeasureCoreAsync
-  → Simulated.GetSimulatedValue builds idleResponse
-  → DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
-    → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
-    → Idle: SCPI-compatible scientific-notation response from MeasurementRange
-  → numeric parsing/rounding
+→ AdapterMeasurementExecutor
+→ MeasurementBase.MeasureCoreAsync
+→ Simulated.GetSimulatedValue builds idleResponse
+→ DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
+  → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
+  → Idle: SCPI-compatible scientific-notation response from MeasurementRange
+→ MultimeterResponseProcessor.TryParseMeasurement
+  → MeasurementResponseChecker → MeasurementResponse
+→ rounding
 → range verdict and DeviceMessages.PublishOperationResultAsync
 ```
+
+Единая обработка ответов Keysight 34465A и В7-78/3 находится в
+`Ask.Device.ResponseProcessor/Multimeter/`:
+
+- `MultimeterResponseProcessor.CheckInitialization` проверяет идентификационный ответ;
+- `CheckMode` через `ModeResponseChecker` проверяет ответы `FUNCTION?`/профильного `GetMode`;
+- `TryParseMeasurement` через `MeasurementResponseChecker` разбирает знак, точку/запятую,
+  экспоненту и допустимый текстовый суффикс;
+- `TryCheckContinuity` интерпретирует измерение и SCPI-значение перегрузки `9.9E+37`;
+- `CheckNoInstrumentError` через `InstrumentErrorResponseChecker` разбирает код и текст
+  ответа `SYSTEM:ERROR?`.
+
+Общий `MeasurementBase`, `SetModeBase`, `RangeBase`, `ContinuityMeasurementBase` и
+отдельный legacy-путь `B7783/VoltageMeasurementBase` не разбирают ответы самостоятельно.
+Публикация рабочих сообщений и результатов самоконтроля мультиметра централизована в
+`MultimeterMessages`; тексты и параметры сообщений сохранены в `Ask.Protocol.Messages`.
+Сообщения подключения, отключения, инициализации и сброса для `IMultimeter` проходят через
+`MultimeterResponseProcessor`. Retry и проверка измерения по допустимому диапазону остаются
+в Runtime/Engine.
 
 Для `MultimeterTypeMode.Continuity` общий `MeasurementBase` не вызывает
 `RangeBase`: режим прозвонки задаётся профильной командой `CONF:CONT`, а
 измерительный запрос выполняется через `MEAS:CONT?` без установки диапазона.
 
-По умолчанию измерение сопротивления выполняет три замера:
-`correctMeasurementCount = 2` и `falseMeasurementCount = 1`. Правильным
-считается числовой ответ внутри `MeasurementRange`; аппаратная ошибка
-не считается ложным замером и идёт в обычный equipment retry flow. Серия
-проходит при двух или трёх правильных замерах. Прошедшая серия
-возвращает среднее правильных значений; непрошедшая — значение вне
-диапазона, сохраняя существующие verdict/retry semantics в Engine. Перегрузка
-`IResistanceMeasurement.MeasureResistanceAsync` позволяет вызывающему коду
-явно задать оба количества.
+Сопротивление, напряжение, диод и прозвонка сначала выполняют один замер. Если его
+результат вне `MeasurementRange`, он отбрасывается и `MeasureOtherAsync` выполняет второй
+замер, результат которого становится итоговым независимо от диапазона. Это не усреднение.
+Отдельный путь В7-78/3 в `B7783/VoltageMeasurementBase.MeasureVoltageAsync` применяет то же
+правило двух попыток.
+Повтор внутри `AdapterMeasurementExecutor` относится только к восстановлению после ошибки
+оборудования. Серия измерений с усреднением реализована только для ёмкости в
+`MeasurementBase.MeasureCapacitanceAsync`; количество задаётся параметром
+`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
@@ -1130,7 +1150,7 @@ IMultimeter.ConnectableManager.InitializeAsync()
 → DeviceProtocolEmulator.QueryMultimeterAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
-→ проверка непустого ответа
+→ MultimeterResponseProcessor.CheckInitialization
 ```
 
 `DeviceProtocolEmulator.QueryMultimeterAsync` записывает каждую операцию двумя строками единого формата:
@@ -1833,6 +1853,8 @@ ErrorItem → translator/runner ErrorList
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
 | `DeviceBusCommutationResponseProcessor` | response facade | Ask.Device.ResponseProcessor | validates УКШ JSON/numeric firmware responses and publishes operation/connection/reset results | [Equipment](#real--idle) |
 | `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
+| `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
+| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
 | `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |
 | `BreakdownTesterEmulatorProtocol` | stateful Idle protocol | Ask.Device.Emulator | emulates GPT79904 SCPI identification, configuration, test state and measurement responses | [Equipment](#device-matrix) |
