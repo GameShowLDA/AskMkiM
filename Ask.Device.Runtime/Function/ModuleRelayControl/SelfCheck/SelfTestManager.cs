@@ -1,5 +1,4 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
@@ -8,6 +7,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 {
@@ -144,59 +144,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       token.ThrowIfCancellationRequested();
 
       string answer = await relaySwitchModule.PointManager.CheckPoint(point, userMessageService);
-      SelfPointModel model = SelfPointModel.FromJson(answer);
-
-      if (model != null)
-      {
-        model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
-        await SelfTestMessages.PublishResultAsync(
-          $"Точка {point}",
-          model.SelfControl,
-          userMessageService,
-          indentLevel: 1,
-          executionErrorMessage: model.SelfControl ? null : string.Empty,
-          executionError: !model.SelfControl,
-          canBeDeleted: model.SelfControl);
-
-        if (!model.SelfControl)
-        {
-          var lastLine = userMessageService.GetLastLineNumber();
-          userMessageService.AddError(ModuleRelayControlError.PointError(lastLine, $"{relaySwitchModule.NumberChassis}.{model.NumberDevice}.{model.NumberPoint}"));
-          await SelfTestMessages.PublishResultAsync(
-            "Подключение точки",
-            model.ConnectPoint,
-            userMessageService,
-            indentLevel: 2,
-            executionErrorMessage: model.ConnectPoint ? string.Empty : $"Точка[{point}] - Подключение точки",
-            canBeDeleted: model.ConnectPoint);
-          await SelfTestMessages.PublishResultAsync(
-            "\t\tОтключение с шины А",
-            model.DisconnectBusA,
-            userMessageService,
-            indentLevel: 2,
-            executionErrorMessage: model.DisconnectBusA ? string.Empty : $"Точка[{point}] - Отключение с шины A",
-            canBeDeleted: model.DisconnectBusA);
-          await SelfTestMessages.PublishResultAsync(
-            "\t\tОтключение с шины B",
-            model.DisconnectBusB,
-            userMessageService,
-            indentLevel: 2,
-            executionErrorMessage: model.DisconnectBusB ? string.Empty : $"Точка[{point}] - Отключение с шины B",
-            canBeDeleted: model.DisconnectBusB);
-
-          return false;
-        }
-      }
-      else
-      {
-        await SelfTestMessages.PublishResultAsync(
-          "\tОшибка данных!",
-          false,
-          userMessageService,
-          message: answer);
-        return false;
-      }
-      return true;
+      return await ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync(
+        answer,
+        relaySwitchModule,
+        point,
+        userMessageService);
     }
 
     private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, IUserInteractionService? userMessageService = null)

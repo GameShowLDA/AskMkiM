@@ -62,7 +62,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// Преобразует JSON-строку в объект SelfBusModel.
     /// </summary>
     /// <param name="json">JSON-строка с данными.</param>
-    /// <returns>Объект SelfPointModel или null, если преобразование не удалось.</returns>
+    /// <returns>Объект <see cref="SelfBusModel"/> или <see langword="null"/>, если преобразование не удалось.</returns>
     public static SelfBusModel FromJson(string json)
     {
       try

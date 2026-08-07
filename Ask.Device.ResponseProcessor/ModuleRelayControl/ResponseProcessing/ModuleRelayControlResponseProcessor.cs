@@ -1,8 +1,11 @@
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseModels;
 using Ask.Protocol.Messages.EntryPoints;
+using System.Text.Json;
 
 namespace Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 
@@ -91,6 +94,91 @@ public static class ModuleRelayControlResponseProcessor
       useHardwareVerification: true, outputService);
   }
 
+  /// <summary>
+  /// Проверяет ответ самоконтроля точки МКР и публикует его результат в экранный протокол.
+  /// </summary>
+  /// <param name="response">JSON-ответ МКР.</param>
+  /// <param name="module">Модуль, выполнивший самоконтроль.</param>
+  /// <param name="pointNumber">Ожидаемый номер проверенной точки.</param>
+  /// <param name="userInteractionService">Сервис вывода сообщений и накопления ошибок.</param>
+  /// <returns>
+  /// <see langword="true"/>, если все этапы самоконтроля точки выполнены успешно.
+  /// В противном случае — <see langword="false"/>.
+  /// </returns>
+  public static async Task<bool> CheckPointSelfTestAsync(
+    string response,
+    IRelaySwitchModule module,
+    int pointNumber,
+    IUserInteractionService? userInteractionService = null)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+
+    PointSelfTestResponse? model = DeserializePointSelfTestResponse(response);
+    if (model == null ||
+        !ModuleResponseIdentityChecker.Check(model, module.NumberChassis, module.Number) ||
+        model.NumberPoint != pointNumber)
+    {
+      await SelfTestMessages.PublishResultAsync(
+        "\tОшибка данных!",
+        false,
+        userInteractionService,
+        message: response);
+      return false;
+    }
+
+    bool isValid = PointSelfTestChecker.Check(
+      response,
+      module.NumberChassis,
+      module.Number,
+      pointNumber);
+
+    await SelfTestMessages.PublishResultAsync(
+      $"Точка {pointNumber}",
+      isValid,
+      userInteractionService,
+      indentLevel: 1,
+      executionErrorMessage: isValid ? null : string.Empty,
+      executionError: !isValid,
+      canBeDeleted: isValid);
+
+    if (isValid)
+    {
+      return true;
+    }
+
+    if (userInteractionService != null)
+    {
+      int lastLine = userInteractionService.GetLastLineNumber();
+      userInteractionService.AddError(ModuleRelayControlError.PointError(
+        lastLine,
+        $"{module.NumberChassis}.{model.NumberDevice}.{model.NumberPoint}"));
+    }
+
+    await SelfTestMessages.PublishResultAsync(
+      "Подключение точки",
+      model.ConnectPoint,
+      userInteractionService,
+      indentLevel: 2,
+      executionErrorMessage: model.ConnectPoint ? string.Empty : $"Точка[{pointNumber}] - Подключение точки",
+      canBeDeleted: model.ConnectPoint);
+    await SelfTestMessages.PublishResultAsync(
+      "\t\tОтключение с шины А",
+      model.DisconnectBusA,
+      userInteractionService,
+      indentLevel: 2,
+      executionErrorMessage: model.DisconnectBusA ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины A",
+      canBeDeleted: model.DisconnectBusA);
+    await SelfTestMessages.PublishResultAsync(
+      "\t\tОтключение с шины B",
+      model.DisconnectBusB,
+      userInteractionService,
+      indentLevel: 2,
+      executionErrorMessage: model.DisconnectBusB ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины B",
+      canBeDeleted: model.DisconnectBusB);
+
+    return false;
+  }
+
   private static async Task<bool> CheckPointOperationAsync(
     string response,
     IRelaySwitchModule module,
@@ -120,5 +208,22 @@ public static class ModuleRelayControlResponseProcessor
       outputService);
 
     return isValid;
+  }
+
+  private static PointSelfTestResponse? DeserializePointSelfTestResponse(string response)
+  {
+    if (string.IsNullOrWhiteSpace(response))
+    {
+      return null;
+    }
+
+    try
+    {
+      return JsonSerializer.Deserialize<PointSelfTestResponse>(response);
+    }
+    catch (JsonException)
+    {
+      return null;
+    }
   }
 }

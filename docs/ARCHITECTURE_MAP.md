@@ -1040,6 +1040,20 @@ executor/strategy
 `PointConnectionResponseChecker` проверяет
 `ModuleName == "MKR"`, `NumberChassis`, `NumberDevice`, точную строку `Answer`
 для команды `8` или `82`, а для команды с аппаратным контролем также `Checked == true`.
+`PointSelfTestChecker` десериализует ответ команды `TEST_MKR` (`6.<point>`), проверяет
+идентификатор МКР, ожидаемый `NumberPoint`, прошивочный статус `sucsess` и обязательную
+истинность `ConnectPoint`, `DisconnectBusA`, `DisconnectBusB` и `SelfControl`; пустой,
+повреждённый или частично неуспешный ответ даёт `false`. Runtime
+`SelfTestManager.CheckPoint` после `IRelaySwitchModule.PointManager.CheckPoint` передаёт сырой
+ответ в `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`. Processor сохраняет
+прежние строки `SelfTestMessages` (`Точка N`, детализацию подключения и отключения от шин),
+добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
+ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
+Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает обе настройки
+симуляции: `IsErrorSimulationMode` детерминированно делает ложным один из этапов
+`ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
+`SelfControl = false`; `IsHardwareErrorSimulationMode` через
+`IdleHardwareErrorSimulator` с вероятностью 50% возвращает пустой ответ до разбора команды.
 После проверки processor напрямую вызывает
 `EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
 device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;

@@ -78,6 +78,43 @@ public sealed class ModuleRelayControlEmulatorProtocolTests
     Assert.Empty(await protocol.QueryAsync("1.0.0.0"));
   }
 
+  [Fact(DisplayName = "МКР: самоконтроль точки без симуляции ошибок проходит успешно")]
+  public async Task PointSelfTest_WithoutMeasurementError_ReturnsSuccessfulStages()
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => false,
+      () => false);
+
+    using JsonDocument response = await QueryJsonAsync(protocol, "6.1");
+
+    Assert.True(response.RootElement.GetProperty("ConnectPoint").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("DisconnectBusA").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("DisconnectBusB").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("SelfControl").GetBoolean());
+  }
+
+  [Theory(DisplayName = "МКР: симуляция ошибки измерения проваливает один этап самоконтроля точки")]
+  [InlineData("6.3", "ConnectPoint")]
+  [InlineData("6.1", "DisconnectBusA")]
+  [InlineData("6.2", "DisconnectBusB")]
+  public async Task PointSelfTest_WithMeasurementError_ReturnsFailedStage(
+    string command,
+    string failedStage)
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => false,
+      () => true);
+
+    using JsonDocument response = await QueryJsonAsync(protocol, command);
+
+    Assert.False(response.RootElement.GetProperty(failedStage).GetBoolean());
+    Assert.False(response.RootElement.GetProperty("SelfControl").GetBoolean());
+  }
+
   private static ModuleRelayControlEmulatorProtocol CreateProtocol()
     => new(() => 4, () => 2, () => false);
 
