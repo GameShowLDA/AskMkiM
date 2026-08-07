@@ -24,8 +24,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     Task<bool> SetResistanceRangeAsync(double range, IUserInteractionService? userMessageService = null);
 
     /// <summary>
-    /// Асинхронно выполняет измерение сопротивления по правилу двух правильных
-    /// и одного допустимого ложного результата.
+    /// Асинхронно выполняет измерение сопротивления.
     /// </summary>
     /// <returns>Задача, возвращающая измеренное значение сопротивления в Омах.</returns>
     /// <param name="measurementRange">Ожидаемое значение и допустимые границы результата.</param>
@@ -36,24 +35,5 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
       IUserInteractionService? userMessageService = null,
       double responseDelay = 0);
 
-    /// <summary>
-    /// Асинхронно выполняет серию измерений сопротивления с заданным правилом приёмки.
-    /// </summary>
-    /// <returns>Задача, возвращающая итоговое значение сопротивления в Омах.</returns>
-    /// <param name="measurementRange">Ожидаемое значение и допустимые границы результата.</param>
-    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
-    /// <param name="correctMeasurementCount">Обязательное количество результатов в допустимых границах.</param>
-    /// <param name="falseMeasurementCount">Допустимое количество результатов вне допустимых границ.</param>
-    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Выбрасывается, если <paramref name="correctMeasurementCount"/> меньше единицы
-    /// или <paramref name="falseMeasurementCount"/> меньше нуля.
-    /// </exception>
-    Task<double> MeasureResistanceAsync(
-      MeasurementRange measurementRange,
-      IUserInteractionService? userMessageService,
-      int correctMeasurementCount,
-      int falseMeasurementCount,
-      double responseDelay = 0);
   }
 }

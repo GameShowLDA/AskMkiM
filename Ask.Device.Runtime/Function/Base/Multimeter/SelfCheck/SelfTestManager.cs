@@ -9,6 +9,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
@@ -73,7 +74,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       ArgumentNullException.ThrowIfNull(meter);
 
       cancellationToken.ThrowIfCancellationRequested();
-      await ExecutionMessages.PublishMultimeterSetupAsync(userMessageService);
+      await MultimeterMessages.PublishSetupAsync(userMessageService);
 
       cancellationToken.ThrowIfCancellationRequested();
       await ShowActionHeaderAsync("Инициализация коммутационного устройства", userMessageService);
@@ -487,7 +488,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача вывода сообщения.</returns>
     private static Task ShowSectionHeaderAsync(string header, IUserInteractionService userMessageService)
     {
-      return SelfTestMessages.PublishCommandAsync(header, userMessageService);
+      return MultimeterMessages.PublishSelfTestCommandAsync(header, userMessageService);
     }
 
     /// <summary>
@@ -495,7 +496,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// </summary>
     private static Task ShowActionHeaderAsync(string header, IUserInteractionService userMessageService)
     {
-      return SelfTestMessages.PublishCommandAsync(
+      return MultimeterMessages.PublishSelfTestCommandAsync(
         header,
         userMessageService,
         onlyWhenStepMode: true);
@@ -521,7 +522,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       IUserInteractionService userMessageService,
       int indentLevel = 1)
     {
-      return SelfTestMessages.PublishCommandAsync(
+      return MultimeterMessages.PublishSelfTestCommandAsync(
         header,
         userMessageService,
         message,
@@ -539,7 +540,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <returns>Задача вывода сообщения.</returns>
     private static Task ShowActiveResistanceResultAsync(double result, bool isCorrect, string capacitanceValue, IUserInteractionService userMessageService)
     {
-      return SelfTestMessages.PublishActiveResistanceResultAsync(
+      return MultimeterMessages.PublishActiveResistanceResultAsync(
         result,
         isCorrect,
         capacitanceValue,
