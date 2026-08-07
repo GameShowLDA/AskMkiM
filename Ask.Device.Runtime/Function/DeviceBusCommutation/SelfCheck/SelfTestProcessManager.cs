@@ -223,6 +223,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       string testName = GetTestName(testType);
       string busName = SelfTestMetadataProvider.GetBusContactName(busContact);
 
+
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
         () => ExecuteCircuitOperationAsync(
           () => selfTestChecker.ExecuteSelfTestAsync(cancellationToken, testType, busContact, 1),
@@ -255,12 +256,17 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
             }
           }
 
-          await ShowCircuitOperationResultAsync(
-            messageService,
-            testName,
-            $"Подключение к шине {busName}",
-            continuityResult,
-            skipPause: !continuityResult);
+
+
+          if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await ShowCircuitOperationResultAsync(
+              messageService,
+              testName,
+              $"Подключение к шине {busName}",
+              continuityResult,
+              skipPause: !continuityResult);
+          }
 
           return continuityResult;
 
@@ -284,12 +290,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       {
         return false;
       }
-
-      await ShowCircuitOperationResultAsync(
-        messageService,
-        testName,
-        $"Отключение от шины {busName}",
-        result: true);
+      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+      {
+        await ShowCircuitOperationResultAsync(
+          messageService,
+          testName,
+          $"Отключение от шины {busName}",
+          result: true);
+      }
 
       return continuityResult;
     }
@@ -576,7 +584,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       int busContact,
       int relay,
       int action,
-      string operationMessage, 
+      string operationMessage,
       TestExecutionResult testResult)
     {
       return UserActionHelper.GetRunWithUserRepeatAsync(
