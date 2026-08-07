@@ -89,7 +89,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await MeasurementMessages.PublishStartAsync(
+            await MeasurementMessages.PublishStartAsync(CheckType.Test,
               MeasurementTypeCommand.SI,
               protocolUI);
 
@@ -110,7 +110,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                   ResistanceUnit.MegaOhm,
                   MeasurementLimitKind.Minimum)
                 : null;
-              await MeasurementMessages.PublishResultAsync(
+              await MeasurementMessages.PublishResultAsync(CheckType.Test,
                 ResistanceUnit.MegaOhm,
                 new MeasurementRange(answer.value, dataModel.Param, -1),
                 isSuccessful,

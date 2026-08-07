@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Protocol.Messages.Builders;
 using Ask.Protocol.Messages.Show;
 using System.Runtime.CompilerServices;
@@ -184,6 +185,50 @@ public static class EquipmentMessages
     }
 
     return Task.CompletedTask;
+  }
+
+  /// <summary>
+  /// Публикует результат коммутации точки МКР.
+  /// </summary>
+  /// <param name="device">Модуль коммутации реле.</param>
+  /// <param name="pointNumber">Номер коммутируемой точки.</param>
+  /// <param name="bus">Шина коммутации.</param>
+  /// <param name="connect">Признак подключения точки.</param>
+  /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishPointOperationResultAsync(
+    IAttachableDevice device,
+    int pointNumber,
+    BusPoint bus,
+    bool connect,
+    bool isSuccessful,
+    IMessageOutputService? outputService = null,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    if (!ShouldPublish(isSuccessful))
+    {
+      return Task.CompletedTask;
+    }
+
+    ShowMessageModel message = EquipmentMessageBuilder.BuildPointOperationResult(
+      device,
+      pointNumber,
+      bus,
+      connect,
+      isSuccessful);
+
+    return EquipmentMessagePublisher.PublishAsync(
+      message,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
   }
 
   /// <summary>

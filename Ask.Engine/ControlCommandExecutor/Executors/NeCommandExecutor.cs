@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -113,7 +114,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var measurementResult = MeasurementResultEvaluator.Evaluate(
           measurementRange,
           pointContext.IsOverloadExpected);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.NE,
           new MeasurementRange(
             measurementResult.Value,

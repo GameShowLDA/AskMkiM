@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
+    <ProjectReference Include="..\Ask.Protocol.Messages\Ask.Protocol.Messages.csproj" />
+  </ItemGroup>
+
 </Project>

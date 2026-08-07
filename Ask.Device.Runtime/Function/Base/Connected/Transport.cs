@@ -1,10 +1,12 @@
 ﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Connected;
 using Ask.Protocol.Messages.EntryPoints;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.Base.Connected
 {
@@ -46,7 +48,16 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ConnectAsync(userMessageService);
-        await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer, userMessageService);
+        string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishConnectionResultAsync(
+            module, result.Connect, error, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, error, userMessageService);
+        }
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -59,7 +70,16 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.DisconnectAsync(userMessageService);
-        await EquipmentMessages.PublishDisconnectionResultAsync(_device, result, outputService: userMessageService);
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishDisconnectionResultAsync(
+            module, result, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishDisconnectionResultAsync(
+            _device, result, outputService: userMessageService);
+        }
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -72,7 +92,17 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.InitializeAsync(userMessageService);
-        await EquipmentMessages.PublishInitializationResultAsync(_device, result.Connect, string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer, userMessageService);
+        string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishInitializationResultAsync(
+            module, result.Connect, error, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishInitializationResultAsync(
+            _device, result.Connect, error, userMessageService);
+        }
         return result;
       }, userMessageService,
       deviceTask: true);
@@ -86,7 +116,16 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ResetAsync(userMessageService);
-        await EquipmentMessages.PublishResetResultAsync(_device, result, outputService: userMessageService);
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishResetResultAsync(
+            module, result, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishResetResultAsync(
+            _device, result, outputService: userMessageService);
+        }
 
         return result;
       }, userMessageService, deviceTask: true);

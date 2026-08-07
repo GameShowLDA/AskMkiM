@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
@@ -25,7 +26,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
   /// и чтение конфигурации.  
   /// 
   /// В процессе работы все операции сопровождаются сообщениями, формируемыми через
-  /// <see cref="DeviceMessageBuilder"/>, для удобства взаимодействия с пользователем.
+  /// <see cref="DeviceMessages"/>, для удобства взаимодействия с пользователем.
   /// </remarks>
   internal class DcwModeAdapter : IDcwModeBreakdown
   {
@@ -114,7 +115,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// <remarks>
     /// Класс реализует интерфейс <see cref="IModeConfigurable"/> и обеспечивает
     /// установку и чтение режима DCW через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class DcwAdapterMode : IModeConfigurable
     {
@@ -165,7 +166,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка режима DCW",
             succes.Success ? "DCW" : succes.Message,
@@ -203,7 +204,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// <remarks>
     /// Класс реализует интерфейс <see cref="IVoltageConfigurable"/> и обеспечивает
     /// установку и получение значения напряжения в режиме DCW через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class VoltageAdapterMode : IVoltageConfigurable
     {
@@ -255,7 +256,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка напряжения DCW",
             succes.Success ? $"{value} В" : succes.Message,
@@ -288,7 +289,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// <remarks>
     /// Класс реализует интерфейс <see cref="ICurrentLimitsConfigurable"/> и обеспечивает
     /// установку и получение верхнего и нижнего пределов тока через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class CurrentLimitsAdapterMode : ICurrentLimitsConfigurable
     {
@@ -340,7 +341,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка верхнего предела тока DCW",
             succes.Success ? $"{value} мА" : succes.Message,
@@ -391,7 +392,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка нижнего предела тока DCW",
             succes.Success ? $"{value} мА" : succes.Message,
@@ -424,7 +425,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// Класс реализует интерфейс <see cref="ITimeConfigurable"/> и обеспечивает
     /// установку и чтение параметров времени теста и времени нарастания (Ramp Time)
     /// через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class TimeAdapterMode : ITimeConfigurable
     {
@@ -475,7 +476,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           var succes = await _dcwMode.Time.SetTestTimeAsync(value);
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка времени теста DCW",
             succes.Success ? $"{value} сек" : succes.Message,
@@ -525,7 +526,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           var succes = await _dcwMode.Time.SetRampTimeAsync(value);
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка Ramp Time DCW",
             succes.Success ? $"{value} сек" : succes.Message,
@@ -558,7 +559,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// <remarks>
     /// Класс реализует интерфейс <see cref="IOffsetConfigurable"/> и обеспечивает
     /// установку и считывание значения смещения через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class OffsetAdapterMode : IOffsetConfigurable
     {
@@ -610,7 +611,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка смещения DCW",
             succes.Success ? $"{value} мА" : succes.Message,
@@ -643,7 +644,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// <remarks>
     /// Класс реализует интерфейс <see cref="IArcCurrentConfigurable"/> и обеспечивает
     /// установку и считывание значения дугового тока через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class ArcCurrentAdapterMode : IArcCurrentConfigurable
     {
@@ -695,7 +696,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка дугового тока DCW",
             succes.Success ? $"{value} мА" : succes.Message,
@@ -743,7 +744,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка земли DCW",
             succes.Success ? (state ? "ON" : "OFF") : succes.Message,
@@ -772,7 +773,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// Класс реализует интерфейс <see cref="IMeasurable"/> и обеспечивает
     /// выполнение измерений тока утечки, а также управление процессом измерения
     /// (подача напряжения и остановка измерений) через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class MeasureAdapterMode : IMeasurable
     {
@@ -821,7 +822,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
         if (!execution.Success)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Ошибка измерения тока DCW",
             execution.ErrorMessage,
@@ -839,7 +840,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
         var (result, unit) = execution.Value;
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Измерение тока DCW",
           $"{result} мА",
@@ -884,7 +885,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// <remarks>
     /// Класс реализует интерфейс <see cref="IConfigurationProvider{T}"/> и обеспечивает
     /// чтение и сброс конфигурации режима DCW через функциональность класса <see cref="DcwMode"/>.  
-    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessageBuilder"/>.
+    /// Все операции сопровождаются уведомлениями пользователю посредством <see cref="DeviceMessages"/>.
     /// </remarks>
     public class ConfigAdapterMode : IConfigurationProvider<DcwConfiguration>
     {
@@ -922,7 +923,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       {
         var config = await _dcwMode.Config.ReadConfigurationAsync();
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Чтение конфигурации DCW",
           "Конфигурация считана",

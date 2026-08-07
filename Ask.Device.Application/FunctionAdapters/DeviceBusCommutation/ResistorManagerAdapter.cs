@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
@@ -35,7 +36,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение резистора", $"№{number}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение резистора", $"№{number}", succes, 1, userMessageService);
         }
 
         return succes;
@@ -56,7 +57,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение резистора", $"№{number}", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение резистора", $"№{number}", succes, 1, userMessageService);
         }
 
         return succes;

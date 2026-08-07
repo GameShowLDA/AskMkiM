@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.ManagerChassis;
 using Ask.Device.Runtime.Function.ModuleRelayControl;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -71,6 +72,17 @@ namespace Ask.Device.Runtime.Function.Connected
         return (false, $"Нет ответа от устройства {_device.Name}({_device.Number})");
       }
 
+      if (_device is IRelaySwitchModule module)
+      {
+        bool success = ModuleRelayControlResponseProcessor.CheckInitialization(response, module);
+        if (!success)
+        {
+          IsReset?.Invoke();
+        }
+
+        return (success, success ? string.Empty : response);
+      }
+
       var initializationResult = _device.InitializationValidationDelegate(response, _device);
       if (initializationResult.Success)
       {
@@ -129,7 +141,9 @@ namespace Ask.Device.Runtime.Function.Connected
 
     private bool ValidateReset(string response)
     {
-      var resetResult = _device.ResetValidationDelegate(response, _device);
+      bool resetResult = _device is IRelaySwitchModule module
+        ? ModuleRelayControlResponseProcessor.CheckReset(response, module)
+        : _device.ResetValidationDelegate(response, _device);
       IsReset?.Invoke();
 
       return resetResult;

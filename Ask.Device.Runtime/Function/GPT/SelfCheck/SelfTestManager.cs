@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
@@ -130,7 +131,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             ? $"СИ. Проверка при напряжении {item}В " +
               $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
             : null;
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(result, lowerBound, upperBound),
             isSuccessful,
@@ -138,7 +139,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage,
             outputService: userMessageService);
 
-          await MeasurementMessages.PublishErrorAsync(
+          await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,
@@ -223,7 +224,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
                 $"({lowerBound} - {upperBound} В) : {formattedResult}"
               : null);
 
-          await MeasurementMessages.PublishErrorAsync(
+          await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,
@@ -307,7 +308,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
                 $"({lowerBound} - {upperBound} В) : {formattedResult}"
               : null);
 
-          await MeasurementMessages.PublishErrorAsync(
+          await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,

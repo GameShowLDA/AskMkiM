@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -153,7 +154,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer.value;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.SI,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
@@ -190,7 +191,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         measurement.Restart();
         measurementRange.TargetValue = answer.Value;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.SI,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
