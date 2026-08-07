@@ -68,7 +68,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <param name="token">Токен отмены операции.</param>
     private async Task PerformClosureCycle(CancellationToken token, IRelaySwitchModule relaySwitchModule, ActionSettings settings, IUserInteractionService? userMessageService = null, string testNumber = null)
     {
-      await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
+      {
+        await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
+      }
       if (!(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
         return;
@@ -107,7 +110,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
+      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
+      {
+        await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
+      }
 
       if (!(await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
@@ -126,7 +132,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       {
         TestName = testName,
       });
-      if(!string.IsNullOrEmpty(testNumber))
+      if (!string.IsNullOrEmpty(testNumber))
       {
         testName = $"{testNumber}. {testName}";
       }
@@ -173,15 +179,18 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       {
         model.SelfControl = model.ConnectPoint && model.DisconnectBusA && model.DisconnectBusB;
         string executionErrorMessage = model.SelfControl ? null : string.Empty;
-        await SelfTestMessages.PublishResultAsync(
-          $"Точка {point}",
-          model.SelfControl,
-          userMessageService,
-          indentLevel: 1,
-          executionErrorMessage: executionErrorMessage,
-          executionError: !model.SelfControl,
-          canBeDeleted: model.SelfControl);
-      if (executionErrorMessage != null)
+        if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+        {
+          await SelfTestMessages.PublishResultAsync(
+            $"Точка {point}",
+            model.SelfControl,
+            userMessageService,
+            indentLevel: 1,
+            executionErrorMessage: executionErrorMessage,
+            executionError: !model.SelfControl,
+            canBeDeleted: model.SelfControl);
+        }
+        if (executionErrorMessage != null)
         {
           settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
           {
@@ -233,13 +242,17 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     {
       (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
       string name = $"Шины AB{busNumber}";
-      await SelfTestMessages.PublishResultAsync(
+      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+      {
+
+        await SelfTestMessages.PublishResultAsync(
         name,
         answer.Item1,
         userMessageService,
         indentLevel: 2,
         executionError: !answer.Item1,
         canBeDeleted: answer.Item1);
+      }
       if (!answer.Item1)
       {
         settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
