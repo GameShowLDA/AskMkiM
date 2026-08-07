@@ -15,6 +15,7 @@ using Message;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.Execution
 {
@@ -23,8 +24,23 @@ namespace UI.Controls.Settings.Execution
   /// </summary>
   public partial class ExecutionControl : UserControl
   {
+    private static readonly HashSet<Type> HardwareFailureSimulationDeviceTypes =
+    [
+      typeof(IChassisManager),
+      typeof(IRelaySwitchModule),
+      typeof(ISwitchingDevice),
+      typeof(IPowerSourceModule),
+      typeof(IMultimeter),
+      typeof(IBreakdownTester),
+    ];
+
     private bool _isInitialized;
     private readonly List<HardwareFailureSimulationEntry> _hardwareFailureSimulationEntries = [];
+    private readonly Action<DeviceConfigurationEvents.Changed> _deviceConfigurationChangedHandler;
+    private CancellationTokenSource? _hardwareFailureRefreshCancellation;
+    private bool _isDeviceConfigurationChangedSubscribed;
+    private bool _isSavingHardwareFailureSimulation;
+    private bool _refreshHardwareFailureSimulationAfterSave;
 
     /// <summary>
     /// Базовая (сохранённая) модель выполнения, считанная при загрузке.
@@ -41,7 +57,9 @@ namespace UI.Controls.Settings.Execution
     public ExecutionControl()
     {
       InitializeComponent();
+      _deviceConfigurationChangedHandler = OnDeviceConfigurationChanged;
       Loaded += ExecutionControl_Loaded;
+      Unloaded += ExecutionControl_Unloaded;
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(e => ChangeVisible(e.IsPowered));
       ChangeVisible(SystemStateManager.GetIsActivePower());
     }
@@ -83,6 +101,24 @@ namespace UI.Controls.Settings.Execution
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
       HasUnsavedChanges = false;
+
+      if (IsLoaded && !_isDeviceConfigurationChangedSubscribed)
+      {
+        EventAggregator.Subscribe(_deviceConfigurationChangedHandler);
+        _isDeviceConfigurationChangedSubscribed = true;
+      }
+    }
+
+    private void ExecutionControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+      if (_isDeviceConfigurationChangedSubscribed)
+      {
+        EventAggregator.Unsubscribe(_deviceConfigurationChangedHandler);
+        _isDeviceConfigurationChangedSubscribed = false;
+      }
+
+      _hardwareFailureRefreshCancellation?.Cancel();
+      _hardwareFailureRefreshCancellation = null;
     }
     /// <summary>
     /// Клик по галочке «сохранить»: сохраняет текущую модель,
@@ -189,17 +225,81 @@ namespace UI.Controls.Settings.Execution
       }
     }
 
-    private async Task LoadHardwareFailureSimulationDevicesAsync()
+    private void OnDeviceConfigurationChanged(DeviceConfigurationEvents.Changed eventData)
     {
-      HardwareFailureSimulationCards.Children.Clear();
-      _hardwareFailureSimulationEntries.Clear();
+      if (eventData.DeviceType != null
+        && !HardwareFailureSimulationDeviceTypes.Contains(eventData.DeviceType))
+      {
+        return;
+      }
 
-      var chassisTask = ChassisManagers.GetAllAsync();
-      var relayTask = RelaySwitchModules.GetAllAsync();
-      var switchingTask = SwitchingDevices.GetAllAsync();
-      var powerSourceTask = PowerSourceModules.GetAllAsync();
-      var fastMeterTask = FastMeters.GetAllAsync();
-      var breakdownTesterTask = BreakdownTesters.GetAllAsync();
+      if (!Dispatcher.CheckAccess())
+      {
+        _ = Dispatcher.InvokeAsync(() => OnDeviceConfigurationChanged(eventData));
+        return;
+      }
+
+      if (!IsLoaded)
+      {
+        return;
+      }
+
+      if (_isSavingHardwareFailureSimulation)
+      {
+        _refreshHardwareFailureSimulationAfterSave = true;
+        return;
+      }
+
+      QueueHardwareFailureSimulationRefresh();
+    }
+
+    private void QueueHardwareFailureSimulationRefresh()
+    {
+      _hardwareFailureRefreshCancellation?.Cancel();
+
+      var cancellation = new CancellationTokenSource();
+      _hardwareFailureRefreshCancellation = cancellation;
+      _ = RefreshHardwareFailureSimulationDevicesAsync(cancellation);
+    }
+
+    private async Task RefreshHardwareFailureSimulationDevicesAsync(CancellationTokenSource cancellation)
+    {
+      try
+      {
+        await Task.Delay(100, cancellation.Token);
+        await LoadHardwareFailureSimulationDevicesAsync(
+          preserveUnsavedValues: true,
+          cancellation.Token);
+        CheckedChanged(sender: null, e: false);
+      }
+      catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+      {
+      }
+      catch (Exception exception)
+      {
+        LogException(exception, "Не удалось динамически обновить список симуляции сбоев оборудования.");
+      }
+      finally
+      {
+        if (ReferenceEquals(_hardwareFailureRefreshCancellation, cancellation))
+        {
+          _hardwareFailureRefreshCancellation = null;
+        }
+
+        cancellation.Dispose();
+      }
+    }
+
+    private async Task LoadHardwareFailureSimulationDevicesAsync(
+      bool preserveUnsavedValues = false,
+      CancellationToken cancellationToken = default)
+    {
+      var chassisTask = ChassisManagers.GetAllAsync(cancellationToken);
+      var relayTask = RelaySwitchModules.GetAllAsync(cancellationToken);
+      var switchingTask = SwitchingDevices.GetAllAsync(cancellationToken);
+      var powerSourceTask = PowerSourceModules.GetAllAsync(cancellationToken);
+      var fastMeterTask = FastMeters.GetAllAsync(cancellationToken);
+      var breakdownTesterTask = BreakdownTesters.GetAllAsync(cancellationToken);
 
       await Task.WhenAll(
         chassisTask,
@@ -209,34 +309,52 @@ namespace UI.Controls.Settings.Execution
         fastMeterTask,
         breakdownTesterTask);
 
-      AddHardwareFailureSimulationCards(chassisTask.Result, ChassisManagers.UpdateAsync, "Контроллер шасси");
-      AddHardwareFailureSimulationCards(relayTask.Result, RelaySwitchModules.UpdateAsync, "Модуль коммутации реле");
-      AddHardwareFailureSimulationCards(switchingTask.Result, SwitchingDevices.UpdateAsync, "Устройство коммутации");
-      AddHardwareFailureSimulationCards(powerSourceTask.Result, PowerSourceModules.UpdateAsync, "Модуль источника питания");
-      AddHardwareFailureSimulationCards(fastMeterTask.Result, FastMeters.UpdateAsync, "Быстрый измеритель");
-      AddHardwareFailureSimulationCards(breakdownTesterTask.Result, BreakdownTesters.UpdateAsync, "Пробойная установка");
+      cancellationToken.ThrowIfCancellationRequested();
+      Dictionary<HardwareFailureSimulationDeviceKey, bool> unsavedValues = preserveUnsavedValues
+        ? _hardwareFailureSimulationEntries
+          .Where(entry => entry.Card.IsChecked != entry.SavedValue)
+          .ToDictionary(entry => entry.Key, entry => entry.Card.IsChecked)
+        : [];
+
+      HardwareFailureSimulationCards.Children.Clear();
+      _hardwareFailureSimulationEntries.Clear();
+
+      AddHardwareFailureSimulationCards(chassisTask.Result, ChassisManagers.UpdateAsync, "Контроллер шасси", unsavedValues);
+      AddHardwareFailureSimulationCards(relayTask.Result, RelaySwitchModules.UpdateAsync, "Модуль коммутации реле", unsavedValues);
+      AddHardwareFailureSimulationCards(switchingTask.Result, SwitchingDevices.UpdateAsync, "Устройство коммутации", unsavedValues);
+      AddHardwareFailureSimulationCards(powerSourceTask.Result, PowerSourceModules.UpdateAsync, "Модуль источника питания", unsavedValues);
+      AddHardwareFailureSimulationCards(fastMeterTask.Result, FastMeters.UpdateAsync, "Быстрый измеритель", unsavedValues);
+      AddHardwareFailureSimulationCards(breakdownTesterTask.Result, BreakdownTesters.UpdateAsync, "Пробойная установка", unsavedValues);
     }
 
     private void AddHardwareFailureSimulationCards<TDevice>(
       IEnumerable<TDevice> devices,
       Func<TDevice, CancellationToken, Task<TDevice>> updateAsync,
-      string deviceKind)
+      string deviceKind,
+      IReadOnlyDictionary<HardwareFailureSimulationDeviceKey, bool> unsavedValues)
       where TDevice : class, IDevice
     {
       foreach (var device in devices.OrderBy(item => item.Number))
       {
+        var key = new HardwareFailureSimulationDeviceKey(typeof(TDevice), device.Id);
+        bool savedValue = device.IsHardwareFailureSimulationEnabled;
+        bool currentValue = unsavedValues.TryGetValue(key, out bool unsavedValue)
+          ? unsavedValue
+          : savedValue;
+
         var card = new SettingsCard
         {
           Title = BuildDeviceTitle(device, deviceKind),
           Description = BuildDeviceDescription(device, deviceKind),
-          IsChecked = device.IsHardwareFailureSimulationEnabled,
+          IsChecked = currentValue,
           Margin = new Thickness(0, 6, 10, 0),
           VerticalAlignment = VerticalAlignment.Top,
         };
 
         var entry = new HardwareFailureSimulationEntry(
+          key,
           card,
-          device.IsHardwareFailureSimulationEnabled,
+          savedValue,
           async enabled =>
           {
             device.IsHardwareFailureSimulationEnabled = enabled;
@@ -270,26 +388,47 @@ namespace UI.Controls.Settings.Execution
 
     private async Task SaveHardwareFailureSimulationDevicesAsync()
     {
-      foreach (var entry in _hardwareFailureSimulationEntries.Where(
-        item => item.Card.IsChecked != item.SavedValue))
+      _hardwareFailureRefreshCancellation?.Cancel();
+      _isSavingHardwareFailureSimulation = true;
+
+      try
       {
-        await entry.SaveAsync(entry.Card.IsChecked);
-        entry.SavedValue = entry.Card.IsChecked;
+        foreach (var entry in _hardwareFailureSimulationEntries.Where(
+          item => item.Card.IsChecked != item.SavedValue))
+        {
+          await entry.SaveAsync(entry.Card.IsChecked);
+          entry.SavedValue = entry.Card.IsChecked;
+        }
+      }
+      finally
+      {
+        _isSavingHardwareFailureSimulation = false;
+
+        if (_refreshHardwareFailureSimulationAfterSave)
+        {
+          _refreshHardwareFailureSimulationAfterSave = false;
+          QueueHardwareFailureSimulationRefresh();
+        }
       }
     }
+
+    private readonly record struct HardwareFailureSimulationDeviceKey(Type DeviceType, int DeviceId);
 
     private sealed class HardwareFailureSimulationEntry
     {
       public HardwareFailureSimulationEntry(
+        HardwareFailureSimulationDeviceKey key,
         SettingsCard card,
         bool savedValue,
         Func<bool, Task> saveAsync)
       {
+        Key = key;
         Card = card;
         SavedValue = savedValue;
         SaveAsync = saveAsync;
       }
 
+      public HardwareFailureSimulationDeviceKey Key { get; }
       public SettingsCard Card { get; }
       public bool SavedValue { get; set; }
       public Func<bool, Task> SaveAsync { get; }

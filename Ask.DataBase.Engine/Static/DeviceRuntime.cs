@@ -1,3 +1,5 @@
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.DataBase.Engine.Contracts;
@@ -75,9 +77,13 @@ public static class DeviceRuntime
   /// <summary>
   /// Создаёт новое устройство.
   /// </summary>
-  public static Task<TDevice> CreateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
-    where TDevice : class, IDevice =>
-    Engine.CreateAsync(device, cancellationToken);
+  public static async Task<TDevice> CreateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice
+  {
+    var created = await Engine.CreateAsync(device, cancellationToken);
+    PublishConfigurationChanged<TDevice>(DeviceConfigurationEvents.ChangeKind.Created, created.Id);
+    return created;
+  }
 
   /// <summary>
   /// Создаёт набор устройств.
@@ -88,37 +94,68 @@ public static class DeviceRuntime
   /// <returns>
   /// Список созданных runtime-объектов устройств с актуальными данными.
   /// </returns>
-  public static Task<List<TDevice>> CreateRangeAsync<TDevice>(IEnumerable<TDevice> devices, CancellationToken cancellationToken = default)
-    where TDevice : class, IDevice =>
-    Engine.CreateRangeAsync(devices, cancellationToken);
+  public static async Task<List<TDevice>> CreateRangeAsync<TDevice>(IEnumerable<TDevice> devices, CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice
+  {
+    var created = await Engine.CreateRangeAsync(devices, cancellationToken);
+    if (created.Count > 0)
+    {
+      PublishConfigurationChanged<TDevice>(DeviceConfigurationEvents.ChangeKind.Created);
+    }
+
+    return created;
+  }
 
   /// <summary>
   /// Обновляет существующее устройство.
   /// </summary>
-  public static Task<TDevice> UpdateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
-    where TDevice : class, IDevice =>
-    Engine.UpdateAsync(device, cancellationToken);
+  public static async Task<TDevice> UpdateAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice
+  {
+    var updated = await Engine.UpdateAsync(device, cancellationToken);
+    PublishConfigurationChanged<TDevice>(DeviceConfigurationEvents.ChangeKind.Updated, updated.Id);
+    return updated;
+  }
 
   /// <summary>
   /// Удаляет устройство.
   /// </summary>
   public static Task<bool> DeleteAsync<TDevice>(TDevice device, CancellationToken cancellationToken = default)
-    where TDevice : class, IDevice =>
-    Engine.DeleteAsync(device, cancellationToken);
+    where TDevice : class, IDevice
+  {
+    ArgumentNullException.ThrowIfNull(device);
+    return DeleteByIdAsync<TDevice>(device.Id, cancellationToken);
+  }
 
   /// <summary>
   /// Удаляет устройство по идентификатору.
   /// </summary>
-  public static Task<bool> DeleteByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
-    where TDevice : class, IDevice =>
-    Engine.DeleteByIdAsync<TDevice>(id, cancellationToken);
+  public static async Task<bool> DeleteByIdAsync<TDevice>(int id, CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice
+  {
+    bool deleted = await Engine.DeleteByIdAsync<TDevice>(id, cancellationToken);
+    if (deleted)
+    {
+      PublishConfigurationChanged<TDevice>(DeviceConfigurationEvents.ChangeKind.Deleted, id);
+    }
+
+    return deleted;
+  }
 
   /// <summary>
   /// Удаляет все устройства из таблицы данных.
   /// </summary>
-  public static Task<bool> DeleteAllAsync<TDevice>(CancellationToken cancellationToken = default)
-    where TDevice : class, IDevice =>
-    Engine.DeleteAllAsync<TDevice>(cancellationToken);
+  public static async Task<bool> DeleteAllAsync<TDevice>(CancellationToken cancellationToken = default)
+    where TDevice : class, IDevice
+  {
+    bool deleted = await Engine.DeleteAllAsync<TDevice>(cancellationToken);
+    if (deleted)
+    {
+      PublishConfigurationChanged<TDevice>(DeviceConfigurationEvents.ChangeKind.Deleted);
+    }
+
+    return deleted;
+  }
 
   /// <summary>
   /// Создаёт runtime-объект устройства на основе DTO.
@@ -136,4 +173,12 @@ public static class DeviceRuntime
   /// Очищает внутренний кэш устройств.
   /// </summary>
   public static void ClearCache() => Engine.ClearCache();
+
+  private static void PublishConfigurationChanged<TDevice>(
+    DeviceConfigurationEvents.ChangeKind kind,
+    int? deviceId = null)
+    where TDevice : class, IDevice
+  {
+    EventAggregator.Publish(new DeviceConfigurationEvents.Changed(typeof(TDevice), kind, deviceId));
+  }
 }

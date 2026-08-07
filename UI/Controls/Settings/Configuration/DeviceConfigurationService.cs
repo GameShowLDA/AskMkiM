@@ -1,3 +1,5 @@
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -205,6 +207,9 @@ public static class DeviceConfigurationService
 
     await transaction.CommitAsync(cancellationToken);
     DeviceRuntime.ClearCache();
+    EventAggregator.Publish(new DeviceConfigurationEvents.Changed(
+      deviceType: null,
+      kind: DeviceConfigurationEvents.ChangeKind.Replaced));
   }
 
   private static JsonSerializerOptions CreateJsonOptions(bool writeIndented)

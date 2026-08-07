@@ -758,6 +758,12 @@ type name и compatibility-sensitive contract.
 `ExecutionControl` загружает экземпляры через статические фасады, показывает для
 каждого отдельную `SettingsCard` и сохраняет изменённые экземпляры через
 соответствующий `UpdateAsync`; обновление пересобирает запись runtime-cache.
+После успешных `CreateAsync` / `UpdateAsync` / `DeleteAsync` / `DeleteAllAsync`
+`DeviceRuntime` публикует `DeviceConfigurationEvents.Changed`. Полная замена
+конфигурации в `DeviceConfigurationService.ApplyConfigurationFileAsync` публикует
+то же событие с видом `Replaced`. `ExecutionControl` подписывается на время своей
+WPF-жизни, объединяет близкие события и перечитывает шесть списков оборудования;
+несохранённые переключатели переносятся по ключу `(device interface type, Id)`.
 
 #### Files
 
@@ -1565,6 +1571,9 @@ Architecturally significant flows:
 - `ExecutionConfig.IdleModeChange` → `StateEventsBinder.OnIdleModeChange`;
 - `ProtocolConfig.SaveProtocolAsyncEvent` and other config save events
   → DB static settings facades;
+- успешный CRUD в `DeviceRuntime` или импорт в `DeviceConfigurationService`
+  → `DeviceConfigurationEvents.Changed`
+  → динамическое перестроение карточек оборудования в `ExecutionControl`;
 - `LoggerUtility.ExceptionLogged`/callback → `IExceptionDiagnosticReporter`;
 - `Transport.IsReset` → local state reset for points and buses of the addressed device;
 - `ActionExecutor.StartProcessing` → execution-state consumers;
