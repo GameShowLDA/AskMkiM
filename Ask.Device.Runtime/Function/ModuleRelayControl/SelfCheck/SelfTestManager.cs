@@ -36,7 +36,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
-      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(_moduleRelay, userMessageService);
+      await ModuleRelayControlResponseProcessor.PublishSelfTestTitleAsync(_moduleRelay, userMessageService);
 
       switch (typeConnector)
       {
@@ -64,7 +64,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <param name="token">Токен отмены операции.</param>
     private async Task PerformClosureCycle(CancellationToken token, IRelaySwitchModule relaySwitchModule, IUserInteractionService? userMessageService = null)
     {
-      await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
+      await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync("Настройка устройств", userMessageService);
       if (!(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
         return;
@@ -73,7 +73,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
       await _moduleRelay.MeterManager.ConnectMeterAsync(userMessageService);
 
-      await SelfTestMessages.PublishInformationAsync("Проверка подключения точек", userMessageService);
+      await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync("Проверка подключения точек", userMessageService);
       for (int point = 1; point <= _moduleRelay.PointCount; point++)
       {
         await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, userMessageService), userMessageService);
@@ -85,7 +85,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       if (switchingDevice == null)
       {
-        await SelfTestMessages.PublishResultAsync(
+        await ModuleRelayControlResponseProcessor.PublishSelfTestResultAsync(
           "Устройство коммутации шин не задана в конфигурации!",
           false,
           userMessageService,
@@ -93,7 +93,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await SelfTestMessages.PublishInformationAsync("Настройка устройств", userMessageService);
+      await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync("Настройка устройств", userMessageService);
 
       if (!(await switchingDevice.ConnectableManager.InitializeAsync(userMessageService)).Connect || !(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
       {
@@ -108,7 +108,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await SelfTestMessages.PublishInformationAsync("Проверка коммутации шин", userMessageService);
+      await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync("Проверка коммутации шин", userMessageService);
 
       for (int busNumber = 1; busNumber <= 4; busNumber++)
       {

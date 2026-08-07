@@ -3,7 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
 
@@ -58,9 +58,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer.Contains($"4.{typeBus}.{typeVoltage}") ?? false)
+        if (await ModuleRelayControlResponseProcessor.CheckBusOperationAsync(
+          response,
+          _moduleRelayControl,
+          bus,
+          typeBus,
+          typeVoltage,
+          connect: true,
+          userMessageService))
         {
           connectionState.Set(bus, true);
           return true;
@@ -98,9 +103,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"4.{typeBus}.{typeVoltage}.2")
+        if (await ModuleRelayControlResponseProcessor.CheckBusOperationAsync(
+          response,
+          _moduleRelayControl,
+          bus,
+          typeBus,
+          typeVoltage,
+          connect: false,
+          userMessageService))
         {
           connectionState.Set(bus, false);
           return true;

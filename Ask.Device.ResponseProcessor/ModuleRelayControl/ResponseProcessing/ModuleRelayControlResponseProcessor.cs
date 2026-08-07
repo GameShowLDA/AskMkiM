@@ -14,6 +14,199 @@ namespace Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 /// </summary>
 public static class ModuleRelayControlResponseProcessor
 {
+  public static void EnsureCommandAccepted(string response, IRelaySwitchModule module, string command)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+    string? error = CommandStatusChecker.GetError(response);
+    if (error == null)
+    {
+      return;
+    }
+
+    throw new ModuleRelayControlProtocolException(
+      $"{module.Name} {module.NumberChassis}.{module.Number}",
+      GetOperationName(command),
+      error,
+      CommandStatusChecker.GetStatus(response)!);
+  }
+
+  public static bool CheckInitialization(string response, IRelaySwitchModule module)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+    InitializationResponse? model = ResponseDeserializer.Deserialize<InitializationResponse>(response);
+    return model != null &&
+      ModuleResponseIdentityChecker.Check(model, module.NumberChassis, module.Number);
+  }
+
+  public static bool CheckReset(string response, IRelaySwitchModule module)
+    => CheckCommandResponse(response, module, "2.0.1");
+
+  /// <summary>
+  /// Проверяет адрес отправителя и точное подтверждение произвольной обычной команды МКР.
+  /// </summary>
+  /// <param name="response">JSON-ответ МКР.</param>
+  /// <param name="module">Модуль, которому была отправлена команда.</param>
+  /// <param name="expectedAnswer">Ожидаемое значение поля <c>Answer</c>.</param>
+  /// <returns>
+  /// <see langword="true"/>, если адрес и подтверждение команды совпадают с ожидаемыми.
+  /// В противном случае — <see langword="false"/>.
+  /// </returns>
+  public static bool CheckCommandResponse(
+    string response,
+    IRelaySwitchModule module,
+    string expectedAnswer)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+    return CommandResponseChecker.Check(
+      response,
+      module.NumberChassis,
+      module.Number,
+      expectedAnswer);
+  }
+
+  public static Task PublishConnectionResultAsync(
+    IRelaySwitchModule module,
+    bool result,
+    string? error,
+    IUserInteractionService? outputService = null)
+    => EquipmentMessages.PublishConnectionResultAsync(module, result, error, outputService);
+
+  public static Task PublishDisconnectionResultAsync(
+    IRelaySwitchModule module,
+    bool result,
+    IUserInteractionService? outputService = null)
+    => EquipmentMessages.PublishDisconnectionResultAsync(module, result, outputService: outputService);
+
+  public static Task PublishInitializationResultAsync(
+    IRelaySwitchModule module,
+    bool result,
+    string? error,
+    IUserInteractionService? outputService = null)
+    => EquipmentMessages.PublishInitializationResultAsync(module, result, error, outputService);
+
+  public static Task PublishResetResultAsync(
+    IRelaySwitchModule module,
+    bool result,
+    IUserInteractionService? outputService = null)
+    => EquipmentMessages.PublishResetResultAsync(module, result, outputService: outputService);
+
+  public static Task PublishOperationResultAsync(
+    IRelaySwitchModule module,
+    string operation,
+    bool result,
+    IUserInteractionService? outputService = null)
+    => DeviceMessages.PublishOperationResultAsync(module, operation, result, 1, outputService);
+
+  public static Task PublishSelfTestTitleAsync(
+    IRelaySwitchModule module,
+    IUserInteractionService? outputService = null)
+    => outputService is null
+      ? Task.CompletedTask
+      : EquipmentMessages.PublishDeviceHealthCheckTitleAsync(module, outputService);
+
+  public static Task PublishSelfTestInformationAsync(
+    string text,
+    IUserInteractionService? outputService = null)
+    => SelfTestMessages.PublishInformationAsync(text, outputService);
+
+  public static Task PublishSelfTestResultAsync(
+    string text,
+    bool result,
+    IUserInteractionService? outputService = null,
+    bool skipPause = true)
+    => SelfTestMessages.PublishResultAsync(text, result, outputService, skipPause: skipPause);
+
+  public static async Task<bool> CheckBusOperationAsync(
+    string response,
+    IRelaySwitchModule module,
+    SwitchingBus bus,
+    int busType,
+    int busNumber,
+    bool connect,
+    IUserInteractionService? outputService = null)
+  {
+    bool result = CheckCommandResponse(
+      response,
+      module,
+      $"4.{busType}.{busNumber}.{(connect ? 1 : 2)}");
+    await DeviceMessages.PublishOperationResultAsync(
+      module,
+      $"{(connect ? "Подключение" : "Отключение")} шины [{bus}]",
+      result,
+      1,
+      outputService);
+    return result;
+  }
+
+  public static async Task<bool> CheckMeterOperationAsync(
+    string response,
+    IRelaySwitchModule module,
+    bool connect,
+    IUserInteractionService? outputService = null)
+  {
+    bool result = CheckCommandResponse(response, module, $"5.{(connect ? 1 : 2)}");
+    await DeviceMessages.PublishOperationResultAsync(
+      module,
+      $"{(connect ? "Подключение" : "Отключение")} измерителя модуля МКР",
+      result,
+      1,
+      outputService);
+    return result;
+  }
+
+  public static async Task<bool> CheckMeterStateAsync(
+    string response,
+    IRelaySwitchModule module,
+    IUserInteractionService? outputService = null)
+  {
+    bool result = CheckCommandResponse(response, module, "7.1");
+    await DeviceMessages.PublishOperationResultAsync(
+      module,
+      result ? "Обнаружено подключение шин/точек (МКР)" : "Подключение шин/точек не обнаружено (МКР)",
+      result,
+      1,
+      outputService);
+    return result;
+  }
+
+  public static async Task<bool> CheckPointRangeOperationAsync(
+    string response,
+    IRelaySwitchModule module,
+    int firstPoint,
+    int lastPoint,
+    BusPoint bus,
+    bool connect,
+    IUserInteractionService? outputService = null)
+  {
+    int action = ((int)bus * 10) + (connect ? 1 : 2);
+    bool result = CheckCommandResponse(response, module, $"11.{firstPoint}.{lastPoint}.{action}");
+    string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шине [{bus}]";
+    await DeviceMessages.PublishOperationResultAsync(
+      module,
+      $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
+      result,
+      1,
+      outputService);
+    return result;
+  }
+
+  public static async Task<bool> CheckPointReconnectionAsync(
+    string response,
+    IRelaySwitchModule module,
+    int pointNumber,
+    BusPoint bus,
+    IUserInteractionService? outputService = null)
+  {
+    bool result = CheckCommandResponse(response, module, $"81.{pointNumber}.{(int)bus}.0");
+    await DeviceMessages.PublishOperationResultAsync(
+      module,
+      $"Переподключение точки {pointNumber} к шине [{bus}]",
+      result,
+      1,
+      outputService);
+    return result;
+  }
+
   /// <summary>
   /// Проверяет ответ самоконтроля внешней шины МКР без публикации результата.
   /// </summary>
@@ -301,6 +494,35 @@ public static class ModuleRelayControlResponseProcessor
       outputService);
 
     return isValid;
+  }
+
+  private static string GetOperationName(string command)
+  {
+    string[] parts = command.Split('.');
+    if (!int.TryParse(parts.ElementAtOrDefault(0), out int commandNumber))
+    {
+      return "Выполнение команды";
+    }
+
+    int.TryParse(parts.ElementAtOrDefault(1), out int firstParameter);
+    int.TryParse(parts.ElementAtOrDefault(2), out int secondParameter);
+    int.TryParse(parts.ElementAtOrDefault(3), out int thirdParameter);
+
+    return commandNumber switch
+    {
+      1 => "Инициализация",
+      2 => "Сброс",
+      4 => thirdParameter == 2 ? "Отключение шины" : "Подключение шины",
+      5 => firstParameter == 2 ? "Отключение измерителя" : "Подключение измерителя",
+      6 => "Самоконтроль точки",
+      7 => "Проверка измерителя",
+      8 or 82 => thirdParameter == 2 ? "Отключение точки" : "Подключение точки",
+      9 => secondParameter == 2 ? "Отключение точек от шины" : "Подключение точек к шине",
+      10 => "Самоконтроль внешней шины",
+      11 => thirdParameter % 10 == 2 ? "Отключение диапазона точек" : "Подключение диапазона точек",
+      81 => "Переподключение точки",
+      _ => $"Выполнение команды {commandNumber}",
+    };
   }
 
   private static PointSelfTestResponse? DeserializePointSelfTestResponse(string response)

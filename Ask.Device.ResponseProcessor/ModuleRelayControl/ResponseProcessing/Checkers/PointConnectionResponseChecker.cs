@@ -1,5 +1,4 @@
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseModels;
-using System.Text.Json;
 
 namespace Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
 
@@ -36,34 +35,17 @@ internal static class PointConnectionResponseChecker
     bool connect,
     bool useHardwareVerification)
   {
-    if (string.IsNullOrWhiteSpace(response))
-    {
-      return false;
-    }
+    int commandNumber = useHardwareVerification
+      ? VerifiedPointCommandNumber
+      : PointCommandNumber;
+    int action = connect ? ConnectAction : DisconnectAction;
+    string expectedAnswer = $"{commandNumber}.{pointNumber}.{busNumber}.{action}";
 
-    try
-    {
-      RelayVerificationResponse? model =
-        JsonSerializer.Deserialize<RelayVerificationResponse>(response);
-
-      if (model == null ||
-          !ModuleResponseIdentityChecker.Check(model, chassisNumber, moduleNumber))
-      {
-        return false;
-      }
-
-      int commandNumber = useHardwareVerification
-        ? VerifiedPointCommandNumber
-        : PointCommandNumber;
-      int action = connect ? ConnectAction : DisconnectAction;
-      string expectedAnswer = $"{commandNumber}.{pointNumber}.{busNumber}.{action}";
-
-      return string.Equals(model.Answer, expectedAnswer, StringComparison.Ordinal) &&
-        (!useHardwareVerification || model.Checked);
-    }
-    catch (JsonException)
-    {
-      return false;
-    }
+    return CommandResponseChecker.Check(
+      response,
+      chassisNumber,
+      moduleNumber,
+      expectedAnswer,
+      useHardwareVerification);
   }
 }

@@ -4,7 +4,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
-using Ask.Device.Runtime.Base.DeviceResponses;
 using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
 
@@ -179,9 +178,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 3000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{((int)bus * 10) + 1}")
+        if (await ModuleRelayControlResponseProcessor.CheckPointRangeOperationAsync(
+          response,
+          _moduleRelayControl,
+          firstPoint,
+          lastPoint,
+          bus,
+          connect: true,
+          userMessageService))
         {
           connectionState.SetRange(firstPoint, lastPoint, bus, true);
           return true;
@@ -212,9 +216,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       for (int attempt = 1; attempt <= 2; attempt++)
       {
         string response = await _queryExecutor.QueryAsync(commandText, timeout: 3000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{((int)bus * 10) + 2}")
+        if (await ModuleRelayControlResponseProcessor.CheckPointRangeOperationAsync(
+          response,
+          _moduleRelayControl,
+          firstPoint,
+          lastPoint,
+          bus,
+          connect: false,
+          userMessageService))
         {
           connectionState.SetRange(firstPoint, lastPoint, bus, false);
           return true;
@@ -242,7 +251,12 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       var cmd = new DeviceCommand(81, nubmerPoint, (int)bus);
       string response = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
-      var result = response.Contains(cmd.ToString()[..^1]);
+      var result = await ModuleRelayControlResponseProcessor.CheckPointReconnectionAsync(
+        response,
+        _moduleRelayControl,
+        nubmerPoint,
+        bus,
+        userMessageService);
       if (result)
       {
         if (bus == BusPoint.A)

@@ -80,7 +80,7 @@
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Ask.Protocol.Messages`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
 | `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; содержит фасады и builders для executor-команд, блоков проверки, оборудования и измерений | `Ask.Core`, `Ask.LogLib`; потребители — `Ask.Device.Runtime`, `Ask.Engine` |
-| `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime`, `Ask.Protocol.Messages` |
+| `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
@@ -1072,6 +1072,19 @@ device-строку вида `Модуль МКР-350(1.6) - Подключен�
 `PointManagerAdapter` для четырёх одиночных операций не выполняет повторную проверку
 `DeviceDisplayConfig` и не публикует дублирующее сообщение; он передаёт
 `IUserInteractionService` в runtime `PointManager` и сохраняет только user retry/error boundary.
+Все используемые production-команды МКР теперь проходят через
+`ModuleRelayControlResponseProcessor`: `1` (инициализация), `2` (сброс), `4` (шины),
+`5`/`7` (измеритель), `6` (самоконтроль точки), `8`/`82` (одиночная точка),
+`10` (самоконтроль внешней шины), `11` (диапазон точек) и `81` (переподключение точки).
+`CommandResponseChecker` проверяет идентификатор МКР и точное значение `Answer`;
+`CommandStatusChecker` преобразует `UnknownCommand`/`InvalidParametr` в
+`ModuleRelayControlProtocolException`. Runtime-менеджеры больше не используют
+`BaseResponse.FromJson` для ответов МКР. Публикация результатов этих операций, включая
+инициализацию, сброс и агрегированное отключение сохранённых точек, вызывается через processor;
+заголовки и информационные строки самоконтроля МКР также маршрутизируются через processor.
+В `Ask.Device.Runtime/Function/ModuleRelayControl/` и соответствующих application adapters
+не осталось прямого разбора JSON или прямых вызовов `DeviceMessages`, `EquipmentMessages` и
+`SelfTestMessages`; решение о видимости остаётся внутри `Ask.Protocol.Messages`.
 Runtime `PointManager` ожидает эти методы для обычного и контролируемого
 подключения/отключения одной точки; остальные команды МКР пока продолжают собственную
 десериализацию моделей из `Ask.Device.Runtime`.
