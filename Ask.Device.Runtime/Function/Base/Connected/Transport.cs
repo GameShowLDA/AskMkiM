@@ -1,12 +1,14 @@
 ﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Connected;
 using Ask.Protocol.Messages.EntryPoints;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.Base.Connected
 {
@@ -54,6 +56,11 @@ namespace Ask.Device.Runtime.Function.Base.Connected
           await ModuleRelayControlResponseProcessor.PublishConnectionResultAsync(
             module, result.Connect, error, userMessageService);
         }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishConnectionResultAsync(
+            switchingDevice, result.Connect, error, userMessageService);
+        }
         else
         {
           await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, error, userMessageService);
@@ -74,6 +81,11 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         {
           await ModuleRelayControlResponseProcessor.PublishDisconnectionResultAsync(
             module, result, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishDisconnectionResultAsync(
+            switchingDevice, result, userMessageService);
         }
         else
         {
@@ -98,6 +110,11 @@ namespace Ask.Device.Runtime.Function.Base.Connected
           await ModuleRelayControlResponseProcessor.PublishInitializationResultAsync(
             module, result.Connect, error, userMessageService);
         }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishInitializationResultAsync(
+            switchingDevice, result.Connect, error, userMessageService);
+        }
         else
         {
           await EquipmentMessages.PublishInitializationResultAsync(
@@ -120,6 +137,11 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         {
           await ModuleRelayControlResponseProcessor.PublishResetResultAsync(
             module, result, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishResetResultAsync(
+            switchingDevice, result, userMessageService);
         }
         else
         {

@@ -1,5 +1,3 @@
-using Ask.Protocol.Messages.EntryPoints;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
@@ -32,12 +30,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.ConnectRelay(numberRelay);
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.ConnectRelay(numberRelay, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -53,12 +46,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.DisconnectRelay(numberRelay);
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.DisconnectRelay(numberRelay, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -74,12 +62,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.EnableRelay();
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Включение реле", $"Общий", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.EnableRelay(userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -95,12 +78,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.DisableRelay();
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Выключение реле", $"Общий", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.DisableRelay(userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -117,12 +95,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         async () =>
         {
-          var succes = await _relayManager.ConnectRCRelay();
-
-          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-          {
-            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение RC реле", $"Общий", succes, 1, userMessageService);
-          }
+          var succes = await _relayManager.ConnectRCRelay(userMessageService);
 
           return succes;
         },
@@ -141,12 +114,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         async () =>
         {
-          var succes = await _relayManager.DisconnectRCRelay();
-
-          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-          {
-            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение RC реле", $"Общий", succes, 1, userMessageService);
-          }
+          var succes = await _relayManager.DisconnectRCRelay(userMessageService);
 
           return succes;
         },
@@ -165,12 +133,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         async () =>
         {
-          var succes = await _relayManager.ConnectResistor(numberResistor);
-
-          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-          {
-            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
-          }
+          var succes = await _relayManager.ConnectResistor(numberResistor, userMessageService);
 
           return succes;
         },
@@ -189,12 +152,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         async () =>
         {
-          var succes = await _relayManager.DisconnectResistor(numberResistor);
-
-          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-          {
-            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение резистора RC реле", $"R{numberResistor}", succes, 1, userMessageService);
-          }
+          var succes = await _relayManager.DisconnectResistor(numberResistor, userMessageService);
 
           return succes;
         },
@@ -213,12 +171,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         async () =>
         {
-          var succes = await _relayManager.ConnectCapacitor(numberCapacitor);
-
-          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-          {
-            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
-          }
+          var succes = await _relayManager.ConnectCapacitor(numberCapacitor, userMessageService);
 
           return succes;
         },
@@ -237,12 +190,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         async () =>
         {
-          var succes = await _relayManager.DisconnectCapacitor(numberCapacitor);
-
-          if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-          {
-            await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение конденсатора RC реле", $"C{numberCapacitor}", succes, 1, userMessageService);
-          }
+          var succes = await _relayManager.DisconnectCapacitor(numberCapacitor, userMessageService);
 
           return succes;
         },

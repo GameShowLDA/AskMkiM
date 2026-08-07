@@ -2,11 +2,14 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.ManagerChassis;
 using Ask.Device.Runtime.Function.ModuleRelayControl;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
+using Ask.Device.Runtime.Function.DeviceBusCommutation;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -53,6 +56,14 @@ namespace Ask.Device.Runtime.Function.Connected
         return ValidateInitialization(response);
       }
 
+      if (_device is ISwitchingDevice switchingDevice)
+      {
+        string response = await new DeviceBusCommutationQueryExecutor(switchingDevice).QueryAsync(
+          _device.ConnectedProfile.Initialize,
+          _device.ConnectedProfile.Timeout);
+        return ValidateInitialization(response);
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
@@ -75,6 +86,17 @@ namespace Ask.Device.Runtime.Function.Connected
       if (_device is IRelaySwitchModule module)
       {
         bool success = ModuleRelayControlResponseProcessor.CheckInitialization(response, module);
+        if (!success)
+        {
+          IsReset?.Invoke();
+        }
+
+        return (success, success ? string.Empty : response);
+      }
+
+      if (_device is ISwitchingDevice switchingDevice)
+      {
+        bool success = DeviceBusCommutationResponseProcessor.CheckInitialization(response, switchingDevice);
         if (!success)
         {
           IsReset?.Invoke();
@@ -124,6 +146,14 @@ namespace Ask.Device.Runtime.Function.Connected
         return ValidateReset(response);
       }
 
+      if (_device is ISwitchingDevice switchingDevice)
+      {
+        string response = await new DeviceBusCommutationQueryExecutor(switchingDevice).QueryAsync(
+          _device.ConnectedProfile.Reset,
+          _device.ConnectedProfile.Timeout);
+        return ValidateReset(response);
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
@@ -141,9 +171,12 @@ namespace Ask.Device.Runtime.Function.Connected
 
     private bool ValidateReset(string response)
     {
-      bool resetResult = _device is IRelaySwitchModule module
-        ? ModuleRelayControlResponseProcessor.CheckReset(response, module)
-        : _device.ResetValidationDelegate(response, _device);
+      bool resetResult = _device switch
+      {
+        IRelaySwitchModule module => ModuleRelayControlResponseProcessor.CheckReset(response, module),
+        ISwitchingDevice switchingDevice => DeviceBusCommutationResponseProcessor.CheckReset(response, switchingDevice),
+        _ => _device.ResetValidationDelegate(response, _device)
+      };
       IsReset?.Invoke();
 
       return resetResult;

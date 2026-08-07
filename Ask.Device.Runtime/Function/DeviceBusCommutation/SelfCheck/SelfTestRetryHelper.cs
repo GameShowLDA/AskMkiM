@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
@@ -25,8 +26,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     {
       cancellation.ThrowIfCancellationRequested();
 
-      var result = await meter.ContinuityManager.CheckContinuityAsync(false, messageService);
-      await SelfTestMessages.PublishResultAsync(
+      var result = await meter.ContinuityManager.CheckContinuityAsync(false);
+      await DeviceBusCommutationMessages.PublishResultAsync(
         $"Реле {relay}",
         result,
         messageService,
@@ -56,7 +57,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool result = await operation();
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        await SelfTestMessages.PublishResultAsync(
+        await DeviceBusCommutationMessages.PublishResultAsync(
           operationMessage,
           result,
           messageService,

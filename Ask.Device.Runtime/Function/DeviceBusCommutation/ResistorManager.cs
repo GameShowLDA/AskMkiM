@@ -1,6 +1,6 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using Ask.Device.Runtime.Commands;
 using static Ask.LogLib.LoggerUtility;
 
@@ -39,7 +39,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 1);
         string answer = await queryExecutor.QueryAsync(cmd.ToString());
-        return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+        return await DeviceBusCommutationResponseProcessor.CheckChainOperationAsync(
+          answer, _deviceBusCommutation, true, "резистора", $"№{number}", userMessageService);
       }
 
       LogError("Неверный номер резистора!", isDeviceLog: true);
@@ -57,7 +58,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       {
         DeviceCommand cmd = new DeviceCommand(6, 1, num, 2);
         string answer = await queryExecutor.QueryAsync(cmd.ToString());
-        return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+        return await DeviceBusCommutationResponseProcessor.CheckChainOperationAsync(
+          answer, _deviceBusCommutation, false, "резистора", $"№{number}", userMessageService);
       }
 
       LogError("Неверный номер резистора!", isDeviceLog: true);
