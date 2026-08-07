@@ -123,20 +123,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     {
       DeviceCommand cmd = new DeviceCommand(10, number);
       string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
-      SelfBusModel busModel = SelfBusModel.FromJson(answer);
-      if (busModel == null)
-      {
-        return (false, "Не удалось расшифровать овтет от устройства!");
-      }
-
-      if (busModel.ConnectMain && busModel.ConnectProtect)
-      {
-        return (true, string.Empty);
-      }
-      else
-      {
-        return (false, answer);
-      }
+      bool success = ModuleRelayControlResponseProcessor.CheckExternalBusSelfTest(
+        answer,
+        _moduleRelay,
+        number);
+      return (success, success ? string.Empty : answer);
     }
 
     private async Task<bool> CheckPoint(CancellationToken token, IRelaySwitchModule relaySwitchModule, int point, IUserInteractionService? userMessageService = null)
@@ -153,35 +144,15 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
     private async Task<bool> CheckBus(CancellationToken token, IRelaySwitchModule relaySwitchModule, int busNumber, IUserInteractionService? userMessageService = null)
     {
-      (bool, string) answer = await TryGetCheckBusConntcrion(busNumber);
+      token.ThrowIfCancellationRequested();
 
-      await SelfTestMessages.PublishResultAsync(
-        $"Шины AB{busNumber}",
-        answer.Item1,
-        userMessageService,
-        indentLevel: 2,
-        executionError: !answer.Item1,
-        canBeDeleted: answer.Item1);
-
-      if (!answer.Item1)
-      {
-        SelfBusModel selfBusModel = SelfBusModel.FromJson(answer.Item2);
-        await SelfTestMessages.PublishResultAsync(
-          $"\t\tПодключение защитных реле({selfBusModel.ProtectReleBusA},{selfBusModel.ProtectReleBusB})",
-          selfBusModel.ConnectProtect,
-          userMessageService,
-          indentLevel: 3,
-          canBeDeleted: selfBusModel.ConnectProtect);
-        await SelfTestMessages.PublishResultAsync(
-          $"\t\tПодключение основных реле({selfBusModel.MainReleBusA},{selfBusModel.MainReleBusB})",
-          selfBusModel.ConnectMain,
-          userMessageService,
-          indentLevel: 3,
-          canBeDeleted: selfBusModel.ConnectMain);
-
-        return false;
-      }
-      return true;
+      DeviceCommand command = new(10, busNumber);
+      string response = await _queryExecutor.QueryAsync(command.ToString(), timeout: 1000);
+      return await ModuleRelayControlResponseProcessor.CheckExternalBusSelfTestAsync(
+        response,
+        relaySwitchModule,
+        busNumber,
+        userMessageService);
     }
   }
 }

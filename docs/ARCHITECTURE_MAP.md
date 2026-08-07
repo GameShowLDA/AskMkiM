@@ -1054,6 +1054,17 @@ Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` уч
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
 `SelfControl = false`; `IsHardwareErrorSimulationMode` через
 `IdleHardwareErrorSimulator` с вероятностью 50% возвращает пустой ответ до разбора команды.
+`ExternalBusSelfTestChecker` обрабатывает ответ команды `AUTOTEST_EXTERNAL_BUS`
+(`10.<bus>`): проверяет идентификатор МКР, ожидаемый `NumberBus`, соответствие четырёх номеров
+реле таблице прошивки, `ConnectProtect`, `ConnectMain` и `Error == 0`. Runtime
+`SelfTestManager.CheckBus` передаёт сырой ответ в
+`ModuleRelayControlResponseProcessor.CheckExternalBusSelfTestAsync`; processor сохраняет
+прежние строки `Шины ABN`, `Подключение защитных реле(...)` и
+`Подключение основных реле(...)`, а повреждённый ответ, чужой адрес или другую шину выводит
+как `Ошибка данных!`. Прежняя runtime-модель `SelfBusModel` удалена. В Idle команда `10.<bus>`
+при симуляции ошибки измерения случайно выбирает один из трёх равновероятных исходов: оба этапа
+исправны, отказ защитных реле или отказ основных реле. При отказе возвращается ненулевой `Error`;
+при симуляции ошибки оборудования общий emulator path возвращает пустой ответ.
 После проверки processor напрямую вызывает
 `EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
 device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;

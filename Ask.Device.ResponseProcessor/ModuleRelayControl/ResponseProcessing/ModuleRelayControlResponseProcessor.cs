@@ -15,6 +15,29 @@ namespace Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 public static class ModuleRelayControlResponseProcessor
 {
   /// <summary>
+  /// Проверяет ответ самоконтроля внешней шины МКР без публикации результата.
+  /// </summary>
+  /// <param name="response">JSON-ответ МКР.</param>
+  /// <param name="module">Модуль, выполнивший самоконтроль.</param>
+  /// <param name="busNumber">Ожидаемый номер проверенной внешней шины.</param>
+  /// <returns>
+  /// <see langword="true"/>, если ответ подтверждает исправность внешней шины.
+  /// В противном случае — <see langword="false"/>.
+  /// </returns>
+  public static bool CheckExternalBusSelfTest(
+    string response,
+    IRelaySwitchModule module,
+    int busNumber)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+    return ExternalBusSelfTestChecker.Check(
+      response,
+      module.NumberChassis,
+      module.Number,
+      busNumber);
+  }
+
+  /// <summary>
   /// Проверяет ответ на подключение точки МКР.
   /// </summary>
   /// <param name="response">JSON-ответ МКР.</param>
@@ -175,6 +198,76 @@ public static class ModuleRelayControlResponseProcessor
       indentLevel: 2,
       executionErrorMessage: model.DisconnectBusB ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины B",
       canBeDeleted: model.DisconnectBusB);
+
+    return false;
+  }
+
+  /// <summary>
+  /// Проверяет ответ самоконтроля внешней шины МКР и публикует результат.
+  /// </summary>
+  /// <param name="response">JSON-ответ МКР.</param>
+  /// <param name="module">Модуль, выполнивший самоконтроль.</param>
+  /// <param name="busNumber">Ожидаемый номер проверенной внешней шины.</param>
+  /// <param name="userInteractionService">Сервис вывода сообщений.</param>
+  /// <returns>
+  /// <see langword="true"/>, если защитные и основные реле шины прошли самоконтроль.
+  /// В противном случае — <see langword="false"/>.
+  /// </returns>
+  public static async Task<bool> CheckExternalBusSelfTestAsync(
+    string response,
+    IRelaySwitchModule module,
+    int busNumber,
+    IUserInteractionService? userInteractionService = null)
+  {
+    ArgumentNullException.ThrowIfNull(module);
+
+    ExternalBusSelfTestResponse? model = ExternalBusSelfTestChecker.Deserialize(response);
+    if (!ExternalBusSelfTestChecker.MatchesRequest(
+          model,
+          module.NumberChassis,
+          module.Number,
+          busNumber))
+    {
+      await SelfTestMessages.PublishResultAsync(
+        "\tОшибка данных!",
+        false,
+        userInteractionService,
+        message: response);
+      return false;
+    }
+
+    ExternalBusSelfTestResponse validModel = model!;
+    bool isValid = ExternalBusSelfTestChecker.Check(
+      response,
+      module.NumberChassis,
+      module.Number,
+      busNumber);
+
+    await SelfTestMessages.PublishResultAsync(
+      $"Шины AB{busNumber}",
+      isValid,
+      userInteractionService,
+      indentLevel: 2,
+      executionError: !isValid,
+      canBeDeleted: isValid);
+
+    if (isValid)
+    {
+      return true;
+    }
+
+    await SelfTestMessages.PublishResultAsync(
+      $"\t\tПодключение защитных реле({validModel.ProtectRelayBusA},{validModel.ProtectRelayBusB})",
+      validModel.ProtectRelaysConnected,
+      userInteractionService,
+      indentLevel: 3,
+      canBeDeleted: validModel.ProtectRelaysConnected);
+    await SelfTestMessages.PublishResultAsync(
+      $"\t\tПодключение основных реле({validModel.MainRelayBusA},{validModel.MainRelayBusB})",
+      validModel.MainRelaysConnected,
+      userInteractionService,
+      indentLevel: 3,
+      canBeDeleted: validModel.MainRelaysConnected);
 
     return false;
   }
