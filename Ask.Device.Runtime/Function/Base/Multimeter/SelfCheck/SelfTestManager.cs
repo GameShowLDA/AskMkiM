@@ -73,7 +73,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       ArgumentNullException.ThrowIfNull(device);
       ArgumentNullException.ThrowIfNull(meter);
 
-      settings.DeviceResults.Add(new DeviceExecutionResult(meter.Name, meter.NumberChassis, meter.Number));        
+      settings.DeviceResults.Add(new DeviceExecutionResult(meter.Name, meter.NumberChassis, meter.Number));
 
       cancellationToken.ThrowIfCancellationRequested();
       await ExecutionMessages.PublishMultimeterSetupAsync(userMessageService);
@@ -95,21 +95,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         switch (selectedType)
         {
           case MultimeterTypeConnector.Voltage:
-            await StartVoltageMeasurementTestAsync(cancellationToken, device, meter, userMessageService);
+            await StartVoltageMeasurementTestAsync(cancellationToken, device, meter, userMessageService, settings, 1);
             break;
 
           case MultimeterTypeConnector.Resistance:
-            await StartResistanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService);
+            await StartResistanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService, settings, 2);
             break;
 
           case MultimeterTypeConnector.Capacity:
-            await StartCapacitanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService);
+            await StartCapacitanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService, settings, 3);
             break;
 
           case MultimeterTypeConnector.FullCheck:
-            await StartVoltageMeasurementTestAsync(cancellationToken, device, meter, userMessageService);
-            await StartResistanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService);
-            await StartCapacitanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService);
+            await StartVoltageMeasurementTestAsync(cancellationToken, device, meter, userMessageService, settings, 1);
+            await StartResistanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService, settings, 3);
+            await StartCapacitanceMeasurementTestAsync(cancellationToken, device, meter, userMessageService, settings, 4);
             break;
         }
       }
@@ -135,7 +135,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="meter">Проверяемый мультиметр.</param>
     /// <param name="userMessageService">Сервис выводы сообщений пользователю.</param>
     /// <returns>Задача, представляющая выполнение проверки напряжения.</returns>
-    private static async Task StartVoltageMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
+    private static async Task StartVoltageMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService, ActionSettings settings, int testNumber)
     {
       cancellationToken.ThrowIfCancellationRequested();
       await ShowActionHeaderAsync("Подключение мультиметра к шине AB1", userMessageService);
@@ -149,9 +149,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         await device.RelayManager.EnableRelay(userMessageService);
         relayEnabled = true;
 
+        var testName = $"Тест измерения постоянного напряжения";
+        settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+
         await RunVoltageModeCheckAsync(
           cancellationToken,
-          "Тест измерения постоянного напряжения:",
+          $"{testNumber}. {testName}:",
           "Режим измерения постоянного напряжения",
           meter.DcVoltageManager.SetDCVoltageModeAsync,
           meter.DcVoltageManager.SetDCVoltageRangeAsync,
@@ -159,9 +162,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
           DcVoltageRanges,
           userMessageService);
 
+        testName = $"Тест измерения переменного напряжения";
+        settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+
         await RunVoltageModeCheckAsync(
           cancellationToken,
-          "Тест измерения переменного напряжения:",
+          $"{testNumber + 1}. {testName}:",
           "Режим измерения переменного напряжения",
           meter.AcVoltageManager.SetACVoltageModeAsync,
           meter.AcVoltageManager.SetACVoltageRangeAsync,
@@ -259,8 +265,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="device">Устройство коммутации шин.</param>
     /// <param name="meter">Проверяемый мультиметр.</param>
     /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
+    /// <param name="settings">Настройки проверки.</param>
+    /// <param name="testNumber">Номер теста.</param>
     /// <returns>Задача, представляющая выполнение проверки сопротивления.</returns>
-    private static async Task StartResistanceMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
+    private static async Task StartResistanceMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService, ActionSettings settings, int testNumber)
     {
       await RunWithRcRelayAsync(
         cancellationToken,
@@ -268,7 +276,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         userMessageService,
         async () =>
         {
-          await ShowSectionHeaderAsync("Тест измерения сопротивления:", userMessageService);
+          var testName = $"Тест измерения сопротивления";
+          settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+
+          await ShowSectionHeaderAsync($"{testNumber}. {testName}:", userMessageService);
 
           cancellationToken.ThrowIfCancellationRequested();
           await ShowActionHeaderAsync("Режим измерения сопротивления", userMessageService);
@@ -347,7 +358,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     /// <param name="meter">Проверяемый мультиметр.</param>
     /// <param name="userMessageService">Сервис вывода сообщений пользователю.</param>
     /// <returns>Задача, представляющая выполнение проверки ёмкости.</returns>
-    private static async Task StartCapacitanceMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService)
+    private static async Task StartCapacitanceMeasurementTestAsync(CancellationToken cancellationToken, ISwitchingDevice device, IMultimeter meter, IUserInteractionService userMessageService, ActionSettings settings, int testNumber)
     {
       await RunWithRcRelayAsync(
         cancellationToken,
@@ -355,7 +366,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         userMessageService,
         async () =>
         {
-          await ShowSectionHeaderAsync($"Тест измерения ёмкости:", userMessageService);
+          var testName = $"Тест измерения ёмкости";
+          settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+
+          await ShowSectionHeaderAsync($"{testNumber}. {testName}:", userMessageService);
 
           foreach (var check in CapacitanceChecks)
           {
