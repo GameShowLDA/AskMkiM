@@ -493,7 +493,19 @@
     <value>Симуляция ошибок измерений</value>
   </data>
   <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
-    <value>Добавляет существующие случайные отклонения результатов измерений от заданных норм.</value>
+    <value>Позволяет отключить симуляцию или выбрать направление отклонения результата от нормы.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.none" xml:space="preserve">
+    <value>Нет</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.random" xml:space="preserve">
+    <value>Случайная</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.aboveNorm" xml:space="preserve">
+    <value>Выше нормы</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.belowNorm" xml:space="preserve">
+    <value>Ниже нормы</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
     <value>Симуляция сбоев оборудования</value>

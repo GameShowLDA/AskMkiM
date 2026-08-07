@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -52,12 +53,31 @@ namespace Ask.Core.Services.Config.AppSettings
     /// Включает или выключает симуляцию отрицательных результатов измерений.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
-    public static void SetIsErrorSimulationMode(bool enable) => SettingsExecutionModel.IsErrorSimulationMode = enable;
+    public static void SetIsErrorSimulationMode(bool enable)
+    {
+      SettingsExecutionModel.IsErrorSimulationMode = enable;
+      SettingsExecutionModel.MeasurementErrorSimulationMode = enable
+        ? SettingsExecutionModel.MeasurementErrorSimulationMode == MeasurementErrorSimulationMode.None
+          ? MeasurementErrorSimulationMode.Random
+          : SettingsExecutionModel.MeasurementErrorSimulationMode
+        : MeasurementErrorSimulationMode.None;
+    }
+
+    /// <summary>
+    /// Устанавливает направление отклонения при симуляции ошибки измерения.
+    /// </summary>
+    public static void SetMeasurementErrorSimulationMode(
+      MeasurementErrorSimulationMode mode)
+    {
+      SettingsExecutionModel.MeasurementErrorSimulationMode = mode;
+      SettingsExecutionModel.IsErrorSimulationMode = mode != MeasurementErrorSimulationMode.None;
+    }
 
     public static Task SetExecutionModel(SettingsExecutionDto protocolModel)
     {
       SetIdleMode(protocolModel.IdleModeExecution);
-      SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
+      SetMeasurementErrorSimulationMode(
+        ResolveMeasurementErrorSimulationMode(protocolModel));
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
       SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
@@ -88,6 +108,13 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetIsErrorSimulationEnabled() => SettingsExecutionModel?.IsErrorSimulationMode ?? false;
 
     /// <summary>
+    /// Возвращает выбранное направление отклонения симулируемого измерения.
+    /// </summary>
+    public static MeasurementErrorSimulationMode GetMeasurementErrorSimulationMode() =>
+      SettingsExecutionModel?.MeasurementErrorSimulationMode
+      ?? MeasurementErrorSimulationMode.None;
+
+    /// <summary>
     /// Возвращает, включен ли пошаговый режим.
     /// </summary>
     /// <returns>true, если включен; false, если выключена.</returns>
@@ -100,6 +127,7 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
         IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
+        MeasurementErrorSimulationMode = SettingsExecutionModel.MeasurementErrorSimulationMode,
         StepByStepMode = SettingsExecutionModel.StepByStepMode,
         StopOnError = SettingsExecutionModel.StopOnError,
         LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode
@@ -111,14 +139,26 @@ namespace Ask.Core.Services.Config.AppSettings
 
     public static async Task SaveExecutionModel(SettingsExecutionDto execution)
     {
+      var measurementErrorSimulationMode = ResolveMeasurementErrorSimulationMode(execution);
+      execution.MeasurementErrorSimulationMode = measurementErrorSimulationMode;
+      execution.IsErrorSimulationMode =
+        measurementErrorSimulationMode != MeasurementErrorSimulationMode.None;
+
       SetIdleMode(execution.IdleModeExecution);
-      SetIsErrorSimulationMode(execution.IsErrorSimulationMode);
+      SetMeasurementErrorSimulationMode(measurementErrorSimulationMode);
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);
       SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);
 
       await InvokeSaveExecutionAsync(execution);
     }
+
+    private static MeasurementErrorSimulationMode ResolveMeasurementErrorSimulationMode(
+      SettingsExecutionDto execution) =>
+      execution.MeasurementErrorSimulationMode == MeasurementErrorSimulationMode.None
+        && execution.IsErrorSimulationMode
+          ? MeasurementErrorSimulationMode.Random
+          : execution.MeasurementErrorSimulationMode;
 
     private static async Task InvokeSaveExecutionAsync(SettingsExecutionDto execution)
     {

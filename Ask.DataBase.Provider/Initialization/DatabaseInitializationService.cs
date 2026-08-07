@@ -69,6 +69,7 @@ public static class DatabaseInitializationService
 
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureMeasurementErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureHardwareFailureSimulationColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
@@ -345,6 +346,55 @@ public static class DatabaseInitializationService
 
     await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontFamily", "TEXT NOT NULL DEFAULT 'Consolas'", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontSize", "REAL NOT NULL DEFAULT 10.0", report, progress, cancellationToken);
+  }
+
+  private static async Task EnsureMeasurementErrorSimulationModeColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "Execution", cancellationToken)
+      || await ColumnExistsAsync(
+        connection,
+        "Execution",
+        "MeasurementErrorSimulationMode",
+        cancellationToken))
+    {
+      return;
+    }
+
+    await using var addColumnCommand = connection.CreateCommand();
+    addColumnCommand.CommandText =
+      """
+      ALTER TABLE "Execution"
+      ADD COLUMN "MeasurementErrorSimulationMode" INTEGER NOT NULL DEFAULT 0;
+      """;
+    await addColumnCommand.ExecuteNonQueryAsync(cancellationToken);
+
+    if (await ColumnExistsAsync(
+      connection,
+      "Execution",
+      "IsErrorSimulationMode",
+      cancellationToken))
+    {
+      await using var migrateValueCommand = connection.CreateCommand();
+      migrateValueCommand.CommandText =
+        """
+        UPDATE "Execution"
+        SET "MeasurementErrorSimulationMode" = 1
+        WHERE "IsErrorSimulationMode" = 1;
+        """;
+      await migrateValueCommand.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    TraceWarning(
+      report,
+      progress,
+      "[DB] В старой схеме Execution добавлена колонка MeasurementErrorSimulationMode.");
   }
 
   /// <summary>

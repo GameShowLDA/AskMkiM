@@ -294,7 +294,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 }
                 else
                 {
-                  result = Rx;
+                  result = IdleMeasurementErrorSimulator.CreateValue(LowerBound, UpperBound);
                 }
               }
               else
@@ -307,7 +307,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 result -= context.CabelResistance;
               }
 
-              if (result < 0)
+              if (result < 0
+                && (!ExecutionConfig.GetIsIdleModeEnabled()
+                  || !ExecutionConfig.GetIsErrorSimulationEnabled()))
               {
                 result = 0;
               }

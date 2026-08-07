@@ -490,7 +490,19 @@
     <value>Measurement error simulation</value>
   </data>
   <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
-    <value>Adds the existing random deviations of measurement results from their specified limits.</value>
+    <value>Disables simulation or selects the direction in which the result deviates from its limits.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.random" xml:space="preserve">
+    <value>Random</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.aboveNorm" xml:space="preserve">
+    <value>Above limits</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.mode.belowNorm" xml:space="preserve">
+    <value>Below limits</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
     <value>Hardware failure simulation</value>

@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,6 +26,11 @@ public class SettingsExecutionDto
   /// Включает симуляцию отрицательных результатов измерений.
   /// </summary>
   public bool IsErrorSimulationMode { get; set; }
+
+  /// <summary>
+  /// Определяет направление отклонения при симуляции ошибки измерения.
+  /// </summary>
+  public MeasurementErrorSimulationMode MeasurementErrorSimulationMode { get; set; }
 
   /// <summary>
   /// Включает пошаговый режим выполнения.

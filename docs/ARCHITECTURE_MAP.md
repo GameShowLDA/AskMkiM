@@ -19,7 +19,7 @@
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
-| Холостой режим и симуляция сбоев | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs`, `IDevice.IsHardwareFailureSimulationEnabled` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, DTO шести типов оборудования, целевой manager/adapter в `Ask.Device.*` |
+| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, `MeasurementResultEvaluator.cs`, DTO шести типов оборудования, целевой manager/adapter в `Ask.Device.*` |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
@@ -1133,8 +1133,13 @@ Idle measurement-error and equipment-failure simulation are configured independe
 
 ```text
 ExecutionControl
-→ SettingsExecutionDto.IsErrorSimulationMode
-→ existing measurement simulation algorithms
+→ SettingsExecutionDto.MeasurementErrorSimulationMode
+  (`None` выключает симуляцию; остальные значения включают legacy bool gate
+   `IsErrorSimulationMode`)
+→ IdleMeasurementErrorSimulator.CreateValue
+→ значение выше UpperBound / ниже LowerBound
+  или равновероятный выбор направления в режиме Random
+→ device Idle generators / MeasurementResultEvaluator
 
 ExecutionControl
 → nested Border «Симуляция сбоев оборудования»
@@ -1148,8 +1153,13 @@ ExecutionControl
 ```
 
 The nested `Выполнение с ошибками` settings group is visible only while Idle is
-enabled. Measurement simulation retains its existing generators, probabilities
-and tolerance semantics. Equipment-failure simulation is disabled by default,
+enabled. The single measurement-simulation select replaces the former checkbox;
+`None` disables simulation. `AboveNorm` produces a value above the upper bound
+(or overload for a lower-bound-only range),
+`BelowNorm` below the lower bound, and `Random` selects either direction through
+an equal two-way random choice. The common generator is used by multimeter/GPT
+Idle responses, special Engine measurement flows and the final result evaluator.
+Equipment-failure simulation is disabled by default,
 selected independently for every configured device and affects only Idle
 initialization/reset, connection, mode/configuration, range, switching, source
 and power operations. Every applicable call of a selected device, including a
@@ -1649,11 +1659,16 @@ ordinary update preserves runtime object identity and applies DTO in-place,
 while a `DeviceClass` change replaces the runtime object. Startup clears and
 warms the caches.
 
+The `Execution.MeasurementErrorSimulationMode` integer column stores the
+measurement-error choice (`None = 0`, `Random = 1`, `AboveNorm = 2`,
+`BelowNorm = 3`). Its migration and compatibility DDL map an existing enabled
+`IsErrorSimulationMode` flag to `Random`; disabled rows default to `None`.
+
 ## Configuration
 
 | Runtime config | Persisted DTO/table | Load/save bridge | Major consumers |
 | --- | --- | --- | --- |
-| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates; independent measurement/hardware Idle error settings |
+| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates; persisted none/above/below/random measurement-error choice with derived legacy bool gate; independent per-device hardware failure settings |
 | `ProtocolConfig` | `SettingsProtocolDto` / `SettingsProtocol` | `ProtocolSettings` | protocol templates, output visibility, print |
 | `UserInterfaceConfig` | `UserInterfaceDto` / `UserInterface` | `UserInterfaceSettings` | MainWindow, theme/menu UI |
 | `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |
@@ -1725,7 +1740,7 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности метрологического режима | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
-| `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
+| `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет выбранное через `IdleMeasurementErrorSimulator` направление Idle-ошибки, гарантирует отрицательный verdict симуляции и проверяет обычное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |

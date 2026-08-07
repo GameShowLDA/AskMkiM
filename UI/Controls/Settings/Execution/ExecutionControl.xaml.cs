@@ -9,7 +9,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.UI.Infrastructure.Localization;
 using Ask.UI.Shared.Components;
 using Message;
 using System.Windows;
@@ -41,6 +43,10 @@ namespace UI.Controls.Settings.Execution
     private bool _isDeviceConfigurationChangedSubscribed;
     private bool _isSavingHardwareFailureSimulation;
     private bool _refreshHardwareFailureSimulationAfterSave;
+
+    private sealed record MeasurementErrorSimulationOption(
+      MeasurementErrorSimulationMode Mode,
+      string Title);
 
     /// <summary>
     /// Базовая (сохранённая) модель выполнения, считанная при загрузке.
@@ -83,13 +89,14 @@ namespace UI.Controls.Settings.Execution
     {
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
       await LoadHardwareFailureSimulationDevicesAsync();
+      LoadMeasurementErrorSimulationOptions();
       DefalultData();
 
       if (!_isInitialized)
       {
         StopInError.CheckedChanged += CheckedChanged;
         StepByStepMode.CheckedChanged += CheckedChanged;
-        MeasurementErrorSimulation.CheckedChanged += CheckedChanged;
+        MeasurementErrorSimulationModeSelect.ValueChanged += MeasurementErrorSimulationMode_ValueChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
         CompatibilityModeCheckBox.CheckedChanged += CheckedChanged;
@@ -182,6 +189,9 @@ namespace UI.Controls.Settings.Execution
       }
     }
 
+    private void MeasurementErrorSimulationMode_ValueChanged(object? sender, object? e) =>
+      CheckedChanged(sender, false);
+
     /// <summary>
     /// Формирует модель протокола из текущих значений элементов UI.
     /// </summary>
@@ -191,10 +201,15 @@ namespace UI.Controls.Settings.Execution
       {
         StopOnError = StopInError.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
-        IsErrorSimulationMode = MeasurementErrorSimulation.IsChecked,
+        MeasurementErrorSimulationMode = MeasurementErrorSimulationModeSelect.SelectedValue
+          is MeasurementErrorSimulationMode mode
+            ? mode
+            : MeasurementErrorSimulationMode.None,
         IdleModeExecution = IdleMode.IsChecked,
         LegacyCompatibilityMode = CompatibilityModeCheckBox.IsChecked,
       };
+      model.IsErrorSimulationMode =
+        model.MeasurementErrorSimulationMode != MeasurementErrorSimulationMode.None;
       return model;
     }
 
@@ -204,6 +219,7 @@ namespace UI.Controls.Settings.Execution
     private static bool ProtocolEquals(SettingsExecutionDto a, SettingsExecutionDto b) =>
       a.IdleModeExecution == b.IdleModeExecution &&
       a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
+      a.MeasurementErrorSimulationMode == b.MeasurementErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
       a.LegacyCompatibilityMode == b.LegacyCompatibilityMode;
@@ -214,7 +230,8 @@ namespace UI.Controls.Settings.Execution
     private void DefalultData()
     {
       IdleMode.IsChecked = _baseExecutionModel.IdleModeExecution;
-      MeasurementErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
+      MeasurementErrorSimulationModeSelect.SelectedValue =
+        _baseExecutionModel.MeasurementErrorSimulationMode;
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;
@@ -223,6 +240,25 @@ namespace UI.Controls.Settings.Execution
       {
         entry.Card.IsChecked = entry.SavedValue;
       }
+    }
+
+    private void LoadMeasurementErrorSimulationOptions()
+    {
+      MeasurementErrorSimulationModeSelect.ItemsSource = new[]
+      {
+        new MeasurementErrorSimulationOption(
+          MeasurementErrorSimulationMode.None,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.mode.none")),
+        new MeasurementErrorSimulationOption(
+          MeasurementErrorSimulationMode.Random,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.mode.random")),
+        new MeasurementErrorSimulationOption(
+          MeasurementErrorSimulationMode.AboveNorm,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.mode.aboveNorm")),
+        new MeasurementErrorSimulationOption(
+          MeasurementErrorSimulationMode.BelowNorm,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.mode.belowNorm")),
+      };
     }
 
     private void OnDeviceConfigurationChanged(DeviceConfigurationEvents.Changed eventData)

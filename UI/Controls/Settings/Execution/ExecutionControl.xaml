@@ -154,12 +154,14 @@
                         </Style>
                     </WrapPanel.Style>
 
-                    <SharedComponents:SettingsCard
+                    <Components:SettingsCardSelect
+                        x:Name="MeasurementErrorSimulationModeSelect"
                         Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
                         Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
+                        DisplayMemberPath="Title"
+                        SelectedValuePath="Mode"
                         Margin="0,10,10,0"
-                        VerticalAlignment="Top"
-                        x:Name="MeasurementErrorSimulation"/>
+                        VerticalAlignment="Top"/>
 
                     <Border Margin="0,10,0,0"
                             VerticalAlignment="Top"

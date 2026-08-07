@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.Helpers;
@@ -119,9 +120,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       }
 
       bool actualOutcome = !ExecutionConfig.GetIsErrorSimulationEnabled()
-        || Random.Shared.Next(2) == 1
         ? expectedOutcome
-        : !expectedOutcome;
+        : ExecutionConfig.GetMeasurementErrorSimulationMode() switch
+        {
+          MeasurementErrorSimulationMode.AboveNorm => false,
+          MeasurementErrorSimulationMode.BelowNorm => true,
+          _ => Random.Shared.Next(2) == 1,
+        };
       string idleResponse = actualOutcome ? "+1.00000000E+00" : "+9.90000000E+37";
       string response = await DeviceProtocolEmulator.QueryMultimeterAsync(
         _device,

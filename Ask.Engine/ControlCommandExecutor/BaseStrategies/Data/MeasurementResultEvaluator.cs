@@ -14,27 +14,32 @@ internal static class MeasurementResultEvaluator
   /// </summary>
   /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
   /// <param name="isOverloadExpected">Признак ожидаемой перегрузки прибора.</param>
+  /// <param name="random">Необязательный генератор случайного направления для тестирования.</param>
   /// <returns>Признак успешного измерения и итоговое измеренное значение.</returns>
   internal static (bool IsSuccessful, double Value) Evaluate(
     MeasurementRange measurementRange,
-    bool isOverloadExpected = false)
+    bool isOverloadExpected = false,
+    Random? random = null)
   {
     ArgumentNullException.ThrowIfNull(measurementRange);
 
     double value = measurementRange.TargetValue;
-    if (ExecutionConfig.GetIsIdleModeEnabled() && ExecutionConfig.GetIsErrorSimulationEnabled())
+    bool isSimulationEnabled = ExecutionConfig.GetIsIdleModeEnabled()
+      && ExecutionConfig.GetIsErrorSimulationEnabled();
+
+    if (isSimulationEnabled)
     {
-      var random = new Random();
-      value = measurementRange.UpperBound != -1
-        ? random.NextDouble() * ((measurementRange.UpperBound + 1) * 2)
-        : random.NextDouble();
+      value = IdleMeasurementErrorSimulator.CreateValue(
+        measurementRange.LowerBound,
+        measurementRange.UpperBound,
+        random);
     }
 
-    bool isSuccessful = isOverloadExpected
+    bool isSuccessful = !isSimulationEnabled && (isOverloadExpected
       ? MeasurementValueFormatter.IsOverloadValue(value)
       : measurementRange.UpperBound != -1
         ? value >= measurementRange.LowerBound && value <= measurementRange.UpperBound
-        : value >= measurementRange.LowerBound;
+        : value >= measurementRange.LowerBound);
 
     return (isSuccessful, value);
   }
