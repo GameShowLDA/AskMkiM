@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Protocol.Messages.Builders;
 using Ask.Protocol.Messages.Models;
@@ -71,9 +72,11 @@ public static class MeasurementMessages
     Enum unit)
     => MeasurementFailureMessageBuilder.BuildNodeRangeFailure(
       point, lowerLimit, upperLimit, result, unit);
+
   /// <summary>
   /// Выводит ранее сформированное сообщение с результатом измерения.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="message">Сформированное сообщение с результатом измерения.</param>
   /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
   /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
@@ -81,6 +84,7 @@ public static class MeasurementMessages
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
   public static Task PublishBuiltMessageAsync(
+    CheckType checkType,
     ShowMessageModel message,
     IMessageOutputService outputService,
     [CallerMemberName] string callerName = "",
@@ -90,7 +94,7 @@ public static class MeasurementMessages
     ArgumentNullException.ThrowIfNull(message);
     ArgumentNullException.ThrowIfNull(outputService);
     return MeasurementMessagePublisher.PublishAsync(
-      message, outputService, callerName, callerFile, callerLine);
+      message, checkType, outputService, callerName, callerFile, callerLine);
   }
 
   /// <summary>
@@ -100,13 +104,9 @@ public static class MeasurementMessages
   /// <param name="measurementRange">Измеренное значение и допустимые границы.</param>
   /// <param name="chainDisplay">Обозначение измеренной цепи.</param>
   /// <returns>Результат алгоритма с сообщением об ошибке измерения.</returns>
-  public static AlgorithmExecutionResult BuildFaultChainResult(
-    MeasurementTypeCommand measurementTypeCommand,
-    MeasurementRange measurementRange,
-    string chainDisplay)
+  public static AlgorithmExecutionResult BuildFaultChainResult(MeasurementTypeCommand measurementTypeCommand, MeasurementRange measurementRange, string chainDisplay)
   {
-    var message = BuildMeasurementResultMessage(
-      measurementTypeCommand, measurementRange, chainDisplay);
+    var message = BuildMeasurementResultMessage(measurementTypeCommand, measurementRange, chainDisplay);
     message.Status = ShowMessageModel.MessageType.Error;
     message.IndentLevel = 3;
     return AlgorithmExecutionResult.FromErrors(new List<ShowMessageModel> { message });
@@ -114,6 +114,7 @@ public static class MeasurementMessages
   /// <summary>
   /// Публикует заголовок начала измерения.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementTypeCommand">Тип выполняемого измерения.</param>
   /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
   /// <param name="isBlockStart">Признак начала логического блока.</param>
@@ -123,6 +124,7 @@ public static class MeasurementMessages
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
   public static Task PublishStartAsync(
+    CheckType checkType,
     MeasurementTypeCommand measurementTypeCommand,
     IMessageOutputService? outputService,
     bool isBlockStart = false,
@@ -141,17 +143,19 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
+      checkType,
       outputService,
       callerName,
       callerFile,
       callerLine,
-      isBlockStart,
+      isBlockStart: isBlockStart,
       skipPause: false);
   }
 
   /// <summary>
   /// Публикует заголовок измерения тока утечки в режиме проверки прочности изоляции.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementTypeCommand">Режим проверки прочности изоляции.</param>
   /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
   /// <param name="indentLevel">Уровень отступа сообщения.</param>
@@ -160,6 +164,7 @@ public static class MeasurementMessages
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
   public static Task PublishLeakageCurrentStartAsync(
+    CheckType checkType,
     MeasurementTypeCommand measurementTypeCommand,
     IMessageOutputService? outputService,
     int indentLevel = 0,
@@ -175,12 +180,13 @@ public static class MeasurementMessages
     ShowMessageModel message = MeasurementMessageBuilder.BuildLeakageCurrentStart(measurementTypeCommand);
     message.IndentLevel = indentLevel;
     return MeasurementMessagePublisher.PublishAsync(
-      message, outputService, callerName, callerFile, callerLine, skipPause: false);
+      message, checkType, outputService, callerName, callerFile, callerLine, skipPause: false);
   }
 
   /// <summary>
   /// Публикует заголовок этапа выполнения измерений.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
   /// <param name="isBlockStart">Признак начала логического блока.</param>
   /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
@@ -188,6 +194,7 @@ public static class MeasurementMessages
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
   public static Task PublishMeasurementStageAsync(
+    CheckType checkType,
     IMessageOutputService? outputService,
     bool isBlockStart = true,
     [CallerMemberName] string callerName = "",
@@ -201,17 +208,19 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       MeasurementMessageBuilder.BuildMeasurementStage(),
+      checkType,
       outputService,
       callerName,
       callerFile,
       callerLine,
-      isBlockStart,
+      isBlockStart: isBlockStart,
       skipPause: false);
   }
 
   /// <summary>
   /// Публикует эталонное измеренное значение.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementUnit">Единица измерения эталонного значения.</param>
   /// <param name="value">Измеренное эталонное значение.</param>
   /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
@@ -220,6 +229,7 @@ public static class MeasurementMessages
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
   public static Task PublishReferenceValueAsync(
+    CheckType checkType,
     Enum measurementUnit,
     double value,
     IMessageOutputService? outputService,
@@ -234,6 +244,7 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       MeasurementMessageBuilder.BuildReferenceValue(measurementUnit, value),
+      checkType,
       outputService,
       callerName,
       callerFile,
@@ -264,6 +275,7 @@ public static class MeasurementMessages
   /// <summary>
   /// Публикует заданное испытательное напряжение режима проверки прочности изоляции.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementTypeCommand">Режим испытательного напряжения.</param>
   /// <param name="voltage">Заданное испытательное напряжение.</param>
   /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
@@ -277,6 +289,7 @@ public static class MeasurementMessages
   /// к режиму прочности изоляции ACW или DCW.
   /// </exception>
   public static Task PublishTestVoltageOutputAsync(
+    CheckType checkType,
     MeasurementTypeCommand measurementTypeCommand,
     double voltage,
     IMessageOutputService? outputService,
@@ -297,6 +310,7 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
+      checkType,
       outputService,
       callerName,
       callerFile,
@@ -342,6 +356,7 @@ public static class MeasurementMessages
   /// <summary>
   /// Публикует сообщение об отсутствии подключения проверяемой точки.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementTarget">Обозначение проверяемой точки.</param>
   /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
   /// <param name="details">Описание ошибки подключения.</param>
@@ -350,6 +365,7 @@ public static class MeasurementMessages
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
   public static Task PublishPointConnectionErrorAsync(
+    CheckType checkType,
     string measurementTarget,
     IMessageOutputService outputService,
     string details = "Rизм = Нет подлючения точки",
@@ -359,6 +375,7 @@ public static class MeasurementMessages
   {
     return MeasurementMessagePublisher.PublishAsync(
       MeasurementMessageBuilder.BuildPointConnectionError(measurementTarget, details),
+      checkType,
       outputService,
       callerName,
       callerFile,
@@ -422,6 +439,7 @@ public static class MeasurementMessages
   /// <summary>
   /// Публикует итоговый результат измерения цепи.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
   /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
   /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
@@ -436,6 +454,7 @@ public static class MeasurementMessages
   /// Выбрасывается, если <paramref name="measurementRange"/> равен <see langword="null"/>.
   /// </exception>
   public static Task PublishResultAsync(
+    CheckType checkType,
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     bool isSuccessful,
@@ -448,6 +467,7 @@ public static class MeasurementMessages
   {
     return PublishAsync(
       measurementTypeCommand,
+      checkType,
       measurementRange,
       isSuccessful,
       DeviceDisplayConfig.GetMeasurementResultsVisibility(),
@@ -462,6 +482,7 @@ public static class MeasurementMessages
   /// <summary>
   /// Публикует результат измерения с явно заданной единицей измерения.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementUnit">Единица измерения.</param>
   /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
   /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
@@ -479,6 +500,7 @@ public static class MeasurementMessages
   /// <paramref name="measurementRange"/> равен <see langword="null"/>.
   /// </exception>
   public static Task PublishResultAsync(
+    CheckType checkType,
     Enum measurementUnit,
     MeasurementRange measurementRange,
     bool isSuccessful,
@@ -495,11 +517,6 @@ public static class MeasurementMessages
     ArgumentNullException.ThrowIfNull(measurementUnit);
     ArgumentNullException.ThrowIfNull(measurementRange);
 
-    if (outputService == null || (isSuccessful && !DeviceDisplayConfig.GetMeasurementResultsVisibility()))
-    {
-      return Task.CompletedTask;
-    }
-
     ShowMessageModel message = MeasurementMessageBuilder.BuildResult(
       measurementUnit,
       measurementRange,
@@ -514,15 +531,18 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
+      checkType,
       outputService,
       callerName,
       callerFile,
-      callerLine);
+      callerLine,
+      isVisible: DeviceDisplayConfig.GetMeasurementResultsVisibility());
   }
 
   /// <summary>
   /// Публикует погрешность измерения.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementUnit">Единица измерения.</param>
   /// <param name="measurementRange">Погрешность и допустимые границы измерения.</param>
   /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
@@ -540,6 +560,7 @@ public static class MeasurementMessages
   /// равен <see langword="null"/>.
   /// </exception>
   public static Task PublishErrorAsync(
+    CheckType checkType,
     Enum measurementUnit,
     MeasurementRange measurementRange,
     bool isSuccessful,
@@ -567,6 +588,7 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
+      checkType,
       outputService,
       callerName,
       callerFile,
@@ -576,6 +598,7 @@ public static class MeasurementMessages
   /// <summary>
   /// Публикует промежуточный результат измерения цепи.
   /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
   /// <param name="measurementTypeCommand">Тип выполненного измерения.</param>
   /// <param name="measurementRange">Измеренное значение и границы допустимого диапазона.</param>
   /// <param name="isSuccessful">Признак соответствия результата допустимому диапазону.</param>
@@ -590,6 +613,7 @@ public static class MeasurementMessages
   /// Выбрасывается, если <paramref name="measurementRange"/> равен <see langword="null"/>.
   /// </exception>
   public static Task PublishIntermediateResultAsync(
+    CheckType checkType,
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     bool isSuccessful,
@@ -602,6 +626,7 @@ public static class MeasurementMessages
   {
     return PublishAsync(
       measurementTypeCommand,
+      checkType,
       measurementRange,
       isSuccessful,
       DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility(),
@@ -615,6 +640,7 @@ public static class MeasurementMessages
 
   private static Task PublishAsync(
     MeasurementTypeCommand measurementTypeCommand,
+    CheckType checkType,
     MeasurementRange measurementRange,
     bool isSuccessful,
     bool isVisible,
@@ -626,11 +652,6 @@ public static class MeasurementMessages
     int callerLine)
   {
     ArgumentNullException.ThrowIfNull(measurementRange);
-
-    if (outputService == null || (isSuccessful && !isVisible))
-    {
-      return Task.CompletedTask;
-    }
 
     ShowMessageModel message = BuildMeasurementResultMessage(
       measurementTypeCommand,
@@ -645,9 +666,11 @@ public static class MeasurementMessages
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
+      checkType,
       outputService,
       callerName,
       callerFile,
-      callerLine);
+      callerLine,
+      isVisible: isVisible);
   }
 }

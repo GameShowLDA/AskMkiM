@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
@@ -344,7 +345,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         messages.Errors.Add(error);
 
         RegisterDisconnectChainError(context, error.Header, error.Message);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           context.TypeCommand,
           range,
           false,
@@ -373,7 +374,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
 
       messages.Errors.Add(error);
-      await MeasurementMessages.PublishResultAsync(
+      await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
         context.TypeCommand,
         range,
         false,

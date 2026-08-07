@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Devices;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -250,7 +251,7 @@ namespace Ask.Engine.Tests.Base
       measurementRange.TargetValue = answer;
 
       var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-      await MeasurementMessages.PublishResultAsync(
+      await MeasurementMessages.PublishResultAsync(CheckType.Test,
         MeasurementTypeCommand.KC,
         new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
         result.IsSuccessful,

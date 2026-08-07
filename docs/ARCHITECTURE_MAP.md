@@ -157,7 +157,7 @@ Ask.Device.ResponseProcessor
 отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
 `CommandMessages`, `ExecutionMessages`, `EquipmentMessages`, `MeasurementMessages` и `SelfTestMessages`. Допустимые диапазоны
 значений независимо от вызывающей подсистемы публикуются через `RangeMessages`.
-`DeviceMessageBuilder` удалён из `Ask.Device.Runtime`: 108 вызовов device-результатов из
+`DeviceMessageBuilder` удалён из `Ask.Device.Runtime`: 104 оставшихся вызова device-результатов из
 `Ask.Device.Runtime` и `Ask.Device.Application` переведены на
 `DeviceMessages.PublishOperationResultAsync`. Формат, статус, отступ, признак device-сообщения
 и step-checkpoint формируются внутри `Ask.Protocol.Messages`; условия видимости по
@@ -667,6 +667,18 @@ executor throws
 - `MeasurementMessages` формирует тексты брака узлового и группового методов через
   `MeasurementFailureMessageBuilder`; `MeasurementLimitKind`, старые
   `GroupMethodProtocolBuilder` и `NodeMethodProtocolBuilder` удалены из `Ask.Engine`;
+- все методы публикации `MeasurementMessages` требуют явный `CheckType`: метрологические
+  исполнители передают `CheckType.Metrology`, исполнители программ контроля —
+  `CheckType.ControlProgram`, обычные тесты — `CheckType.Test`, самоконтроль оборудования —
+  `CheckType.SelfTest`. `MeasurementMessagePublisher` централизованно игнорирует настройки
+  видимости итоговых и промежуточных успешных результатов для метрологии; для остальных
+  типов сохраняет фильтрацию через `DeviceDisplayConfig`. Ошибочные результаты настройками
+  видимости не скрываются;
+- `BaseMeasurement.MeasurementPointsDisplay` централизованно форматирует обе введённые
+  точки из `BaseMeasurement.Points`; метрологические режимы передают строку точек в
+  `MeasurementMessages.PublishResultAsync`, поэтому точки отображаются в строке результата
+  над обычной строкой погрешности. Отдельные сообщения допустимого диапазона
+  (`RangeMessages.PublishAllowedRangeAsync`) метрологические режимы не публикуют;
 - исполнители команд передают `SourceLines` в `CommandMessages.FormatSourceLines`;
   `CommandExecutorBase` больше не содержит форматирование текста протокола;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
@@ -1010,7 +1022,7 @@ executor/strategy
 → UdpClient.SendAsync/ReceiveAsync
 → ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
   ├─ Status absent/success → ModuleRelayControlResponseProcessor validation
-  → adapter DeviceMessages or RelayExceptionFactory
+  → PointManagerAdapter возвращает результат или создаёт ошибку через RelayExceptionFactory
   └─ Status = UnknownCommand / InvalidParametr / InvalidParameter
     → ModuleRelayControlProtocolException(device, operation, localized error, firmware status)
     → UserActionHelper catches hardware exception
@@ -1032,6 +1044,9 @@ executor/strategy
 `EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
 device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;
 решение об отображении принимает `Ask.Protocol.Messages` через общий `ShouldPublish`.
+`PointManagerAdapter` для четырёх одиночных операций не выполняет повторную проверку
+`DeviceDisplayConfig` и не публикует дублирующее сообщение; он передаёт
+`IUserInteractionService` в runtime `PointManager` и сохраняет только user retry/error boundary.
 Runtime `PointManager` ожидает эти методы для обычного и контролируемого
 подключения/отключения одной точки; остальные команды МКР пока продолжают собственную
 десериализацию моделей из `Ask.Device.Runtime`.
@@ -1719,11 +1734,11 @@ ErrorItem → translator/runner ErrorList
 | `SelfTestMessages` | static facade | Ask.Protocol.Messages | публикует этапы, команды пошагового режима, ошибки и результаты самоконтроля мультиметра, GPT, МКР, УКШ и модуля напряжения/тока; runtime SelfCheck-классы моделей экранного протокола не создают | [Equipment](#equipment-architecture) |
 | `SelfTestMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует информационные, командные и результирующие сообщения самоконтроля, включая видимость измерений, Overload, погрешность и свойства итогового протокола | [Equipment](#equipment-architecture) |
 | `SelfTestMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения самоконтроля общему `MessagePublisher` с признаками блока, паузы и проверки доступности вывода | [Equipment](#equipment-architecture) |
-| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности; публикация требует явный `CheckType` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |
 | `MeasurementLimitKind` | enum | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, задающий минимальный или максимальный предел при формировании описания брака | [Protocols](#protocols-and-file-formats) |
-| `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает опубликованные измерения в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | централизованно применяет видимость успешных результатов: `Metrology` выводится всегда, остальные типы учитывают `DeviceDisplayConfig`; опубликованные измерения записывает в device log и передаёт `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности метрологического режима | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
