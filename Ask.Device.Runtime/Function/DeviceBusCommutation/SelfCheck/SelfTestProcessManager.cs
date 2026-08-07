@@ -154,13 +154,13 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       var testDescription = $"\n{testNumber}. Тест подключения \"{testName}\"";
       var testResult = new TestExecutionResult
       {
-        TestName = $"Тест \"{testName}\"",
+        TestName = $"Тест подключения \"{testName}\"",
       };
 
       settings.DeviceResults.LastOrDefault()?.Tests.Add(testResult);
 
       await SelfTestMessages.PublishInformationAsync(
-        $"\n{testNumber}. Тест \"{testName}\"",
+        $"\n{testDescription}",
         messageService,
         isBlockStart: true,
         ignoreOutputValidation: true);
