@@ -1,6 +1,7 @@
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -13,6 +14,8 @@ using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
+using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
+using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
 using EquipmentMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using MeasurementMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using SelfTestMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
@@ -44,8 +47,10 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
     }
 
     /// <inheritdoc />
-    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
+    public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, ActionSettings settings, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null)
     {
+      settings.DeviceResults.Add(new DeviceExecutionResult(breakdownTester.Name, breakdownTester.NumberChassis, breakdownTester.Number));
+
       await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(breakdownTester, userMessageService);
       await InitDevices(userMessageService, device, meter, breakdownTester);
 
@@ -55,25 +60,25 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       switch (selectedType)
       {
         case TypeConnector.IR:
-          await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService);
           break;
 
         case TypeConnector.ACW:
-          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService);
           break;
 
         case TypeConnector.DCW:
-          await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService);
           break;
 
         case TypeConnector.FullCheck:
-          await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService, 1.ToString());
           await Task.Delay(500);
 
-          await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService, 2.ToString());
           await Task.Delay(500);
 
-          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, userMessageService);
+          await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService, 3.ToString());
           await Task.Delay(500);
           break;
       }
@@ -90,7 +95,9 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       IBreakdownTester breakdownTester,
       ISwitchingDevice device,
       IMultimeter meter,
-      IUserInteractionService? userMessageService = null)
+      ActionSettings settings,
+      IUserInteractionService? userMessageService = null,
+      string testNumber = null)
     {
       try
       {
@@ -100,6 +107,12 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
+        var testName = "Тест измерения сопротивления изоляции";
+        settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+        if (!string.IsNullOrEmpty(testNumber))
+        {
+          testName = $"{testNumber}. {testName}";
+        }
         await SelfTestMessages.PublishInformationAsync("Проверка измерения соопротивления изоляции", userMessageService);
         await SelfTestMessages.PublishInformationAsync("Настройка оборудования", userMessageService);
 
@@ -134,6 +147,14 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             ? $"СИ. Проверка при напряжении {item}В " +
               $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
             : null;
+          if (executionErrorMessage != null)
+          {
+            settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
+            {
+              Message = executionErrorMessage,
+            });
+          }
+
           await MeasurementMessages.PublishMeasurementResultAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(result, lowerBound, upperBound),
@@ -165,7 +186,9 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       IBreakdownTester breakdownTester,
       ISwitchingDevice device,
       IMultimeter meter,
-      IUserInteractionService? userMessageService = null)
+      ActionSettings settings,
+      IUserInteractionService? userMessageService = null,
+      string testNumber = null)
     {
       try
       {
@@ -175,7 +198,13 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
-        await SelfTestMessages.PublishInformationAsync("Проверка напряжения ACW с ППУ", userMessageService);
+        var testName = "Тест измерения напряжения ACW";
+        settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+        if (!string.IsNullOrEmpty(testNumber))
+        {
+          testName = $"{testNumber}. {testName}";
+        }
+        await SelfTestMessages.PublishInformationAsync(testName, userMessageService);
         await SelfTestMessages.PublishInformationAsync("Настройка оборудования", userMessageService);
 
         await breakdownTester.AcwManger.Mode.SetModeAsync(userMessageService);
@@ -216,16 +245,25 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           var err = result - item;
           bool isSuccessful = result >= lowerBound && result <= upperBound;
           var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "В");
+          string? executionErrorMessage = !isSuccessful
+            ? $"ПИ ACW. Проверка при напряжении {item}В " +
+              $"({lowerBound} - {upperBound} В) : {formattedResult}"
+            : null;
           await SelfTestMessages.PublishResultAsync(
             "Результат ACW",
             isSuccessful,
             userMessageService,
             message: formattedResult,
             indentLevel: 1,
-            executionErrorMessage: !isSuccessful
-              ? $"ПИ ACW. Проверка при напряжении {item}В " +
-                $"({lowerBound} - {upperBound} В) : {formattedResult}"
-              : null);
+            executionErrorMessage);
+
+          if (executionErrorMessage != null)
+          {
+            settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
+            {
+              Message = executionErrorMessage,
+            });
+          }
 
           await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
@@ -250,7 +288,9 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       IBreakdownTester breakdownTester,
       ISwitchingDevice device,
       IMultimeter meter,
-      IUserInteractionService? userMessageService = null)
+      ActionSettings settings,
+      IUserInteractionService? userMessageService = null,
+      string testNumber = null)
     {
       try
       {
@@ -260,7 +300,13 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         await userMessageService.AppendEmptyLineAsync();
-        await SelfTestMessages.PublishInformationAsync("Проверка напряжения DCW с ППУ", userMessageService);
+        var testName = "Тест измерения напряжения DCW";
+        settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult { TestName = testName, });
+        if (!string.IsNullOrEmpty(testNumber))
+        {
+          testName = $"{testNumber}. {testName}";
+        }
+        await SelfTestMessages.PublishInformationAsync(testName, userMessageService);
         await SelfTestMessages.PublishInformationAsync("Настройка оборудования", userMessageService);
 
         await breakdownTester.DcwManger.Mode.SetModeAsync(userMessageService);
@@ -300,16 +346,25 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           var err = result - item;
           bool isSuccessful = result >= lowerBound && result <= upperBound;
           var formattedResult = MeasurementValueFormatter.FormatWithUnit(result, "В");
+          string? executionErrorMessage = !isSuccessful
+            ? $"ПИ DCW. Проверка при напряжении {item}В " +
+              $"({lowerBound} - {upperBound} В) : {formattedResult}"
+            : null;
+          if (executionErrorMessage != null)
+          {
+            settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
+            {
+              Message = executionErrorMessage,
+            });
+          }
           await SelfTestMessages.PublishResultAsync(
             "Результат DCW",
             isSuccessful,
             userMessageService,
             message: formattedResult,
             indentLevel: 1,
-            executionErrorMessage: !isSuccessful
-              ? $"ПИ DCW. Проверка при напряжении {item}В " +
-                $"({lowerBound} - {upperBound} В) : {formattedResult}"
-              : null);
+            executionErrorMessage);
+
 
           await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,

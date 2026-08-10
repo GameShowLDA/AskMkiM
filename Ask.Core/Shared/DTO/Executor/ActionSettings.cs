@@ -1,4 +1,7 @@
-﻿using Ask.Core.Shared.Metadata.Enums.FileEnums;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using System.Windows.Controls;
 using static Ask.Core.Shared.Metadata.Static.DelegateManager;
 
 namespace Ask.Core.Shared.DTO.Executor
@@ -39,6 +42,11 @@ namespace Ask.Core.Shared.DTO.Executor
     public CheckType CheckType { get; init; } = CheckType.None;
 
     /// <summary>
+    /// Режим выполнения.
+    /// </summary>
+    public string Mode { get; set; }
+
+    /// <summary>
     /// Автоматически добавлять сообщения об ошибках выполнения в итоговое заключение.
     /// </summary>
     public bool AccumulateErrorMessages { get; init; }
@@ -64,6 +72,11 @@ namespace Ask.Core.Shared.DTO.Executor
     public TimeSpan ExecutionDuration { get; set; }
 
     /// <summary>
+    /// Результаты выполненных тестов.
+    /// </summary>
+    public List<DeviceExecutionResult> DeviceResults { get; } = [];
+
+    /// <summary>
     /// Ошибки, сформированные во время выполнения действия.
     /// </summary>
     public List<string> ExecutionErrors { get; } = new();
@@ -72,5 +85,6 @@ namespace Ask.Core.Shared.DTO.Executor
     /// Подтверждённые входные параметры текущего выполнения.
     /// </summary>
     public List<string> InputParameters { get; } = new();
+
   }
 }

@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Core.Shared.Metadata.Static
 {
@@ -25,7 +26,7 @@ namespace Ask.Core.Shared.Metadata.Static
     /// <param name="cancellationToken">
     /// Токен отмены, позволяющий прервать выполнение.
     /// </param>
-    public delegate Task StartDelegate(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken);
+    public delegate Task StartDelegate(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken);
 
     /// <summary>
     /// Делегат для метода остановки.

@@ -147,6 +147,8 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
     public async Task StartAsync()
     {
+      _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
+      _modeSettings.Current.DeviceResults.Clear();
       var actionSettings = _modeSettings.Current;
       var executionName = actionSettings.NameProvider?.Invoke();
       if (!string.IsNullOrWhiteSpace(executionName))

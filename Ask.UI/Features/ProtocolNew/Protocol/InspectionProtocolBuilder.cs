@@ -15,8 +15,8 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     ArgumentNullException.ThrowIfNull(settings);
 
     var message = new StringBuilder();
-    message.AppendLine($"Проверка \"{settings.Name}\" от {DateTime.Now:dd.MM.yyyy} завершена.");
-    message.AppendLine($"\tНачало проверки: {settings.StartTime:HH:mm:ss}");
+    message.AppendLine($"Проверка \"{settings.Name}\" ({settings.Mode}).");
+    message.AppendLine($"\tНачало проверки: {DateTime.Now:dd.MM.yyyy} {settings.StartTime:HH:mm:ss}");
     message.AppendLine($"\tВремя выполнения: {settings.ExecutionDuration:hh\\:mm\\:ss\\:fff}");
     message.AppendLine();
 
@@ -29,18 +29,68 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
       message.AppendLine();
     }
 
-    if (settings.ExecutionErrors.Count == 0)
+    if (settings.DeviceResults.Count > 1)
     {
-      message.AppendLine("\tЗаключение: ошибок не обнаружено");
-      return message.ToString();
+
+      int i = 1;
+      foreach (var deviceResult in settings.DeviceResults)
+      {
+        message.AppendLine($"\t{i}. {deviceResult.DeviceName}");
+        foreach (var testResult in deviceResult.Tests)
+        {
+          if (testResult.Errors.Count > 0)
+          {
+            WriteErrorMessage(message, i, testResult);
+          }
+        }
+        i++;
+      }
+
+    }
+    else if(settings.DeviceResults.Count == 1)
+    {
+      foreach (var deviceResult in settings.DeviceResults)
+      {
+        int i = 1;
+        foreach (var testResult in deviceResult.Tests)
+        {
+          if (testResult.Errors.Count > 0)
+          {
+            WriteErrorMessage(message, i, testResult);
+          }
+          else
+          {
+            message.AppendLine($"\t\t{i}. {testResult.TestName} [НОРМА]");
+            i++;
+          }
+        }
+      }
     }
 
-    message.AppendLine("Заключение:");
-    for (var index = 0; index < settings.ExecutionErrors.Count; index++)
+
+    if (settings.ExecutionErrors.Count == 0)
     {
-      message.AppendLine($"\t{index + 1}. {settings.ExecutionErrors[index]} [БРАК]");
+      message.AppendLine("\nЗаключение: ошибок не обнаружено");
+      return message.ToString();
+    }
+    else if(settings.ExecutionErrors.Count == 1)
+    {
+      message.AppendLine($"\nЗаключение: обнаружена {settings.ExecutionErrors.Count} ошибка");
+    }
+    else
+    {
+      message.AppendLine($"\nЗаключение: обнаружено {settings.ExecutionErrors.Count} ошибок");
     }
 
     return message.ToString();
+  }
+
+  private static void WriteErrorMessage(StringBuilder message, int i, TestExecutionResult testResult)
+  {
+    message.AppendLine($"\t\t{i}. {testResult.TestName}:");
+    for (var index = 0; index < testResult.Errors.Count; index++)
+    {
+      message.AppendLine($"\t\t\t{i}.{index + 1}. {testResult.Errors[index].Message} [БРАК]");
+    }
   }
 }
