@@ -33,6 +33,7 @@
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png" />
+	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\part_executionSettings.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png" />
 	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png" />
 	  <None Remove="AppHelp\favicon.ico" />
