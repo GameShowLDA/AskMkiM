@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Communication.Com.Interop;
 using Ask.Device.Runtime.Device;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.SystemCommandManager;
@@ -110,37 +111,49 @@ namespace Ask.Device.Runtime.Function.GPT
         // Запрос контраста дисплея
         string contrastCommand = GetCommandSyntax(SystemCommand.LCD_CONTRAST) + "?";
         string contrastResponse = await _gptModel.DeviceProtocol.QueryAsync(contrastCommand, 100);
-        systemData.LcdContrast = int.Parse(contrastResponse);
+        systemData.LcdContrast = BreakdownTesterResponseProcessor.TryParseNumber(contrastResponse, out double contrast)
+          ? Convert.ToInt32(contrast)
+          : 0;
         Console.WriteLine($"Контраст дисплея: {systemData.LcdContrast}");
 
         // Запрос яркости дисплея
         string brightnessCommand = GetCommandSyntax(SystemCommand.LCD_BRIGHTNESS) + "?";
         string brightnessResponse = await _gptModel.DeviceProtocol.QueryAsync(brightnessCommand, 100);
-        systemData.LcdBrightness = int.Parse(brightnessResponse);
+        systemData.LcdBrightness = BreakdownTesterResponseProcessor.TryParseNumber(brightnessResponse, out double brightness)
+          ? Convert.ToInt32(brightness)
+          : 0;
         Console.WriteLine($"Яркость дисплея: {systemData.LcdBrightness}");
 
         // Запрос состояния звука успешного теста
         string buzzerPSoundCommand = GetCommandSyntax(SystemCommand.BUZZER_PSOUND) + "?";
         string buzzerPSoundResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerPSoundCommand, 100);
-        systemData.BuzzerPrimarySound = buzzerPSoundResponse.Trim().ToUpper() == "ON";
+        systemData.BuzzerPrimarySound = BreakdownTesterResponseProcessor.TryParseState(
+          buzzerPSoundResponse,
+          out bool primarySound) && primarySound;
         Console.WriteLine($"Звук успешного теста: {systemData.BuzzerPrimarySound}");
 
         // Запрос состояния звука ошибочного теста
         string buzzerFSoundCommand = GetCommandSyntax(SystemCommand.BUZZER_FSOUND) + "?";
         string buzzerFSoundResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerFSoundCommand, 100);
-        systemData.BuzzerFeedbackSound = buzzerFSoundResponse.Trim().ToUpper() == "ON";
+        systemData.BuzzerFeedbackSound = BreakdownTesterResponseProcessor.TryParseState(
+          buzzerFSoundResponse,
+          out bool feedbackSound) && feedbackSound;
         Console.WriteLine($"Звук ошибочного теста: {systemData.BuzzerFeedbackSound}");
 
         // Запрос продолжительности звука успешного теста
         string buzzerPTimeCommand = GetCommandSyntax(SystemCommand.BUZZER_PTIME) + "?";
         string buzzerPTimeResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerPTimeCommand, 100);
-        systemData.BuzzerPrimaryTime = double.Parse(buzzerPTimeResponse);
+        systemData.BuzzerPrimaryTime = BreakdownTesterResponseProcessor.TryParseNumber(
+          buzzerPTimeResponse,
+          out double primaryTime) ? primaryTime : 0;
         Console.WriteLine($"Продолжительность звука успешного теста: {systemData.BuzzerPrimaryTime}");
 
         // Запрос продолжительности звука ошибочного теста
         string buzzerFTimeCommand = GetCommandSyntax(SystemCommand.BUZZER_FTIME) + "?";
         string buzzerFTimeResponse = await _gptModel.DeviceProtocol.QueryAsync(buzzerFTimeCommand, 100);
-        systemData.BuzzerFeedbackTime = double.Parse(buzzerFTimeResponse);
+        systemData.BuzzerFeedbackTime = BreakdownTesterResponseProcessor.TryParseNumber(
+          buzzerFTimeResponse,
+          out double feedbackTime) ? feedbackTime : 0;
         Console.WriteLine($"Продолжительность звука ошибочного теста: {systemData.BuzzerFeedbackTime}");
 
         Console.WriteLine("===============================");

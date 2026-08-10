@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using static Ask.LogLib.LoggerUtility;
@@ -109,8 +110,8 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         var query = $"{ManualCommandManager.GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} ?";
         var response = await _gptModel.DeviceProtocol.QueryAsync(query, timeout: 1000);
 
-        if (int.TryParse(response.Replace("Hz", "").Trim(), out var freq))
-          return freq;
+        if (BreakdownTesterResponseProcessor.TryParseNumber(response, out double frequency))
+          return Convert.ToInt32(frequency);
 
         return 0;
       }
