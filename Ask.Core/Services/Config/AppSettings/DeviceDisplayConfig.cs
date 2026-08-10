@@ -82,6 +82,15 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetExecutionParametersVisibility() => _settingsModel.ShowDeviceExecutionParameters;
 
     /// <summary>
+    /// Определяет, следует ли отображать результат операции с устройством.
+    /// Ошибочные результаты отображаются всегда, успешные — согласно настройке
+    /// показа параметров выполнения устройств.
+    /// </summary>
+    /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
+    public static bool ShouldDisplayOperationResult(bool isSuccessful) =>
+      !isSuccessful || GetExecutionParametersVisibility();
+
+    /// <summary>
     /// Возвращает признак отображения результатов измерений.
     /// </summary>
     public static bool GetMeasurementResultsVisibility() => _settingsModel.ShowMeasurementResults;

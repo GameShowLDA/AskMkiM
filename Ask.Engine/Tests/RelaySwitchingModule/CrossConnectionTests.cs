@@ -34,7 +34,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     {
       _controller = executionController;
       _userInteractionService = userInteractionService;
-
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteTestProcess,
@@ -142,9 +141,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await ExecutionMessages.PublishEquipmentSetupAsync(_userInteractionService);
       await RelayModuleHelper.MeterEnableAsync(_userInteractionService, verificatModuleRelayControl, _userInteractionService, cancellationToken);
 
-      await RunPart1(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
-      await RunPart2(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
-      await RunPart3(_userInteractionService, testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
+      await RunPart1(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.A1, SwitchingBus.B1, BusPoint.A, BusPoint.B, cancellationToken);
+      await RunPart2(testedModuleRelayControl, verificatModuleRelayControl, points, SwitchingBus.B1, SwitchingBus.A1, BusPoint.B, BusPoint.A, cancellationToken);
+      await RunPart3(testedModuleRelayControl, verificatModuleRelayControl, cancellationToken, false);
     }
 
     #region Логика теста
@@ -170,7 +169,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// </param>
     /// <returns>True, если тест выполнен успешно</returns>
     private async Task<bool> RunPart1(
-      IUserInteractionService messageService,
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       List<int> rangePoints,
@@ -182,9 +180,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       bool needRestartModuleAfter = true)
     {
       await ExecutionMessages.PublishTestStageAsync(
-        "ТЕСТ 1: проверка замыкания точек при подключении к A1",
+        "Этап 1. Проверка точек при подключении к шине A1",
         _userInteractionService);
-      bool result = await RunPointTest(messageService, tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
+      bool result = await RunPointTest(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
       return result;
     }
 
@@ -208,7 +206,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <c>true</c> — БК сбросятся по завершению,
     /// </param>
     /// <returns>True, если тест выполнен успешно</returns>
-    private async Task<bool> RunPart2(IUserInteractionService messageService,
+    private async Task<bool> RunPart2(
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       List<int> rangePoints,
@@ -220,9 +218,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       bool needRestartModuleAfter = true)
     {
       await ExecutionMessages.PublishTestStageAsync(
-        "\nТЕСТ 2: проверка замыкания точек при подключении к B1\n",
+        "Этап 2. Проверка точек при подключении к шине B1",
         _userInteractionService);
-      bool result = await RunPointTest(messageService, tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
+      bool result = await RunPointTest(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus1, bus2, cancellationToken, needRestartModuleAfter);
       return result;
     }
 
@@ -241,15 +239,13 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// </param>
     /// <returns>True, если тест успешно завершён</returns>
     private async Task<bool> RunPart3(
-    IUserInteractionService messageService,
-    IRelaySwitchModule tested_module,
-    IRelaySwitchModule verificat_module,
-    CancellationToken cancellationToken,
-    bool needRestartModuleAfter = true)
+      IRelaySwitchModule tested_module,
+      IRelaySwitchModule verificat_module,
+      CancellationToken cancellationToken,
+      bool needRestartModuleAfter = true)
     {
-
       await ExecutionMessages.PublishTestStageAsync(
-        "\nТЕСТ 3: проверка замыканий между всеми шинами\n",
+        "Этап 3. Проверка замыканий между шинами",
         _userInteractionService);
 
       var allVerifBuses = new[] {
@@ -266,7 +262,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await tested_module.PointManager.ConnectRelayAsync(BusPoint.A, 1, _userInteractionService);
       await tested_module.PointManager.ConnectRelayAsync(BusPoint.B, 1, _userInteractionService);
 
-      await verificatModuleRelayControl.MeterManager.ConnectMeterAsync();
+      await verificatModuleRelayControl.MeterManager.ConnectMeterAsync(_userInteractionService);
 
       var busPairs = new (SwitchingBus A, SwitchingBus B)[]
       {
@@ -285,9 +281,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           verificat_module,
           cancellationToken,
           expectedMeterAnswer: true,
-          "[НОРМА]",
+          $"Проверка шин {busA} и {busB}",
           $"замыкание шин {busA} и {busB}",
-          "[ОБРЫВ ШИНЫ]",
+          $"Проверка шин {busA} и {busB}",
           $"обрыв БК {tested_module.Number} от шин {busA} и {busB}");
 
         await RelayModuleHelper.BusDisconnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
@@ -296,9 +292,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           verificat_module,
           cancellationToken,
           expectedMeterAnswer: false,
-          "[НОРМА]",
+          $"Проверка отключения шины {busA}",
           $"замыкание на шине {busA} отсутствует",
-          "[ЗАМЫКАНИЕ ШИН]",
+          $"Проверка отключения шины {busA}",
           $"замыкание при отключении БК {tested_module.Number} от шины {busA}");
 
         await RelayModuleHelper.BusConnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
@@ -308,9 +304,9 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           verificat_module,
           cancellationToken,
           expectedMeterAnswer: false,
-          "[НОРМА]",
+          $"Проверка отключения шины {busB}",
           $"замыкание на шине {busB} отсутствует",
-          "[ЗАМЫКАНИЕ ШИН]",
+          $"Проверка отключения шины {busB}",
           $"замыкание при отключении БК {tested_module.Number} от шины {busB}");
 
         await RelayModuleHelper.BusDisconnectAsync(busA, tested_module, _userInteractionService, cancellationToken);
@@ -421,7 +417,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// </param>
     /// <returns>True, если все проверки прошли успешно</returns>
     private async Task<bool> RunPointTest(
-      IUserInteractionService messageService,
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       List<int> rangePoints,
@@ -434,7 +429,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     {
       await PreparePointTestAsync(tested_module, verificat_module, rangePoints, switchingBus1, switchingBus2, bus2, cancellationToken);
       await ExecutePointChecksAsync(tested_module, verificat_module, rangePoints, bus1, bus2, cancellationToken);
-      await ResetModulesAfterPointTestAsync(messageService, tested_module, verificat_module, needRestartModuleAfter);
+      await ResetModulesAfterPointTestAsync(tested_module, verificat_module, needRestartModuleAfter);
 
       return true;
     }
@@ -469,11 +464,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       await RelayModuleHelper.BusConnectAsync(switchingBus2, tested_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus1, verificat_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus2, verificat_module, _userInteractionService, cancellationToken);
-
-      await CommandMessages.PublishPointsConnectionAsync(
-        _userInteractionService,
-        indentLevel: 0,
-        isBlockStart: false);
       await verificat_module.PointManager.ConnectRelayGroupAsync(bus2, rangePoints.First(), rangePoints.Last(), _userInteractionService);
     }
 
@@ -528,10 +518,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         verificat_module,
         cancellationToken,
         expectedMeterAnswer: true,
-        $"Результат проверки точки {point}",
-        string.Empty,
-        $"Результат проверки точки {point}",
-        string.Empty);
+        $"Проверка подключения точки {point}",
+        "Замыкание обнаружено",
+        $"Проверка подключения точки {point}",
+        "Замыкание не обнаружено");
     }
 
     /// <summary>
@@ -556,10 +546,10 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         verificat_module,
         cancellationToken,
         expectedMeterAnswer: false,
-        "Результат проверки",
-        string.Empty,
-        "Результат проверки",
-        $"Замыкание при отключении точки {point} от шины {busB}");
+        $"Проверка отключения точки {point}",
+        "Замыкание отсутствует",
+        $"Проверка отключения точки {point}",
+        $"Замыкание сохраняется после отключения от шины [{busB}]");
     }
 
     /// <summary>
@@ -596,7 +586,6 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <c>false</c> — состояние БК сохраняется.
     /// </param>
     private async Task ResetModulesAfterPointTestAsync(
-      IUserInteractionService messageService,
       IRelaySwitchModule tested_module,
       IRelaySwitchModule verificat_module,
       bool needRestartModuleAfter)
@@ -606,8 +595,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      await tested_module.ConnectableManager.ResetAsync(messageService);
-      await verificat_module.ConnectableManager.ResetAsync(messageService);
+      await tested_module.ConnectableManager.ResetAsync(_userInteractionService);
+      await verificat_module.ConnectableManager.ResetAsync(_userInteractionService);
     }
 
     #endregion

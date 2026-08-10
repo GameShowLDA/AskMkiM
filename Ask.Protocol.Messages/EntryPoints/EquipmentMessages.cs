@@ -62,7 +62,8 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (device is IAttachableDevice attachableDevice && ShouldPublish(isSuccessful))
+    if (device is IAttachableDevice attachableDevice
+        && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       var message = EquipmentMessageBuilder.BuildConnectionResult(attachableDevice, isSuccessful, details);
       return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
@@ -91,7 +92,8 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (device is IAttachableDevice attachableDevice && ShouldPublish(isSuccessful))
+    if (device is IAttachableDevice attachableDevice
+        && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       var message = EquipmentMessageBuilder.BuildDisconnectionResult(attachableDevice, isSuccessful, details);
       return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
@@ -120,7 +122,8 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (device is IAttachableDevice attachableDevice && ShouldPublish(isSuccessful))
+    if (device is IAttachableDevice attachableDevice
+        && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       var message = EquipmentMessageBuilder.BuildInitializationResult(attachableDevice, isSuccessful, details);
       return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
@@ -149,7 +152,8 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (device is IAttachableDevice attachableDevice && ShouldPublish(isSuccessful))
+    if (device is IAttachableDevice attachableDevice
+        && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       var message = EquipmentMessageBuilder.BuildConfigurationResult(attachableDevice, isSuccessful, details);
       return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
@@ -178,7 +182,8 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (device is IAttachableDevice attachableDevice && ShouldPublish(isSuccessful))
+    if (device is IAttachableDevice attachableDevice
+        && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       var message = EquipmentMessageBuilder.BuildResetResult(attachableDevice, isSuccessful, details);
       return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
@@ -211,7 +216,7 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (!ShouldPublish(isSuccessful))
+    if (!DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       return Task.CompletedTask;
     }
@@ -229,18 +234,5 @@ public static class EquipmentMessages
       callerName,
       callerFile,
       callerLine);
-  }
-
-  /// <summary>
-  /// Проверяет, требуется ли публиковать результат операции.
-  /// </summary>
-  /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
-  /// <returns>
-  /// <see langword="true"/>, если результат требуется опубликовать;
-  /// в противном случае — <see langword="false"/>.
-  /// </returns>
-  private static bool ShouldPublish(bool isSuccessful)
-  {
-    return !isSuccessful || DeviceDisplayConfig.GetExecutionParametersVisibility();
   }
 }

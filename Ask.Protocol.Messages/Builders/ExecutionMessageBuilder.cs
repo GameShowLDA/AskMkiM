@@ -27,10 +27,10 @@ internal static class ExecutionMessageBuilder
     => new(header: "Инициализация завершена, тест начат!");
 
   internal static ShowMessageModel BuildTestStageMessage(string title)
-    => new(header: title);
+    => new(header: title, type: ShowMessageModel.MessageType.Command);
 
   internal static ShowMessageModel BuildTestPointMessage(int pointNumber)
-    => new(header: $"Тест точки {pointNumber}");
+    => new(header: $"Точка {pointNumber}");
 
   internal static ShowMessageModel BuildOperationResultMessage(
     bool isSuccessful,
