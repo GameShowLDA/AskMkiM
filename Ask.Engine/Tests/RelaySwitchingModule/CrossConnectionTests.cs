@@ -459,6 +459,12 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       BusPoint bus2,
       CancellationToken cancellationToken)
     {
+      await RelayModuleHelper.MeterEnableAsync(
+        _userInteractionService,
+        verificat_module,
+        _userInteractionService,
+        cancellationToken);
+
       await RelayModuleHelper.BusConnectAsync(switchingBus1, tested_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus2, tested_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.BusConnectAsync(switchingBus1, verificat_module, _userInteractionService, cancellationToken);

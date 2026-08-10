@@ -80,18 +80,11 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> GetMeterResponseAsync(IUserInteractionService? userMessageService = null)
     {
-      return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-       {
-         var succes = await _meterManager.GetMeterResponseAsync(userMessageService);
-
-         if (!succes)
-         {
-           throw MeterExceptionFactory.MeterAnswerFailed(_moduleRelayControl.Name, _moduleRelayControl.NumberChassis, _moduleRelayControl.Number);
-         }
-
-         return succes;
-
-       }, userMessageService, deviceTask: true);
+      return await UserActionHelper.GetRunWithUserRepeatAsync(
+        () => _meterManager.GetMeterResponseAsync(userMessageService),
+        static _ => true,
+        userMessageService,
+        deviceTask: true);
     }
   }
 }

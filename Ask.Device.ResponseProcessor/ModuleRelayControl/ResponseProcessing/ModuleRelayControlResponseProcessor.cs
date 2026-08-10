@@ -160,6 +160,15 @@ public static class ModuleRelayControlResponseProcessor
     IUserInteractionService? outputService = null)
   {
     bool result = CheckCommandResponse(response, module, "7.1");
+    bool isValidResponse = result || CheckCommandResponse(response, module, "7.2");
+    if (!isValidResponse)
+    {
+      throw MeterExceptionFactory.MeterAnswerFailed(
+        module.Name,
+        module.NumberChassis,
+        module.Number);
+    }
+
     await DeviceMessages.PublishOperationResultAsync(
       module,
       result ? "Обнаружено подключение шин/точек (МКР)" : "Подключение шин/точек не обнаружено (МКР)",
