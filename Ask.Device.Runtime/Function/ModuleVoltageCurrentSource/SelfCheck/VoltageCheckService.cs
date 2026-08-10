@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -78,7 +79,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       double result = await GetMeasurementResult(messageService, measurementRange, delay, fastMeter);
       bool error = !(result >= firstNorm && result <= lastNorm);
 
-      await MeasurementMessages.PublishResultAsync(
+      await MeasurementMessages.PublishResultAsync(CheckType.SelfTest,
         VoltageUnit.Volt,
         new MeasurementRange(result, firstNorm, lastNorm),
         !error,
@@ -89,7 +90,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         messageService,
         indentLevel: 3,
         header: "Диапазон значений");
-      await MeasurementMessages.PublishErrorAsync(
+      await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
         VoltageUnit.Volt,
         new MeasurementRange(Math.Abs(result - voltage), firstNorm, lastNorm),
         !error,

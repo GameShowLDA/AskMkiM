@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -199,7 +200,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
           measurementRange.TargetValue = answer.value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
             MeasurementTypeCommand.PI_ACW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
             result.IsSuccessful,
@@ -212,7 +213,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
           measurementRange.TargetValue = answer.value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
             MeasurementTypeCommand.PI_DCW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
             result.IsSuccessful,
@@ -243,7 +244,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService)).value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
             MeasurementTypeCommand.PI_ACW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
             result.IsSuccessful,
@@ -256,7 +257,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService)).value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
             MeasurementTypeCommand.PI_DCW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
             result.IsSuccessful,

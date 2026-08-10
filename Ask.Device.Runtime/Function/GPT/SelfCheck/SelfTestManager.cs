@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
@@ -13,6 +14,9 @@ using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
+using EquipmentMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
+using MeasurementMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
+using SelfTestMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
 
@@ -143,7 +147,6 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             ? $"СИ. Проверка при напряжении {item}В " +
               $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
             : null;
-
           if (executionErrorMessage != null)
           {
             settings.DeviceResults[0].Tests.LastOrDefault()?.Errors.Add(new TestError
@@ -152,7 +155,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             });
           }
 
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishMeasurementResultAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(result, lowerBound, upperBound),
             isSuccessful,
@@ -160,7 +163,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage,
             outputService: userMessageService);
 
-          await MeasurementMessages.PublishErrorAsync(
+          await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,
@@ -262,7 +265,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             });
           }
 
-          await MeasurementMessages.PublishErrorAsync(
+          await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,
@@ -363,7 +366,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage);
 
 
-          await MeasurementMessages.PublishErrorAsync(
+          await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,

@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl
@@ -41,7 +42,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
         $"{mode} | [{device}] Ответ МКР на \"{command}\": \"{(string.IsNullOrEmpty(response) ? "<пустой>" : response)}\".",
         isDeviceLog: true);
 
+      ModuleRelayControlResponseProcessor.EnsureCommandAccepted(response, _module, command);
+
       return response;
     }
+
   }
 }

@@ -45,8 +45,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _capacitorManager.ConnectCapacitor(number);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение конденсатора", number.ToString(), succes, 1, userMessageService);
+        var succes = await _capacitorManager.ConnectCapacitor(number, userMessageService);
         return succes;
       }, userMessageService, deviceTask: true);
 
@@ -72,8 +71,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _capacitorManager.DisconnectCapacitor(number);
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение конденсатора", number.ToString(), succes, 1, userMessageService);
+        var succes = await _capacitorManager.DisconnectCapacitor(number, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);

@@ -33,6 +33,12 @@ namespace Ask.Device.Runtime.Base.DeviceResponses
     public string? Answer { get; set; }
 
     /// <summary>
+    /// Статус выполнения команды, возвращённый прошивкой устройства.
+    /// </summary>
+    [JsonPropertyName("Status")]
+    public string? Status { get; set; }
+
+    /// <summary>
     /// Десериализует JSON-строку в объект <see cref="BaseResponse"/>.
     /// </summary>
     /// <param name="json">Строка JSON с данными.</param>

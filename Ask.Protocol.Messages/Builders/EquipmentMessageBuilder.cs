@@ -1,5 +1,8 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using System.Windows;
+using System.Windows.Media;
 
 namespace Ask.Protocol.Messages.Builders;
 
@@ -96,6 +99,82 @@ internal static class EquipmentMessageBuilder
     string? details = null)
   {
     return BuildOperationResult(device, "Сброс устройства", isSuccessful, details);
+  }
+
+  /// <summary>
+  /// Формирует сообщение о результате коммутации точки МКР.
+  /// </summary>
+  /// <param name="device">Модуль коммутации реле.</param>
+  /// <param name="pointNumber">Номер коммутируемой точки.</param>
+  /// <param name="bus">Шина коммутации.</param>
+  /// <param name="connect">Признак подключения точки.</param>
+  /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
+  /// <returns>Модель сообщения о результате коммутации точки.</returns>
+  internal static ShowMessageModel BuildPointOperationResult(
+    IAttachableDevice device,
+    int pointNumber,
+    BusPoint bus,
+    bool connect,
+    bool isSuccessful)
+  {
+    ArgumentNullException.ThrowIfNull(device);
+
+    string operation = connect
+      ? $"Подключение точки {pointNumber} к шине [{bus}]"
+      : $"Отключение точки {pointNumber} от шины [{bus}]";
+
+    Color? fallbackMessageColor = Application.Current == null
+      ? isSuccessful ? Colors.Green : Colors.Red
+      : null;
+
+    return new ShowMessageModel(
+      header: $"{device.Name}({device.NumberChassis}.{device.Number}) - {operation}",
+      messageColor: fallbackMessageColor,
+      type: isSuccessful
+        ? ShowMessageModel.MessageType.Success
+        : ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = 1,
+      IsDeviceMessage = true,
+    };
+  }
+
+  /// <summary>
+  /// Формирует сообщение о результате операции с устройством.
+  /// </summary>
+  /// <param name="device">Устройство, над которым выполнена операция.</param>
+  /// <param name="operation">Название выполненной операции.</param>
+  /// <param name="details">Дополнительные сведения об операции.</param>
+  /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="isStepModeCheckpoint">Признак контрольной точки пошагового режима.</param>
+  /// <returns>Модель сообщения о результате операции.</returns>
+  internal static ShowMessageModel BuildDeviceOperationResult(
+    IAttachableDevice device,
+    string operation,
+    string? details,
+    bool isSuccessful,
+    int indentLevel,
+    bool isStepModeCheckpoint)
+  {
+    ArgumentNullException.ThrowIfNull(device);
+
+    Color? fallbackMessageColor = Application.Current == null
+      ? isSuccessful ? Colors.Green : Colors.Red
+      : null;
+
+    return new ShowMessageModel(
+      header: $"{device.Name}({device.NumberChassis}.{device.Number}) - {operation}",
+      message: details,
+      messageColor: fallbackMessageColor,
+      type: isSuccessful
+        ? ShowMessageModel.MessageType.Success
+        : ShowMessageModel.MessageType.Error)
+    {
+      IndentLevel = indentLevel,
+      IsDeviceMessage = true,
+      IsStepModeCheckpoint = isStepModeCheckpoint,
+    };
   }
 
   /// <summary>

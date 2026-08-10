@@ -20,12 +20,10 @@ using Ask.Engine.ControlCommandAnalyser.Parser.Kc;
 using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.Engine.ControlCommandExecutor.Executors;
 using Ask.Engine.UnitTests.Fixtures;
+using Ask.Engine.UnitTests.TestInfrastructure;
 using Moq;
 using System.Globalization;
 using System.Reflection;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.Executors;
 
@@ -790,7 +788,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
 
     public async Task<ProtocolModel> ExecuteAsync(KsCommandModel command)
     {
-      return await StaTestHost.RunAsync(async () =>
+      return await WpfTestHost.RunAsync(async () =>
       {
         var manager = new CommandExecutionManager(
           ConsoleMock.Object,
@@ -816,44 +814,4 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     }
   }
 
-  private static class StaTestHost
-  {
-    private static readonly Lazy<Dispatcher> DispatcherInstance = new(CreateDispatcher);
-
-    public static Task<T> RunAsync<T>(Func<Task<T>> action)
-    {
-      var dispatcher = DispatcherInstance.Value;
-      return dispatcher.InvokeAsync(async () => await action()).Task.Unwrap();
-    }
-
-    private static Dispatcher CreateDispatcher()
-    {
-      var ready = new TaskCompletionSource<Dispatcher>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-      var thread = new Thread(() =>
-      {
-        EnsureApplicationWithResources();
-        ready.SetResult(Dispatcher.CurrentDispatcher);
-        Dispatcher.Run();
-      });
-
-      thread.IsBackground = true;
-      thread.SetApartmentState(ApartmentState.STA);
-      thread.Start();
-
-      return ready.Task.GetAwaiter().GetResult();
-    }
-
-    private static void EnsureApplicationWithResources()
-    {
-      var application = Application.Current ?? new Application();
-      application.Resources["TestsProtocolMessageSuccesForeground"] = new SolidColorBrush(Colors.Green);
-      application.Resources["TestsProtocolMessageErrorForeground"] = new SolidColorBrush(Colors.Red);
-      application.Resources["TestsProtocolHeaderForeground"] = new SolidColorBrush(Colors.White);
-      application.Resources["TestsProtocolMessageForeground"] = new SolidColorBrush(Colors.White);
-      application.Resources["TestsProtocolTimeForeground"] = new SolidColorBrush(Colors.White);
-      application.Resources["YellowColorSolidColorBrush"] = new SolidColorBrush(Colors.Yellow);
-      application.Resources["LightBlueColorSolidColorBrush"] = new SolidColorBrush(Colors.LightBlue);
-    }
-  }
 }

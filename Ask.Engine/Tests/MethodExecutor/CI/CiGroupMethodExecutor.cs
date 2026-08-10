@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -88,7 +88,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
 
           var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-          await MeasurementMessages.PublishStartAsync(
+          await MeasurementMessages.PublishStartAsync(CheckType.Test,
             MeasurementTypeCommand.SI,
             messageService,
             indentLevel: 1);
@@ -109,7 +109,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
               ResistanceUnit.MegaOhm,
               MeasurementLimitKind.Minimum)
             : null;
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.Test,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(answer.value, dataModel.Param, -1),
             isSuccessful,

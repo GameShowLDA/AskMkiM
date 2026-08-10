@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Base.Device;
 using System.Net;
 using System.Net.Sockets;
@@ -47,7 +48,7 @@ namespace Ask.Device.Runtime.Function.Connected
           idleResponse,
           timeout: _device.ConnectedProfile.Timeout,
           port: _device.ConnectedProfile.Port);
-        return string.IsNullOrWhiteSpace(answer)
+        return !MultimeterResponseProcessor.CheckInitialization(answer)
           ? (false, $"Нет ответа на команду {_device.ConnectedProfile.Initialize} от {_device.Name}")
           : (true, answer.Trim());
       }

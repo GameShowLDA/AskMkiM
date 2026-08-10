@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
@@ -134,17 +134,12 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, resultFastMeterMeasured, LowerBound, UpperBound, "В");
         }
 
-        await MeasurementMessages.PublishReferenceValueAsync(
+        await MeasurementMessages.PublishReferenceValueAsync(CheckType.Metrology,
           VoltageUnit.Volt,
           resultReferenceMeterMeasured,
           protocolUI);
-        await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KN_DCW, new MeasurementRange(resultFastMeterMeasured, LowerBound, UpperBound), result, outputService: protocolUI);
-        await RangeMessages.PublishAllowedRangeAsync(
-          VoltageUnit.Volt,
-          new MeasurementRange(LowerBound, LowerBound, UpperBound),
-          protocolUI,
-          indentLevel: 2);
-        await MeasurementMessages.PublishErrorAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.Metrology, MeasurementTypeCommand.KN_DCW, new MeasurementRange(resultFastMeterMeasured, LowerBound, UpperBound), result, chains: MeasurementPointsDisplay, outputService: protocolUI);
+        await PublishMetrologyMeasurementErrorAsync(
           VoltageUnit.Volt,
           new MeasurementRange(err, LowerBound, UpperBound),
           result,

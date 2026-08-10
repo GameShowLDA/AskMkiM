@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
@@ -177,6 +178,15 @@ namespace Ask.Core.Services.UI
         bool hardwareSucceeded = hardwareException == null && (!deviceTask || operationSucceeded);
         bool attemptProducedOutput = messageService != null &&
           messageService.GetLastLineNumber() != outputLineBeforeAttempt;
+
+        if (hardwareException is ModuleRelayControlProtocolException &&
+            messageService != null &&
+            !attemptProducedOutput)
+        {
+          await ShowAttemptResultAsync(messageService, success: false, hardwareException);
+          attemptProducedOutput = true;
+        }
+
         if (!interactiveMode && hardwareSucceeded && operationSucceeded)
         {
           return result;
@@ -233,12 +243,21 @@ namespace Ask.Core.Services.UI
       bool success,
       Exception? exception)
     {
+      string header = success ? "Повторная аппаратная операция" : "Аппаратная операция";
+      string message = success
+        ? "Повторная попытка выполнена успешно."
+        : exception?.Message ?? "Оборудование не выполнило операцию.";
+
+      if (exception is ModuleRelayControlProtocolException protocolException)
+      {
+        header = $"{protocolException.DeviceDisplayName}: {protocolException.Operation}";
+        message = $"Системная ошибка. {protocolException.ProtocolError}";
+      }
+
       await messageService.ShowMessageAsync(
         new ShowMessageModel(
-          header: success ? "Повторная аппаратная операция" : "Аппаратная операция",
-          message: success
-            ? "Повторная попытка выполнена успешно."
-            : exception?.Message ?? "Оборудование не выполнило операцию.",
+          header: header,
+          message: message,
           type: success
             ? ShowMessageModel.MessageType.Success
             : ShowMessageModel.MessageType.Error),

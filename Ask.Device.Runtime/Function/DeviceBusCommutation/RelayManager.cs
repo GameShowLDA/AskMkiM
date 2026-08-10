@@ -1,6 +1,6 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using Ask.Device.Runtime.Commands;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation
@@ -42,7 +42,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 1);
       string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+      return await DeviceBusCommutationResponseProcessor.CheckRelayOperationAsync(
+        answer, _deviceBusCommutation, numberRelay, true, userMessageService);
     }
 
     /// <summary>
@@ -60,7 +61,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       DeviceCommand cmd = new DeviceCommand(8, numberRelay, 2);
       string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+      return await DeviceBusCommutationResponseProcessor.CheckRelayOperationAsync(
+        answer, _deviceBusCommutation, numberRelay, false, userMessageService);
     }
 
     /// <summary>
@@ -73,7 +75,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       string answer = await queryExecutor.QueryAsync(cmd.ToString());
 
       await Task.Delay(10);
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(cmd.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 1, 0, true, "Включение реле", "Общий", outputService: userMessageService);
     }
 
     /// <summary>
@@ -86,36 +89,29 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       string answer = await queryExecutor.QueryAsync(cmd.ToString());
 
       await Task.Delay(10);
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(cmd.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 1, 0, false, "Выключение реле", "Общий", outputService: userMessageService);
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectRCRelay(IUserInteractionService? userMessageService = null)
     {
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand(9, 3, 0, 1);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 3, 0, true, "Подключение RC реле", "Общий", outputService: userMessageService);
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectRCRelay(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand(9, 3, 0, 2);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 3, 0, false, "Отключение RC реле", "Общий", outputService: userMessageService);
     }
 
     /// <inheritdoc />
@@ -126,15 +122,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand(9, 3, numberResistor, 1);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 3, numberResistor, true,
+        "Подключение резистора RC реле", $"R{numberResistor}", outputService: userMessageService);
     }
 
     /// <inheritdoc />
@@ -145,15 +138,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand(9, 3, numberResistor, 2);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 3, numberResistor, false,
+        "Отключение резистора RC реле", $"R{numberResistor}", outputService: userMessageService);
     }
 
     /// <inheritdoc />
@@ -164,15 +154,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand(9, 3, numberCapacitor + 10, 1);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 3, numberCapacitor + 10, true,
+        "Подключение конденсатора RC реле", $"C{numberCapacitor}", outputService: userMessageService);
     }
 
     /// <inheritdoc />
@@ -183,15 +170,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
         return false;
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand(9, 3, numberCapacitor + 10, 2);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString());
+      string answer = await queryExecutor.QueryAsync(cmd.ToString());
       await Task.Delay(10);
-      return true;
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 3, numberCapacitor + 10, false,
+        "Отключение конденсатора RC реле", $"C{numberCapacitor}", outputService: userMessageService);
     }
   }
 }

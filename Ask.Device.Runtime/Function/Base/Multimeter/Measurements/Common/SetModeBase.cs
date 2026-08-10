@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Helpers;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
@@ -23,7 +24,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(device, header, succes, 1, userMessageService);
+          await MultimeterMessages.PublishOperationResultAsync(device, header, succes, 1, userMessageService);
         }
 
         return succes;
@@ -57,7 +58,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile.GetMode,
         profile.CheckMode,
         timeout: profile.Timeout);
-      if (answer.Contains(profile.CheckMode))
+      if (MultimeterResponseProcessor.CheckMode(answer, profile.CheckMode))
       {
         device.TypeMode = profile.TypeMode;
         return true;

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
@@ -216,7 +216,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
             expectedResistance,
             result,
             ResistanceUnit.Ohm);
-        await MeasurementMessages.PublishResultAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.Test,
           ResistanceUnit.Ohm,
           new MeasurementRange(result, 0d, expectedResistance),
           success,

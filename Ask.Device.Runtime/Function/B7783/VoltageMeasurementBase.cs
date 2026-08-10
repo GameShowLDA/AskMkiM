@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using System.Globalization;
 
 namespace Ask.Device.Runtime.Function.B7783
@@ -50,7 +51,7 @@ namespace Ask.Device.Runtime.Function.B7783
       await ConfigureVoltageMeasurementAsync(param, rangeFrom, rangeTo);
       string function = await Device.DeviceProtocol.QueryAsync("FUNCTION?", timeout: CommandTimeoutMs);
 
-      if (function.Contains(ModeResponseToken, StringComparison.OrdinalIgnoreCase))
+      if (MultimeterResponseProcessor.CheckMode(function, ModeResponseToken))
       {
         Device.TypeMode = TargetMode;
         return true;
@@ -81,15 +82,21 @@ namespace Ask.Device.Runtime.Function.B7783
         }
       }
 
-      string response = await Device.DeviceProtocol.QueryAsync("READ?", timeout: MeasurementTimeoutMs);
-      response = response.Trim().Replace("+", string.Empty, StringComparison.Ordinal);
-
-      if (double.TryParse(response, NumberStyles.Float, CultureInfo.InvariantCulture, out double voltage))
+      for (int measurementAttempt = 1; measurementAttempt <= 2; measurementAttempt++)
       {
-        return voltage;
+        string response = await Device.DeviceProtocol.QueryAsync("READ?", timeout: MeasurementTimeoutMs);
+        if (!MultimeterResponseProcessor.TryParseMeasurement(response, out var measurement))
+        {
+          throw new FormatException($"Invalid B7-78/3 {FunctionName} voltage response: '{response}'.");
+        }
+
+        if (measurementAttempt == 2 || IsWithinRange(measurement!.Value, rangeFrom, rangeTo))
+        {
+          return measurement.Value;
+        }
       }
 
-      throw new FormatException($"Invalid B7-78/3 {FunctionName} voltage response: '{response}'.");
+      throw new InvalidOperationException("Failed to obtain B7-78/3 voltage measurement result.");
     }
 
     protected async Task<bool> SetVoltageRangeCoreAsync(
@@ -112,7 +119,7 @@ namespace Ask.Device.Runtime.Function.B7783
       await ConfigureVoltageMeasurementAsync(range);
       string function = await Device.DeviceProtocol.QueryAsync("FUNCTION?", timeout: CommandTimeoutMs);
 
-      if (function.Contains(ModeResponseToken, StringComparison.OrdinalIgnoreCase))
+      if (MultimeterResponseProcessor.CheckMode(function, ModeResponseToken))
       {
         Device.TypeMode = TargetMode;
         return true;
@@ -148,7 +155,7 @@ namespace Ask.Device.Runtime.Function.B7783
     private async Task EnsureNoInstrumentErrorAsync()
     {
       string error = await Device.DeviceProtocol.QueryAsync("SYSTEM:ERROR?", timeout: CommandTimeoutMs);
-      if (!string.IsNullOrWhiteSpace(error) && !error.StartsWith("+0", StringComparison.Ordinal))
+      if (!MultimeterResponseProcessor.CheckNoInstrumentError(error, out _))
       {
         throw new InvalidOperationException($"B7-78/3 configuration error: {error}");
       }
@@ -196,6 +203,14 @@ namespace Ask.Device.Runtime.Function.B7783
     private static bool HasMeasurementConfiguration(double param, double rangeFrom, double rangeTo)
     {
       return param != 0 || rangeFrom >= 0 || rangeTo >= 0;
+    }
+
+    private static bool IsWithinRange(double value, double rangeFrom, double rangeTo)
+    {
+      bool isLowerValid = rangeFrom == -1 || value >= rangeFrom;
+      bool isUpperValid = rangeTo == -1 || value <= rangeTo;
+
+      return isLowerValid && isUpperValid;
     }
 
     private static double ResolveResolution(double range)

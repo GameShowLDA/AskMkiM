@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -88,7 +88,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-        await MeasurementMessages.PublishLeakageCurrentStartAsync(
+        await MeasurementMessages.PublishLeakageCurrentStartAsync(CheckType.Test,
           MeasurementTypeCommand.PI_DCW,
           messageService);
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
@@ -109,7 +109,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
               CurrentUnit.MilliAmpere,
               MeasurementLimitKind.Maximum)
             : null;
-          await MeasurementMessages.PublishResultAsync(
+          await MeasurementMessages.PublishResultAsync(CheckType.Test,
             CurrentUnit.MilliAmpere,
             new MeasurementRange(answer.value, 0, dataModel.Param),
             isSuccessful,

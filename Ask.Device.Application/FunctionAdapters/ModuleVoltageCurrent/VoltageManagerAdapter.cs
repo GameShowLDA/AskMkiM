@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -32,7 +33,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         try
         {
           await _voltageManager.SetSourceVoltageAsync(voltageSources);
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Выбор источника напряжения",
             $"Источник: {label}",
@@ -43,7 +44,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         }
         catch (Exception ex)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Ошибка выбора источника напряжения",
             ex.Message,
@@ -64,7 +65,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         try
         {
           await _voltageManager.SetVoltageLevelAsync(integerPart, decimalPart);
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка уровня напряжения",
             $"Напряжение: {value} В",
@@ -75,7 +76,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         }
         catch (Exception ex)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Ошибка установки напряжения",
             ex.Message,

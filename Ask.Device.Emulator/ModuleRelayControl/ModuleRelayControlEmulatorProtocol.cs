@@ -12,13 +12,19 @@ namespace Ask.Device.Emulator.ModuleRelayControl
     private readonly Func<int> _moduleNumberProvider;
     private readonly Func<int> _chassisNumberProvider;
     private readonly Func<bool> _hardwareErrorProvider;
+    private readonly Func<bool> _measurementErrorProvider;
+    private readonly Func<int> _externalBusFailedStageProvider;
     private bool _notDefaultState;
     private bool _meterEnabled;
 
     public ModuleRelayControlEmulatorProtocol(
       Func<int> moduleNumberProvider,
       Func<int> chassisNumberProvider)
-      : this(moduleNumberProvider, chassisNumberProvider, IdleHardwareErrorSimulator.ShouldSimulateHardwareError)
+      : this(
+        moduleNumberProvider,
+        chassisNumberProvider,
+        IdleHardwareErrorSimulator.ShouldSimulateHardwareError,
+        ExecutionConfig.GetIsErrorSimulationEnabled)
     {
     }
 
@@ -26,6 +32,30 @@ namespace Ask.Device.Emulator.ModuleRelayControl
       Func<int> moduleNumberProvider,
       Func<int> chassisNumberProvider,
       Func<bool> hardwareErrorProvider)
+      : this(moduleNumberProvider, chassisNumberProvider, hardwareErrorProvider, () => false)
+    {
+    }
+
+    internal ModuleRelayControlEmulatorProtocol(
+      Func<int> moduleNumberProvider,
+      Func<int> chassisNumberProvider,
+      Func<bool> hardwareErrorProvider,
+      Func<bool> measurementErrorProvider)
+      : this(
+        moduleNumberProvider,
+        chassisNumberProvider,
+        hardwareErrorProvider,
+        measurementErrorProvider,
+        () => Random.Shared.Next(3))
+    {
+    }
+
+    internal ModuleRelayControlEmulatorProtocol(
+      Func<int> moduleNumberProvider,
+      Func<int> chassisNumberProvider,
+      Func<bool> hardwareErrorProvider,
+      Func<bool> measurementErrorProvider,
+      Func<int> externalBusFailedStageProvider)
     {
       _moduleNumberProvider = moduleNumberProvider
         ?? throw new ArgumentNullException(nameof(moduleNumberProvider));
@@ -33,6 +63,10 @@ namespace Ask.Device.Emulator.ModuleRelayControl
         ?? throw new ArgumentNullException(nameof(chassisNumberProvider));
       _hardwareErrorProvider = hardwareErrorProvider
         ?? throw new ArgumentNullException(nameof(hardwareErrorProvider));
+      _measurementErrorProvider = measurementErrorProvider
+        ?? throw new ArgumentNullException(nameof(measurementErrorProvider));
+      _externalBusFailedStageProvider = externalBusFailedStageProvider
+        ?? throw new ArgumentNullException(nameof(externalBusFailedStageProvider));
     }
 
     /// <inheritdoc />
@@ -106,28 +140,42 @@ namespace Ask.Device.Emulator.ModuleRelayControl
           });
 
         case 6 when Matches(parts, 2) && parts[1] > 0:
-          return Envelope(new
           {
-            Status = "sucsess",
-            NumberPoint = parts[1],
-            ConnectPoint = true,
-            DisconnectBusA = true,
-            DisconnectBusB = true,
-            SelfControl = true
-          });
+            bool simulateMeasurementError = _measurementErrorProvider();
+            int failedStage = parts[1] % 3;
+            bool connectPoint = !simulateMeasurementError || failedStage != 0;
+            bool disconnectBusA = !simulateMeasurementError || failedStage != 1;
+            bool disconnectBusB = !simulateMeasurementError || failedStage != 2;
+            return Envelope(new
+            {
+              Status = "sucsess",
+              NumberPoint = parts[1],
+              ConnectPoint = connectPoint,
+              DisconnectBusA = disconnectBusA,
+              DisconnectBusB = disconnectBusB,
+              SelfControl = connectPoint && disconnectBusA && disconnectBusB
+            });
+          }
 
         case 10 when Matches(parts, 2) && parts[1] is >= 1 and <= 4:
-          return Envelope(new
           {
-            NumberBus = parts[1],
-            ProtectReleBusA = 100 + (parts[1] * 2) - 1,
-            ProtectReleBusB = 108 + (parts[1] * 2) - 1,
-            ConnectProtect = true,
-            MainReleBusA = 100 + (parts[1] * 2),
-            MainReleBusB = 108 + (parts[1] * 2),
-            ConnectMain = true,
-            Error = 0
-          });
+            bool simulateMeasurementError = _measurementErrorProvider();
+            int simulationOutcome = _externalBusFailedStageProvider();
+            bool connectProtect = !simulateMeasurementError || simulationOutcome != 1;
+            bool connectMain = !simulateMeasurementError || simulationOutcome != 2;
+            bool hasError = !connectProtect || !connectMain;
+            return Envelope(new
+            {
+              NumberBus = parts[1],
+              ProtectReleBusA = 100 + (parts[1] * 2) - 1,
+              ProtectReleBusB = 108 + (parts[1] * 2) - 1,
+              ConnectProtect = connectProtect,
+              MainReleBusA = 100 + (parts[1] * 2),
+              MainReleBusB = 108 + (parts[1] * 2),
+              ConnectMain = connectMain,
+              Error = hasError ? 1 : 0
+            });
+          }
 
         default:
           return null;

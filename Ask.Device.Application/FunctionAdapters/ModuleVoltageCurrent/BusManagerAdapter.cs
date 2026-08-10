@@ -1,3 +1,4 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleVoltageCurrent;
 using Ask.Core.Services.UI;
@@ -32,7 +33,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         var succes = await _busManager.ConnectBusToPositiveAsync(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к +", bus.ToString(), succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_module, "Подключение к +", bus.ToString(), succes, 1, userMessageService);
         }
 
         return succes;
@@ -53,7 +54,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Подключение к -", bus.ToString(), succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_module, "Подключение к -", bus.ToString(), succes, 1, userMessageService);
         }
 
         return succes;
@@ -73,7 +74,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         var succes = await _busManager.DisconnectBusToPositiveAsync(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от +", bus.ToString(), succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_module, "Отключение от +", bus.ToString(), succes, 1, userMessageService);
         }
         return succes;
       }, userMessageService, deviceTask: true);
@@ -92,7 +93,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleVoltageCurrent
         var succes = await _busManager.DisconnectBusToNegativeAsync(bus);
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_module, "Отключение от -", bus.ToString(), succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(_module, "Отключение от -", bus.ToString(), succes, 1, userMessageService);
         }
 
         return succes;

@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
@@ -74,11 +74,6 @@ namespace Ask.Engine.Tests.Metrology
       var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KC, data.Param);
 
       await _userInteractionService.AppendEmptyLineAsync();
-      await RangeMessages.PublishAllowedRangeAsync(
-        ResistanceUnit.Ohm,
-        new MeasurementRange(LowerBound, LowerBound, UpperBound),
-        _userInteractionService);
-
       var realyModule = testMeasurement.GetRelayModuleWithMaxNumber(metrologicalModeRole);
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService, realyModule.SwitchResistance), _userInteractionService, true);
     }
@@ -107,7 +102,7 @@ namespace Ask.Engine.Tests.Metrology
       {
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
-        await MeasurementMessages.PublishStartAsync(
+        await MeasurementMessages.PublishStartAsync(CheckType.Metrology,
           MeasurementTypeCommand.KC,
           protocolUI,
           isBlockStart: true);
@@ -128,8 +123,8 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, result, LowerBound, UpperBound, "Ом");
         }
 
-        await MeasurementMessages.PublishResultAsync(MeasurementTypeCommand.KC, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, outputService: protocolUI);
-        await MeasurementMessages.PublishErrorAsync(
+        await MeasurementMessages.PublishResultAsync(CheckType.Metrology, MeasurementTypeCommand.KC, new MeasurementRange(result, LowerBound, UpperBound), result >= LowerBound && result <= UpperBound, chains: MeasurementPointsDisplay, outputService: protocolUI);
+        await PublishMetrologyMeasurementErrorAsync(
           ResistanceUnit.Ohm,
           new MeasurementRange(err, LowerBound, UpperBound),
           result >= LowerBound && result <= UpperBound,
@@ -140,11 +135,6 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
       {
         await PrintResult(messageService, MeasurementTypeCommand.KC);
-        await RangeMessages.PublishAllowedRangeAsync(
-          ResistanceUnit.Ohm,
-          new MeasurementRange(LowerBound, LowerBound, UpperBound),
-          messageService,
-          indentLevel: 1);
         await base.FinalizeMeasurement(metrologicalModeRole, messageService);
 
         Measurements.Clear();
