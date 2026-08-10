@@ -37,7 +37,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task ExecuteMeasurementProcess(IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
+    private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, metrologyMode: MeasurementTypeCommand.PI_ACW, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       PiACWMethodExecutorMeasurement testMeasurement = new PiACWMethodExecutorMeasurement();

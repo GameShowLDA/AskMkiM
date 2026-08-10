@@ -168,8 +168,8 @@ namespace Ask.Engine.Tests.Base
       var displayInfo = metrologyMode.GetCommandDisplayInfo();
       var parameters = new List<(string Header, string Value)>
       {
-        ("Первая точка", data.FirstPoint.ToString()),
-        ("Вторая точка", data.SecondPoint.ToString()),
+        ("Начальная точка", data.FirstPoint.ToString()),
+        ("Конечная точка", data.SecondPoint.ToString()),
         (
           $"Заданное значение {displayInfo.MeasurementDescription.ToLowerInvariant()}",
           MeasurementValueFormatter.FormatWithUnit(data.Param, displayInfo.Unit)),

@@ -1,5 +1,6 @@
 using System;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 {
@@ -19,7 +20,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     {
       ArgumentNullException.ThrowIfNull(userMessageService);
 
-      return SelfTestMessages.PublishMultimeterMeasurementResultAsync(
+      return MultimeterMessages.PublishSelfTestMeasurementResultAsync(
         status,
         result,
         param,

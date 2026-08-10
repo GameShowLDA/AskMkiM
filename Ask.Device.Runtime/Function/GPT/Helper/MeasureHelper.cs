@@ -5,9 +5,8 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.GPT.Command;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using System.Diagnostics;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
 
@@ -104,14 +103,15 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
           query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
           answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-          if (answerDevice != string.Empty && !answerDevice.Contains("TEST"))
+          if (answerDevice != string.Empty
+            && !BreakdownTesterResponseProcessor.IsTestInProgress(answerDevice))
             break;
 
           await Task.Delay(PollIntervalMs);
         }
         LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{i + 1}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
-        if (!answerDevice.Contains("FAIL"))
+        if (!BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
           break;
         }
@@ -124,7 +124,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       if (breakDown.Mode != Ask.Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
       {
-        if (answerDevice.Contains("FAIL"))
+        if (BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
           value = -1;
         }
@@ -159,7 +159,8 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
         answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-        if (!string.IsNullOrEmpty(answerDevice) && !answerDevice.Contains("TEST"))
+        if (!string.IsNullOrEmpty(answerDevice)
+          && !BreakdownTesterResponseProcessor.IsTestInProgress(answerDevice))
           break;
       }
       LogInformation($"[PERF][GPT][MeasureFullTime] Poll result: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
@@ -175,29 +176,11 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// </summary>
     static private (double value, string unit) ParseMeasureValue(string answer)
     {
-      var parts = answer.Split(',');
-      if (parts.Length < 4)
+      if (!BreakdownTesterResponseProcessor.TryParseMeasurement(answer, out var response))
         throw new FormatException("Некорректный формат ответа прибора.");
 
-      var source = parts[3].Trim();
-      LogInformation($"Парсинг измерения: {source}", isDeviceLog: true);
-
-      // 1) Старый регекс (без пробела между числом и единицей)
-      var match = Regex.Match(source, @"(?<value>\d+(\.\d+)?)(?<unit>[A-Za-z]+)");
-
-      if (!match.Success)
-      {
-        // 2) Новая версия (разрешаем пробелы)
-        match = Regex.Match(source, @"(?<value>\d+(?:\.\d+)?)[\s]*(?<unit>[A-Za-z]+)");
-      }
-
-      if (!match.Success)
-        throw new FormatException($"Не удалось выделить число и единицу измерения из '{source}'.");
-
-      double value = double.Parse(match.Groups["value"].Value, CultureInfo.InvariantCulture);
-      string unit = match.Groups["unit"].Value;
-
-      return (value, unit);
+      LogInformation($"Парсинг измерения: {response.Value} {response.Unit}", isDeviceLog: true);
+      return (response.Value, response.Unit);
     }
 
     /// <summary>
@@ -217,7 +200,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         var answerDevice = await breakDown.DeviceProtocol.QueryAsync(statusCommand, responseDelay: StopPollIntervalMs, timeout: 1000);
 
         if (!string.IsNullOrWhiteSpace(answerDevice)
-          && answerDevice.Contains("TEST OFF", StringComparison.OrdinalIgnoreCase))
+          && BreakdownTesterResponseProcessor.IsTestStopped(answerDevice))
         {
           LogInformation($"[PERF][GPT][StopMeasure] Total: {total.ElapsedMilliseconds} ms", isDeviceLog: true);
           return;

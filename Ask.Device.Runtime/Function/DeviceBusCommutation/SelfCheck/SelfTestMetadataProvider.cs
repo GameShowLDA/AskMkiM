@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Commands;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
@@ -57,15 +58,17 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <inheritdoc />
     static public async Task<int> GetRelayCountAsync(Device.DeviceBusCommutation _deviceBusCommutation, SwitchingDeviceTypeConnector testType, int busContact)
     {
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_deviceBusCommutation) ? -1 : 0;
       }
 
       DeviceCommand cmd = new DeviceCommand(41, (int)testType * 10, busContact, 0);
-      string response = await _deviceBusCommutation.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 2000);
+      string response = await new DeviceBusCommutationQueryExecutor(_deviceBusCommutation)
+        .QueryAsync(cmd.ToString(), timeout: 2000);
 
-      if (int.TryParse(response, out int relayCount))
+      if (DeviceBusCommutationResponseProcessor.TryReadNumericResponse(response, out int relayCount))
       {
         LogInformation($"Количество реле в цепи {testType}: {relayCount}", isDeviceLog: true);
         return relayCount;

@@ -24,7 +24,7 @@
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
-| Пробойная установка GPT | `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
+| Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
 | UPS | `Ask.Core/Shared/Interfaces/DeviceInterfaces/UninterruptiblePowerSupply/` | `Ask.Device.Application/FunctionAdapters/MikUps1101rRm/`, `Ask.Device.Runtime/Function/MikUps1101rRm/` |
@@ -84,7 +84,7 @@
 | `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
-| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Контракты и последующая обработка ответов оборудования; сейчас содержит модели всех JSON-ответов прошивки МКР | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций МКР) |
+| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Модели, строгая проверка протокольных ответов и централизованная публикация сообщений МКР, УКШ, мультиметров и пробойной установки GPT | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций и самоконтроля) |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
@@ -1101,9 +1101,9 @@ device-строку вида `Модуль МКР-350(1.6) - Подключен�
 В `Ask.Device.Runtime/Function/ModuleRelayControl/` и соответствующих application adapters
 не осталось прямого разбора JSON или прямых вызовов `DeviceMessages`, `EquipmentMessages` и
 `SelfTestMessages`; решение о видимости остаётся внутри `Ask.Protocol.Messages`.
-Runtime `PointManager` ожидает эти методы для обычного и контролируемого
-подключения/отключения одной точки; остальные команды МКР пока продолжают собственную
-десериализацию моделей из `Ask.Device.Runtime`.
+Runtime-менеджеры МКР передают исходные ответы и параметры операции в
+`ModuleRelayControlResponseProcessor`; модели и проверки протокола находятся в
+`Ask.Device.ResponseProcessor/ModuleRelayControl/`.
 
 Representative Keysight measurement:
 
@@ -1111,32 +1111,81 @@ Representative Keysight measurement:
 executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
-→ MeasurementBase.MeasureResistanceAsync
+→ MeasurementBase.MeasureAsync → MeasureOtherAsync
 → SetModeBase / RangeBase → DeviceProtocolEmulator.QueryMultimeterAsync
-→ repeat correctMeasurementCount + falseMeasurementCount times
-  → AdapterMeasurementExecutor
-  → MeasurementBase.MeasureCoreAsync
-  → Simulated.GetSimulatedValue builds idleResponse
-  → DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
-    → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
-    → Idle: SCPI-compatible scientific-notation response from MeasurementRange
-  → numeric parsing/rounding
+→ AdapterMeasurementExecutor
+→ MeasurementBase.MeasureCoreAsync
+→ Simulated.GetSimulatedValue builds idleResponse
+→ DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
+  → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
+  → Idle: SCPI-compatible scientific-notation response from MeasurementRange
+→ MultimeterResponseProcessor.TryParseMeasurement
+  → MeasurementResponseChecker → MeasurementResponse
+→ rounding
 → range verdict and DeviceMessages.PublishOperationResultAsync
 ```
+
+Единая обработка ответов Keysight 34465A и В7-78/3 находится в
+`Ask.Device.ResponseProcessor/Multimeter/`:
+
+- `MultimeterResponseProcessor.CheckInitialization` проверяет идентификационный ответ;
+- `CheckMode` через `ModeResponseChecker` проверяет ответы `FUNCTION?`/профильного `GetMode`;
+- `TryParseMeasurement` через `MeasurementResponseChecker` разбирает знак, точку/запятую,
+  экспоненту и допустимый текстовый суффикс;
+- `TryCheckContinuity` интерпретирует измерение и SCPI-значение перегрузки `9.9E+37`;
+- `CheckNoInstrumentError` через `InstrumentErrorResponseChecker` разбирает код и текст
+  ответа `SYSTEM:ERROR?`.
+
+Единая обработка ответов GPT-79904 находится в
+`Ask.Device.ResponseProcessor/BreakdownTester/`:
+
+- `BreakdownTesterResponseProcessor.CheckInitialization` проверяет идентификационный ответ GPT;
+- `CheckMode` проверяет ответы выбора ACW/DCW/IR;
+- `TryParseNumber` через `NumericResponseChecker` разбирает знаковые значения, десятичную
+  точку/запятую, экспоненту и суффиксы `kV`, `mA`, `Hz`, `GOhm`/`MOhm`;
+- `TryParseState` обрабатывает `ON`/`OFF` для режима земли и системных настроек;
+- `TryParseMeasurement` через `MeasurementResponseChecker` извлекает последний измерительный
+  результат, единицу и статус `PASS`/`FAIL`/`TEST` из составного ответа GPT;
+- `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
+  ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
+
+Runtime-путь GPT:
+
+```text
+IBreakdownTester / GPT79904
+→ application AcwModeAdapter / DcwModeAdapter / IrModeAdapter / SystemSettingsAdapter
+→ runtime manager/helper в Ask.Device.Runtime/Function/GPT
+→ BreakdownTesterCommandProtocol.QueryAsync
+→ Real ComProtocol / Idle BreakdownTesterEmulatorProtocol
+→ BreakdownTesterResponseProcessor (режим/число/состояние/измерение)
+→ BreakdownTesterMessages → Ask.Protocol.Messages
+```
+
+Подключение, отключение, инициализация и сброс `IBreakdownTester` маршрутизируются в
+`Transport` через `BreakdownTesterResponseProcessor`; COM-идентификация дополнительно проверяется
+в `ComTransport.IsExpectedInitializeAnswer` по `ConnectedProfile.CheckMode`.
+
+Общий `MeasurementBase`, `SetModeBase`, `RangeBase`, `ContinuityMeasurementBase` и
+отдельный legacy-путь `B7783/VoltageMeasurementBase` не разбирают ответы самостоятельно.
+Публикация рабочих сообщений и результатов самоконтроля мультиметра централизована в
+`MultimeterMessages`; тексты и параметры сообщений сохранены в `Ask.Protocol.Messages`.
+Сообщения подключения, отключения, инициализации и сброса для `IMultimeter` проходят через
+`MultimeterResponseProcessor`. Retry и проверка измерения по допустимому диапазону остаются
+в Runtime/Engine.
 
 Для `MultimeterTypeMode.Continuity` общий `MeasurementBase` не вызывает
 `RangeBase`: режим прозвонки задаётся профильной командой `CONF:CONT`, а
 измерительный запрос выполняется через `MEAS:CONT?` без установки диапазона.
 
-По умолчанию измерение сопротивления выполняет три замера:
-`correctMeasurementCount = 2` и `falseMeasurementCount = 1`. Правильным
-считается числовой ответ внутри `MeasurementRange`; аппаратная ошибка
-не считается ложным замером и идёт в обычный equipment retry flow. Серия
-проходит при двух или трёх правильных замерах. Прошедшая серия
-возвращает среднее правильных значений; непрошедшая — значение вне
-диапазона, сохраняя существующие verdict/retry semantics в Engine. Перегрузка
-`IResistanceMeasurement.MeasureResistanceAsync` позволяет вызывающему коду
-явно задать оба количества.
+Сопротивление, напряжение, диод и прозвонка сначала выполняют один замер. Если его
+результат вне `MeasurementRange`, он отбрасывается и `MeasureOtherAsync` выполняет второй
+замер, результат которого становится итоговым независимо от диапазона. Это не усреднение.
+Отдельный путь В7-78/3 в `B7783/VoltageMeasurementBase.MeasureVoltageAsync` применяет то же
+правило двух попыток.
+Повтор внутри `AdapterMeasurementExecutor` относится только к восстановлению после ошибки
+оборудования. Серия измерений с усреднением реализована только для ёмкости в
+`MeasurementBase.MeasureCapacitanceAsync`; количество задаётся параметром
+`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
@@ -1146,7 +1195,7 @@ IMultimeter.ConnectableManager.InitializeAsync()
 → DeviceProtocolEmulator.QueryMultimeterAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
-→ проверка непустого ответа
+→ MultimeterResponseProcessor.CheckInitialization
 ```
 
 `DeviceProtocolEmulator.QueryMultimeterAsync` записывает каждую операцию двумя строками единого формата:
@@ -1207,6 +1256,16 @@ Selection is distributed, not DI-based:
   - УКШ runtime-команды `4`, `5`, `6`, `7`, `8`, `9`, `41` проходят через
     `DeviceBusCommutationQueryExecutor` и `DeviceBusCommutationEmulatorProtocol`, формируя журналируемый ответ
     в формате прошивки: JSON для `4/5/7/9`, строковое значение для `6/8/41`;
+    затем `DeviceBusCommutationResponseProcessor` выбирает специализированную проверку команды
+    (`EquipmentCommandResponseChecker`, `BusCommandResponseChecker`, `RelayCommandResponseChecker`,
+    `ChainCommandResponseChecker` или `SelfTestCommandResponseChecker`), проверяет `ModuleName`, адрес УКШ
+    и точное поле `Answer` либо ожидаемое числовое значение. Менеджеры `ConnectorManager`, `RelayManager`,
+    `ResistorManager`, `CapacitorManager` и UKSH SelfCheck не формируют ожидаемые ответы и не разбирают их
+    самостоятельно; сообщения операций и самоконтроля проходят через
+    `DeviceBusCommutationResponseProcessor`/`DeviceBusCommutationMessages`.
+    Команда `7` подтверждается сокращённым ответом `7.<action>` согласно `makeAnswer(..., 2)` прошивки;
+    команда `6` возвращает `0` при успехе и код несуществующей цепи при ошибке. Idle-эмулятор использует
+    те же форматы и при симуляции ошибок измерения случайно возвращает как успешный, так и ошибочный код;
   - остальные UDP/TCP/COM/USB connectable managers возвращают simulated success или обходят I/O;
 - relay/source/switch managers update in-memory state and return success;
 - `Simulated.GetSimulatedValue` supplies values to the Idle multimeter SCPI-response path;
@@ -1258,8 +1317,9 @@ is included in failure messages. The migration copies the former global flag to
 all six device tables once, preserving the old effective selection during the
 transition.
 
-Chassis and МКР Idle flows preserve their device command contracts; ответы МКР
-дополнительно проверяются централизованным response processor:
+Chassis, МКР and УКШ Idle flows preserve their device command contracts. Ответы
+МКР и УКШ проверяются теми же централизованными response processors, что и ответы
+реальных устройств; для chassis сохраняется существующая runtime-проверка:
 
 ```text
 Transport / target runtime manager
@@ -1268,7 +1328,9 @@ Transport / target runtime manager
 → ModeSelectingDeviceProtocol
   → Real: current device protocol
   → Idle: ChassisEmulatorProtocol / ModuleRelayControlEmulatorProtocol / DeviceBusCommutationEmulatorProtocol
-→ ModuleRelayControlResponseProcessor для МКР / existing validation для остальных устройств
+→ ModuleRelayControlResponseProcessor для МКР
+  / DeviceBusCommutationResponseProcessor для УКШ
+  / existing runtime validation для chassis
 ```
 
 The emulator handles initialization (`1.0.0.0`), reset (`2.1.0.0`), power on/off
@@ -1867,6 +1929,12 @@ ErrorItem → translator/runner ErrorList
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
+| `DeviceBusCommutationResponseProcessor` | response facade | Ask.Device.ResponseProcessor | validates УКШ JSON/numeric firmware responses and publishes operation/connection/reset results | [Equipment](#real--idle) |
+| `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
+| `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
+| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
+| `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904 | [Equipment](#equipment-architecture) |
+| `BreakdownTesterMessages` | message facade | Ask.Device.ResponseProcessor | маршрутизирует рабочие сообщения и результаты самоконтроля GPT через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
 | `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |
 | `BreakdownTesterEmulatorProtocol` | stateful Idle protocol | Ask.Device.Emulator | emulates GPT79904 SCPI identification, configuration, test state and measurement responses | [Equipment](#device-matrix) |

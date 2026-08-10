@@ -1,5 +1,3 @@
-using Ask.Protocol.Messages.EntryPoints;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
@@ -32,12 +30,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _resistorManager.ConnectResistor(number);
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Подключение резистора", $"№{number}", succes, 1, userMessageService);
-        }
+        var succes = await _resistorManager.ConnectResistor(number, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -53,12 +46,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _resistorManager.DisconnectResistor(number);
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessages.PublishOperationResultAsync(_deviceBusCommutation, "Отключение резистора", $"№{number}", succes, 1, userMessageService);
-        }
+        var succes = await _resistorManager.DisconnectResistor(number, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);

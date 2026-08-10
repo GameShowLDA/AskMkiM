@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Device.Communication.Usb.Discovery;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Base.Device;
 
 namespace Ask.Device.Runtime.Function.Connected
@@ -87,7 +88,7 @@ namespace Ask.Device.Runtime.Function.Connected
           _device.ConnectedProfile.Initialize,
           idleResponse,
           timeout: _device.ConnectedProfile.Timeout);
-        return string.IsNullOrWhiteSpace(answer)
+        return !MultimeterResponseProcessor.CheckInitialization(answer)
           ? (false, $"Нет ответа на команду {_device.ConnectedProfile.Initialize} от {_device.Name}")
           : (true, answer.Trim());
       }

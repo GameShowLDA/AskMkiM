@@ -103,7 +103,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// подготовка диапазона точек, выполнение трёх этапов перекрёстного теста.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
-    private async Task ExecuteTestProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
+    private async Task ExecuteTestProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var (ok, message, tested, tester, range) = await UIValidationHelperLightweight.TryValidateAndParseInputAsync(
         _messageService,

@@ -23,8 +23,8 @@ namespace Ask.Engine.UnitTests.Tests.Base
 
       Assert.Collection(
         parameters,
-        parameter => Assert.Equal(("Первая точка", "1.2.3"), parameter),
-        parameter => Assert.Equal(("Вторая точка", "1.2.4"), parameter),
+        parameter => Assert.Equal(("Начальная точка", "1.2.3"), parameter),
+        parameter => Assert.Equal(("Конечная точка", "1.2.4"), parameter),
         parameter =>
         {
           Assert.Equal("Заданное значение сопротивления", parameter.Header);

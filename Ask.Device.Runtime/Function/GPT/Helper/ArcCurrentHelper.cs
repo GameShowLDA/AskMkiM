@@ -1,7 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using System.Globalization;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
@@ -78,7 +78,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
         LogDebug($"Ответ на {nameof(GetArcCurrentAsync)}: \"{response}\"", isDeviceLog: true);
 
-        if (double.TryParse(response.Replace("mA", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var arc))
+        if (BreakdownTesterResponseProcessor.TryParseNumber(response, out var arc))
         {
           LogInformation($"{nameof(GetArcCurrentAsync)}: Результат = {arc}", isDeviceLog: true);
           return arc;

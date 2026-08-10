@@ -1,13 +1,15 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using Ask.Device.Runtime.Commands;
 using System.Net;
+using YamlDotNet.Serialization;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
@@ -26,21 +28,21 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="selectedType">Тип выполняемой проверки.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
-    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
+    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ActionSettings settings, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       SelfTestManager.MeterConnect = false;
       SelfTestManager.DbcConnect = false;
 
       if (selectedType is not SwitchingDeviceTypeConnector type)
       {
-        await SelfTestMessages.PublishErrorAsync(
+        await DeviceBusCommutationMessages.PublishErrorAsync(
           "Неверный тип проверки: требуется TypeConnector",
           messageService);
         return;
       }
-
-      await EquipmentMessages.PublishDeviceHealthCheckTitleAsync(device, messageService);
-      await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
+      settings.DeviceResults.Add(new DeviceExecutionResult(device.Name, device.NumberChassis, device.Number));
+      await DeviceBusCommutationMessages.PublishSelfTestTitleAsync(device, messageService);
+      await DeviceBusCommutationMessages.PublishInformationAsync("Настройка оборудования", messageService);
 
       if (!await SelfTestConnectionHelper.SettingsMeter(meter, messageService))
       {
@@ -53,21 +55,21 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       switch (type)
       {
         case SwitchingDeviceTypeConnector.FullCheck:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           // await SelfTestRunner.RunSelfCheckAdcAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckAdcReversedAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckPintAsync(cancellationToken, messageService, device, meter);
           // await SelfTestRunner.RunSelfCheckShuntAsync(cancellationToken, messageService, device, meter);
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         case SwitchingDeviceTypeConnector.BlockingRelay:
-          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBlockingRelayAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         case SwitchingDeviceTypeConnector.Multimeter:
-          await SelfTestRunner.RunSelfCheckMultimeterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckMultimeterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         // case SwitchingDeviceTypeConnector.ADC:
@@ -87,11 +89,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         //  break;
 
         case SwitchingDeviceTypeConnector.BreakdownTester:
-          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(cancellationToken, messageService, getNextTestNumber, device, meter);
+          await SelfTestRunner.RunSelfCheckBreakdownTesterAsync(settings, cancellationToken, messageService, getNextTestNumber, device, meter);
           break;
 
         default:
-          await SelfTestMessages.PublishErrorAsync(
+          await DeviceBusCommutationMessages.PublishErrorAsync(
             $"Тип проверки {type} не распознан.",
             messageService);
           break;
@@ -117,7 +119,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <exception cref="OperationCanceledException">
     /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
     /// </exception>
-    internal static async Task<bool> SelfCheckCircuitAsync(CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
+    internal static async Task<bool> SelfCheckCircuitAsync(ActionSettings settings, CancellationToken cancellationToken, SwitchingDeviceTypeConnector testType, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       if (!SelfTestManager.MeterConnect && !SelfTestManager.DbcConnect)
       {
@@ -132,7 +134,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       if (selfTestChecker == null)
       {
-        await SelfTestMessages.PublishErrorAsync(
+        await DeviceBusCommutationMessages.PublishErrorAsync(
           "Устройство не поддерживает самоконтроль.",
           messageService);
         LogError("Ошибка: Устройство не поддерживает самоконтроль.", isDeviceLog: true);
@@ -148,9 +150,17 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       bool allTestsPassed = true;
       string testName = GetTestName(testType);
+      var testNumber = getNextTestNumber();
+      var testDescription = $"\n{testNumber}. Тест подключения \"{testName}\"";
+      var testResult = new TestExecutionResult
+      {
+        TestName = $"Тест подключения \"{testName}\"",
+      };
 
-      await SelfTestMessages.PublishInformationAsync(
-        $"\n{getNextTestNumber()}. Тест \"{testName}\"",
+      settings.DeviceResults.LastOrDefault()?.Tests.Add(testResult);
+
+      await DeviceBusCommutationMessages.PublishInformationAsync(
+        testDescription,
         messageService,
         isBlockStart: true,
         ignoreOutputValidation: true);
@@ -161,8 +171,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
 
         string circuitName = selfTestChecker.GetCircuitName(testType, busContact);
-
-        if (!await PerformCircuitTestAsync(cancellationToken, messageService, selfTestChecker, meter, testType, circuitName, busContact))
+        var test = settings.DeviceResults.LastOrDefault()?.Tests.LastOrDefault();
+        if (!await PerformCircuitTestAsync(cancellationToken, messageService, selfTestChecker, meter, testType, circuitName, busContact, test))
         {
           LogError($"Проверка {circuitName} завершилась с ошибкой!", isDeviceLog: true);
           allTestsPassed = false;
@@ -208,10 +218,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <see langword="true"/>, если цепь и её реле прошли проверку.
     /// В противном случае — <see langword="false"/>.
     /// </returns>
-    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact)
+    private static async Task<bool> PerformCircuitTestAsync(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, IMultimeter meter, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, TestExecutionResult testResult)
     {
       string testName = GetTestName(testType);
       string busName = SelfTestMetadataProvider.GetBusContactName(busContact);
+
 
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
         () => ExecuteCircuitOperationAsync(
@@ -232,12 +243,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           continuityResult = await meter.ContinuityManager.CheckContinuityAsync(
-            true,
-            messageService);
+            true);
 
           if (continuityResult)
           {
-            bool relayResult = await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter);
+            bool relayResult = await PerformRelayCheck(cancellationToken, messageService, selfTestChecker, testType, circuitName, busContact, meter, testResult);
 
             if (ExecutionConfig.GetIsIdleModeEnabled())
             {
@@ -245,12 +255,17 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
             }
           }
 
-          await ShowCircuitOperationResultAsync(
-            messageService,
-            testName,
-            $"Подключение к шине {busName}",
-            continuityResult,
-            skipPause: !continuityResult);
+
+
+          if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+          {
+            await ShowCircuitOperationResultAsync(
+              messageService,
+              testName,
+              $"Подключение к шине {busName}",
+              continuityResult,
+              skipPause: !continuityResult);
+          }
 
           return continuityResult;
 
@@ -258,7 +273,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       }
       else
       {
-        await SelfTestMessages.PublishInformationAsync(
+        await DeviceBusCommutationMessages.PublishInformationAsync(
           $"Прибор не поддерживает самоконтроль для {circuitName}. Пропуск теста.",
           messageService);
       }
@@ -274,12 +289,14 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       {
         return false;
       }
-
-      await ShowCircuitOperationResultAsync(
-        messageService,
-        testName,
-        $"Отключение от шины {busName}",
-        result: true);
+      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+      {
+        await ShowCircuitOperationResultAsync(
+          messageService,
+          testName,
+          $"Отключение от шины {busName}",
+          result: true);
+      }
 
       return continuityResult;
     }
@@ -332,7 +349,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool result,
       bool skipPause = false)
     {
-      return SelfTestMessages.PublishResultAsync(
+      return DeviceBusCommutationMessages.PublishResultAsync(
         testName,
         result,
         messageService,
@@ -359,7 +376,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <exception cref="OperationCanceledException">
     /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
     /// </exception>
-    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IMultimeter meter)
+    private static async Task<bool> PerformRelayCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, string circuitName, int busContact, IMultimeter meter, TestExecutionResult testResult)
     {
       int relayCount = await GetRelayCountAsync(
         messageService,
@@ -384,7 +401,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           circuitName,
           busContact,
           meter,
-          relay))
+          relay,
+          testResult))
         {
           return false;
         }
@@ -451,7 +469,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       string circuitName,
       bool skipPause = false)
     {
-      return SelfTestMessages.PublishErrorAsync(
+      return DeviceBusCommutationMessages.PublishErrorAsync(
         $"Невозможно получить количество реле для {circuitName}.",
         messageService,
         skipPause: skipPause);
@@ -483,10 +501,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       string circuitName,
       int busContact,
       IMultimeter meter,
-      int relay)
+      int relay,
+      TestExecutionResult testResult)
     {
       cancellationToken.ThrowIfCancellationRequested();
-      await SelfTestMessages.PublishInformationAsync(
+      await messageService.AppendEmptyLineAsync();
+      await DeviceBusCommutationMessages.PublishInformationAsync(
         $"Проверка реле {relay} в цепи {circuitName}",
         messageService,
         indentLevel: 1);
@@ -499,11 +519,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         busContact,
         relay,
         action: 2,
-        operationMessage: $"Включение реле {relay} в цепи {circuitName}"))
+        operationMessage: $"Включение реле {relay} в цепи {circuitName}",
+        testResult))
       {
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
-          await SelfTestMessages.PublishResultAsync(
+          await DeviceBusCommutationMessages.PublishResultAsync(
             $"Включении реле {relay} в цепи {circuitName}",
             false,
             messageService,
@@ -530,7 +551,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         busContact,
         relay,
         action: 1,
-        operationMessage: $"Выключение реле {relay} в цепи {circuitName}"))
+        operationMessage: $"Выключение реле {relay} в цепи {circuitName}",
+        testResult))
       {
         return true;
       }
@@ -562,7 +584,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       int busContact,
       int relay,
       int action,
-      string operationMessage)
+      string operationMessage,
+      TestExecutionResult testResult)
     {
       return UserActionHelper.GetRunWithUserRepeatAsync(
         () => SelfTestRetryHelper.ExecuteHardwareOperationAsync(
@@ -611,7 +634,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       string answer = await new DeviceBusCommutationQueryExecutor(_deviceBusCommutation)
         .QueryAsync(cmd.ToString(), cancellationToken: cancellationToken);
-      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+      return DeviceBusCommutationResponseProcessor.CheckSelfTestRelayControl(answer);
     }
 
     /// <summary>
@@ -646,7 +669,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       string answer = await new DeviceBusCommutationQueryExecutor(_deviceBusCommutation)
         .QueryAsync(cmd.ToString(), cancellationToken: cancellationToken);
-      return !ExecutionConfig.GetIsIdleModeEnabled() || !string.IsNullOrWhiteSpace(answer);
+      return DeviceBusCommutationResponseProcessor.CheckSelfTestCircuitControl(
+        answer, _deviceBusCommutation, (int)testType, busContact, action);
     }
   }
 }

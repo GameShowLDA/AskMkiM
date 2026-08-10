@@ -1,6 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
@@ -22,7 +23,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
         var trimmed = response.Trim();
         LogInformation($"{nameof(GetModeAsync)}: Результат = {trimmed}", isDeviceLog: true);
-        var result = trimmed.Equals(typeMode.ToString(), StringComparison.OrdinalIgnoreCase);
+        var result = BreakdownTesterResponseProcessor.CheckMode(response, typeMode.ToString());
         return (result, trimmed);
       }
       catch (Exception ex)

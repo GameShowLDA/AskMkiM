@@ -1,4 +1,3 @@
-using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -7,6 +6,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -143,7 +143,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
         if (!success || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessages.PublishOperationResultAsync(
+          await MultimeterMessages.PublishOperationResultAsync(
             device,
             header,
             rangeText,
@@ -277,10 +277,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         getRangeErrorCommand,
         "+0,\"No error\"",
         timeout: timeout);
-      var normalizedError = error?.TrimStart();
-      if (!string.IsNullOrWhiteSpace(normalizedError)
-        && !normalizedError.StartsWith("+0", StringComparison.Ordinal)
-        && !normalizedError.StartsWith("0", StringComparison.Ordinal))
+      if (!MultimeterResponseProcessor.CheckNoInstrumentError(error, out _))
       {
         throw new InvalidOperationException($"Ошибка установки диапазона: {error}");
       }

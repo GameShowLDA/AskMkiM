@@ -6,8 +6,8 @@ using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
 using Ask.Device.Runtime.Function.Helpers;
-using System.Globalization;
-using System.Text.RegularExpressions;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseModels;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
 
@@ -130,7 +130,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
           timeout: 500,
           delayBeforeCall: _delayBeforeCall);
 
-        if (!response.ToLower().Contains("test"))
+        if (!BreakdownTesterResponseProcessor.IsTestInProgress(response))
           break;
 
         await Task.Delay(50);
@@ -141,38 +141,24 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         timeout: 500,
         delayBeforeCall: _delayBeforeCall);
 
-      var parts = response.Split(',');
-      string raw = parts.ElementAtOrDefault(3)?.ToLower()
-        ?? throw new FormatException("Нет результата измерения.");
-
-      double multiplier = raw.EndsWith("gohm") ? 1000 :
-                          raw.EndsWith("mohm") ? 1 :
-                          raw.EndsWith("kohm") ? 0.001 :
-                          throw new FormatException("Неизвестный формат.");
-
-      raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
-      double value;
-
-      while (!double.TryParse(raw, out value))
+      BreakdownMeasurementResponse measurement;
+      while (!BreakdownTesterResponseProcessor.TryParseMeasurement(response, out measurement))
       {
         response = await _gptModel.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.MEASURE)} ?",
           timeout: 500,
           delayBeforeCall: _delayBeforeCall);
-
-        parts = response.Split(',');
-        raw = parts.ElementAtOrDefault(3)?.ToLower()
-          ?? throw new FormatException("Нет результата измерения.");
-
-        multiplier = raw.EndsWith("gohm") ? 1000 :
-                     raw.EndsWith("mohm") ? 1 :
-                     raw.EndsWith("kohm") ? 0.001 :
-                     throw new FormatException("Неизвестный формат.");
-
-        raw = Regex.Replace(raw, @"[^0-9.,]", "").Replace('.', ',');
       }
 
-      return (MeasurementAdapterHelper.Round(value * multiplier), string.Empty);
+      double multiplier = measurement.Unit.ToLowerInvariant() switch
+      {
+        "gohm" => 1000d,
+        "mohm" => 1d,
+        "kohm" => 0.001d,
+        _ => throw new FormatException("Неизвестный формат результата измерения."),
+      };
+
+      return (MeasurementAdapterHelper.Round(measurement.Value * multiplier), string.Empty);
     }
 
     /// <inheritdoc />
@@ -213,61 +199,20 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     /// </summary>
     private MeasurementData ParseMeasurement(string response)
     {
-      if (string.IsNullOrWhiteSpace(response))
+      if (!BreakdownTesterResponseProcessor.TryParseMeasurement(response, out var parsed))
         return new MeasurementData { Status = "UNKNOWN", Resistance = 0 };
 
-      var parts = response.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                          .Select(p => p.Trim())
-                          .ToList();
-
-      string status = "UNKNOWN";
-
-      foreach (var p in parts)
+      double resistance = parsed.Unit.ToUpperInvariant() switch
       {
-        var upper = p.ToUpperInvariant();
-
-        if (upper.Contains("PASS"))
-        {
-          status = "PASS";
-          break;
-        }
-        if (upper.Contains("FAIL"))
-        {
-          status = "FAIL";
-          break;
-        }
-        if (upper.Contains("TEST"))
-        {
-          status = "TEST";
-          break;
-        }
-      }
-
-      double resistance = 0;
-
-      foreach (var p in parts)
-      {
-        var match = Regex.Match(p, @"([-+]?\d+(\.\d+)?)([GMk]?)(ohm|OHM)", RegexOptions.IgnoreCase);
-        if (match.Success)
-        {
-          double value = double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-          string unit = match.Groups[3].Value.ToUpperInvariant();
-
-          resistance = unit switch
-          {
-            "G" => value * 1_000_000,
-            "M" => value * 1_000,
-            _ => value
-          };
-
-          break;
-        }
-      }
+        "GOHM" => parsed.Value * 1_000_000,
+        "MOHM" => parsed.Value * 1_000,
+        _ => parsed.Value,
+      };
 
       return new MeasurementData
       {
-        Status = status,
-        Resistance = resistance
+        Status = parsed.Status,
+        Resistance = resistance,
       };
     }
 

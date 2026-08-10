@@ -694,6 +694,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       lock (_errorSync)
       {
         _actionSettings?.ExecutionErrors.Add(error);
+        _actionSettings?.DeviceResults.LastOrDefault()?.Tests.LastOrDefault()?.Errors.Add(new TestError { Message = error });
       }
     }
 
@@ -744,6 +745,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           actionSettings.StartTime = TimeOnly.FromDateTime(DateTime.Now);
 
           ProcessTask = Task.Run(() => actionSettings.StartDelegate(
+            actionSettings,
             ProtocolSelfCheck,
             ProtocolSelfCheck,
             ProtocolSelfCheck.GetInputHighlightService(),

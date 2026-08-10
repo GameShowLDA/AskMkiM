@@ -1,4 +1,3 @@
-using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -8,6 +7,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.Helpers;
 
@@ -46,13 +46,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         "Прозвонка",
         () => CheckContinuityCoreAsync(expectedOutcome, responseDelay: responseDelay),
         value => !value,
-        maxAttempts: userMessageService == null ? 2 : 1);
+        maxAttempts: 2);
 
       if (!execution.Success)
       {
         if (execution.HasValue)
         {
-          await DeviceMessages.PublishOperationResultAsync(
+          await MultimeterMessages.PublishOperationResultAsync(
             _device,
             "Ошибка при прозвонке",
             "Результат прозвонки не соответствует ожидаемому состоянию.",
@@ -63,7 +63,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
           return execution.Value;
         }
 
-        await DeviceMessages.PublishOperationResultAsync(
+        await MultimeterMessages.PublishOperationResultAsync(
           _device,
           "Ошибка при прозвонке",
           execution.ErrorMessage,
@@ -81,7 +81,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         return false;
       }
 
-      await DeviceMessages.PublishOperationResultAsync(
+      await MultimeterMessages.PublishOperationResultAsync(
         _device,
         execution.Value ? "Результат прозвонки" : "Ошибка при прозвонке",
         execution.Value
@@ -135,12 +135,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         idleResponse,
         responseDelay: responseDelay,
         timeout: _device.ContinuityCommands.Timeout);
-      if (string.IsNullOrWhiteSpace(response))
+      if (!MultimeterResponseProcessor.TryCheckContinuity(
+            response, expectedOutcome, out bool matchesExpected))
       {
-        throw new InvalidOperationException("Мультиметр вернул пустой ответ.");
+        throw new InvalidOperationException($"Не удалось обработать ответ прозвонки: {response}");
       }
 
-      return response != "+9.90000000E+37" == expectedOutcome;
+      return matchesExpected;
     }
   }
 }

@@ -1,7 +1,9 @@
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using YamlDotNet.Serialization;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
@@ -19,9 +21,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
-    static internal async Task RunSelfCheckBlockingRelayAsync(CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
+    static internal async Task RunSelfCheckBlockingRelayAsync(ActionSettings settings, CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.BlockingRelay, messageService, getNextTestNumber, device, meter);
+      await SelfTestProcessManager.SelfCheckCircuitAsync(settings, cancellationToken, SwitchingDeviceTypeConnector.BlockingRelay, messageService, getNextTestNumber, device, meter);
     }
 
     /// <summary>
@@ -32,9 +34,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
-    static internal async Task RunSelfCheckMultimeterAsync(CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
+    static internal async Task RunSelfCheckMultimeterAsync(ActionSettings settings, CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.Multimeter, messageService, getNextTestNumber, device, meter);
+      await SelfTestProcessManager.SelfCheckCircuitAsync(settings, cancellationToken, SwitchingDeviceTypeConnector.Multimeter, messageService, getNextTestNumber, device, meter);
     }
 
     /// <summary>
@@ -86,9 +88,9 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="getNextTestNumber">Функция получения следующего порядкового номера теста.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
-    static internal async Task RunSelfCheckBreakdownTesterAsync(CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
+    static internal async Task RunSelfCheckBreakdownTesterAsync(ActionSettings settings, CancellationToken cancellationToken, IUserInteractionService messageService, Func<int> getNextTestNumber, ISwitchingDevice device = null, IMultimeter meter = null)
     {
-      await SelfTestProcessManager.SelfCheckCircuitAsync(cancellationToken, SwitchingDeviceTypeConnector.BreakdownTester, messageService, getNextTestNumber, device, meter);
+      await SelfTestProcessManager.SelfCheckCircuitAsync(settings, cancellationToken, SwitchingDeviceTypeConnector.BreakdownTester, messageService, getNextTestNumber, device, meter);
     }
 
   }
