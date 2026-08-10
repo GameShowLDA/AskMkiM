@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com.Extensions;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using Microsoft.Win32.SafeHandles;
 using System.IO.Ports;
 using System.Reflection;
@@ -234,6 +235,13 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <returns><c>true</c>, если ответ соответствует профилю подключения.</returns>
     private bool IsExpectedInitializeAnswer(string answer)
     {
+      if (_device is IBreakdownTester)
+      {
+        return BreakdownTesterResponseProcessor.CheckInitialization(
+          answer,
+          _device.ConnectedProfile.CheckMode);
+      }
+
       return !string.IsNullOrWhiteSpace(answer)
         && answer.Contains(_device.ConnectedProfile.CheckMode);
     }

@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Device;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
@@ -83,7 +84,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _highLimit;
       }
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RHISET)} ?", timeout: 1000);
-      return ParseDouble(response, "G");
+      return BreakdownTesterResponseProcessor.TryParseNumber(response, out double value) ? value : 0;
     }
 
     /// <inheritdoc />
@@ -131,18 +132,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _lowLimit;
       }
       var response = await _gptModel.DeviceProtocol.QueryAsync($"{GetCommandSyntax(ManualCommand.MANU_IR_RLOSET)} ?", timeout: 1000);
-      return ParseDouble(response, "M");
-    }
-
-    /// <summary>
-    /// Парсинг числового значения с единицей измерения (ГОм/МОм).
-    /// </summary>
-    private double ParseDouble(string response, string suffix)
-    {
-      if (response.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-        response = response.Substring(0, response.Length - 1);
-
-      return double.TryParse(response, out var result) ? result : 0;
+      return BreakdownTesterResponseProcessor.TryParseNumber(response, out double value) ? value : 0;
     }
   }
 }

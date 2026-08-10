@@ -13,6 +13,9 @@ using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
+using EquipmentMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
+using MeasurementMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
+using SelfTestMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 
 namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 {
@@ -131,7 +134,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             ? $"СИ. Проверка при напряжении {item}В " +
               $"({lowerBound} - {upperBound} МОм) : {formattedResult}"
             : null;
-          await MeasurementMessages.PublishResultAsync(CheckType.SelfTest,
+          await MeasurementMessages.PublishMeasurementResultAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(result, lowerBound, upperBound),
             isSuccessful,
@@ -139,7 +142,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage,
             outputService: userMessageService);
 
-          await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
+          await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             ResistanceUnit.MegaOhm,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,
@@ -224,7 +227,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
                 $"({lowerBound} - {upperBound} В) : {formattedResult}"
               : null);
 
-          await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
+          await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,
@@ -308,7 +311,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
                 $"({lowerBound} - {upperBound} В) : {formattedResult}"
               : null);
 
-          await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
+          await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),
             isSuccessful,

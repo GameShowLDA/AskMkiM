@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
 
@@ -62,14 +63,13 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
         LogDebug($"Ответ на {nameof(GetGroundModeAsync)}: \"{response}\"", isDeviceLog: true);
 
-        var trimmed = response.Trim();
-        if (trimmed.Equals("ON", StringComparison.OrdinalIgnoreCase))
+        if (BreakdownTesterResponseProcessor.TryParseState(response, out bool state) && state)
         {
           LogInformation($"{nameof(GetGroundModeAsync)}: Результат = ON", isDeviceLog: true);
           return true;
         }
 
-        if (trimmed.Equals("OFF", StringComparison.OrdinalIgnoreCase))
+        if (BreakdownTesterResponseProcessor.TryParseState(response, out state) && !state)
         {
           LogInformation($"{nameof(GetGroundModeAsync)}: Результат = OFF", isDeviceLog: true);
           return false;
