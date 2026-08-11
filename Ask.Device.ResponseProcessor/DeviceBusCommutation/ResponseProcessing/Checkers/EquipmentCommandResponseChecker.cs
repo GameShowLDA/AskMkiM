@@ -30,5 +30,5 @@ internal static class EquipmentCommandResponseChecker
     => JsonCommandResponseChecker.Check(
       response,
       device,
-      $"{commandNumber}.{firstParameter}.{secondParameter}.{action}");
+      $"{commandNumber}.{firstParameter}.{secondParameter}.{action}.");
 }

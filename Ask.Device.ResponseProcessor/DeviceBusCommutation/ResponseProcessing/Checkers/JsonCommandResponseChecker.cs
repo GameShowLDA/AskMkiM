@@ -23,7 +23,8 @@ internal static class JsonCommandResponseChecker
   /// Ожидаемое значение поля <c>Answer</c> или <see langword="null"/>, если поле проверять не требуется.
   /// </param>
   /// <returns>
-  /// <see langword="true"/>, если ответ принадлежит ожидаемому УКШ и содержит требуемое подтверждение.
+  /// <see langword="true"/>, если ответ принадлежит ожидаемому УКШ и содержит требуемое подтверждение
+  /// с учётом необязательной завершающей точки.
   /// В противном случае — <see langword="false"/>.
   /// </returns>
   public static bool Check(string response, ISwitchingDevice device, string? expectedAnswer = null)
@@ -40,11 +41,18 @@ internal static class JsonCommandResponseChecker
         model.ModuleName == ModuleName &&
         model.NumberChassis == device.NumberChassis &&
         model.NumberDevice == device.Number &&
-        (expectedAnswer == null || model.Answer == expectedAnswer);
+        (expectedAnswer == null || AnswersMatch(model.Answer, expectedAnswer));
     }
     catch (JsonException)
     {
       return false;
     }
   }
+
+  private static bool AnswersMatch(string? actualAnswer, string expectedAnswer)
+    => actualAnswer != null &&
+      string.Equals(
+        actualAnswer.TrimEnd('.'),
+        expectedAnswer.TrimEnd('.'),
+        StringComparison.Ordinal);
 }

@@ -5,16 +5,33 @@ namespace Ask.Device.Emulator.UnitTests.DeviceBusCommutation;
 
 public sealed class DeviceBusCommutationResponseProcessorTests
 {
-  [Fact(DisplayName = "УКШ: JSON-ответ проверяется по адресу и точному подтверждению")]
-  public void JsonCommand_ValidAddressAndAnswer_ReturnsTrue()
+  [Theory(DisplayName = "УКШ: JSON-ответ игнорирует только завершающую точку Answer")]
+  [InlineData("5.7.0.1", "5.7.0.1")]
+  [InlineData("5.7.0.1.", "5.7.0.1")]
+  [InlineData("5.7.0.1", "5.7.0.1.")]
+  [InlineData("5.7.0.1.", "5.7.0.1.")]
+  public void JsonCommand_OptionalTrailingPoint_ReturnsTrue(string answer, string expectedAnswer)
   {
     SwitchingDevice device = CreateDevice();
-    const string response = """
-      {"ModuleName":"DeviceBusCommutation","NumberDevice":20,"NumberChassis":1,"Answer":"5.7.0.1"}
+    string response = $$"""
+      {"ModuleName":"DeviceBusCommutation","NumberDevice":20,"NumberChassis":1,"Answer":"{{answer}}"}
       """;
 
-    Assert.True(DeviceBusCommutationResponseProcessor.CheckJsonCommand(response, device, "5.7.0.1"));
-    Assert.False(DeviceBusCommutationResponseProcessor.CheckJsonCommand(response, device, "5.7.0.2"));
+    Assert.True(DeviceBusCommutationResponseProcessor.CheckJsonCommand(response, device, expectedAnswer));
+  }
+
+  [Theory(DisplayName = "УКШ: JSON-ответ с другим подтверждением отклоняется")]
+  [InlineData("5.7.0.2.")]
+  [InlineData("prefix.5.7.0.1.")]
+  [InlineData("5.7.0.1.extra")]
+  public void JsonCommand_DifferentAnswer_ReturnsFalse(string answer)
+  {
+    SwitchingDevice device = CreateDevice();
+    string response = $$"""
+      {"ModuleName":"DeviceBusCommutation","NumberDevice":20,"NumberChassis":1,"Answer":"{{answer}}"}
+      """;
+
+    Assert.False(DeviceBusCommutationResponseProcessor.CheckJsonCommand(response, device, "5.7.0.1."));
   }
 
   [Fact(DisplayName = "УКШ: ответ от другого устройства отклоняется")]
@@ -22,10 +39,10 @@ public sealed class DeviceBusCommutationResponseProcessorTests
   {
     SwitchingDevice device = CreateDevice();
     const string response = """
-      {"ModuleName":"DeviceBusCommutation","NumberDevice":21,"NumberChassis":1,"Answer":"7.1"}
+      {"ModuleName":"DeviceBusCommutation","NumberDevice":21,"NumberChassis":1,"Answer":"7.1."}
       """;
 
-    Assert.False(DeviceBusCommutationResponseProcessor.CheckJsonCommand(response, device, "7.1"));
+    Assert.False(DeviceBusCommutationResponseProcessor.CheckJsonCommand(response, device, "7.1."));
   }
 
   [Theory(DisplayName = "УКШ: числовой ответ проверяется строго")]
@@ -44,13 +61,13 @@ public sealed class DeviceBusCommutationResponseProcessorTests
     Assert.True(DeviceBusCommutationResponseProcessor.CheckInitialization(
       "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1}", device));
     Assert.True(DeviceBusCommutationResponseProcessor.CheckReset(
-      "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1,\"Answer\":\"2.0.1\"}", device));
+      "{\"ModuleName\":\"DeviceBusCommutation\",\"NumberDevice\":20,\"NumberChassis\":1,\"Answer\":\"2.0.1.\"}", device));
   }
 
   [Theory(DisplayName = "УКШ: обработчик шин знает сокращённый формат ответа прошивки")]
-  [InlineData(true, "7.1", true)]
-  [InlineData(false, "7.2", true)]
-  [InlineData(true, "7.2", false)]
+  [InlineData(true, "7.1.", true)]
+  [InlineData(false, "7.2.", true)]
+  [InlineData(true, "7.2.", false)]
   public async Task AllBuses_UsesFirmwareAnswer(bool connect, string answer, bool expected)
   {
     SwitchingDevice device = CreateDevice();
