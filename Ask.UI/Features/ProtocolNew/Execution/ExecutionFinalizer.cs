@@ -67,6 +67,8 @@ internal sealed class ExecutionFinalizer
         () => _protocolCompletionService.DisplayCompletionAsync(settings, protocol)),
       ("уведомление о завершении выполнения",
         AsAsync(() => processingStateChanged?.Invoke(false))),
+      ("вывод обязательного финального блока программы контроля",
+        () => _protocolCompletionService.AppendControlProgramCompletionAsync(settings, protocol)),
       ("сохранение протоколов",
         () => _protocolCompletionService.SaveAndExposeAsync(settings, protocol)));
   }

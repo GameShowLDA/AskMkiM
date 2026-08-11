@@ -719,7 +719,13 @@ ProtocolUI.RequestCommandJump
 
 `ExecutionFinalizer` последовательно отменяет текущую задачу, очищает состояние,
 сбрасывает оборудование, печатает при включённой настройке, восстанавливает UI,
-показывает результат и сохраняет протоколы. Все шаги выполняются внутри
+показывает результат, добавляет обязательный финальный блок программы контроля через
+`ProtocolCompletionService.AppendControlProgramCompletionAsync` →
+`ControlProgramCompletionMessageBuilder.Build` и сохраняет протоколы. Финальный блок
+не зависит от настроек протокола и добавляется после остальных сообщений. Перед его выводом
+`ProtocolUI.FinalizeCurrentCommandGroupAsync` → `ProtocolListBoxUI.FinalizeCurrentCommandGroupAsync`
+закрывает последнюю группу команды, поэтому финальная зелёная запись отображается отдельно и не сворачивается
+вместе с `КЦ` или другой последней командой. Все шаги выполняются внутри
 `EquipmentExecutionContext.EnterMandatoryFinalization`; ошибка отдельного шага
 логируется и не прерывает оставшиеся обязательные действия.
 
@@ -732,6 +738,8 @@ ProtocolUI.RequestCommandJump
 
 - `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`
 - `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ControlProgramCompletionMessageBuilder.cs`
 - `UI/Controls/Runner/RunControl.xaml.cs`
 - `Ask.Engine/ControlCommandExecutor/Execution/`
 - `Ask.Engine/ControlCommandExecutor/Executors/`
@@ -859,9 +867,15 @@ executors/tests
 
 ActionExecutor finalization
 → ExecutionFinalizer
-→ ProtocolCompletionService.BuildInspectionProtocol
-→ InspectionProtocolBuilder
-→ ProtocolUI.ShowInspectionProtocol
+├─→ ProtocolCompletionService.DisplayCompletionAsync
+│  → InspectionProtocolBuilder
+│  → ProtocolUI.ShowInspectionProtocol
+├─→ ProtocolCompletionService.AppendControlProgramCompletionAsync
+│  → ProtocolUI.FinalizeCurrentCommandGroupAsync
+│  → ProtocolListBoxUI.FinalizeCurrentCommandGroupAsync
+│  → ControlProgramCompletionMessageBuilder.Build
+│  → ProtocolUI.ShowMessageAsync (отдельная зелёная последняя запись потокового протокола)
+└─→ ProtocolCompletionService.SaveAndExposeAsync
 → ProtocolStorageService
 → ExecutionProtocolHistoryService
 ```
@@ -1894,6 +1908,7 @@ ErrorItem → translator/runner ErrorList
 | `RangeMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения о диапазонах в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
 | `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
+| `ControlProgramCompletionMessageBuilder` | internal static builder | Ask.UI | обязательный финальный блок программы контроля с режимом и длительностью выполнения | [Protocols](#protocols-and-file-formats) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |
 | `CommandExecutionManager` | orchestrator | Ask.Engine | sequential command execution | [Execution Engine](#execution-engine) |
 | `ICommandExecutor` | interface | Ask.Engine | executable mnemonic contract | [Execution Engine](#execution-engine) |
