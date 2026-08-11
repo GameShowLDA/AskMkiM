@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 {
@@ -193,12 +194,40 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       return Activator.CreateInstance(selectedType);
     }
 
-    /// <summary>
-    /// Disables changing connection type with mouse wheel.
-    /// </summary>
-    private void ConnectionTypeSelectionBox_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    private void SettingsScrollViewer_OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
+      if (FindVisualAncestor<ComboBox>(e.OriginalSource as DependencyObject) is { IsDropDownOpen: true })
+      {
+        return;
+      }
+
+      double targetOffset = Math.Clamp(
+        SettingsScrollViewer.VerticalOffset - e.Delta,
+        0,
+        SettingsScrollViewer.ScrollableHeight);
+
+      if (Math.Abs(targetOffset - SettingsScrollViewer.VerticalOffset) < double.Epsilon)
+      {
+        return;
+      }
+
+      SettingsScrollViewer.ScrollToVerticalOffset(targetOffset);
       e.Handled = true;
+    }
+
+    private static T? FindVisualAncestor<T>(DependencyObject? element) where T : DependencyObject
+    {
+      while (element != null)
+      {
+        if (element is T ancestor)
+        {
+          return ancestor;
+        }
+
+        element = VisualTreeHelper.GetParent(element);
+      }
+
+      return null;
     }
 
     public void LoadFromDevice(DeviceDto device)
