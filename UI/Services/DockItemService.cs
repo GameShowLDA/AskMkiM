@@ -284,6 +284,15 @@ namespace UI.Services
       bool removeFilePath)
     {
       dockItem.HideOnPerformClose = false;
+      var sourceEditor = ExtractSourceEditor(dockItem);
+      EventHandler? textChangedHandler = null;
+      if (confirmBeforeClose && sourceEditor != null)
+      {
+        textChangedHandler = (_, _) => UpdateModifiedIndicator(dockItem);
+        sourceEditor.TextChanged += textChangedHandler;
+        UpdateModifiedIndicator(dockItem);
+      }
+
       dockItem.Closing += (sender, e) =>
       {
         LogDebug($"Закрытие файла {nameFile}.");
@@ -294,9 +303,38 @@ namespace UI.Services
           return;
         }
 
+        if (sourceEditor != null && textChangedHandler != null)
+        {
+          sourceEditor.TextChanged -= textChangedHandler;
+        }
+
         Application.Current.Dispatcher.BeginInvoke(
           DispatcherPriority.Background,
           new Action(() => FinalizeDockItemClose(textEditorContainer, editorType, nameFile, dockItem, removeFilePath)));
+      };
+    }
+
+    /// <summary>
+    /// Обновляет признак несохранённых изменений в имени вкладки.
+    /// </summary>
+    public void UpdateModifiedIndicator(DockItem dockItem)
+    {
+      if (dockItem == null)
+      {
+        return;
+      }
+
+      bool isModified = _fileManager.FileService.Comparison.HasFileChanged(dockItem, notifyMissingFile: false);
+      dockItem.TabText = isModified ? $"{dockItem.Title} *" : dockItem.Title;
+    }
+
+    private static TextEditorUI? ExtractSourceEditor(DockItem dockItem)
+    {
+      return dockItem.Content switch
+      {
+        TextEditorUI editor => editor,
+        TranslatorItem translator => translator.GetLeftBox()?.GetTextEditor(),
+        _ => null,
       };
     }
 
@@ -309,7 +347,7 @@ namespace UI.Services
     {
       if (removeFilePath)
       {
-        _fileManager.EditorWorkspaceModel.FilePaths.Remove(dockItem.TabText);
+        _fileManager.EditorWorkspaceModel.FilePaths.Remove(dockItem.Title);
         EditorEventAdapter.RaiseTextEditorContainerClosing(true, nameFile);
       }
 

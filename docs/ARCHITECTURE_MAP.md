@@ -1417,6 +1417,11 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+`FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
+`DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
+только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
+`SaveFileManager` обновляет снимок и снимает индикатор после фактической записи,
+а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
 В правой области `RunControl` панель действий документа отображается только для
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
