@@ -127,6 +127,40 @@ public static class SelfTestMessages
       skipPause: skipPause);
 
   /// <summary>
+  /// Публикует командный заголовок с формированием логического блока.
+  /// Сохраняет бинарную совместимость со сборками, созданными до появления
+  /// явного признака начала блока.
+  /// </summary>
+  /// <param name="header">Заголовок шага самоконтроля.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="message">Дополнительное описание шага.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="onlyWhenStepMode">Признак вывода только в пошаговом режиме.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishCommandAsync(
+    string header,
+    IMessageOutputService? outputService,
+    string? message = null,
+    int indentLevel = 0,
+    bool onlyWhenStepMode = false,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => PublishCommandAsync(
+      header,
+      outputService,
+      message,
+      indentLevel,
+      onlyWhenStepMode,
+      true,
+      callerName,
+      callerFile,
+      callerLine);
+
+  /// <summary>
   /// Публикует командный заголовок шага самоконтроля.
   /// </summary>
   /// <param name="header">Заголовок шага самоконтроля.</param>
@@ -142,10 +176,10 @@ public static class SelfTestMessages
   public static Task PublishCommandAsync(
     string header,
     IMessageOutputService? outputService,
-    string? message = null,
-    int indentLevel = 0,
-    bool onlyWhenStepMode = false,
-    bool isBlockStart = true,
+    string? message,
+    int indentLevel,
+    bool onlyWhenStepMode,
+    bool isBlockStart,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
