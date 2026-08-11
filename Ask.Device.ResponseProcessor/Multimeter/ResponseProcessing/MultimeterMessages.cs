@@ -75,7 +75,12 @@ public static class MultimeterMessages
     int indentLevel = 0,
     bool onlyWhenStepMode = false)
     => SelfTestMessages.PublishCommandAsync(
-      header, outputService, message, indentLevel, onlyWhenStepMode);
+      header,
+      outputService,
+      message,
+      indentLevel,
+      onlyWhenStepMode,
+      isBlockStart: false);
 
   /// <summary>
   /// Публикует результат измерения при самоконтроле мультиметра.

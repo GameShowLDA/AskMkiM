@@ -134,6 +134,7 @@ public static class SelfTestMessages
   /// <param name="message">Дополнительное описание шага.</param>
   /// <param name="indentLevel">Уровень отступа сообщения.</param>
   /// <param name="onlyWhenStepMode">Признак вывода только в пошаговом режиме.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
   /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
@@ -144,6 +145,7 @@ public static class SelfTestMessages
     string? message = null,
     int indentLevel = 0,
     bool onlyWhenStepMode = false,
+    bool isBlockStart = true,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
@@ -154,12 +156,12 @@ public static class SelfTestMessages
     }
 
     return SelfTestMessagePublisher.PublishAsync(
-      SelfTestMessageBuilder.BuildCommand(header, message, indentLevel),
+      SelfTestMessageBuilder.BuildCommand(header, message, indentLevel, isBlockStart),
       outputService,
       callerName,
       callerFile,
       callerLine,
-      isBlockStart: true);
+      isBlockStart);
   }
 
   /// <summary>
@@ -200,7 +202,7 @@ public static class SelfTestMessages
       callerName,
       callerFile,
       callerLine,
-      isBlockStart: true);
+      isBlockStart: false);
 
   /// <summary>
   /// Публикует результат проверки активного сопротивления конденсатора.
@@ -242,6 +244,6 @@ public static class SelfTestMessages
       callerName,
       callerFile,
       callerLine,
-      isBlockStart: true);
+      isBlockStart: false);
   }
 }

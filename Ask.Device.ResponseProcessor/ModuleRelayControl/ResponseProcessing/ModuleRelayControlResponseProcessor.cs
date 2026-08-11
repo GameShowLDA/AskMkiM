@@ -2,8 +2,8 @@ using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseModels;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
 using Ask.Protocol.Messages.EntryPoints;
 using System.Text.Json;
 
@@ -349,7 +349,7 @@ public static class ModuleRelayControlResponseProcessor
       pointNumber);
 
     await SelfTestMessages.PublishResultAsync(
-      $"Точка {pointNumber}",
+      $"{module.NumberChassis}.{module.Number}.{pointNumber}",
       isValid,
       userInteractionService,
       indentLevel: 1,

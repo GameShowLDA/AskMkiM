@@ -1153,6 +1153,11 @@ IBreakdownTester / GPT79904
 отдельный legacy-путь `B7783/VoltageMeasurementBase` не разбирают ответы самостоятельно.
 Публикация рабочих сообщений и результатов самоконтроля мультиметра централизована в
 `MultimeterMessages`; тексты и параметры сообщений сохранены в `Ask.Protocol.Messages`.
+Заголовки этапов и результаты измерений самоконтроля мультиметра публикуются с
+`isBlockStart: false`. При этом `SelfTestMessageBuilder.BuildCommand()` формирует заголовок как
+`MessageType.Info`, а не `Command`: `ProtocolUI.CheckBlockStart()` не открывает логический блок,
+а `ProtocolListBoxUI.AppendVisibleMessage()` не создаёт сворачиваемую `ProtocolCommandGroup`. Цвет заголовка
+и явная step-mode checkpoint сохраняются. Другие потоки самоконтроля сохраняют свою политику блоков.
 Сообщения подключения, отключения, инициализации и сброса для `IMultimeter` проходят через
 `MultimeterResponseProcessor`. Retry и проверка измерения по допустимому диапазону остаются
 в Runtime/Engine.
@@ -1883,7 +1888,7 @@ ErrorItem → translator/runner ErrorList
 | `DeviceBusCommutationResponseProcessor` | response facade | Ask.Device.ResponseProcessor | validates УКШ JSON/numeric firmware responses and publishes operation/connection/reset results | [Equipment](#real--idle) |
 | `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
 | `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
-| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
+| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages; для self-test-сообщений отключает `isBlockStart`, чтобы UI не создавал сворачиваемые блоки | [Equipment](#equipment-architecture) |
 | `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904 | [Equipment](#equipment-architecture) |
 | `BreakdownTesterMessages` | message facade | Ask.Device.ResponseProcessor | маршрутизирует рабочие сообщения и результаты самоконтроля GPT через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
