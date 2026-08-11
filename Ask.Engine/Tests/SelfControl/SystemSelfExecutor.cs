@@ -4,6 +4,8 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
+using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -46,6 +48,7 @@ namespace Ask.Engine.Tests.SelfControl
 
       var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
       var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
+      var breakdownTester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
 
       await dbc.SelfTestManager.StartSelfCheck(
         _messageService.GetCancellationToken(),
@@ -64,6 +67,23 @@ namespace Ask.Engine.Tests.SelfControl
           _messageService,
           dbc);
       }
+
+      await meter.SelfTestManager.StartSelfCheck(
+      _messageService.GetCancellationToken(),
+      MultimeterTypeConnector.FullCheck,
+      settings,
+      _messageService,
+      dbc,
+      meter);
+
+      await breakdownTester.SelfTestManager.StartSelfCheck(
+        _messageService.GetCancellationToken(),
+        TypeConnector.FullCheck,
+        settings,
+        _messageService,
+        breakdownTester,
+        dbc,
+        meter);
     }
   }
 }

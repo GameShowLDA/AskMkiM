@@ -57,7 +57,8 @@ internal static class SelfTestMessageBuilder
   internal static ShowMessageModel BuildCommand(
     string header,
     string? message,
-    int indentLevel)
+    int indentLevel,
+    bool createCommandGroup)
   {
     var headerColor = new ShowMessageModel(type: ShowMessageModel.MessageType.CommandBlock)
       .GetColorMessage();
@@ -66,11 +67,13 @@ internal static class SelfTestMessageBuilder
       header,
       headerColor: headerColor,
       message: message,
-      type: ShowMessageModel.MessageType.Command)
+      type: createCommandGroup
+        ? ShowMessageModel.MessageType.Command
+        : ShowMessageModel.MessageType.Info)
     {
       IndentLevel = indentLevel,
       IsStepModeCheckpoint = true,
-      IsControlProgramCommandHeader = true,
+      IsControlProgramCommandHeader = createCommandGroup,
     };
   }
 
