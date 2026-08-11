@@ -1355,7 +1355,8 @@ same path with gates enabled and performs real transport I/O.
   I/O failure; per-device semaphore.
 - COM: `SerialPortCustom` serialized in `ConnectionDetails`; `ComProtocol` opens
   through `SerialPortExtensions.UsePort`, writes newline-terminated command and
-  polls `ReadExisting`.
+  polls `ReadExisting`. `DeviceWithCOM` owns the resulting `SerialPort` and implements
+  `IDisposable`: disposal closes and releases the port even when `Close` reports an error.
 - USB: `UsbProtocol` delegates discovery/commands to `IUsbCommandHandler`;
   `UsbCommandHandler` includes B7783 and UPS/ViewPower branches.
 
@@ -1792,7 +1793,10 @@ legacy adoption behavior.
 
 Runtime device cache uses `(requested interface, Id)` and query caches for
 GetAll/chassis lists. Create/update/delete invalidate relevant caches; startup
-clears and warms them.
+clears and warms them. `DeviceCache` disposes resource-owning devices when they are
+removed, replaced or cleared. `DeviceEngine.UpdateInternalAsync` removes the old cached
+instance in `finally`, so a GPT configuration update releases its COM port after success,
+provider error and cancellation; a later query builds a fresh runtime instance from the DB.
 
 ## Configuration
 
