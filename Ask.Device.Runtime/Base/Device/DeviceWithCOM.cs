@@ -15,7 +15,7 @@ namespace Ask.Device.Runtime.Base.Device
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого через COM-порт.
   /// </summary>
-  public abstract class DeviceWithCOM : IDevice, IComPortSettingsProvider
+  public abstract class DeviceWithCOM : IDevice, IComPortSettingsProvider, IDisposable
   {
     public DeviceWithCOM()
     {
@@ -129,6 +129,41 @@ namespace Ask.Device.Runtime.Base.Device
     /// Хранит текущий экземпляр COM-порта устройства.
     /// </summary>
     private SerialPort _comPort = null!;
+
+    /// <summary>
+    /// Освобождает последовательный порт, принадлежащий устройству.
+    /// </summary>
+    public void Dispose()
+    {
+      var port = Interlocked.Exchange(ref _comPort, null!);
+      if (port == null)
+      {
+        return;
+      }
+
+      try
+      {
+        if (port.IsOpen)
+        {
+          port.Close();
+        }
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, $"[{Name}] Не удалось закрыть COM-порт {port.PortName}.", isDeviceLog: true);
+      }
+      finally
+      {
+        try
+        {
+          port.Dispose();
+        }
+        catch (Exception ex)
+        {
+          LogException(ex, $"[{Name}] Не удалось освободить COM-порт {port.PortName}.", isDeviceLog: true);
+        }
+      }
+    }
 
     /// <summary>
     /// Хранит сериализованные параметры подключения.
