@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Usb.Protocols;
+using Ask.Device.Communication.Common;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base;
 using Ask.Device.Runtime.Function.Base.Connected;
@@ -30,7 +31,9 @@ namespace Ask.Device.Runtime.Device
       DcVoltageManager = new DCVMeasurementBase(this);
       DiodeManager = new DiodeMeasurementBase(this);
       SelfTestManager = new SelfTestManager();
-      DeviceProtocol = new UsbProtocol(this, new UsbCommandHandler());
+      DeviceProtocol = new HardwareWatchdogProtocol(
+        new UsbProtocol(this, new UsbCommandHandler()),
+        Name);
       ResistanceCommands = new ResistanceMeasurementProfile()
       {
         Measure = "READ?",

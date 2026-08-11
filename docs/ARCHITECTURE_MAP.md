@@ -1192,6 +1192,23 @@ IMultimeter.ConnectableManager.InitializeAsync()
 Для SCPI-команд мультиметра без `?` этот шлюз передаёт в транспорт `timeout = 0`
 и не ждёт ответа; команды с `?` сохраняют заданный `timeout` и `responseDelay`.
 
+`HardwareWatchdogProtocol` оборачивает реальные COM/TCP/UDP/USB-протоколы при их создании
+в `DeviceWithCOM`, `DeviceWithIP`, `KeysightDevice`, `MultimeterB7783` и
+`MikUps1101rRmDevice`. Он запускает вызов `IDeviceProtocol.QueryAsync` вне вызывающего потока,
+ожидает не более 5 секунд, отменяет связанный `CancellationToken` и выбрасывает
+`TimeoutException`. Поэтому защищены как вызовы через `DeviceProtocolEmulator`, так и прямые
+обращения к `device.DeviceProtocol`. `ModeSelectingDeviceProtocol` сохраняет вторую watchdog-
+границу для реальных обращений через Real/Idle-шлюз; холостой режим ей не ограничивается.
+Watchdog ограничивает ожидание вызывающего кода, но не может принудительно завершить уже
+зависший нативный вызов VISA внутри процесса.
+
+Для команды `НЭ` токен `IUserInteractionService.GetCancellationToken()` проходит через
+`NeCommandExecutor → IDiodeMeasurement → DiodeMeasurementBase → MeasurementBase →
+DeviceProtocolEmulator`. Ошибка установки режима публикуется в UI как ошибка выполнения и
+завершает только текущую команду. Ошибка или отсутствие ответа при измерении преобразуется
+в отрицательный результат точки, поэтому `CommandExecutionManager` может перейти к следующей
+команде программы контроля.
+
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
 `UserActionHelper`, который повторяет тот же measurement delegate. Без UI-сервиса
@@ -1726,7 +1743,7 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Host/diagnostic bridge | `AppHost.StartAsync` | connects static command history to service | host/process lifetime |
 | Initial chassis lookup | `PreStartupInitializer` fire-and-forget Task | warms first chassis/tester access | one-shot, exceptions caught |
 | Execution session | `ActionExecutor.ExecuteTaskAsync` | `Task.Run(StartDelegate)` with cancellation | `FinalizeAsync`/`StopAsync` cancels and disposes session |
-| Device protocol waits | COM/TCP/UDP queries | semaphore-protected I/O and timeout polling | per-call cancellation/timeout |
+| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling | linked cancellation; caller resumes with `TimeoutException` |
 | Help server | `HelpServer.EnsureStarted` | Kestrel static-file host | `App.OnExit → HelpServer.Stop` |
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |

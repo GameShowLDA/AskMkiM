@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Communication.Com.Protocols;
+using Ask.Device.Communication.Common;
 using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Base.Status;
 using System.IO.Ports;
@@ -67,7 +68,9 @@ namespace Ask.Device.Runtime.Base.Device
         if (port != null)
         {
           COMPort = port;
-          var realProtocol = new ComProtocol(this, port);
+          var realProtocol = new HardwareWatchdogProtocol(
+            new ComProtocol(this, port),
+            Name);
           DeviceProtocol = this is IBreakdownTester breakdownTester
             ? DeviceProtocolEmulator.CreateBreakdownTester(breakdownTester, realProtocol)
             : realProtocol;
