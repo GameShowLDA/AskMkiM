@@ -11,7 +11,9 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <summary>
     /// Устанавливает режим проверки диода.
     /// </summary>
-    Task<bool> SetDiodeModeAsync(IUserInteractionService? userMessageService = null);
+    Task<bool> SetDiodeModeAsync(
+      IUserInteractionService? userMessageService = null,
+      CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Проверяет диод и возвращает измеренное падение напряжения.
@@ -22,6 +24,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     Task<double> CheckDiodeAsync(
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
-      double responseDelay = 0);
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default);
   }
 }

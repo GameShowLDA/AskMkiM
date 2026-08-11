@@ -37,7 +37,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       int measurementCount = 1,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       if (profile.Unit is CapacitanceUnit)
       {
@@ -55,7 +56,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile,
         measurementRange,
         userMessageService,
-        responseDelay);
+        responseDelay,
+        cancellationToken);
     }
 
     /// <summary>
@@ -74,13 +76,14 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       IMeasurementProfile profile,
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
 
       if (device.TypeMode != profile.TypeMode)
       {
-        await SetModeBase.SetModeAsync(device, profile, userMessageService);
+        await SetModeBase.SetModeAsync(device, profile, userMessageService, cancellationToken);
       }
 
       if (profile.ElectricalTest == ElectricalTestFunction.DCVoltage
@@ -105,7 +108,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             measurementRange.LowerBound,
             measurementRange.UpperBound,
             userMessageService: userMessageService,
-            responseDelay: responseDelay),
+            responseDelay: responseDelay,
+            cancellationToken: cancellationToken),
           maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
@@ -305,7 +309,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double rangeFrom = -1,
       double rangeTo = -1,
       IUserInteractionService? userMessageService = null,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
@@ -326,7 +331,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile.Measure,
         idleResponse,
         responseDelay: responseDelay,
-        timeout: profile.Timeout);
+        timeout: profile.Timeout,
+        cancellationToken: cancellationToken);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       if (MultimeterResponseProcessor.TryParseMeasurement(response, out var measurement))
