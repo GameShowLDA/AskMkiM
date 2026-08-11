@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -334,10 +335,13 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         bool success;
         try
         {
-          bool meterAnswer = await RelayModuleHelper.GetMeterAnswer(
-            verificat_module,
-            _userInteractionService,
-            cancellationToken);
+          cancellationToken.ThrowIfCancellationRequested();
+          bool meterAnswer = IsNominalIdleMode()
+            ? expectedMeterAnswer
+            : await RelayModuleHelper.GetMeterAnswer(
+              verificat_module,
+              _userInteractionService,
+              cancellationToken);
           success = meterAnswer == expectedMeterAnswer;
         }
         catch
@@ -356,6 +360,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
         return success;
       }, _userInteractionService);
+    }
+
+    /// <summary>
+    /// Проверяет, выполняется ли холостой режим без симуляции ошибок.
+    /// </summary>
+    private static bool IsNominalIdleMode()
+    {
+      return ExecutionConfig.GetIsIdleModeEnabled()
+        && !ExecutionConfig.GetIsErrorSimulationEnabled()
+        && !ExecutionConfig.GetIsHardwareErrorSimulationEnabled();
     }
 
     #endregion
