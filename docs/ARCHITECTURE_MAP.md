@@ -679,11 +679,18 @@ executor throws
   `MeasurementMessages.PublishResultAsync`, поэтому точки отображаются в строке результата
   над обычной строкой погрешности. Отдельные сообщения допустимого диапазона
   (`RangeMessages.PublishAllowedRangeAsync`) метрологические режимы не публикуют;
-- исполнители команд передают `SourceLines` в `CommandMessages.FormatSourceLines`;
+- исполнители команд передают исходные строки в `CommandMessages.FormatSourceLines`;
+  `CommandExecutionContext.ProtocolSourceLines` по умолчанию ссылается на `Command.SourceLines`,
+  но позволяет вложенному executor вывести полный текст родительской команды;
   `CommandExecutorBase` больше не содержит форматирование текста протокола;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
 `ПИ` вызывает `СИ` как вложенный executor до и после основной ACW/DCW-проверки.
+Оба контекста `СИ1`/`СИ2` получают в `ProtocolSourceLines` исходные строки `ПИ`, поэтому
+левый протокол сохраняет параметры ПИ и адреса точек из программы контроля; самостоятельная
+`СИ` продолжает использовать собственные `SourceLines`. Для вложенных этапов
+`CommandMessages.FormatSourceLinesWithHeader` заменяет исходные номер и мнемонику заголовком
+`ПИ/СИ1`, `ПИ/ПИ1` или `ПИ/СИ2`, не дублируя `номер ПИ` перед параметрами.
 `РМ` вызывает `EquipmentService.AnalyzePoints` и готовит equipment state.
 
 #### Pause, stop and command jump

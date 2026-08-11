@@ -26,8 +26,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}/{command.CommandNumber} {command.Mnemonic}";
-      var message = CommandMessages.FormatSourceLines(command.SourceLines);
-      message = message.Replace("ПИ", "ПИ/ПИ");
+      var message = CommandMessages.FormatSourceLinesWithHeader(
+        $"{command.CommandNumber} {command.Mnemonic}/ПИ1",
+        command.SourceLines);
 
       SetActiveLine(context, command);
 
@@ -54,6 +55,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
         commandExecutionContext.IsInvokedByAnotherCommand = true;
+        commandExecutionContext.ProtocolSourceLines = command.SourceLines;
         var siCommandExecutor = new SiCommandExecutor();
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
         command.Scheme.SetErrorChainDisconnectedPoints(command.SiCommand.Scheme.GetErrorChainDisconnectedPoints());
@@ -133,6 +135,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var commandExecutionContext = new CommandExecutionContext(context.CommandExecutionManager, command.SiCommand, context.Console, context.TranslationControl, context.OpkFilePath);
         var siCommandExecutor = new SiCommandExecutor();
         commandExecutionContext.IsInvokedByAnotherCommand = true;
+        commandExecutionContext.ProtocolSourceLines = command.SourceLines;
 
         command.SiCommand.CommandNumber = siCommanNumber + " " + 2;
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
