@@ -94,7 +94,7 @@ namespace UI.Services.FileManager
       if (!_fileManager.EditorWorkspaceModel.FilePaths.ContainsValue(path))
         return false;
 
-      var existingItem = container.DockManager.DockItems.FirstOrDefault(item => item.TabText == fileName);
+      var existingItem = container.DockManager.DockItems.FirstOrDefault(item => item.Title == fileName);
       if (existingItem == null)
         return false;
 

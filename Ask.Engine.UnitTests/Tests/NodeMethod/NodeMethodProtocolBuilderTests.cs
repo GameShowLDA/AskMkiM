@@ -1,8 +1,8 @@
 using System.Globalization;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
-using Ask.Engine.Tests.NodeMethod;
-using Ask.Engine.Tests.Protocol;
+using Ask.Protocol.Messages.EntryPoints;
+using Ask.Protocol.Messages.Models;
 
 namespace Ask.Engine.UnitTests.Tests.NodeMethod;
 
@@ -20,7 +20,7 @@ public class NodeMethodProtocolBuilderTests
         PointNumber = 20,
       };
 
-      var result = NodeMethodProtocolBuilder.BuildFailure(
+      var result = MeasurementMessages.BuildNodeFailure(
         point,
         10,
         7.35,
@@ -43,7 +43,7 @@ public class NodeMethodProtocolBuilderTests
         PointNumber = 20,
       };
 
-      var result = NodeMethodProtocolBuilder.BuildFailure(
+      var result = MeasurementMessages.BuildNodeFailure(
         point,
         10,
         12.35,
@@ -66,7 +66,7 @@ public class NodeMethodProtocolBuilderTests
         PointNumber = 1,
       };
 
-      var result = NodeMethodProtocolBuilder.BuildRangeFailure(
+      var result = MeasurementMessages.BuildNodeRangeFailure(
         point,
         0,
         10,

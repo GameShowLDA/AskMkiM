@@ -168,11 +168,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (request.PairwiseFirstPointAltContext == null)
         throw new ArgumentNullException(nameof(request.PairwiseFirstPointAltContext));
 
-      var result =
-        await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(
-          request.PairwiseFirstPointAltContext);
-
-      return new AlgorithmExecutionResult(result.errorMessage, result.infoMessage);
+      return await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(
+        request.PairwiseFirstPointAltContext);
     }
 
     /// <summary>
@@ -194,8 +191,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (request.NodeFullContext == null)
         throw new ArgumentNullException(nameof(request.NodeFullContext));
 
-      var errors = await NodeFullChecker.CheckSequenceAsync(request.NodeFullContext);
-      return AlgorithmExecutionResult.FromErrors(errors);
+      return await NodeFullChecker.CheckSequenceAsync(request.NodeFullContext);
     }
 
     /// <summary>
@@ -217,10 +213,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (request.MethodExecutionContext == null)
         throw new ArgumentNullException(nameof(request.MethodExecutionContext));
 
-      var errors =
-        await MethodExecutor.CheckSequenceAsync(request.MethodExecutionContext);
-
-      return AlgorithmExecutionResult.FromErrors(errors);
+      return await MethodExecutor.CheckSequenceAsync(request.MethodExecutionContext);
     }
 
     /// <summary>
@@ -243,11 +236,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (request.PairwiseFirstPointContext == null)
         throw new ArgumentNullException(nameof(request.PairwiseFirstPointContext));
 
-      var errors =
-        await PairwiseFirstPointChecker.CheckSequenceAsync(
-          request.PairwiseFirstPointContext);
-
-      return AlgorithmExecutionResult.FromErrors(errors);
+      return await PairwiseFirstPointChecker.CheckSequenceAsync(
+        request.PairwiseFirstPointContext);
     }
 
     /// <summary>
@@ -271,11 +261,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (request.NodeAccumulationContext == null)
         throw new ArgumentNullException(nameof(request.NodeAccumulationContext));
 
-      var errors =
-        await NodeAccumulationChecker.CheckSequenceAsync(
-          request.NodeAccumulationContext);
-
-      return AlgorithmExecutionResult.FromErrors(errors);
+      return await NodeAccumulationChecker.CheckSequenceAsync(
+        request.NodeAccumulationContext);
     }
   }
 }

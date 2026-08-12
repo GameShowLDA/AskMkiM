@@ -8,12 +8,11 @@ namespace Ask.Engine.UnitTests.Tests.Base
   public sealed class UIValidationHelperProtocolTests
   {
     [Fact]
-    public void BuildMetrologyInputMessages_ForKc_ContainsCommandPointsAndResistance()
+    public void BuildMetrologyInputParameters_ForKc_ContainsPointsAndResistance()
     {
       var data = CreateData();
 
-      var messages = UIValidationHelper.BuildMetrologyInputMessages(
-        "Режим КС",
+      var parameters = UIValidationHelper.BuildMetrologyInputParameters(
         MeasurementTypeCommand.KC,
         data,
         timeCheck: false,
@@ -23,27 +22,25 @@ namespace Ask.Engine.UnitTests.Tests.Base
         pairBusCheck: false);
 
       Assert.Collection(
-        messages,
-        message => Assert.Equal("Запуск \"Режим КС\"", message.Header),
-        message => Assert.Equal("1.2.3", message.Message),
-        message => Assert.Equal("1.2.4", message.Message),
-        message =>
+        parameters,
+        parameter => Assert.Equal(("Начальная точка", "1.2.3"), parameter),
+        parameter => Assert.Equal(("Конечная точка", "1.2.4"), parameter),
+        parameter =>
         {
-          Assert.Equal("Заданное значение сопротивления", message.Header);
-          Assert.Equal("10 Ом", message.Message);
+          Assert.Equal("Заданное значение сопротивления", parameter.Header);
+          Assert.Equal("10 Ом", parameter.Value);
         });
     }
 
     [Fact]
-    public void BuildMetrologyInputMessages_ForPi_ContainsActiveAdditionalParameters()
+    public void BuildMetrologyInputParameters_ForPi_ContainsActiveAdditionalParameters()
     {
       var data = CreateData();
       data.Time = 30;
       data.RampTime = 0.5;
       data.Voltage = 100;
 
-      var messages = UIValidationHelper.BuildMetrologyInputMessages(
-        "Режим ПИ ACW",
+      var parameters = UIValidationHelper.BuildMetrologyInputParameters(
         MeasurementTypeCommand.PI_ACW,
         data,
         timeCheck: true,
@@ -52,12 +49,12 @@ namespace Ask.Engine.UnitTests.Tests.Base
         busCheck: false,
         pairBusCheck: false);
 
-      Assert.Contains(messages, message => message.Header == "Время выполнения" && message.Message == "30 с");
+      Assert.Contains(parameters, parameter => parameter.Header == "Время выполнения" && parameter.Value == "30 с");
       Assert.Contains(
-        messages,
-        message => message.Header == "Время нарастания" &&
-                   message.Message == MeasurementValueFormatter.FormatWithUnit(0.5, "с"));
-      Assert.Contains(messages, message => message.Header == "Напряжение" && message.Message == "100 В");
+        parameters,
+        parameter => parameter.Header == "Время нарастания" &&
+                     parameter.Value == MeasurementValueFormatter.FormatWithUnit(0.5, "с"));
+      Assert.Contains(parameters, parameter => parameter.Header == "Напряжение" && parameter.Value == "100 В");
     }
 
     private static UIValidationHelper.DataModel CreateData() =>

@@ -1,7 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 {
@@ -26,17 +26,15 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     {
       cancellation.ThrowIfCancellationRequested();
 
-      var result = await meter.ContinuityManager.CheckContinuityAsync(false, messageService);
-      if (result)
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
-        return true;
-      }
-      else
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-        return false;
-      }
+      var result = await meter.ContinuityManager.CheckContinuityAsync(false);
+      await DeviceBusCommutationMessages.PublishResultAsync(
+        $"Реле {relay}",
+        result,
+        messageService,
+        indentLevel: 3,
+        executionError: false,
+        skipPause: false);
+      return result;
     }
 
     /// <summary>
@@ -59,12 +57,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       bool result = await operation();
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        await messageService.ShowMessageAsync(
-          new ShowMessageModel(operationMessage, type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error)
-          {
-            IndentLevel = indentLevel,
-          },
-          skipPause: true);
+        await DeviceBusCommutationMessages.PublishResultAsync(
+          operationMessage,
+          result,
+          messageService,
+          indentLevel: indentLevel,
+          executionError: false);
       }
 
       return result;

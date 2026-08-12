@@ -70,6 +70,30 @@ internal sealed class ProtocolCompletionService
   }
 
   /// <summary>
+  /// Добавляет обязательный финальный блок программы контроля в конец потокового протокола.
+  /// </summary>
+  /// <param name="settings">Параметры завершённого выполнения.</param>
+  /// <param name="protocol">Компонент отображения протокола.</param>
+  public async Task AppendControlProgramCompletionAsync(ActionSettings settings, ProtocolUI protocol)
+  {
+    if (settings.CheckType != CheckType.ControlProgram)
+    {
+      return;
+    }
+
+    await protocol.FinalizeCurrentCommandGroupAsync();
+    var completionMessage = ControlProgramCompletionMessageBuilder.Build(settings);
+    var successColor = ShowMessageModel.SuccessMessage.TitleColor;
+    completionMessage.HeaderColor = successColor;
+    completionMessage.MessageColor = successColor;
+    completionMessage.TimeColor = successColor;
+    await protocol.ShowMessageAsync(
+      completionMessage,
+      skipPause: true,
+      ignoreOutputValidation: true);
+  }
+
+  /// <summary>
   /// Сохраняет оба представления протокола и показывает панель управления сохранёнными файлами.
   /// </summary>
   /// <param name="settings">Настройки завершённого действия.</param>

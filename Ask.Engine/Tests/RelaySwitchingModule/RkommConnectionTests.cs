@@ -1,8 +1,7 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -14,6 +13,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
 using Ask.Engine.Tests.NodeMethod;
+using Ask.Protocol.Messages.EntryPoints;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
@@ -85,6 +85,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(
+        ActionSettings settings,
         IUserInteractionService _messageService,
         IInputFieldProvider inputFieldProvider,
         IInputHighlightService inputHighlightService,
@@ -114,18 +115,14 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       needReset = true;
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Инициализация оборудования"),
-          IsBlockStart: true);
+      await ExecutionMessages.PublishEquipmentInitializationAsync(_userInteractionService);
 
       // Подключение к устройствам (МКР + УКШ + мультиметр)
       await RelayModuleHelper.ConnectIfNeededAsync(_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ConnectIfNeededAsync(_busSwitcher, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ConnectIfNeededAsync(_fastMeter, _userInteractionService, cancellationToken);
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Настройка оборудования"),
-          IsBlockStart: true);
+      await ExecutionMessages.PublishEquipmentSetupAsync(_userInteractionService);
 
       var busses = ConvertingInSwitchingBusNewToSwitchingBus(data.ActivePairBus);
 
@@ -154,9 +151,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           _userInteractionService,
           cancellationToken);
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Инициализация завершена, тест начат!"),
-          IsBlockStart: true);
+      await ExecutionMessages.PublishTestStartedAsync(_userInteractionService);
 
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
@@ -213,25 +208,21 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           ModuleNumber = _module.Number,
           PointNumber = pointNumber,
         };
-        var type = success
-          ? ShowMessageModel.MessageType.Success
-          : ShowMessageModel.MessageType.Error;
-        var resultMessage = new ShowMessageModel(
-          $"Результат измерения точки {point}",
-          message: NodeMethodProtocolBuilder.FormatValue(result, ResistanceUnit.Ohm),
-          type: type)
-        {
-          IndentLevel = 2,
-          ExecutionErrorMessage = success
-            ? null
-            : NodeMethodProtocolBuilder.BuildRangeFailure(
-              point,
-              0d,
-              expectedResistance,
-              result,
-              ResistanceUnit.Ohm),
-        };
-        await _userInteractionService.ShowMessageAsync(resultMessage, skipPause: true);
+        string? executionErrorMessage = success
+          ? null
+          : MeasurementMessages.BuildNodeRangeFailure(
+            point,
+            0d,
+            expectedResistance,
+            result,
+            ResistanceUnit.Ohm);
+        await MeasurementMessages.PublishResultAsync(CheckType.Test,
+          ResistanceUnit.Ohm,
+          new MeasurementRange(result, 0d, expectedResistance),
+          success,
+          point.ToString(),
+          executionErrorMessage,
+          _userInteractionService);
 
         return success;
       }

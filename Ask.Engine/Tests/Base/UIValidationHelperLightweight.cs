@@ -9,25 +9,25 @@ namespace Ask.Engine.Tests.Base
   /// </summary>
   public static class UIValidationHelperLightweight
   {
-    private static IInputFieldAccessor? input;
-
     #region Методы валидации
 
     /// <summary>
     /// Извлекает и проверяет строки «тестируемого» и «тестирующего» номера и диапазона.
     /// </summary>
-    /// <param name="protocolUI">Экземпляр ProtocolUI, в котором лежит InputFieldLightweight.</param>
+    /// <param name="message">Сервис вывода сообщений об ошибках проверки данных.</param>
+    /// <param name="inputFieldProvider">Поставщик значений проверяемых полей.</param>
+    /// <param name="inputHighlightService">Сервис подсветки полей с некорректными значениями.</param>
     /// <returns>
-    /// Кортеж: 
-    /// Success – результат проверки; 
-    /// Message – текст ошибки или "OK"; 
-    /// Tested, Tester, Range – строковые значения полей (пустые при ошибке).
+    /// Задача, возвращающая результат проверки, описание ошибки и нормализованные значения полей.
     /// </returns>
-    public static (bool Success, string Message, string Tested, string Tester, string Range)
-        TryValidateAndParseInput(IMessageOutputService message, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService)
+    public static async Task<(bool Success, string Message, string Tested, string Tester, string Range)>
+        TryValidateAndParseInputAsync(
+          IMessageOutputService message,
+          IInputFieldProvider inputFieldProvider,
+          IInputHighlightService inputHighlightService)
     {
       // 1) Достаём контрол
-      input = inputFieldProvider.GetInputFieldAccessor();
+      IInputFieldAccessor? input = inputFieldProvider.GetInputFieldAccessor();
       if (input == null)
       {
         return (false, "Поле ввода не найдено.", "", "", "");
@@ -43,8 +43,7 @@ namespace Ask.Engine.Tests.Base
        || string.IsNullOrWhiteSpace(t1Parts[0])
        || string.IsNullOrWhiteSpace(t1Parts[1]))
       {
-        _ = message.ShowMessageAsync(
-            new ShowMessageModel("Поле 'Номер проверяемого' заполнено некорректно!", ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishInvalidTestedNumberAsync(message);
         inputHighlightService.HighlightTestedNumber();
         return (false, "Неверный формат 'Номер проверяемого'.", "", "", "");
       }
@@ -56,8 +55,7 @@ namespace Ask.Engine.Tests.Base
        || string.IsNullOrWhiteSpace(t2Parts[0])
        || string.IsNullOrWhiteSpace(t2Parts[1]))
       {
-        _ = message.ShowMessageAsync(
-            new ShowMessageModel("Поле 'Номер проверяющего' заполнено некорректно!", ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishInvalidTesterNumberAsync(message);
         inputHighlightService.HighlightTesterNumber();
         return (false, "Неверный формат 'Номер проверяющего'.", "", "", "");
       }
@@ -65,8 +63,7 @@ namespace Ask.Engine.Tests.Base
       // 5) Нельзя совпадать
       if (t1 == t2)
       {
-        _ = message.ShowMessageAsync(
-            new ShowMessageModel("Номера проверяемого и проверяющего блоков совпадают!", ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishDuplicateNumbersAsync(message);
         inputHighlightService.HighlightTestedNumber();
         inputHighlightService.HighlightTesterNumber();
         return (false, "Повтор параметров.", "", "", "");
@@ -76,15 +73,13 @@ namespace Ask.Engine.Tests.Base
       var rg = range.Trim();
       if (string.IsNullOrEmpty(rg))
       {
-        _ = message.ShowMessageAsync(
-            new ShowMessageModel("Поле 'Диапазон проверки' не заполнено!", ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishEmptyRangeAsync(message);
         inputHighlightService.HighlightTestRange();
         return (false, "Диапазон не задан.", "", "", "");
       }
       if (!ValidateRangeInput(rg, out var error))
       {
-        _ = message.ShowMessageAsync(
-            new ShowMessageModel($"Неверный диапазон: {error}", ShowMessageModel.ErrorMessage.TitleColor));
+        await ValidationMessages.PublishInvalidRangeAsync(message, error);
         inputHighlightService.HighlightTestRange();
         return (false, "Неверный диапазон.", "", "", "");
       }

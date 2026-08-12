@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Devices;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -249,8 +250,14 @@ namespace Ask.Engine.Tests.Base
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
       measurementRange.TargetValue = answer;
 
-      var (success, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, measurementRange, point);
-      return (success, result);
+      var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+      await MeasurementMessages.PublishResultAsync(CheckType.Test,
+        MeasurementTypeCommand.KC,
+        new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+        result.IsSuccessful,
+        point,
+        outputService: ui);
+      return result;
     }
 
     /// <summary>

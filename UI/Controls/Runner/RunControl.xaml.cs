@@ -515,7 +515,7 @@ namespace UI.Controls.Runner
       UpdateDocumentActionPanel();
     }
 
-    private async Task StartTest(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
+    private async Task StartTest(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       TextEditorUI? editor = null;
 

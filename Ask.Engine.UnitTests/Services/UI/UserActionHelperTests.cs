@@ -1,6 +1,9 @@
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Engine.UnitTests.TestInfrastructure;
 using Moq;
 
 namespace Ask.Engine.UnitTests.Services.UI;
@@ -267,6 +270,43 @@ public sealed class UserActionHelperTests
         () => Task.FromResult(false),
         interaction.Object,
         deviceTask: true));
+  }
+
+  [Fact]
+  public async Task ModuleRelayControlProtocolErrorIsAlwaysWrittenToProtocol()
+  {
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
+    var messages = new List<ShowMessageModel>();
+    var interaction = CreateInteractionService(requests: null, UserAction.None);
+    interaction
+      .Setup(service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()))
+      .Callback<ShowMessageModel, bool, bool, bool, bool, string, string, int>(
+        (message, _, _, _, _, _, _, _) => messages.Add(message))
+      .Returns(Task.CompletedTask);
+
+    await Assert.ThrowsAsync<ModuleRelayControlProtocolException>(
+      () => UserActionHelper.GetRunWithUserRepeatAsync(
+        () => Task.FromException<bool>(
+          new ModuleRelayControlProtocolException(
+            "МКР 1.6",
+            "Подключение точки",
+            "Неизвестная команда программы.",
+            "UnknownCommand")),
+        interaction.Object,
+        deviceTask: true));
+
+    ShowMessageModel message = Assert.Single(messages);
+    Assert.Equal(ShowMessageModel.MessageType.Error, message.Status);
+    Assert.Equal("МКР 1.6: Подключение точки", message.Header);
+    Assert.Equal("Системная ошибка. Неизвестная команда программы.", message.Message);
   }
 
   private static Mock<IUserInteractionService> CreateInteractionService(

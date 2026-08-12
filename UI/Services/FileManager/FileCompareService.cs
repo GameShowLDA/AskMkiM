@@ -31,7 +31,7 @@ namespace UI.Services.FileManager
     /// Возвращает <c>true</c>, если в редакторе есть несохранённые изменения;
     /// иначе <c>false</c>.
     /// </returns>
-    public bool HasFileChanged(IDockItem control)
+    public bool HasFileChanged(IDockItem control, bool notifyMissingFile = true)
     {
       if (!IsValidDockItem(control))
       {
@@ -62,7 +62,7 @@ namespace UI.Services.FileManager
           StringComparison.Ordinal);
       }
 
-      return CompareWithSavedFile(editor, editor.TextEditorModel.FilePath);
+      return CompareWithSavedFile(editor, editor.TextEditorModel.FilePath, notifyMissingFile);
     }
 
     /// <summary>
@@ -102,18 +102,18 @@ namespace UI.Services.FileManager
     /// </summary>
     private static bool CheckUnsavedFile(TextEditorUI editor)
     {
-      return !string.IsNullOrWhiteSpace(editor.Text);
+      return !string.IsNullOrEmpty(editor.Text);
     }
 
     /// <summary>
     /// Сравнивает текст редактора с содержимым файла на диске.
     /// Используется только как резервный путь, если снимок ещё не заполнен.
     /// </summary>
-    private static bool CompareWithSavedFile(TextEditorUI editor, string filePath)
+    private static bool CompareWithSavedFile(TextEditorUI editor, string filePath, bool notifyMissingFile)
     {
       if (!File.Exists(filePath))
       {
-        return HandleMissingFile();
+        return HandleMissingFile(notifyMissingFile);
       }
 
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -128,9 +128,13 @@ namespace UI.Services.FileManager
     /// <summary>
     /// Обрабатывает ситуацию, когда файл отсутствует на диске.
     /// </summary>
-    private static bool HandleMissingFile()
+    private static bool HandleMissingFile(bool notifyMissingFile)
     {
-      MessageBoxCustom.Show("Файл был удалён или повреждён", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+      if (notifyMissingFile)
+      {
+        MessageBoxCustom.Show("Файл был удалён или повреждён", "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+      }
+
       return true;
     }
 

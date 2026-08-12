@@ -2,6 +2,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Udp.Protocols;
+using Ask.Device.Communication.Common;
 using Ask.Device.Runtime.Base.DeviceResponses;
 using System.Net;
 using static Ask.LogLib.LoggerUtility;
@@ -101,7 +102,7 @@ namespace Ask.Device.Runtime.Base.Device
       if (IPAddress.TryParse(ipString, out IPAddress? ipAddress))
       {
         IPAddress = ipAddress;
-        DeviceProtocol ??= new UdpProtocol(this);
+        DeviceProtocol ??= new HardwareWatchdogProtocol(new UdpProtocol(this), Name);
       }
       else
       {

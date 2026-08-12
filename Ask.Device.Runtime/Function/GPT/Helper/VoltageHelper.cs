@@ -1,7 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using System.Globalization;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
@@ -91,7 +91,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
         LogDebug($"Ответ на {nameof(GetVoltageAsync)}: \"{response}\"", isDeviceLog: true);
 
-        if (double.TryParse(response.Replace("kV", "").Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var voltage))
+        if (BreakdownTesterResponseProcessor.TryParseNumber(response, out var voltage))
         {
           LogInformation($"{nameof(GetVoltageAsync)}: Результат = {voltage}", isDeviceLog: true);
           return voltage;

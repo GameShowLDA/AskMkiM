@@ -1,6 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -23,20 +22,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="points">Список точек для проверки.</param>
     /// <param name="messageService">Сервис отображения сообщений.</param>
     /// <returns>Задача, представляющая выполнение проверки.</returns>
-    static public async Task<List<ShowMessageModel>> CheckSequenceAsync(MethodExecutionContext methodExecutionContext)
+    static public async Task<AlgorithmExecutionResult> CheckSequenceAsync(MethodExecutionContext methodExecutionContext)
     {
-      List<ShowMessageModel> showMessageModels = new List<ShowMessageModel>();
+      var executionResult = new AlgorithmExecutionResult();
 
       var groupChains = methodExecutionContext.SchemeModel.GetPointsDisconnected();
       if (groupChains.ChainModels.Count == 0)
       {
-        return showMessageModels;
+        return executionResult;
       }
 
-      if (ProtocolConfig.GetTestStepMessagesInProtocol())
-      { 
-        await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildCheckBlockHeader(ControlCheckAlgorithm.Group, methodExecutionContext.IsPolarityReversed));
-      }
+      await CommandMessages.PublishCheckBlockHeaderAsync(
+        methodExecutionContext.MessageService,
+        ControlCheckAlgorithm.Group,
+        methodExecutionContext.IsPolarityReversed);
 
       HighestBitCount = GetHighestPointBinaryDigits(groupChains.ChainModels);
       var binaryPoints = ConvertToReversedBinaryRange(groupChains, HighestBitCount);
@@ -46,10 +45,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         string stepStr = GetBitString(step);
         int dischargeNumber = GetDischargeNumber(step);
 
-        if (ProtocolConfig.GetTestStepMessagesInProtocol())
-        {
-          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckBlock(dischargeNumber, stepStr), IsBlockStart: true);
-        }
+        await CommandMessages.PublishDischargeCheckBlockAsync(
+          methodExecutionContext.MessageService,
+          dischargeNumber,
+          stepStr);
 
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
@@ -59,19 +58,29 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
-          await methodExecutionContext.MessageService.ShowMessageAsync(ExecutorMessageBuilder.BuildDischargeCheckError(dischargeNumber, stepStr), IsBlockStart: true);
-          showMessageModels.Add(new ShowMessageModel($"Разряд {dischargeNumber} ({stepStr})({methodExecutionContext.LowerLimit}{(methodExecutionContext.HigherLimit != -1 ? $"-{methodExecutionContext.HigherLimit}" : "<")}{methodExecutionContext.Unit})", message: $"{methodExecutionContext.UnitMnemonic}изм = {result.Value} {methodExecutionContext.Unit}. Переход к методу полного узла", type: ShowMessageModel.MessageType.Error));
+          await CommandMessages.PublishDischargeCheckErrorAsync(
+            methodExecutionContext.MessageService,
+            dischargeNumber,
+            stepStr);
+          executionResult.Errors.Add(MeasurementMessages.BuildFullNodeFallbackResult(
+            methodExecutionContext.TypeCommand,
+            new Ask.Core.Shared.DTO.Devices.Measurements.MeasurementRange(
+              result.Value,
+              methodExecutionContext.LowerLimit,
+              methodExecutionContext.HigherLimit),
+            dischargeNumber,
+            stepStr));
 
           NodeFullContext contextNodeFull = methodExecutionContext.CreateChild<NodeFullContext>();
           contextNodeFull.PerformMeasurementAsync = methodExecutionContext.PerformMeasurementAsync;
-          showMessageModels.AddRange(await NodeFullChecker.CheckSequenceAsync(contextNodeFull));
+          executionResult.AddRange(await NodeFullChecker.CheckSequenceAsync(contextNodeFull));
 
-          return showMessageModels;
+          return executionResult;
         }
         await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
       }
 
-      return showMessageModels;
+      return executionResult;
     }
 
     /// <summary>

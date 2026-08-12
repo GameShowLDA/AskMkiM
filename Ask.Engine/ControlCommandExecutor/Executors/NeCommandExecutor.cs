@@ -1,4 +1,6 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -6,7 +8,6 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -27,13 +28,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var command = GetRequiredCommand<NeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
-
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
@@ -47,7 +45,19 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
       var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
-      await SettingMeter(meter, context.Console);
+      try
+      {
+        await SettingMeter(meter, context.Console.GetCancellationToken());
+      }
+      catch (OperationCanceledException) when (context.Console.GetCancellationToken().IsCancellationRequested)
+      {
+        throw;
+      }
+      catch (Exception ex)
+      {
+        await PublishHardwareErrorAsync(context.Console, ex.Message);
+        return;
+      }
 
       if (command.LowerLimitVoltage.HasValue)
       {
@@ -85,17 +95,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
-      if (infoMessage.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, infoMessage);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
 
     /// <summary>
@@ -115,7 +116,23 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext, messageService);
+        try
+        {
+          answer = await GetDiodeMeasurementValueAsync(
+            meter,
+            value,
+            pointContext,
+            messageService,
+            cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+          throw;
+        }
+        catch (DeviceException)
+        {
+          return (false, 0d);
+        }
 
         if (answer < 0)
         {
@@ -123,11 +140,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         MeasurementRange measurementRange = new MeasurementRange(answer, firstValue, secondValue);
-        return await MessageManager.ShowMeasurementResultAsync(
-          messageService,
-          MeasurementTypeCommand.NE,
+        var measurementResult = MeasurementResultEvaluator.Evaluate(
           measurementRange,
-          isOverloadExpected: pointContext.IsOverloadExpected);
+          pointContext.IsOverloadExpected);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.NE,
+          new MeasurementRange(
+            measurementResult.Value,
+            measurementRange.LowerBound,
+            measurementRange.UpperBound),
+          measurementResult.IsSuccessful,
+          outputService: messageService);
+        return measurementResult;
       }, messageService);
 
       return result;
@@ -140,7 +164,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       IMultimeter meter,
       double value,
       ConnectedPointContext pointContext,
-      IUserInteractionService messageService)
+      IUserInteractionService messageService,
+      CancellationToken cancellationToken)
     {
       if (await ShouldReturnOverloadInIdleReverseModeAsync(pointContext))
       {
@@ -148,7 +173,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
-      return await meter.DiodeManager.CheckDiodeAsync(measurementRange, messageService);
+      return await meter.DiodeManager.CheckDiodeAsync(
+        measurementRange,
+        messageService,
+        cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -164,9 +192,29 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       && !ExecutionConfig.GetIsErrorSimulationEnabled()
       && pointContext.IsOverloadExpected;
 
-    private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
+    private async Task SettingMeter(
+      IMultimeter meter,
+      CancellationToken cancellationToken)
     {
-      await meter.DiodeManager.SetDiodeModeAsync(userMessageService);
+      await meter.DiodeManager.SetDiodeModeAsync(
+        userMessageService: null,
+        cancellationToken: cancellationToken);
+    }
+
+    private static Task PublishHardwareErrorAsync(
+      IUserInteractionService messageService,
+      string error)
+    {
+      return messageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: "Ошибка оборудования при выполнении НЭ",
+          message: $"Команда НЭ завершена, программа контроля продолжит выполнение. {error}",
+          type: ShowMessageModel.MessageType.Error)
+        {
+          ExecutionError = true,
+          IsDeviceMessage = true,
+        },
+        skipPause: true);
     }
   }
 }

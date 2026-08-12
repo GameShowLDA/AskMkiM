@@ -695,6 +695,15 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
+      if (message.UseSuccessColorForEntireMessage)
+      {
+        Color successColor = GetThemeColor("TestsProtocolMessageSuccesForeground", Colors.Green);
+        message.HeaderColor = successColor;
+        message.MessageColor = successColor;
+        message.TimeColor = successColor;
+        return;
+      }
+
       switch (message.Status)
       {
         case ShowMessageModel.MessageType.Success:
@@ -819,6 +828,14 @@ namespace Ask.UI.Components.ProtocolListBox
         var activeGroup = _currentGroup ?? _pendingGroup;
         activeGroup?.SetExecutionResult(hasErrors);
       }).Task;
+    }
+
+    /// <summary>
+    /// Завершает текущую группу команды, чтобы последующие сообщения отображались вне неё.
+    /// </summary>
+    public Task FinalizeCurrentCommandGroupAsync()
+    {
+      return Application.Current.Dispatcher.InvokeAsync(FinalizeLatestCommandGroup).Task;
     }
 
     public async Task ShowMessageAsync(

@@ -1,7 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.Base.DeviceResponses;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 using Ask.Device.Runtime.Commands;
 
 namespace Ask.Device.Runtime.Function.ModuleRelayControl
@@ -12,6 +12,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
   public class MeterManager : IMeterManager
   {
     private readonly ModuleRelayControlQueryExecutor _queryExecutor;
+    private readonly IRelaySwitchModule _moduleRelayControl;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="MeterManager"/>.
@@ -19,6 +20,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     /// <param name="moduleRelayControl">Экземпляр интерфейса модуля реле.</param>
     public MeterManager(IRelaySwitchModule moduleRelayControl)
     {
+      _moduleRelayControl = moduleRelayControl;
       _queryExecutor = new ModuleRelayControlQueryExecutor(moduleRelayControl);
     }
 
@@ -33,7 +35,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       DeviceCommand cmd = new DeviceCommand(5, 1);
       string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
-      return BaseResponse.FromJson(answer)?.Answer == "5.1";
+      return await ModuleRelayControlResponseProcessor.CheckMeterOperationAsync(
+        answer, _moduleRelayControl, connect: true, userMessageService);
     }
 
     /// <summary>
@@ -47,7 +50,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       DeviceCommand cmd = new DeviceCommand(5, 2);
       string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
-      return BaseResponse.FromJson(answer)?.Answer == "5.2";
+      return await ModuleRelayControlResponseProcessor.CheckMeterOperationAsync(
+        answer, _moduleRelayControl, connect: false, userMessageService);
     }
 
     /// <summary>
@@ -62,7 +66,8 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       DeviceCommand cmd = new DeviceCommand(7);
       string answer = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
 
-      return BaseResponse.FromJson(answer)?.Answer == "7.1";
+      return await ModuleRelayControlResponseProcessor.CheckMeterStateAsync(
+        answer, _moduleRelayControl, userMessageService);
     }
   }
 }

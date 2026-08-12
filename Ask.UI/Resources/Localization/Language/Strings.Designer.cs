@@ -1374,7 +1374,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Вывод протокола в ПО.
+        ///   Ищет локализованную строку, похожую на Формирование протокола программы контроля.
         /// </summary>
         internal static string settings_protocol_showInSoftware_title {
             get {

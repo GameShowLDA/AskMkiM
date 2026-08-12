@@ -47,7 +47,7 @@ public class SettingsProtocolDto
   public bool ShowDetailedProtocol { get; set; }
 
   /// <summary>
-  /// Отображать протокол в программном обеспечении.
+  /// Формировать итоговый протокол программы контроля.
   /// </summary>
   public bool ShowProtocolInSoftware { get; set; }
 

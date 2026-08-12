@@ -152,6 +152,7 @@ namespace UI.Components.MultiEditorMethods
           {
             if (!fileManager.FileService.Comparison.HasFileChanged(control))
             {
+              fileManager.DockItemService.UpdateModifiedIndicator(control);
               return true;
             }
 
@@ -159,7 +160,13 @@ namespace UI.Components.MultiEditorMethods
             if (control.Content is TextEditorUI)
             {
               var textEditor = control.Content as TextEditorUI;
-              return SaveDataFromTextEditor(textEditor, filePath);
+              bool saved = SaveDataFromTextEditor(textEditor, filePath);
+              if (saved)
+              {
+                fileManager.DockItemService.UpdateModifiedIndicator(control);
+              }
+
+              return saved;
             }
           }
         }
@@ -174,7 +181,19 @@ namespace UI.Components.MultiEditorMethods
             }
             else
             {
-              return SaveDataFromTextEditor(textEditor, textEditor.TextEditorModel.FilePath);
+              if (!fileManager.FileService.Comparison.HasFileChanged(control))
+              {
+                fileManager.DockItemService.UpdateModifiedIndicator(control);
+                return true;
+              }
+
+              bool saved = SaveDataFromTextEditor(textEditor, textEditor.TextEditorModel.FilePath);
+              if (saved)
+              {
+                fileManager.DockItemService.UpdateModifiedIndicator(control);
+              }
+
+              return saved;
             }
           }
         }
@@ -265,7 +284,7 @@ namespace UI.Components.MultiEditorMethods
         return false;
       }
 
-      string previousFileName = control.TabText;
+      string previousFileName = control.Title;
       RenamePage(control, filePath);
 
       textEditor.TextEditorModel.FilePath = filePath;
@@ -579,7 +598,7 @@ namespace UI.Components.MultiEditorMethods
         return Path.GetFileNameWithoutExtension(textEditor.TextEditorModel.FileName);
       }
 
-      return Path.GetFileNameWithoutExtension(control?.TabText) ?? string.Empty;
+      return Path.GetFileNameWithoutExtension(control?.Title) ?? string.Empty;
     }
   }
 }

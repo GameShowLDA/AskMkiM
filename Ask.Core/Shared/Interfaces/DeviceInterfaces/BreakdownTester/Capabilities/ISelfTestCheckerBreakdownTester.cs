@@ -1,4 +1,5 @@
 ﻿
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -14,7 +15,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabiliti
     /// <param name="selectedType">Выбранное значение перечисления.</param>
     /// <param name="device">Устройство коммутации шин (необязательно).</param>
     /// <param name="meter">Измеритель (необязательно).</param>
-    Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null);
+    Task StartSelfCheck(CancellationToken cancellationToken, System.Enum selectedType, ActionSettings settings, IUserInteractionService? userMessageService = null, IBreakdownTester breakdownTester = null, ISwitchingDevice device = null, IMultimeter meter = null);
 
     /// <summary>
     /// Возвращает тип перечисления, используемый как тип проверки.

@@ -1,8 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using System.Globalization;
-using System.Text.RegularExpressions;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.Device.Runtime.Function.GPT.Command.ManualCommandManager;
@@ -81,8 +80,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
         LogDebug($"Ответ на {nameof(GetTestTimeAsync)}: \"{response}\"", isDeviceLog: true);
 
-        var match = Regex.Match(response, @"\d+(\.\d+)?");
-        if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var testTime))
+        if (BreakdownTesterResponseProcessor.TryParseNumber(response, out var testTime))
         {
           LogInformation($"{nameof(GetTestTimeAsync)}: Результат = {testTime}", isDeviceLog: true);
           return testTime;
@@ -152,8 +150,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
         LogDebug($"Ответ на {nameof(GetRampTimeAsync)}: \"{response}\"", isDeviceLog: true);
 
-        var match = Regex.Match(response, @"\d+(\.\d+)?");
-        if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var rampTime))
+        if (BreakdownTesterResponseProcessor.TryParseNumber(response, out var rampTime))
         {
           LogInformation($"{nameof(GetRampTimeAsync)}: Результат = {rampTime}", isDeviceLog: true);
           return rampTime;

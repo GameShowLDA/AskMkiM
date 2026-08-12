@@ -24,7 +24,7 @@
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
-| Пробойная установка GPT | `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
+| Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
 | UPS | `Ask.Core/Shared/Interfaces/DeviceInterfaces/UninterruptiblePowerSupply/` | `Ask.Device.Application/FunctionAdapters/MikUps1101rRm/`, `Ask.Device.Runtime/Function/MikUps1101rRm/` |
@@ -34,11 +34,11 @@
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
-| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; оборудование реализовано, остальные группы пока являются заглушками |
+| Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования, измерений, допустимых диапазонов и ошибок UI-валидации формируются централизованно |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
-| Самоконтроль и инженерные тесты | `MainWindow/Services/TestService.cs`, `MainWindow/Services/SelfTestServices.cs` | `Ask.UI/Controls/ExecutorControls/TestsControls/`, `Ask.Engine/Tests/` |
+| Самоконтроль и инженерные тесты | `MainWindow/Services/TestService.cs`, `MainWindow/Services/SelfTestServices.cs` | `Ask.Device.Runtime/Function/*/SelfCheck/`, `Ask.Protocol.Messages/EntryPoints/SelfTestMessages.cs`, `Ask.UI/Controls/ExecutorControls/TestsControls/`, `Ask.Engine/Tests/` |
 | Ошибки трансляции | `Ask.Core/Services/Errors/Translation/` | целевой parser/validator, `Ask.UI/Controls/ErrorList/`, `UI/Controls/ErrorList/` |
 | Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `MainWindow/Services/TranslationServices.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Services/ExceptionDiagnosticReporter.cs`, `Ask.Diagnostics/Collectors/` |
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
@@ -77,13 +77,14 @@
 | `MainWindowProgram` | `MainWindow/MainWindowProgram.csproj` | WPF entry point, shell, startup, ручная композиция UI; `MainWindowProgram.*` | `Ask.Diagnostics`, `Ask.DataBase.Engine`, `Ask.Support`, `Ask.UI`, `ConsoleUI`, `Message`, `UI` |
 | `UI` | `UI/UI.csproj` | Legacy WPF workspace, editor, runner, settings, protocol/file services; `UI.*` | `Ask.Core`, `Ask.DataBase.Provider`, `Ask.Engine`, `Ask.Support`, `Ask.UI`, `Message`, `Ask.Device.Runtime` |
 | `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
-| `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Message` |
+| `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Ask.Protocol.Messages`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
-| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; классы разделены по ролям между `EntryPoints`, `Builders` и `Show`; оборудование реализовано, остальные группы пока являются заглушками | `Ask.Core`, `Ask.LogLib`; первый потребитель — `Ask.Device.Runtime` |
-| `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime` |
-| `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Protocol.Messages` |
+| `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; содержит фасады и builders для executor-команд, блоков проверки, оборудования и измерений | `Ask.Core`, `Ask.LogLib`; потребители — `Ask.Device.Runtime`, `Ask.Engine` |
+| `Ask.Device.Application` | `Ask.Device.Application/Ask.Device.Application.csproj` | Application adapters/decorators over raw device managers, retry and user-facing error conversion; `Ask.Device.Application.*` | `Ask.Core`, `Ask.LogLib`, `Ask.Device.Runtime`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
+| `Ask.Device.Runtime` | `Ask.Device.Runtime/Ask.Device.Runtime.csproj` | Concrete devices, low-level managers, device command generation and transports; `Ask.Device.Runtime.*` | `Ask.Core`, `Ask.Device.Communication`, `Ask.Device.Emulator`, `Ask.Device.ResponseProcessor`, `Ask.Protocol.Messages` |
 | `Ask.Device.Emulator` | `Ask.Device.Emulator/Ask.Device.Emulator.csproj` | Stateful raw-protocol emulation for chassis and МКР in Idle mode and Real/Idle protocol selection; `Ask.Device.Emulator.*` | `Ask.Core` |
 | `Ask.Device.Communication` | `Ask.Device.Communication/Ask.Device.Communication.csproj` | COM/TCP/UDP/USB protocol implementations; `Ask.Device.Communication.*` | `Ask.Core`, `Ask.Diagnostics`, `Ask.LogLib` |
+| `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Модели, строгая проверка протокольных ответов и централизованная публикация сообщений МКР, УКШ, мультиметров и пробойной установки GPT | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций и самоконтроля) |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
@@ -116,9 +117,13 @@ MainWindowProgram
 │  │  │        ├─ Ask.Device.Communication
 │  │  │        │  ├─ Ask.Diagnostics
 │  │  │        │  └─ Ask.LogLib
-│  │  │        └─ Ask.Device.Emulator ── Ask.Core
+│  │  │        ├─ Ask.Device.Emulator ── Ask.Core
+│  │  │        └─ Ask.Device.ResponseProcessor
+│  │  │           ├─ Ask.Core
+│  │  │           └─ Ask.Protocol.Messages
 │  │  ├─ Ask.Core
 │  │  ├─ Ask.LogLib
+│  │  ├─ Ask.Protocol.Messages
 │  │  └─ Message
 │  ├─ Ask.UI
 │  ├─ Ask.Support
@@ -135,17 +140,33 @@ MainWindowProgram
 Ask.Protocol.Messages
 ├─ Ask.Core ── Ask.LogLib
 └─ Ask.LogLib
+
+Ask.Device.ResponseProcessor
+├─ Ask.Core (контракты `IRelaySwitchModule`, `IMessageOutputService`)
+└─ Ask.Protocol.Messages (централизованная публикация операций МКР;
+   JSON-модели используют BCL `System.Text.Json`)
 ```
 
 `Ask.Protocol.Messages` добавлен в solution как отдельная production-библиотека.
 `EntryPoints/EquipmentMessages` является публичным фасадом, внутренний
 `Builders/EquipmentMessageBuilder` формирует результаты операций, а
-`Show/EquipmentMessagePublisher` записывает их в device log и передаёт `IMessageOutputService`.
-Фасад сохраняет метаданные исходного места вызова, а publisher передаёт в экранный протокол
+`Show/EquipmentMessagePublisher` задаёт политику device log и делегирует вывод общему
+`Show/MessagePublisher`. Фасад сохраняет метаданные исходного места вызова, а общий publisher передаёт в экранный протокол
 собственный источник и исходный метод в формате `PublishAsync (вызван из File.cs → Method, строка N)`.
 `Ask.Device.Runtime.Function.Base.Connected.Transport` уже использует новый фасад для подключения,
-отключения, инициализации и сброса; остальные runtime-потоки пока продолжают использовать
-`ExecutorMessageBuilder`, `DeviceMessageBuilder` и локальное создание `ShowMessageModel`.
+отключения, инициализации и сброса. `ExecutorMessageBuilder` удалён: его методы распределены между
+`CommandMessages`, `ExecutionMessages`, `EquipmentMessages`, `MeasurementMessages` и `SelfTestMessages`. Допустимые диапазоны
+значений независимо от вызывающей подсистемы публикуются через `RangeMessages`.
+`DeviceMessageBuilder` удалён из `Ask.Device.Runtime`: 104 оставшихся вызова device-результатов из
+`Ask.Device.Runtime` и `Ask.Device.Application` переведены на
+`DeviceMessages.PublishOperationResultAsync`. Формат, статус, отступ, признак device-сообщения
+и step-checkpoint формируются внутри `Ask.Protocol.Messages`; условия видимости по
+`DeviceDisplayConfig` остаются в существующих adapters/managers.
+
+Все реализации в `Ask.Device.Runtime/Function/*/SelfCheck/` публикуют экранные сообщения через
+`SelfTestMessages → SelfTestMessageBuilder → SelfTestMessagePublisher → MessagePublisher → IMessageOutputService`.
+В самих SelfCheck-классах остаются управление оборудованием, вычисление результата и регистрация аппаратных ошибок;
+`ShowMessageModel` и прямые вызовы `ShowMessageAsync` в этом потоке отсутствуют.
 
 `Directory.Build.props` направляет обычные результаты сборки в
 `Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path
@@ -187,7 +208,14 @@ AskMkiM/
 ├─ Ask.Protocol.Messages/      унифицированное формирование, логирование и отображение сообщений
 │  ├─ EntryPoints/             публичные фасады групп сообщений
 │  ├─ Builders/                внутреннее формирование `ShowMessageModel`
-│  └─ Show/                    внутреннее логирование и передача в экранный протокол
+│  ├─ Models/                  контракты накопленных результатов и пределов измерений
+│  ├─ Extensions/              интеграция результатов сообщений с `ProtocolModel`
+│  └─ Show/                    категорийная политика и общий вывод в экранный протокол
+├─ Ask.Device.ResponseProcessor/ контракты ответов оборудования
+│  └─ ModuleRelayControl/
+│     ├─ ResponseModels/        модели всех JSON-форм, возвращаемых прошивкой МКР
+│     └─ ResponseProcessing/    публичная статическая точка входа обработки ответов МКР
+│        └─ Checkers/           отдельные internal-проверки форм ответов
 ├─ Ask.Device.Application/     adapters and application composition
 ├─ Ask.Device.Runtime/         device classes and raw function managers
 ├─ Ask.Device.Emulator/        stateful chassis and МКР protocol emulation for Idle mode
@@ -511,6 +539,7 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 → IUserInteractionService.WaitIfPausedAsync
 → editor.SetActiveLine
 → BreakpointHandler.OnBreakpointHitAsync
+→ CommandMessages.ShowBreakpointHitAsync (публикация заголовка без ожидания паузы и проверки пошагового режима)
 → new CommandExecutionContext
 → CommandExecutorRegistry.TryGet(mnemonic)
 → ICommandExecutor.ExecuteAsync(context, ProtocolModel)
@@ -637,14 +666,53 @@ executor throws
 
 #### Strategies
 
-- `ConnectedPointChecker` — проверки соединённых цепей;
+- `ConnectedPointChecker` — проверяет соединённые цепи, формирует единый `AlgorithmExecutionResult` и передаёт
+  создание и публикацию этапов и результатов в `CommandMessages`/`MeasurementMessages`;
 - `DisconnectionCheckExecutor` выбирает `MethodExecutor`,
   `NodeAccumulationChecker`, `NodeFullChecker` или pairwise strategy;
-- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка;
-- `FaultChainMeasurementService` — повторное измерение проблемных цепей;
+- `MethodExecutor`, `NodeAccumulationChecker`, `NodeFullChecker` и `PairwiseFirstPointChecker`
+  возвращают единый `AlgorithmExecutionResult`; формирование и публикация их заголовков,
+  этапов локализации, диагностических сообщений и готовых результатов измерения проходят
+  через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
+- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; возвращает `AlgorithmExecutionResult`, а создание
+  и публикацию измерений, ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
+- `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
+  `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
+- `EhtCommandExecutor`, `IeCommandExecutor`, `KsCommandExecutor`, `NeCommandExecutor`,
+  `PiCommandExecutor`, `PrCommandExecutor` и `SiCommandExecutor` передают единый
+  `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
+  в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
+  ошибки и информационные сообщения по коллекциям `ProtocolModel`;
+- `ParallelTestRunner` публикует этап общего сброса через `ExecutionMessages`, а
+  `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
+  `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
+- `MeasurementMessages` формирует тексты брака узлового и группового методов через
+  `MeasurementFailureMessageBuilder`; `MeasurementLimitKind`, старые
+  `GroupMethodProtocolBuilder` и `NodeMethodProtocolBuilder` удалены из `Ask.Engine`;
+- все методы публикации `MeasurementMessages` требуют явный `CheckType`: метрологические
+  исполнители передают `CheckType.Metrology`, исполнители программ контроля —
+  `CheckType.ControlProgram`, обычные тесты — `CheckType.Test`, самоконтроль оборудования —
+  `CheckType.SelfTest`. `MeasurementMessagePublisher` централизованно игнорирует настройки
+  видимости итоговых и промежуточных успешных результатов для метрологии; для остальных
+  типов сохраняет фильтрацию через `DeviceDisplayConfig`. Ошибочные результаты настройками
+  видимости не скрываются;
+- `BaseMeasurement.MeasurementPointsDisplay` централизованно форматирует обе введённые
+  точки из `BaseMeasurement.Points`; метрологические режимы передают строку точек в
+  `MeasurementMessages.PublishResultAsync`, поэтому точки отображаются в строке результата
+  над обычной строкой погрешности. Отдельные сообщения допустимого диапазона
+  (`RangeMessages.PublishAllowedRangeAsync`) метрологические режимы не публикуют;
+- исполнители команд передают исходные строки в `CommandMessages.FormatSourceLines`;
+  `CommandExecutionContext.ProtocolSourceLines` по умолчанию ссылается на `Command.SourceLines`,
+  но позволяет вложенному executor вывести полный текст родительской команды;
+  `CommandExecutorBase` больше не содержит форматирование текста протокола;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
 `ПИ` вызывает `СИ` как вложенный executor до и после основной ACW/DCW-проверки.
+Оба контекста `СИ1`/`СИ2` получают в `ProtocolSourceLines` исходные строки `ПИ`, поэтому
+левый протокол сохраняет параметры ПИ и адреса точек из программы контроля; самостоятельная
+`СИ` продолжает использовать собственные `SourceLines`. Для вложенных этапов
+`CommandMessages.FormatSourceLinesWithHeader` заменяет исходные номер и мнемонику заголовком
+`ПИ/СИ1`, `ПИ/ПИ1` или `ПИ/СИ2`, не дублируя `номер ПИ` перед параметрами.
 `РМ` вызывает `EquipmentService.AnalyzePoints` и готовит equipment state.
 
 #### Pause, stop and command jump
@@ -662,12 +730,24 @@ ProtocolUI.RequestCommandJump
 → drawer events
 → ActionExecutor.InterruptPauseForCommandJump
 → CommandJumpRequestedException
+→ CommandJumpService.PrepareAsync
+→ CommandMessages.ShowCommandJumpAsync
+→ DeviceResetService.ResetDevicesAsync
 → CommandExecutionManager resumes at selected command
 ```
 
+`CommandExecutionManager` передаёт сообщения о неизвестной команде, запуске аварийного
+`КЦ` и ошибке аварийного `КЦ` в `ExecutionMessages`; моделей экранного протокола сам не создаёт.
+
 `ExecutionFinalizer` последовательно отменяет текущую задачу, очищает состояние,
 сбрасывает оборудование, печатает при включённой настройке, восстанавливает UI,
-показывает результат и сохраняет протоколы. Все шаги выполняются внутри
+показывает результат, добавляет обязательный финальный блок программы контроля через
+`ProtocolCompletionService.AppendControlProgramCompletionAsync` →
+`ControlProgramCompletionMessageBuilder.Build` и сохраняет протоколы. Финальный блок
+не зависит от настроек протокола и добавляется после остальных сообщений. Перед его выводом
+`ProtocolUI.FinalizeCurrentCommandGroupAsync` → `ProtocolListBoxUI.FinalizeCurrentCommandGroupAsync`
+закрывает последнюю группу команды, поэтому финальная зелёная запись отображается отдельно и не сворачивается
+вместе с `КЦ` или другой последней командой. Все шаги выполняются внутри
 `EquipmentExecutionContext.EnterMandatoryFinalization`; ошибка отдельного шага
 логируется и не прерывает оставшиеся обязательные действия.
 
@@ -680,6 +760,8 @@ ProtocolUI.RequestCommandJump
 
 - `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`
 - `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ControlProgramCompletionMessageBuilder.cs`
 - `UI/Controls/Runner/RunControl.xaml.cs`
 - `Ask.Engine/ControlCommandExecutor/Execution/`
 - `Ask.Engine/ControlCommandExecutor/Executors/`
@@ -702,6 +784,7 @@ RmCommandExecutor
 → ChassisManagers.GetByNumberAsync
 → SwitchingDevices.GetDevicesByNumberChassisAsync
 → RelaySwitchModules.GetDevicesByNumberChassisAsync
+→ ValidationMessages.PublishEquipmentConfigurationErrorAsync при ошибке конфигурации
 → validate module point bounds
 → module.ConnectableManager.InitializeAsync + ResetAsync
 → switchingDevice.ConnectableManager.InitializeAsync + ResetAsync
@@ -806,9 +889,15 @@ executors/tests
 
 ActionExecutor finalization
 → ExecutionFinalizer
-→ ProtocolCompletionService.BuildInspectionProtocol
-→ InspectionProtocolBuilder
-→ ProtocolUI.ShowInspectionProtocol
+├─→ ProtocolCompletionService.DisplayCompletionAsync
+│  → InspectionProtocolBuilder
+│  → ProtocolUI.ShowInspectionProtocol
+├─→ ProtocolCompletionService.AppendControlProgramCompletionAsync
+│  → ProtocolUI.FinalizeCurrentCommandGroupAsync
+│  → ProtocolListBoxUI.FinalizeCurrentCommandGroupAsync
+│  → ControlProgramCompletionMessageBuilder.Build
+│  → ProtocolUI.ShowMessageAsync (отдельная зелёная последняя запись потокового протокола)
+└─→ ProtocolCompletionService.SaveAndExposeAsync
 → ProtocolStorageService
 → ExecutionProtocolHistoryService
 ```
@@ -834,9 +923,29 @@ ExecutionFinalizer
 → PrintUtility.PrintProtocol(messages)
 ```
 
-Для программы контроля итоговый протокол показывается/сохраняется как report, но
-автоматическая печать в `ProtocolCompletionService` исключена; ручные print buttons
-в `Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml.cs` печатают execution или inspection text.
+Для программы контроля `KscCommandExecutor.GetProtocol` заполняет базовые поля `ProtocolModel` и
+при включенной печати или формировании протокола программы контроля запрашивает дополнительные данные:
+
+```text
+KscCommandExecutor.GetProtocol
+→ ProtocolConfig.ShouldShowProtocolInfoDialog()
+→ AutoPrintProtocol || ShowProtocolInSoftware
+├─ false → ветка итогового report не запускается
+└─ true → FileInteractionEventAdapter.RaiseGetProtocolInfo
+   → MainWindow.Services.FileService.OnGetProtocolInfo
+   → ProtocolInfoWindow.ShowDialog
+   → FileInteractionEventAdapter.RaiseProtocolInfoClose
+   → KscCommandExecutor.OnProtocolInfoClosing
+   → FileInteractionEventAdapter.RaiseViewProtocol
+   → MainWindow.Services.FileService.ViewProtocol
+   → UI.Services.ProtocolManager.ProtocolService.ViewProtocol
+      ├─ !ShowProtocolInSoftware → ExportProtocolAsPdf
+      └─ AutoPrintProtocol → PrintUtility.PrintProtocol(protocol, protocolText)
+```
+
+`ProtocolConfig.ShouldShowProtocolInfoDialog()` — единая точка решения для окна ввода данных. При отключенных
+настройках не запускаются ни окно, ни последующая цепочка итогового report. Ручные print
+buttons в `Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml.cs` печатают execution или inspection text без этой проверки.
 
 #### Files
 
@@ -950,12 +1059,78 @@ executor/strategy
 → UserActionHelper.GetRunWithUserRepeatAsync
 → runtime PointManager.ConnectRelayAsync
 → DeviceCommand(8, point, bus, action).ToString
+→ ModuleRelayControlQueryExecutor.QueryAsync
 → IDeviceProtocol.QueryAsync
 → UdpProtocol.QueryAsync
 → UdpClient.SendAsync/ReceiveAsync
-→ BaseResponse.FromJson validation
-→ adapter DeviceMessageBuilder or RelayExceptionFactory
+→ ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
+  ├─ Status absent/success → ModuleRelayControlResponseProcessor validation
+  → PointManagerAdapter возвращает результат или создаёт ошибку через RelayExceptionFactory
+  └─ Status = UnknownCommand / InvalidParametr / InvalidParameter
+    → ModuleRelayControlProtocolException(device, operation, localized error, firmware status)
+    → UserActionHelper catches hardware exception
+    → IUserInteractionService.ShowMessageAsync(MessageType.Error, skipPause: true)
+    → protocol line "МКР chassis.number: operation. Системная ошибка. reason [БРАК]"
+    → existing Retry / Continue / Abort equipment flow
 ```
+
+`Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor`
+предоставляет новые проверки ответов подключения/отключения одной точки. Методы
+`CheckPointConnectionAsync`, `CheckPointDisconnectionAsync`,
+`CheckVerifiedPointConnectionAsync` и `CheckVerifiedPointDisconnectionAsync` принимают
+сырой JSON, ожидаемый `IRelaySwitchModule`, номер точки, шины и необязательный
+`IMessageOutputService`. Публичный API не содержит булевого переключателя режима проверки.
+`PointConnectionResponseChecker` проверяет
+`ModuleName == "MKR"`, `NumberChassis`, `NumberDevice`, точную строку `Answer`
+для команды `8` или `82`, а для команды с аппаратным контролем также `Checked == true`.
+`PointSelfTestChecker` десериализует ответ команды `TEST_MKR` (`6.<point>`), проверяет
+идентификатор МКР, ожидаемый `NumberPoint`, прошивочный статус `sucsess` и обязательную
+истинность `ConnectPoint`, `DisconnectBusA`, `DisconnectBusB` и `SelfControl`; пустой,
+повреждённый или частично неуспешный ответ даёт `false`. Runtime
+`SelfTestManager.CheckPoint` после `IRelaySwitchModule.PointManager.CheckPoint` передаёт сырой
+ответ в `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`. Processor сохраняет
+прежние строки `SelfTestMessages` (`Точка N`, детализацию подключения и отключения от шин),
+добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
+ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
+Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает обе настройки
+симуляции: `IsErrorSimulationMode` детерминированно делает ложным один из этапов
+`ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
+`SelfControl = false`; `IsHardwareErrorSimulationMode` через
+`IdleHardwareErrorSimulator` с вероятностью 50% возвращает пустой ответ до разбора команды.
+`ExternalBusSelfTestChecker` обрабатывает ответ команды `AUTOTEST_EXTERNAL_BUS`
+(`10.<bus>`): проверяет идентификатор МКР, ожидаемый `NumberBus`, соответствие четырёх номеров
+реле таблице прошивки, `ConnectProtect`, `ConnectMain` и `Error == 0`. Runtime
+`SelfTestManager.CheckBus` передаёт сырой ответ в
+`ModuleRelayControlResponseProcessor.CheckExternalBusSelfTestAsync`; processor сохраняет
+прежние строки `Шины ABN`, `Подключение защитных реле(...)` и
+`Подключение основных реле(...)`, а повреждённый ответ, чужой адрес или другую шину выводит
+как `Ошибка данных!`. Прежняя runtime-модель `SelfBusModel` удалена. В Idle команда `10.<bus>`
+при симуляции ошибки измерения случайно выбирает один из трёх равновероятных исходов: оба этапа
+исправны, отказ защитных реле или отказ основных реле. При отказе возвращается ненулевой `Error`;
+при симуляции ошибки оборудования общий emulator path возвращает пустой ответ.
+После проверки processor напрямую вызывает
+`EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
+device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;
+решение об отображении принимает `Ask.Protocol.Messages` через общий `ShouldPublish`.
+`PointManagerAdapter` для четырёх одиночных операций не выполняет повторную проверку
+`DeviceDisplayConfig` и не публикует дублирующее сообщение; он передаёт
+`IUserInteractionService` в runtime `PointManager` и сохраняет только user retry/error boundary.
+Все используемые production-команды МКР теперь проходят через
+`ModuleRelayControlResponseProcessor`: `1` (инициализация), `2` (сброс), `4` (шины),
+`5`/`7` (измеритель), `6` (самоконтроль точки), `8`/`82` (одиночная точка),
+`10` (самоконтроль внешней шины), `11` (диапазон точек) и `81` (переподключение точки).
+`CommandResponseChecker` проверяет идентификатор МКР и точное значение `Answer`;
+`CommandStatusChecker` преобразует `UnknownCommand`/`InvalidParametr` в
+`ModuleRelayControlProtocolException`. Runtime-менеджеры больше не используют
+`BaseResponse.FromJson` для ответов МКР. Публикация результатов этих операций, включая
+инициализацию, сброс и агрегированное отключение сохранённых точек, вызывается через processor;
+заголовки и информационные строки самоконтроля МКР также маршрутизируются через processor.
+В `Ask.Device.Runtime/Function/ModuleRelayControl/` и соответствующих application adapters
+не осталось прямого разбора JSON или прямых вызовов `DeviceMessages`, `EquipmentMessages` и
+`SelfTestMessages`; решение о видимости остаётся внутри `Ask.Protocol.Messages`.
+Runtime-менеджеры МКР передают исходные ответы и параметры операции в
+`ModuleRelayControlResponseProcessor`; модели и проверки протокола находятся в
+`Ask.Device.ResponseProcessor/ModuleRelayControl/`.
 
 Representative Keysight measurement:
 
@@ -963,32 +1138,86 @@ Representative Keysight measurement:
 executor/metrology
 → IMultimeter.ResistanceManager.MeasureResistanceAsync
 → ResistanceMeasurementBase
-→ MeasurementBase.MeasureResistanceAsync
+→ MeasurementBase.MeasureAsync → MeasureOtherAsync
 → SetModeBase / RangeBase → DeviceProtocolEmulator.QueryMultimeterAsync
-→ repeat correctMeasurementCount + falseMeasurementCount times
-  → AdapterMeasurementExecutor
-  → MeasurementBase.MeasureCoreAsync
-  → Simulated.GetSimulatedValue builds idleResponse
-  → DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
-    → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
-    → Idle: SCPI-compatible scientific-notation response from MeasurementRange
-  → numeric parsing/rounding
-→ range verdict and DeviceMessageBuilder
+→ AdapterMeasurementExecutor
+→ MeasurementBase.MeasureCoreAsync
+→ Simulated.GetSimulatedValue builds idleResponse
+→ DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
+  → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
+  → Idle: SCPI-compatible scientific-notation response from MeasurementRange
+→ MultimeterResponseProcessor.TryParseMeasurement
+  → MeasurementResponseChecker → MeasurementResponse
+→ rounding
+→ range verdict and DeviceMessages.PublishOperationResultAsync
 ```
+
+Единая обработка ответов Keysight 34465A и В7-78/3 находится в
+`Ask.Device.ResponseProcessor/Multimeter/`:
+
+- `MultimeterResponseProcessor.CheckInitialization` проверяет идентификационный ответ;
+- `CheckMode` через `ModeResponseChecker` проверяет ответы `FUNCTION?`/профильного `GetMode`;
+- `TryParseMeasurement` через `MeasurementResponseChecker` разбирает знак, точку/запятую,
+  экспоненту и допустимый текстовый суффикс;
+- `TryCheckContinuity` интерпретирует измерение и SCPI-значение перегрузки `9.9E+37`;
+- `CheckNoInstrumentError` через `InstrumentErrorResponseChecker` разбирает код и текст
+  ответа `SYSTEM:ERROR?`.
+
+Единая обработка ответов GPT-79904 находится в
+`Ask.Device.ResponseProcessor/BreakdownTester/`:
+
+- `BreakdownTesterResponseProcessor.CheckInitialization` проверяет идентификационный ответ GPT;
+- `CheckMode` проверяет ответы выбора ACW/DCW/IR;
+- `TryParseNumber` через `NumericResponseChecker` разбирает знаковые значения, десятичную
+  точку/запятую, экспоненту и суффиксы `kV`, `mA`, `Hz`, `GOhm`/`MOhm`;
+- `TryParseState` обрабатывает `ON`/`OFF` для режима земли и системных настроек;
+- `TryParseMeasurement` через `MeasurementResponseChecker` извлекает последний измерительный
+  результат, единицу и статус `PASS`/`FAIL`/`TEST` из составного ответа GPT;
+- `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
+  ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
+
+Runtime-путь GPT:
+
+```text
+IBreakdownTester / GPT79904
+→ application AcwModeAdapter / DcwModeAdapter / IrModeAdapter / SystemSettingsAdapter
+→ runtime manager/helper в Ask.Device.Runtime/Function/GPT
+→ BreakdownTesterCommandProtocol.QueryAsync
+→ Real ComProtocol / Idle BreakdownTesterEmulatorProtocol
+→ BreakdownTesterResponseProcessor (режим/число/состояние/измерение)
+→ BreakdownTesterMessages → Ask.Protocol.Messages
+```
+
+Подключение, отключение, инициализация и сброс `IBreakdownTester` маршрутизируются в
+`Transport` через `BreakdownTesterResponseProcessor`; COM-идентификация дополнительно проверяется
+в `ComTransport.IsExpectedInitializeAnswer` по `ConnectedProfile.CheckMode`.
+
+Общий `MeasurementBase`, `SetModeBase`, `RangeBase`, `ContinuityMeasurementBase` и
+отдельный legacy-путь `B7783/VoltageMeasurementBase` не разбирают ответы самостоятельно.
+Публикация рабочих сообщений и результатов самоконтроля мультиметра централизована в
+`MultimeterMessages`; тексты и параметры сообщений сохранены в `Ask.Protocol.Messages`.
+Заголовки этапов и результаты измерений самоконтроля мультиметра публикуются с
+`isBlockStart: false`. При этом `SelfTestMessageBuilder.BuildCommand()` формирует заголовок как
+`MessageType.Info`, а не `Command`: `ProtocolUI.CheckBlockStart()` не открывает логический блок,
+а `ProtocolListBoxUI.AppendVisibleMessage()` не создаёт сворачиваемую `ProtocolCommandGroup`. Цвет заголовка
+и явная step-mode checkpoint сохраняются. Другие потоки самоконтроля сохраняют свою политику блоков.
+Сообщения подключения, отключения, инициализации и сброса для `IMultimeter` проходят через
+`MultimeterResponseProcessor`. Retry и проверка измерения по допустимому диапазону остаются
+в Runtime/Engine.
 
 Для `MultimeterTypeMode.Continuity` общий `MeasurementBase` не вызывает
 `RangeBase`: режим прозвонки задаётся профильной командой `CONF:CONT`, а
 измерительный запрос выполняется через `MEAS:CONT?` без установки диапазона.
 
-По умолчанию измерение сопротивления выполняет три замера:
-`correctMeasurementCount = 2` и `falseMeasurementCount = 1`. Правильным
-считается числовой ответ внутри `MeasurementRange`; аппаратная ошибка
-не считается ложным замером и идёт в обычный equipment retry flow. Серия
-проходит при двух или трёх правильных замерах. Прошедшая серия
-возвращает среднее правильных значений; непрошедшая — значение вне
-диапазона, сохраняя существующие verdict/retry semantics в Engine. Перегрузка
-`IResistanceMeasurement.MeasureResistanceAsync` позволяет вызывающему коду
-явно задать оба количества.
+Сопротивление, напряжение, диод и прозвонка сначала выполняют один замер. Если его
+результат вне `MeasurementRange`, он отбрасывается и `MeasureOtherAsync` выполняет второй
+замер, результат которого становится итоговым независимо от диапазона. Это не усреднение.
+Отдельный путь В7-78/3 в `B7783/VoltageMeasurementBase.MeasureVoltageAsync` применяет то же
+правило двух попыток.
+Повтор внутри `AdapterMeasurementExecutor` относится только к восстановлению после ошибки
+оборудования. Серия измерений с усреднением реализована только для ёмкости в
+`MeasurementBase.MeasureCapacitanceAsync`; количество задаётся параметром
+`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
@@ -998,13 +1227,30 @@ IMultimeter.ConnectableManager.InitializeAsync()
 → DeviceProtocolEmulator.QueryMultimeterAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
-→ проверка непустого ответа
+→ MultimeterResponseProcessor.CheckInitialization
 ```
 
 `DeviceProtocolEmulator.QueryMultimeterAsync` записывает каждую операцию двумя строками единого формата:
 `Команда мультиметра: "..."` и `Ответ мультиметра на "...": "..."`.
 Для SCPI-команд мультиметра без `?` этот шлюз передаёт в транспорт `timeout = 0`
 и не ждёт ответа; команды с `?` сохраняют заданный `timeout` и `responseDelay`.
+
+`HardwareWatchdogProtocol` оборачивает реальные COM/TCP/UDP/USB-протоколы при их создании
+в `DeviceWithCOM`, `DeviceWithIP`, `KeysightDevice`, `MultimeterB7783` и
+`MikUps1101rRmDevice`. Он запускает вызов `IDeviceProtocol.QueryAsync` вне вызывающего потока,
+ожидает не более 5 секунд, отменяет связанный `CancellationToken` и выбрасывает
+`TimeoutException`. Поэтому защищены как вызовы через `DeviceProtocolEmulator`, так и прямые
+обращения к `device.DeviceProtocol`. `ModeSelectingDeviceProtocol` сохраняет вторую watchdog-
+границу для реальных обращений через Real/Idle-шлюз; холостой режим ей не ограничивается.
+Watchdog ограничивает ожидание вызывающего кода, но не может принудительно завершить уже
+зависший нативный вызов VISA внутри процесса.
+
+Для команды `НЭ` токен `IUserInteractionService.GetCancellationToken()` проходит через
+`NeCommandExecutor → IDiodeMeasurement → DiodeMeasurementBase → MeasurementBase →
+DeviceProtocolEmulator`. Ошибка установки режима публикуется в UI как ошибка выполнения и
+завершает только текущую команду. Ошибка или отсутствие ответа при измерении преобразуется
+в отрицательный результат точки, поэтому `CommandExecutionManager` может перейти к следующей
+команде программы контроля.
 
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
@@ -1035,6 +1281,8 @@ factories and typed result handling. `Transport`, source/current adapters and
 active measurement paths также входят в общий интерактивный контур. Аппаратный
 `false`/exception передаётся с `deviceTask: true`; корректный измерительный ответ
 проверяется на норму внешним Engine-слоем и не смешивается с ошибкой оборудования.
+Отклонение команды прошивкой МКР — отдельная типизированная ветка: она всегда публикует
+ошибку в экранный протокол до интерактивного выбора оператора.
 
 ### Real / Idle
 
@@ -1057,6 +1305,19 @@ Selection is distributed, not DI-based:
   - УКШ runtime-команды `4`, `5`, `6`, `7`, `8`, `9`, `41` проходят через
     `DeviceBusCommutationQueryExecutor` и `DeviceBusCommutationEmulatorProtocol`, формируя журналируемый ответ
     в формате прошивки: JSON для `4/5/7/9`, строковое значение для `6/8/41`;
+    затем `DeviceBusCommutationResponseProcessor` выбирает специализированную проверку команды
+    (`EquipmentCommandResponseChecker`, `BusCommandResponseChecker`, `RelayCommandResponseChecker`,
+    `ChainCommandResponseChecker` или `SelfTestCommandResponseChecker`), проверяет `ModuleName`, адрес УКШ
+    и точное поле `Answer` либо ожидаемое числовое значение. Менеджеры `ConnectorManager`, `RelayManager`,
+    `ResistorManager`, `CapacitorManager` и UKSH SelfCheck не формируют ожидаемые ответы и не разбирают их
+    самостоятельно; сообщения операций и самоконтроля проходят через
+    `DeviceBusCommutationResponseProcessor`/`DeviceBusCommutationMessages`.
+    Все JSON-значения `Answer` заканчиваются точкой: `2.0.1.`, полные ответы команд `4/5/9`
+    и сокращённый ответ команды `7` в формате `7.<action>.` согласно `makeAnswer(..., 2)`;
+    `JsonCommandResponseChecker` перед строгим ordinal-сравнением удаляет конечные точки из фактического и
+    ожидаемого `Answer`, поэтому принимает оба варианта прошивки, но не произвольное вхождение строки;
+    команда `6` возвращает `0` при успехе и код несуществующей цепи при ошибке. Idle-эмулятор использует
+    те же форматы и при симуляции ошибок измерения случайно возвращает как успешный, так и ошибочный код;
   - остальные UDP/TCP/COM/USB connectable managers возвращают simulated success или обходят I/O;
 - relay/source/switch managers update in-memory state and return success;
 - `Simulated.GetSimulatedValue` supplies values to the Idle multimeter SCPI-response path;
@@ -1088,8 +1349,8 @@ switching, source and power operations. Every equipment call, including a
 the corresponding real contract: `false`, a failed tuple/status, or the
 operation-specific exception path. Real execution never enters this mechanism.
 
-Chassis and МКР Idle flows preserve their device command contracts without a
-separate response processor:
+Chassis, МКР and УКШ Idle flows preserve their device command contracts through
+the same response processors used for real devices:
 
 ```text
 Transport / target runtime manager
@@ -1130,7 +1391,8 @@ same path with gates enabled and performs real transport I/O.
   I/O failure; per-device semaphore.
 - COM: `SerialPortCustom` serialized in `ConnectionDetails`; `ComProtocol` opens
   through `SerialPortExtensions.UsePort`, writes newline-terminated command and
-  polls `ReadExisting`.
+  polls `ReadExisting`. `DeviceWithCOM` owns the resulting `SerialPort` and implements
+  `IDisposable`: disposal closes and releases the port even when `Close` reports an error.
 - USB: `UsbProtocol` delegates discovery/commands to `IUsbCommandHandler`;
   `UsbCommandHandler` includes B7783 and UPS/ViewPower branches.
 
@@ -1191,6 +1453,11 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+`FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
+`DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
+только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
+`SaveFileManager` обновляет снимок и снимает индикатор после фактической записи,
+а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
 В правой области `RunControl` панель действий документа отображается только для
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
@@ -1454,7 +1721,8 @@ Once measurement interaction has opened, a valid retry stays interactive even
 when its value is now in range. `EquipmentExecutionContext` suppresses all
 Retry/Continue/Finish requests during emergency `КЦ` and `ExecutionFinalizer`;
 errors there are logged and the remaining mandatory actions continue.
-`DeviceMessageBuilder` controls device result output using `DeviceDisplayConfig`.
+Adapters/managers сохраняют существующие проверки `DeviceDisplayConfig`, после чего
+`DeviceMessages` централизованно формирует и публикует device-результат.
 Typed factories are grouped in `Ask.Core/Services/Errors/Device/`.
 
 ### Execution errors
@@ -1524,7 +1792,7 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Host/diagnostic bridge | `AppHost.StartAsync` | connects static command history to service | host/process lifetime |
 | Initial chassis lookup | `PreStartupInitializer` fire-and-forget Task | warms first chassis/tester access | one-shot, exceptions caught |
 | Execution session | `ActionExecutor.ExecuteTaskAsync` | `Task.Run(StartDelegate)` with cancellation | `FinalizeAsync`/`StopAsync` cancels and disposes session |
-| Device protocol waits | COM/TCP/UDP queries | semaphore-protected I/O and timeout polling | per-call cancellation/timeout |
+| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling | linked cancellation; caller resumes with `TimeoutException` |
 | Help server | `HelpServer.EnsureStarted` | Kestrel static-file host | `App.OnExit → HelpServer.Stop` |
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |
@@ -1569,7 +1837,10 @@ duplicated in the initialization service.
 
 Runtime device cache uses `(requested interface, Id)` and query caches for
 GetAll/chassis lists. Create/update/delete invalidate relevant caches; startup
-clears and warms them.
+clears and warms them. `DeviceCache` disposes resource-owning devices when they are
+removed, replaced or cleared. `DeviceEngine.UpdateInternalAsync` removes the old cached
+instance in `finally`, so a GPT configuration update releases its COM port after success,
+provider error and cancellation; a later query builds a fresh runtime instance from the DB.
 
 ## Configuration
 
@@ -1629,16 +1900,40 @@ ErrorItem → translator/runner ErrorList
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
-| `CommandMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения команд, цепей, точек и разрядов; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `CommandMessages` | static facade | Ask.Protocol.Messages | проверяет настройки видимости этапов, формирует и выводит начало программы контроля, сообщения команд, точек останова, блоков проверки, цепей, точек, подключения точек, направления диода и разрядов; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
+| `CommandMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит перенесённую из `ExecutorMessageBuilder` логику начала программы контроля, сообщений команд, точек останова и блоков проверки | [Protocols](#protocols-and-file-formats) |
+| `CommandMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сформированные сообщения команд в `IMessageOutputService` с настройками блока, паузы, пошагового режима и метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `MessagePublisher` | internal static publisher | Ask.Protocol.Messages | единообразно добавляет метаданные исходного вызова, при необходимости пишет сообщение в device log и передаёт его `IMessageOutputService`; категорийные publishers задают только свою политику | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessages` | static facade | Ask.Protocol.Messages | публично формирует, логирует и выводит результаты операций оборудования | [Protocols](#protocols-and-file-formats) |
-| `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки и сброса оборудования | [Protocols](#protocols-and-file-formats) |
+| `DeviceMessages` | static facade | Ask.Protocol.Messages | заменяет удалённый runtime `DeviceMessageBuilder`; формирует и публикует унифицированные результаты device-операций с деталями, статусом, отступом и step-checkpoint | [Protocols](#protocols-and-file-formats) |
+| `EquipmentMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует результаты подключения, отключения, инициализации, настройки, сброса и заголовок самоконтроля оборудования | [Protocols](#protocols-and-file-formats) |
 | `EquipmentMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения оборудования в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
-| `MeasurementMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения значений, диапазонов и погрешностей; методов пока нет | [Protocols](#protocols-and-file-formats) |
-| `ExecutionMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения жизненного цикла выполнения; методов пока нет | [Protocols](#protocols-and-file-formats) |
-| `ValidationMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения проверки входных данных и конфигурации; методов пока нет | [Protocols](#protocols-and-file-formats) |
-| `MetrologyMessageBuilder` | static builder stub | Ask.Protocol.Messages | будущие сообщения метрологических режимов; методов пока нет | [Protocols](#protocols-and-file-formats) |
+| `SelfTestMessages` | static facade | Ask.Protocol.Messages | публикует этапы, команды пошагового режима, ошибки и результаты самоконтроля мультиметра, GPT, МКР, УКШ и модуля напряжения/тока; runtime SelfCheck-классы моделей экранного протокола не создают | [Equipment](#equipment-architecture) |
+| `SelfTestMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует информационные, командные и результирующие сообщения самоконтроля, включая видимость измерений, Overload, погрешность и свойства итогового протокола | [Equipment](#equipment-architecture) |
+| `SelfTestMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения самоконтроля общему `MessagePublisher` с признаками блока, паузы и проверки доступности вывода | [Equipment](#equipment-architecture) |
+| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности; публикация требует явный `CheckType` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |
+| `MeasurementLimitKind` | enum | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, задающий минимальный или максимальный предел при формировании описания брака | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | централизованно применяет видимость успешных результатов: `Metrology` выводится всегда, остальные типы учитывают `DeviceDisplayConfig`; опубликованные измерения записывает в device log и передаёт `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
+| `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности метрологического режима | [Protocols](#protocols-and-file-formats) |
+| `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
+| `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
+| `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
+| `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
+| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessages` | static facade | Ask.Protocol.Messages | публикует ошибки полей ввода, поиска и конфигурации оборудования, зависимости самоконтроля, а также заголовок запуска и введённые параметры проверки | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует ошибки данных, поиска и конфигурации оборудования, сообщения о зависимостях самоконтроля и представление введённых параметров запуска | [Protocols](#protocols-and-file-formats) |
+| `ValidationMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт ошибки в `IMessageOutputService`, поддерживает обход паузы/пошагового режима и добавляет метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
+| `RangeMessages` | static facade | Ask.Protocol.Messages | принимает `MeasurementRange` и типизированную единицу, публикует допустимый диапазон независимо от вызывающей подсистемы | [Protocols](#protocols-and-file-formats) |
+| `RangeMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует единый текст допустимого диапазона значений | [Protocols](#protocols-and-file-formats) |
+| `RangeMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения о диапазонах в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
 | `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
+| `ControlProgramCompletionMessageBuilder` | internal static builder | Ask.UI | обязательный финальный блок программы контроля с режимом и длительностью выполнения | [Protocols](#protocols-and-file-formats) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |
 | `CommandExecutionManager` | orchestrator | Ask.Engine | sequential command execution | [Execution Engine](#execution-engine) |
 | `ICommandExecutor` | interface | Ask.Engine | executable mnemonic contract | [Execution Engine](#execution-engine) |
@@ -1666,6 +1961,12 @@ ErrorItem → translator/runner ErrorList
 | `ModuleRelayControl` | device | Ask.Device.Runtime | МКР implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutation` | device | Ask.Device.Runtime | switching device implementation | [Equipment](#device-matrix) |
 | `DeviceBusCommutationQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs УКШ commands through the real protocol or Idle emulator | [Equipment](#real--idle) |
+| `DeviceBusCommutationResponseProcessor` | response facade | Ask.Device.ResponseProcessor | validates УКШ JSON/numeric firmware responses and publishes operation/connection/reset results | [Equipment](#real--idle) |
+| `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
+| `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
+| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages; для self-test-сообщений отключает `isBlockStart`, чтобы UI не создавал сворачиваемые блоки | [Equipment](#equipment-architecture) |
+| `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904 | [Equipment](#equipment-architecture) |
+| `BreakdownTesterMessages` | message facade | Ask.Device.ResponseProcessor | маршрутизирует рабочие сообщения и результаты самоконтроля GPT через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
 | `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |
 | `BreakdownTesterEmulatorProtocol` | stateful Idle protocol | Ask.Device.Emulator | emulates GPT79904 SCPI identification, configuration, test state and measurement responses | [Equipment](#device-matrix) |

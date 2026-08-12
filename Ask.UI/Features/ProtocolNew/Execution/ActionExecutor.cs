@@ -62,6 +62,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
     private ActionSettings? _actionSettings;
 
+    private DateTime _executionStartedAtUtc;
+
     /// <summary>
     /// Объект синхронизации для операций паузы и возобновления выполнения.
     /// </summary>
@@ -202,6 +204,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       _session?.Dispose();
       _session = new ExecutionSession(actionSettings);
+      _executionStartedAtUtc = DateTime.UtcNow;
 
       try
       {
@@ -300,6 +303,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       }
 
       isExit = true;
+      if (actionSettings.ExecutionDuration == TimeSpan.Zero && _executionStartedAtUtc != default)
+      {
+        actionSettings.ExecutionDuration = DateTime.UtcNow - _executionStartedAtUtc;
+      }
+
       LogInformation($"Завершение \"{actionSettings.Name}\"");
       var equipmentUsage = _session?.EquipmentUsage;
 
@@ -694,6 +702,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       lock (_errorSync)
       {
         _actionSettings?.ExecutionErrors.Add(error);
+        _actionSettings?.DeviceResults.LastOrDefault()?.Tests.LastOrDefault()?.Errors.Add(new TestError { Message = error });
       }
     }
 
@@ -744,6 +753,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           actionSettings.StartTime = TimeOnly.FromDateTime(DateTime.Now);
 
           ProcessTask = Task.Run(() => actionSettings.StartDelegate(
+            actionSettings,
             ProtocolSelfCheck,
             ProtocolSelfCheck,
             ProtocolSelfCheck.GetInputHighlightService(),

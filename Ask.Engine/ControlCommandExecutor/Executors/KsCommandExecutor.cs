@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -27,13 +28,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var command = GetRequiredCommand<KsCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
-
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
@@ -96,17 +94,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
-      if (infoMessage.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, infoMessage);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
 
     /// <summary>
@@ -135,7 +124,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange, chains: null, isOverloadExpected: false);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.KC,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
       }, messageService);
 
       return result;
@@ -166,7 +161,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         measurementRange.TargetValue = answer;
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, measurementRange);
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.KC,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
 
       }, messageService);
 

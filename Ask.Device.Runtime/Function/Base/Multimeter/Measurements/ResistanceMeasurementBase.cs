@@ -11,9 +11,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
   /// </summary>
   internal class ResistanceMeasurementBase : IResistanceMeasurement
   {
-    private const int DefaultCorrectMeasurementCount = 2;
-    private const int DefaultFalseMeasurementCount = 1;
-
     /// <summary>
     /// Мультиметр, с которым выполняются измерения.
     /// </summary>
@@ -33,28 +30,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       double responseDelay = 0)
-        => await MeasureResistanceAsync(
-          measurementRange,
-          userMessageService,
-          DefaultCorrectMeasurementCount,
-          DefaultFalseMeasurementCount,
-          responseDelay);
-
-    /// <inheritdoc />
-    public async Task<double> MeasureResistanceAsync(
-      MeasurementRange measurementRange,
-      IUserInteractionService? userMessageService,
-      int correctMeasurementCount,
-      int falseMeasurementCount,
-      double responseDelay = 0)
-        => await MeasurementBase.MeasureResistanceAsync(
+        => await MeasurementBase.MeasureAsync(
           _device,
           _device.ResistanceCommands,
           measurementRange,
           userMessageService,
-          correctMeasurementCount,
-          falseMeasurementCount,
-          responseDelay);
+          responseDelay: responseDelay);
 
     /// <inheritdoc />
     public async Task<bool> SetResistanceModeAsync(IUserInteractionService? userMessageService = null) => await SetModeBase.SetModeAsync(_device, _device.ResistanceCommands, userMessageService);

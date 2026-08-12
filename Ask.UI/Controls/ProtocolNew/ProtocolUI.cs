@@ -147,6 +147,10 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
     public async Task StartAsync()
     {
+      _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
+      _modeSettings.Current.StartTime = TimeOnly.FromDateTime(DateTime.Now);
+      _modeSettings.Current.ExecutionDuration = TimeSpan.Zero;
+      _modeSettings.Current.DeviceResults.Clear();
       var actionSettings = _modeSettings.Current;
       var executionName = actionSettings.NameProvider?.Invoke();
       if (!string.IsNullOrWhiteSpace(executionName))
@@ -282,6 +286,14 @@ namespace Ask.UI.Controls.ProtocolNew
     public async Task CompleteCommandAsync(bool hasErrors)
     {
       await protocolTextBox.CompleteCommandAsync(hasErrors);
+    }
+
+    /// <summary>
+    /// Завершает текущую группу команды, чтобы следующее сообщение отображалось отдельно.
+    /// </summary>
+    public async Task FinalizeCurrentCommandGroupAsync()
+    {
+      await protocolTextBox.FinalizeCurrentCommandGroupAsync();
     }
 
     public int GetLastLineNumber()

@@ -28,7 +28,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
       if (match.Success)
       {
         string? value = match.Groups["val"].Success ? match.Groups["val"].Value : null;
-        string unit = match.Groups["unit"].Value;
+        string unit = match.Groups["unit"].Value.ToLowerInvariant();
 
         var remainder = input.Remove(match.Index, match.Length).Trim();
 

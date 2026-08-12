@@ -44,9 +44,9 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetPrintProtocol(bool enable) => ProtocolModel.AutoPrintProtocol = enable;
     /// <summary>
-    /// Устанавливает отображение времени выполнения операций.
+    /// Управляет формированием итогового протокола программы контроля.
     /// </summary>
-    /// <param name="enable">true для отображения, false для скрытия.</param>
+    /// <param name="enable"><see langword="true"/> для формирования; иначе — <see langword="false"/>.</param>
     public static void SetTimeStart(bool enable) => ProtocolModel.DisplayOperationTime = enable;
 
     /// <summary>
@@ -112,6 +112,16 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     /// <returns>true, если включено; false, если выключено.</returns>
     public static bool GetPrintProtocol() => ProtocolModel.AutoPrintProtocol;
+
+    /// <summary>
+    /// Определяет, требуется ли запрашивать данные итогового протокола.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если включена печать или формирование протокола.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    public static bool ShouldShowProtocolInfoDialog() =>
+      ProtocolModel.AutoPrintProtocol || ProtocolModel.ShowProtocolInSoftware;
 
     /// <summary>
     /// Возвращает статус отображения времени в протоколе.

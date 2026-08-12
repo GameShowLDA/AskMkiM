@@ -121,8 +121,20 @@ namespace MainWindowProgram.Events
       Application.Current.Dispatcher.BeginInvoke(() =>
       {
         _mainWindow.PowerButton.Visibility = e ? Visibility.Collapsed : Visibility.Visible;
+        ApplyExecutionIndicatorColor(e);
         ApplyMainPanelBackground();
       });
+    }
+
+    private void ApplyExecutionIndicatorColor(bool isIdleMode)
+    {
+      string brushKey = isIdleMode
+        ? "NotificationSuccessIconBrush"
+        : "NotificationErrorIconBrush";
+
+      _mainWindow.UploadErrorIndicator.SetResourceReference(
+        System.Windows.Controls.Control.ForegroundProperty,
+        brushKey);
     }
 
     private void OnPowerChanged(SystemStateEvents.PowerChanged _)
@@ -148,6 +160,7 @@ namespace MainWindowProgram.Events
       {
         if (newValue)
         {
+          ApplyExecutionIndicatorColor(ExecutionConfig.GetIsIdleModeEnabled());
           _mainWindow.TopPanel.Visibility = Visibility.Collapsed;
           _mainWindow.UploadErrorIndicator.Visibility = Visibility.Visible;
           if (!ExecutionConfig.GetIsIdleModeEnabled())

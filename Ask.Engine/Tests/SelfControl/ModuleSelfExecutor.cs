@@ -1,5 +1,4 @@
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -56,7 +55,7 @@ namespace Ask.Engine.Tests.SelfControl
     /// Выполнение контроля.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены.</param>
-    private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
+    private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       IDeviceSelector deviceSelector = _deviceSelectorProvider.GetDeviceSelector();
 
@@ -69,7 +68,7 @@ namespace Ask.Engine.Tests.SelfControl
         var meter = deviceSelector.GetFastMeterSafe();
         if (meter == null)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось преобразовать объект в измеритель!", type: ShowMessageModel.MessageType.Error));
+          await ValidationMessages.PublishMeterUnavailableAsync(_messageService);
           return;
         }
 
@@ -81,6 +80,7 @@ namespace Ask.Engine.Tests.SelfControl
             await relay.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               dbc);
             break;
@@ -89,6 +89,7 @@ namespace Ask.Engine.Tests.SelfControl
             await switcher.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               switcher,
               meter);
@@ -100,6 +101,7 @@ namespace Ask.Engine.Tests.SelfControl
             await mint.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               _messageService,
+              settings,
               part,
               switcher1,
               mint,
@@ -112,6 +114,7 @@ namespace Ask.Engine.Tests.SelfControl
             await breakdown.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               breakdown,
               switcher2,
@@ -124,6 +127,7 @@ namespace Ask.Engine.Tests.SelfControl
             await multimeter.SelfTestManager.StartSelfCheck(
               _messageService.GetCancellationToken(),
               part,
+              settings,
               _messageService,
               switcher3,
               multimeter);
@@ -132,7 +136,7 @@ namespace Ask.Engine.Tests.SelfControl
       }
       else
       {
-        await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось получить устройство.", type: ShowMessageModel.MessageType.Error));
+        await ValidationMessages.PublishDeviceUnavailableAsync(_messageService);
         return;
       }
     }

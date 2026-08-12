@@ -78,6 +78,83 @@ public sealed class ModuleRelayControlEmulatorProtocolTests
     Assert.Empty(await protocol.QueryAsync("1.0.0.0"));
   }
 
+  [Fact(DisplayName = "МКР: самоконтроль точки без симуляции ошибок проходит успешно")]
+  public async Task PointSelfTest_WithoutMeasurementError_ReturnsSuccessfulStages()
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => false,
+      () => false);
+
+    using JsonDocument response = await QueryJsonAsync(protocol, "6.1");
+
+    Assert.True(response.RootElement.GetProperty("ConnectPoint").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("DisconnectBusA").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("DisconnectBusB").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("SelfControl").GetBoolean());
+  }
+
+  [Theory(DisplayName = "МКР: симуляция ошибки измерения проваливает один этап самоконтроля точки")]
+  [InlineData("6.3", "ConnectPoint")]
+  [InlineData("6.1", "DisconnectBusA")]
+  [InlineData("6.2", "DisconnectBusB")]
+  public async Task PointSelfTest_WithMeasurementError_ReturnsFailedStage(
+    string command,
+    string failedStage)
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => false,
+      () => true);
+
+    using JsonDocument response = await QueryJsonAsync(protocol, command);
+
+    Assert.False(response.RootElement.GetProperty(failedStage).GetBoolean());
+    Assert.False(response.RootElement.GetProperty("SelfControl").GetBoolean());
+  }
+
+  [Fact(DisplayName = "МКР: самоконтроль внешней шины без симуляции ошибок проходит успешно")]
+  public async Task ExternalBusSelfTest_WithoutMeasurementError_ReturnsSuccessfulStages()
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => false,
+      () => false);
+
+    using JsonDocument response = await QueryJsonAsync(protocol, "10.1");
+
+    Assert.True(response.RootElement.GetProperty("ConnectProtect").GetBoolean());
+    Assert.True(response.RootElement.GetProperty("ConnectMain").GetBoolean());
+    Assert.Equal(0, response.RootElement.GetProperty("Error").GetInt32());
+  }
+
+  [Theory(DisplayName = "МКР: симуляция измерительной ошибки допускает норму и два варианта отказа внешней шины")]
+  [InlineData(0, true, true, 0)]
+  [InlineData(1, false, true, 1)]
+  [InlineData(2, true, false, 1)]
+  public async Task ExternalBusSelfTest_WithMeasurementError_ReturnsRandomOutcome(
+    int simulationOutcome,
+    bool expectedProtect,
+    bool expectedMain,
+    int expectedError)
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => false,
+      () => true,
+      () => simulationOutcome);
+
+    using JsonDocument response = await QueryJsonAsync(protocol, "10.1");
+
+    Assert.Equal(expectedProtect, response.RootElement.GetProperty("ConnectProtect").GetBoolean());
+    Assert.Equal(expectedMain, response.RootElement.GetProperty("ConnectMain").GetBoolean());
+    Assert.Equal(expectedError, response.RootElement.GetProperty("Error").GetInt32());
+  }
+
   private static ModuleRelayControlEmulatorProtocol CreateProtocol()
     => new(() => 4, () => 2, () => false);
 

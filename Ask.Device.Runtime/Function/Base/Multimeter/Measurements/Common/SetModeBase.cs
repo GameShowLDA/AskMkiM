@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Helpers;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
@@ -13,17 +14,22 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
   internal class SetModeBase
   {
     /// <inheritdoc />
-    static public async Task<bool> SetModeAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
+    static public async Task<bool> SetModeAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      IUserInteractionService? userMessageService = null,
+      CancellationToken cancellationToken = default)
     {
       var header = GetModeHeader(profile.TypeMode);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await SetModeCoreAsync(device, profile, userMessageService);
+        cancellationToken.ThrowIfCancellationRequested();
+        var succes = await SetModeCoreAsync(device, profile, cancellationToken);
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(device, header, succes, 1, userMessageService);
+          await MultimeterMessages.PublishOperationResultAsync(device, header, succes, 1, userMessageService);
         }
 
         return succes;
@@ -39,7 +45,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     }
 
     /// <inheritdoc />
-    static private async Task<bool> SetModeCoreAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
+    static private async Task<bool> SetModeCoreAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      CancellationToken cancellationToken)
     {
       if (device.TypeMode == profile.TypeMode)
       {
@@ -51,13 +60,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(
+        device,
+        profile.SetMode,
+        string.Empty,
+        cancellationToken: cancellationToken);
       var answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         profile.GetMode,
         profile.CheckMode,
-        timeout: profile.Timeout);
-      if (answer.Contains(profile.CheckMode))
+        timeout: profile.Timeout,
+        cancellationToken: cancellationToken);
+      if (MultimeterResponseProcessor.CheckMode(answer, profile.CheckMode))
       {
         device.TypeMode = profile.TypeMode;
         return true;

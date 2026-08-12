@@ -1,10 +1,18 @@
 ﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Connected;
 using Ask.Protocol.Messages.EntryPoints;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Function.Base.Connected
 {
@@ -46,7 +54,31 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ConnectAsync(userMessageService);
-        await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer, userMessageService);
+        string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishConnectionResultAsync(
+            module, result.Connect, error, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishConnectionResultAsync(
+            switchingDevice, result.Connect, error, userMessageService);
+        }
+        else if (_device is IMultimeter multimeter)
+        {
+          await MultimeterResponseProcessor.PublishConnectionResultAsync(
+            multimeter, result.Connect, error, userMessageService);
+        }
+        else if (_device is IBreakdownTester breakdownTester)
+        {
+          await BreakdownTesterResponseProcessor.PublishConnectionResultAsync(
+            breakdownTester, result.Connect, error, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, error, userMessageService);
+        }
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -59,7 +91,31 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.DisconnectAsync(userMessageService);
-        await EquipmentMessages.PublishDisconnectionResultAsync(_device, result, outputService: userMessageService);
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishDisconnectionResultAsync(
+            module, result, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishDisconnectionResultAsync(
+            switchingDevice, result, userMessageService);
+        }
+        else if (_device is IMultimeter multimeter)
+        {
+          await MultimeterResponseProcessor.PublishDisconnectionResultAsync(
+            multimeter, result, userMessageService);
+        }
+        else if (_device is IBreakdownTester breakdownTester)
+        {
+          await BreakdownTesterResponseProcessor.PublishDisconnectionResultAsync(
+            breakdownTester, result, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishDisconnectionResultAsync(
+            _device, result, outputService: userMessageService);
+        }
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -72,7 +128,32 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.InitializeAsync(userMessageService);
-        await EquipmentMessages.PublishInitializationResultAsync(_device, result.Connect, string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer, userMessageService);
+        string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishInitializationResultAsync(
+            module, result.Connect, error, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishInitializationResultAsync(
+            switchingDevice, result.Connect, error, userMessageService);
+        }
+        else if (_device is IMultimeter multimeter)
+        {
+          await MultimeterResponseProcessor.PublishInitializationResultAsync(
+            multimeter, result.Connect, error, userMessageService);
+        }
+        else if (_device is IBreakdownTester breakdownTester)
+        {
+          await BreakdownTesterResponseProcessor.PublishInitializationResultAsync(
+            breakdownTester, result.Connect, error, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishInitializationResultAsync(
+            _device, result.Connect, error, userMessageService);
+        }
         return result;
       }, userMessageService,
       deviceTask: true);
@@ -86,7 +167,31 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ResetAsync(userMessageService);
-        await EquipmentMessages.PublishResetResultAsync(_device, result, outputService: userMessageService);
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishResetResultAsync(
+            module, result, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishResetResultAsync(
+            switchingDevice, result, userMessageService);
+        }
+        else if (_device is IMultimeter multimeter)
+        {
+          await MultimeterResponseProcessor.PublishResetResultAsync(
+            multimeter, result, userMessageService);
+        }
+        else if (_device is IBreakdownTester breakdownTester)
+        {
+          await BreakdownTesterResponseProcessor.PublishResetResultAsync(
+            breakdownTester, result, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishResetResultAsync(
+            _device, result, outputService: userMessageService);
+        }
 
         return result;
       }, userMessageService, deviceTask: true);

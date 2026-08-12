@@ -4,6 +4,7 @@ using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Communication.Com.Protocols;
+using Ask.Device.Communication.Common;
 using Ask.Device.Emulator;
 using Ask.Device.Runtime.Function.Base.Status;
 using System.IO.Ports;
@@ -14,7 +15,7 @@ namespace Ask.Device.Runtime.Base.Device
   /// <summary>
   /// Представляет базовый тип устройства, подключаемого через COM-порт.
   /// </summary>
-  public abstract class DeviceWithCOM : IDevice, IComPortSettingsProvider
+  public abstract class DeviceWithCOM : IDevice, IComPortSettingsProvider, IDisposable
   {
     public DeviceWithCOM()
     {
@@ -67,7 +68,9 @@ namespace Ask.Device.Runtime.Base.Device
         if (port != null)
         {
           COMPort = port;
-          var realProtocol = new ComProtocol(this, port);
+          var realProtocol = new HardwareWatchdogProtocol(
+            new ComProtocol(this, port),
+            Name);
           DeviceProtocol = this is IBreakdownTester breakdownTester
             ? DeviceProtocolEmulator.CreateBreakdownTester(breakdownTester, realProtocol)
             : realProtocol;
@@ -126,6 +129,41 @@ namespace Ask.Device.Runtime.Base.Device
     /// Хранит текущий экземпляр COM-порта устройства.
     /// </summary>
     private SerialPort _comPort = null!;
+
+    /// <summary>
+    /// Освобождает последовательный порт, принадлежащий устройству.
+    /// </summary>
+    public void Dispose()
+    {
+      var port = Interlocked.Exchange(ref _comPort, null!);
+      if (port == null)
+      {
+        return;
+      }
+
+      try
+      {
+        if (port.IsOpen)
+        {
+          port.Close();
+        }
+      }
+      catch (Exception ex)
+      {
+        LogException(ex, $"[{Name}] Не удалось закрыть COM-порт {port.PortName}.", isDeviceLog: true);
+      }
+      finally
+      {
+        try
+        {
+          port.Dispose();
+        }
+        catch (Exception ex)
+        {
+          LogException(ex, $"[{Name}] Не удалось освободить COM-порт {port.PortName}.", isDeviceLog: true);
+        }
+      }
+    }
 
     /// <summary>
     /// Хранит сериализованные параметры подключения.
