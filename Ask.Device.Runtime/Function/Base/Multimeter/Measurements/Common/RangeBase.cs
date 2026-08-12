@@ -14,10 +14,26 @@ using System.Runtime.CompilerServices;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 {
+  /// <summary>
+  /// Устанавливает автоматические и ручные диапазоны измерений мультиметра.
+  /// </summary>
   internal static class RangeBase
   {
+    /// <summary>
+    /// Последние установленные диапазоны для экземпляров мультиметров и режимов измерения.
+    /// </summary>
     private static readonly ConcurrentDictionary<string, double> SelectedRanges = new();
 
+    /// <summary>
+    /// Устанавливает диапазон для текущего режима измерения мультиметра.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="range">Требуемый диапазон; неположительное значение включает автоматический выбор.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns><see langword="true"/>, если диапазон установлен успешно.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если текущий режим не поддерживает установку диапазона или прибор сообщил об ошибке.
+    /// </exception>
     public static async Task<bool> SetRangeAsync(
         IMultimeter device,
         double range,
@@ -33,6 +49,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       };
     }
 
+    /// <summary>
+    /// Устанавливает диапазон для измерения, сохраняя ранее выбранный диапазон при отсутствии целевого значения.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="range">
+    /// Целевое значение измерения; при неположительном значении используется последний выбранный диапазон.
+    /// </param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns><see langword="true"/>, если диапазон установлен успешно.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если текущий режим не поддерживает установку диапазона или прибор сообщил об ошибке.
+    /// </exception>
     public static Task<bool> SetRangeForMeasurementAsync(
         IMultimeter device,
         double range,
@@ -45,6 +73,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return SetRangeAsync(device, effectiveRange, userMessageService);
     }
 
+    /// <summary>
+    /// Устанавливает диапазон измерения переменного напряжения.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="range">Требуемый диапазон; неположительное значение включает автоматический выбор.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns><see langword="true"/>, если диапазон установлен успешно.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если прибор не подключён или сообщил об ошибке.
+    /// </exception>
     private static async Task<bool> SetACVoltageRangeAsync(
       IMultimeter device,
       double range,
@@ -62,6 +100,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
+    /// <summary>
+    /// Устанавливает диапазон измерения постоянного напряжения.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="range">Требуемый диапазон; неположительное значение включает автоматический выбор.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns><see langword="true"/>, если диапазон установлен успешно.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если прибор не подключён или сообщил об ошибке.
+    /// </exception>
     private static async Task<bool> SetDCVoltageRangeAsync(
       IMultimeter device,
       double range,
@@ -79,6 +127,16 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
+    /// <summary>
+    /// Устанавливает диапазон измерения сопротивления.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="range">Требуемый диапазон; неположительное значение включает автоматический выбор.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns><see langword="true"/>, если диапазон установлен успешно.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если прибор не подключён или сообщил об ошибке.
+    /// </exception>
     private static async Task<bool> SetResistanceRangeAsync(
       IMultimeter device,
       double range,
@@ -96,6 +154,13 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         userMessageService);
     }
 
+    /// <summary>
+    /// Подтверждает выбор диапазона измерения ёмкости.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого выбирается диапазон.</param>
+    /// <param name="range">Требуемый диапазон измерения ёмкости.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Всегда <see langword="true"/>.</returns>
     private static async Task<bool> SetCapacitanceRangeAsync(
       IMultimeter device,
       double range,
@@ -104,6 +169,23 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return true;
     }
 
+    /// <summary>
+    /// Устанавливает диапазон по командам профиля измерения и запоминает выбранное значение.
+    /// </summary>
+    /// <typeparam name="TProfile">Тип профиля измерения.</typeparam>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="profile">Профиль команд и параметров измерения.</param>
+    /// <param name="range">Требуемый диапазон; неположительное значение включает автоматический выбор.</param>
+    /// <param name="setRangeCommand">Функция получения команды ручной установки диапазона.</param>
+    /// <param name="setAutoRangeCommand">Функция получения команды автоматического выбора диапазона.</param>
+    /// <param name="getRangeErrorCommand">Функция получения команды чтения ошибки прибора.</param>
+    /// <param name="getSupportedRanges">Функция получения поддерживаемых диапазонов.</param>
+    /// <param name="getRangeCommandMultiplier">Функция получения множителя значения в команде.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns><see langword="true"/>, если диапазон установлен или уже был выбран.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если прибор не подключён, сообщил об ошибке или установка диапазона не выполнена.
+    /// </exception>
     private static async Task<bool> SetMeasurementRangeAsync<TProfile>(
       IMultimeter device,
       TProfile profile,
@@ -164,6 +246,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return true;
     }
 
+    /// <summary>
+    /// Формирует заголовок операции установки диапазона для режима измерения.
+    /// </summary>
+    /// <param name="typeMode">Режим измерения мультиметра.</param>
+    /// <returns>Заголовок операции установки диапазона.</returns>
     private static string GetRangeHeader(MultimeterTypeMode typeMode)
     {
       return typeMode switch
@@ -176,6 +263,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       };
     }
 
+    /// <summary>
+    /// Переключает режим мультиметра, передаёт команду диапазона и проверяет ошибку прибора.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого устанавливается диапазон.</param>
+    /// <param name="profile">Профиль команд и параметров измерения.</param>
+    /// <param name="range">Диапазон; неположительное значение включает автоматический выбор.</param>
+    /// <param name="setRangeCommand">Шаблон команды ручной установки диапазона.</param>
+    /// <param name="setAutoRangeCommand">Команда автоматического выбора диапазона.</param>
+    /// <param name="getRangeErrorCommand">Команда чтения ошибки прибора.</param>
+    /// <param name="supportedRanges">Поддерживаемые диапазоны измерения.</param>
+    /// <param name="rangeCommandMultiplier">Множитель диапазона при формировании команды.</param>
+    /// <returns><see langword="true"/>, если команда выполнена без ошибки прибора.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если прибор не подключён или сообщил об ошибке.
+    /// </exception>
     private static async Task<bool> SetMeasurementRangeCoreAsync(
       IMultimeter device,
       IMeasurementProfile profile,
@@ -206,6 +308,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return true;
     }
 
+    /// <summary>
+    /// Формирует команду установки диапазона и разрешения измерения.
+    /// </summary>
+    /// <param name="template">Шаблон команды с заполнителями диапазона и разрешения.</param>
+    /// <param name="profile">Профиль измерения, определяющий единицу измерения.</param>
+    /// <param name="range">Диапазон измерения.</param>
+    /// <param name="rangeCommandMultiplier">Множитель диапазона при формировании команды.</param>
+    /// <returns>Команда установки диапазона и разрешения.</returns>
+    /// <exception cref="FormatException">
+    /// Выбрасывается, если <paramref name="template"/> имеет недопустимый составной формат.
+    /// </exception>
     private static string BuildRangeCommand(string template, IMeasurementProfile profile, double range, double rangeCommandMultiplier)
     {
       var commandRange = range * rangeCommandMultiplier;
@@ -216,6 +329,15 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         ResolveResolution(profile, commandRange));
     }
 
+    /// <summary>
+    /// Выбирает поддерживаемый диапазон для запрошенного значения.
+    /// </summary>
+    /// <param name="requestedRange">Запрошенное значение диапазона.</param>
+    /// <param name="supportedRanges">Поддерживаемые диапазоны измерения.</param>
+    /// <returns>
+    /// Минимальный поддерживаемый диапазон, включающий запрошенное значение; максимальный диапазон при
+    /// превышении всех поддерживаемых значений; модуль запрошенного значения при пустом списке диапазонов.
+    /// </returns>
     private static double ResolveRange(double requestedRange, double[] supportedRanges)
     {
       var requested = Math.Abs(requestedRange);
@@ -235,6 +357,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       return supportedRanges.Max();
     }
 
+    /// <summary>
+    /// Определяет разрешение измерения для единицы измерения и диапазона.
+    /// </summary>
+    /// <param name="profile">Профиль измерения, определяющий единицу измерения.</param>
+    /// <param name="range">Диапазон измерения.</param>
+    /// <returns>Разрешение измерения.</returns>
     private static double ResolveResolution(IMeasurementProfile profile, double range)
     {
       return profile.Unit switch
@@ -245,6 +373,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       };
     }
 
+    /// <summary>
+    /// Определяет разрешение измерения напряжения для заданного диапазона.
+    /// </summary>
+    /// <param name="range">Диапазон измерения напряжения.</param>
+    /// <returns>Разрешение измерения напряжения.</returns>
     private static double ResolveVoltageResolution(double range)
     {
       return range switch
@@ -257,11 +390,26 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       };
     }
 
+    /// <summary>
+    /// Определяет разрешение измерения сопротивления для заданного диапазона.
+    /// </summary>
+    /// <param name="range">Диапазон измерения сопротивления.</param>
+    /// <returns>Разрешение измерения сопротивления.</returns>
     private static double ResolveResistanceResolution(double range)
     {
       return Math.Max(range * 0.000001d, 0.000001d);
     }
 
+    /// <summary>
+    /// Проверяет отсутствие ошибки мультиметра после установки диапазона.
+    /// </summary>
+    /// <param name="device">Мультиметр, состояние которого проверяется.</param>
+    /// <param name="getRangeErrorCommand">Команда чтения ошибки прибора.</param>
+    /// <param name="timeout">Время ожидания ответа прибора, мс.</param>
+    /// <returns>Задача, представляющая асинхронную проверку.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Выбрасывается, если мультиметр сообщил об ошибке установки диапазона.
+    /// </exception>
     private static async Task EnsureNoInstrumentErrorAsync(
       IMultimeter device,
       string? getRangeErrorCommand,
@@ -283,6 +431,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       }
     }
 
+    /// <summary>
+    /// Возвращает последний установленный диапазон для текущего режима мультиметра.
+    /// </summary>
+    /// <param name="device">Мультиметр, для которого запрашивается диапазон.</param>
+    /// <returns>Последний установленный диапазон или ноль, если диапазон не сохранён.</returns>
     private static double GetSelectedRange(IMultimeter device)
     {
       return SelectedRanges.TryGetValue(BuildRangeKey(device, device.TypeMode), out var range)
@@ -290,6 +443,12 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         : 0;
     }
 
+    /// <summary>
+    /// Формирует ключ диапазона для экземпляра мультиметра и режима измерения.
+    /// </summary>
+    /// <param name="device">Экземпляр мультиметра.</param>
+    /// <param name="typeMode">Режим измерения мультиметра.</param>
+    /// <returns>Ключ сохранённого диапазона.</returns>
     private static string BuildRangeKey(IMultimeter device, MultimeterTypeMode typeMode)
     {
       return $"{RuntimeHelpers.GetHashCode(device)}:{typeMode}";
