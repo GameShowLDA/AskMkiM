@@ -28,6 +28,37 @@ public static class CommandMessages
   }
 
   /// <summary>
+  /// Форматирует полную исходную команду с заменой её заголовка на отображаемый заголовок вложенного этапа.
+  /// </summary>
+  /// <param name="displayHeader">Заголовок вложенного этапа.</param>
+  /// <param name="sourceLines">Исходные строки команды программы контроля.</param>
+  /// <returns>Полный текст команды без повторения исходного номера и мнемоники.</returns>
+  public static string FormatSourceLinesWithHeader(
+    string displayHeader,
+    IEnumerable<string> sourceLines)
+  {
+    ArgumentException.ThrowIfNullOrWhiteSpace(displayHeader);
+    ArgumentNullException.ThrowIfNull(sourceLines);
+
+    var lines = sourceLines.Where(line => !string.IsNullOrWhiteSpace(line)).ToList();
+    if (lines.Count == 0)
+    {
+      return displayHeader;
+    }
+
+    lines[0] = System.Text.RegularExpressions.Regex.Replace(
+      lines[0],
+      @"^\s*\d+\s+\S+\s*",
+      string.Empty,
+      System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    string body = string.Join("\r\n  ", lines.Where(line => !string.IsNullOrWhiteSpace(line)));
+    return string.IsNullOrWhiteSpace(body)
+      ? displayHeader
+      : $"{displayHeader}  {body}";
+  }
+
+  /// <summary>
   /// Выводит заголовок выполняемой команды программы контроля.
   /// </summary>
   public static Task PublishCommandExecutionAsync(

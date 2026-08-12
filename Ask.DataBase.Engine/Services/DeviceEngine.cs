@@ -545,11 +545,20 @@ public class DeviceEngine : IDeviceEngine
     where TDevice : class, IDevice
     where TDto : DeviceDto
   {
-    var dto = mapper(device);
+    TDto updated;
+    try
+    {
+      var dto = mapper(device);
+      updated = await service.UpdateAsync(dto, cancellationToken);
+    }
+    finally
+    {
+      // Старый runtime-экземпляр может владеть открытым COM-портом.
+      // Освобождаем его также при ошибке провайдера или отмене операции.
+      _cache.Remove(typeof(TDevice), device.Id);
+      InvalidateQueryCaches(typeof(TDevice));
+    }
 
-    var updated = await service.UpdateAsync(dto, cancellationToken);
-
-    InvalidateQueryCaches(typeof(TDevice));
     return Build<TDevice>(updated);
   }
 

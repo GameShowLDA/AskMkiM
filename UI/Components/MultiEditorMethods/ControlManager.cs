@@ -167,8 +167,8 @@ namespace UI.Components.MultiEditorMethods
             return false;
           }
 
-          fileManager.EditorWorkspaceModel.FilePaths.Remove(item.TabText);
-          EditorEventAdapter.RaiseTextEditorContainerClosing(true, item.TabText);
+          fileManager.EditorWorkspaceModel.FilePaths.Remove(item.Title);
+          EditorEventAdapter.RaiseTextEditorContainerClosing(true, item.Title);
         }
       }
 

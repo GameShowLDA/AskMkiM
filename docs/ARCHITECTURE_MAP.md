@@ -679,11 +679,18 @@ executor throws
   `MeasurementMessages.PublishResultAsync`, поэтому точки отображаются в строке результата
   над обычной строкой погрешности. Отдельные сообщения допустимого диапазона
   (`RangeMessages.PublishAllowedRangeAsync`) метрологические режимы не публикуют;
-- исполнители команд передают `SourceLines` в `CommandMessages.FormatSourceLines`;
+- исполнители команд передают исходные строки в `CommandMessages.FormatSourceLines`;
+  `CommandExecutionContext.ProtocolSourceLines` по умолчанию ссылается на `Command.SourceLines`,
+  но позволяет вложенному executor вывести полный текст родительской команды;
   `CommandExecutorBase` больше не содержит форматирование текста протокола;
 - `DeviceManager` — grouped facade для relay/switch equipment operations.
 
 `ПИ` вызывает `СИ` как вложенный executor до и после основной ACW/DCW-проверки.
+Оба контекста `СИ1`/`СИ2` получают в `ProtocolSourceLines` исходные строки `ПИ`, поэтому
+левый протокол сохраняет параметры ПИ и адреса точек из программы контроля; самостоятельная
+`СИ` продолжает использовать собственные `SourceLines`. Для вложенных этапов
+`CommandMessages.FormatSourceLinesWithHeader` заменяет исходные номер и мнемонику заголовком
+`ПИ/СИ1`, `ПИ/ПИ1` или `ПИ/СИ2`, не дублируя `номер ПИ` перед параметрами.
 `РМ` вызывает `EquipmentService.AnalyzePoints` и готовит equipment state.
 
 #### Pause, stop and command jump
@@ -712,7 +719,13 @@ ProtocolUI.RequestCommandJump
 
 `ExecutionFinalizer` последовательно отменяет текущую задачу, очищает состояние,
 сбрасывает оборудование, печатает при включённой настройке, восстанавливает UI,
-показывает результат и сохраняет протоколы. Все шаги выполняются внутри
+показывает результат, добавляет обязательный финальный блок программы контроля через
+`ProtocolCompletionService.AppendControlProgramCompletionAsync` →
+`ControlProgramCompletionMessageBuilder.Build` и сохраняет протоколы. Финальный блок
+не зависит от настроек протокола и добавляется после остальных сообщений. Перед его выводом
+`ProtocolUI.FinalizeCurrentCommandGroupAsync` → `ProtocolListBoxUI.FinalizeCurrentCommandGroupAsync`
+закрывает последнюю группу команды, поэтому финальная зелёная запись отображается отдельно и не сворачивается
+вместе с `КЦ` или другой последней командой. Все шаги выполняются внутри
 `EquipmentExecutionContext.EnterMandatoryFinalization`; ошибка отдельного шага
 логируется и не прерывает оставшиеся обязательные действия.
 
@@ -725,6 +738,8 @@ ProtocolUI.RequestCommandJump
 
 - `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`
 - `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ControlProgramCompletionMessageBuilder.cs`
 - `UI/Controls/Runner/RunControl.xaml.cs`
 - `Ask.Engine/ControlCommandExecutor/Execution/`
 - `Ask.Engine/ControlCommandExecutor/Executors/`
@@ -867,9 +882,15 @@ executors/tests
 
 ActionExecutor finalization
 → ExecutionFinalizer
-→ ProtocolCompletionService.BuildInspectionProtocol
-→ InspectionProtocolBuilder
-→ ProtocolUI.ShowInspectionProtocol
+├─→ ProtocolCompletionService.DisplayCompletionAsync
+│  → InspectionProtocolBuilder
+│  → ProtocolUI.ShowInspectionProtocol
+├─→ ProtocolCompletionService.AppendControlProgramCompletionAsync
+│  → ProtocolUI.FinalizeCurrentCommandGroupAsync
+│  → ProtocolListBoxUI.FinalizeCurrentCommandGroupAsync
+│  → ControlProgramCompletionMessageBuilder.Build
+│  → ProtocolUI.ShowMessageAsync (отдельная зелёная последняя запись потокового протокола)
+└─→ ProtocolCompletionService.SaveAndExposeAsync
 → ProtocolStorageService
 → ExecutionProtocolHistoryService
 ```
@@ -1169,6 +1190,11 @@ IBreakdownTester / GPT79904
 отдельный legacy-путь `B7783/VoltageMeasurementBase` не разбирают ответы самостоятельно.
 Публикация рабочих сообщений и результатов самоконтроля мультиметра централизована в
 `MultimeterMessages`; тексты и параметры сообщений сохранены в `Ask.Protocol.Messages`.
+Заголовки этапов и результаты измерений самоконтроля мультиметра публикуются с
+`isBlockStart: false`. При этом `SelfTestMessageBuilder.BuildCommand()` формирует заголовок как
+`MessageType.Info`, а не `Command`: `ProtocolUI.CheckBlockStart()` не открывает логический блок,
+а `ProtocolListBoxUI.AppendVisibleMessage()` не создаёт сворачиваемую `ProtocolCommandGroup`. Цвет заголовка
+и явная step-mode checkpoint сохраняются. Другие потоки самоконтроля сохраняют свою политику блоков.
 Сообщения подключения, отключения, инициализации и сброса для `IMultimeter` проходят через
 `MultimeterResponseProcessor`. Retry и проверка измерения по допустимому диапазону остаются
 в Runtime/Engine.
@@ -1202,6 +1228,23 @@ IMultimeter.ConnectableManager.InitializeAsync()
 `Команда мультиметра: "..."` и `Ответ мультиметра на "...": "..."`.
 Для SCPI-команд мультиметра без `?` этот шлюз передаёт в транспорт `timeout = 0`
 и не ждёт ответа; команды с `?` сохраняют заданный `timeout` и `responseDelay`.
+
+`HardwareWatchdogProtocol` оборачивает реальные COM/TCP/UDP/USB-протоколы при их создании
+в `DeviceWithCOM`, `DeviceWithIP`, `KeysightDevice`, `MultimeterB7783` и
+`MikUps1101rRmDevice`. Он запускает вызов `IDeviceProtocol.QueryAsync` вне вызывающего потока,
+ожидает не более 5 секунд, отменяет связанный `CancellationToken` и выбрасывает
+`TimeoutException`. Поэтому защищены как вызовы через `DeviceProtocolEmulator`, так и прямые
+обращения к `device.DeviceProtocol`. `ModeSelectingDeviceProtocol` сохраняет вторую watchdog-
+границу для реальных обращений через Real/Idle-шлюз; холостой режим ей не ограничивается.
+Watchdog ограничивает ожидание вызывающего кода, но не может принудительно завершить уже
+зависший нативный вызов VISA внутри процесса.
+
+Для команды `НЭ` токен `IUserInteractionService.GetCancellationToken()` проходит через
+`NeCommandExecutor → IDiodeMeasurement → DiodeMeasurementBase → MeasurementBase →
+DeviceProtocolEmulator`. Ошибка установки режима публикуется в UI как ошибка выполнения и
+завершает только текущую команду. Ошибка или отсутствие ответа при измерении преобразуется
+в отрицательный результат точки, поэтому `CommandExecutionManager` может перейти к следующей
+команде программы контроля.
 
 При наличии `IUserInteractionService` низкоуровневая измерительная попытка
 выполняется один раз. Ошибка обмена поднимается как аппаратная ошибка до
@@ -1263,7 +1306,10 @@ Selection is distributed, not DI-based:
     `ResistorManager`, `CapacitorManager` и UKSH SelfCheck не формируют ожидаемые ответы и не разбирают их
     самостоятельно; сообщения операций и самоконтроля проходят через
     `DeviceBusCommutationResponseProcessor`/`DeviceBusCommutationMessages`.
-    Команда `7` подтверждается сокращённым ответом `7.<action>` согласно `makeAnswer(..., 2)` прошивки;
+    Все JSON-значения `Answer` заканчиваются точкой: `2.0.1.`, полные ответы команд `4/5/9`
+    и сокращённый ответ команды `7` в формате `7.<action>.` согласно `makeAnswer(..., 2)`;
+    `JsonCommandResponseChecker` перед строгим ordinal-сравнением удаляет конечные точки из фактического и
+    ожидаемого `Answer`, поэтому принимает оба варианта прошивки, но не произвольное вхождение строки;
     команда `6` возвращает `0` при успехе и код несуществующей цепи при ошибке. Idle-эмулятор использует
     те же форматы и при симуляции ошибок измерения случайно возвращает как успешный, так и ошибочный код;
   - остальные UDP/TCP/COM/USB connectable managers возвращают simulated success или обходят I/O;
@@ -1362,7 +1408,8 @@ same path with gates enabled and performs real transport I/O.
   I/O failure; per-device semaphore.
 - COM: `SerialPortCustom` serialized in `ConnectionDetails`; `ComProtocol` opens
   through `SerialPortExtensions.UsePort`, writes newline-terminated command and
-  polls `ReadExisting`.
+  polls `ReadExisting`. `DeviceWithCOM` owns the resulting `SerialPort` and implements
+  `IDisposable`: disposal closes and releases the port even when `Close` reports an error.
 - USB: `UsbProtocol` delegates discovery/commands to `IUsbCommandHandler`;
   `UsbCommandHandler` includes B7783 and UPS/ViewPower branches.
 
@@ -1423,6 +1470,11 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+`FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
+`DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
+только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
+`SaveFileManager` обновляет снимок и снимает индикатор после фактической записи,
+а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
 В правой области `RunControl` панель действий документа отображается только для
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
@@ -1760,7 +1812,7 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Host/diagnostic bridge | `AppHost.StartAsync` | connects static command history to service | host/process lifetime |
 | Initial chassis lookup | `PreStartupInitializer` fire-and-forget Task | warms first chassis/tester access | one-shot, exceptions caught |
 | Execution session | `ActionExecutor.ExecuteTaskAsync` | `Task.Run(StartDelegate)` with cancellation | `FinalizeAsync`/`StopAsync` cancels and disposes session |
-| Device protocol waits | COM/TCP/UDP queries | semaphore-protected I/O and timeout polling | per-call cancellation/timeout |
+| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling | linked cancellation; caller resumes with `TimeoutException` |
 | Help server | `HelpServer.EnsureStarted` | Kestrel static-file host | `App.OnExit → HelpServer.Stop` |
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |
@@ -1902,6 +1954,7 @@ ErrorItem → translator/runner ErrorList
 | `RangeMessagePublisher` | internal static publisher | Ask.Protocol.Messages | записывает сообщения о диапазонах в device log и передаёт их `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
 | `ActionExecutor` | orchestrator | Ask.UI | run/pause/stop/finalize | [Execution Engine](#execution-engine) |
 | `ExecutionFinalizer` | coordinator | Ask.UI | mandatory cleanup, reset, output and protocol completion | [Execution Engine](#execution-engine) |
+| `ControlProgramCompletionMessageBuilder` | internal static builder | Ask.UI | обязательный финальный блок программы контроля с режимом и длительностью выполнения | [Protocols](#protocols-and-file-formats) |
 | `CommandTranslationManager` | parser orchestrator | Ask.Engine | reflection parser/formatter pipeline | [Translation](#translation-and-command-language) |
 | `CommandExecutionManager` | orchestrator | Ask.Engine | sequential command execution | [Execution Engine](#execution-engine) |
 | `ICommandExecutor` | interface | Ask.Engine | executable mnemonic contract | [Execution Engine](#execution-engine) |
@@ -1932,7 +1985,7 @@ ErrorItem → translator/runner ErrorList
 | `DeviceBusCommutationResponseProcessor` | response facade | Ask.Device.ResponseProcessor | validates УКШ JSON/numeric firmware responses and publishes operation/connection/reset results | [Equipment](#real--idle) |
 | `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
 | `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
-| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
+| `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages; для self-test-сообщений отключает `isBlockStart`, чтобы UI не создавал сворачиваемые блоки | [Equipment](#equipment-architecture) |
 | `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904 | [Equipment](#equipment-architecture) |
 | `BreakdownTesterMessages` | message facade | Ask.Device.ResponseProcessor | маршрутизирует рабочие сообщения и результаты самоконтроля GPT через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |

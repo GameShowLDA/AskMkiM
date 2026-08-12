@@ -30,7 +30,8 @@ internal static class ExternalBusSelfTestChecker
   }
 
   /// <summary>
-  /// Проверяет идентификатор МКР, номер шины и назначенные ей номера реле.
+  /// Проверяет идентификатор МКР и номер шины.
+  /// Наличие полей реле проверяется при десериализации ответа.
   /// </summary>
   internal static bool MatchesRequest(
     ExternalBusSelfTestResponse? model,
@@ -40,11 +41,7 @@ internal static class ExternalBusSelfTestChecker
   {
     return model != null &&
       ModuleResponseIdentityChecker.Check(model, chassisNumber, moduleNumber) &&
-      model.NumberBus == busNumber &&
-      model.ProtectRelayBusA == 100 + (busNumber * 2) - 1 &&
-      model.ProtectRelayBusB == 108 + (busNumber * 2) - 1 &&
-      model.MainRelayBusA == 100 + (busNumber * 2) &&
-      model.MainRelayBusB == 108 + (busNumber * 2);
+      model.NumberBus == busNumber;
   }
 
   /// <summary>

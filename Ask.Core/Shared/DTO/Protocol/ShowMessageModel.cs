@@ -135,6 +135,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     public bool IsStepModeCheckpoint { get; set; }
 
     /// <summary>
+    /// Признак отображения всей записи цветом успешного результата.
+    /// </summary>
+    public bool UseSuccessColorForEntireMessage { get; set; }
+
+    /// <summary>
     /// Итоговый результат выполнения команды протокола.
     /// <see langword="null"/> означает, что команда ещё не завершена
     /// или результат для неё не определён.
@@ -205,6 +210,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       IsDeviceMessage = false;
       IsControlProgramCommandHeader = false;
       IsStepModeCheckpoint = false;
+      UseSuccessColorForEntireMessage = false;
       CommandExecutionHasErrors = null;
       IndentLevel = 0;
 

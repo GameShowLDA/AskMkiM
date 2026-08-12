@@ -6,10 +6,11 @@ namespace Ask.Device.Emulator.UnitTests.DeviceBusCommutation;
 public sealed class DeviceBusCommutationEmulatorProtocolTests
 {
   [Theory(DisplayName = "УКШ: JSON-команда возвращает идентификаторы устройства и подтверждение прошивки")]
-  [InlineData("4.1.2.1", "4.1.2.1")]
-  [InlineData("5.7.0.2", "5.7.0.2")]
-  [InlineData("7.1.0.0", "7.1")]
-  [InlineData("9.2.0.1", "9.2.0.1")]
+  [InlineData("2.1.0.0", "2.0.1.")]
+  [InlineData("4.1.2.1", "4.1.2.1.")]
+  [InlineData("5.7.0.2", "5.7.0.2.")]
+  [InlineData("7.1.0.0", "7.1.")]
+  [InlineData("9.2.0.1", "9.2.0.1.")]
   public async Task JsonCommand_ReturnsEnvelope(string command, string expectedAnswer)
   {
     using var mode = new TestExecutionMode(idleMode: true);

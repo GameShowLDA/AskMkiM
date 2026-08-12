@@ -54,7 +54,19 @@ public class DeviceCache
   {
     ArgumentNullException.ThrowIfNull(deviceType);
     ArgumentNullException.ThrowIfNull(device);
-    _cache[new DeviceCacheKey(deviceType, id)] = device;
+    var key = new DeviceCacheKey(deviceType, id);
+    _cache.AddOrUpdate(
+      key,
+      device,
+      (_, previous) =>
+      {
+        if (!ReferenceEquals(previous, device))
+        {
+          Release(previous);
+        }
+
+        return device;
+      });
   }
 
   /// <summary>
@@ -71,7 +83,10 @@ public class DeviceCache
   public void Remove(Type deviceType, int id)
   {
     ArgumentNullException.ThrowIfNull(deviceType);
-    _cache.TryRemove(new DeviceCacheKey(deviceType, id), out _);
+    if (_cache.TryRemove(new DeviceCacheKey(deviceType, id), out var device))
+    {
+      Release(device);
+    }
   }
 
   /// <summary>
@@ -79,6 +94,29 @@ public class DeviceCache
   /// </summary>
   public void Clear()
   {
-    _cache.Clear();
+    foreach (var key in _cache.Keys)
+    {
+      if (_cache.TryRemove(key, out var device))
+      {
+        Release(device);
+      }
+    }
+  }
+
+  private static void Release(IDevice device)
+  {
+    if (device is not IDisposable disposable)
+    {
+      return;
+    }
+
+    try
+    {
+      disposable.Dispose();
+    }
+    catch (Exception ex)
+    {
+      Ask.LogLib.LoggerUtility.LogException(ex, $"Не удалось освободить ресурсы устройства {device.Name}.");
+    }
   }
 }

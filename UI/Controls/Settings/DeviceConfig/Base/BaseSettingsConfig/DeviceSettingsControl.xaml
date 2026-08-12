@@ -65,7 +65,13 @@
                        TextWrapping="Wrap"
                        Foreground="{DynamicResource ForegrounfBrushes}" FontSize="25" FontWeight="Bold"/>
 
-            <ScrollViewer x:Name="SettingsScrollViewer" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" Padding="2,0">
+            <ScrollViewer x:Name="SettingsScrollViewer"
+                          Grid.Row="1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="2,0"
+                          PreviewMouseWheel="SettingsScrollViewer_OnPreviewMouseWheel">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -252,8 +258,7 @@
                             <ComboBox Grid.Row="1" 
                                 Name="ConnectionTypeSelectionBox" 
                                 Style="{StaticResource DeviceSettingsUnifiedComboBoxStyle}"
-                                SelectionChanged="ConnectionTypeSelectionBox_SelectionChanged"
-                                PreviewMouseWheel="ConnectionTypeSelectionBox_OnPreviewMouseWheel">
+                                SelectionChanged="ConnectionTypeSelectionBox_SelectionChanged">
 
                                 <ComboBoxItem IsEnabled="False" Content="Выбор типа подключения:" IsSelected="True" Foreground="Gray"/>
                                 <ComboBoxItem Content="IP" Name="ConnectionTypeIPItem"/>

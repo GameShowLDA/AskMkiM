@@ -59,6 +59,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// </summary>
     public bool IsInvokedByAnotherCommand { get; set; }
 
+    /// <summary>
+    /// Исходные строки команды, выводимые в экранный протокол.
+    /// Для вложенной команды могут содержать полный текст родительской команды.
+    /// </summary>
+    public IReadOnlyList<string> ProtocolSourceLines { get; set; }
+
     public CommandExecutionContext(CommandExecutionManager commandExecutionManager, BaseCommandModel command, IUserInteractionService console, ITextEditorAdapter editorAdapter, string opkFileName)
     {
       Command = command;
@@ -66,6 +72,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       TranslationControl = editorAdapter;
       CommandExecutionManager = commandExecutionManager;
       OpkFilePath = opkFileName;
+      ProtocolSourceLines = command.SourceLines;
     }
 
     /// <summary>

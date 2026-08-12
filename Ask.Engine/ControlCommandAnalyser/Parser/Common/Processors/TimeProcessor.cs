@@ -39,11 +39,18 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors
         model.Time = timeValue.Value;
 
       model.TimeSource = timeRaw + unitRaw;
-      if ((model is SiCommandModel || model is PiCommandModel)
-          && timeValue.GetValueOrDefault(-1) < 0)
+      if (timeValue.GetValueOrDefault(-1) < 0)
       {
-        model.Time = 1;
-        model.TimeSource = "1C";
+        if (model is PiCommandModel)
+        {
+          model.Time = 1;
+          model.TimeSource = "1c";
+        }
+        else if(model is SiCommandModel)
+        {
+          model.Time = 5;
+          model.TimeSource = "5c";
+        }
       }
 
       return $"{rest}{tail}";

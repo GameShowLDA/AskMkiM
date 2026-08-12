@@ -97,9 +97,9 @@ namespace Ask.Device.Emulator.DeviceBusCommutation
       string? answer = commandNumber switch
       {
         1 => null,
-        2 => "2.0.1",
-        4 or 5 or 9 => normalizedCommand,
-        7 => $"7.{parts[1]}",
+        2 => "2.0.1.",
+        4 or 5 or 9 => $"{normalizedCommand}.",
+        7 => $"7.{parts[1]}.",
         _ => null
       };
 

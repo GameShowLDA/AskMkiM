@@ -18,5 +18,5 @@ internal static class BusCommandResponseChecker
   /// В противном случае — <see langword="false"/>.
   /// </returns>
   internal static bool Check(string response, ISwitchingDevice device, bool connect)
-    => JsonCommandResponseChecker.Check(response, device, $"7.{(connect ? 1 : 2)}");
+    => JsonCommandResponseChecker.Check(response, device, $"7.{(connect ? 1 : 2)}.");
 }

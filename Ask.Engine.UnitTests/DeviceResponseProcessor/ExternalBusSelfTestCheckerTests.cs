@@ -31,11 +31,7 @@ public sealed class ExternalBusSelfTestCheckerTests
   [InlineData("NumberChassis", "1", "2")]
   [InlineData("NumberDevice", "6", "7")]
   [InlineData("NumberBus", "2", "3")]
-  [InlineData("ProtectReleBusA", "103", "101")]
-  [InlineData("ProtectReleBusB", "111", "109")]
   [InlineData("ConnectProtect", "true", "false")]
-  [InlineData("MainReleBusA", "104", "102")]
-  [InlineData("MainReleBusB", "112", "110")]
   [InlineData("ConnectMain", "true", "false")]
   [InlineData("Error", "0", "1")]
   public void Check_MismatchedOrFailedField_ReturnsFalse(
@@ -49,6 +45,34 @@ public sealed class ExternalBusSelfTestCheckerTests
       StringComparison.Ordinal);
 
     Assert.False(ExternalBusSelfTestChecker.Check(response, 1, 6, 2));
+  }
+
+  [Theory]
+  [InlineData("ProtectReleBusA")]
+  [InlineData("ProtectReleBusB")]
+  [InlineData("MainReleBusA")]
+  [InlineData("MainReleBusB")]
+  public void Check_MissingRelayField_ReturnsFalse(string field)
+  {
+    string response = string.Join(
+      Environment.NewLine,
+      SuccessfulResponse
+        .Split(Environment.NewLine)
+        .Where(line => !line.Contains($"\"{field}\"", StringComparison.Ordinal)));
+
+    Assert.False(ExternalBusSelfTestChecker.Check(response, 1, 6, 2));
+  }
+
+  [Fact]
+  public void Check_ChangedRelayNumbers_ReturnsTrue()
+  {
+    string response = SuccessfulResponse
+      .Replace("\"ProtectReleBusA\": 103", "\"ProtectReleBusA\": 501", StringComparison.Ordinal)
+      .Replace("\"ProtectReleBusB\": 111", "\"ProtectReleBusB\": 502", StringComparison.Ordinal)
+      .Replace("\"MainReleBusA\": 104", "\"MainReleBusA\": 503", StringComparison.Ordinal)
+      .Replace("\"MainReleBusB\": 112", "\"MainReleBusB\": 504", StringComparison.Ordinal);
+
+    Assert.True(ExternalBusSelfTestChecker.Check(response, 1, 6, 2));
   }
 
   [Theory]

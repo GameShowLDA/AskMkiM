@@ -69,6 +69,66 @@ public sealed class DeviceProtocolEmulatorTests
     Assert.Throws<ArgumentNullException>(() => DeviceProtocolEmulator.CreateDeviceBusCommutation(null!));
   }
 
+  [Fact(DisplayName = "Реальный протокол: зависшая аппаратная операция завершается по watchdog-тайм-ауту")]
+  public async Task ModeSelectingProtocol_HangingRealQuery_ThrowsTimeoutException()
+  {
+    using var mode = new TestExecutionMode(idleMode: false);
+    var realProtocol = new HangingProtocol();
+    var protocol = new global::Ask.Device.Emulator.Protocols.ModeSelectingDeviceProtocol(
+      () => realProtocol,
+      new StubProtocol("IDLE"),
+      TimeSpan.FromMilliseconds(50));
+
+    TimeoutException exception = await Assert.ThrowsAsync<TimeoutException>(
+      () => protocol.QueryAsync("READ?"));
+
+    Assert.Contains("READ?", exception.Message, StringComparison.Ordinal);
+  }
+
+  [Fact(DisplayName = "Реальный протокол: внешняя отмена не преобразуется в watchdog-тайм-аут")]
+  public async Task ModeSelectingProtocol_CancelledQuery_ThrowsOperationCanceledException()
+  {
+    using var mode = new TestExecutionMode(idleMode: false);
+    var realProtocol = new HangingProtocol();
+    var protocol = new global::Ask.Device.Emulator.Protocols.ModeSelectingDeviceProtocol(
+      () => realProtocol,
+      new StubProtocol("IDLE"),
+      TimeSpan.FromSeconds(1));
+    using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
+
+    await Assert.ThrowsAnyAsync<OperationCanceledException>(
+      () => protocol.QueryAsync("READ?", cancellationToken: cancellation.Token));
+  }
+
+  [Fact(DisplayName = "Реальный протокол: ошибка оборудования завершается без ожидания watchdog")]
+  public async Task ModeSelectingProtocol_HardwareError_PropagatesImmediately()
+  {
+    using var mode = new TestExecutionMode(idleMode: false);
+    var protocol = new global::Ask.Device.Emulator.Protocols.ModeSelectingDeviceProtocol(
+      () => new FailingProtocol(),
+      new StubProtocol("IDLE"),
+      TimeSpan.FromSeconds(1));
+
+    InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
+      () => protocol.QueryAsync("READ?"));
+
+    Assert.Equal("Ошибка оборудования.", exception.Message);
+  }
+
+  [Fact(DisplayName = "Реальный транспорт: общий watchdog ограничивает прямое обращение к протоколу")]
+  public async Task HardwareWatchdogProtocol_DirectHangingQuery_ThrowsTimeoutException()
+  {
+    var protocol = new global::Ask.Device.Communication.Common.HardwareWatchdogProtocol(
+      new HangingProtocol(),
+      "В7-78/3",
+      TimeSpan.FromMilliseconds(50));
+
+    TimeoutException exception = await Assert.ThrowsAsync<TimeoutException>(
+      () => protocol.QueryAsync("READ?"));
+
+    Assert.Contains("В7-78/3", exception.Message, StringComparison.Ordinal);
+  }
+
   private static T CreateDevice<T>(IDeviceProtocol protocol, string name, int chassisNumber, int deviceNumber)
     where T : class
   {
@@ -98,5 +158,36 @@ public sealed class DeviceProtocolEmulatorTests
       LastCommand = command;
       return Task.FromResult(response);
     }
+  }
+
+  private sealed class HangingProtocol : IDeviceProtocol
+  {
+    public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
+
+    public async Task<string> QueryAsync(
+      string command,
+      double responseDelay = 0,
+      int timeout = 0,
+      int port = 0,
+      int delayBeforeCall = 0,
+      CancellationToken cancellationToken = default)
+    {
+      await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+      return string.Empty;
+    }
+  }
+
+  private sealed class FailingProtocol : IDeviceProtocol
+  {
+    public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
+
+    public Task<string> QueryAsync(
+      string command,
+      double responseDelay = 0,
+      int timeout = 0,
+      int port = 0,
+      int delayBeforeCall = 0,
+      CancellationToken cancellationToken = default) =>
+      Task.FromException<string>(new InvalidOperationException("Ошибка оборудования."));
   }
 }
