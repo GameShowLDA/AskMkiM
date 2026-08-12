@@ -1,10 +1,10 @@
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -146,7 +146,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
 
       await context.MessageService.WaitIfPausedAsync();
-      await ShowChainCheckHeaderAsync(chainCopy, context);
+
+      if (context.TypeCommand != MeasurementTypeCommand.NE)
+      {
+        await ShowChainCheckHeaderAsync(chainCopy, context);
+      }
 
       var neCommandModel = GetNeCommandModel(context);
       var isNeCommand = neCommandModel != null;
