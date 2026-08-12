@@ -33,7 +33,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронная операция, возвращающая <c>true</c>, если измерение прошло успешно,
     /// или <c>false</c>, если обнаружена ошибка.
     /// </returns>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, PointModel point, double errorResistance);
 
     /// <summary>
     /// Асинхронно выполняет проверку соединённых точек в схеме, формируя новый список цепей (ССИРТ)
@@ -48,8 +48,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         return messages;
       }
-
-      await PublishCheckBlockHeaderAsync(context);
+      if (context.TypeCommand != MeasurementTypeCommand.NE)
+      {
+        await PublishCheckBlockHeaderAsync(context);
+      }
 
       var newGroups = await BuildCheckedGroupsAsync(sourceGroups, context, preMeasurementDelegate, messages);
       context.NewScheme = new SchemeModel(newGroups);
@@ -154,7 +156,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       var neCommandModel = GetNeCommandModel(context);
       var isNeCommand = neCommandModel != null;
-      var directPolarity = isNeCommand && ResolvePolarity(chain, neCommandModel!);
+      var directPolarity = isNeCommand && ResolvePolarity(chain, neCommandModel!); // направление проверки диода
 
       var result = await RunChainPassAsync(
         chainCopy.PointModels,
@@ -512,8 +514,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       ChainFragmentState state)
     {
       var messageService = context.MessageService;
-
-      await ShowPointCheckHeaderAsync(state.BasePoint, point, messageService);
+      if (context.TypeCommand != MeasurementTypeCommand.NE)
+      {
+        await ShowPointCheckHeaderAsync(state.BasePoint, point, messageService);
+      }
       await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, messageService, revers);
 
       try
@@ -558,6 +562,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         context.Value,
         messageService,
         messageService.GetCancellationToken(),
+        point,
         errorResistance);
     }
 

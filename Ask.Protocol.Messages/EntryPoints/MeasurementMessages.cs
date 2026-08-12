@@ -333,13 +333,15 @@ public static class MeasurementMessages
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     string? chains = null,
-    string comparisonSign = "=")
+    string comparisonSign = "=", 
+    string points = null)
   {
     return MeasurementMessageBuilder.BuildResult(
       measurementTypeCommand,
       measurementRange,
       chains,
-      comparisonSign);
+      comparisonSign, 
+      points);
   }
 
   /// <summary>
@@ -460,6 +462,7 @@ public static class MeasurementMessages
     bool isSuccessful,
     string? chains = null,
     string comparisonSign = "=",
+    string points = null,
     IMessageOutputService? outputService = null,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -473,6 +476,7 @@ public static class MeasurementMessages
       DeviceDisplayConfig.GetMeasurementResultsVisibility(),
       chains,
       comparisonSign,
+      points,
       outputService,
       callerName,
       callerFile,
@@ -619,6 +623,7 @@ public static class MeasurementMessages
     bool isSuccessful,
     string? chains = null,
     string comparisonSign = "=",
+    string points = null,
     IMessageOutputService? outputService = null,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
@@ -632,6 +637,7 @@ public static class MeasurementMessages
       DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility(),
       chains,
       comparisonSign,
+      points,
       outputService,
       callerName,
       callerFile,
@@ -646,6 +652,7 @@ public static class MeasurementMessages
     bool isVisible,
     string? chains,
     string comparisonSign,
+    string points,
     IMessageOutputService? outputService,
     string callerName,
     string callerFile,
@@ -657,7 +664,8 @@ public static class MeasurementMessages
       measurementTypeCommand,
       measurementRange,
       chains,
-      comparisonSign);
+      comparisonSign,
+      points);
 
     message.Status = isSuccessful
       ? ShowMessageModel.MessageType.Success

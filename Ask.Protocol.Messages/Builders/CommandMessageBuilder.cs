@@ -17,6 +17,10 @@ internal static class CommandMessageBuilder
   internal static ShowMessageModel BuildCheckBlockHeader(ControlCheckAlgorithm algorithm, bool inversion)
   {
     string header = algorithm.GetDescription();
+    if(string.Equals(header, ControlCheckAlgorithm.MessageRelativeToFirstPoint.GetDescription()))
+    {
+      header = string.Empty;
+    }
     if (inversion)
     {
       header += "(инверсия)";
