@@ -5,6 +5,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Connected;
@@ -26,6 +27,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     /// </summary>
     private readonly IDevice _device;
     private readonly IConnectable _connectionTransport;
+    private readonly InitialDeviceSoundConfigurator _initialSoundConfigurator;
 
     /// <summary>
     /// Тип подключения, используемый для взаимодействия с устройством.
@@ -42,6 +44,9 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       _device = device ?? throw new ArgumentNullException(nameof(device));
       connectionType = _device.ConnectionInfo.ConnectionType;
       _connectionTransport = CreateConnectionTransport();
+      _initialSoundConfigurator = new InitialDeviceSoundConfigurator(
+        _device,
+        GetConnectedProfile().InitialBeeperDisableCommands);
       _connectionTransport.IsReset += () => IsReset?.Invoke();
     }
 
@@ -54,6 +59,11 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ConnectAsync(userMessageService);
+        if (result.Connect && _device is IBreakdownTester)
+        {
+          await _initialSoundConfigurator.ApplyOnceAsync();
+        }
+
         string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
         if (_device is IRelaySwitchModule module)
         {
@@ -128,6 +138,11 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.InitializeAsync(userMessageService);
+        if (result.Connect)
+        {
+          await _initialSoundConfigurator.ApplyOnceAsync();
+        }
+
         string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
         if (_device is IRelaySwitchModule module)
         {
@@ -207,5 +222,18 @@ namespace Ask.Device.Runtime.Function.Base.Connected
       ConnectionType.USB => new UsbTransport((DeviceWithUSB)_device),
       _ => throw new NotSupportedException($"Unsupported connection type: {connectionType}"),
     };
+
+    /// <summary>
+    /// Возвращает профиль подключения устройства независимо от типа транспорта.
+    /// </summary>
+    /// <returns>Профиль команд подключения устройства.</returns>
+    private ConnectedBaseProfile GetConnectedProfile() =>
+      _device switch
+      {
+        DeviceWithCOM device => device.ConnectedProfile,
+        DeviceWithIP device => device.ConnectedProfile,
+        DeviceWithUSB device => device.ConnectedProfile,
+        _ => throw new NotSupportedException($"Unsupported device type: {_device.GetType().FullName}"),
+      };
   }
 }

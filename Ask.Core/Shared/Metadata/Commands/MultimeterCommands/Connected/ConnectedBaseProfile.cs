@@ -19,5 +19,10 @@
     /// Время ожидания ответа устройства, в миллисекундах.
     /// </summary>
     public int Timeout { get; set; } = 1000;
+
+    /// <summary>
+    /// Команды отключения звуковой сигнализации после первой успешной инициализации.
+    /// </summary>
+    public IReadOnlyList<string> InitialBeeperDisableCommands { get; set; } = [];
   }
 }

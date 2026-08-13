@@ -22,6 +22,7 @@ namespace Ask.Device.Runtime.Device
       DeviceClass = GetType().FullName ?? string.Empty;
       DeviceType = DeviceType.FastMeter;
       ConnectionDetails = "VID_164E&PID_0DB7";
+      ConnectedProfile.InitialBeeperDisableCommands = ["SYST:BEEP:STAT OFF"];
 
       ConnectableManager = new Transport(this);
       ResistanceManager = new ResistanceMeasurementBase(this);
