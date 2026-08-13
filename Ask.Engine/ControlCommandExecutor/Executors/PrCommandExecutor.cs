@@ -179,10 +179,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(answer, 0, subtract: false);
 
         measurementRange.TargetValue = answer;
 
@@ -221,10 +218,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(answer, 0, subtract: false);
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
@@ -261,15 +255,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
-        }
-
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(
+          answer,
+          errorResistance,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);

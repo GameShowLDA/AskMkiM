@@ -113,15 +113,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
         answer = await meter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
-        }
-
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(
+          answer,
+          errorResistance,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
@@ -150,15 +145,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
         answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
-        }
-
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(
+          answer,
+          errorResistance,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
