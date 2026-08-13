@@ -9,6 +9,17 @@ namespace Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing.Checkers;
 /// </summary>
 internal static class MeasurementResponseChecker
 {
+  private const double ScpiOverloadThreshold = 9.9E+37;
+
+  private static readonly HashSet<string> OverloadTokens = new(StringComparer.OrdinalIgnoreCase)
+  {
+    "OL",
+    "OVL",
+    "OVLD",
+    "OVLOAD",
+    "OVERLOAD"
+  };
+
   /// <summary>
   /// Шаблон числа с необязательными знаком, дробной частью и экспонентой.
   /// </summary>
@@ -34,6 +45,18 @@ internal static class MeasurementResponseChecker
     }
 
     string normalized = response.Trim();
+    string token = normalized.Trim('"', '\'');
+    if (OverloadTokens.Contains(token))
+    {
+      result = new MeasurementResponse
+      {
+        RawValue = response,
+        Value = double.PositiveInfinity,
+        State = MeasurementState.Overload
+      };
+      return true;
+    }
+
     Match match = NumericValuePattern.Match(normalized);
     if (!match.Success || !double.TryParse(
           match.Value.Replace(',', '.'),
@@ -44,7 +67,12 @@ internal static class MeasurementResponseChecker
       return false;
     }
 
-    result = new MeasurementResponse { RawValue = response, Value = value };
+    result = new MeasurementResponse
+    {
+      RawValue = response,
+      Value = value >= ScpiOverloadThreshold ? double.PositiveInfinity : value,
+      State = value >= ScpiOverloadThreshold ? MeasurementState.Overload : MeasurementState.Value
+    };
     return true;
   }
 }

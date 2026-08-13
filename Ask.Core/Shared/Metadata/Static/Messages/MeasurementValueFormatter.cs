@@ -29,6 +29,11 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// </summary>
     public static string Format(double value)
     {
+      if (IsOverloadValue(value))
+      {
+        return "Overload";
+      }
+
       return Round(value).ToString(DisplayFormat, RussianDisplayCulture);
     }
 
@@ -45,7 +50,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// </summary>
     public static bool IsOverloadValue(double value, double threshold = 9.9E+37)
     {
-      return value >= threshold;
+      return double.IsPositiveInfinity(value) || value >= threshold;
     }
   }
 }

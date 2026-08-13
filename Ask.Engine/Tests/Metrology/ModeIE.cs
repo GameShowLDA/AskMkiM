@@ -108,7 +108,8 @@ namespace Ask.Engine.Tests.Metrology
         MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
         double result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(measurementRange, userMessageService: protocolUI);
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled() && result != 9.8999999999999969E+46)
+        bool isOverload = MeasurementValueFormatter.IsOverloadValue(result);
+        if (!ExecutionConfig.GetIsIdleModeEnabled() && !isOverload)
         {
           result -= intrinsicValue;
         }
@@ -116,7 +117,7 @@ namespace Ask.Engine.Tests.Metrology
         var err = result - param;
         Measurements.Add(err);
 
-        if (result != 9.8999999999999969E+46)
+        if (!isOverload)
         {
           if (result < LowerBound || result > UpperBound)
           {

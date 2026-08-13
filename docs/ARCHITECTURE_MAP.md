@@ -1207,7 +1207,11 @@ executor/metrology
 - `MultimeterResponseProcessor.CheckInitialization` проверяет идентификационный ответ;
 - `CheckMode` через `ModeResponseChecker` проверяет ответы `FUNCTION?`/профильного `GetMode`;
 - `TryParseMeasurement` через `MeasurementResponseChecker` разбирает знак, точку/запятую,
-  экспоненту и допустимый текстовый суффикс;
+  экспоненту и допустимый текстовый суффикс; SCPI-маркер `9.9E+37` и текстовые ответы
+  `OL`/`OVL`/`OVLD`/`OVLOAD`/`OVERLOAD` возвращаются как `MeasurementState.Overload`
+  с единым совместимым значением `double.PositiveInfinity`; проверки диапазонов считают
+  неожиданную перегрузку браком даже при отсутствующей верхней границе, а UI/протоколы
+  форматируют состояние строго строкой `Overload`;
 - `TryCheckContinuity` интерпретирует измерение и SCPI-значение перегрузки `9.9E+37`;
 - `CheckNoInstrumentError` через `InstrumentErrorResponseChecker` разбирает код и текст
   ответа `SYSTEM:ERROR?`.

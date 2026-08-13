@@ -70,4 +70,42 @@ public class MeasurementResultEvaluatorTests
       ExecutionConfig.SetIdleMode(originalIdleMode);
     }
   }
+
+  [Fact]
+  public void Evaluate_WithoutUpperBound_RejectsUnexpectedOverload()
+  {
+    var originalIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
+    try
+    {
+      ExecutionConfig.SetIdleMode(false);
+      var range = new MeasurementRange(double.PositiveInfinity, 100, -1);
+
+      var result = MeasurementResultEvaluator.Evaluate(range);
+
+      Assert.False(result.IsSuccessful);
+    }
+    finally
+    {
+      ExecutionConfig.SetIdleMode(originalIdleMode);
+    }
+  }
+
+  [Fact]
+  public void Evaluate_ExpectedOverload_AcceptsOverload()
+  {
+    var originalIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
+    try
+    {
+      ExecutionConfig.SetIdleMode(false);
+      var range = new MeasurementRange(double.PositiveInfinity, 100, -1);
+
+      var result = MeasurementResultEvaluator.Evaluate(range, isOverloadExpected: true);
+
+      Assert.True(result.IsSuccessful);
+    }
+    finally
+    {
+      ExecutionConfig.SetIdleMode(originalIdleMode);
+    }
+  }
 }

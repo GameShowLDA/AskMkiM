@@ -30,11 +30,12 @@ internal static class MeasurementResultEvaluator
         : random.NextDouble();
     }
 
+    bool isOverload = MeasurementValueFormatter.IsOverloadValue(value);
     bool isSuccessful = isOverloadExpected
-      ? MeasurementValueFormatter.IsOverloadValue(value)
-      : measurementRange.UpperBound != -1
+      ? isOverload
+      : !isOverload && measurementRange.UpperBound != -1
         ? value >= measurementRange.LowerBound && value <= measurementRange.UpperBound
-        : value >= measurementRange.LowerBound;
+        : !isOverload && value >= measurementRange.LowerBound;
 
     return (isSuccessful, value);
   }
