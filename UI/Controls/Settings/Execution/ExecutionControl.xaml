@@ -22,6 +22,8 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_MeasurementErrorSimulation_Description" Key="settings.execution.measurementErrorSimulation.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_HardwareErrorSimulation_Title" Key="settings.execution.hardwareErrorSimulation.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_HardwareErrorSimulation_Description" Key="settings.execution.hardwareErrorSimulation.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_DisablePowerCheck_Title" Key="settings.execution.disablePowerCheck.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_DisablePowerCheck_Description" Key="settings.execution.disablePowerCheck.description" />
     </UserControl.Resources>
 
     <Border 
@@ -137,6 +139,17 @@
                     VerticalAlignment="Top"
                     x:Name="CompatibilityModeCheckBox"
                  />
+                </WrapPanel>
+
+                <WrapPanel x:Name="RootSettingsGroup"
+                           Orientation="Horizontal"
+                           Visibility="Collapsed">
+                    <SharedComponents:SettingsCard
+                        Title="{Binding Source={StaticResource Settings_Execution_DisablePowerCheck_Title}, Path=Value}"
+                        Description="{Binding Source={StaticResource Settings_Execution_DisablePowerCheck_Description}, Path=Value}"
+                        Margin="10,10"
+                        VerticalAlignment="Top"
+                        x:Name="DisablePowerCheck" />
                 </WrapPanel>
 
                 <WrapPanel x:Name="ErrorSimulationGroup"

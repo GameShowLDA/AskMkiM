@@ -497,10 +497,13 @@ equipment preparation, протокол, stop/finalize и аварийный `К
 ```text
 RunControl.Start(models)
 → ProtocolUI.StartAsync()
+  → рабочий режим + `ActionSettings.CheckPower`: проверка `SystemStateManager.IsActivePower`
+    → питание отсутствует: сообщение об ошибке, кнопка запуска восстанавливается, выполнение не создаётся
+    → Idle, специальный запуск с `CheckPower == false` или root-настройка
+      `ExecutionConfig.DisablePowerCheck`: проверка пропускается
 → ActionExecutor.StartAsync(ActionSettings)
   → ExecutionRunGuard.TryAcquire
   → clear protocol/errors and reset StepControlManager
-  → real mode only: power check
   → ExecutionSystemResetService.ResetAsync clears global execution state
   → ActionSettings.PreActionDelegate (if any)
   → Task.Run(ActionSettings.StartDelegate)
@@ -831,6 +834,9 @@ menu command
   → PerformMeasurement override
   → FinalizeMeasurement/result protocol
 ```
+
+Метрология, программы контроля, системный и модульный самоконтроль используют стандартное
+`ActionSettings.CheckPower == true`; в исполнителях самоконтроля отдельной проверки или обхода нет.
 
 Для сопротивления в метрологических режимах ПР и КС ветка `PerformMeasurement`
 имеет общий обязательный этап компенсации:
