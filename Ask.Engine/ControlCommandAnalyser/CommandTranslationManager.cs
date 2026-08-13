@@ -630,7 +630,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         model.SourceLines = new List<string> { newSourseLines.ToString() };
         if (!string.IsNullOrEmpty(pointsLine.ToString()) && !string.IsNullOrWhiteSpace(pointsLine.ToString()))
         {
-          model.SourceLines.Add($"\t{pointsLine.ToString()}");
+          model.SourceLines.Add($"{pointsLine.ToString()}");
         }
         if (!string.IsNullOrEmpty(commentsLine.ToString()) && !string.IsNullOrWhiteSpace(commentsLine.ToString()))
         {
@@ -673,8 +673,14 @@ namespace Ask.Engine.ControlCommandAnalyser
         return string.Empty;
       }
 
-      return Regex.Replace(points.Trim(), @"(?<!^)\*", Environment.NewLine + "*");
+      var formatted = Regex.Replace(
+        points.Trim(),
+        @"(?<!^)\*",
+        Environment.NewLine + "*");
+
+      return "\t" + formatted.Replace(Environment.NewLine, Environment.NewLine + "\t");
     }
+
 
     private static IEnumerable<string> NormalizeUnknownSourceLines(IEnumerable<string>? sourceLines)
     {
