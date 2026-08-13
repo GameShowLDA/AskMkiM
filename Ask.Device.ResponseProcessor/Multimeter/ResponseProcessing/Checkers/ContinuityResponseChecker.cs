@@ -8,8 +8,6 @@ internal static class ContinuityResponseChecker
   /// <summary>
   /// Значение перегрузки, возвращаемое прибором для разомкнутой цепи.
   /// </summary>
-  private const double OpenCircuitValue = 9.9E+37;
-
   /// <summary>
   /// Проверяет соответствие фактического состояния цепи ожидаемому.
   /// </summary>
@@ -28,7 +26,7 @@ internal static class ContinuityResponseChecker
       return false;
     }
 
-    bool actualClosed = measurement!.Value < OpenCircuitValue;
+    bool actualClosed = measurement!.State != ResponseModels.MeasurementState.Overload;
     matchesExpected = actualClosed == expectedClosed;
     return true;
   }

@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Emulator;
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Helpers;
@@ -282,6 +283,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// </returns>
     static private bool IsWithinRange(double value, double rangeFrom, double rangeTo)
     {
+      if (MeasurementValueFormatter.IsOverloadValue(value))
+      {
+        return false;
+      }
+
       bool isLowerValid = rangeFrom == -1 || value >= rangeFrom;
       bool isUpperValid = rangeTo == -1 || value <= rangeTo;
 
@@ -336,6 +342,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       if (MultimeterResponseProcessor.TryParseMeasurement(response, out var measurement))
       {
+        if (measurement!.State == Ask.Device.ResponseProcessor.Multimeter.ResponseModels.MeasurementState.Overload)
+        {
+          return double.PositiveInfinity;
+        }
+
         if (profile.Unit is CapacitanceUnit)
         {
           return MeasurementAdapterHelper.Round(measurement!.Value * 1e9);

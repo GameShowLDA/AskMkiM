@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using System.Globalization;
 
 namespace Ask.Device.Runtime.Function.B7783
@@ -207,6 +208,11 @@ namespace Ask.Device.Runtime.Function.B7783
 
     private static bool IsWithinRange(double value, double rangeFrom, double rangeTo)
     {
+      if (MeasurementValueFormatter.IsOverloadValue(value))
+      {
+        return false;
+      }
+
       bool isLowerValid = rangeFrom == -1 || value >= rangeFrom;
       bool isUpperValid = rangeTo == -1 || value <= rangeTo;
 

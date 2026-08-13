@@ -14,4 +14,9 @@ public sealed class MeasurementResponse
   /// Числовое значение ответа.
   /// </summary>
   public double Value { get; init; }
+
+  /// <summary>
+  /// Состояние результата измерения.
+  /// </summary>
+  public MeasurementState State { get; init; }
 }

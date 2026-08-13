@@ -224,17 +224,7 @@ internal static class MeasurementMessageBuilder
       return $"{prefix}ПРОБОЙ";
     }
 
-    if (MeasurementValueFormatter.IsOverloadValue(measurementRange.TargetValue) &&
-        measurementTypeCommand is MeasurementTypeCommand.EHT or
-          MeasurementTypeCommand.KC or
-          MeasurementTypeCommand.PR or
-          MeasurementTypeCommand.NE)
-    {
-      return $"{prefix}Overload";
-    }
-
-    if (MeasurementValueFormatter.IsOverloadValue(measurementRange.TargetValue, 9.899999999999999E+46) &&
-        measurementTypeCommand == MeasurementTypeCommand.IE)
+    if (MeasurementValueFormatter.IsOverloadValue(measurementRange.TargetValue))
     {
       return $"{prefix}Overload";
     }

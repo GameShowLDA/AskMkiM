@@ -93,6 +93,18 @@ public sealed class MeasurementMessagesTests
   }
 
   [Fact]
+  public void BuildMeasurementResultMessage_CanonicalOverload_ContainsOnlyOverloadState()
+  {
+    var message = MeasurementMessages.BuildMeasurementResultMessage(
+      MeasurementTypeCommand.IE,
+      new MeasurementRange(double.PositiveInfinity, 10, 20),
+      "A1,B2");
+
+    Assert.Contains("Overload", message.Message);
+    Assert.DoesNotContain("Infinity", message.Message);
+  }
+
+  [Fact]
   public void BuildMeasurementResultMessage_UpperLimit_FormatsUnitBeforeLimit()
   {
     var message = MeasurementMessages.BuildMeasurementResultMessage(
