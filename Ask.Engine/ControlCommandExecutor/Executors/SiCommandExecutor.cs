@@ -148,7 +148,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, 60000);
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, -1);
 
         var measurement = Stopwatch.StartNew();
         var answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
@@ -185,7 +185,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        MeasurementRange measurementRange = new MeasurementRange(value, value, 60000);
+        MeasurementRange measurementRange = new MeasurementRange(value, value, -1);
 
         var measurement = Stopwatch.StartNew();
         answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);

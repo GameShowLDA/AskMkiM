@@ -852,6 +852,12 @@ ModePr.PrMeasurement.PerformMeasurement / ModeKC.KcMeasurement.PerformMeasuremen
 (`PrCommandExecutor`, `KsCommandExecutor`) и их метрологических режимов. Ограничение
 выполняется до `MeasurementResultEvaluator`/ручной проверки диапазона и публикации.
 
+Для команды СИ обе измерительные ветки `SiCommandExecutor`
+(`NodeFullPerformMeasurementAsync` и `NodeAccumulationPerformMeasurementAsync`)
+передают в `MeasurementResultEvaluator` диапазон `[rangeFrom, -1]`. Значение `-1`
+означает отсутствие верхней границы: проверяется только `value >= rangeFrom`.
+При заданной верхней границе evaluator проверяет обе границы включительно.
+
 Attributed modes: КС, ИЕ, СИ, ПР, ПИ(DCW/ACW), КН(DCW/ACW), ЭТ.
 Other runtime branches:
 
