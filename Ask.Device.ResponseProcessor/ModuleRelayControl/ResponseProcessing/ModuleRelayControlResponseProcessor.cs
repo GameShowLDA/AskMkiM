@@ -130,12 +130,15 @@ public static class ModuleRelayControlResponseProcessor
       response,
       module,
       $"4.{busType}.{busNumber}.{(connect ? 1 : 2)}");
-    await DeviceMessages.PublishOperationResultAsync(
-      module,
-      $"{(connect ? "Подключение" : "Отключение")} шины [{bus}]",
-      result,
-      1,
-      outputService);
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await DeviceMessages.PublishOperationResultAsync(
+        module,
+        $"{(connect ? "Подключение" : "Отключение")} шины [{bus}]",
+        result,
+        1,
+        outputService);
+    }
     return result;
   }
 
@@ -183,11 +186,11 @@ public static class ModuleRelayControlResponseProcessor
     bool result = CheckCommandResponse(response, module, $"11.{firstPoint}.{lastPoint}.{action}");
     string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шине [{bus}]";
     await DeviceMessages.PublishOperationResultAsync(
-      module,
-      $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
-      result,
-      1,
-      outputService);
+    module,
+    $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
+    result,
+    1,
+    outputService);
     return result;
   }
 
@@ -199,12 +202,16 @@ public static class ModuleRelayControlResponseProcessor
     IUserInteractionService? outputService = null)
   {
     bool result = CheckCommandResponse(response, module, $"81.{pointNumber}.{(int)bus}.0");
-    await DeviceMessages.PublishOperationResultAsync(
+    
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await DeviceMessages.PublishOperationResultAsync(
       module,
       $"Переподключение точки {pointNumber} к шине [{bus}]",
       result,
       1,
       outputService);
+    }
     return result;
   }
 
