@@ -45,7 +45,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
         foreach (var chains in groups.ChainModels)
         {
-          bool errorPoint = false;
+          bool basePointConnectionError = false;
           var str = string.Empty;
 
           foreach (var points in chains.PointModels)
@@ -80,7 +80,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
             string measurementTarget = $"{_basePoint.Mnemonic}{machineAddress}";
             var errorMessageModels = MeasurementMessages.BuildPointConnectionError(measurementTarget);
-            errorPoint = true;
+            basePointConnectionError = true;
 
             await MeasurementMessages.PublishPointConnectionErrorAsync(CheckType.ControlProgram,
               measurementTarget,
@@ -126,6 +126,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           {
             context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
             var point = chains.PointModels[i];
+            bool currentPointError = false;
             await ConnectToBusAAndBAsync(context.MessageService, point);
 
             var Rt2 = context.ValidatePointConnections
@@ -151,7 +152,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               var errorMessageModels = MeasurementMessages.BuildPointConnectionError(
                 measurementTarget,
                 connectionError);
-              errorPoint = true;
+              currentPointError = true;
 
               await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                 MeasurementTypeCommand.KC,
@@ -226,7 +227,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            if (!errorPoint)
+            if (CanMeasurePair(basePointConnectionError, currentPointError))
             {
               Rt = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
 
@@ -238,7 +239,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   false,
                   $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
                   indentLevel: 1);
-                errorPoint = true;
+                currentPointError = true;
 
                 await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
@@ -273,17 +274,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             }
 
             await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
-            if (!errorPoint)
+            if (CanMeasurePair(basePointConnectionError, currentPointError))
             {
-              double Rx = 0;
-              if (!errorPoint)
-              {
-                Rx = Rt - ((Rt1 + Rt2) / 2);
-              }
-              else
-              {
-                Rx = Rt;
-              }
+              double Rx = Rt - ((Rt1 + Rt2) / 2);
 
               double result = 0;
 
@@ -363,6 +356,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       return messages;
     }
+
+    internal static bool CanMeasurePair(bool basePointConnectionError, bool currentPointError)
+      => !basePointConnectionError && !currentPointError;
 
     static private async Task ConnectToBusAAndBAsync(IUserInteractionService userMessageService, PointModel pointModel)
     {
