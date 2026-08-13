@@ -937,7 +937,10 @@ Current structured traces also contain `#ASKM_MESSAGE_V2#` snapshots represented
 `ExecutionProtocolMessageSnapshot`. On open, `FileOpenService` and `MainWindow/Services/FileService`
 call `ExecutionProtocolDiagnosticFormatter.TryRestoreMessages`; successful restoration is rendered
 by `SavedExecutionProtocolUI` through the production `ProtocolListBoxUI` templates and grouping.
-Legacy traces without V2 snapshots retain the text-editor/XSHD fallback.
+Legacy traces without V2 snapshots are converted line-by-line by
+`ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
+`ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
+lines are restored as `Info` while preserving their complete text and blank-line layout.
 
 При открытии `.asktrace` `ExecutionProtocolDiagnosticFormatter.PrepareForDisplay`
 скрывает служебные записи для обычных ролей и раскрывает источник вызова и атрибуты

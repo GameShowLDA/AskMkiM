@@ -167,6 +167,28 @@ public static class ExecutionProtocolDiagnosticFormatter
     return restored.Count > 0;
   }
 
+  /// <summary>
+  /// Преобразует текст старого протокола в модели для унифицированного просмотра.
+  /// </summary>
+  public static IReadOnlyList<ShowMessageModel> RestoreLegacyMessages(
+    string text,
+    bool includeDiagnostics)
+  {
+    ArgumentNullException.ThrowIfNull(text);
+    string displayText = PrepareForDisplay(text, includeDiagnostics);
+
+    return displayText
+      .Replace("\r\n", "\n")
+      .Replace('\r', '\n')
+      .Split('\n')
+      .Select(line => new ShowMessageModel
+      {
+        Header = line,
+        Status = ShowMessageModel.MessageType.Info
+      })
+      .ToList();
+  }
+
   private static string AddStatusMarkers(string line, DiagnosticEntry entry)
   {
     string marker = entry.Status switch

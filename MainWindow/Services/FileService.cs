@@ -249,12 +249,12 @@ namespace MainWindowProgram.Services
         }
         else
         {
-          string executionProtocolText = File.Exists(executionProtocolPath)
-            ? ExecutionProtocolDiagnosticFormatter.PrepareForDisplay(
+          var legacyMessages = File.Exists(executionProtocolPath)
+            ? ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
               rawExecutionProtocol,
               DebugAccessConfig.IsDebugEnabled)
-            : $"Связанный протокол выполнения не найден:\n{executionProtocolPath}";
-          viewer = new SavedProtocolPairUI(executionProtocolText, resultProtocolText);
+            : new[] { new ShowMessageModel($"Связанный протокол выполнения не найден:\n{executionProtocolPath}") };
+          viewer = new SavedProtocolPairUI(legacyMessages, resultProtocolText);
         }
         _multiWindow.WorkspaceService.AddControl(
           Path.GetFileName(fullResultPath),

@@ -53,12 +53,18 @@ namespace UI.Services.FileManager
         {
           var (rawContent, encoding) = ReadRawFileContent(path);
           var fileType = DetermineFileType(fileName);
-          if (fileType == FileType.Protocol
-              && ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
-                rawContent,
-                DebugAccessConfig.IsDebugEnabled,
-                out var messages))
+          if (fileType == FileType.Protocol)
           {
+            if (!ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
+                  rawContent,
+                  DebugAccessConfig.IsDebugEnabled,
+                  out var messages))
+            {
+              messages = ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
+                rawContent,
+                DebugAccessConfig.IsDebugEnabled);
+            }
+
             new UI.Components.MultiEditorMethods.ControlManager(_fileManager.EditorWorkspaceModel).AddControl(
               fileName,
               new SavedExecutionProtocolUI(messages),
@@ -67,9 +73,7 @@ namespace UI.Services.FileManager
             return;
           }
 
-          string fileContent = ProtocolFileExtensions.IsTrace(Path.GetExtension(path))
-            ? ExecutionProtocolDiagnosticFormatter.PrepareForDisplay(rawContent, DebugAccessConfig.IsDebugEnabled)
-            : rawContent;
+          string fileContent = rawContent;
           var container = EnsureTextEditorContainer();
 
           if (TryActivateAlreadyOpenedFile(container, fileName, path, fileType))

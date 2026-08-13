@@ -117,4 +117,17 @@ public class ExecutionProtocolLineFormatterTests
     Assert.Contains("тип=Info", root[0].Debug);
     Assert.Contains("оборудование", root[0].Debug);
   }
+
+  [Fact]
+  public void LegacyStorage_RestoresEveryTextLineIncludingEmptyLines()
+  {
+    const string legacy = "Первая строка\n\n  Вторая строка | 00:01.000";
+
+    var messages = ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(legacy, false);
+
+    Assert.Equal(3, messages.Count);
+    Assert.Equal("Первая строка", messages[0].Header);
+    Assert.Equal(string.Empty, messages[1].Header);
+    Assert.Equal("  Вторая строка | 00:01.000", messages[2].Header);
+  }
 }
