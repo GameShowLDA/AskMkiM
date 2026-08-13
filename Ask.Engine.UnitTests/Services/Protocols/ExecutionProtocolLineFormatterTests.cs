@@ -130,4 +130,28 @@ public class ExecutionProtocolLineFormatterTests
     Assert.Equal(string.Empty, messages[1].Header);
     Assert.Equal("  Вторая строка | 00:01.000", messages[2].Header);
   }
+
+  [Fact]
+  public void CompressedStorage_RestoresMessagesAndIsSmallerThanPerMessageV2Storage()
+  {
+    var messages = Enumerable.Range(0, 500)
+      .Select(index => new ShowMessageModel
+      {
+        Header = "Модуль МКР-350(1.6)",
+        Message = $"Подключение точки {index % 96 + 1} к шине [A]: [НОРМА]",
+        Time = $"00:00.{index:000}",
+        DiagnosticSource = "EquipmentMessagePublisher.cs → PublishAsync (строка 36)",
+        IsDeviceMessage = true,
+        IndentLevel = 1
+      })
+      .ToList();
+
+    string v2 = string.Join("\n", messages.SelectMany(ExecutionProtocolDiagnosticFormatter.FormatForStorage));
+    string v3 = string.Join("\n", ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, null));
+
+    Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(v3, false, out var restored));
+    Assert.Equal(messages.Count, restored.Count);
+    Assert.Equal(messages[123].Message, restored[123].Message);
+    Assert.True(v3.Length < v2.Length / 2, $"V2={v2.Length}, V3={v3.Length}");
+  }
 }

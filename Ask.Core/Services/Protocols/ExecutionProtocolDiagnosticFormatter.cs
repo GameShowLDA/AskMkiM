@@ -1,4 +1,6 @@
 using Ask.Core.Shared.DTO.Protocol;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 
@@ -11,6 +13,7 @@ public static class ExecutionProtocolDiagnosticFormatter
 {
   private const string Marker = "#ASKM_DEBUG_V1#";
   private const string MessageMarker = "#ASKM_MESSAGE_V2#";
+  private const string CompressedProtocolMarker = "#ASKM_PROTOCOL_V3_BR#";
   private const string EnvironmentMarker = "#ASKM_ENV_V1#";
   private const string StatusMarker = "\u2063";
   private const string RootDebugMarker = "\u2063\u2063";
@@ -70,6 +73,34 @@ public static class ExecutionProtocolDiagnosticFormatter
   }
 
   /// <summary>
+  /// Формирует видимые строки и единый сжатый блок структурированных данных протокола.
+  /// </summary>
+  public static IEnumerable<string> FormatProtocolForStorage(
+    IEnumerable<ShowMessageModel> messages,
+    ExecutionProtocolEnvironmentSnapshot? environment)
+  {
+    ArgumentNullException.ThrowIfNull(messages);
+    var messageList = messages.ToList();
+
+    foreach (var message in messageList)
+    {
+      string line = ExecutionProtocolLineFormatter.Format(message);
+      if (!string.IsNullOrWhiteSpace(line))
+        yield return line;
+    }
+
+    var payload = new CompressedProtocolPayload(
+      environment,
+      messageList.Select(ExecutionProtocolMessageSnapshot.FromModel).ToList());
+    byte[] json = JsonSerializer.SerializeToUtf8Bytes(payload);
+    using var output = new MemoryStream();
+    using (var brotli = new BrotliStream(output, CompressionLevel.SmallestSize, leaveOpen: true))
+      brotli.Write(json);
+
+    yield return CompressedProtocolMarker + Convert.ToBase64String(output.ToArray());
+  }
+
+  /// <summary>
   /// Удаляет служебные записи либо раскрывает их в читаемом виде для root.
   /// </summary>
   public static string PrepareForDisplay(string text, bool includeDiagnostics)
@@ -91,6 +122,9 @@ public static class ExecutionProtocolDiagnosticFormatter
       }
 
       if (line.StartsWith(MessageMarker, StringComparison.Ordinal))
+        continue;
+
+      if (line.StartsWith(CompressedProtocolMarker, StringComparison.Ordinal))
         continue;
 
       if (!line.StartsWith(Marker, StringComparison.Ordinal))
@@ -124,6 +158,9 @@ public static class ExecutionProtocolDiagnosticFormatter
     out IReadOnlyList<ShowMessageModel> messages)
   {
     ArgumentNullException.ThrowIfNull(text);
+    if (TryRestoreCompressedProtocol(text, includeDiagnostics, out messages))
+      return true;
+
     var restored = new List<ShowMessageModel>();
 
     foreach (string line in text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
@@ -165,6 +202,55 @@ public static class ExecutionProtocolDiagnosticFormatter
 
     messages = restored;
     return restored.Count > 0;
+  }
+
+  private static bool TryRestoreCompressedProtocol(
+    string text,
+    bool includeDiagnostics,
+    out IReadOnlyList<ShowMessageModel> messages)
+  {
+    string? encoded = text
+      .Replace("\r\n", "\n")
+      .Replace('\r', '\n')
+      .Split('\n')
+      .FirstOrDefault(line => line.StartsWith(CompressedProtocolMarker, StringComparison.Ordinal));
+    if (encoded == null)
+    {
+      messages = Array.Empty<ShowMessageModel>();
+      return false;
+    }
+
+    try
+    {
+      byte[] compressed = Convert.FromBase64String(encoded[CompressedProtocolMarker.Length..]);
+      using var input = new MemoryStream(compressed);
+      using var brotli = new BrotliStream(input, CompressionMode.Decompress);
+      var payload = JsonSerializer.Deserialize<CompressedProtocolPayload>(brotli);
+      if (payload == null || payload.Messages.Count == 0)
+      {
+        messages = Array.Empty<ShowMessageModel>();
+        return false;
+      }
+
+      var restored = payload.Messages.Select(snapshot => snapshot.ToModel(includeDiagnostics)).ToList();
+      if (includeDiagnostics && payload.Environment != null)
+      {
+        restored.Insert(0, new ShowMessageModel
+        {
+          Debug = string.Join(Environment.NewLine, FormatEnvironment(payload.Environment)),
+          HeaderColor = System.Windows.Media.Colors.Transparent,
+          MessageColor = System.Windows.Media.Colors.Transparent
+        });
+      }
+
+      messages = restored;
+      return true;
+    }
+    catch (Exception ex) when (ex is FormatException or InvalidDataException or JsonException)
+    {
+      messages = Array.Empty<ShowMessageModel>();
+      return false;
+    }
   }
 
   /// <summary>
@@ -323,4 +409,8 @@ public static class ExecutionProtocolDiagnosticFormatter
     bool UseSuccessColorForEntireMessage,
     int? MessageStart,
     int? TimeStart);
+
+  private sealed record CompressedProtocolPayload(
+    ExecutionProtocolEnvironmentSnapshot? Environment,
+    IReadOnlyList<ExecutionProtocolMessageSnapshot> Messages);
 }

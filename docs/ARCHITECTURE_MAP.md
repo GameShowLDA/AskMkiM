@@ -942,6 +942,12 @@ Legacy traces without V2 snapshots are converted line-by-line by
 `ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
 lines are restored as `Info` while preserving their complete text and blank-line layout.
 
+New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
+`ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
+lines plus one Base64-encoded Brotli block containing the environment and the complete snapshot
+array. Readers remain backward-compatible with V2 per-message snapshots, V1 diagnostics and
+pre-structured text traces.
+
 При открытии `.asktrace` `ExecutionProtocolDiagnosticFormatter.PrepareForDisplay`
 скрывает служебные записи для обычных ролей и раскрывает источник вызова и атрибуты
 сообщения для `Root`. Старые текстовые протоколы открываются без преобразования.

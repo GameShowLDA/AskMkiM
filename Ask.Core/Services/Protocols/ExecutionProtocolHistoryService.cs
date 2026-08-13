@@ -29,13 +29,7 @@ public static class ExecutionProtocolHistoryService
     IEnumerable<ShowMessageModel> messages,
     ExecutionProtocolEnvironmentSnapshot? environment = null)
   {
-    var messageLines = messages
-      .SelectMany(ExecutionProtocolDiagnosticFormatter.FormatForStorage)
-      .Where(static line => !string.IsNullOrWhiteSpace(line));
-    var lines = environment == null
-      ? messageLines
-      : new[] { ExecutionProtocolDiagnosticFormatter.FormatEnvironmentForStorage(environment) }
-        .Concat(messageLines);
+    var lines = ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, environment);
 
     return await SaveLinesAsync(protocolName, lines, ProtocolFileExtensions.Trace);
   }
