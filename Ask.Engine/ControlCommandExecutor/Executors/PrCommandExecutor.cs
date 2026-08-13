@@ -184,7 +184,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer;
 
-        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        var result = MeasurementResultEvaluator.EvaluateDisconnection(answer, lowValue);
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
@@ -222,7 +222,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         answer = ResistanceCompensation.SubtractSwitchResistance(answer, 0, subtract: false);
 
         measurementRange.TargetValue = answer;
-        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        var result = MeasurementResultEvaluator.EvaluateDisconnection(answer, lowValue);
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),

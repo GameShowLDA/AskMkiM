@@ -659,6 +659,11 @@ executor throws
   сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
   точку той же цепи); возвращает `AlgorithmExecutionResult`, а создание и публикацию измерений,
   ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
+- измерительные делегаты проверки разобщения ПР используют
+  `MeasurementResultEvaluator.EvaluateDisconnection`: разрыв подтверждается только при
+  `value > DisconnectedLowerLimitResistance`; состояние `Overload` также подтверждает разрыв,
+  а равенство порогу считается браком. Обычная проверка соединения ПР продолжает использовать
+  диапазонный `MeasurementResultEvaluator.Evaluate`;
 - `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
   `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
 - `EhtCommandExecutor`, `IeCommandExecutor`, `KsCommandExecutor`, `NeCommandExecutor`,
