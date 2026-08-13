@@ -832,6 +832,26 @@ menu command
   → FinalizeMeasurement/result protocol
 ```
 
+Для сопротивления в метрологических режимах ПР и КС ветка `PerformMeasurement`
+имеет общий обязательный этап компенсации:
+
+```text
+ModePr.PrMeasurement.PerformMeasurement / ModeKC.KcMeasurement.PerformMeasurement
+→ IMultimeter.ContinuityManager.CheckContinuityAsync /
+  IMultimeter.ResistanceManager.MeasureResistanceAsync
+→ ResistanceCompensation.SubtractSwitchResistance(Rизм, Rкомм,
+  subtract: !ExecutionConfig.GetIsIdleModeEnabled())
+  → Math.Max(0, Rизм - Rкомм) в Real или Math.Max(0, Rизм) в Idle
+→ расчёт метрологической погрешности от ограниченного результата
+→ проверка результата по LowerBound/UpperBound
+→ MeasurementMessages.PublishResultAsync / PublishMetrologyMeasurementErrorAsync
+→ UI и протокол
+```
+
+Та же функция компенсации вызывается только из production-алгоритмов команд ПР/КС
+(`PrCommandExecutor`, `KsCommandExecutor`) и их метрологических режимов. Ограничение
+выполняется до `MeasurementResultEvaluator`/ручной проверки диапазона и публикации.
+
 Attributed modes: КС, ИЕ, СИ, ПР, ПИ(DCW/ACW), КН(DCW/ACW), ЭТ.
 Other runtime branches:
 
@@ -846,6 +866,7 @@ Other runtime branches:
 - `Ask.UI/Controls/ExecutorControls/MetrologyControls/`
 - `Ask.UI/Controls/ExecutorControls/TestsControls/`
 - `Ask.Engine/Tests/Metrology/`
+- `Ask.Engine/ControlCommandExecutor/BaseStrategies/Data/ResistanceCompensation.cs`
 - `Ask.Engine/Tests/RelaySwitchingModule/`
 - `Ask.Engine/Tests/SelfControl/`
 
