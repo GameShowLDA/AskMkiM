@@ -223,12 +223,17 @@ public static class EquipmentMessages
       connect,
       isSuccessful);
 
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
     return EquipmentMessagePublisher.PublishAsync(
-      message,
-      outputService,
-      callerName,
-      callerFile,
-      callerLine);
+    message,
+    outputService,
+    callerName,
+    callerFile,
+    callerLine);
   }
 
   /// <summary>
@@ -241,6 +246,6 @@ public static class EquipmentMessages
   /// </returns>
   private static bool ShouldPublish(bool isSuccessful)
   {
-    return !isSuccessful || DeviceDisplayConfig.GetExecutionParametersVisibility();
+    return !isSuccessful || DeviceDisplayConfig.GetConnectionInfoVisibility();
   }
 }

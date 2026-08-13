@@ -12,6 +12,7 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -71,8 +72,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       ConnectedPointContext pointContext = new ConnectedPointContext();
       ConnectedPointChecker.PerformMeasurementAsync measure =
-        (value, messageService, cancellationToken, errorResistance) =>
-          DioideMeasure(value, messageService, cancellationToken, pointContext, errorResistance);
+        (value, messageService, cancellationToken, firstPoint, checkedPoint, errorResistance) =>
+          DioideMeasure(value, messageService, cancellationToken, pointContext, firstPoint, checkedPoint, errorResistance);
 
       pointContext.SchemeModel = command.Scheme;
       pointContext.CommandManager = context.CommandExecutionManager;
@@ -109,6 +110,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       IUserInteractionService messageService,
       CancellationToken cancellationToken,
       ConnectedPointContext pointContext,
+      PointModel firstPoint,
+      PointModel checkedPoint,
       double errorResistance = 0)
     {
       var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
@@ -143,6 +146,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var measurementResult = MeasurementResultEvaluator.Evaluate(
           measurementRange,
           pointContext.IsOverloadExpected);
+        var points = $"{pointContext.CurrentNeDirectionSign}{firstPoint}, {checkedPoint.ToString()}";
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.NE,
           new MeasurementRange(
@@ -150,6 +154,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             measurementRange.LowerBound,
             measurementRange.UpperBound),
           measurementResult.IsSuccessful,
+          points: points,
           outputService: messageService);
         return measurementResult;
       }, messageService);

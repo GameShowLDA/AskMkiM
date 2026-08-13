@@ -17,6 +17,10 @@ internal static class CommandMessageBuilder
   internal static ShowMessageModel BuildCheckBlockHeader(ControlCheckAlgorithm algorithm, bool inversion)
   {
     string header = algorithm.GetDescription();
+    if(string.Equals(header, ControlCheckAlgorithm.MessageRelativeToFirstPoint.GetDescription()))
+    {
+      header = string.Empty;
+    }
     if (inversion)
     {
       header += "(инверсия)";
@@ -133,7 +137,7 @@ internal static class CommandMessageBuilder
   }
 
   internal static ShowMessageModel BuildPointsConnectionMessage(int indentLevel)
-    => new("Подлючение точек") { IndentLevel = indentLevel };
+    => new("Подключение точек") { IndentLevel = indentLevel };
 
   internal static ShowMessageModel BuildBreakpointHitMessage(
     string commandName,

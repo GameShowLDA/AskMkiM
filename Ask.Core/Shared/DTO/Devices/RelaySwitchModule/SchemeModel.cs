@@ -148,6 +148,21 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
       AllPoint.PointModels.Add(pointModel);
     }
 
+    public PointModel GetGroupFistPoint(PointModel pointModel)
+    {
+      foreach (var group in GroupModels)
+      {
+        foreach (var chain in group.ChainModels)
+        {
+          if (chain.PointModels.Contains(pointModel))
+          {
+            return chain.PointModels.FirstOrDefault();
+          }
+        }
+      }
+      return null;
+    }
+
     public GroupModel GetPointsDisconnected()
     {
       var allChains = ChainDisconnectedPointsMap.Values.ToList();
