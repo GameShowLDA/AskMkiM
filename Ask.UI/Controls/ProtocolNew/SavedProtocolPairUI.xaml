@@ -9,9 +9,11 @@
             <ColumnDefinition Width="*" MinWidth="100"/>
         </Grid.ColumnDefinitions>
 
-        <TextEditorControl:TextEditorUI x:Name="ExecutionProtocolEditor"
-                                        Grid.Column="0"
-                                        IsReadOnly="True"/>
+        <Grid Grid.Column="0">
+            <TextEditorControl:TextEditorUI x:Name="ExecutionProtocolEditor"
+                                            IsReadOnly="True"/>
+            <ContentControl x:Name="StructuredExecutionProtocol" Visibility="Collapsed"/>
+        </Grid>
 
         <GridSplitter Grid.Column="1"
                       Width="5"

@@ -303,6 +303,10 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       LogInformation($"Завершение \"{actionSettings.Name}\"");
       var equipmentUsage = _session?.EquipmentUsage;
+      ProtocolSelfCheck.SetProtocolEnvironmentSnapshot(
+        ExecutionProtocolEnvironmentSnapshotFactory.Create(
+          actionSettings,
+          equipmentUsage?.GetUsedDevices() ?? []));
 
       await _finalizer.FinalizeAsync(
         actionSettings,

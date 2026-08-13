@@ -9,8 +9,22 @@
 	<Color name="Error" foreground="#f1301b" />
 	<Color name="Mnemonic" foreground="#90EE90" />
 	<Color name="CommandNumber" foreground="#00BFFF" />
+	<Color name="RootDebug" foreground="#8CF3F0F9" />
+	<Color name="StatusCommand" foreground="#E69138" />
+	<Color name="StatusCommandBlock" foreground="#5DADE2" />
+	<Color name="StatusInfo" foreground="#F3F0F9" />
+	<Color name="StatusSuccess" foreground="#2FA84F" />
+	<Color name="StatusError" foreground="#F1301B" />
+	<Color name="StatusTime" foreground="#9ACD32" />
 
 	<RuleSet ignoreCase="true">
+		<Rule color="RootDebug">⁣⁣[^⁣]*</Rule>
+		<Rule color="StatusCommand">⁣​[^⁣]*</Rule>
+		<Rule color="StatusCommandBlock">⁣‌[^⁣]*</Rule>
+		<Rule color="StatusSuccess">⁣‍[^⁣]*</Rule>
+		<Rule color="StatusError">⁣⁠[^⁣]*</Rule>
+		<Rule color="StatusInfo">⁣﻿[^⁣]*</Rule>
+		<Rule color="StatusTime">⁣⁢[^⁣]*</Rule>
 
 		<!-- первая строка может начинаться с BOM -->
 		<Rule color="ProtocolMain">^\uFEFF?\s*Протокол\s*\([^)]*режим[^)]*\)\s*от</Rule>

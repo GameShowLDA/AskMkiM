@@ -241,6 +241,31 @@ namespace Ask.UI.Components.ProtocolListBox
         () => (IReadOnlyList<ShowMessageModel>)_historyMessages.ToList());
     }
 
+    /// <summary>
+    /// Загружает сохранённые сообщения в представление протокола.
+    /// </summary>
+    public void LoadMessages(IEnumerable<ShowMessageModel> messages)
+    {
+      ArgumentNullException.ThrowIfNull(messages);
+
+      _historyMessages.Clear();
+      bool useSyntaxHighlighting = UserInterfaceConfig.GetSyntaxHighlighting();
+      bool useCommandBackgroundHighlighting = UserInterfaceConfig.GetCommandBodyBackgroundHighlighting();
+      bool useChainPointBackgroundHighlighting = UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting();
+
+      foreach (var message in messages)
+      {
+        ApplyThemeColors(
+          message,
+          useSyntaxHighlighting,
+          useCommandBackgroundHighlighting,
+          useChainPointBackgroundHighlighting);
+        _historyMessages.Add(message);
+      }
+
+      RestoreVisibleItems();
+    }
+
     private bool HandleZoomShortcuts(KeyEventArgs e)
     {
       if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)

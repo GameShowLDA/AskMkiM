@@ -1,6 +1,7 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -415,6 +416,11 @@ namespace Ask.UI.Controls.ProtocolNew
     public async Task SaveProtocolAsync(string name)
     {
       await _protocolStorage.SaveExecutionProtocolAsync(name, protocolTextBox.GetMessagesSnapshot());
+    }
+
+    public void SetProtocolEnvironmentSnapshot(ExecutionProtocolEnvironmentSnapshot snapshot)
+    {
+      _protocolStorage.SetEnvironmentSnapshot(snapshot);
     }
 
     /// <summary>

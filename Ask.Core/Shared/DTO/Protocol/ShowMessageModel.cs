@@ -83,6 +83,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     public string Debug { get; set; }
 
     /// <summary>
+    /// Источник записи, сохраняемый для последующего диагностического просмотра под root.
+    /// </summary>
+    public string? DiagnosticSource { get; set; }
+
+    /// <summary>
     /// Получает или задает цвет заголовка сообщения.
     /// </summary>
     public Color? HeaderColor { get; set; }
