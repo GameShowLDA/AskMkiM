@@ -110,6 +110,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.FastMeter;
       ConnectionInfo.IsConnected = false;
       ConnectedProfile.Port = 5025;
+      ConnectedProfile.InitialBeeperDisableCommands = ["SYST:BEEP:STAT OFF"];
 
       CapacitanceManager = new CapacitanceMeasurementBase(this);
       ConnectableManager = new Transport(this);

@@ -1233,7 +1233,24 @@ IMultimeter.ConnectableManager.InitializeAsync()
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
 → MultimeterResponseProcessor.CheckInitialization
+→ Transport.InitialDeviceSoundConfigurator.ApplyOnceAsync
+  → KeysightDevice / MultimeterB7783: `SYST:BEEP:STAT OFF`
+  → DeviceProtocolEmulator.QueryMultimeterAsync
+    → Real: TcpProtocol / UsbProtocol
+    → Idle: команда поглощается эмулятором без обращения к физическому прибору
 ```
+
+После первого успешного идентификационного обмена `Transport` вызывает
+`InitialDeviceSoundConfigurator` для конкретного runtime-экземпляра устройства. Для `GPT79904`
+тот же шаг выполняется из `Transport.ConnectAsync` и `Transport.InitializeAsync`, после чего через
+`BreakdownTesterCommandProtocol` однократно отправляются `SYST:BUZZ:PSOUND OFF` и
+`SYST:BUZZ:FSOUND OFF`. Профили `KeysightDevice` и `MultimeterB7783` задают
+`SYST:BEEP:STAT OFF`; остальные устройства наследуют пустой список
+`ConnectedBaseProfile.InitialBeeperDisableCommands`, поэтому дополнительных запросов не получают.
+`InitialDeviceSoundConfigurator` защищён `SemaphoreSlim` от параллельной первичной инициализации и
+фиксирует одну попытку на время жизни экземпляра, не сбрасывая её при измерении, reset или reconnect.
+Ошибка неподдерживаемой команды записывается как warning и не превращает успешную инициализацию в
+ошибку, а повторно команда не отправляется.
 
 `DeviceProtocolEmulator.QueryMultimeterAsync` записывает каждую операцию двумя строками единого формата:
 `Команда мультиметра: "..."` и `Ответ мультиметра на "...": "..."`.
@@ -1949,6 +1966,7 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentUsageTracker` | async execution context | Ask.Core | execution-scoped registration of actually addressed devices | [Execution Engine](#addressed-reset-of-test-equipment) |
 | `EquipmentUsageSession` | execution state | Ask.Core | ordered unique snapshot of equipment used by one run | [Execution Engine](#addressed-reset-of-test-equipment) |
 | `EquipmentTrackingConnectable` | decorator | Ask.Device.Application | registers device usage before connection lifecycle operations | [Execution Engine](#addressed-reset-of-test-equipment) |
+| `InitialDeviceSoundConfigurator` | internal lifecycle helper | Ask.Device.Runtime | однократно отключает звуковую сигнализацию GPT/мультиметра после первой успешной инициализации и сохраняет Real/Idle-маршрутизацию | [Equipment](#equipment-architecture) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
 | `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
