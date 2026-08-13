@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -35,6 +36,23 @@ namespace Ask.UI.Components.ProtocolListBox
     /// Сообщение, отображаемое в строке.
     /// </summary>
     public ShowMessageModel Message { get; }
+
+    /// <summary>
+    /// Текст строки для посимвольного выделения и копирования.
+    /// </summary>
+    public string SelectableText
+    {
+      get
+      {
+        string line = ExecutionProtocolLineFormatter.Format(Message);
+        if (string.IsNullOrEmpty(Message.Debug))
+          return line;
+
+        return string.IsNullOrEmpty(line)
+          ? Message.Debug.TrimStart('\r', '\n')
+          : line + Message.Debug;
+      }
+    }
 
     /// <summary>
     /// Признак заголовка главной команды.

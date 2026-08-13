@@ -126,8 +126,14 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetIsPowerCheckDisabled() => SettingsExecutionModel?.DisablePowerCheck ?? false;
 
     public static Task<SettingsExecutionDto> GetExecitonModel()
+      => Task.FromResult(GetExecutionModelSnapshot());
+
+    /// <summary>
+    /// Возвращает снимок текущих настроек выполнения.
+    /// </summary>
+    public static SettingsExecutionDto GetExecutionModelSnapshot()
     {
-      var executionModel = new SettingsExecutionDto
+      return new SettingsExecutionDto
       {
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
         IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
@@ -138,7 +144,6 @@ namespace Ask.Core.Services.Config.AppSettings
         DisablePowerCheck = SettingsExecutionModel.DisablePowerCheck,
       };
 
-      return Task.FromResult(executionModel);
     }
     #endregion
 

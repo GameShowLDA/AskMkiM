@@ -16,6 +16,12 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
 
     /// <summary>Путь к последнему сохранённому итоговому протоколу.</summary>
     private string? _lastInspectionProtocolPath;
+    private ExecutionProtocolEnvironmentSnapshot? _environmentSnapshot;
+
+    public void SetEnvironmentSnapshot(ExecutionProtocolEnvironmentSnapshot snapshot)
+    {
+      _environmentSnapshot = snapshot;
+    }
 
     /// <summary>Текст текущего итогового протокола.</summary>
     public string InspectionProtocolText { get; private set; } = string.Empty;
@@ -45,7 +51,10 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       string name,
       IReadOnlyList<ShowMessageModel> messages)
     {
-      _lastExecutionProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(name, messages);
+      _lastExecutionProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(
+        name,
+        messages,
+        _environmentSnapshot);
     }
 
     /// <summary>

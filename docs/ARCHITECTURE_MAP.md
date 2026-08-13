@@ -911,6 +911,8 @@ ActionExecutor finalization
 └─→ ProtocolCompletionService.SaveAndExposeAsync
 → ProtocolStorageService
 → ExecutionProtocolHistoryService
+→ ExecutionProtocolDiagnosticFormatter.FormatForStorage
+  (видимая строка + скрытая структурированная диагностика каждой записи)
 ```
 
 Форматы:
@@ -923,6 +925,37 @@ ActionExecutor finalization
 `CheckType.ControlProgram`, иначе `.askresult`, и старается использовать basename
 соответствующего `.asktrace`. Каталог истории:
 `Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory))`.
+
+Structured `.asktrace` message metadata is decoded for every role and supplies invisible segment
+markers for header/message/time highlighting; only the readable `ROOT` diagnostic expansion is
+role-restricted. New trace entries persist exact message/time offsets instead of deriving segment
+boundaries from punctuation. Both `Ask.UI/Controls/TextEditorControl/TextEditorUI.xaml.cs` and the
+legacy `UI/Controls/TextEditorControl/TextEditorUI.xaml.cs` bind named `MKI_PROTOCOL.xshd` colors
+to the current WPF resources used by `ProtocolListBoxUI.ApplyThemeColors`, including custom themes.
+
+Current structured traces also contain `#ASKM_MESSAGE_V2#` snapshots represented by
+`ExecutionProtocolMessageSnapshot`. On open, `FileOpenService` and `MainWindow/Services/FileService`
+call `ExecutionProtocolDiagnosticFormatter.TryRestoreMessages`; successful restoration is rendered
+by `SavedExecutionProtocolUI` through the production `ProtocolListBoxUI` templates and grouping.
+Legacy traces without V2 snapshots are converted line-by-line by
+`ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
+`ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
+lines are restored as `Info` while preserving their complete text and blank-line layout.
+
+New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
+`ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
+lines plus one Base64-encoded Brotli block containing the environment and the complete snapshot
+array. Readers remain backward-compatible with V2 per-message snapshots, V1 diagnostics and
+pre-structured text traces.
+
+При открытии `.asktrace` `ExecutionProtocolDiagnosticFormatter.PrepareForDisplay`
+скрывает служебные записи для обычных ролей и раскрывает источник вызова и атрибуты
+сообщения для `Root`. Старые текстовые протоколы открываются без преобразования.
+Перед сохранением `ActionExecutor.FinalizeAsync` формирует через
+`ExecutionProtocolEnvironmentSnapshotFactory` root-снимок настроек выполнения,
+протокола и отображения оборудования, версии/роли/режима и устройств, фактически
+зарегистрированных в `EquipmentUsageSession`; снимок сохраняется первой скрытой
+записью `.asktrace` и раскрывается в начале документа только для `Root`.
 
 Автопечать:
 
@@ -964,6 +997,9 @@ buttons в `Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml.cs` печатают exe
 - `Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml.cs`
 - `Ask.UI/Features/ProtocolNew/Protocol/`
 - `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs`
+- `Ask.Core/Services/Protocols/ExecutionProtocolDiagnosticFormatter.cs`
+- `Ask.Core/Services/Protocols/ExecutionProtocolEnvironmentSnapshot.cs`
+- `Ask.UI/Features/ProtocolNew/Protocol/ExecutionProtocolEnvironmentSnapshotFactory.cs`
 - `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`
 
 ### Archive and legacy file conversion

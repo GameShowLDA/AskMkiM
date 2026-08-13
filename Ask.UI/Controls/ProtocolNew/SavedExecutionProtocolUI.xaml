@@ -1,0 +1,8 @@
+<UserControl x:Class="Ask.UI.Controls.ProtocolNew.SavedExecutionProtocolUI"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:protocol="clr-namespace:Ask.UI.Components.ProtocolListBox">
+    <Grid Margin="5">
+        <protocol:ProtocolListBoxUI x:Name="Protocol"/>
+    </Grid>
+</UserControl>

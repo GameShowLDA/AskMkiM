@@ -94,15 +94,15 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       string callerFile,
       int callerLine)
     {
-      if (!DebugAccessConfig.IsDebugEnabled)
-      {
-        return;
-      }
-
       var source = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})";
-      message.Debug = string.IsNullOrEmpty(message.Debug)
+      message.DiagnosticSource = string.IsNullOrEmpty(message.DiagnosticSource)
         ? source
-        : $"{message.Debug}|| {source}";
+        : $"{message.DiagnosticSource}|| {source}";
+
+      if (DebugAccessConfig.IsDebugEnabled)
+      {
+        message.Debug = message.DiagnosticSource;
+      }
     }
 
     /// <summary>Удаляет заменяемую запись при отключённом детальном протоколе.</summary>

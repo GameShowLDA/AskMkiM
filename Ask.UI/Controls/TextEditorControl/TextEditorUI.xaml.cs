@@ -589,6 +589,7 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        ApplyProtocolRuntimeColors();
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
       }
       catch (Exception ex)
@@ -596,6 +597,29 @@ namespace Ask.UI.Controls.TextEditorControl
         LogError($"Ошибка загрузки подсветки: {ex.Message}");
         textEditor.SyntaxHighlighting = null;
       }
+    }
+
+    private void ApplyProtocolRuntimeColors()
+    {
+      if (FileType != FileType.Protocol || textEditor.SyntaxHighlighting == null)
+        return;
+
+      SetHighlightingColor("StatusCommand", "YellowColorSolidColorBrush");
+      SetHighlightingColor("StatusCommandBlock", "LightBlueColorSolidColorBrush");
+      SetHighlightingColor("StatusSuccess", "TestsProtocolMessageSuccesForeground");
+      SetHighlightingColor("StatusError", "TestsProtocolMessageErrorForeground");
+      SetHighlightingColor("StatusInfo", "TestsProtocolMessageForeground");
+      SetHighlightingColor("StatusTime", "TestsProtocolTimeForeground");
+    }
+
+    private void SetHighlightingColor(string highlightingName, string resourceKey)
+    {
+      if (Application.Current?.Resources[resourceKey] is not SolidColorBrush brush)
+        return;
+
+      var highlightingColor = textEditor.SyntaxHighlighting?.GetNamedColor(highlightingName);
+      if (highlightingColor != null)
+        highlightingColor.Foreground = new SimpleHighlightingBrush(brush.Color);
     }
 
     private static Stream? OpenHighlightingStream(string fileName)
