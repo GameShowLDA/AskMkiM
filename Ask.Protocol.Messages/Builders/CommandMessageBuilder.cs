@@ -137,7 +137,7 @@ internal static class CommandMessageBuilder
   }
 
   internal static ShowMessageModel BuildPointsConnectionMessage(int indentLevel)
-    => new("Подлючение точек") { IndentLevel = indentLevel };
+    => new("Подключение точек") { IndentLevel = indentLevel };
 
   internal static ShowMessageModel BuildBreakpointHitMessage(
     string commandName,
