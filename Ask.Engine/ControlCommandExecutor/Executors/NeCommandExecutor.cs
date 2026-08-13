@@ -72,8 +72,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       ConnectedPointContext pointContext = new ConnectedPointContext();
       ConnectedPointChecker.PerformMeasurementAsync measure =
-        (value, messageService, cancellationToken, checkedPoint, errorResistance) =>
-          DioideMeasure(value, messageService, cancellationToken, pointContext, checkedPoint, errorResistance);
+        (value, messageService, cancellationToken, firstPoint, checkedPoint, errorResistance) =>
+          DioideMeasure(value, messageService, cancellationToken, pointContext, firstPoint, checkedPoint, errorResistance);
 
       pointContext.SchemeModel = command.Scheme;
       pointContext.CommandManager = context.CommandExecutionManager;
@@ -110,6 +110,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       IUserInteractionService messageService,
       CancellationToken cancellationToken,
       ConnectedPointContext pointContext,
+      PointModel firstPoint,
       PointModel checkedPoint,
       double errorResistance = 0)
     {
@@ -145,7 +146,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var measurementResult = MeasurementResultEvaluator.Evaluate(
           measurementRange,
           pointContext.IsOverloadExpected);
-        var firstPoint = pointContext.SchemeModel.GetGroupFistPoint(checkedPoint).ToString();
         var points = $"{pointContext.CurrentNeDirectionSign}{firstPoint}, {checkedPoint.ToString()}";
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.NE,

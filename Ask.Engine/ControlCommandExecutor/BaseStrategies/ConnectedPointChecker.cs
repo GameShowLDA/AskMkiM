@@ -33,7 +33,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронная операция, возвращающая <c>true</c>, если измерение прошло успешно,
     /// или <c>false</c>, если обнаружена ошибка.
     /// </returns>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, PointModel point, double errorResistance);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, PointModel firstPoint,PointModel checkedPoint, double errorResistance);
 
     /// <summary>
     /// Асинхронно выполняет проверку соединённых точек в схеме, формируя новый список цепей (ССИРТ)
@@ -522,7 +522,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       try
       {
-        var measured = await MeasurePointAsync(point, context, messageService);
+        var measured = await MeasurePointAsync(state.BasePoint, point, context, messageService);
         var chainStr = BuildChainString(context, state.BasePoint, point);
 
         LogMeasurement(state.BasePoint, point, measured);
@@ -551,18 +551,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Выполняет измерение для точки с учётом типа команды и параметров модуля.
     /// </summary>
     private static async Task<(bool Result, double Value)> MeasurePointAsync(
-      PointModel point,
+      PointModel firstPoint,
+      PointModel checkedPoint,
       ConnectedPointContext context,
       IUserInteractionService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
+      var module = EquipmentService.GetModuleByPoint(checkedPoint);
       var errorResistance = GetMeasurementErrorValue(context, module);
 
       return await context.PerformMeasurementAsync(
         context.Value,
         messageService,
         messageService.GetCancellationToken(),
-        point,
+        firstPoint,
+        checkedPoint,
         errorResistance);
     }
 

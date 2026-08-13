@@ -104,7 +104,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel point, double errorResistance = 0)
+    private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel firstPoint, PointModel checkedPoint, double errorResistance = 0)
     {
       var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
@@ -142,7 +142,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel point, double errorResistance = 0)
+    private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel firstPoint, PointModel checkedPoint, double errorResistance = 0)
     {
       var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;

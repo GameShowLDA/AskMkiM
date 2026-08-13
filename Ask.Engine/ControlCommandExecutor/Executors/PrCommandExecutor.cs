@@ -245,7 +245,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel point, double errorResistance)
+    private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel firstPoint, PointModel checkedPoint, double errorResistance)
     {
       var fastMeter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = -1;
