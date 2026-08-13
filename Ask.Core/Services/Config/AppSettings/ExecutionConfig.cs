@@ -49,6 +49,12 @@ namespace Ask.Core.Services.Config.AppSettings
     public static void SetLegacyCompatibilityMode(bool enable) => SettingsExecutionModel.LegacyCompatibilityMode = enable;
 
     /// <summary>
+    /// Включает или отключает проверку питания перед запуском выполнения.
+    /// </summary>
+    /// <param name="disable">Признак отключения проверки питания.</param>
+    public static void SetDisablePowerCheck(bool disable) => SettingsExecutionModel.DisablePowerCheck = disable;
+
+    /// <summary>
     /// Включает или выключает симуляцию отрицательных результатов измерений.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
@@ -69,6 +75,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
       SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
+      SetDisablePowerCheck(protocolModel.DisablePowerCheck);
 
       return Task.CompletedTask;
     }
@@ -112,6 +119,12 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
     public static bool GetIsLegacyCompatibilityModeEnabled() => SettingsExecutionModel?.LegacyCompatibilityMode ?? false;
 
+    /// <summary>
+    /// Проверяет, отключена ли проверка питания перед запуском выполнения.
+    /// </summary>
+    /// <returns><see langword="true"/>, если проверка питания отключена.</returns>
+    public static bool GetIsPowerCheckDisabled() => SettingsExecutionModel?.DisablePowerCheck ?? false;
+
     public static Task<SettingsExecutionDto> GetExecitonModel()
     {
       var executionModel = new SettingsExecutionDto
@@ -121,7 +134,8 @@ namespace Ask.Core.Services.Config.AppSettings
         IsHardwareErrorSimulationMode = SettingsExecutionModel.IsHardwareErrorSimulationMode,
         StepByStepMode = SettingsExecutionModel.StepByStepMode,
         StopOnError = SettingsExecutionModel.StopOnError,
-        LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode
+        LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode,
+        DisablePowerCheck = SettingsExecutionModel.DisablePowerCheck,
       };
 
       return Task.FromResult(executionModel);
@@ -136,6 +150,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);
       SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);
+      SetDisablePowerCheck(execution.DisablePowerCheck);
 
       await InvokeSaveExecutionAsync(execution);
     }

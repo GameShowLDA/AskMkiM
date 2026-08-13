@@ -3,6 +3,7 @@ using System;
 using Ask.DataBase.Provider.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ask.DataBase.Provider.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260813063449_AddDisablePowerCheck")]
+    partial class AddDisablePowerCheck
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -841,6 +844,13 @@ namespace Ask.DataBase.Provider.Migrations
 
                     b.Property<bool>("GenerateProtocol")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("PrintFontFamily")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("PrintFontSize")
+                        .HasColumnType("REAL");
 
                     b.Property<bool>("ShowCommandHeadersInProtocol")
                         .HasColumnType("INTEGER");

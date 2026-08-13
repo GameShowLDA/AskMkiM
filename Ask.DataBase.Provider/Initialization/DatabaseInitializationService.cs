@@ -70,6 +70,7 @@ public static class DatabaseInitializationService
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureHardwareErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDisablePowerCheckColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
@@ -385,6 +386,42 @@ public static class DatabaseInitializationService
       report,
       progress,
       "[DB] В старой схеме Execution добавлена колонка IsHardwareErrorSimulationMode.");
+  }
+
+  /// <summary>
+  /// Добавляет настройку отключения проверки питания в совместимую старую схему.
+  /// </summary>
+  /// <param name="databasePath">Путь к файлу базы данных.</param>
+  /// <param name="report">Отчёт об инициализации базы данных.</param>
+  /// <param name="progress">Обработчик сообщений о ходе инициализации.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  private static async Task EnsureDisablePowerCheckColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "Execution", cancellationToken)
+      || await ColumnExistsAsync(connection, "Execution", "DisablePowerCheck", cancellationToken))
+    {
+      return;
+    }
+
+    await using var command = connection.CreateCommand();
+    command.CommandText =
+      """
+      ALTER TABLE "Execution"
+      ADD COLUMN "DisablePowerCheck" INTEGER NOT NULL DEFAULT 0;
+      """;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    TraceWarning(
+      report,
+      progress,
+      "[DB] В старой схеме Execution добавлена колонка DisablePowerCheck.");
   }
 
   private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(

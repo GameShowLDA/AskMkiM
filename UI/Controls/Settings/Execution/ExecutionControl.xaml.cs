@@ -2,6 +2,7 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -54,6 +55,7 @@ namespace UI.Controls.Settings.Execution
     private async void ExecutionControl_Loaded(object sender, RoutedEventArgs e)
     {
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
+      RootSettingsGroup.Visibility = IsRootRole() ? Visibility.Visible : Visibility.Collapsed;
       DefalultData();
 
       if (!_isInitialized)
@@ -65,6 +67,7 @@ namespace UI.Controls.Settings.Execution
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
         CompatibilityModeCheckBox.CheckedChanged += CheckedChanged;
+        DisablePowerCheck.CheckedChanged += CheckedChanged;
         Success.PreviewMouseDown += Success_PreviewMouseDown;
         Error.PreviewMouseDown += Error_PreviewMouseDown;
         _isInitialized = true;
@@ -148,6 +151,9 @@ namespace UI.Controls.Settings.Execution
         IsHardwareErrorSimulationMode = HardwareErrorSimulation.IsChecked,
         IdleModeExecution = IdleMode.IsChecked,
         LegacyCompatibilityMode = CompatibilityModeCheckBox.IsChecked,
+        DisablePowerCheck = IsRootRole()
+          ? DisablePowerCheck.IsChecked
+          : _baseExecutionModel.DisablePowerCheck,
       };
       return model;
     }
@@ -161,7 +167,8 @@ namespace UI.Controls.Settings.Execution
       a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
-      a.LegacyCompatibilityMode == b.LegacyCompatibilityMode;
+      a.LegacyCompatibilityMode == b.LegacyCompatibilityMode &&
+      a.DisablePowerCheck == b.DisablePowerCheck;
 
     /// <summary>
     /// Заполняет элементы UI значениями из базовой (сохранённой) модели.
@@ -174,6 +181,13 @@ namespace UI.Controls.Settings.Execution
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;
+      DisablePowerCheck.IsChecked = _baseExecutionModel.DisablePowerCheck;
     }
+
+    /// <summary>
+    /// Проверяет, обладает ли текущая сессия ролью Root.
+    /// </summary>
+    /// <returns><see langword="true"/>, если активна роль Root.</returns>
+    private static bool IsRootRole() => RoleAuthorizationConfig.CurrentRole == RoleType.Root;
   }
 }

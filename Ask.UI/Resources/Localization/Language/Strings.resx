@@ -651,6 +651,12 @@
   <data name="settings.execution.compatibilityMode.legacySystemExecution" xml:space="preserve">
     <value>Включает привязку модулей АСК-МКИ-М к разъёмам переходной панели по таблице соответствия старой системы АСК-МКИ. Используется для сохранения совместимости рабочих мест и существующих схем подключения.</value>
   </data>
+  <data name="settings.execution.disablePowerCheck.title" xml:space="preserve">
+    <value>Отключить проверку питания</value>
+  </data>
+  <data name="settings.execution.disablePowerCheck.description" xml:space="preserve">
+    <value>Разрешает запуск метрологии, программ контроля и самоконтроля без проверки состояния питания системы. Настройка доступна только роли Root.</value>
+  </data>
   <data name="settings.device.multimeter.additionalDividerCoefficient.acw" xml:space="preserve">
     <value>Доп. коэф. делителя ACW, %</value>
   </data>

@@ -147,11 +147,26 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
     public async Task StartAsync()
     {
+      var actionSettings = _modeSettings.Current;
+      if (ShouldBlockStartForMissingPower(
+        ExecutionConfig.GetIsIdleModeEnabled(),
+        SystemStateManager.GetIsActivePower(),
+        actionSettings.CheckPower,
+        ExecutionConfig.GetIsPowerCheckDisabled()))
+      {
+        await ShowMessageAsync(
+          new ShowMessageModel(
+            "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
+            type: ShowMessageModel.MessageType.Error),
+          skipPause: true);
+        ShowOnlyStartButton();
+        return;
+      }
+
       _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
       _modeSettings.Current.StartTime = TimeOnly.FromDateTime(DateTime.Now);
       _modeSettings.Current.ExecutionDuration = TimeSpan.Zero;
       _modeSettings.Current.DeviceResults.Clear();
-      var actionSettings = _modeSettings.Current;
       var executionName = actionSettings.NameProvider?.Invoke();
       if (!string.IsNullOrWhiteSpace(executionName))
       {
@@ -161,6 +176,24 @@ namespace Ask.UI.Controls.ProtocolNew
 
       await ActionExecutor.StartAsync(actionSettings);
     }
+
+    /// <summary>
+    /// Определяет, следует ли блокировать запуск из-за отсутствия питания системы.
+    /// </summary>
+    /// <param name="isIdleMode">Признак холостого режима.</param>
+    /// <param name="isPowerActive">Признак активного питания системы.</param>
+    /// <param name="checkPower">Признак необходимости проверки питания для запуска.</param>
+    /// <param name="isPowerCheckDisabled">Признак отключения проверки питания в настройках.</param>
+    /// <returns>
+    /// <see langword="true"/>, если запуск следует заблокировать;
+    /// в противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldBlockStartForMissingPower(
+      bool isIdleMode,
+      bool isPowerActive,
+      bool checkPower,
+      bool isPowerCheckDisabled) =>
+      !isIdleMode && !isPowerActive && checkPower && !isPowerCheckDisabled;
 
     /// <summary>
     /// Завершение текущей выполняемой задачи.

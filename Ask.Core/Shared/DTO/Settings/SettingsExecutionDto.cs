@@ -46,4 +46,9 @@ public class SettingsExecutionDto
   /// Использует таблицу соответствия модулей МКР-350 и разъёмов переходной панели.
   /// </summary>
   public bool LegacyCompatibilityMode { get; set; }
+
+  /// <summary>
+  /// Отключает проверку состояния питания перед запуском выполнения.
+  /// </summary>
+  public bool DisablePowerCheck { get; set; }
 }

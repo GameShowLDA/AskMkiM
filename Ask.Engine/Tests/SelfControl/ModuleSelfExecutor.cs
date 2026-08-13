@@ -31,7 +31,6 @@ namespace Ask.Engine.Tests.SelfControl
       {
         StartDelegate = ExecuteMeasurementProcess,
         CheckType = CheckType.SelfTest,
-        CheckPower = false,
         AccumulateErrorMessages = true,
         NameProvider = GetExecutionName,
       };

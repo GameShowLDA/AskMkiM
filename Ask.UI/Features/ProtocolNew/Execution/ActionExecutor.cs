@@ -223,13 +223,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         StepMode = false;
 
         await ProtocolSelfCheck.ClearAllMessagesAsync();
-        if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && actionSettings.CheckPower)
-        {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
-          await FinalizeAsync(actionSettings);
-          return;
-        }
-
         if (actionSettings.PreActionDelegate != null)
         {
           await actionSettings.PreActionDelegate(ProtocolSelfCheck.GetCancellationToken());
