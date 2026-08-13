@@ -39,4 +39,20 @@ internal static class MeasurementResultEvaluator
 
     return (isSuccessful, value);
   }
+
+  /// <summary>
+  /// Проверяет, подтверждает ли измерение разрыв цепи относительно заданного порога.
+  /// </summary>
+  /// <param name="value">Измеренное сопротивление.</param>
+  /// <param name="disconnectionThreshold">Граница, выше которой цепь считается разобщённой.</param>
+  /// <returns>Признак разобщения цепи и измеренное сопротивление.</returns>
+  internal static (bool IsSuccessful, double Value) EvaluateDisconnection(
+    double value,
+    double disconnectionThreshold)
+  {
+    bool isSuccessful = MeasurementValueFormatter.IsOverloadValue(value)
+      || value > disconnectionThreshold;
+
+    return (isSuccessful, value);
+  }
 }

@@ -108,4 +108,20 @@ public class MeasurementResultEvaluatorTests
       ExecutionConfig.SetIdleMode(originalIdleMode);
     }
   }
+
+  [Theory]
+  [InlineData(101, 100, true)]
+  [InlineData(100, 100, false)]
+  [InlineData(99, 100, false)]
+  [InlineData(double.PositiveInfinity, 100, true)]
+  public void EvaluateDisconnection_ChecksValueStrictlyAboveThreshold(
+    double value,
+    double threshold,
+    bool expected)
+  {
+    var result = MeasurementResultEvaluator.EvaluateDisconnection(value, threshold);
+
+    Assert.Equal(expected, result.IsSuccessful);
+    Assert.Equal(value, result.Value);
+  }
 }
