@@ -655,8 +655,10 @@ executor throws
   возвращают единый `AlgorithmExecutionResult`; формирование и публикация их заголовков,
   этапов локализации, диагностических сообщений и готовых результатов измерения проходят
   через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
-- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; возвращает `AlgorithmExecutionResult`, а создание
-  и публикацию измерений, ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
+- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; обходит все группы, цепи и точки,
+  сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
+  точку той же цепи); возвращает `AlgorithmExecutionResult`, а создание и публикацию измерений,
+  ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
 - `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
   `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
 - `EhtCommandExecutor`, `IeCommandExecutor`, `KsCommandExecutor`, `NeCommandExecutor`,
