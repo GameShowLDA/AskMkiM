@@ -72,6 +72,18 @@ public sealed class ProtocolHotkeyControllerTests
     Assert.True(args.Handled);
   });
 
+  [Fact(DisplayName = "R при доступном повторе повторяет выполнение")]
+  public Task R_WhenRepeatIsAvailable_InvokesRepeat() => RunOnStaAsync(() =>
+  {
+    var context = new RecordingHotkeyContext { CanRepeat = true };
+    var args = CreateKeyEventArgs(Key.R);
+
+    new ProtocolHotkeyController(context).HandleKeyDown(this, args);
+
+    Assert.Equal(1, context.RepeatCount);
+    Assert.True(args.Handled);
+  });
+
   [Fact(DisplayName = "F4 при паузе открывает переход к другой команде")]
   public Task F4_WhenCommandJumpIsAvailable_InvokesCommandJump() => RunOnStaAsync(() =>
   {
@@ -138,6 +150,8 @@ public sealed class ProtocolHotkeyControllerTests
 
     public int CommandJumpCount { get; private set; }
 
+    public int RepeatCount { get; private set; }
+
     public List<bool> StepModes { get; } = [];
 
     public void Start()
@@ -154,9 +168,7 @@ public sealed class ProtocolHotkeyControllerTests
 
     public void Exit() => ExitCount++;
 
-    public void Repeat()
-    {
-    }
+    public void Repeat() => RepeatCount++;
 
     public void JumpToCommand() => CommandJumpCount++;
 

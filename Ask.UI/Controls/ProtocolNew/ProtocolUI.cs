@@ -526,6 +526,40 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <inheritdoc />
+    public async Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount)
+    {
+      if (!await ExecutionConfig.GetIsStopOnErrorEnabled())
+      {
+        return UserAction.None;
+      }
+
+      MessageBoxResult ShowDialog() => MessageBoxCustom.Show(
+        $"Найдено ошибок: {errorCount}.\r\n\r\n" +
+        "Да — повторить всю команду.\r\n" +
+        "Нет — принять результат с ошибками и продолжить выполнение.\r\n" +
+        "Отмена — закрыть окно, изучить протокол и выбрать действие позже.",
+        "Ошибки выполнения команды",
+        MessageBoxButton.YesNoCancel,
+        MessageBoxImage.Question);
+
+      var result = Dispatcher.CheckAccess()
+        ? ShowDialog()
+        : Dispatcher.Invoke(ShowDialog);
+
+      if (result == MessageBoxResult.Yes)
+      {
+        return UserAction.Retry;
+      }
+
+      if (result == MessageBoxResult.No)
+      {
+        return UserAction.Continue;
+      }
+
+      return await WaitUserActionAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<UserAction> WaitRetryOrContinueAsync()
     {
       _userActionTcs = new TaskCompletionSource<UserAction>(

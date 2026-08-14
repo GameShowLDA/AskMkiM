@@ -521,10 +521,24 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 → editor.SetActiveLine
 → BreakpointHandler.OnBreakpointHitAsync
 → CommandMessages.ShowBreakpointHitAsync (публикация заголовка без ожидания паузы и проверки пошагового режима)
-→ new CommandExecutionContext
 → CommandExecutorRegistry.TryGet(mnemonic)
-→ ICommandExecutor.ExecuteAsync(context, ProtocolModel)
-→ CompleteCommandAsync(hasErrors)
+→ capture ProtocolModel snapshot протокола результатов
+→ ControlProgramCommandExecutionContext.Enter
+  → new CommandExecutionContext
+  → ICommandExecutor.ExecuteAsync(context, ProtocolModel)
+  → вложенные UserActionHelper и ProtocolPostOutputController не открывают
+    Retry/Continue/Finish и не применяют StopOnError внутри команды
+→ определить ошибки, добавленные всей попыткой команды
+→ StopOnError OFF или ошибок нет: принять попытку
+→ StopOnError ON и есть ошибки: MessageBoxCustom показывает количество ошибок
+  и вопрос о повторе команды (`YesNoCancel`)
+  → Да: сохранить все шаги попытки в левом экранном протоколе,
+    восстановить ProtocolModel протокола результатов и отбросить ещё не
+    опубликованные ErrorItem → повторить весь ICommandExecutor
+  → Нет: принять последнюю попытку и перейти дальше
+  → Отмена: закрыть диалог, оставить выполнение в ожидании и показать штатные
+    кнопки Repeat/Continue/Finish для изучения левого протокола перед решением
+→ CompleteCommandAsync(hasErrors) только для принятой попытки
 → apply JumpToCommandNumber for УП
 ```
 
@@ -709,7 +723,10 @@ executor throws
 `ExecutionPauseController`, `ExecutionRunGuard`, `ExecutionFinalizer`.
 `ProtocolUI` реализует `IExecutionController`, `IExecutionPauseGate` и
 `IUserInteractionService`. Pause checkpoints проходят через
-`WaitAtExecutionCheckpointAsync`; command jump от F4 идёт:
+`WaitAtExecutionCheckpointAsync`. `ProtocolHotkeyController` не перехватывает
+обычный ввод в `TextBox`/`ComboBox`, но разрешает доступные действия `R`
+(повтор), `P` (продолжение/пауза) и `Esc` (завершение), даже если после команды
+фокус остался в поле ввода. Command jump от F4 идёт:
 
 ```text
 ProtocolUI.RequestCommandJump
@@ -1780,7 +1797,27 @@ available only after the latest attempt produced a valid equipment response.
 Retries are unlimited, and each retry passes through the original adapter,
 logging, protocol output and driver chain.
 
-Measurement verdicts use a separate branch:
+Исключение составляет одна попытка команды программы контроля. Пока активен
+`ControlProgramCommandExecutionContext`, вложенные adapters/managers выполняются
+один раз и возвращают результат без собственного интерактивного цикла, а
+`ProtocolPostOutputController` не ставит выполнение на паузу по отдельной записи
+`Error`. После возврата `ICommandExecutor.ExecuteAsync` решение принимается в
+`CommandExecutionManager` для всей команды. Повтор сохраняет экранный протокол
+выполнения со всеми шагами и попытками, но откатывает `ProtocolModel` протокола
+результатов и отложенные `ErrorItem` предыдущей попытки, после чего заново
+вызывает тот же executor. Метрология, инженерные тесты и самоконтроль этот
+контекст не создают и сохраняют прежнее поведение `UserActionHelper`.
+
+В самоконтроле УКШ `SelfTestRetryHelper.CheckRelayStateAsync` публикует результат
+проверки реле с `skipPause: true`: строка `[БРАК]` сохраняется, но общая
+`ProtocolPostOutputController`-пауза не перехватывает управление до возврата
+результата. После этого `UserActionHelper` показывает штатные интерактивные
+действия согласно `StopOnError`, не подменяя их кнопками пошагового режима.
+`SelfTestProcessManager.PerformRelayTestAsync` передаёт
+`deviceTask: true`, поэтому отрицательный результат проверки реле не считается
+допустимым продолжением: Repeat заново вызывает `CheckContinuityAsync`.
+
+Вне `ControlProgramCommandExecutionContext` measurement verdicts use a separate branch:
 
 ```text
 valid measurement response

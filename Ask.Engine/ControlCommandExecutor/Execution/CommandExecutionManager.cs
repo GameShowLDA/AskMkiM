@@ -8,6 +8,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 
@@ -94,6 +95,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     private bool _isExecutingEmergencyKsc;
 
     /// <summary>
+    /// Ошибки текущей попытки команды, публикуемые только после принятия результата оператором.
+    /// </summary>
+    private List<ErrorItem>? _attemptErrors;
+    private readonly object _attemptErrorsSync = new();
+
+    /// <summary>
     /// Событие добавления ошибки выполнения.
     /// Используется для уведомления внешних компонентов
     /// о возникновении ошибки.
@@ -116,7 +123,19 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// <param name="errorItem">
     /// Информация об ошибке выполнения команды.
     /// </param>
-    public void AddErrorMethod(ErrorItem errorItem) => AddError?.Invoke(errorItem);
+    public void AddErrorMethod(ErrorItem errorItem)
+    {
+      lock (_attemptErrorsSync)
+      {
+        if (_attemptErrors != null)
+        {
+          _attemptErrors.Add(errorItem);
+          return;
+        }
+      }
+
+      AddError?.Invoke(errorItem);
+    }
 
     public List<BaseCommandModel> CommandsToExecute { get; set; } = new();
 
@@ -221,32 +240,67 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
             }
           }
 
-          var context = new CommandExecutionContext(
-              this, command, _console, _textEditor, _opkFilePath);
-
           int? jumpToIndex = null;
-          context.JumpToCommandNumber = targetLabel =>
-          {
-            jumpToIndex = ResolveJumpIndex(targetLabel);
-          };
-
           bool hasExecutor = _executorRegistry.TryGet(command.Mnemonic, out var executor);
 
-          if (hasExecutor)
+          bool hasExecutionErrors;
+          while (true)
           {
-            await executor.ExecuteAsync(context, _protocolModel);
-            await _console.WaitIfPausedAsync();
-          }
-          else
-          {
-            await ExecutionMessages.PublishUnknownCommandAsync(command.Mnemonic, _console);
-          }
+            var protocolSnapshot = ProtocolModelSnapshot.Capture(_protocolModel);
+            lock (_attemptErrorsSync)
+            {
+              _attemptErrors = new List<ErrorItem>();
+            }
 
-          bool hasExecutionErrors =
-            !hasExecutor ||
-            HasExecutionErrors(command);
+            var context = new CommandExecutionContext(
+              this, command, _console, _textEditor, _opkFilePath);
+            context.JumpToCommandNumber = targetLabel =>
+            {
+              jumpToIndex = ResolveJumpIndex(targetLabel);
+            };
 
-          await _console.CompleteCommandAsync(hasExecutionErrors);
+            using (ControlProgramCommandExecutionContext.Enter())
+            {
+              if (hasExecutor)
+              {
+                await executor.ExecuteAsync(context, _protocolModel);
+                await _console.WaitIfPausedAsync();
+              }
+              else
+              {
+                await ExecutionMessages.PublishUnknownCommandAsync(command.Mnemonic, _console);
+              }
+            }
+
+            int executionErrorCount = GetNewExecutionErrorCount(command, protocolSnapshot);
+            hasExecutionErrors = !hasExecutor || executionErrorCount > 0;
+            var action = hasExecutionErrors
+              ? await _console.ConfirmControlProgramCommandRetryAsync(
+                hasExecutor ? executionErrorCount : 1)
+              : UserAction.None;
+
+            if (action == UserAction.Retry)
+            {
+              protocolSnapshot.Restore(_protocolModel);
+              lock (_attemptErrorsSync)
+              {
+                _attemptErrors = null;
+              }
+              jumpToIndex = null;
+              continue;
+            }
+
+            if (action == UserAction.Abort)
+            {
+              throw new OperationCanceledException(
+                "Выполнение завершено оператором.",
+                _console.GetCancellationToken());
+            }
+
+            FlushAttemptErrors();
+            await _console.CompleteCommandAsync(hasExecutionErrors);
+            break;
+          }
 
           if (command is not UpCommandModel and not CuCommandModel)
           {
@@ -261,6 +315,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
         catch (CommandJumpRequestedException)
         {
+          lock (_attemptErrorsSync)
+          {
+            _attemptErrors = null;
+          }
           var targetCommand = TakePendingJumpCommand();
           if (targetCommand == null)
           {
@@ -285,6 +343,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
         catch (Exception ex)
         {
+          FlushAttemptErrors();
           await _console.CompleteCommandAsync(true);
           await ExecuteKscOnExceptionAsync(command, ex);
           throw;
@@ -378,19 +437,71 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       return targetIndex >= 0 ? targetIndex : null;
     }
 
-    private bool HasExecutionErrors(BaseCommandModel command)
+    private int GetNewExecutionErrorCount(
+      BaseCommandModel command,
+      ProtocolModelSnapshot snapshot)
     {
-      var exactKey = $"{command.CommandNumber} {command.Mnemonic}";
-      if (_protocolModel.Errors.TryGetValue(exactKey, out var exactErrors) &&
-          exactErrors is { Count: > 0 })
+      var commandPrefix = $"{command.CommandNumber} ";
+      int currentCount = CountCommandErrors(_protocolModel.Errors, commandPrefix);
+      int previousCount = CountCommandErrors(snapshot.Errors, commandPrefix);
+      return Math.Max(0, currentCount - previousCount);
+    }
+
+    private static int CountCommandErrors(
+      Dictionary<string, List<ShowMessageModel>> errors,
+      string commandPrefix) =>
+      errors
+        .Where(kvp => kvp.Key.StartsWith(commandPrefix, StringComparison.OrdinalIgnoreCase))
+        .Sum(kvp => kvp.Value.Count);
+
+    private void FlushAttemptErrors()
+    {
+      List<ErrorItem>? errors;
+      lock (_attemptErrorsSync)
       {
-        return true;
+        errors = _attemptErrors;
+        _attemptErrors = null;
       }
 
-      var commandPrefix = $"{command.CommandNumber} ";
-      return _protocolModel.Errors.Any(kvp =>
-        kvp.Key.StartsWith(commandPrefix, StringComparison.OrdinalIgnoreCase) &&
-        kvp.Value is { Count: > 0 });
+      if (errors == null)
+      {
+        return;
+      }
+
+      foreach (var error in errors)
+      {
+        AddError?.Invoke(error);
+      }
+    }
+
+    private sealed class ProtocolModelSnapshot
+    {
+      public Dictionary<string, List<ShowMessageModel>> Errors { get; }
+      private Dictionary<string, List<ShowMessageModel>> Info { get; }
+
+      private ProtocolModelSnapshot(
+        Dictionary<string, List<ShowMessageModel>> errors,
+        Dictionary<string, List<ShowMessageModel>> info)
+      {
+        Errors = errors;
+        Info = info;
+      }
+
+      public static ProtocolModelSnapshot Capture(ProtocolModel model) =>
+        new(Clone(model.Errors), Clone(model.Info));
+
+      public void Restore(ProtocolModel model)
+      {
+        model.Errors = Clone(Errors);
+        model.Info = Clone(Info);
+      }
+
+      private static Dictionary<string, List<ShowMessageModel>> Clone(
+        Dictionary<string, List<ShowMessageModel>> source) =>
+        source.ToDictionary(
+          pair => pair.Key,
+          pair => new List<ShowMessageModel>(pair.Value),
+          source.Comparer);
     }
 
     public BaseCommandModel? GetNextCommand(BaseCommandModel currentCommand)

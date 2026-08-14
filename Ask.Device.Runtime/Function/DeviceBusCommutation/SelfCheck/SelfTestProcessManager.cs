@@ -538,7 +538,8 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
 
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
         () => SelfTestRetryHelper.CheckRelayStateAsync(cancellationToken, messageService, meter, relay),
-        messageService))
+        messageService,
+        deviceTask: true))
       {
         return false;
       }

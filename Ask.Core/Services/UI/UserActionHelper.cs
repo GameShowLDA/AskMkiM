@@ -175,6 +175,11 @@ namespace Ask.Core.Services.UI
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
 
+        if (ControlProgramCommandExecutionContext.IsActive)
+        {
+          return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
+        }
+
         bool hardwareSucceeded = hardwareException == null && (!deviceTask || operationSucceeded);
         bool attemptProducedOutput = messageService != null &&
           messageService.GetLastLineNumber() != outputLineBeforeAttempt;

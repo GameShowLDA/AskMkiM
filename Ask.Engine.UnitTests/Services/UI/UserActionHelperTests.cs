@@ -259,6 +259,61 @@ public sealed class UserActionHelperTests
   }
 
   [Fact]
+  public async Task ControlProgramCommandDoesNotRequestActionForNestedFailure()
+  {
+    var interaction = CreateInteractionService(
+      requests: null,
+      UserAction.Retry);
+    int calls = 0;
+
+    using (ControlProgramCommandExecutionContext.Enter())
+    {
+      bool result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        () =>
+        {
+          calls++;
+          return Task.FromResult(false);
+        },
+        interaction.Object,
+        deviceTask: true);
+
+      Assert.False(result);
+    }
+
+    Assert.Equal(1, calls);
+    interaction.Verify(
+      service => service.WaitUserActionAsync(
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>()),
+      Times.Never);
+  }
+
+  [Fact]
+  public async Task ControlProgramCommandPreservesNestedException()
+  {
+    var interaction = CreateInteractionService();
+
+    using (ControlProgramCommandExecutionContext.Enter())
+    {
+      var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        () => UserActionHelper.GetRunWithUserRepeatAsync(
+          () => Task.FromException<bool>(new InvalidOperationException("failure")),
+          interaction.Object,
+          deviceTask: true));
+
+      Assert.Equal("failure", exception.Message);
+    }
+
+    interaction.Verify(
+      service => service.WaitUserActionAsync(
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>()),
+      Times.Never);
+  }
+
+  [Fact]
   public async Task FinishCancelsCurrentCallChain()
   {
     var interaction = CreateInteractionService(
