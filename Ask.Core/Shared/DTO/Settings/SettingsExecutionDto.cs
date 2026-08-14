@@ -42,6 +42,11 @@ public class SettingsExecutionDto
   public bool StopOnError { get; set; }
 
   /// <summary>
+  /// Разрешает повтор отдельных измерений оборудования.
+  /// </summary>
+  public bool RepeatMeasurement { get; set; }
+
+  /// <summary>
   /// Включает режим совместимости со старой системой АСК-МКИ.
   /// Использует таблицу соответствия модулей МКР-350 и разъёмов переходной панели.
   /// </summary>

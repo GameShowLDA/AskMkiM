@@ -117,7 +117,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
             executionErrorMessage,
             messageService);
           return isSuccessful;
-        }, messageService);
+        }, messageService, measurementTask: true);
       }
 
       public override async Task FinalizeAsync(IUserInteractionService messageService)

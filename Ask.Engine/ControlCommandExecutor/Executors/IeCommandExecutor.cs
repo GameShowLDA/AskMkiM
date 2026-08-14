@@ -102,7 +102,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           result.IsSuccessful,
           outputService: messageService);
         return result;
-      }, messageService);
+      }, messageService, measurementTask: true);
 
       return result;
     }

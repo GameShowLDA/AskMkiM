@@ -14,6 +14,8 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_Section_Title" Key="settings.execution.section.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StopOnError_Title" Key="settings.execution.stopOnError.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StopOnError_Description" Key="settings.execution.stopOnError.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_RepeatMeasurement_Title" Key="settings.execution.repeatMeasurement.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_RepeatMeasurement_Description" Key="settings.execution.repeatMeasurement.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Title" Key="settings.execution.stepByStepMode.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Description" Key="settings.execution.stepByStepMode.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Title" Key="settings.execution.idleMode.title" />
@@ -111,6 +113,14 @@
                     Margin="10,10"
                     VerticalAlignment="Top"
                     x:Name="StopInError"
+                 />
+
+                <SharedComponents:SettingsCard
+                    Title="{Binding Source={StaticResource Settings_Execution_RepeatMeasurement_Title}, Path=Value}"
+                    Description="{Binding Source={StaticResource Settings_Execution_RepeatMeasurement_Description}, Path=Value}"
+                    Margin="10,10"
+                    VerticalAlignment="Top"
+                    x:Name="RepeatMeasurement"
                  />
 
                 <SharedComponents:SettingsCard

@@ -173,7 +173,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     {
       await UserActionHelper.RunWithUserRepeatAsync(
         () => MeasurePointResistanceAsync(pointNumber, expectedResistance, cancellationToken),
-        _userInteractionService);
+        _userInteractionService,
+        measurementTask: true);
     }
 
     /// <summary>
