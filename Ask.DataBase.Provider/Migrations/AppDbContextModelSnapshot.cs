@@ -786,6 +786,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("DisablePowerCheck")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IdleModeExecution")
                         .HasColumnType("INTEGER");
 

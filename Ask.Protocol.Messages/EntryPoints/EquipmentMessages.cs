@@ -228,11 +228,29 @@ public static class EquipmentMessages
       connect,
       isSuccessful);
 
+    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      return Task.CompletedTask;
+    }
+
     return EquipmentMessagePublisher.PublishAsync(
-      message,
-      outputService,
-      callerName,
-      callerFile,
-      callerLine);
+    message,
+    outputService,
+    callerName,
+    callerFile,
+    callerLine);
+  }
+
+  /// <summary>
+  /// Проверяет, требуется ли публиковать результат операции.
+  /// </summary>
+  /// <param name="isSuccessful">Признак успешного выполнения операции.</param>
+  /// <returns>
+  /// <see langword="true"/>, если результат требуется опубликовать;
+  /// в противном случае — <see langword="false"/>.
+  /// </returns>
+  private static bool ShouldPublish(bool isSuccessful)
+  {
+    return !isSuccessful || DeviceDisplayConfig.GetConnectionInfoVisibility();
   }
 }

@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.LogLib;
 using System.Globalization;
 using System.Windows;
@@ -174,9 +175,12 @@ namespace Ask.UI.Features.ServiceTools.Multimeter
         }
 
         double result = await MeasureAsync(Meter, new MeasurementRange(target, lower, upper));
-        ResultValueText.Text = result.ToString("G10", CultureInfo.CurrentCulture);
+        string resultText = MeasurementValueFormatter.IsOverloadValue(result)
+          ? "Overload"
+          : result.ToString("G10", CultureInfo.CurrentCulture);
+        ResultValueText.Text = resultText;
         ResultDetailsText.Text = $"{Mode} · допустимый диапазон: {lower:G6}…{upper:G6}";
-        LoggerUtility.LogInformation($"Мультиметр — {Mode}: результат {result:G10}.", isDeviceLog: true);
+        LoggerUtility.LogInformation($"Мультиметр — {Mode}: результат {resultText}.", isDeviceLog: true);
       }
       catch (Exception exception)
       {

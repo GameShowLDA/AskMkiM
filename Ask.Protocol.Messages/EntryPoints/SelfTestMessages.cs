@@ -127,7 +127,9 @@ public static class SelfTestMessages
       skipPause: skipPause);
 
   /// <summary>
-  /// Публикует командный заголовок шага самоконтроля.
+  /// Публикует командный заголовок с формированием логического блока.
+  /// Сохраняет бинарную совместимость со сборками, созданными до появления
+  /// явного признака начала блока.
   /// </summary>
   /// <param name="header">Заголовок шага самоконтроля.</param>
   /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
@@ -147,6 +149,40 @@ public static class SelfTestMessages
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
+    => PublishCommandAsync(
+      header,
+      outputService,
+      message,
+      indentLevel,
+      onlyWhenStepMode,
+      true,
+      callerName,
+      callerFile,
+      callerLine);
+
+  /// <summary>
+  /// Публикует командный заголовок шага самоконтроля.
+  /// </summary>
+  /// <param name="header">Заголовок шага самоконтроля.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="message">Дополнительное описание шага.</param>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <param name="onlyWhenStepMode">Признак вывода только в пошаговом режиме.</param>
+  /// <param name="isBlockStart">Признак начала логического блока.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishCommandAsync(
+    string header,
+    IMessageOutputService? outputService,
+    string? message,
+    int indentLevel,
+    bool onlyWhenStepMode,
+    bool isBlockStart,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
   {
     if (onlyWhenStepMode && !StepControlManager.StepMode)
     {
@@ -154,12 +190,12 @@ public static class SelfTestMessages
     }
 
     return SelfTestMessagePublisher.PublishAsync(
-      SelfTestMessageBuilder.BuildCommand(header, message, indentLevel),
+      SelfTestMessageBuilder.BuildCommand(header, message, indentLevel, isBlockStart),
       outputService,
       callerName,
       callerFile,
       callerLine,
-      isBlockStart: true);
+      isBlockStart);
   }
 
   /// <summary>
@@ -200,7 +236,7 @@ public static class SelfTestMessages
       callerName,
       callerFile,
       callerLine,
-      isBlockStart: true);
+      isBlockStart: false);
 
   /// <summary>
   /// Публикует результат проверки активного сопротивления конденсатора.
@@ -242,6 +278,6 @@ public static class SelfTestMessages
       callerName,
       callerFile,
       callerLine,
-      isBlockStart: true);
+      isBlockStart: false);
   }
 }

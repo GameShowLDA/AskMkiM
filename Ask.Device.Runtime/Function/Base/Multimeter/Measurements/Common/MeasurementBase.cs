@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Device.Emulator;
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Helpers;
@@ -37,7 +38,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       int measurementCount = 1,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       if (profile.Unit is CapacitanceUnit)
       {
@@ -55,7 +57,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile,
         measurementRange,
         userMessageService,
-        responseDelay);
+        responseDelay,
+        cancellationToken);
     }
 
     /// <summary>
@@ -74,19 +77,19 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       IMeasurementProfile profile,
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       var header = EnumExtensions.GetDescription(profile.ElectricalTest);
 
       if (device.TypeMode != profile.TypeMode)
       {
-        await SetModeBase.SetModeAsync(device, profile, userMessageService);
+        await SetModeBase.SetModeAsync(device, profile, userMessageService, cancellationToken);
       }
 
       if (profile.ElectricalTest == ElectricalTestFunction.DCVoltage
       || profile.ElectricalTest == ElectricalTestFunction.ACVoltage
       || profile.ElectricalTest == ElectricalTestFunction.Resistance
-      || profile.ElectricalTest == ElectricalTestFunction.Diode
       || profile.ElectricalTest == ElectricalTestFunction.Capacitance)
       {
         await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
@@ -105,7 +108,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             measurementRange.LowerBound,
             measurementRange.UpperBound,
             userMessageService: userMessageService,
-            responseDelay: responseDelay),
+            responseDelay: responseDelay,
+            cancellationToken: cancellationToken),
           maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
@@ -279,6 +283,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// </returns>
     static private bool IsWithinRange(double value, double rangeFrom, double rangeTo)
     {
+      if (MeasurementValueFormatter.IsOverloadValue(value))
+      {
+        return false;
+      }
+
       bool isLowerValid = rangeFrom == -1 || value >= rangeFrom;
       bool isUpperValid = rangeTo == -1 || value <= rangeTo;
 
@@ -305,7 +314,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double rangeFrom = -1,
       double rangeTo = -1,
       IUserInteractionService? userMessageService = null,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
@@ -326,11 +336,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile.Measure,
         idleResponse,
         responseDelay: responseDelay,
-        timeout: profile.Timeout);
+        timeout: profile.Timeout,
+        cancellationToken: cancellationToken);
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       if (MultimeterResponseProcessor.TryParseMeasurement(response, out var measurement))
       {
+        if (measurement!.State == Ask.Device.ResponseProcessor.Multimeter.ResponseModels.MeasurementState.Overload)
+        {
+          return double.PositiveInfinity;
+        }
+
         if (profile.Unit is CapacitanceUnit)
         {
           return MeasurementAdapterHelper.Round(measurement!.Value * 1e9);

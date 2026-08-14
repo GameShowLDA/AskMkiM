@@ -1,4 +1,5 @@
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseModels;
 
 namespace Ask.Device.Emulator.UnitTests.Multimeter;
 
@@ -18,10 +19,27 @@ public sealed class MultimeterResponseProcessorTests
 
   [Theory(DisplayName = "Мультиметр: некорректное измерение отклоняется")]
   [InlineData("")]
-  [InlineData("OVLOAD")]
   [InlineData("No value")]
   public void MeasurementResponse_InvalidValue_ReturnsFalse(string response)
     => Assert.False(MultimeterResponseProcessor.TryParseMeasurement(response, out _));
+
+  [Theory(DisplayName = "Мультиметр: все поддерживаемые ответы перегрузки распознаются как отдельное состояние")]
+  [InlineData("+9.90000000E+37")]
+  [InlineData("9.9E37 OHM")]
+  [InlineData("OL")]
+  [InlineData("OVL")]
+  [InlineData("OVLD")]
+  [InlineData("OVLOAD")]
+  [InlineData("OVERLOAD")]
+  [InlineData("\"overload\"")]
+  public void MeasurementResponse_Overload_ReturnsOverloadState(string response)
+  {
+    bool parsed = MultimeterResponseProcessor.TryParseMeasurement(response, out var measurement);
+
+    Assert.True(parsed);
+    Assert.Equal(MeasurementState.Overload, measurement!.State);
+    Assert.True(double.IsPositiveInfinity(measurement.Value));
+  }
 
   [Theory(DisplayName = "Мультиметр: текущий режим проверяется без учёта регистра")]
   [InlineData("\"VOLT:AC\"", "VOLT:AC", true)]

@@ -31,6 +31,11 @@ namespace Ask.Device.Runtime.Device
       IrMaxResistanceMOhm = 60000;
       SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
+      ConnectedProfile.InitialBeeperDisableCommands =
+      [
+        "SYST:BUZZ:PSOUND OFF",
+        "SYST:BUZZ:FSOUND OFF",
+      ];
 
       ApplyDefaultComPortSettings();
 

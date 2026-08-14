@@ -12,6 +12,7 @@ using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -103,7 +104,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
+    private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel firstPoint, PointModel checkedPoint, double errorResistance = 0)
     {
       var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
@@ -113,15 +114,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
         answer = await meter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
-        }
-
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(
+          answer,
+          errorResistance,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
@@ -141,7 +137,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
+    private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel firstPoint, PointModel checkedPoint, double errorResistance = 0)
     {
       var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
@@ -150,15 +146,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
         answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
-        }
-
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(
+          answer,
+          errorResistance,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);

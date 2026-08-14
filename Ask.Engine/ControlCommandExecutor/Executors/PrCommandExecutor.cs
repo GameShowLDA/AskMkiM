@@ -13,6 +13,7 @@ using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -179,14 +180,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(answer, 0, subtract: false);
 
         measurementRange.TargetValue = answer;
 
-        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        var result = MeasurementResultEvaluator.EvaluateDisconnection(answer, lowValue);
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
@@ -221,13 +219,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(answer, 0, subtract: false);
 
         measurementRange.TargetValue = answer;
-        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        var result = MeasurementResultEvaluator.EvaluateDisconnection(answer, lowValue);
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
@@ -244,7 +239,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance)
+    private async Task<(bool, double)> ConnectedPointCheckerMeasurementAsync(double resistance, IUserInteractionService messageService, CancellationToken cancellationToken, PointModel firstPoint, PointModel checkedPoint, double errorResistance)
     {
       var fastMeter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = -1;
@@ -261,15 +256,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
         }
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          answer -= errorResistance;
-        }
-
-        if (answer < 0)
-        {
-          answer = 0;
-        }
+        answer = ResistanceCompensation.SubtractSwitchResistance(
+          answer,
+          errorResistance,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);

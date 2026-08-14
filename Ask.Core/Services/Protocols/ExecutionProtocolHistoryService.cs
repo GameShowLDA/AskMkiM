@@ -24,11 +24,12 @@ public static class ExecutionProtocolHistoryService
   /// <returns>
   /// Полный путь к сохранённому и зашифрованному файлу протокола.
   /// </returns>
-  public static async Task<string> SaveAsync(string? protocolName, IEnumerable<ShowMessageModel> messages)
+  public static async Task<string> SaveAsync(
+    string? protocolName,
+    IEnumerable<ShowMessageModel> messages,
+    ExecutionProtocolEnvironmentSnapshot? environment = null)
   {
-    var lines = messages
-      .Select(ExecutionProtocolLineFormatter.Format)
-      .Where(static line => !string.IsNullOrWhiteSpace(line));
+    var lines = ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, environment);
 
     return await SaveLinesAsync(protocolName, lines, ProtocolFileExtensions.Trace);
   }

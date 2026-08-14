@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Usb.Protocols;
+using Ask.Device.Communication.Common;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base;
 
@@ -24,7 +25,9 @@ namespace Ask.Device.Runtime.Device
       ConnectionDetails = "VID_0665&PID_5161";
       ConnectedProfile.UseViewPower = true;
       ConnectableManager = new Function.MikUps1101rRm.ConnectableManager(this);
-      DeviceProtocol = new UsbProtocol(this, new UsbCommandHandler());
+      DeviceProtocol = new HardwareWatchdogProtocol(
+        new UsbProtocol(this, new UsbCommandHandler()),
+        Name);
       PowerManager = new Function.MikUps1101rRm.PowerManager(this);
     }
 

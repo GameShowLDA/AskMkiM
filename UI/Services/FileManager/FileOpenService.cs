@@ -1,8 +1,12 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.Protocols;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
+using Ask.UI.Controls.ProtocolNew;
 using Message;
 using System.IO;
 using System.Text;
@@ -47,9 +51,30 @@ namespace UI.Services.FileManager
 
         try
         {
-          var (fileContent, encoding) = ReadFileContent(path);
-          var container = EnsureTextEditorContainer();
+          var (rawContent, encoding) = ReadRawFileContent(path);
           var fileType = DetermineFileType(fileName);
+          if (fileType == FileType.Protocol)
+          {
+            if (!ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
+                  rawContent,
+                  DebugAccessConfig.IsDebugEnabled,
+                  out var messages))
+            {
+              messages = ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
+                rawContent,
+                DebugAccessConfig.IsDebugEnabled);
+            }
+
+            new UI.Components.MultiEditorMethods.ControlManager(_fileManager.EditorWorkspaceModel).AddControl(
+              fileName,
+              new SavedExecutionProtocolUI(messages),
+              TypeWindow.Files,
+              path);
+            return;
+          }
+
+          string fileContent = rawContent;
+          var container = EnsureTextEditorContainer();
 
           if (TryActivateAlreadyOpenedFile(container, fileName, path, fileType))
             return;
@@ -94,7 +119,7 @@ namespace UI.Services.FileManager
       if (!_fileManager.EditorWorkspaceModel.FilePaths.ContainsValue(path))
         return false;
 
-      var existingItem = container.DockManager.DockItems.FirstOrDefault(item => item.TabText == fileName);
+      var existingItem = container.DockManager.DockItems.FirstOrDefault(item => item.Title == fileName);
       if (existingItem == null)
         return false;
 
@@ -180,6 +205,19 @@ namespace UI.Services.FileManager
     /// Считывает содержимое указанного файла и определяет его кодировку.
     /// </summary>
     internal (string, Encoding) ReadFileContent(string path)
+    {
+      var (content, encoding) = ReadRawFileContent(path);
+      if (ProtocolFileExtensions.IsTrace(Path.GetExtension(path)))
+      {
+        content = ExecutionProtocolDiagnosticFormatter.PrepareForDisplay(
+          content,
+          DebugAccessConfig.IsDebugEnabled);
+      }
+
+      return (content, encoding);
+    }
+
+    private static (string, Encoding) ReadRawFileContent(string path)
     {
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
       var extention = Path.GetExtension(path).ToLowerInvariant();

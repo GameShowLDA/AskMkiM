@@ -62,6 +62,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
     private ActionSettings? _actionSettings;
 
+    private DateTime _executionStartedAtUtc;
+
     /// <summary>
     /// Объект синхронизации для операций паузы и возобновления выполнения.
     /// </summary>
@@ -202,6 +204,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       _session?.Dispose();
       _session = new ExecutionSession(actionSettings);
+      _executionStartedAtUtc = DateTime.UtcNow;
 
       try
       {
@@ -220,13 +223,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         StepMode = false;
 
         await ProtocolSelfCheck.ClearAllMessagesAsync();
-        if (!ExecutionConfig.GetIsIdleModeEnabled() && !SystemStateManager.GetIsActivePower() && actionSettings.CheckPower)
-        {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.", type: MessageType.Error), skipPause: true);
-          await FinalizeAsync(actionSettings);
-          return;
-        }
-
         if (actionSettings.PreActionDelegate != null)
         {
           await actionSettings.PreActionDelegate(ProtocolSelfCheck.GetCancellationToken());
@@ -300,8 +296,17 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       }
 
       isExit = true;
+      if (actionSettings.ExecutionDuration == TimeSpan.Zero && _executionStartedAtUtc != default)
+      {
+        actionSettings.ExecutionDuration = DateTime.UtcNow - _executionStartedAtUtc;
+      }
+
       LogInformation($"Завершение \"{actionSettings.Name}\"");
       var equipmentUsage = _session?.EquipmentUsage;
+      ProtocolSelfCheck.SetProtocolEnvironmentSnapshot(
+        ExecutionProtocolEnvironmentSnapshotFactory.Create(
+          actionSettings,
+          equipmentUsage?.GetUsedDevices() ?? []));
 
       await _finalizer.FinalizeAsync(
         actionSettings,

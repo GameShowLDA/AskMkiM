@@ -1,10 +1,10 @@
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -33,7 +33,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Асинхронная операция, возвращающая <c>true</c>, если измерение прошло успешно,
     /// или <c>false</c>, если обнаружена ошибка.
     /// </returns>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, PointModel firstPoint,PointModel checkedPoint, double errorResistance);
 
     /// <summary>
     /// Асинхронно выполняет проверку соединённых точек в схеме, формируя новый список цепей (ССИРТ)
@@ -48,8 +48,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       {
         return messages;
       }
-
-      await PublishCheckBlockHeaderAsync(context);
+      if (context.TypeCommand != MeasurementTypeCommand.NE)
+      {
+        await PublishCheckBlockHeaderAsync(context);
+      }
 
       var newGroups = await BuildCheckedGroupsAsync(sourceGroups, context, preMeasurementDelegate, messages);
       context.NewScheme = new SchemeModel(newGroups);
@@ -146,11 +148,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
 
       await context.MessageService.WaitIfPausedAsync();
-      await ShowChainCheckHeaderAsync(chainCopy, context);
+
+      if (context.TypeCommand != MeasurementTypeCommand.NE)
+      {
+        await ShowChainCheckHeaderAsync(chainCopy, context);
+      }
 
       var neCommandModel = GetNeCommandModel(context);
       var isNeCommand = neCommandModel != null;
-      var directPolarity = isNeCommand && ResolvePolarity(chain, neCommandModel!);
+      var directPolarity = isNeCommand && ResolvePolarity(chain, neCommandModel!); // направление проверки диода
 
       var result = await RunChainPassAsync(
         chainCopy.PointModels,
@@ -508,13 +514,15 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       ChainFragmentState state)
     {
       var messageService = context.MessageService;
-
-      await ShowPointCheckHeaderAsync(state.BasePoint, point, messageService);
+      if (context.TypeCommand != MeasurementTypeCommand.NE)
+      {
+        await ShowPointCheckHeaderAsync(state.BasePoint, point, messageService);
+      }
       await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, messageService, revers);
 
       try
       {
-        var measured = await MeasurePointAsync(point, context, messageService);
+        var measured = await MeasurePointAsync(state.BasePoint, point, context, messageService);
         var chainStr = BuildChainString(context, state.BasePoint, point);
 
         LogMeasurement(state.BasePoint, point, measured);
@@ -543,17 +551,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// Выполняет измерение для точки с учётом типа команды и параметров модуля.
     /// </summary>
     private static async Task<(bool Result, double Value)> MeasurePointAsync(
-      PointModel point,
+      PointModel firstPoint,
+      PointModel checkedPoint,
       ConnectedPointContext context,
       IUserInteractionService messageService)
     {
-      var module = EquipmentService.GetModuleByPoint(point);
+      var module = EquipmentService.GetModuleByPoint(checkedPoint);
       var errorResistance = GetMeasurementErrorValue(context, module);
 
       return await context.PerformMeasurementAsync(
         context.Value,
         messageService,
         messageService.GetCancellationToken(),
+        firstPoint,
+        checkedPoint,
         errorResistance);
     }
 

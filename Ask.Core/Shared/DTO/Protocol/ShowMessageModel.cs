@@ -83,6 +83,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     public string Debug { get; set; }
 
     /// <summary>
+    /// Источник записи, сохраняемый для последующего диагностического просмотра под root.
+    /// </summary>
+    public string? DiagnosticSource { get; set; }
+
+    /// <summary>
     /// Получает или задает цвет заголовка сообщения.
     /// </summary>
     public Color? HeaderColor { get; set; }
@@ -133,6 +138,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// Используется сценариями без команд программы контроля, например самоконтролем.
     /// </summary>
     public bool IsStepModeCheckpoint { get; set; }
+
+    /// <summary>
+    /// Признак отображения всей записи цветом успешного результата.
+    /// </summary>
+    public bool UseSuccessColorForEntireMessage { get; set; }
 
     /// <summary>
     /// Итоговый результат выполнения команды протокола.
@@ -205,6 +215,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       IsDeviceMessage = false;
       IsControlProgramCommandHeader = false;
       IsStepModeCheckpoint = false;
+      UseSuccessColorForEntireMessage = false;
       CommandExecutionHasErrors = null;
       IndentLevel = 0;
 

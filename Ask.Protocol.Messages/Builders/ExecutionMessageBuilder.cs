@@ -122,7 +122,7 @@ internal static class ExecutionMessageBuilder
     => new("Анализ на наличие короткого замыкания между точками");
 
   internal static ShowMessageModel BuildLocalizationStepMessage(int step)
-    => new($"Выполнение шага {step}");
+    => new($"Выполнение шага локализации №{step}");
 
   internal static ShowMessageModel BuildGroupPartOperationMessage(string operation)
     => new(operation);

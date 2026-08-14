@@ -12,6 +12,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
+using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.Metrology
@@ -110,10 +111,10 @@ namespace Ask.Engine.Tests.Metrology
         MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
         var result = await fastMeter.ResistanceManager.MeasureResistanceAsync(measurementRange, protocolUI);
 
-        if (!ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          result -= intrinsicValue;
-        }
+        result = ResistanceCompensation.SubtractSwitchResistance(
+          result,
+          intrinsicValue,
+          !ExecutionConfig.GetIsIdleModeEnabled());
 
         var err = result - param;
         Measurements.Add(err);

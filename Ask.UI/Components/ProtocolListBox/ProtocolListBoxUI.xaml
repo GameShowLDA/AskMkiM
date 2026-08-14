@@ -18,6 +18,7 @@
         <local:HeaderToBrushIfNoMessageConverter x:Key="HeaderToBrushIfNoMessageConverter"/>
 
         <DataTemplate x:Key="ProtocolLineContentTemplate">
+            <Grid>
             <TextBlock TextWrapping="Wrap"
                        FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
                        FontFamily="Consolas"
@@ -62,6 +63,25 @@
 
                 <Run Text="{Binding Message.Debug}" Foreground="{DynamicResource TextEditorLineNumberBrush}"/>
             </TextBlock>
+
+            <TextBox Text="{Binding SelectableText, Mode=OneWay}"
+                     IsReadOnly="True"
+                     IsReadOnlyCaretVisible="False"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                     FontFamily="Consolas"
+                     FontWeight="{Binding CommandFontWeight}"
+                     Foreground="Transparent"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="0"
+                     Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}"
+                     SelectionBrush="#993A78A1"
+                     SelectionTextBrush="White"
+                     Cursor="IBeam"
+                     VerticalContentAlignment="Top"/>
+            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="ProtocolLineTemplate">
@@ -240,7 +260,7 @@
                      VirtualizingStackPanel.VirtualizationMode="Recycling"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     SelectionMode="Single"
+                     SelectionMode="Extended"
                      Focusable="True"
                      IsHitTestVisible="True"
                      PreviewMouseWheel="ProtocolListBox_PreviewMouseWheel"
@@ -278,7 +298,7 @@
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="OverridesDefaultStyle" Value="True"/>
-                        <Setter Property="Focusable" Value="False"/>
+                        <Setter Property="Focusable" Value="True"/>
                         <Setter Property="BorderThickness" Value="0"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="Background" Value="Transparent"/>
@@ -299,6 +319,11 @@
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#663A78A1"/>
+                            </Trigger>
+                        </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>

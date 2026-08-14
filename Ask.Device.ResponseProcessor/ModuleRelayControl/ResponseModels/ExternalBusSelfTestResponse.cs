@@ -16,12 +16,14 @@ public sealed class ExternalBusSelfTestResponse : ModuleRelayControlResponse
   /// <summary>
   /// Номер защитного реле шины A.
   /// </summary>
+  [JsonRequired]
   [JsonPropertyName("ProtectReleBusA")]
   public int ProtectRelayBusA { get; init; }
 
   /// <summary>
   /// Номер защитного реле шины B.
   /// </summary>
+  [JsonRequired]
   [JsonPropertyName("ProtectReleBusB")]
   public int ProtectRelayBusB { get; init; }
 
@@ -34,12 +36,14 @@ public sealed class ExternalBusSelfTestResponse : ModuleRelayControlResponse
   /// <summary>
   /// Номер основного реле шины A.
   /// </summary>
+  [JsonRequired]
   [JsonPropertyName("MainReleBusA")]
   public int MainRelayBusA { get; init; }
 
   /// <summary>
   /// Номер основного реле шины B.
   /// </summary>
+  [JsonRequired]
   [JsonPropertyName("MainReleBusB")]
   public int MainRelayBusB { get; init; }
 

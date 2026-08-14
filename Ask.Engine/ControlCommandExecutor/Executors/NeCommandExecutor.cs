@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -11,6 +12,7 @@ using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
@@ -44,7 +46,19 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
       var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
-      await SettingMeter(meter, context.Console);
+      try
+      {
+        await SettingMeter(meter, context.Console.GetCancellationToken());
+      }
+      catch (OperationCanceledException) when (context.Console.GetCancellationToken().IsCancellationRequested)
+      {
+        throw;
+      }
+      catch (Exception ex)
+      {
+        await PublishHardwareErrorAsync(context.Console, ex.Message);
+        return;
+      }
 
       if (command.LowerLimitVoltage.HasValue)
       {
@@ -58,8 +72,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       ConnectedPointContext pointContext = new ConnectedPointContext();
       ConnectedPointChecker.PerformMeasurementAsync measure =
-        (value, messageService, cancellationToken, errorResistance) =>
-          DioideMeasure(value, messageService, cancellationToken, pointContext, errorResistance);
+        (value, messageService, cancellationToken, firstPoint, checkedPoint, errorResistance) =>
+          DioideMeasure(value, messageService, cancellationToken, pointContext, firstPoint, checkedPoint, errorResistance);
 
       pointContext.SchemeModel = command.Scheme;
       pointContext.CommandManager = context.CommandExecutionManager;
@@ -96,6 +110,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       IUserInteractionService messageService,
       CancellationToken cancellationToken,
       ConnectedPointContext pointContext,
+      PointModel firstPoint,
+      PointModel checkedPoint,
       double errorResistance = 0)
     {
       var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
@@ -103,7 +119,23 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext, messageService);
+        try
+        {
+          answer = await GetDiodeMeasurementValueAsync(
+            meter,
+            value,
+            pointContext,
+            messageService,
+            cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+          throw;
+        }
+        catch (DeviceException)
+        {
+          return (false, 0d);
+        }
 
         if (answer < 0)
         {
@@ -114,6 +146,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var measurementResult = MeasurementResultEvaluator.Evaluate(
           measurementRange,
           pointContext.IsOverloadExpected);
+        var points = $"{pointContext.CurrentNeDirectionSign}{firstPoint}, {checkedPoint.ToString()}";
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.NE,
           new MeasurementRange(
@@ -121,6 +154,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             measurementRange.LowerBound,
             measurementRange.UpperBound),
           measurementResult.IsSuccessful,
+          points: points,
           outputService: messageService);
         return measurementResult;
       }, messageService);
@@ -135,7 +169,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       IMultimeter meter,
       double value,
       ConnectedPointContext pointContext,
-      IUserInteractionService messageService)
+      IUserInteractionService messageService,
+      CancellationToken cancellationToken)
     {
       if (await ShouldReturnOverloadInIdleReverseModeAsync(pointContext))
       {
@@ -143,7 +178,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
-      return await meter.DiodeManager.CheckDiodeAsync(measurementRange, messageService);
+      return await meter.DiodeManager.CheckDiodeAsync(
+        measurementRange,
+        messageService,
+        cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -159,9 +197,29 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       && !ExecutionConfig.GetIsErrorSimulationEnabled()
       && pointContext.IsOverloadExpected;
 
-    private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)
+    private async Task SettingMeter(
+      IMultimeter meter,
+      CancellationToken cancellationToken)
     {
-      await meter.DiodeManager.SetDiodeModeAsync(userMessageService);
+      await meter.DiodeManager.SetDiodeModeAsync(
+        userMessageService: null,
+        cancellationToken: cancellationToken);
+    }
+
+    private static Task PublishHardwareErrorAsync(
+      IUserInteractionService messageService,
+      string error)
+    {
+      return messageService.ShowMessageAsync(
+        new ShowMessageModel(
+          header: "Ошибка оборудования при выполнении НЭ",
+          message: $"Команда НЭ завершена, программа контроля продолжит выполнение. {error}",
+          type: ShowMessageModel.MessageType.Error)
+        {
+          ExecutionError = true,
+          IsDeviceMessage = true,
+        },
+        skipPause: true);
     }
   }
 }

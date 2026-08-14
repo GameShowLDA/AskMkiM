@@ -129,7 +129,8 @@ internal static class MeasurementMessageBuilder
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     string? chains = null,
-    string comparisonSign = "=")
+    string comparisonSign = "=", 
+    string points = null)
   {
     CommandDisplayInfoAttribute? displayInfo = typeof(MeasurementTypeCommand)
       .GetMember(measurementTypeCommand.ToString())
@@ -146,7 +147,7 @@ internal static class MeasurementMessageBuilder
     ArgumentNullException.ThrowIfNull(measurementRange);
 
     string chainDisplay = chains ?? string.Empty;
-    string header = BuildMeasurementHeader(chainDisplay, measurementRange, displayInfo.Unit);
+    string header = BuildMeasurementHeader(chainDisplay, measurementRange, displayInfo.Unit, points);
 
     string measuredValue = BuildMeasuredValue(
       measurementTypeCommand,
@@ -161,14 +162,15 @@ internal static class MeasurementMessageBuilder
     Enum measurementUnit,
     MeasurementRange measurementRange,
     string? measurementTarget = null,
-    string comparisonSign = "=")
+    string comparisonSign = "=",
+    string points = null)
   {
     ArgumentNullException.ThrowIfNull(measurementUnit);
     ArgumentNullException.ThrowIfNull(measurementRange);
 
     string unit = measurementUnit.GetUnit();
     string symbol = measurementUnit.GetQuantitySymbol().ToString();
-    string header = BuildMeasurementHeader(measurementTarget ?? string.Empty, measurementRange, unit);
+    string header = BuildMeasurementHeader(measurementTarget ?? string.Empty, measurementRange, unit, points);
     string message = $"{symbol}изм{comparisonSign} " +
       $"{MeasurementValueFormatter.Format(measurementRange.TargetValue)} {unit}";
 
@@ -222,17 +224,7 @@ internal static class MeasurementMessageBuilder
       return $"{prefix}ПРОБОЙ";
     }
 
-    if (MeasurementValueFormatter.IsOverloadValue(measurementRange.TargetValue) &&
-        measurementTypeCommand is MeasurementTypeCommand.EHT or
-          MeasurementTypeCommand.KC or
-          MeasurementTypeCommand.PR or
-          MeasurementTypeCommand.NE)
-    {
-      return $"{prefix}Overload";
-    }
-
-    if (MeasurementValueFormatter.IsOverloadValue(measurementRange.TargetValue, 9.899999999999999E+46) &&
-        measurementTypeCommand == MeasurementTypeCommand.IE)
+    if (MeasurementValueFormatter.IsOverloadValue(measurementRange.TargetValue))
     {
       return $"{prefix}Overload";
     }
@@ -243,7 +235,8 @@ internal static class MeasurementMessageBuilder
   private static string BuildMeasurementHeader(
     string chains,
     MeasurementRange measurementRange,
-    string unit)
+    string unit,
+    string points)
   {
     string range = measurementRange.UpperBound == -1
       ? $"{FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}"
@@ -251,9 +244,11 @@ internal static class MeasurementMessageBuilder
         ? $"{unit}<{FormatMeasurementLimit(measurementRange.UpperBound)}"
         : $"{FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}<" +
           FormatMeasurementLimit(measurementRange.UpperBound);
-
-    return string.IsNullOrWhiteSpace(chains)
+    var result = string.IsNullOrWhiteSpace(points)
       ? $"({range})"
+      : $"{points} ({range})";
+    return string.IsNullOrWhiteSpace(chains)
+      ? $"{result}"
       : $"{chains} ({range})";
   }
 

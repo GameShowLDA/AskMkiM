@@ -5,6 +5,7 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats.Apk;
 using Ask.Core.Services.FileFormats.Opk;
 using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Static;
@@ -235,11 +236,26 @@ namespace MainWindowProgram.Services
         string executionProtocolPath = Path.ChangeExtension(fullResultPath, traceExtension);
 
         string resultProtocolText = ReadSavedProtocolText(fullResultPath);
-        string executionProtocolText = File.Exists(executionProtocolPath)
+        string rawExecutionProtocol = File.Exists(executionProtocolPath)
           ? ReadSavedProtocolText(executionProtocolPath)
-          : $"Связанный протокол выполнения не найден:\n{executionProtocolPath}";
-
-        var viewer = new SavedProtocolPairUI(executionProtocolText, resultProtocolText);
+          : string.Empty;
+        SavedProtocolPairUI viewer;
+        if (ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
+              rawExecutionProtocol,
+              DebugAccessConfig.IsDebugEnabled,
+              out var messages))
+        {
+          viewer = new SavedProtocolPairUI(messages, resultProtocolText);
+        }
+        else
+        {
+          var legacyMessages = File.Exists(executionProtocolPath)
+            ? ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
+              rawExecutionProtocol,
+              DebugAccessConfig.IsDebugEnabled)
+            : new[] { new ShowMessageModel($"Связанный протокол выполнения не найден:\n{executionProtocolPath}") };
+          viewer = new SavedProtocolPairUI(legacyMessages, resultProtocolText);
+        }
         _multiWindow.WorkspaceService.AddControl(
           Path.GetFileName(fullResultPath),
           viewer,

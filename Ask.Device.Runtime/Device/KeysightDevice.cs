@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
+using Ask.Device.Communication.Common;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base.Connected;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements;
@@ -109,6 +110,7 @@ namespace Ask.Device.Runtime.Device
       DeviceType = DeviceType.FastMeter;
       ConnectionInfo.IsConnected = false;
       ConnectedProfile.Port = 5025;
+      ConnectedProfile.InitialBeeperDisableCommands = ["SYST:BEEP:STAT OFF"];
 
       CapacitanceManager = new CapacitanceMeasurementBase(this);
       ConnectableManager = new Transport(this);
@@ -119,7 +121,9 @@ namespace Ask.Device.Runtime.Device
       TextMessage = new Function.Keysight3466new.TextMessage(this);
       DiodeManager = new DiodeMeasurementBase(this);
       SelfTestManager = new SelfTestManager();
-      DeviceProtocol = new TcpProtocol(this, ConnectedProfile.Port);
+      DeviceProtocol = new HardwareWatchdogProtocol(
+        new TcpProtocol(this, ConnectedProfile.Port),
+        Name);
 
       ResistanceCommands = new ResistanceMeasurementProfile()
       {

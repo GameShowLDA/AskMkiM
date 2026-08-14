@@ -27,7 +27,7 @@ public static class DeviceBusCommutationResponseProcessor
   /// <param name="device">Сбрасываемое устройство.</param>
   /// <returns><see langword="true"/>, если УКШ подтвердил команду сброса.</returns>
   public static bool CheckReset(string response, ISwitchingDevice device)
-    => JsonCommandResponseChecker.Check(response, device, "2.0.1");
+    => JsonCommandResponseChecker.Check(response, device, "2.0.1.");
 
   /// <summary>
   /// Проверяет произвольное JSON-подтверждение команды УКШ.

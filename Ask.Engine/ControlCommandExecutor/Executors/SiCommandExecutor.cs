@@ -42,7 +42,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<SiCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = string.Empty;
+      string? nestedCommandHeader = null;
       SetActiveLine(context, command);
 
       if (context.IsInvokedByAnotherCommand)
@@ -56,10 +56,12 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           nameCommand = $"{command.CommandNumber} ПИ/{command.Mnemonic}";
         }
 
-        message = nameCommand;
+        nestedCommandHeader = nameCommand;
       }
 
-      message += CommandMessages.FormatSourceLines(command.SourceLines);
+      var message = nestedCommandHeader == null
+        ? CommandMessages.FormatSourceLines(context.ProtocolSourceLines)
+        : CommandMessages.FormatSourceLinesWithHeader(nestedCommandHeader, context.ProtocolSourceLines);
       var total = Stopwatch.StartNew();
       await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
@@ -146,7 +148,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, 60000);
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, -1);
 
         var measurement = Stopwatch.StartNew();
         var answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
@@ -183,7 +185,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
-        MeasurementRange measurementRange = new MeasurementRange(value, value, 60000);
+        MeasurementRange measurementRange = new MeasurementRange(value, value, -1);
 
         var measurement = Stopwatch.StartNew();
         answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);

@@ -1,9 +1,10 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseModels;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.Checkers;
 using Ask.Protocol.Messages.EntryPoints;
 using System.Text.Json;
 
@@ -129,12 +130,15 @@ public static class ModuleRelayControlResponseProcessor
       response,
       module,
       $"4.{busType}.{busNumber}.{(connect ? 1 : 2)}");
-    await DeviceMessages.PublishOperationResultAsync(
-      module,
-      $"{(connect ? "Подключение" : "Отключение")} шины [{bus}]",
-      result,
-      1,
-      outputService);
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await DeviceMessages.PublishOperationResultAsync(
+        module,
+        $"{(connect ? "Подключение" : "Отключение")} шины [{bus}]",
+        result,
+        1,
+        outputService);
+    }
     return result;
   }
 
@@ -191,11 +195,11 @@ public static class ModuleRelayControlResponseProcessor
     bool result = CheckCommandResponse(response, module, $"11.{firstPoint}.{lastPoint}.{action}");
     string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шине [{bus}]";
     await DeviceMessages.PublishOperationResultAsync(
-      module,
-      $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
-      result,
-      1,
-      outputService);
+    module,
+    $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
+    result,
+    1,
+    outputService);
     return result;
   }
 
@@ -207,12 +211,16 @@ public static class ModuleRelayControlResponseProcessor
     IUserInteractionService? outputService = null)
   {
     bool result = CheckCommandResponse(response, module, $"81.{pointNumber}.{(int)bus}.0");
-    await DeviceMessages.PublishOperationResultAsync(
+    
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await DeviceMessages.PublishOperationResultAsync(
       module,
       $"Переподключение точки {pointNumber} к шине [{bus}]",
       result,
       1,
       outputService);
+    }
     return result;
   }
 
@@ -356,16 +364,17 @@ public static class ModuleRelayControlResponseProcessor
       module.NumberChassis,
       module.Number,
       pointNumber);
-
-    await SelfTestMessages.PublishResultAsync(
-      $"Точка {pointNumber}",
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await SelfTestMessages.PublishResultAsync(
+      $"{module.NumberChassis}.{module.Number}.{pointNumber}",
       isValid,
       userInteractionService,
       indentLevel: 1,
       executionErrorMessage: isValid ? null : string.Empty,
       executionError: !isValid,
       canBeDeleted: isValid);
-
+    }
     if (isValid)
     {
       return true;
@@ -378,29 +387,30 @@ public static class ModuleRelayControlResponseProcessor
         lastLine,
         $"{module.NumberChassis}.{model.NumberDevice}.{model.NumberPoint}"));
     }
-
-    await SelfTestMessages.PublishResultAsync(
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await SelfTestMessages.PublishResultAsync(
       "Подключение точки",
       model.ConnectPoint,
       userInteractionService,
       indentLevel: 2,
       executionErrorMessage: model.ConnectPoint ? string.Empty : $"Точка[{pointNumber}] - Подключение точки",
       canBeDeleted: model.ConnectPoint);
-    await SelfTestMessages.PublishResultAsync(
-      "\t\tОтключение с шины А",
-      model.DisconnectBusA,
-      userInteractionService,
-      indentLevel: 2,
-      executionErrorMessage: model.DisconnectBusA ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины A",
-      canBeDeleted: model.DisconnectBusA);
-    await SelfTestMessages.PublishResultAsync(
-      "\t\tОтключение с шины B",
-      model.DisconnectBusB,
-      userInteractionService,
-      indentLevel: 2,
-      executionErrorMessage: model.DisconnectBusB ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины B",
-      canBeDeleted: model.DisconnectBusB);
-
+      await SelfTestMessages.PublishResultAsync(
+        "\t\tОтключение с шины А",
+        model.DisconnectBusA,
+        userInteractionService,
+        indentLevel: 2,
+        executionErrorMessage: model.DisconnectBusA ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины A",
+        canBeDeleted: model.DisconnectBusA);
+      await SelfTestMessages.PublishResultAsync(
+        "\t\tОтключение с шины B",
+        model.DisconnectBusB,
+        userInteractionService,
+        indentLevel: 2,
+        executionErrorMessage: model.DisconnectBusB ? string.Empty : $"Точка[{pointNumber}] - Отключение с шины B",
+        canBeDeleted: model.DisconnectBusB);
+    }
     return false;
   }
 
@@ -444,15 +454,16 @@ public static class ModuleRelayControlResponseProcessor
       module.NumberChassis,
       module.Number,
       busNumber);
-
-    await SelfTestMessages.PublishResultAsync(
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await SelfTestMessages.PublishResultAsync(
       $"Шины AB{busNumber}",
       isValid,
       userInteractionService,
       indentLevel: 2,
       executionError: !isValid,
       canBeDeleted: isValid);
-
+    }
     if (isValid)
     {
       return true;

@@ -14,13 +14,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
   internal class SetModeBase
   {
     /// <inheritdoc />
-    static public async Task<bool> SetModeAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
+    static public async Task<bool> SetModeAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      IUserInteractionService? userMessageService = null,
+      CancellationToken cancellationToken = default)
     {
       var header = GetModeHeader(profile.TypeMode);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await SetModeCoreAsync(device, profile, userMessageService);
+        cancellationToken.ThrowIfCancellationRequested();
+        var succes = await SetModeCoreAsync(device, profile, cancellationToken);
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
@@ -40,7 +45,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     }
 
     /// <inheritdoc />
-    static private async Task<bool> SetModeCoreAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
+    static private async Task<bool> SetModeCoreAsync(
+      IMultimeter device,
+      IMeasurementProfile profile,
+      CancellationToken cancellationToken)
     {
       if (device.TypeMode == profile.TypeMode)
       {
@@ -52,12 +60,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty);
+      await DeviceProtocolEmulator.QueryMultimeterAsync(
+        device,
+        profile.SetMode,
+        string.Empty,
+        cancellationToken: cancellationToken);
       var answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
         device,
         profile.GetMode,
         profile.CheckMode,
-        timeout: profile.Timeout);
+        timeout: profile.Timeout,
+        cancellationToken: cancellationToken);
       if (MultimeterResponseProcessor.CheckMode(answer, profile.CheckMode))
       {
         device.TypeMode = profile.TypeMode;

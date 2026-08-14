@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -168,6 +169,37 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
+      if (e.OriginalSource is TextBox textBox)
+      {
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A)
+        {
+          textBox.SelectAll();
+          e.Handled = true;
+          return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C && textBox.SelectionLength > 0)
+        {
+          Clipboard.SetText(textBox.SelectedText);
+          e.Handled = true;
+          return;
+        }
+      }
+
+      if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A)
+      {
+        ProtocolListBox.SelectAll();
+        e.Handled = true;
+        return;
+      }
+
+      if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
+      {
+        CopySelectedLines();
+        e.Handled = true;
+        return;
+      }
+
       if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
       {
         e.Handled = true;
@@ -175,6 +207,35 @@ namespace Ask.UI.Components.ProtocolListBox
         var text = GetText();
         await PrintOperationNotificationService.PrintTextAsync(text, "Печать протокола");
       }
+    }
+
+    private void CopySelectedLines()
+    {
+      var selected = ProtocolListBox.SelectedItems
+        .OfType<ProtocolDisplayItem>()
+        .ToHashSet();
+      if (selected.Count == 0)
+        return;
+
+      string text = string.Join(
+        Environment.NewLine,
+        DisplayItems
+          .Where(selected.Contains)
+          .Select(item => FormatDisplayItemForClipboard(item.Message)));
+
+      if (!string.IsNullOrEmpty(text))
+        Clipboard.SetText(text);
+    }
+
+    private static string FormatDisplayItemForClipboard(ShowMessageModel message)
+    {
+      string line = ExecutionProtocolLineFormatter.Format(message);
+      if (string.IsNullOrEmpty(message.Debug))
+        return line;
+
+      return string.IsNullOrEmpty(line)
+        ? message.Debug.TrimStart('\r', '\n')
+        : line + message.Debug;
     }
 
     private void ProtocolListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -239,6 +300,31 @@ namespace Ask.UI.Components.ProtocolListBox
 
       return Application.Current.Dispatcher.Invoke(
         () => (IReadOnlyList<ShowMessageModel>)_historyMessages.ToList());
+    }
+
+    /// <summary>
+    /// Загружает сохранённые сообщения в представление протокола.
+    /// </summary>
+    public void LoadMessages(IEnumerable<ShowMessageModel> messages)
+    {
+      ArgumentNullException.ThrowIfNull(messages);
+
+      _historyMessages.Clear();
+      bool useSyntaxHighlighting = UserInterfaceConfig.GetSyntaxHighlighting();
+      bool useCommandBackgroundHighlighting = UserInterfaceConfig.GetCommandBodyBackgroundHighlighting();
+      bool useChainPointBackgroundHighlighting = UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting();
+
+      foreach (var message in messages)
+      {
+        ApplyThemeColors(
+          message,
+          useSyntaxHighlighting,
+          useCommandBackgroundHighlighting,
+          useChainPointBackgroundHighlighting);
+        _historyMessages.Add(message);
+      }
+
+      RestoreVisibleItems();
     }
 
     private bool HandleZoomShortcuts(KeyEventArgs e)
@@ -695,6 +781,15 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
+      if (message.UseSuccessColorForEntireMessage)
+      {
+        Color successColor = GetThemeColor("TestsProtocolMessageSuccesForeground", Colors.Green);
+        message.HeaderColor = successColor;
+        message.MessageColor = successColor;
+        message.TimeColor = successColor;
+        return;
+      }
+
       switch (message.Status)
       {
         case ShowMessageModel.MessageType.Success:
@@ -819,6 +914,14 @@ namespace Ask.UI.Components.ProtocolListBox
         var activeGroup = _currentGroup ?? _pendingGroup;
         activeGroup?.SetExecutionResult(hasErrors);
       }).Task;
+    }
+
+    /// <summary>
+    /// Завершает текущую группу команды, чтобы последующие сообщения отображались вне неё.
+    /// </summary>
+    public Task FinalizeCurrentCommandGroupAsync()
+    {
+      return Application.Current.Dispatcher.InvokeAsync(FinalizeLatestCommandGroup).Task;
     }
 
     public async Task ShowMessageAsync(
