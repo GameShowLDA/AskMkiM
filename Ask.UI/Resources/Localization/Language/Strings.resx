@@ -517,7 +517,7 @@
     <value>Симуляция ошибок оборудования</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%.</value>
+    <value>Выберите оборудование, для которого каждая не измерительная команда должна завершаться ошибкой (вероятность 100%).</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>

@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -5,6 +6,7 @@ using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.DTO.Devices.Rack;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -256,17 +258,24 @@ public static class DeviceConfigurationService
       $"В разделе \"{sectionName}\" есть привязка к несуществующим шасси: {string.Join(", ", unknownChassis)}.");
   }
 
-  private static ChassisManagerDto ToDto(IChassisManager item) => item.Convert();
+  private static ChassisManagerDto ToDto(IChassisManager item) => PreserveHardwareSimulation(item, item.Convert());
 
-  private static RackDto ToDto(IRack item) => item.Convert();
+  private static RackDto ToDto(IRack item) => PreserveHardwareSimulation(item, item.Convert());
 
-  private static RelaySwitchModuleDto ToDto(IRelaySwitchModule item) => item.Convert();
+  private static RelaySwitchModuleDto ToDto(IRelaySwitchModule item) => PreserveHardwareSimulation(item, item.Convert());
 
-  private static SwitchingDeviceDto ToDto(ISwitchingDevice item) => item.Convert();
+  private static SwitchingDeviceDto ToDto(ISwitchingDevice item) => PreserveHardwareSimulation(item, item.Convert());
 
-  private static PowerSourceModuleDto ToDto(IPowerSourceModule item) => item.Convert();
+  private static PowerSourceModuleDto ToDto(IPowerSourceModule item) => PreserveHardwareSimulation(item, item.Convert());
 
-  private static FastMeterDto ToDto(IMultimeter item) => item.Convert();
+  private static FastMeterDto ToDto(IMultimeter item) => PreserveHardwareSimulation(item, item.Convert());
 
-  private static BreakdownTesterDto ToDto(IBreakdownTester item) => item.Convert();
+  private static BreakdownTesterDto ToDto(IBreakdownTester item) => PreserveHardwareSimulation(item, item.Convert());
+
+  private static TDto PreserveHardwareSimulation<TDto>(IDevice source, TDto dto)
+    where TDto : DeviceDto
+  {
+    dto.IsHardwareFailureSimulationEnabled = source.IsHardwareFailureSimulationEnabled;
+    return dto;
+  }
 }

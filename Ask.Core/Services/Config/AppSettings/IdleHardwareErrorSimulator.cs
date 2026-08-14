@@ -1,3 +1,5 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+
 namespace Ask.Core.Services.Config.AppSettings;
 
 /// <summary>
@@ -5,9 +7,6 @@ namespace Ask.Core.Services.Config.AppSettings;
 /// </summary>
 public static class IdleHardwareErrorSimulator
 {
-  private const int ProbabilityDenominator = 2;
-  private const int FailureRoll = 0;
-
   /// <summary>
   /// Текст ответа для имитированной ошибки выполнения команды оборудования.
   /// </summary>
@@ -20,33 +19,11 @@ public static class IdleHardwareErrorSimulator
   /// <see langword="true"/>, если для текущего вызова выбрана аппаратная ошибка.
   /// В противном случае — <see langword="false"/>.
   /// </returns>
-  public static bool ShouldSimulateHardwareError()
+  public static bool ShouldSimulateHardwareError(IDevice device)
   {
-    return ShouldSimulateHardwareError(Random.Shared.Next(ProbabilityDenominator));
-  }
+    ArgumentNullException.ThrowIfNull(device);
 
-  /// <summary>
-  /// Проверяет результат попытки с заданным случайным выбором.
-  /// </summary>
-  /// <param name="roll">Случайное целое число: ноль или один.</param>
-  /// <returns>
-  /// <see langword="true"/>, если настройки разрешают симуляцию и выбрана аппаратная ошибка.
-  /// В противном случае — <see langword="false"/>.
-  /// </returns>
-  internal static bool ShouldSimulateHardwareError(int roll)
-  {
     return ExecutionConfig.GetIsIdleModeEnabled()
-      && ExecutionConfig.GetIsHardwareErrorSimulationEnabled()
-      && IsFailureRoll(roll);
+      && device.IsHardwareFailureSimulationEnabled;
   }
-
-  /// <summary>
-  /// Проверяет результат случайного выбора для вероятности один к двум.
-  /// </summary>
-  /// <param name="roll">Случайное целое число: ноль или один.</param>
-  /// <returns>
-  /// <see langword="true"/>, если число соответствует аппаратной ошибке.
-  /// В противном случае — <see langword="false"/>.
-  /// </returns>
-  internal static bool IsFailureRoll(int roll) => roll == FailureRoll;
 }

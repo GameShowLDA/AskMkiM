@@ -514,7 +514,7 @@
     <value>Hardware error simulation</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Simulates a non-measurement hardware command failure with a 50% probability.</value>
+    <value>Select equipment whose every non-measurement command must fail (100% probability).</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Operation time output</value>

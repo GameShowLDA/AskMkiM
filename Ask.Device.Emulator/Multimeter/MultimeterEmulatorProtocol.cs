@@ -1,4 +1,3 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 
 namespace Ask.Device.Emulator.Multimeter;
@@ -9,10 +8,18 @@ namespace Ask.Device.Emulator.Multimeter;
 internal sealed class MultimeterEmulatorProtocol : IDeviceProtocol
 {
   private readonly string _response;
+  private readonly Func<bool> _hardwareErrorProvider;
 
   public MultimeterEmulatorProtocol(string response)
+    : this(response, () => false)
+  {
+  }
+
+  internal MultimeterEmulatorProtocol(string response, Func<bool> hardwareErrorProvider)
   {
     _response = response;
+    _hardwareErrorProvider = hardwareErrorProvider
+      ?? throw new ArgumentNullException(nameof(hardwareErrorProvider));
   }
 
   /// <inheritdoc />
@@ -28,9 +35,18 @@ internal sealed class MultimeterEmulatorProtocol : IDeviceProtocol
     CancellationToken cancellationToken = default)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    string response = IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+    string response = _hardwareErrorProvider() && !IsMeasurementCommand(command)
       ? string.Empty
       : _response;
     return Task.FromResult(response);
+  }
+
+  private static bool IsMeasurementCommand(string command)
+  {
+    string normalized = command.Trim();
+    return normalized.Equals("READ?", StringComparison.OrdinalIgnoreCase)
+      || normalized.StartsWith("MEAS", StringComparison.OrdinalIgnoreCase)
+      || normalized.StartsWith("FETC", StringComparison.OrdinalIgnoreCase)
+      || normalized.StartsWith("FETCH", StringComparison.OrdinalIgnoreCase);
   }
 }

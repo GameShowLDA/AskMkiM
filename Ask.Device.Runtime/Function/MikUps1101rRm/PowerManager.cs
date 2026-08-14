@@ -54,7 +54,7 @@ namespace Ask.Device.Runtime.Function.MikUps1101rRm
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device);
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(VerifyPowerCommand, timeout: 1_000);
@@ -67,9 +67,9 @@ namespace Ask.Device.Runtime.Function.MikUps1101rRm
     /// <exception cref="DeviceException">
     /// Выбрасывается, если для текущего вызова выбрана аппаратная ошибка.
     /// </exception>
-    private static void ThrowIfHardwareErrorSimulated()
+    private void ThrowIfHardwareErrorSimulated()
     {
-      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
       {
         throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
       }

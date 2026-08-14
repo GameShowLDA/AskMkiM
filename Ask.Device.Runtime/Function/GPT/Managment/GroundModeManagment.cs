@@ -54,7 +54,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError() && _groundMode;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_gptModel) && _groundMode;
       }
 
       return await GroundModeHelper.GetGroundModeAsync(_gptModel, _delay);
