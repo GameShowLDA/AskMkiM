@@ -121,7 +121,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
 
               return isSuccessful;
 
-            }, protocolUI);
+            }, protocolUI, measurementTask: true);
           }
           else
           {

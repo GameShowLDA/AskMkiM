@@ -169,6 +169,7 @@ internal sealed class ApplicationAutoConfigurationService
       IsHardwareErrorSimulationMode = false,
       StepByStepMode = false,
       StopOnError = false,
+      RepeatMeasurement = false,
       LegacyCompatibilityMode = false
     };
 

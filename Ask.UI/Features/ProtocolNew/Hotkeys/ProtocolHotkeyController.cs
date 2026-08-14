@@ -46,7 +46,8 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           $"canStart={_context.CanStart}, canPause={_context.CanPause}, canContinue={_context.CanContinue}");
       }
 
-      if (drawerBlocksInput || textInputFocused)
+      if (drawerBlocksInput
+          || (textInputFocused && !CanHandleWhileTextInputFocused(key, modifiers)))
       {
         return;
       }
@@ -105,6 +106,31 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           NotifySpecialKey(sender, e, key);
           break;
       }
+    }
+
+    /// <summary>
+    /// Проверяет доступность команды выполнения при сохранённом фокусе в поле ввода.
+    /// </summary>
+    /// <param name="key">Нажатая клавиша.</param>
+    /// <param name="modifiers">Активные клавиши-модификаторы.</param>
+    /// <returns>
+    /// <see langword="true"/>, если клавиша соответствует доступной команде выполнения.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private bool CanHandleWhileTextInputFocused(Key key, ModifierKeys modifiers)
+    {
+      if (modifiers != ModifierKeys.None)
+      {
+        return false;
+      }
+
+      return key switch
+      {
+        Key.P => _context.CanContinue || _context.CanPause,
+        Key.Escape => _context.CanExit,
+        Key.R => _context.CanRepeat,
+        _ => false
+      };
     }
 
     /// <summary>Проверяет, находится ли фокус в элементе ввода текста.</summary>

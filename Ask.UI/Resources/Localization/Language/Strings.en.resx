@@ -468,6 +468,12 @@
   <data name="settings.execution.stopOnError.description" xml:space="preserve">
     <value>Pauses execution when an error occurs so the operator can choose the next action deliberately.</value>
   </data>
+  <data name="settings.execution.repeatMeasurement.title" xml:space="preserve">
+    <value>Repeat measurement</value>
+  </data>
+  <data name="settings.execution.repeatMeasurement.description" xml:space="preserve">
+    <value>Allows individual equipment measurements to be repeated. Does not repeat the entire command, test, or control program.</value>
+  </data>
   <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
     <value>Step-by-step mode</value>
   </data>

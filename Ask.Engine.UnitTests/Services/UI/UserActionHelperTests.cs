@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -8,8 +9,88 @@ using Moq;
 
 namespace Ask.Engine.UnitTests.Services.UI;
 
+[Collection("ExecutionConfigCollection")]
 public sealed class UserActionHelperTests
 {
+  [Fact]
+  public async Task EnabledMeasurementRepeatRetriesMeasurementInsideControlCommand()
+  {
+    var original = ExecutionConfig.GetExecutionModelSnapshot();
+    var configured = ExecutionConfig.GetExecutionModelSnapshot();
+    configured.RepeatMeasurement = true;
+
+    try
+    {
+      await ExecutionConfig.SetExecutionModel(configured);
+      var interaction = CreateInteractionService(
+        requests: null,
+        UserAction.Retry,
+        UserAction.Continue);
+      var results = new Queue<bool>([false, true]);
+      int calls = 0;
+
+      using (ControlProgramCommandExecutionContext.Enter())
+      {
+        bool result = await UserActionHelper.GetRunWithUserRepeatAsync(
+          () =>
+          {
+            calls++;
+            return Task.FromResult(results.Dequeue());
+          },
+          interaction.Object,
+          measurementTask: true);
+
+        Assert.True(result);
+      }
+
+      Assert.Equal(2, calls);
+      interaction.Verify(
+        service => service.WaitRetryOrContinueAsync(),
+        Times.Once);
+    }
+    finally
+    {
+      await ExecutionConfig.SetExecutionModel(original);
+    }
+  }
+
+  [Fact]
+  public async Task DisabledMeasurementRepeatDoesNotPauseInsideControlCommand()
+  {
+    var original = ExecutionConfig.GetExecutionModelSnapshot();
+    var configured = ExecutionConfig.GetExecutionModelSnapshot();
+    configured.RepeatMeasurement = false;
+
+    try
+    {
+      await ExecutionConfig.SetExecutionModel(configured);
+      var interaction = CreateInteractionService(requests: null, UserAction.Retry);
+      int calls = 0;
+
+      using (ControlProgramCommandExecutionContext.Enter())
+      {
+        bool result = await UserActionHelper.GetRunWithUserRepeatAsync(
+          () => Task.FromResult(++calls > 1),
+          interaction.Object,
+          measurementTask: true);
+
+        Assert.False(result);
+      }
+
+      Assert.Equal(1, calls);
+      interaction.Verify(
+        service => service.WaitUserActionAsync(
+          It.IsAny<bool>(),
+          It.IsAny<bool>(),
+          It.IsAny<bool>()),
+        Times.Never);
+    }
+    finally
+    {
+      await ExecutionConfig.SetExecutionModel(original);
+    }
+  }
+
   [Fact]
   public async Task SuccessfulInitialAttemptDoesNotRequestUserAction()
   {
@@ -259,6 +340,61 @@ public sealed class UserActionHelperTests
   }
 
   [Fact]
+  public async Task ControlProgramCommandDoesNotRequestActionForNestedFailure()
+  {
+    var interaction = CreateInteractionService(
+      requests: null,
+      UserAction.Retry);
+    int calls = 0;
+
+    using (ControlProgramCommandExecutionContext.Enter())
+    {
+      bool result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        () =>
+        {
+          calls++;
+          return Task.FromResult(false);
+        },
+        interaction.Object,
+        deviceTask: true);
+
+      Assert.False(result);
+    }
+
+    Assert.Equal(1, calls);
+    interaction.Verify(
+      service => service.WaitUserActionAsync(
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>()),
+      Times.Never);
+  }
+
+  [Fact]
+  public async Task ControlProgramCommandPreservesNestedException()
+  {
+    var interaction = CreateInteractionService();
+
+    using (ControlProgramCommandExecutionContext.Enter())
+    {
+      var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        () => UserActionHelper.GetRunWithUserRepeatAsync(
+          () => Task.FromException<bool>(new InvalidOperationException("failure")),
+          interaction.Object,
+          deviceTask: true));
+
+      Assert.Equal("failure", exception.Message);
+    }
+
+    interaction.Verify(
+      service => service.WaitUserActionAsync(
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>()),
+      Times.Never);
+  }
+
+  [Fact]
   public async Task FinishCancelsCurrentCallChain()
   {
     var interaction = CreateInteractionService(
@@ -328,6 +464,9 @@ public sealed class UserActionHelperTests
         requests?.Add((force, hardware, canContinue));
         return actionQueue.Count == 0 ? UserAction.None : actionQueue.Dequeue();
       });
+    interaction
+      .Setup(service => service.WaitRetryOrContinueAsync())
+      .ReturnsAsync(() => actionQueue.Count == 0 ? UserAction.None : actionQueue.Dequeue());
 
     return interaction;
   }

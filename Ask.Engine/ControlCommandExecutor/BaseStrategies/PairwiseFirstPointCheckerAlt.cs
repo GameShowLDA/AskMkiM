@@ -2,6 +2,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -273,57 +274,50 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(point, context.MessageService, context.IsPolarityReversed);
             if (CanMeasurePair(basePointConnectionError, currentPointError))
             {
-              double Rx = Rt - ((Rt1 + Rt2) / 2);
-
-              double result = 0;
-
-              if (ExecutionConfig.GetIsIdleModeEnabled())
-              {
-                if (IdleMeasurementErrorSimulator.TryGetValue(
-                      LowerBound,
-                      UpperBound,
-                      out double erroneousValue))
-                {
-                  result = erroneousValue;
-                }
-                else
-                {
-                  result = (LowerBound / 2) + (UpperBound / 2);
-                }
-              }
-              else
-              {
-                result = Rx;
-              }
-
-              if (!ExecutionConfig.GetIsIdleModeEnabled())
-              {
-                result -= context.CabelResistance;
-              }
-
-              if (result < 0)
-              {
-                result = 0;
-              }
-
-              var succes = result >= LowerBound && result <= UpperBound;
-
               string measurementTarget = $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}";
+              bool useInitialMeasurement = true;
+              var finalMeasurement = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+              {
+                if (!useInitialMeasurement)
+                {
+                  Rt = await GetResistanceAsync(
+                    context.MessageService,
+                    context.Value,
+                    context.LowerLimit,
+                    context.HigherLimit);
+                }
+
+                useInitialMeasurement = false;
+                double result = CalculateFinalResistance(
+                  Rt,
+                  Rt1,
+                  Rt2,
+                  LowerBound,
+                  UpperBound,
+                  context.CabelResistance);
+                bool success = result >= LowerBound && result <= UpperBound;
+                var range = new MeasurementRange(result, LowerBound, UpperBound);
+
+                await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+                  ResistanceUnit.Ohm,
+                  range,
+                  success,
+                  measurementTarget,
+                  outputService: context.MessageService);
+
+                return (success, result);
+              }, context.MessageService, measurementTask: true);
+
+              bool succes = finalMeasurement.Connect;
+              double result = finalMeasurement.Answer;
               var measurementRange = new MeasurementRange(result, LowerBound, UpperBound);
               var message = MeasurementMessages.BuildMeasurementResultMessage(
                 ResistanceUnit.Ohm,
                 measurementRange,
                 succes,
                 measurementTarget);
-              await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-                ResistanceUnit.Ohm,
-                measurementRange,
-                succes,
-                measurementTarget,
-                outputService: context.MessageService);
 
               if (!succes)
               {
@@ -351,6 +345,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}"));
               }
             }
+
+            await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(
+              point,
+              context.MessageService,
+              context.IsPolarityReversed);
           }
 
           await DisconnectAllPoints(context.MessageService, chains);
@@ -358,6 +357,38 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       }
 
       return messages;
+    }
+
+    private static double CalculateFinalResistance(
+      double measuredResistance,
+      double firstPointResistance,
+      double secondPointResistance,
+      double lowerBound,
+      double upperBound,
+      double cableResistance)
+    {
+      double result = measuredResistance - ((firstPointResistance + secondPointResistance) / 2);
+
+      if (ExecutionConfig.GetIsIdleModeEnabled())
+      {
+        if (IdleMeasurementErrorSimulator.TryGetValue(
+              lowerBound,
+              upperBound,
+              out double erroneousValue))
+        {
+          result = erroneousValue;
+        }
+        else
+        {
+          result = (lowerBound / 2) + (upperBound / 2);
+        }
+      }
+      else
+      {
+        result -= cableResistance;
+      }
+
+      return Math.Max(0, result);
     }
 
     internal static bool CanMeasurePair(bool basePointConnectionError, bool currentPointError)

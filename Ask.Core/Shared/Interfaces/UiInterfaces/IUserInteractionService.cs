@@ -30,6 +30,14 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     Task<UserAction> WaitRetryOrContinueAsync() =>
       WaitUserActionAsync(loop: true, deviceTask: true, canContinue: true);
 
+    /// <summary>
+    /// Запрашивает повтор команды программы контроля после обнаружения ошибок.
+    /// </summary>
+    /// <param name="errorCount">Количество ошибок текущей попытки команды.</param>
+    /// <returns>Действие, выбранное оператором.</returns>
+    Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount) =>
+      WaitUserActionAsync();
+
     CancellationToken GetCancellationToken();
 
     void AddError(ErrorItem errorItem);

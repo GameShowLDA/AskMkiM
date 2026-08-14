@@ -20,11 +20,13 @@ namespace Ask.Core.Services.UI
     /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="loop">Признак обязательного интерактивного режима.</param>
     /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="measurementTask">Признак отдельного измерения оборудования.</param>
     public static async Task RunWithUserRepeatAsync(
       Func<Task<bool>> operation,
       IUserInteractionService? messageService,
       bool loop = false,
-      bool deviceTask = false)
+      bool deviceTask = false,
+      bool measurementTask = false)
     {
       await RunCoreAsync(
         operation,
@@ -32,6 +34,7 @@ namespace Ask.Core.Services.UI
         messageService,
         loop,
         deviceTask,
+        measurementTask,
         exceptionFallback: null);
     }
 
@@ -42,12 +45,14 @@ namespace Ask.Core.Services.UI
     /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="loop">Признак обязательного интерактивного режима.</param>
     /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="measurementTask">Признак отдельного измерения оборудования.</param>
     /// <returns>Результат последней подтверждённой попытки.</returns>
     public static Task<bool> GetRunWithUserRepeatAsync(
       Func<Task<bool>> operation,
       IUserInteractionService? messageService,
       bool loop = false,
-      bool deviceTask = false)
+      bool deviceTask = false,
+      bool measurementTask = false)
     {
       return RunCoreAsync(
         operation,
@@ -55,6 +60,7 @@ namespace Ask.Core.Services.UI
         messageService,
         loop,
         deviceTask,
+        measurementTask,
         exceptionFallback: null);
     }
 
@@ -65,12 +71,14 @@ namespace Ask.Core.Services.UI
     /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="loop">Признак обязательного интерактивного режима.</param>
     /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="measurementTask">Признак отдельного измерения оборудования.</param>
     /// <returns>Результат последней подтверждённой попытки подключения.</returns>
     public static Task<(bool Connect, string Answer)> GetRunWithUserRepeatAsync(
       Func<Task<(bool Connect, string Answer)>> operation,
       IUserInteractionService? messageService,
       bool loop = false,
-      bool deviceTask = false)
+      bool deviceTask = false,
+      bool measurementTask = false)
     {
       return RunCoreAsync(
         operation,
@@ -78,6 +86,7 @@ namespace Ask.Core.Services.UI
         messageService,
         loop,
         deviceTask,
+        measurementTask,
         exception => (false, exception.Message));
     }
 
@@ -88,12 +97,14 @@ namespace Ask.Core.Services.UI
     /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="loop">Признак обязательного интерактивного режима.</param>
     /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="measurementTask">Признак отдельного измерения оборудования.</param>
     /// <returns>Результат последней подтверждённой попытки измерения.</returns>
     public static Task<(bool Connect, double Answer)> GetRunWithUserRepeatAsync(
       Func<Task<(bool Connect, double Answer)>> operation,
       IUserInteractionService? messageService,
       bool loop = false,
-      bool deviceTask = false)
+      bool deviceTask = false,
+      bool measurementTask = false)
     {
       return RunCoreAsync(
         operation,
@@ -101,6 +112,7 @@ namespace Ask.Core.Services.UI
         messageService,
         loop,
         deviceTask,
+        measurementTask,
         static _ => (false, -1));
     }
 
@@ -113,13 +125,15 @@ namespace Ask.Core.Services.UI
     /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
     /// <param name="loop">Признак обязательного интерактивного режима.</param>
     /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="measurementTask">Признак отдельного измерения оборудования.</param>
     /// <returns>Результат последней подтверждённой попытки.</returns>
     public static Task<T> GetRunWithUserRepeatAsync<T>(
       Func<Task<T>> operation,
       Func<T, bool> isSuccessful,
       IUserInteractionService? messageService,
       bool loop = false,
-      bool deviceTask = false)
+      bool deviceTask = false,
+      bool measurementTask = false)
     {
       ArgumentNullException.ThrowIfNull(isSuccessful);
 
@@ -129,6 +143,7 @@ namespace Ask.Core.Services.UI
         messageService,
         loop,
         deviceTask,
+        measurementTask,
         exceptionFallback: null);
     }
 
@@ -138,6 +153,7 @@ namespace Ask.Core.Services.UI
       IUserInteractionService? messageService,
       bool loop,
       bool deviceTask,
+      bool measurementTask,
       Func<Exception, T>? exceptionFallback)
     {
       ArgumentNullException.ThrowIfNull(operation);
@@ -171,6 +187,14 @@ namespace Ask.Core.Services.UI
         }
 
         if (EquipmentExecutionContext.IsMandatoryFinalization)
+        {
+          return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
+        }
+
+        bool repeatMeasurement = measurementTask
+          && ExecutionConfig.GetIsRepeatMeasurementEnabled();
+
+        if (ControlProgramCommandExecutionContext.IsActive && !repeatMeasurement)
         {
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
@@ -209,10 +233,12 @@ namespace Ask.Core.Services.UI
 
         bool forceInteraction = interactiveMode;
         interactiveMode = true;
-        UserAction action = await messageService.WaitUserActionAsync(
-          loop: loop || forceInteraction,
-          deviceTask: !hardwareSucceeded || deviceTask,
-          canContinue: hardwareSucceeded);
+        UserAction action = repeatMeasurement && !operationSucceeded
+          ? await messageService.WaitRetryOrContinueAsync()
+          : await messageService.WaitUserActionAsync(
+            loop: loop || forceInteraction,
+            deviceTask: !hardwareSucceeded || deviceTask,
+            canContinue: hardwareSucceeded);
 
         switch (action)
         {
