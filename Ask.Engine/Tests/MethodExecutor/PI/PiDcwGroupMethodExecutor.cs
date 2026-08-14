@@ -119,7 +119,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
 
           return isSuccessful;
 
-        }, messageService);
+        }, messageService, measurementTask: true);
       }
 
       public override async Task FinalizeAsync(IUserInteractionService messageService)

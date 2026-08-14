@@ -71,6 +71,7 @@ public static class DatabaseInitializationService
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureHardwareErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureDisablePowerCheckColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureRepeatMeasurementColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
@@ -422,6 +423,37 @@ public static class DatabaseInitializationService
       report,
       progress,
       "[DB] В старой схеме Execution добавлена колонка DisablePowerCheck.");
+  }
+
+  /// <summary>
+  /// Добавляет настройку повтора измерения в совместимую старую схему.
+  /// </summary>
+  /// <param name="databasePath">Путь к файлу базы данных.</param>
+  /// <param name="report">Отчёт об инициализации базы данных.</param>
+  /// <param name="progress">Обработчик сообщений о ходе инициализации.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  private static async Task EnsureRepeatMeasurementColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "Execution", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureColumnAsync(
+      connection,
+      "Execution",
+      "RepeatMeasurement",
+      "INTEGER NOT NULL DEFAULT 0",
+      report,
+      progress,
+      cancellationToken);
   }
 
   private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(

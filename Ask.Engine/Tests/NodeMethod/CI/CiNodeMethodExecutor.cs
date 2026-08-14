@@ -119,7 +119,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
                 protocolUI);
               return isSuccessful;
 
-            }, protocolUI);
+            }, protocolUI, measurementTask: true);
           }
           else
           {

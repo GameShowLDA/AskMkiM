@@ -1833,6 +1833,17 @@ Once measurement interaction has opened, a valid retry stays interactive even
 when its value is now in range. `EquipmentExecutionContext` suppresses all
 Retry/Continue/Finish requests during emergency `КЦ` and `ExecutionFinalizer`;
 errors there are logged and the remaining mandatory actions continue.
+
+Измерительные делегаты передают `measurementTask: true` в `UserActionHelper`.
+При включённом `SettingsExecutionDto.RepeatMeasurement` отрицательный результат
+принудительно вызывает блокирующий `IUserInteractionService.WaitRetryOrContinueAsync()`
+и открывает выбор действия независимо от `StopOnError`. Для такого делегата разрешён вложенный повтор даже внутри
+`ControlProgramCommandExecutionContext`: повторно выполняется только измерение,
+а не весь `ICommandExecutor`. При выключенной настройке контекст программы
+контроля по-прежнему подавляет вложенный интерактивный цикл.
+В попарной ветке ЭХТ `PairwiseFirstPointCheckerAlt` сохраняет текущую коммутацию
+до решения оператора. Повтор заново читает сопротивление и рассчитывает
+компенсированный результат; переключение точек выполняется только после принятия результата.
 Adapters/managers сохраняют существующие проверки `DeviceDisplayConfig`, после чего
 `DeviceMessages` централизованно формирует и публикует device-результат.
 Typed factories are grouped in `Ask.Core/Services/Errors/Device/`.
@@ -1955,7 +1966,7 @@ provider error and cancellation; a later query builds a fresh runtime instance f
 
 | Runtime config | Persisted DTO/table | Load/save bridge | Major consumers |
 | --- | --- | --- | --- |
-| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates; independent measurement/hardware Idle error settings |
+| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates; independent measurement/hardware Idle error settings; `RepeatMeasurement` enables retry of explicitly marked equipment measurements |
 | `ProtocolConfig` | `SettingsProtocolDto` / `SettingsProtocol` | `ProtocolSettings` | protocol templates, output visibility, print |
 | `UserInterfaceConfig` | `UserInterfaceDto` / `UserInterface` | `UserInterfaceSettings` | MainWindow, theme/menu UI |
 | `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |

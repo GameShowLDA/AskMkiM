@@ -61,6 +61,7 @@ namespace UI.Controls.Settings.Execution
       if (!_isInitialized)
       {
         StopInError.CheckedChanged += CheckedChanged;
+        RepeatMeasurement.CheckedChanged += CheckedChanged;
         StepByStepMode.CheckedChanged += CheckedChanged;
         MeasurementErrorSimulation.CheckedChanged += CheckedChanged;
         HardwareErrorSimulation.CheckedChanged += CheckedChanged;
@@ -146,6 +147,7 @@ namespace UI.Controls.Settings.Execution
       var model = new SettingsExecutionDto()
       {
         StopOnError = StopInError.IsChecked,
+        RepeatMeasurement = RepeatMeasurement.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
         IsErrorSimulationMode = MeasurementErrorSimulation.IsChecked,
         IsHardwareErrorSimulationMode = HardwareErrorSimulation.IsChecked,
@@ -167,6 +169,7 @@ namespace UI.Controls.Settings.Execution
       a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
+      a.RepeatMeasurement == b.RepeatMeasurement &&
       a.LegacyCompatibilityMode == b.LegacyCompatibilityMode &&
       a.DisablePowerCheck == b.DisablePowerCheck;
 
@@ -180,6 +183,7 @@ namespace UI.Controls.Settings.Execution
       HardwareErrorSimulation.IsChecked = _baseExecutionModel.IsHardwareErrorSimulationMode;
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
+      RepeatMeasurement.IsChecked = _baseExecutionModel.RepeatMeasurement;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;
       DisablePowerCheck.IsChecked = _baseExecutionModel.DisablePowerCheck;
     }

@@ -127,7 +127,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           result.IsSuccessful,
           outputService: messageService);
         return result;
-      }, messageService);
+      }, messageService, measurementTask: true);
 
       return result;
     }
@@ -160,7 +160,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           outputService: messageService);
         return result;
 
-      }, messageService);
+      }, messageService, measurementTask: true);
 
       return result;
     }

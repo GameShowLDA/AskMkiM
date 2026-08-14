@@ -471,6 +471,12 @@
   <data name="settings.execution.stopOnError.description" xml:space="preserve">
     <value>При возникновении ошибки выполнение приостанавливается, чтобы оператор мог осознанно выбрать дальнейшее действие и управлять ходом работы.</value>
   </data>
+  <data name="settings.execution.repeatMeasurement.title" xml:space="preserve">
+    <value>Повтор измерения</value>
+  </data>
+  <data name="settings.execution.repeatMeasurement.description" xml:space="preserve">
+    <value>Разрешает повторять отдельные измерения оборудования. Не влияет на повтор всей команды, теста или программы контроля.</value>
+  </data>
   <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
     <value>Пошаговый режим</value>
   </data>

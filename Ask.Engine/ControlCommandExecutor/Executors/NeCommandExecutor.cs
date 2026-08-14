@@ -157,7 +157,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           points: points,
           outputService: messageService);
         return measurementResult;
-      }, messageService);
+      }, messageService, measurementTask: true);
 
       return result;
     }

@@ -74,6 +74,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIsHardwareErrorSimulationMode(protocolModel.IsHardwareErrorSimulationMode);
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
+      SettingsExecutionModel.RepeatMeasurement = protocolModel.RepeatMeasurement;
       SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
       SetDisablePowerCheck(protocolModel.DisablePowerCheck);
 
@@ -95,6 +96,13 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     /// <returns>true, если включен; false, если выключен.</returns>
     public static Task<bool> GetIsStopOnErrorEnabled() => Task.FromResult(SettingsExecutionModel?.StopOnError ?? false);
+
+    /// <summary>
+    /// Проверяет, разрешён ли повтор отдельных измерений оборудования.
+    /// </summary>
+    /// <returns><see langword="true"/>, если повтор измерений разрешён.</returns>
+    public static bool GetIsRepeatMeasurementEnabled() =>
+      SettingsExecutionModel?.RepeatMeasurement ?? false;
 
     /// <summary>
     /// Возвращает, включена ли симуляция ошибок в холостом режиме.
@@ -140,6 +148,7 @@ namespace Ask.Core.Services.Config.AppSettings
         IsHardwareErrorSimulationMode = SettingsExecutionModel.IsHardwareErrorSimulationMode,
         StepByStepMode = SettingsExecutionModel.StepByStepMode,
         StopOnError = SettingsExecutionModel.StopOnError,
+        RepeatMeasurement = SettingsExecutionModel.RepeatMeasurement,
         LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode,
         DisablePowerCheck = SettingsExecutionModel.DisablePowerCheck,
       };
@@ -154,6 +163,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIsHardwareErrorSimulationMode(execution.IsHardwareErrorSimulationMode);
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);
+      SettingsExecutionModel.RepeatMeasurement = execution.RepeatMeasurement;
       SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);
       SetDisablePowerCheck(execution.DisablePowerCheck);
 
