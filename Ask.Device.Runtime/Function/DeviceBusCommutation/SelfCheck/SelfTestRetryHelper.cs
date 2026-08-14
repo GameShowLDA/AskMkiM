@@ -33,7 +33,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
         messageService,
         indentLevel: 3,
         executionError: false,
-        skipPause: false);
+        skipPause: true);
       return result;
     }
 

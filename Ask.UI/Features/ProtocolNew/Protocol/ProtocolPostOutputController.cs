@@ -1,5 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
@@ -63,7 +64,9 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// <summary>Устанавливает паузу после ошибочной записи, если это разрешено настройками.</summary>
     private async Task PauseOnErrorAsync(MessageType? status)
     {
-      if (status == MessageType.Error && await ExecutionConfig.GetIsStopOnErrorEnabled())
+      if (!ControlProgramCommandExecutionContext.IsActive
+        && status == MessageType.Error
+        && await ExecutionConfig.GetIsStopOnErrorEnabled())
       {
         await _context.PauseAsync();
       }
