@@ -282,13 +282,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               if (ExecutionConfig.GetIsIdleModeEnabled())
               {
-                if (!ExecutionConfig.GetIsErrorSimulationEnabled())
+                if (IdleMeasurementErrorSimulator.TryGetValue(
+                      LowerBound,
+                      UpperBound,
+                      out double erroneousValue))
                 {
-                  result = (LowerBound + UpperBound) / 2;
+                  result = erroneousValue;
                 }
                 else
                 {
-                  result = Rx;
+                  result = (LowerBound / 2) + (UpperBound / 2);
                 }
               }
               else

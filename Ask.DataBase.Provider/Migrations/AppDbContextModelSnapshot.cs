@@ -789,10 +789,11 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("DisablePowerCheck")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IdleModeExecution")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("ErroneousMeasurementType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("IsErrorSimulationMode");
 
-                    b.Property<bool>("IsErrorSimulationMode")
+                    b.Property<bool>("IdleModeExecution")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsHardwareErrorSimulationMode")

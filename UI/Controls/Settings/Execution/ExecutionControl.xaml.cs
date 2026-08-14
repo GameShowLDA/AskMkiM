@@ -2,7 +2,9 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
+using Ask.UI.Infrastructure.Localization;
 using Message;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +18,7 @@ namespace UI.Controls.Settings.Execution
   public partial class ExecutionControl : UserControl
   {
     private bool _isInitialized;
+    private sealed record ErroneousMeasurementOption(TypeErroneousMeasurement Value, string Title);
 
     /// <summary>
     /// Базовая (сохранённая) модель выполнения, считанная при загрузке.
@@ -56,13 +59,14 @@ namespace UI.Controls.Settings.Execution
     {
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
       RootSettingsGroup.Visibility = IsRootRole() ? Visibility.Visible : Visibility.Collapsed;
+      LoadErroneousMeasurementOptions();
       DefalultData();
 
       if (!_isInitialized)
       {
         StopInError.CheckedChanged += CheckedChanged;
         StepByStepMode.CheckedChanged += CheckedChanged;
-        MeasurementErrorSimulation.CheckedChanged += CheckedChanged;
+        ErroneousMeasurementTypeSelect.ValueChanged += ErroneousMeasurementTypeChanged;
         HardwareErrorSimulation.CheckedChanged += CheckedChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
@@ -138,6 +142,11 @@ namespace UI.Controls.Settings.Execution
       }
     }
 
+    private void ErroneousMeasurementTypeChanged(object? sender, object? e)
+    {
+      CheckedChanged(sender, false);
+    }
+
     /// <summary>
     /// Формирует модель протокола из текущих значений элементов UI.
     /// </summary>
@@ -147,7 +156,9 @@ namespace UI.Controls.Settings.Execution
       {
         StopOnError = StopInError.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
-        IsErrorSimulationMode = MeasurementErrorSimulation.IsChecked,
+        ErroneousMeasurementType = ErroneousMeasurementTypeSelect.SelectedValue is TypeErroneousMeasurement selectedType
+          ? selectedType
+          : _baseExecutionModel.ErroneousMeasurementType,
         IsHardwareErrorSimulationMode = HardwareErrorSimulation.IsChecked,
         IdleModeExecution = IdleMode.IsChecked,
         LegacyCompatibilityMode = CompatibilityModeCheckBox.IsChecked,
@@ -163,7 +174,7 @@ namespace UI.Controls.Settings.Execution
     /// </summary>
     private static bool ProtocolEquals(SettingsExecutionDto a, SettingsExecutionDto b) =>
       a.IdleModeExecution == b.IdleModeExecution &&
-      a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
+      a.ErroneousMeasurementType == b.ErroneousMeasurementType &&
       a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
@@ -176,12 +187,32 @@ namespace UI.Controls.Settings.Execution
     private void DefalultData()
     {
       IdleMode.IsChecked = _baseExecutionModel.IdleModeExecution;
-      MeasurementErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
+      ErroneousMeasurementTypeSelect.DefaultValue = _baseExecutionModel.ErroneousMeasurementType;
+      ErroneousMeasurementTypeSelect.SelectedValue = _baseExecutionModel.ErroneousMeasurementType;
       HardwareErrorSimulation.IsChecked = _baseExecutionModel.IsHardwareErrorSimulationMode;
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;
       DisablePowerCheck.IsChecked = _baseExecutionModel.DisablePowerCheck;
+    }
+
+    private void LoadErroneousMeasurementOptions()
+    {
+      ErroneousMeasurementTypeSelect.ItemsSource = new[]
+      {
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.None,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.none")),
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.Rnd,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.rnd")),
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.Low,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.low")),
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.High,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.high")),
+      };
     }
 
     /// <summary>

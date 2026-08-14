@@ -19,7 +19,7 @@
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
-| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
+| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
@@ -1147,7 +1147,7 @@ executor/strategy
 добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
 ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
 Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает обе настройки
-симуляции: `IsErrorSimulationMode` детерминированно делает ложным один из этапов
+симуляции: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
 `SelfControl = false`; `IsHardwareErrorSimulationMode` через
 `IdleHardwareErrorSimulator` с вероятностью 50% возвращает пустой ответ до разбора команды.
@@ -1196,7 +1196,9 @@ executor/metrology
 → SetModeBase / RangeBase → DeviceProtocolEmulator.QueryMultimeterAsync
 → AdapterMeasurementExecutor
 → MeasurementBase.MeasureCoreAsync
-→ Simulated.GetSimulatedValue builds idleResponse
+→ Simulated.GetSimulatedValue
+  → IdleMeasurementErrorSimulator applies None/Rnd/Low/High
+  → builds idleResponse
 → DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
   → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
   → Idle: SCPI-compatible scientific-notation response from MeasurementRange
@@ -1402,9 +1404,15 @@ Selection is distributed, not DI-based:
 Idle error simulation has two independent persisted settings:
 
 ```text
-ExecutionControl
-→ SettingsExecutionDto.IsErrorSimulationMode
-→ existing measurement simulation algorithms
+ExecutionControl enum selector
+→ SettingsExecutionDto.ErroneousMeasurementType (None/Rnd/Low/High)
+→ ExecutionConfig
+→ IdleMeasurementErrorSimulator
+→ Simulated / MeasurementResultEvaluator / measurement-specific Idle branches
+→ None: normal Idle value
+→ Rnd: value below or above the allowed range, side selected randomly
+→ Low: value strictly below the lower bound
+→ High: value strictly above the effective upper bound
 
 ExecutionControl
 → SettingsExecutionDto.IsHardwareErrorSimulationMode
@@ -1416,8 +1424,9 @@ ExecutionControl
 ```
 
 The nested `Выполнение с ошибками` settings group is visible only while Idle is
-enabled. Measurement simulation retains its existing generators, probabilities
-and tolerance semantics. Hardware simulation is disabled by default and affects
+enabled. The measurement selector defaults to `None`; persisted legacy boolean
+values remain compatible because `false/0 → None` and `true/1 → Rnd`.
+Hardware simulation is disabled by default and affects
 only Idle initialization/reset, connection, mode/configuration, range,
 switching, source and power operations. Every equipment call, including a
 `Retry`, makes a new independent `1/2` decision. The simulated failure preserves
@@ -1905,7 +1914,9 @@ UI/Engine
 Migrations live in `Ask.DataBase.Provider/Migrations/`.
 `DatabaseInitializationService` also contains explicit compatibility DDL for old
 schemas; a migration change must account for both normal migration and supported
-legacy adoption behavior.
+legacy adoption behavior. `SettingsExecutionDto.ErroneousMeasurementType` remains
+mapped to the existing `Execution.IsErrorSimulationMode` INTEGER column; persisted
+values `0/1` retain `None/Rnd` compatibility without a schema migration.
 
 Runtime device cache uses `(requested interface, Id)` and query caches for
 GetAll/chassis lists. Create/update/delete invalidate relevant caches; startup
@@ -2022,6 +2033,8 @@ ErrorItem → translator/runner ErrorList
 | `InitialDeviceSoundConfigurator` | internal lifecycle helper | Ask.Device.Runtime | однократно отключает звуковую сигнализацию GPT/мультиметра после первой успешной инициализации и сохраняет Real/Idle-маршрутизацию | [Equipment](#equipment-architecture) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `TypeErroneousMeasurement` | enum | Ask.Core | persisted None/Rnd/Low/High mode for Idle measurement errors | [Real / Idle](#real--idle) |
+| `IdleMeasurementErrorSimulator` | static value service | Ask.Core | generates values strictly below/above the configured measurement range according to `TypeErroneousMeasurement` | [Real / Idle](#real--idle) |
 | `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |

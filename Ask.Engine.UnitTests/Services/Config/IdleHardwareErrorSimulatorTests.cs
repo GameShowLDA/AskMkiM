@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Engine.UnitTests.Services.Config;
 
@@ -10,6 +11,9 @@ public sealed class IdleHardwareErrorSimulatorTests
   public void HardwareSimulationIsOffByDefault()
   {
     Assert.False(new SettingsExecutionDto().IsHardwareErrorSimulationMode);
+    Assert.Equal(
+      TypeErroneousMeasurement.None,
+      new SettingsExecutionDto().ErroneousMeasurementType);
   }
 
   [Fact]
@@ -29,23 +33,23 @@ public sealed class IdleHardwareErrorSimulatorTests
       await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
       {
         IdleModeExecution = true,
-        IsErrorSimulationMode = true,
+        ErroneousMeasurementType = TypeErroneousMeasurement.Rnd,
         IsHardwareErrorSimulationMode = false,
       });
 
       SettingsExecutionDto measurementOnly = await ExecutionConfig.GetExecitonModel();
-      Assert.True(measurementOnly.IsErrorSimulationMode);
+      Assert.Equal(TypeErroneousMeasurement.Rnd, measurementOnly.ErroneousMeasurementType);
       Assert.False(measurementOnly.IsHardwareErrorSimulationMode);
 
       await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
       {
         IdleModeExecution = true,
-        IsErrorSimulationMode = false,
+        ErroneousMeasurementType = TypeErroneousMeasurement.None,
         IsHardwareErrorSimulationMode = true,
       });
 
       SettingsExecutionDto hardwareOnly = await ExecutionConfig.GetExecitonModel();
-      Assert.False(hardwareOnly.IsErrorSimulationMode);
+      Assert.Equal(TypeErroneousMeasurement.None, hardwareOnly.ErroneousMeasurementType);
       Assert.True(hardwareOnly.IsHardwareErrorSimulationMode);
     }
     finally
@@ -106,7 +110,7 @@ public sealed class IdleHardwareErrorSimulatorTests
       await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
       {
         IdleModeExecution = true,
-        IsErrorSimulationMode = false,
+        ErroneousMeasurementType = TypeErroneousMeasurement.None,
         IsHardwareErrorSimulationMode = true,
       });
 

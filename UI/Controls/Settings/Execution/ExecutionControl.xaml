@@ -167,12 +167,14 @@
                         </Style>
                     </WrapPanel.Style>
 
-                                <SharedComponents:SettingsCard
+                                <Components:SettingsCardSelect
                                     Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
                                     Margin="0,10,10,0"
                                     VerticalAlignment="Top"
-                                    x:Name="MeasurementErrorSimulation"/>
+                                    DisplayMemberPath="Title"
+                                    SelectedValuePath="Value"
+                                    x:Name="ErroneousMeasurementTypeSelect"/>
 
                                 <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
