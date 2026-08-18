@@ -187,7 +187,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       var parts = SplitParts(segment);
 
-      // Все части, разделённые '#', находятся в одной группе.
       var group = new GroupModel();
 
       foreach (var part in parts)
@@ -201,7 +200,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             errors);
       }
 
-      // Если обычные части создали цепи — добавляем общую группу.
       if (group.ChainModels.Count > 0)
       {
         result.Insert(0, group);
@@ -251,10 +249,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           if (expanded.Count == 0)
             continue;
 
-          // Первый элемент остаётся в текущей цепи.
           currentChain.Add(expanded.First());
-
-          // Фиксируем текущую цепь.
           ValidateSinglePoint(model, currentChain, part, errors);
 
           var (firstErrors, firstChain) =
@@ -266,13 +261,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           }
           else
           {
-            // ВАЖНО:
-            // обычная часть добавляется в текущую группу.
             group.ChainModels.Add(firstChain);
           }
 
-          // Промежуточные точки при -* остаются отдельными группами,
-          // потому что -* означает разрыв цепи.
           for (int i = 1; i < expanded.Count - 1; i++)
           {
             var (midErrors, midGroup) =
@@ -288,12 +279,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             }
           }
 
-          // Последняя точка начинает новую цепь.
           currentChain = new List<string> { expanded.Last() };
         }
         else if (tok.Contains("-"))
         {
-          // Обычный диапазон — точки остаются в одной цепи.
           var expanded = ExpandRangeToken(tok, errors, model);
 
           if (expanded.Count > 0)
@@ -305,7 +294,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         }
       }
 
-      // Финальная цепь.
       if (currentChain.Count > 0)
       {
         ValidateSinglePoint(model, currentChain, part, errors);
@@ -319,9 +307,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         }
         else
         {
-          // ВАЖНО:
-          // не создаём новый GroupModel.
-          // Добавляем ChainModel в существующую группу.
           group.ChainModels.Add(chain);
         }
       }
