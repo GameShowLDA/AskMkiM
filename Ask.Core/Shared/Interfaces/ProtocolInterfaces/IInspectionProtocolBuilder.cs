@@ -1,4 +1,5 @@
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 
 namespace Ask.Core.Shared.Interfaces.ProtocolInterfaces;
 
@@ -12,5 +13,5 @@ public interface IInspectionProtocolBuilder
   /// </summary>
   /// <param name="settings">Настройки и результаты завершённого действия.</param>
   /// <returns>Готовый текст итогового протокола.</returns>
-  string Build(ActionSettings settings);
+  string Build(ActionSettings settings, ExecutionCompletionStatus completionStatus);
 }

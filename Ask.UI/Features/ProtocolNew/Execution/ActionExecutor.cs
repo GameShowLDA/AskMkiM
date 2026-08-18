@@ -1,14 +1,15 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.ProtocolNew;
@@ -54,6 +55,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Признак необходимости завершения выполнения процесса.
     /// </summary>
     private bool isExit = false;
+
+    private ExecutionCompletionStatus _completionStatus = ExecutionCompletionStatus.Success;
 
     /// <summary>
     /// Имя текущего выполняемого процесса.
@@ -186,6 +189,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     internal async Task StartAsync(ActionSettings actionSettings)
     {
       isExit = false;
+      _completionStatus = ExecutionCompletionStatus.Success;
       processName = actionSettings.Name;
       Interlocked.Exchange(ref _commandJumpRequested, 0);
       _pauseController.Reset();
@@ -278,6 +282,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
     internal async Task StopAsync(ActionSettings actionSettings, TaskCompletionSource<UserAction> _userActionTcs)
     {
+      _completionStatus = ExecutionCompletionStatus.Interrupted;
       _userActionTcs?.TrySetResult(UserAction.Abort);
       await FinalizeAsync(actionSettings);
     }
@@ -311,6 +316,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       await _finalizer.FinalizeAsync(
         actionSettings,
         ProtocolSelfCheck,
+        _completionStatus,
         () => CancelProcessTaskAsync(actionSettings.StopDelegate, actionSettings.Name),
         () => ResetUsedEquipmentAsync(
           equipmentUsage,
@@ -760,6 +766,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         }
         catch (OperationCanceledException)
         {
+          _completionStatus = ExecutionCompletionStatus.Interrupted;
           // Отмена ожидаема при остановке выполнения.
         }
         catch (InputValidationException)

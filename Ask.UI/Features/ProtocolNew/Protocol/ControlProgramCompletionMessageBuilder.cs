@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using System.Globalization;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol;
@@ -14,7 +15,7 @@ internal static class ControlProgramCompletionMessageBuilder
   /// </summary>
   /// <param name="settings">Параметры завершённого выполнения.</param>
   /// <returns>Финальный блок протокола.</returns>
-  public static ShowMessageModel Build(ActionSettings settings)
+  public static ShowMessageModel Build(ActionSettings settings, ExecutionCompletionStatus completionStatus)
   {
     ArgumentNullException.ThrowIfNull(settings);
 
@@ -25,6 +26,17 @@ internal static class ControlProgramCompletionMessageBuilder
     long minutes = (long)(totalSeconds / 60);
     double seconds = totalSeconds - (minutes * 60);
     string formattedSeconds = seconds.ToString("0.0", CultureInfo.GetCultureInfo("ru-RU"));
+
+    if (completionStatus == ExecutionCompletionStatus.Interrupted)
+    {
+      return new ShowMessageModel
+      {
+        Header = $"ПРОГРАММА ПРЕРВАНА ({settings.Mode})",
+        Message = $"Время выполнения: {minutes} мин {formattedSeconds} с",
+        UseSuccessColorForEntireMessage = false,
+        CanBeDeleted = false,
+      };
+    }
 
     return new ShowMessageModel
     {
