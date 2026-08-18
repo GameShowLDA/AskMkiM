@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Ask.UI.Features.ProtocolNew.Services;
@@ -49,6 +50,7 @@ internal sealed class ExecutionFinalizer
   public async Task FinalizeAsync(
     ActionSettings settings,
     ProtocolUI protocol,
+    ExecutionCompletionStatus completionStatus,
     Func<Task> cancelProcessAsync,
     Func<Task> resetUsedEquipmentAsync,
     Action resetExecutorState,
@@ -64,11 +66,11 @@ internal sealed class ExecutionFinalizer
       ("снятие блокировки системы", AsAsync(() => SystemStateManager.SetIsLocked(false))),
       ("восстановление кнопки запуска", AsAsync(protocol.ShowOnlyStartButton)),
       ("отображение результата выполнения",
-        () => _protocolCompletionService.DisplayCompletionAsync(settings, protocol)),
+        () => _protocolCompletionService.DisplayCompletionAsync(settings, protocol, completionStatus)),
       ("уведомление о завершении выполнения",
         AsAsync(() => processingStateChanged?.Invoke(false))),
       ("вывод обязательного финального блока программы контроля",
-        () => _protocolCompletionService.AppendControlProgramCompletionAsync(settings, protocol)),
+        () => _protocolCompletionService.AppendControlProgramCompletionAsync(settings, protocol, completionStatus)),
       ("сохранение протоколов",
         () => _protocolCompletionService.SaveAndExposeAsync(settings, protocol)));
   }
