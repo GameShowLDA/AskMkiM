@@ -617,6 +617,8 @@ Every execution terminal path
 EquipmentUsageSession.GetUsedDevices
 → DeviceResetService.ResetDevicesAsync
 → последовательно для каждого уникального устройства
+  → для `IRelaySwitchModule` сначала `PointManager.DisconnectingAllPoint`
+  → только после успешного физического отключения точек `IConnectable.ResetAsync`
   → IConnectable.ResetAsync
   → Transport → адресный UDP/TCP/COM/USB driver
   → bool/exception проверяется отдельно для устройства
@@ -669,6 +671,8 @@ executor throws
   возвращают единый `AlgorithmExecutionResult`; формирование и публикация их заголовков,
   этапов локализации, диагностических сообщений и готовых результатов измерения проходят
   через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
+- `NodeFullChecker` после выполнения алгоритма полного узла снимает цепи с шины `B`,
+  чтобы вложенные `ПИ/СИ*` и самостоятельные `СИ` не оставляли МКР физически подключённым;
 - `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; обходит все группы, цепи и точки,
   сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
   точку той же цепи); возвращает `AlgorithmExecutionResult`, а создание и публикацию измерений,

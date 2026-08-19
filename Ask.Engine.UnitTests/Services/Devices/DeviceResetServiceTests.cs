@@ -3,6 +3,8 @@ using Ask.Core.Services.UI;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
@@ -245,6 +247,32 @@ public sealed class DeviceResetServiceTests
     second.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
+  [Fact]
+  public async Task ResetDevicesAsync_ForRelayModule_DisconnectsAllPointsBeforeReset()
+  {
+    var module = CreateRelayModule(1, disconnectAllResult: true, resetResult: true);
+
+    await DeviceResetService.ResetDevicesAsync([module.Device.Object]);
+
+    Assert.Equal(
+      ["disconnect-all", "reset"],
+      module.CallOrder);
+    module.PointManager.Verify(x => x.DisconnectingAllPoint(null), Times.Once);
+    module.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+  }
+
+  [Fact]
+  public async Task ResetDevicesAsync_ForRelayModule_DoesNotResetWhenPointDisconnectFailed()
+  {
+    var module = CreateRelayModule(1, disconnectAllResult: false, resetResult: true);
+    var interaction = CreateInteractionService(UserAction.Continue);
+
+    await DeviceResetService.ResetDevicesAsync([module.Device.Object], interaction.Object);
+
+    module.PointManager.Verify(x => x.DisconnectingAllPoint(interaction.Object), Times.Once);
+    module.Connectable.Verify(x => x.ResetAsync(null), Times.Never);
+  }
+
   private static (
     Mock<IDevice> Device,
     Mock<IConnectable> Connectable) CreateDevice(
@@ -276,6 +304,40 @@ public sealed class DeviceResetServiceTests
       .Setup(x => x.ResetAsync(null))
       .ThrowsAsync(new InvalidOperationException($"Ошибка {number}"));
     return result;
+  }
+
+  private static (
+    Mock<IRelaySwitchModule> Device,
+    Mock<IConnectable> Connectable,
+    Mock<IPointManager> PointManager,
+    List<string> CallOrder) CreateRelayModule(
+      int number,
+      bool disconnectAllResult,
+      bool resetResult)
+  {
+    var callOrder = new List<string>();
+    var connectable = new Mock<IConnectable>();
+    connectable
+      .Setup(x => x.ResetAsync(null))
+      .Callback(() => callOrder.Add("reset"))
+      .ReturnsAsync(resetResult);
+
+    var pointManager = new Mock<IPointManager>();
+    pointManager
+      .Setup(x => x.DisconnectingAllPoint(It.IsAny<IUserInteractionService?>()))
+      .Callback(() => callOrder.Add("disconnect-all"))
+      .ReturnsAsync(disconnectAllResult);
+
+    var device = new Mock<IRelaySwitchModule>();
+    device.SetupProperty(x => x.Number, number);
+    device.SetupProperty(x => x.NumberChassis, 1);
+    device.SetupProperty(x => x.Name, $"Модуль МКР {number}");
+    device.SetupProperty(x => x.ConnectionDetails, $"192.168.10.{number}");
+    device.SetupProperty(x => x.ConnectableManager, connectable.Object);
+    device.SetupProperty(x => x.PointManager, pointManager.Object);
+    device.SetupGet(x => x.DeviceType).Returns(DeviceType.RelaySwitchModule);
+
+    return (device, connectable, pointManager, callOrder);
   }
 
   private static Mock<IUserInteractionService> CreateInteractionService(
