@@ -93,6 +93,13 @@ namespace Ask.Core.Services.EventCore.Events
     }
 
     /// <summary>
+    /// Событие прерывания выполнения программы контроля пользователем.
+    /// </summary>
+    public class ExecutionInterrupted : IEvent
+    {
+    }
+
+    /// <summary>
     /// Событие нажатия F4 на команде,
     /// поддерживающей breakpoint.
     /// </summary>

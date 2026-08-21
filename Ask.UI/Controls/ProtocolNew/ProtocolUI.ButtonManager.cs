@@ -274,7 +274,8 @@ namespace Ask.UI.Controls.ProtocolNew
     private void ExitButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Завершить\"");
-
+      // TODO: добавить событие на отслеживание прерывания команды
+      ExecutionEventAdapter.RaiseExecutionInterrupted();
       ShowOnlyStartButton();
       ExitButtonPreviewMouseDown?.Invoke(this, e);
     }

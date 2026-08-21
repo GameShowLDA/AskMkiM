@@ -45,6 +45,13 @@ namespace Ask.Core.Services.EventCore.Adapters
       => EventAggregator.Publish(new ExecutionEvents.BreakpointF4Pressed(commandInfo));
 
     /// <summary>
+    /// Публикует событие изменения состояния прерывания выполнения программы контроля.
+    /// </summary>
+    /// <param name="isInterrupted"></param>
+    public static void RaiseExecutionInterrupted()
+      => EventAggregator.Publish(new ExecutionEvents.ExecutionInterrupted());
+
+    /// <summary>
     /// Адаптер для публикации событий управления выполнением.
     /// </summary>
     public static class ExecutionControlEventAdapter

@@ -1,8 +1,9 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FilesUtility;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost;
@@ -64,6 +65,10 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     public static string BuildProtocolText(ProtocolModel protocol)
     {
+      if (protocol.CompletionStatus == ExecutionCompletionStatus.Interrupted)
+      {
+        return "Выполнение программы прервано";
+      }
       return protocol.Errors.Count > 0
           ? ProtocolModel.GetProtocolWithErrorsText(protocol)
           : ProtocolModel.GetProtocolText(protocol);

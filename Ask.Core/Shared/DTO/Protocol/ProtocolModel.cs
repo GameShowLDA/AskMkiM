@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -111,6 +112,12 @@ namespace Ask.Core.Shared.DTO.Protocol
         return EndTime - StartTime;
       }
     }
+
+    /// <summary>
+    /// Статус завершения программы контроля.
+    /// </summary>
+    public ExecutionCompletionStatus CompletionStatus { get; set; } =
+        ExecutionCompletionStatus.Success;
 
     private static string Template { get; set; } = string.Empty;
     private static string ErrorsTemplate { get; set; } = string.Empty;

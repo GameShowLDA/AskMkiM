@@ -8,6 +8,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -292,9 +293,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
             if (action == UserAction.Abort)
             {
+              _protocolModel.CompletionStatus = ExecutionCompletionStatus.Interrupted;
               throw new OperationCanceledException(
                 "Выполнение завершено оператором.",
-                _console.GetCancellationToken());
+                _console.GetCancellationToken());              
             }
 
             FlushAttemptErrors();
@@ -341,6 +343,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
           continue;
         }
+        //catch (OperationCanceledException)
+        //{
+        //  _protocolModel.CompletionStatus =
+        //      ExecutionCompletionStatus.Interrupted;
+        //}
         catch (Exception ex)
         {
           FlushAttemptErrors();

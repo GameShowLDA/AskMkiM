@@ -12,6 +12,8 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.Archive.Application;
+using Ask.UI.Features.Archive.Services;
+using Ask.UI.Features.Archive.Views;
 using MainWindowProgram.Services.Conversion;
 using MainWindowProgram.Windows;
 using Microsoft.Win32;
@@ -22,11 +24,10 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using Ask.UI.Features.Archive.Views;
 using UI.Controls.FileCompare;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
-using Ask.UI.Features.Archive.Services;
+using static Ask.Core.Services.EventCore.Events.ExecutionEvents;
 using static Ask.LogLib.LoggerUtility;
 
 namespace MainWindowProgram.Services
@@ -56,6 +57,7 @@ namespace MainWindowProgram.Services
 
     private bool _isSearchWindowOpen;
     private bool _selectFileHandlerAttached;
+    private bool _executionInterrupted;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="FileService"/>.
@@ -106,18 +108,30 @@ namespace MainWindowProgram.Services
 
       EventAggregator.Unsubscribe<FileInteractionEvents.GetProtocolInfo>(e => OnGetProtocolInfo(e.Protocol));
       EventAggregator.Subscribe<FileInteractionEvents.GetProtocolInfo>(e => OnGetProtocolInfo(e.Protocol));
+
+      EventAggregator.Unsubscribe<ExecutionEvents.ExecutionInterrupted>(OnExecutionInterrupted);
+      EventAggregator.Subscribe<ExecutionEvents.ExecutionInterrupted>(OnExecutionInterrupted);
+
     }
+
 
     private void OnGetProtocolInfo(ProtocolModel protocolModel)
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        ProtocolInfoWindow protocolInfoWindow = new ProtocolInfoWindow(protocolModel);
+        bool executionInterrupted = _executionInterrupted;
+        _executionInterrupted = false;
+        ProtocolInfoWindow protocolInfoWindow = new ProtocolInfoWindow(protocolModel, executionInterrupted);
         Application.Current.MainWindow.Effect = new System.Windows.Media.Effects.BlurEffect();
         bool? dialogResult = protocolInfoWindow.ShowDialog();
         Application.Current.MainWindow.Effect = null;
       });
     }
+    private void OnExecutionInterrupted(ExecutionInterrupted interrupted)
+    {
+      _executionInterrupted = true;
+    }
+
 
     private void OnSearchWindowClosing(bool closing)
     {
