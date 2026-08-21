@@ -65,10 +65,6 @@ namespace UI.Services.ProtocolManager
     /// </summary>
     public static string BuildProtocolText(ProtocolModel protocol)
     {
-      if (protocol.CompletionStatus == ExecutionCompletionStatus.Interrupted)
-      {
-        return "Выполнение программы прервано";
-      }
       return protocol.Errors.Count > 0
           ? ProtocolModel.GetProtocolWithErrorsText(protocol)
           : ProtocolModel.GetProtocolText(protocol);
